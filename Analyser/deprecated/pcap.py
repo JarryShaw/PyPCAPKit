@@ -38,6 +38,17 @@ TP_PROTO = {
 }
 
 
+# TCP Options
+TCP_OPT = {
+    0:  (True, None),
+    1:  (True, 0, 'No-Operation'),
+    2:  (True, 4, 'Maximum Segment Size'),
+    3:  (True, 4, 'Window Scale'),
+    4:  (True, 2, 'SACK Permitted'),
+    5:  (False, 'SACK'),
+}
+
+
 class Reader:
     """Reader for PCAP files.
 
@@ -90,7 +101,7 @@ class Reader:
         else:               _format = None                      # do not unpack
 
         if _format is None:
-            buf = self._file.read(_size)
+            buf = _file.read(_size)
         else:
             try:
                 fmt = '{endian}{format}'.format(endian=_endian, format=_format)
@@ -370,7 +381,7 @@ class Reader:
         )
 
         self._dleng -= tcp['hdr_len']
-        tcp['options'] = _file.read(tcp['hdr_len'] - 20)
+        tcp['options'] = self._read_tcp_options(_file, tcp['hdr_len'] - 20)
         tcp['Application'] = _file.read(self._dleng)
         return tcp
 
@@ -423,6 +434,13 @@ class Reader:
         _byte = struct.unpack('>B', _file.read(1))[0]
         _trans = TP_PROTO.get(_byte)
         return _trans
+
+    def _read_tcp_options(self, _file, _llen):
+        _byte = _file.read(_llen)
+
+        eool = False
+        while not eool:
+            pass
 
 
 if __name__ == '__main__':
