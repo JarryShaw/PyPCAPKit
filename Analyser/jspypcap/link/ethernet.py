@@ -9,15 +9,30 @@ import textwrap
 # Analyser for ethernet protocol header
 
 
-from link import Link
-
-from ..exceptions import StringError
-from ..internet.internet import INTERNET
+# from link import Link
 
 
-class Ethernet(Link):
+##############################################################################
+# for unknown reason and never-encountered situation, at current time
+# we have to change the working directory to import from parent folders
 
-    __all__ = ['name', 'layer', 'source', 'destination', 'protocol']
+import os
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
+from internet.internet import INTERNET
+from protocol import Info, Protocol
+
+del sys.path[1]
+
+# and afterwards, we recover the whole scene back to its original state
+##############################################################################
+
+
+
+class Ethernet(Protocol):
+
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
 
     ##########################################################################
     # Properties.
@@ -28,24 +43,28 @@ class Ethernet(Link):
         return 'Ethernet Protocol'
 
     @property
-    def layer(self):
-        return self.__layer__
+    def info(self):
+        return self._info
 
     @property
     def length(self):
-        pass
+        return 14
 
     @property
-    def source(self):
-        self._dict['src']
+    def src(self):
+        return self._info.src
 
     @property
-    def destination(self):
-        self._dict['dst']
+    def dst(self):
+        return self._info.dst
+
+    @property
+    def layer(self):
+        return 'Link Layer'
 
     @property
     def protocol(self):
-        self._dict['type']
+        return self._info.type
 
     ##########################################################################
     # Data models.
@@ -53,22 +72,13 @@ class Ethernet(Link):
 
     def __init__(self, _file):
         self._file = _file
-        self._dict = self.read_ethernet()
+        self._info = Info(self.read_ethernet())
 
     def __len__(self):
         return 14
 
     def __length_hint__(self):
         return 14
-
-    def __getitem__(self, key):
-        if isinstance(key, str):
-            try:
-                return self._dict[key]
-            except KeyError:
-                return None
-        else:
-            raise StringError
 
     ##########################################################################
     # Utilities.

@@ -6,14 +6,28 @@
 # Analyser for UDP header
 
 
-from transport import Transport
-
-from ..exceptions import StringError
+# from transport import Transport
 
 
-class UDP(Transport):
+##############################################################################
+# for unknown reason and never-encountered situation, at current time
+# we have to change the working directory to import from parent folders
 
-    __all__ = ['name', 'layer', 'length', 'source', 'destination']
+import os
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
+from protocol import Info, Protocol
+
+del sys.path[1]
+
+# and afterwards, we recover the whole scene back to its original state
+##############################################################################
+
+
+class UDP(Protocol):
+
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer']
 
     ##########################################################################
     # Properties.
@@ -24,20 +38,24 @@ class UDP(Transport):
         return 'User Datagram Protocol'
 
     @property
-    def layer(self):
-        return self.__layer__
+    def info(self):
+        return self._info
 
     @property
     def length(self):
-        return self._dict['len']
+        return 8
 
     @property
-    def source(self):
-        self._dict['src']
+    def src(self):
+        return self._info.src
 
     @property
-    def destination(self):
-        self._dict['dst']
+    def dst(self):
+        return self._info.dst
+
+    @property
+    def layer(self):
+        return self.__layer__
 
     ##########################################################################
     # Data models.
@@ -45,22 +63,13 @@ class UDP(Transport):
 
     def __init__(self, _file):
         self._file = _file
-        self._dict = self.read_udp()
+        self._info = Info(self.read_udp())
 
     def __len__(self):
         return 8
 
     def __length_hint__(self):
         return 8
-
-    def __getitem__(self, key):
-        if isinstance(key, str):
-            try:
-                return self._dict[key]
-            except KeyError:
-                return None
-        else:
-            raise StringError
 
     ##########################################################################
     # Utilities.
@@ -77,10 +86,10 @@ class UDP(Transport):
               6              48         udp.checksum            Checksum
 
         """
-        _srcp = self._read_unpack(self._file, 2, _bige=True)
-        _dstp = self._read_unpack(self._file, 2, _bige=True)
-        _tlen = self._read_unpack(self._file, 2, _bige=True)
-        _csum = self._read_unpack(self._file, 2, _bige=True)
+        _srcp = self.read_unpack(self._file, 2, _bige=True)
+        _dstp = self.read_unpack(self._file, 2, _bige=True)
+        _tlen = self.read_unpack(self._file, 2, _bige=True)
+        _csum = self._file.read(2)
 
         udp = dict(
             srcport = _srcp,

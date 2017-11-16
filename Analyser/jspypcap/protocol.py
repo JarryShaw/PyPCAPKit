@@ -22,23 +22,61 @@ abstractmethod = abc.abstractmethod
 abstractproperty = abc.abstractproperty
 
 
+class Info:
+
+    def __init__(self, dict_):
+        for key in dict_:
+            if isinstance(dict_[key], dict):
+                self.__dict__[key] = Info(dict_[key])
+            else:
+                self.__dict__[key] = dict_[key]
+
+    def __repr__(self):
+        list_ = []
+        for (key, value) in self.__dict__.items():
+            str_ = '{key}={value}'.format(key=key, value=value)
+            list_.append(str_)
+        repr_ = 'Info(' + ', '.join(list_) + ')'
+        return repr_
+
+    __str__ = __repr__
+
+    def __setattr__(self, name, value):
+        raise AttributeError('can\'t set attribute')
+
+    def __delattr__(self, name):
+        raise AttributeError('can\'t delete attribute')
+
+    def infotodict(self):
+        dict_ = {}
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], Info):
+                dict_[key] = self.__dict__[key].infotodict()
+            else:
+                dict_[key] = self.__dict__[key]
+        return dict_
+
+
 class Protocol(object):
 
-    __all__ = ['name', 'layer', 'length']
+    __all__ = ['name', 'info', 'length']
     __metaclass__ = ABCMeta
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
+    # name of current protocol
     @abstractproperty
     def name(self):
         pass
 
+    # info dict of current instance
     @abstractproperty
-    def layer(self):
+    def info(self):
         pass
 
+    # header length of current protocol
     @abstractproperty
     def length(self):
         pass
@@ -159,10 +197,6 @@ class Protocol(object):
 
     @abstractmethod
     def __length_hint__(self):
-        pass
-
-    @abstractmethod
-    def __getitem__(self, key):
         pass
 
     def __iter__(self):

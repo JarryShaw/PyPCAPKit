@@ -9,13 +9,12 @@ import datetime
 # Analyser for record/package headers
 
 
-from exceptions import StringError
-from protocol import Protocol
+from protocol import Info, Protocol
 
 
 class Frame(Protocol):
 
-    __all__ = ['name', 'length']
+    __all__ = ['name', 'info', 'length']
 
     ##########################################################################
     # Properties.
@@ -26,43 +25,31 @@ class Frame(Protocol):
         return 'Frame {fnum}'.format(fnum=self._fnum)
 
     @property
-    def layer(self):
-        pass
+    def info(self):
+        return self._info
 
     @property
     def length(self):
-        return self._dict['len']
+        return 16
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
     def __new__(cls, _file, _fnum):
-        self = super().__new__(cls)
+        self = super().__new__(cls, _file)
         return self
 
     def __init__(self, _file, _fnum):
         self._file = _file
         self._fnum = _fnum
-        self._dict = self.read_frame()
+        self._info = Info(self.read_header())
 
     def __len__(self):
         return 16
 
     def __length_hint__(self):
         return 16
-
-    def __getitem__(self, key):
-        if isinstance(key, str):
-            try:
-                try:
-                    return self._dict[key]
-                except KeyError:
-                    return self._dict['frame'][key]
-            except KeyError:
-                return None
-        else:
-            raise StringError
 
     ##########################################################################
     # Utilities.

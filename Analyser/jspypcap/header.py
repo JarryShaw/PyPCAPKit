@@ -6,15 +6,39 @@
 # Analyser for PCAP global headers
 
 
-from exceptions import FileError, StringError
-from protocol import Protocol
+from exceptions import FileError
+from protocol import Info, Protocol
 
 from link.link import LINKTYPE
 
 
+class VersionInfo(Info):
+
+    def __init__(self, vmaj, vmin):
+        self._vers = (vmaj, vmin)
+
+    def __str__(self):
+        str_ = 'pcap version {major}.{minor}'.format(
+                    major=self._vers[0], minor=self._vers[1]
+                )
+        return str_
+
+    def __repr__(self):
+        repr_ = 'pcap.version_info(major={major}, minor={minor})'.format(
+                    major=self._vers[0], minor=self._vers[1]
+                )
+        return repr_
+
+    def __getattribute__(self, name):
+        raise AttributeError("'VersionInfo' object has no attribute '{name}'".format(name=name))
+
+    def __getitem__(self, key):
+        return self._vers[key]
+
+
 class Header(Protocol):
 
-    __all__ = ['name', 'length', 'protocol']
+    __all__ = ['name', 'info', 'length', 'version', 'protocol']
 
     ##########################################################################
     # Properties.
@@ -25,16 +49,20 @@ class Header(Protocol):
         return 'Global Header'
 
     @property
-    def layer(self):
-        pass
+    def info(self):
+        return self._info
 
     @property
     def length(self):
-        return self._dict['snaplen']
+        return 24
+
+    @property
+    def version(self):
+        return VersionInfo(self._info.version_major, self._info.version_minor)
 
     @property
     def protocol(self):
-        return self._dict['network']
+        return self.info.network
 
     ##########################################################################
     # Data models.
@@ -42,22 +70,13 @@ class Header(Protocol):
 
     def __init__(self, _file):
         self._file = _file
-        self._dict = self.read_header()
+        self._info = Info(self.read_header())
 
     def __len__(self):
         return 24
 
     def __length_hint__(self):
         return 24
-
-    def __getitem__(self, key):
-        if isinstance(key, str):
-            try:
-                return self._dict[key]
-            except KeyError:
-                return None
-        else:
-            raise StringError
 
     ##########################################################################
     # Utilities.

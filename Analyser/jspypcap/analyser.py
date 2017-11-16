@@ -3,6 +3,7 @@
 
 
 import io
+import pprint
 
 
 # Analyser for PCAP files
@@ -13,6 +14,7 @@ from jsplist import Writer
 
 from frame import Frame
 from header import Header
+from protocol import Info
 
 
 class Analyser:
@@ -50,7 +52,7 @@ class Analyser:
             fname -- str, file name to be read; if file not exist, raise error
 
         """
-        self._frame = 1                     # frame number
+        self._frnum = 1                     # frame number
         self._plist = Writer('tmp.plist')   # temp PLIST file
         with open(fname, 'rb') as _file:
             self.record_header(_file)    # read PCAP global header
@@ -58,79 +60,133 @@ class Analyser:
 
     def record_header(self, _file):
         self._gbhdr = Header(_file)
-        self._tzone = self._gbhdr._dict['thiszone']
-        self._dlink = self._gbhdr._dict['network']
-        self._plist(self._gbhdr._dict, _name='Global Header')
+        self._dlink = self._gbhdr.protocol
+        self._tzone = self._gbhdr.info.thiszone
+        self._plist(self._gbhdr.info.infotodict(), _name='Global Header')
 
     def record_frames(self, _file):
         self._frame = []
         while True:
             try:
-                _frame = Frame(_file, self._frame)
+                print('Frame', self._frnum)
 
-                length = _frame.length - len(_frame)
+                # read frame header
+                frame = Frame(_file, self._frnum)
+                plist = frame.info.infotodict()
+
+                # pprint.pprint(plist)
+
+                # make BytesIO from frame package data
+                length = frame.info.len - frame.length
+                print(length+16)
                 bytes_ = io.BytesIO(_file.read(length))
 
-                _dlink = self._link_layer(bytes_)
-                _netwk = self._internet_layer(bytes_)
-                _trans = self._transport_layer(bytes_)
-                _applc = self._application_layer(bytes_)
+                # read link layer
+                dlink = self._link_layer(bytes_, length)
 
-                frame = (_frame, _dlink, _netwk, _trans, _applc)
-                self._frame.append(frame)
-                self._frame_plist(frame)
+                # check link layer protocol
+                if not dlink[0]:
+                    plist['Link Layer'] = dlink[1]
+                    self._dlink = 'Unknown'
+                    self._netwk = 'Unknown'
+                    self._trans = 'Unknown'
+                    self._write_record(plist)
+                    continue
+                else:
+                    plist[self._dlink] = dlink[1].info.infotodict()
+                    self._netwk = dlink[1].protocol
+                    length -= dlink[1].length
+
+                # pprint.pprint(plist)
+
+                # read internet layer
+                netwk = self._internet_layer(bytes_, length)
+
+                # check internet layer protocol
+                if not netwk[0]:
+                    plist[self._dlink]['Network Layer'] = netwk[1]
+                    self._netwk = 'Unknown'
+                    self._trans = 'Unknown'
+                    self._write_record(plist)
+                    continue
+                else:
+                    plist[self._dlink][self._netwk] = netwk[1].info.infotodict()
+                    self._trans = netwk[1].protocol
+                    length -= netwk[1].length
+
+                # pprint.pprint(plist)
+
+                # read transport layer
+                trans = self._transport_layer(bytes_, length)
+
+                # check transport layer protocol
+                if not netwk[0]:
+                    plist[self._dlink][self._netwk]['Transport Layer'] = trans[1]
+                    self._trans = 'Unknown'
+                    self._write_record(plist)
+                    continue
+                else:
+                    plist[self._dlink][self._netwk][self._trans] = trans[1].info.infotodict()
+                    length -= trans[1].length
+
+                # pprint.pprint(plist)
+
+                # read application layer
+                applc = self._application_layer(bytes_, length)
+
+                # check application layer protocol
+                plist[self._dlink][self._netwk][self._trans]['Application Layer'] = applc[1]
+
+                # pprint.pprint(plist)
+
+                self._write_record(plist)
+
             except EOFError:
                 break
 
-    def _frame_plist(self, tuple_):
-        applc = tuple_[4]
+    def _write_record(self, plist):
+        # write plist
+        plist['protocols'] = ':'.join((self._dlink, self._netwk, self._trans))
+        _fnum = 'Frame {fnum}'.format(fnum=self._frnum)
 
-        trans = tuple_[3]._dict
-        trans['Application Layer'] = applc
+        print(plist['protocols'])
+        pprint.pprint(plist)
+        self._plist(plist, _name=_fnum)
 
-        netwk = tuple_[2]._dict
-        netwk[self._trans] = trans
+        # record frame
+        info = Info(plist)
+        self._frame.append(info)
+        self._frnum += 1
 
-        dlink = tuple_[1]._dict
-        dlink[self._netwk] = netwk
-
-        frame = tuple_[0]._dict
-        frame[self._dlink] = dlink
-
-        frame['protocols'] = '{link}:{internet}:{transport}'.format(
-            link=self._dlink, internet=self._netwk, transport=self._trans
-        )
-        _fnum = 'Frame {fnum}'.format(fnum=self._frame)
-
-        self._frame += 1
-        self._plist(frame, _name=_fnum)
-
-    def _link_layer(self, _file):
+    def _link_layer(self, _file, length):
         if self._dlink == 'Ethernet':
             from link import ethernet
-            return ethernet.Ethernet(_file)
+            return True, ethernet.Ethernet(_file)
         else:
-            raise NotImplementedError
+            # raise NotImplementedError
+            return False, _file.read(length)
 
-    def _internet_layer(self, _file):
+    def _internet_layer(self, _file, length):
         if self._netwk == 'IPv4':
             from internet import ipv4
-            return ipv4.IPv4(_file)
+            return True, ipv4.IPv4(_file)
         else:
-            raise NotImplementedError
+            # raise NotImplementedError
+            return False, _file.read(length)
 
-    def _transport_layer(self, _file):
+    def _transport_layer(self, _file, length):
         if self._trans == 'TCP':
             from transport import tcp
-            return tcp.TCP(_file)
+            return True, tcp.TCP(_file)
         elif self._trans == 'UDP':
             from transport import udp
-            return udp.UDP(_file)
+            return True, udp.UDP(_file)
         else:
-            raise NotImplementedError
+            # raise NotImplementedError
+            return False, _file.read(length)
 
-    def _application_layer(self, _file):
-        return _file.read()
+    def _application_layer(self, _file, length):
+        return False, _file.read(length)
 
 
 if __name__ == '__main__':

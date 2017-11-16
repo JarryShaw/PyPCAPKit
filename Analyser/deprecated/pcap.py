@@ -177,6 +177,10 @@ class Reader:
 
         """
         while True:
+            self._netwk = 'Unknown'
+            self._trans = 'Unknown'
+            self._applc = 'Unknown'
+
             _temp = self._read_unpack(_file, 4)
             if _temp is None:   break
 
@@ -194,12 +198,15 @@ class Reader:
                 cap_len = _olen,
             )
 
+            self._dleng = frame['len'] - 16
+
             frame[self._dlink] = self.read_link(_file)
             frame['protocols'] = '{link}:{internet}:{transport}'.format(
                 link=self._dlink, internet=self._netwk, transport=self._trans
             )
 
             _fnum = 'Frame {fnum}'.format(fnum=self._frame)
+            print(_fnum, '\t', frame['protocols'], '\t', frame['len'], '\n')
 
             self._frame += 1
             self._plist(frame, _name=_fnum)
@@ -208,21 +215,24 @@ class Reader:
         if self._dlink == 'Eithernet':
             return self._read_ethernet(_file)
         else:
-            raise NotImplementedError
+            # raise NotImplementedError
+            return _file.read(self._dleng)
 
     def read_internet(self, _file):
         if self._netwk == 'IPv4':
             return self._read_ipv4(_file)
         else:
-            raise NotImplementedError
+            # raise NotImplementedError
+            return _file.read(self._dleng)
 
     def read_trans(self, _file):
         if self._trans == 'TCP':
             return self._read_tcp(_file)
-        elif self._trans == 'UDP':
-            return self._read_udp(_file)
+        # elif self._trans == 'UDP':
+        #     return self._read_udp(_file)
         else:
-            raise NotImplementedError
+            # raise NotImplementedError
+            return _file.read(self._dleng)
 
     def _read_ethernet(self, _file):
         """Read Ethernet Protocol.
@@ -248,6 +258,7 @@ class Reader:
         )
 
         self._netwk = ethernet['type']
+        self._dleng -= 14
         ethernet[self._netwk] = self.read_internet(_file)
         return ethernet
 

@@ -9,15 +9,29 @@ import struct
 # Analyser for IPv4 header
 
 
-from internet import Internet
-
-from ..exceptions import StringError
-from ..tranport.transport import TP_PROTO
+# from internet import Internet
 
 
-class IPv4(Internet):
+##############################################################################
+# for unknown reason and never-encountered situation, at current time
+# we have to change the working directory to import from parent folders
 
-    __all__ = ['name', 'layer', 'length', 'source', 'destination', 'protocol']
+import os
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
+from protocol import Info, Protocol
+from transport.transport import TP_PROTO
+
+del sys.path[1]
+
+# and afterwards, we recover the whole scene back to its original state
+##############################################################################
+
+
+class IPv4(Protocol):
+
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
 
     ##########################################################################
     # Properties.
@@ -28,24 +42,28 @@ class IPv4(Internet):
         return 'Internet Protocol version 4'
 
     @property
+    def info(self):
+        return self._info
+
+    @property
+    def length(self):
+        return self._info.hdr_len
+
+    @property
+    def src(self):
+        return self._info.src
+
+    @property
+    def dst(self):
+        return self._info.dst
+
+    @property
     def layer(self):
         return self.__layer__
 
     @property
-    def length(self):
-        return self._dict['len']
-
-    @property
-    def source(self):
-        self._dict['src']
-
-    @property
-    def destination(self):
-        self._dict['dst']
-
-    @property
     def protocol(self):
-        self._dict['proto']
+        return self._info.proto
 
     ##########################################################################
     # Data models.
@@ -53,22 +71,13 @@ class IPv4(Internet):
 
     def __init__(self, _file):
         self._file = _file
-        self._dict = self.read_ipv4()
+        self._info = Info(self.read_ipv4())
 
     def __len__(self):
-        return self._dict['hdr_len']
+        return self._info.hdr_len
 
     def __length_hint__(self):
         return 20
-
-    def __getitem__(self, key):
-        if isinstance(key, str):
-            try:
-                return self._dict[key]
-            except KeyError:
-                return None
-        else:
-            raise StringError
 
     ##########################################################################
     # Utilities.
@@ -98,11 +107,11 @@ class IPv4(Internet):
 
         """
         _vihl = self._file.read(1).hex()
-        _dscp = self.read_binary(1)
-        _tlen = self.read_unpack(2, _bige=True)
-        _iden = self.read_unpack(2, _bige=True)
-        _frag = self.read_binary(2)
-        _ttol = self.read_unpack(1, _bige=True)
+        _dscp = self.read_binary(self._file, 1)
+        _tlen = self.read_unpack(self._file, 2, _bige=True)
+        _iden = self.read_unpack(self._file, 2, _bige=True)
+        _frag = self.read_binary(self._file, 2)
+        _ttol = self.read_unpack(self._file, 1, _bige=True)
         _prot = self._read_ip_proto()
         _csum = self._file.read(2)
         _srca = self._read_ip_addr()

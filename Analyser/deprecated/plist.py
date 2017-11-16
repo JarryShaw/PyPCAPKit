@@ -45,6 +45,7 @@ class Writer:
             int      = lambda text, file_: self._append_integer(text, file_),
             float    = lambda text, file_: self._append_real(text, file_),
             bool     = lambda text, file_: self._append_bool(text, file_),
+            NoneType = lambda text, file_: self._append_none(text, file_),
         )
 
         self.plist_header()
@@ -70,6 +71,7 @@ class Writer:
         self._append_dict(value, _file)
 
     def _append_array(self, value, _file):
+        # print('<array>', end='\t')
         _tabs = '\t' * self._tctr
         _labs = '{tabs}<array>\n'.format(tabs=_tabs)
         _file.write(_labs)
@@ -85,6 +87,7 @@ class Writer:
         _file.write(_labs)
 
     def _append_dict(self, value, _file):
+        # print('<dict>', end='\t')
         _tabs = '\t' * self._tctr
         _labs = '{tabs}<dict>\n'.format(tabs=_tabs)
         _file.write(_labs)
@@ -105,12 +108,14 @@ class Writer:
         _file.write(_labs)
 
     def _append_string(self, value, _file):
+        # print('<string>', end='\t')
         _tabs = '\t' * self._tctr
         _text = value
         _labs = '{tabs}<string>{text}</string>\n'.format(tabs=_tabs, text=_text)
         _file.write(_labs)
 
     def _append_data(self, value, _file):
+        # print('<data>', end='\t')
         # binascii.b2a_base64(value) -> plistlib.Data
         # binascii.a2b_base64(Data) -> value(bytes)
 
@@ -123,25 +128,35 @@ class Writer:
         _file.write(_labs)
 
     def _append_date(self, value, _file):
+        # print('<date>', end='\t')
         _tabs = '\t' * self._tctr
         _text = value.strftime('%Y-%m-%dT%H:%M:%SZ')
         _labs = '{tabs}<date>{text}</date>\n'.format(tabs=_tabs, text=_text)
         _file.write(_labs)
 
     def _append_integer(self, value, _file):
+        # print('<integer>', end='\t')
         _tabs = '\t' * self._tctr
         _text = value
         _labs = '{tabs}<integer>{text}</integer>\n'.format(tabs=_tabs, text=_text)
         _file.write(_labs)
 
     def _append_real(self, value, _file):
+        # print('<real>', end='\t')
         _tabs = '\t' * self._tctr
         _text = value
         _labs = '{tabs}<real>{text}</real>\n'.format(tabs=_tabs, text=_text)
         _file.write(_labs)
 
     def _append_bool(self, value, _file):
+        # print('<bool>', end='\t')
         _tabs = '\t' * self._tctr
         _text = '<true/>' if value else '<false/>'
         _labs = '{tabs}{text}\n'.format(tabs=_tabs, text=_text)
+        _file.write(_labs)
+
+    def _append_none(self, value, _file):
+        # print('<NoneType>', end='\t')
+        _tabs = '\t' * self._tctr
+        _labs = '{tabs}<data>\n{tabs}\n{tabs}</data>\n'.format(tabs=_tabs)
         _file.write(_labs)

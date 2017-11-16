@@ -2,13 +2,27 @@
 # -*- coding: utf-8 -*-
 
 
-# Transport Control Protocol
+# Transmission Control Protocol
 # Analyser for TCP header
 
 
-from transport import Transport
+# from transport import Transport
 
-from ..exceptions import StringError
+
+##############################################################################
+# for unknown reason and never-encountered situation, at current time
+# we have to change the working directory to import from parent folders
+
+import os
+import sys
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
+from protocol import Info, Protocol
+
+del sys.path[1]
+
+# and afterwards, we recover the whole scene back to its original state
+##############################################################################
 
 
 # TCP Options
@@ -22,9 +36,9 @@ TCP_OPT = {
 }
 
 
-class TCP(Transport):
+class TCP(Protocol):
 
-    __all__ = ['name', 'layer', 'source', 'destination']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer']
 
     ##########################################################################
     # Properties.
@@ -32,23 +46,27 @@ class TCP(Transport):
 
     @property
     def name(self):
-        return 'Transport Control Protocol'
+        return 'Transmission Control Protocol'
+
+    @property
+    def info(self):
+        return self._info
+
+    @property
+    def length(self):
+        return self._info.hdr_len
+
+    @property
+    def src(self):
+        return self._info.src
+
+    @property
+    def dst(self):
+        return self._info.dst
 
     @property
     def layer(self):
         return self.__layer__
-
-    @property
-    def length(self):
-        pass
-
-    @property
-    def source(self):
-        self._dict['src']
-
-    @property
-    def destination(self):
-        self._dict['dst']
 
     ##########################################################################
     # Data models.
@@ -56,22 +74,13 @@ class TCP(Transport):
 
     def __init__(self, _file):
         self._file = _file
-        self._dict = self.read_tcp()
+        self._info = Info(self.read_tcp())
 
     def __len__(self):
-        return self._dict['hdr_len']
+        return self._info.hdr_len
 
     def __length_hint__(self):
         return 20
-
-    def __getitem__(self, key):
-        if isinstance(key, str):
-            try:
-                return self._dict[key]
-            except KeyError:
-                return None
-        else:
-            raise StringError
 
     ##########################################################################
     # Utilities.
