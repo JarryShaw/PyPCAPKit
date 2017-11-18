@@ -95,7 +95,7 @@ class Protocol(object):
         return seekcur
 
     @staticmethod
-    def read_unpack(_file, _size=1, *, _sign=False, _bige=False, isfile=False):
+    def read_unpack(_file, _size=1, *, _sign=False, _lttl=True, isfile=False):
         """Read bytes and unpack for integers.
 
         Keyword arguemnts:
@@ -103,15 +103,16 @@ class Protocol(object):
             _size  -- int, buffer size (default is 1)
             _sign  -- bool, signed flag (default is False)
                       <keyword> True / False
-            _bige  -- bool, big-endian flag (default is False)
+            _lttl  -- bool,little-endian flag (default is False)
                       <keyword> True / False
             isfile -- bool, `_file` is file flag (default is False)
                       <keyword> True / False
 
         """
-        def _read_unpack(file_, size=1, *, sign=False, bige=False):
-            endian = '>' if bige else '<'
-            if size == 4:   format_ = 'i' if sign else 'I'  # unpack to 4-byte integer (int)
+        def _read_unpack(file_, size=1, *, sign=False, lttl=False):
+            endian = '<' if lttl else '>'
+            if size == 8:   format_ = 'q' if sign else 'Q'  # unpack to 8-byte integer (long long)
+            elif size == 4: format_ = 'i' if sign else 'I'  # unpack to 4-byte integer (int / long)
             elif size == 2: format_ = 'h' if sign else 'H'  # unpack to 2-byte integer (short)
             elif size == 1: format_ = 'b' if sign else 'B'  # unpack to 1-byte integer (char)
             else:           format_ = None                  # do not unpack
@@ -128,12 +129,12 @@ class Protocol(object):
 
         if isfile:
             with open(_file) as file_:
-                return _read_unpack(file_, _size, sign=_sign, bige=_bige)
+                return _read_unpack(file_, _size, sign=_sign, lttl=_lttl)
         elif isinstance(_file, io.IOBase):
-            return _read_unpack(_file, _size, sign=_sign, bige=_bige)
+            return _read_unpack(_file, _size, sign=_sign, lttl=_lttl)
         elif isinstance(_file, bytes):
             file_ = io.BytesIO(_file)
-            return _read_unpack(file_, _size, sign=_sign, bige=_bige)
+            return _read_unpack(file_, _size, sign=_sign, lttl=_lttl)
         else:
             raise BytesError
 

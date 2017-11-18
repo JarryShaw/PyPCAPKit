@@ -102,12 +102,12 @@ class Header(Protocol):
             raise FileError
 
         _magn = _temp
-        _vmaj = self.read_unpack(self._file, 2)
-        _vmin = self.read_unpack(self._file, 2)
-        _zone = self.read_unpack(self._file, 4, _sign=True)
-        _acts = self.read_unpack(self._file, 4)
-        _slen = self.read_unpack(self._file, 4)
-        _type = self.read_unpack(self._file, 4)
+        _vmaj = self.read_unpack(self._file, 2, _lttl=True)
+        _vmin = self.read_unpack(self._file, 2, _lttl=True)
+        _zone = self.read_unpack(self._file, 4, _lttl=True, _sign=True)
+        _acts = self.read_unpack(self._file, 4, _lttl=True)
+        _slen = self.read_unpack(self._file, 4, _lttl=True)
+        _type = self.read_unpack(self._file, 4, _lttl=True)
 
         header = dict(
             magic_number = _magn,

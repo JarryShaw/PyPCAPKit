@@ -86,9 +86,9 @@ class UDP(Protocol):
               6              48         udp.checksum            Checksum
 
         """
-        _srcp = self.read_unpack(self._file, 2, _bige=True)
-        _dstp = self.read_unpack(self._file, 2, _bige=True)
-        _tlen = self.read_unpack(self._file, 2, _bige=True)
+        _srcp = self.read_unpack(self._file, 2)
+        _dstp = self.read_unpack(self._file, 2)
+        _tlen = self.read_unpack(self._file, 2)
         _csum = self._file.read(2)
 
         udp = dict(

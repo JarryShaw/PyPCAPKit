@@ -108,7 +108,7 @@ class Ethernet(Protocol):
 
     def _read_mac_addr(self):
         _byte = self._file.read(6)
-        _addr = ':'.join(textwrap.wrap(_byte.hex(), 2))
+        _addr = '-'.join(textwrap.wrap(_byte.hex(), 2))
         return _addr
 
     def _read_eth_type(self):

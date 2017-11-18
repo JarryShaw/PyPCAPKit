@@ -108,10 +108,10 @@ class IPv4(Protocol):
         """
         _vihl = self._file.read(1).hex()
         _dscp = self.read_binary(self._file, 1)
-        _tlen = self.read_unpack(self._file, 2, _bige=True)
-        _iden = self.read_unpack(self._file, 2, _bige=True)
+        _tlen = self.read_unpack(self._file, 2)
+        _iden = self.read_unpack(self._file, 2)
         _frag = self.read_binary(self._file, 2)
-        _ttol = self.read_unpack(self._file, 1, _bige=True)
+        _ttol = self.read_unpack(self._file, 1)
         _prot = self._read_ip_proto()
         _csum = self._file.read(2)
         _srca = self._read_ip_addr()

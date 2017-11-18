@@ -70,14 +70,14 @@ class Frame(Protocol):
             } pcaprec_hdr_t;
 
         """
-        _temp = self.read_unpack(self._file, 4)
+        _temp = self.read_unpack(self._file, 4, _lttl=True)
         if _temp is None:   raise EOFError
 
         _time = datetime.datetime.fromtimestamp(_temp)
         _tsss = _temp
-        _tsus = self.read_unpack(self._file, 4)
-        _ilen = self.read_unpack(self._file, 4)
-        _olen = self.read_unpack(self._file, 4)
+        _tsus = self.read_unpack(self._file, 4, _lttl=True)
+        _ilen = self.read_unpack(self._file, 4, _lttl=True)
+        _olen = self.read_unpack(self._file, 4, _lttl=True)
 
         frame = dict(
             frame = dict(

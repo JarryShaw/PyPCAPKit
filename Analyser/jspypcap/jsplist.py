@@ -76,6 +76,7 @@ class Writer:
         self._tctr += 1
 
         for _item in value:
+            if _item is None:   continue
             _type = type(_item).__name__
             self._magic_types[_type](_item, _file)
 
@@ -91,11 +92,13 @@ class Writer:
         self._tctr += 1
 
         for _item in value:
+            _text = value[_item]
+            if _text is None:   continue
+
             _tabs = '\t' * self._tctr
             _keys = '{tabs}<key>{item}</key>\n'.format(tabs=_tabs, item=_item)
             _file.write(_keys)
 
-            _text = value[_item]
             _type = type(_text).__name__
             self._magic_types[_type](_text, _file)
 
