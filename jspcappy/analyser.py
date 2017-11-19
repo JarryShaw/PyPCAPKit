@@ -10,8 +10,6 @@ import textwrap
 # Extract parametres from a PCAP file
 
 
-from jsplist import Writer
-
 from frame import Frame
 from header import Header
 from protocol import Info
@@ -22,7 +20,7 @@ class Analyser:
 
     Properties:
         _frame -- int, frame number
-        _plist -- object, temperory output writer
+        _ofile -- object, temperory output writer
 
         _dlink -- str, data link layer protocol
         _netwk -- str, network layer protocol
@@ -46,21 +44,41 @@ class Analyser:
     def info(self):
         return self._frame
 
-    def __init__(self, fname=None):
+    def __init__(self, *, fmt, fin=None, fout=None):
         """Initialise PCAP Reader.
 
         Keyword arguemnts:
-            fname -- str, file name to be read; if file not exist, raise error
+            fmt  -- str, file format of output
+                    <keyword> 'plist' / 'json'
+            fin  -- str, file name to be read; if file not exist, raise error
+            fout -- str, file name to be written
 
         """
         self._frnum = 1                     # frame number
         self._frame = []                    # frame record
-        self._plist = Writer('tmp.plist')   # temp PLIST file
-        with open(fname, 'rb') as _file:
-            self.record_header(_file)       # read PCAP global header
-            self.record_frames(_file)       # read frames
 
-    def record_header(self, _file):
+        if fin is None:
+            fin = 'in.pcap'
+        ifnm = fin
+
+        if fout is None:
+            fout = 'out'
+        ofnm = '{fout}.{fmt}'.format(fout=fout, fmt=fmt)
+
+        if fmt == 'json':
+            from json import JSON
+            self._ofile = JSON(ofnm)    # output JSON file
+        elif fmt == 'plist':
+            from plist import PLIST
+            self._ofile = PLIST(ofnm)   # output PLIST file
+        else:
+            raise KeyError
+
+        with open(ifnm, 'rb') as _ifile:
+            self.record_header(_ifile)      # read PCAP global header
+            self.record_frames(_ifile)      # read frames
+
+    def record_header(self, _ifile):
         """Read global header.
 
         - Extract global header.
@@ -69,15 +87,15 @@ class Analyser:
         - Write plist file.
 
         Keyword arguments:
-            _file -- file object
+            _ifile -- file object
 
         """
-        self._gbhdr = Header(_file)
+        self._gbhdr = Header(_ifile)
         self._dlink = self._gbhdr.protocol
         self._frame.append(self._gbhdr.info)
-        self._plist(self._gbhdr.info.infotodict(), _name='Global Header')
+        self._ofile(self._gbhdr.info.infotodict(), _name='Global Header')
 
-    def record_frames(self, _file):
+    def record_frames(self, _ifile):
         """Read frames.
 
         - Extract frames and each layer of packets.
@@ -86,7 +104,7 @@ class Analyser:
         - Write plist file.
 
         Keyword arguments:
-            _file -- file object
+            _ifile -- file object
 
         """
         while True:
@@ -95,12 +113,12 @@ class Analyser:
             self._applc = 'Unknown'
             try:
                 # read frame header
-                frame = Frame(_file, self._frnum)
+                frame = Frame(_ifile, self._frnum)
                 plist = frame.info.infotodict()
 
                 # make BytesIO from frame package data
                 length = frame.info.len
-                bytes_ = io.BytesIO(_file.read(length))
+                bytes_ = io.BytesIO(_ifile.read(length))
 
                 # read link layer
                 dlink = self._link_layer(bytes_, length)
@@ -155,7 +173,7 @@ class Analyser:
         # write plist
         _fnum = 'Frame {fnum}'.format(fnum=self._frnum)
         plist['protocols'] = self._merge_protocols()
-        self._plist(plist, _name=_fnum)
+        self._ofile(plist, _name=_fnum)
 
         print(_fnum)
         print(plist['protocols'])
@@ -174,40 +192,40 @@ class Analyser:
                 return ':'.join(list_[:i])
         return ':'.join(list_)
 
-    def _link_layer(self, _file, length):
+    def _link_layer(self, _ifile, length):
         """Read link layer."""
         if self._dlink == 'Ethernet':
             from link import ethernet
-            return True, ethernet.Ethernet(_file)
+            return True, ethernet.Ethernet(_ifile)
         else:
             # raise NotImplementedError
-            return False, _file.read(length)
+            return False, _ifile.read(length)
 
-    def _internet_layer(self, _file, length):
+    def _internet_layer(self, _ifile, length):
         """Read internet layer."""
         if self._netwk == 'IPv4':
             from internet import ipv4
-            return True, ipv4.IPv4(_file)
+            return True, ipv4.IPv4(_ifile)
         else:
             # raise NotImplementedError
-            return False, _file.read(length)
+            return False, _ifile.read(length)
 
-    def _transport_layer(self, _file, length):
+    def _transport_layer(self, _ifile, length):
         """Read transport layer."""
         if self._trans == 'TCP':
             from transport import tcp
-            return True, tcp.TCP(_file)
+            return True, tcp.TCP(_ifile)
         elif self._trans == 'UDP':
             from transport import udp
-            return True, udp.UDP(_file)
+            return True, udp.UDP(_ifile)
         else:
             # raise NotImplementedError
-            return False, _file.read(length)
+            return False, _ifile.read(length)
 
-    def _application_layer(self, _file, length):
+    def _application_layer(self, _ifile, length):
         """Read application layer."""
-        return False, _file.read(length)
+        return False, _ifile.read(length)
 
 
 if __name__ == '__main__':
-    a = Analyser('a.pcap')
+    a = Analyser(fmt='json')
