@@ -1,0 +1,147 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+
+import os
+import textwrap
+
+
+# Writer for treeview text files
+# Dump a TEXT file for PCAP analyser
+
+
+from dumper import Dumper
+
+
+HEADER_START = ''
+HEADER_END = ''
+
+MAKE_BRANCH = lambda t: '  |   ' * t
+MAKE_SPACES = lambda t: '      ' * t
+
+MAGIC_TYPES = dict(
+    dict = lambda self_, text, file_: self_._append_branch(text, file_),    # branch
+    list = lambda self_, text, file_: self_._append_array(text, file_),     # array
+    str = lambda self_, text, file_: self_._append_string(text, file_),     # string
+    bytes = lambda self_, text, file_: self_._append_bytes(text, file_),    # string
+    datetime = lambda self_, text, file_: self_._append_date(text, file_),  # string
+    int = lambda self_, text, file_: self_._append_number(text, file_),     # number
+    float = lambda self_, text, file_: self_._append_number(text, file_),   # number
+    bool = lambda self_, text, file_: self_._append_bool(text, file_),      # True | False
+    NoneType = lambda self_, text, file_: self_._append_none(text, file_),  # N/A
+)
+
+
+class Tree(Dumper):
+    """Tree-view Format
+
+    value   ::=  branch | array | string | number | bool | N/A
+
+    string
+      |-- string
+      |     |-- string -> value
+      |     |-- string
+      |     |     |-- string -> value
+      |     |     |-- string -> value
+      |     |-- string -> value
+      |     |-- string -> value
+      |           |-- string -> value
+      |           |-- string -> value
+      |-- string -> value, value, value
+      |-- string -> True
+      |-- string -> False
+      |-- string -> N/A
+      |-- string -> value
+      |-- string -> value
+
+    """
+    _bctr = 0   # blank branch counter
+    _tctr = -1  # tab (branch) counter
+    _hsrt = HEADER_START
+    _hend = HEADER_END
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def kind(self):
+        return 'txt'
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def append_value(self, value, _file, _name):
+        _keys = _name + '\n'
+        _file.seek(self._sptr, os.SEEK_SET)
+        _file.write(_keys)
+        self._append_branch(value, _file)
+
+    def _append_array(self, value, _file):
+        for (_nctr, _item) in enumerate(value):
+            _cmma = ',' if _nctr else ''
+            _file.write(_cmma)
+
+            _type = type(_item).__name__
+            MAGIC_TYPES[_type](self, _item, _file)
+
+    def _append_branch(self, value, _file):
+        self._tctr += 1
+
+        _vlen = len(value)
+        for (_vctr, (_item, _text)) in enumerate(value.items()):
+            _type = type(_text).__name__
+            _pref = '\n' if _type == 'dict' else ' ->'
+
+            _bran = self._tctr - self._bctr
+            _labs = MAKE_BRANCH(_bran) + MAKE_SPACES(self._bctr)
+            if _vctr == _vlen - 1:
+                self._bctr += 1
+
+            _keys = '{labs}  |-- {item}{pref}'.format(labs=_labs, item=_item, pref=_pref)
+            _file.write(_keys)
+
+            MAGIC_TYPES[_type](self, _text, _file)
+
+            _suff = '' if _type == 'dict' else '\n'
+            _file.write(_suff)
+
+        self._bctr -= 1
+        self._tctr -= 1
+
+    def _append_string(self, value, _file):
+        _text = value
+        _labs = ' {text}'.format(text=_text)
+        _file.write(_labs)
+
+    def _append_bytes(self, value, _file):
+        # binascii.b2a_base64(value) -> plistlib.Data
+        # binascii.a2b_base64(Data) -> value(bytes)
+
+        _text = ' '.join(textwrap.wrap(value.hex(), 2))
+        # _data = [H for H in iter(
+        #         functools.partial(io.StringIO(value.hex()).read, 2), '')
+        #         ]  # to split bytes string into length-2 hex string list
+        _labs = ' {text}'.format(text=_text)
+        _file.write(_labs)
+
+    def _append_date(self, value, _file):
+        _text = value.strftime('%Y-%m-%dT%H:%M:%SZ')
+        _labs = ' {text}'.format(text=_text)
+        _file.write(_labs)
+
+    def _append_number(self, value, _file):
+        _text = value
+        _labs = ' {text}'.format(text=_text)
+        _file.write(_labs)
+
+    def _append_bool(self, value, _file):
+        _text = 'True' if value else 'False'
+        _labs = ' {text}'.format(text=_text)
+        _file.write(_labs)
+
+    def _append_none(self, value, _file):
+        _text = 'N/A'
+        _labs = ' {text}'.format(text=_text)
+        _file.write(_labs)
