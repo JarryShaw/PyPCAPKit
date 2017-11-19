@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import collections
 import os
 import textwrap
 
@@ -13,11 +14,11 @@ import textwrap
 from dumper import Dumper
 
 
-HEADER_START = ''
+HEADER_START = 'PCAP File Tree-View Text File\n'
 HEADER_END = ''
 
-MAKE_BRANCH = lambda t: '  |   ' * t
-MAKE_SPACES = lambda t: '      ' * t
+TEMP_BRANCH = '  |   '
+TEMP_SPACES = '      '
 
 MAGIC_TYPES = dict(
     dict = lambda self_, text, file_: self_._append_branch(text, file_),    # branch
@@ -55,8 +56,7 @@ class Tree(Dumper):
       |-- string -> value
 
     """
-    _bctr = 0   # blank branch counter
-    _tctr = -1  # tab (branch) counter
+    _tctr = -1
     _hsrt = HEADER_START
     _hend = HEADER_END
 
@@ -73,9 +73,11 @@ class Tree(Dumper):
     ##########################################################################
 
     def append_value(self, value, _file, _name):
-        _keys = _name + '\n'
+        _keys = '\n' + _name + '\n'
         _file.seek(self._sptr, os.SEEK_SET)
         _file.write(_keys)
+
+        self._bctr = collections.defaultdict(int)    # blank branch counter dict
         self._append_branch(value, _file)
 
     def _append_array(self, value, _file):
@@ -94,10 +96,11 @@ class Tree(Dumper):
             _type = type(_text).__name__
             _pref = '\n' if _type == 'dict' else ' ->'
 
-            _bran = self._tctr - self._bctr
-            _labs = MAKE_BRANCH(_bran) + MAKE_SPACES(self._bctr)
+            _labs = ''
+            for _ in range(self._tctr):
+                _labs += TEMP_SPACES if self._bctr[_] else TEMP_BRANCH
             if _vctr == _vlen - 1:
-                self._bctr += 1
+                self._bctr[self._tctr] = 1
 
             _keys = '{labs}  |-- {item}{pref}'.format(labs=_labs, item=_item, pref=_pref)
             _file.write(_keys)
@@ -107,7 +110,7 @@ class Tree(Dumper):
             _suff = '' if _type == 'dict' else '\n'
             _file.write(_suff)
 
-        self._bctr -= 1
+        self._bctr[self._tctr] = 0
         self._tctr -= 1
 
     def _append_string(self, value, _file):
