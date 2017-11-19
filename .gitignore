@@ -2,6 +2,7 @@ test.py
 *.pdf
 *.pcap
 *.ini
+*.json
 *.plist
 .DS_Store
 
