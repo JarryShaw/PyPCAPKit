@@ -232,4 +232,7 @@ class Analyser:
         return False, _ifile.read(length)
 
 if __name__ == '__main__':
+    a = Analyser(fmt='plist')
+    a = Analyser(fmt='json')
+    a = Analyser(fmt='html')
     a = Analyser(fmt='tree')

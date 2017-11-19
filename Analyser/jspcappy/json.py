@@ -14,7 +14,7 @@ import textwrap
 from dumper import Dumper
 
 
-HEADER_START = '{'
+HEADER_START = '{\n'
 
 HEADER_END = '\n}'
 

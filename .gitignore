@@ -1,13 +1,13 @@
 test.py
 *.pdf
-*.pcap
 *.ini
-*.txt
-*.js
-*.json
-*.plist
-*.html
+in.pcap
+out.js
+out.txt
+out.json
+out.plist
 *.css
+*.html
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
