@@ -59,6 +59,8 @@ class Analyser:
         """
         if fin is None:
             ifnm = 'in.pcap'
+        elif '.pcap' in fin:
+            ifnm = fin
         else:
             ifnm = '{fin}.pcap'.format(fin=fin)
         # if fout is None:
@@ -186,14 +188,14 @@ class Analyser:
         plist['protocols'] = self._merge_protocols()
         self._ofile(plist, _name=_fnum)
 
-        # print(_fnum)
-        # print(plist['protocols'])
-        # print()
+        print(_fnum)
+        print(plist['protocols'])
+        print()
 
         # record frame
         self._frnum += 1
-        info = Info(plist)
-        self._frame.append(info)
+        # info = Info(plist)
+        # self._frame.append(info)
 
     def _merge_protocols(self):
         """Make protocols chain."""
