@@ -6,23 +6,20 @@ import os
 import textwrap
 
 
-# Dumper for PLIST files
-# Write a macOS Property List file
+# Dumper for XML files
+# Write a XML file for PCAP analyser
 
 
-from dumper import Dumper
+from .dumper import Dumper
 
 
 HEADER_START = '''\
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
+<packet>
 '''
 
 HEADER_END = '''\
-</dict>
-</plist>
+</packet>
 '''
 
 MAGIC_TYPES = dict(
@@ -37,8 +34,8 @@ MAGIC_TYPES = dict(
 )
 
 
-class PLIST(Dumper):
-    """Property List XML Format
+class XML(Dumper):
+    """Extensible Markup Language Format
 
     value    ::=  array | dict | string | data
                     | date | integer | real | bool
@@ -52,7 +49,6 @@ class PLIST(Dumper):
     bool     ::=  "<true/>" | "<false/>"
 
     """
-
     _hsrt = HEADER_START
     _hend = HEADER_END
 
@@ -62,7 +58,7 @@ class PLIST(Dumper):
 
     @property
     def kind(self):
-        return 'plist'
+        return 'xml'
 
     ##########################################################################
     # Utilities.
@@ -70,7 +66,7 @@ class PLIST(Dumper):
 
     def append_value(self, value, _file, _name):
         _tabs = '\t' * self._tctr
-        _keys = '{tabs}<key>{name}</key>\n'.format(tabs=_tabs, name=_name)
+        _keys = '{tabs}<name>{name}</name>\n'.format(tabs=_tabs, name=_name)
         _file.seek(self._sptr, os.SEEK_SET)
         _file.write(_keys)
 
@@ -94,7 +90,8 @@ class PLIST(Dumper):
 
     def _append_dict(self, value, _file):
         _tabs = '\t' * self._tctr
-        _labs = '{tabs}<dict>\n'.format(tabs=_tabs)
+        _dict = '<dict>' if self._tctr > 1 else '<frame>'
+        _labs = '{tabs}{dict}\n'.format(tabs=_tabs, dict=_dict)
         _file.write(_labs)
         self._tctr += 1
 
@@ -110,7 +107,8 @@ class PLIST(Dumper):
 
         self._tctr -= 1
         _tabs = '\t' * self._tctr
-        _labs = '{tabs}</dict>\n'.format(tabs=_tabs)
+        _dict = '</dict>' if self._tctr > 1 else '</frame>'
+        _labs = '{tabs}{dict}\n'.format(tabs=_tabs, dict=_dict)
         _file.write(_labs)
 
     def _append_string(self, value, _file):
@@ -124,11 +122,18 @@ class PLIST(Dumper):
         # binascii.a2b_base64(Data) -> value(bytes)
 
         _tabs = '\t' * self._tctr
-        _text = ' '.join(textwrap.wrap(value.hex(), 2))
+        _labs = '{tabs}<data>\n'.format(tabs=_tabs)
+
+        _list = []
+        for _item in textwrap.wrap(value.hex(), 32):
+            _text = ' '.join(textwrap.wrap(_item, 2))
+            _item = '{tabs}\t{text}'.format(tabs=_tabs, text=_text)
+            _list.append(_item)
+        _labs += '\n'.join(_list)
         # _data = [H for H in iter(
         #         functools.partial(io.StringIO(value.hex()).read, 2), '')
         #         ]  # to split bytes string into length-2 hex string list
-        _labs = '{tabs}<data>\n{tabs}{text}\n{tabs}</data>\n'.format(tabs=_tabs, text=_text)
+        _labs += '\n{tabs}</data>\n'.format(tabs=_tabs)
         _file.write(_labs)
 
     def _append_date(self, value, _file):

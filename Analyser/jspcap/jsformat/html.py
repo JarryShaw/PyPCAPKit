@@ -1,31 +1,25 @@
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
+
+
+import collections
+import os
+import textwrap
+
+
+# Writer for JavaScript files
+# Dump a JavaScript file for PCAP analyser
+
+
+from .json import JSON
+
+
+HEADER_START = '''\
 // demo data
 var data = {
-  name: 'My Tree',
-  children: [
-    { name: 'hello' },
-    { name: 'wat' },
-    {
-      name: 'child folder',
-      children: [
-        {
-          name: 'child folder',
-          children: [
-            { name: 'hello' },
-            { name: 'wat' }
-          ]
-        },
-        { name: 'hello' },
-        { name: 'wat' },
-        {
-          name: 'child folder',
-          children: [
-            { name: 'hello' },
-            { name: 'wat' }
-          ]
-        }
-      ]
-    }
-  ]
+'''
+
+HEADER_END = """
 }
 
 // define the item component
@@ -73,3 +67,11 @@ var demo = new Vue({
     treeData: data
   }
 })
+"""
+
+
+class JavaScript(JSON):
+
+    _hsrt = HEADER_START
+    _hend = HEADER_END
+    _vctr = collections.defaultdict(int)    # value counter dict

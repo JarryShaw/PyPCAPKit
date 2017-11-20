@@ -24,7 +24,7 @@ class Dumper(object):
     # Properties.
     ##########################################################################
 
-    # format of current dumper
+    # file format of current dumper
     @abstractproperty
     def kind(self):
         pass

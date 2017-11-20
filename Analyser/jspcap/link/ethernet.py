@@ -9,25 +9,8 @@ import textwrap
 # Analyser for ethernet protocol header
 
 
-# from link import Link
-
-
-##############################################################################
-# for unknown reason and never-encountered situation, at current time
-# we have to change the working directory to import from parent folders
-
-import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
-from internet.internet import INTERNET
-from protocol import Info, Protocol
-
-del sys.path[1]
-
-# and afterwards, we recover the whole scene back to its original state
-##############################################################################
-
+from ..internet.internet import INTERNET
+from ..protocol import Info, Protocol
 
 
 class Ethernet(Protocol):

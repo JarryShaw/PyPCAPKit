@@ -1,4 +1,5 @@
-{
+// demo data
+var data = {
 	"Global Header" : {
 		"magic_number" : "d4 c3 b2 a1",
 		"version_major" : 2,
@@ -9,7 +10,7 @@
 		"network" : "Ethernet"
 	},
 	"Frame 1" : {
-		"frame" : {
+		"frame_info" : {
 			"ts_sec" : 1511106545,
 			"ts_usec" : 471719,
 			"incl_len" : 86,
@@ -29,7 +30,7 @@
 		"protocols" : "Ethernet:IPv6"
 	},
 	"Frame 2" : {
-		"frame" : {
+		"frame_info" : {
 			"ts_sec" : 1511106545,
 			"ts_usec" : 578078,
 			"incl_len" : 78,
@@ -49,7 +50,7 @@
 		"protocols" : "Ethernet:IPv6"
 	},
 	"Frame 3" : {
-		"frame" : {
+		"frame_info" : {
 			"ts_sec" : 1511106549,
 			"ts_usec" : 777804,
 			"incl_len" : 54,
@@ -105,14 +106,14 @@
 					"window_size" : 45180,
 					"checksum" : "7c 8e",
 					"urgent_pointer" : 0,
-					"Application Layer" : ""
+					"Application Layer" : null
 				}
 			}
 		},
 		"protocols" : "Ethernet:IPv4:TCP"
 	},
 	"Frame 4" : {
-		"frame" : {
+		"frame_info" : {
 			"ts_sec" : 1511106549,
 			"ts_usec" : 777868,
 			"incl_len" : 54,
@@ -168,14 +169,14 @@
 					"window_size" : 65535,
 					"checksum" : "f9 3e",
 					"urgent_pointer" : 0,
-					"Application Layer" : ""
+					"Application Layer" : null
 				}
 			}
 		},
 		"protocols" : "Ethernet:IPv4:TCP"
 	},
 	"Frame 5" : {
-		"frame" : {
+		"frame_info" : {
 			"ts_sec" : 1511106549,
 			"ts_usec" : 913720,
 			"incl_len" : 54,
@@ -231,14 +232,14 @@
 					"window_size" : 65535,
 					"checksum" : "2a f4",
 					"urgent_pointer" : 0,
-					"Application Layer" : ""
+					"Application Layer" : null
 				}
 			}
 		},
 		"protocols" : "Ethernet:IPv4:TCP"
 	},
 	"Frame 6" : {
-		"frame" : {
+		"frame_info" : {
 			"ts_sec" : 1511106551,
 			"ts_usec" : 66835,
 			"incl_len" : 159,
@@ -285,3 +286,49 @@
 		"protocols" : "Ethernet:IPv4:UDP"
 	}
 }
+
+// define the item component
+Vue.component('item', {
+  template: '#item-template',
+  props: {
+    model: Object
+  },
+  data: function () {
+    return {
+      open: false
+    }
+  },
+  computed: {
+    isFolder: function () {
+      return this.model.children &&
+        this.model.children.length
+    }
+  },
+  methods: {
+    toggle: function () {
+      if (this.isFolder) {
+        this.open = !this.open
+      }
+    },
+    changeType: function () {
+      if (!this.isFolder) {
+        Vue.set(this.model, 'children', [])
+        this.addChild()
+        this.open = true
+      }
+    },
+    addChild: function () {
+      this.model.children.push({
+        name: 'new stuff'
+      })
+    }
+  }
+})
+
+// boot up the demo
+var demo = new Vue({
+  el: '#demo',
+  data: {
+    treeData: data
+  }
+})

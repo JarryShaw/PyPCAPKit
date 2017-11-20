@@ -10,9 +10,9 @@ import textwrap
 # Extract parametres from a PCAP file
 
 
-from frame import Frame
-from header import Header
-from protocol import Info
+from .frame import Frame
+from .header import Header
+from .protocol import Info
 
 
 class Analyser:
@@ -29,14 +29,16 @@ class Analyser:
 
         _frame -- list, each item contains `Info` of a record/package
             |--> gbhdr -- Info object, global header
-            |--> frame -- Info object, record/package header
-                    |--> dlink -- Info object, link layer header
-                    |--> netwk -- Info object, internet layer header
-                    |--> trans -- Info object, transport layer header
-                    |--> applc -- Info object, application layer datagram
+            |--> frame 1 -- Info object, record/package header
+            |       |--> dlink -- Info object, link layer header
+            |       |--> netwk -- Info object, internet layer header
+            |       |--> trans -- Info object, transport layer header
+            |       |--> applc -- Info object, application layer datagram
+            |--> frame 2 -- Info object, record/package header
+            |       |--> ......
 
     Usage:
-        reader = Reader('sample.pcap')
+        reader = Analyer(fmt='plist', fin='in', fout='out')
 
     """
 
@@ -57,21 +59,24 @@ class Analyser:
         if fin is None:
             ifnm = 'in.pcap'
         else:
-            ifnm = fin
+            ifnm = '{fin}.pcap'.format(fin=fin)
         if fout is None:
             fout = 'out'
         if fmt == 'plist':
-            from plist import PLIST as output
+            from .jsformat.plist import PLIST as output
             ofnm = '{fout}.plist'.format(fout=fout) # output PLIST file
         elif fmt == 'json':
-            from json import JSON as output
+            from .jsformat.json import JSON as output
             ofnm = '{fout}.json'.format(fout=fout)  # output JSON file
         elif fmt == 'tree':
-            from tree import Tree as output
+            from .jsformat.tree import Tree as output
             ofnm = '{fout}.txt'.format(fout=fout)   # output treeview text file
         elif fmt == 'html':
-            from html import JavaScript as output
+            from .jsformat.html import JavaScript as output
             ofnm = '{fout}.js'.format(fout=fout)    # output JavaScript file
+        elif fmt == 'xml':
+            from .jsformat.xml import XML as output
+            ofnm = '{fout}.xml'.format(fout=fout)   # output XML file
         else:
             raise KeyError
 
@@ -200,39 +205,37 @@ class Analyser:
     def _link_layer(self, _ifile, length):
         """Read link layer."""
         if self._dlink == 'Ethernet':
-            from link import ethernet
-            return True, ethernet.Ethernet(_ifile)
+            from .link.ethernet import Ethernet
+            return True, Ethernet(_ifile)
         else:
             # raise NotImplementedError
-            return False, _ifile.read(length)
+            _data = _ifile.read(length) if length else None
+            return False, _data
 
     def _internet_layer(self, _ifile, length):
         """Read internet layer."""
         if self._netwk == 'IPv4':
-            from internet import ipv4
-            return True, ipv4.IPv4(_ifile)
+            from .internet.ipv4 import IPv4
+            return True, IPv4(_ifile)
         else:
             # raise NotImplementedError
-            return False, _ifile.read(length)
+            _data = _ifile.read(length) if length else None
+            return False, _data
 
     def _transport_layer(self, _ifile, length):
         """Read transport layer."""
         if self._trans == 'TCP':
-            from transport import tcp
-            return True, tcp.TCP(_ifile)
+            from .transport.tcp import TCP
+            return True, TCP(_ifile)
         elif self._trans == 'UDP':
-            from transport import udp
-            return True, udp.UDP(_ifile)
+            from .transport.udp import UDP
+            return True, UDP(_ifile)
         else:
             # raise NotImplementedError
-            return False, _ifile.read(length)
+            _data = _ifile.read(length) if length else None
+            return False, _data
 
     def _application_layer(self, _ifile, length):
         """Read application layer."""
-        return False, _ifile.read(length)
-
-if __name__ == '__main__':
-    a = Analyser(fmt='plist')
-    a = Analyser(fmt='json')
-    a = Analyser(fmt='html')
-    a = Analyser(fmt='tree')
+        _data = _ifile.read(length) if length else None
+        return False, _data

@@ -6,7 +6,7 @@
 	<dict>
 		<key>magic_number</key>
 		<data>
-		d4 c3 b2 a1
+			d4 c3 b2 a1
 		</data>
 		<key>version_major</key>
 		<integer>2</integer>
@@ -23,7 +23,7 @@
 	</dict>
 	<key>Frame 1</key>
 	<dict>
-		<key>frame</key>
+		<key>frame_info</key>
 		<dict>
 			<key>ts_sec</key>
 			<integer>1511106545</integer>
@@ -54,7 +54,11 @@
 			<string>IPv6</string>
 			<key>Network Layer</key>
 			<data>
-			60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
+				60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00
+				00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00
+				1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00
+				fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
+				01 01 a4 5e 60 d9 6b 97
 			</data>
 		</dict>
 		<key>protocols</key>
@@ -62,7 +66,7 @@
 	</dict>
 	<key>Frame 2</key>
 	<dict>
-		<key>frame</key>
+		<key>frame_info</key>
 		<dict>
 			<key>ts_sec</key>
 			<integer>1511106545</integer>
@@ -93,7 +97,10 @@
 			<string>IPv6</string>
 			<key>Network Layer</key>
 			<data>
-			60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
+				60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00
+				1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00
+				00 a6 87 f9 27 93 16 ee 88 00 3f 82 40 00 00 00
+				fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
 			</data>
 		</dict>
 		<key>protocols</key>
@@ -101,7 +108,7 @@
 	</dict>
 	<key>Frame 3</key>
 	<dict>
-		<key>frame</key>
+		<key>frame_info</key>
 		<dict>
 			<key>ts_sec</key>
 			<integer>1511106549</integer>
@@ -151,7 +158,7 @@
 				<dict>
 					<key>rb</key>
 					<data>
-					00
+						00
 					</data>
 					<key>df</key>
 					<true/>
@@ -166,7 +173,7 @@
 				<string>TCP</string>
 				<key>checksum</key>
 				<data>
-				7a 86
+					7a 86
 				</data>
 				<key>src</key>
 				<string>123.129.210.135</string>
@@ -188,7 +195,7 @@
 					<dict>
 						<key>res</key>
 						<data>
-						00 00 00
+							00 00 00
 						</data>
 						<key>ns</key>
 						<false/>
@@ -213,14 +220,10 @@
 					<integer>45180</integer>
 					<key>checksum</key>
 					<data>
-					7c 8e
+						7c 8e
 					</data>
 					<key>urgent_pointer</key>
 					<integer>0</integer>
-					<key>Application Layer</key>
-					<data>
-					
-					</data>
 				</dict>
 			</dict>
 		</dict>
@@ -229,7 +232,7 @@
 	</dict>
 	<key>Frame 4</key>
 	<dict>
-		<key>frame</key>
+		<key>frame_info</key>
 		<dict>
 			<key>ts_sec</key>
 			<integer>1511106549</integer>
@@ -279,7 +282,7 @@
 				<dict>
 					<key>rb</key>
 					<data>
-					00
+						00
 					</data>
 					<key>df</key>
 					<true/>
@@ -294,7 +297,7 @@
 				<string>TCP</string>
 				<key>checksum</key>
 				<data>
-				2a bb
+					2a bb
 				</data>
 				<key>src</key>
 				<string>192.168.1.100</string>
@@ -316,7 +319,7 @@
 					<dict>
 						<key>res</key>
 						<data>
-						00 00 00
+							00 00 00
 						</data>
 						<key>ns</key>
 						<false/>
@@ -341,14 +344,10 @@
 					<integer>65535</integer>
 					<key>checksum</key>
 					<data>
-					f9 3e
+						f9 3e
 					</data>
 					<key>urgent_pointer</key>
 					<integer>0</integer>
-					<key>Application Layer</key>
-					<data>
-					
-					</data>
 				</dict>
 			</dict>
 		</dict>
@@ -357,7 +356,7 @@
 	</dict>
 	<key>Frame 5</key>
 	<dict>
-		<key>frame</key>
+		<key>frame_info</key>
 		<dict>
 			<key>ts_sec</key>
 			<integer>1511106549</integer>
@@ -407,7 +406,7 @@
 				<dict>
 					<key>rb</key>
 					<data>
-					00
+						00
 					</data>
 					<key>df</key>
 					<true/>
@@ -422,7 +421,7 @@
 				<string>TCP</string>
 				<key>checksum</key>
 				<data>
-				2a bb
+					2a bb
 				</data>
 				<key>src</key>
 				<string>192.168.1.100</string>
@@ -444,7 +443,7 @@
 					<dict>
 						<key>res</key>
 						<data>
-						00 00 00
+							00 00 00
 						</data>
 						<key>ns</key>
 						<false/>
@@ -469,14 +468,10 @@
 					<integer>65535</integer>
 					<key>checksum</key>
 					<data>
-					2a f4
+						2a f4
 					</data>
 					<key>urgent_pointer</key>
 					<integer>0</integer>
-					<key>Application Layer</key>
-					<data>
-					
-					</data>
 				</dict>
 			</dict>
 		</dict>
@@ -485,7 +480,7 @@
 	</dict>
 	<key>Frame 6</key>
 	<dict>
-		<key>frame</key>
+		<key>frame_info</key>
 		<dict>
 			<key>ts_sec</key>
 			<integer>1511106551</integer>
@@ -535,7 +530,7 @@
 				<dict>
 					<key>rb</key>
 					<data>
-					00
+						00
 					</data>
 					<key>df</key>
 					<true/>
@@ -550,7 +545,7 @@
 				<string>UDP</string>
 				<key>checksum</key>
 				<data>
-				78 b3
+					78 b3
 				</data>
 				<key>src</key>
 				<string>192.168.1.1</string>
@@ -566,11 +561,18 @@
 					<integer>32000</integer>
 					<key>checksum</key>
 					<data>
-					63 b1
+						63 b1
 					</data>
 					<key>Application Layer</key>
 					<data>
-					01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34
+						01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06
+						00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03
+						36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46
+						38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00
+						0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a
+						74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c
+						2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05
+						31 2e 37 2e 34
 					</data>
 				</dict>
 			</dict>

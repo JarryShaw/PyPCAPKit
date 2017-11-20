@@ -11,7 +11,7 @@ import textwrap
 # Dump a JSON file for PCAP analyser
 
 
-from dumper import Dumper
+from .dumper import Dumper
 
 
 HEADER_START = '{\n'
@@ -43,7 +43,6 @@ class JSON(Dumper):
                      | array | true | false | null
 
     """
-
     _hsrt = HEADER_START
     _hend = HEADER_END
     _vctr = collections.defaultdict(int)    # value counter dict

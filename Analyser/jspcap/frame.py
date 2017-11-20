@@ -9,7 +9,7 @@ import datetime
 # Analyser for record/package headers
 
 
-from protocol import Info, Protocol
+from .protocol import Info, Protocol
 
 
 class Frame(Protocol):
@@ -80,7 +80,7 @@ class Frame(Protocol):
         _olen = self.read_unpack(self._file, 4, _lttl=True)
 
         frame = dict(
-            frame = dict(
+            frame_info = dict(
                 ts_sec = _tsss,
                 ts_usec = _tsus,
                 incl_len = _ilen,

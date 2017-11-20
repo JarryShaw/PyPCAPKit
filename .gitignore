@@ -4,10 +4,10 @@ test.py
 in.pcap
 out.js
 out.txt
+out.xml
+out.yml
 out.json
 out.plist
-*.css
-*.html
 .DS_Store
 
 # Byte-compiled / optimized / DLL files

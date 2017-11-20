@@ -14,7 +14,7 @@ import textwrap
 # Pre-define useful arguments and methods of protocols
 
 
-from exceptions import BytesError
+from .exceptions import BytesError
 
 
 ABCMeta = abc.ABCMeta

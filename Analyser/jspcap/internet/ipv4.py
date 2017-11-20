@@ -9,24 +9,8 @@ import struct
 # Analyser for IPv4 header
 
 
-# from internet import Internet
-
-
-##############################################################################
-# for unknown reason and never-encountered situation, at current time
-# we have to change the working directory to import from parent folders
-
-import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
-from protocol import Info, Protocol
-from transport.transport import TP_PROTO
-
-del sys.path[1]
-
-# and afterwards, we recover the whole scene back to its original state
-##############################################################################
+from ..protocol import Info, Protocol
+from ..transport.transport import TP_PROTO
 
 
 class IPv4(Protocol):

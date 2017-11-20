@@ -11,10 +11,10 @@ import textwrap
 # Dump a TEXT file for PCAP analyser
 
 
-from dumper import Dumper
+from .dumper import Dumper
 
 
-HEADER_START = 'PCAP File Tree-View Text File\n'
+HEADER_START = 'PCAP File Tree-View Format\n'
 HEADER_END = ''
 
 TEMP_BRANCH = '  |   '
@@ -94,7 +94,10 @@ class Tree(Dumper):
         _vlen = len(value)
         for (_vctr, (_item, _text)) in enumerate(value.items()):
             _type = type(_text).__name__
-            _pref = '\n' if _type == 'dict' else ' ->'
+            if _type == 'dict' or (_type == 'bytes' and len(_text) > 32):
+                _pref = '\n'
+            else:
+                _pref = ' ->'
 
             _labs = ''
             for _ in range(self._tctr):
@@ -122,11 +125,21 @@ class Tree(Dumper):
         # binascii.b2a_base64(value) -> plistlib.Data
         # binascii.a2b_base64(Data) -> value(bytes)
 
-        _text = ' '.join(textwrap.wrap(value.hex(), 2))
-        # _data = [H for H in iter(
-        #         functools.partial(io.StringIO(value.hex()).read, 2), '')
-        #         ]  # to split bytes string into length-2 hex string list
-        _labs = ' {text}'.format(text=_text)
+        if len(value) > 32:
+            _tabs = ''
+            for _ in range(self._tctr + 1):
+                _tabs += TEMP_SPACES if self._bctr[_] else TEMP_BRANCH
+
+            _list = []
+            for (_ictr, _item) in enumerate(textwrap.wrap(value.hex(), 32)):
+                _bptr = '       ' if _ictr else '  |--> '
+                _text = ' '.join(textwrap.wrap(_item, 2))
+                _item = '{tabs}{bptr}{text}'.format(tabs=_tabs, bptr=_bptr, text=_text)
+                _list.append(_item)
+            _labs = '\n'.join(_list)
+        else:
+            _text = ' '.join(textwrap.wrap(value.hex(), 2))
+            _labs = ' {text}'.format(text=_text)
         _file.write(_labs)
 
     def _append_date(self, value, _file):
