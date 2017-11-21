@@ -47,6 +47,10 @@ class Analyser:
     def info(self):
         return self._frame
 
+    @property
+    def length(self):
+        return self._frnum
+
     def __init__(self, *, fmt=None, fin=None, fout=None):
         """Initialise PCAP Reader.
 

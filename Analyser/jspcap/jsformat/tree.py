@@ -94,7 +94,7 @@ class Tree(Dumper):
         _vlen = len(value)
         for (_vctr, (_item, _text)) in enumerate(value.items()):
             _type = type(_text).__name__
-            if _type == 'dict' or (_type == 'bytes' and len(_text) > 32):
+            if _type == 'dict' or (_type == 'bytes' and len(_text) > 16):
                 _pref = '\n'
             else:
                 _pref = ' ->'
@@ -125,7 +125,7 @@ class Tree(Dumper):
         # binascii.b2a_base64(value) -> plistlib.Data
         # binascii.a2b_base64(Data) -> value(bytes)
 
-        if len(value) > 32:
+        if len(value) > 16:
             _tabs = ''
             for _ in range(self._tctr + 1):
                 _tabs += TEMP_SPACES if self._bctr[_] else TEMP_BRANCH
