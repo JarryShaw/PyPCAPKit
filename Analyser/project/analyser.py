@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import abc
 import io
 import textwrap
 
@@ -16,7 +17,12 @@ from protocol import Info
 from jsformat.tree import Tree as output
 
 
-class Analyser:
+ABCMeta = abc.ABCMeta
+abstractmethod = abc.abstractmethod
+abstractproperty = abc.abstractproperty
+
+
+class Analyser(object):
     """Analyser for PCAP files.
 
     Properties:
@@ -38,10 +44,11 @@ class Analyser:
             |--> frame 2 -- Info object, record/package header
             |       |--> .....
 
-    Usage:
-        reader = Analyer(fmt='plist', fin='in', fout='out')
-
     """
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
 
     @property
     def info(self):
@@ -51,49 +58,25 @@ class Analyser:
     def length(self):
         return self._frnum
 
-    def __init__(self, *, fmt=None, fin=None, fout=None):
-        """Initialise PCAP Reader.
+    ##########################################################################
+    # Data modules.
+    ##########################################################################
 
-        Keyword arguemnts:
-            fmt  -- str, file format of output
-                    <keyword> 'plist' / 'json' / 'tree' / 'html'
-            fin  -- str, file name to be read; if file not exist, raise error
-            fout -- str, file name to be written
+    # Not hashable
+    __hash__ = None
 
-        """
-        if fin is None:
-            ifnm = 'in.pcap'
-        elif '.pcap' in fin:
-            ifnm = fin
-        else:
-            ifnm = '{fin}.pcap'.format(fin=fin)
-        # if fout is None:
-        #     fout = 'out'
-        # if fmt == 'plist':
-        #     from jsformat.plist import PLIST as output
-        #     ofnm = '{fout}.plist'.format(fout=fout) # output PLIST file
-        # elif fmt == 'json':
-        #     from jsformat.json import JSON as output
-        #     ofnm = '{fout}.json'.format(fout=fout)  # output JSON file
-        # elif fmt == 'tree':
-        #     from jsformat.tree import Tree as output
-        #     ofnm = '{fout}.txt'.format(fout=fout)   # output treeview text file
-        # elif fmt == 'html':
-        #     from jsformat.html import JavaScript as output
-        #     ofnm = '{fout}.js'.format(fout=fout)    # output JavaScript file
-        # elif fmt == 'xml':
-        #     from jsformat.xml import XML as output
-        #     ofnm = '{fout}.xml'.format(fout=fout)   # output XML file
-        # else:
-        #     raise KeyError
+    def __new__(cls):
+        self = super().__new__(cls)
 
         self._frnum = 1                     # frame number
         self._frame = []                    # frame record
         self._ofile = output('out')         # output file
 
-        with open(ifnm, 'rb') as _ifile:
-            self.record_header(_ifile)      # read PCAP global header
-            self.record_frames(_ifile)      # read frames
+        return self
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
 
     def record_header(self, _ifile):
         """Read global header.
@@ -124,66 +107,68 @@ class Analyser:
             _ifile -- file object
 
         """
-        while True:
-            self._netwk = None
-            self._trans = None
-            self._applc = None
-            try:
-                # read frame header
-                frame = Frame(_ifile, self._frnum)
-                plist = frame.info.infotodict()
+        # while True:
+        self._netwk = None
+        self._trans = None
+        self._applc = None
+        try:
+            # read frame header
+            frame = Frame(_ifile, self._frnum)
+            plist = frame.info.infotodict()
 
-                # make BytesIO from frame package data
-                length = frame.info.len
-                bytes_ = io.BytesIO(_ifile.read(length))
+            # make BytesIO from frame package data
+            length = frame.info.len
+            bytes_ = io.BytesIO(_ifile.read(length))
 
-                # read link layer
-                dlink = self._link_layer(bytes_, length)
+            # read link layer
+            dlink = self._link_layer(bytes_, length)
 
-                # check link layer protocol
-                if not dlink[0]:
-                    plist['Link Layer'] = dlink[1]
-                    self._write_record(plist)
-                    continue
-                else:
-                    plist[self._dlink] = dlink[1].info.infotodict()
-                    self._netwk = dlink[1].protocol
-                    length -= dlink[1].length
-
-                # read internet layer
-                netwk = self._internet_layer(bytes_, length)
-
-                # check internet layer protocol
-                if not netwk[0]:
-                    plist[self._dlink]['Network Layer'] = netwk[1]
-                    self._write_record(plist)
-                    continue
-                else:
-                    plist[self._dlink][self._netwk] = netwk[1].info.infotodict()
-                    self._trans = netwk[1].protocol
-                    length -= netwk[1].length
-
-                # read transport layer
-                trans = self._transport_layer(bytes_, length)
-
-                # check transport layer protocol
-                if not trans[0]:
-                    plist[self._dlink][self._netwk]['Transport Layer'] = trans[1]
-                    self._write_record(plist)
-                    continue
-                else:
-                    plist[self._dlink][self._netwk][self._trans] = trans[1].info.infotodict()
-                    length -= trans[1].length
-
-                # read application layer
-                applc = self._application_layer(bytes_, length)
-
-                # check application layer protocol
-                plist[self._dlink][self._netwk][self._trans]['Application Layer'] = applc[1]
+            # check link layer protocol
+            if not dlink[0]:
+                plist['Link Layer'] = dlink[1]
                 self._write_record(plist)
-            except EOFError:
-                # quit when EOF
-                break
+                return
+            else:
+                plist[self._dlink] = dlink[1].info.infotodict()
+                self._netwk = dlink[1].protocol
+                length -= dlink[1].length
+
+            # read internet layer
+            netwk = self._internet_layer(bytes_, length)
+
+            # check internet layer protocol
+            if not netwk[0]:
+                plist[self._dlink]['Network Layer'] = netwk[1]
+                self._write_record(plist)
+                return
+            else:
+                plist[self._dlink][self._netwk] = netwk[1].info.infotodict()
+                self._trans = netwk[1].protocol
+                length -= netwk[1].length
+
+            # read transport layer
+            trans = self._transport_layer(bytes_, length)
+
+            # check transport layer protocol
+            if not trans[0]:
+                plist[self._dlink][self._netwk]['Transport Layer'] = trans[1]
+                self._write_record(plist)
+                return
+            else:
+                plist[self._dlink][self._netwk][self._trans] = trans[1].info.infotodict()
+                length -= trans[1].length
+
+            # read application layer
+            applc = self._application_layer(bytes_, length)
+
+            # check application layer protocol
+            plist[self._dlink][self._netwk][self._trans]['Application Layer'] = applc[1]
+            self._write_record(plist)
+        except EOFError:
+            # quit when EOF
+            # break
+            _ifile.close()
+            raise EOFError
 
     def _write_record(self, plist):
         """Write plist & append Info."""
