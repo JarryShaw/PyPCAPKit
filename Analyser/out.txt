@@ -15,7 +15,7 @@ Frame 1
   |     |-- ts_usec -> 471719
   |     |-- incl_len -> 86
   |     |-- orig_len -> 86
-  |-- time -> 2017-11-19T23:49:05Z
+  |-- time -> 2017-11-19 23:49:05
   |-- number -> 1
   |-- time_epoch -> 1511106545.471719 seconds
   |-- len -> 86
@@ -24,13 +24,19 @@ Frame 1
   |     |-- dst -> 40-33-1a-d1-85-1c
   |     |-- src -> a4-5e-60-d9-6b-97
   |     |-- type -> IPv6
-  |     |-- Network Layer
-  |           |--> 60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00
-  |                00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00
-  |                1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00
-  |                fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
-  |                01 01 a4 5e 60 d9 6b 97
-  |-- protocols -> Ethernet:IPv6
+  |     |-- IPv6
+  |           |-- version -> 6
+  |           |-- tclass -> 96
+  |           |-- label -> 0
+  |           |-- len -> 8192
+  |           |-- next -> ICMPv6
+  |           |-- limit -> 255
+  |           |-- src -> fe80::a6:87f9:2793:16ee
+  |           |-- dst -> fe80::1ccd:7c77:bac7:46b7
+  |           |-- Transport Layer
+  |                 |--> 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
+  |                      1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
+  |-- protocols -> Ethernet:IPv6:ICMPv6
 
 Frame 2
   |-- frame_info
@@ -38,7 +44,7 @@ Frame 2
   |     |-- ts_usec -> 578078
   |     |-- incl_len -> 78
   |     |-- orig_len -> 78
-  |-- time -> 2017-11-19T23:49:05Z
+  |-- time -> 2017-11-19 23:49:05
   |-- number -> 2
   |-- time_epoch -> 1511106545.578078 seconds
   |-- len -> 78
@@ -47,12 +53,19 @@ Frame 2
   |     |-- dst -> a4-5e-60-d9-6b-97
   |     |-- src -> 40-33-1a-d1-85-1c
   |     |-- type -> IPv6
-  |     |-- Network Layer
-  |           |--> 60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00
-  |                1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00
-  |                00 a6 87 f9 27 93 16 ee 88 00 3f 82 40 00 00 00
-  |                fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
-  |-- protocols -> Ethernet:IPv6
+  |     |-- IPv6
+  |           |-- version -> 6
+  |           |-- tclass -> 96
+  |           |-- label -> 0
+  |           |-- len -> 6144
+  |           |-- next -> ICMPv6
+  |           |-- limit -> 255
+  |           |-- src -> fe80::1ccd:7c77:bac7:46b7
+  |           |-- dst -> fe80::a6:87f9:2793:16ee
+  |           |-- Transport Layer
+  |                 |--> 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
+  |                      1c cd 7c 77 ba c7 46 b7
+  |-- protocols -> Ethernet:IPv6:ICMPv6
 
 Frame 3
   |-- frame_info
@@ -60,7 +73,7 @@ Frame 3
   |     |-- ts_usec -> 777804
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T23:49:09Z
+  |-- time -> 2017-11-19 23:49:09
   |-- number -> 3
   |-- time_epoch -> 1511106549.777804 seconds
   |-- len -> 54
@@ -73,8 +86,12 @@ Frame 3
   |           |-- version -> 4
   |           |-- hdr_len -> 20
   |           |-- dsfield
-  |           |     |-- dscp -> 0
-  |           |     |-- ecn -> 0
+  |           |     |-- dscp
+  |           |     |     |--> Routine
+  |           |     |     |--> Normal Delay
+  |           |     |     |--> Normal Throughput
+  |           |     |     |--> Normal Relibility
+  |           |     |-- ecn -> Not-ECT
   |           |-- len -> 10240
   |           |-- id -> 13509
   |           |-- flags
@@ -116,7 +133,7 @@ Frame 4
   |     |-- ts_usec -> 777868
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T23:49:09Z
+  |-- time -> 2017-11-19 23:49:09
   |-- number -> 4
   |-- time_epoch -> 1511106549.777868 seconds
   |-- len -> 54
@@ -129,8 +146,12 @@ Frame 4
   |           |-- version -> 4
   |           |-- hdr_len -> 20
   |           |-- dsfield
-  |           |     |-- dscp -> 0
-  |           |     |-- ecn -> 0
+  |           |     |-- dscp
+  |           |     |     |--> Routine
+  |           |     |     |--> Normal Delay
+  |           |     |     |--> Normal Throughput
+  |           |     |     |--> Normal Relibility
+  |           |     |-- ecn -> Not-ECT
   |           |-- len -> 10240
   |           |-- id -> 0
   |           |-- flags
@@ -172,7 +193,7 @@ Frame 5
   |     |-- ts_usec -> 913720
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T23:49:09Z
+  |-- time -> 2017-11-19 23:49:09
   |-- number -> 5
   |-- time_epoch -> 1511106549.913720 seconds
   |-- len -> 54
@@ -185,8 +206,12 @@ Frame 5
   |           |-- version -> 4
   |           |-- hdr_len -> 20
   |           |-- dsfield
-  |           |     |-- dscp -> 0
-  |           |     |-- ecn -> 0
+  |           |     |-- dscp
+  |           |     |     |--> Routine
+  |           |     |     |--> Normal Delay
+  |           |     |     |--> Normal Throughput
+  |           |     |     |--> Normal Relibility
+  |           |     |-- ecn -> Not-ECT
   |           |-- len -> 10240
   |           |-- id -> 0
   |           |-- flags
@@ -228,7 +253,7 @@ Frame 6
   |     |-- ts_usec -> 66835
   |     |-- incl_len -> 159
   |     |-- orig_len -> 159
-  |-- time -> 2017-11-19T23:49:11Z
+  |-- time -> 2017-11-19 23:49:11
   |-- number -> 6
   |-- time_epoch -> 1511106551.66835 seconds
   |-- len -> 159
@@ -241,8 +266,12 @@ Frame 6
   |           |-- version -> 4
   |           |-- hdr_len -> 20
   |           |-- dsfield
-  |           |     |-- dscp -> 0
-  |           |     |-- ecn -> 0
+  |           |     |-- dscp
+  |           |     |     |--> Routine
+  |           |     |     |--> Normal Delay
+  |           |     |     |--> Normal Throughput
+  |           |     |     |--> Normal Relibility
+  |           |     |-- ecn -> Not-ECT
   |           |-- len -> 37120
   |           |-- id -> 0
   |           |-- flags

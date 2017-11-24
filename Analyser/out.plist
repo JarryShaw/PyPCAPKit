@@ -52,17 +52,33 @@
 			<string>a4-5e-60-d9-6b-97</string>
 			<key>type</key>
 			<string>IPv6</string>
-			<key>Network Layer</key>
-			<data>
-				60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00
-				00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00
-				1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00
-				fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
-				01 01 a4 5e 60 d9 6b 97
-			</data>
+			<key>IPv6</key>
+			<dict>
+				<key>version</key>
+				<string>6</string>
+				<key>tclass</key>
+				<integer>96</integer>
+				<key>label</key>
+				<integer>0</integer>
+				<key>len</key>
+				<integer>8192</integer>
+				<key>next</key>
+				<string>ICMPv6</string>
+				<key>limit</key>
+				<integer>255</integer>
+				<key>src</key>
+				<string>fe80::a6:87f9:2793:16ee</string>
+				<key>dst</key>
+				<string>fe80::1ccd:7c77:bac7:46b7</string>
+				<key>Transport Layer</key>
+				<data>
+					87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
+					1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
+				</data>
+			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv6</string>
+		<string>Ethernet:IPv6:ICMPv6</string>
 	</dict>
 	<key>Frame 2</key>
 	<dict>
@@ -95,16 +111,33 @@
 			<string>40-33-1a-d1-85-1c</string>
 			<key>type</key>
 			<string>IPv6</string>
-			<key>Network Layer</key>
-			<data>
-				60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00
-				1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00
-				00 a6 87 f9 27 93 16 ee 88 00 3f 82 40 00 00 00
-				fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
-			</data>
+			<key>IPv6</key>
+			<dict>
+				<key>version</key>
+				<string>6</string>
+				<key>tclass</key>
+				<integer>96</integer>
+				<key>label</key>
+				<integer>0</integer>
+				<key>len</key>
+				<integer>6144</integer>
+				<key>next</key>
+				<string>ICMPv6</string>
+				<key>limit</key>
+				<integer>255</integer>
+				<key>src</key>
+				<string>fe80::1ccd:7c77:bac7:46b7</string>
+				<key>dst</key>
+				<string>fe80::a6:87f9:2793:16ee</string>
+				<key>Transport Layer</key>
+				<data>
+					88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
+					1c cd 7c 77 ba c7 46 b7
+				</data>
+			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv6</string>
+		<string>Ethernet:IPv6:ICMPv6</string>
 	</dict>
 	<key>Frame 3</key>
 	<dict>
@@ -146,9 +179,14 @@
 				<key>dsfield</key>
 				<dict>
 					<key>dscp</key>
-					<integer>0</integer>
+					<array>
+						<string>Routine</string>
+						<string>Normal Delay</string>
+						<string>Normal Throughput</string>
+						<string>Normal Relibility</string>
+					</array>
 					<key>ecn</key>
-					<integer>0</integer>
+					<string>Not-ECT</string>
 				</dict>
 				<key>len</key>
 				<integer>10240</integer>
@@ -270,9 +308,14 @@
 				<key>dsfield</key>
 				<dict>
 					<key>dscp</key>
-					<integer>0</integer>
+					<array>
+						<string>Routine</string>
+						<string>Normal Delay</string>
+						<string>Normal Throughput</string>
+						<string>Normal Relibility</string>
+					</array>
 					<key>ecn</key>
-					<integer>0</integer>
+					<string>Not-ECT</string>
 				</dict>
 				<key>len</key>
 				<integer>10240</integer>
@@ -394,9 +437,14 @@
 				<key>dsfield</key>
 				<dict>
 					<key>dscp</key>
-					<integer>0</integer>
+					<array>
+						<string>Routine</string>
+						<string>Normal Delay</string>
+						<string>Normal Throughput</string>
+						<string>Normal Relibility</string>
+					</array>
 					<key>ecn</key>
-					<integer>0</integer>
+					<string>Not-ECT</string>
 				</dict>
 				<key>len</key>
 				<integer>10240</integer>
@@ -518,9 +566,14 @@
 				<key>dsfield</key>
 				<dict>
 					<key>dscp</key>
-					<integer>0</integer>
+					<array>
+						<string>Routine</string>
+						<string>Normal Delay</string>
+						<string>Normal Throughput</string>
+						<string>Normal Relibility</string>
+					</array>
 					<key>ecn</key>
-					<integer>0</integer>
+					<string>Not-ECT</string>
 				</dict>
 				<key>len</key>
 				<integer>37120</integer>

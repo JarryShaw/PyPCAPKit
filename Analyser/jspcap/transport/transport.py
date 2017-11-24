@@ -20,20 +20,28 @@
 #
 # # and afterwards, we recover the whole scene back to its original state
 # ##############################################################################
-#
-#
-# class Transport(Protocol):
-#
-#     __layer__ = 'Transport'
 
 
-# Transport laywer protocols
+from ..protocol import Protocol
+
+
+class Transport(Protocol):
+
+    __layer__ = 'Transport'
+
+
+# Transport layer protocols
 TP_PROTO = {
-    1:   'ICMP',
-    2:   'IGMP',
-    6:   'TCP',
-    17:  'UDP',
-    41:  'ENCAP',
-    89:  'OSPF',
-    132: 'SCTP',
+    # IP Suite
+    1:  'ICMP',     # Internet Control Message Protocol
+    2:  'IGMP',     # Internet Group Management Protocol
+    4:  'IP',       # IP in IP (encapsulation)
+   41:  'IPv6',     # IPv6 Encapsulation
+   58:  'ICMPv6',   # ICMP for IPv6
+
+   # Transport Layer
+    6:  'TCP',      # Transmission Control Protocol
+   17:  'UDP',      # User Datagram Protocol
+   89:  'OSPF',     # Open Shortest Path First
+  132:  'SCTP',     # Stream Control Transmission Protocol
 }

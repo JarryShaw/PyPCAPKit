@@ -25,9 +25,19 @@ var data = {
 			"dst" : "40-33-1a-d1-85-1c",
 			"src" : "a4-5e-60-d9-6b-97",
 			"type" : "IPv6",
-			"Network Layer" : "60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97"
+			"IPv6" : {
+				"version" : "6",
+				"tclass" : 96,
+				"label" : 0,
+				"len" : 8192,
+				"next" : "ICMPv6",
+				"limit" : 255,
+				"src" : "fe80::a6:87f9:2793:16ee",
+				"dst" : "fe80::1ccd:7c77:bac7:46b7",
+				"Transport Layer" : "87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97"
+			}
 		},
-		"protocols" : "Ethernet:IPv6"
+		"protocols" : "Ethernet:IPv6:ICMPv6"
 	},
 	"Frame 2" : {
 		"frame_info" : {
@@ -45,9 +55,19 @@ var data = {
 			"dst" : "a4-5e-60-d9-6b-97",
 			"src" : "40-33-1a-d1-85-1c",
 			"type" : "IPv6",
-			"Network Layer" : "60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7"
+			"IPv6" : {
+				"version" : "6",
+				"tclass" : 96,
+				"label" : 0,
+				"len" : 6144,
+				"next" : "ICMPv6",
+				"limit" : 255,
+				"src" : "fe80::1ccd:7c77:bac7:46b7",
+				"dst" : "fe80::a6:87f9:2793:16ee",
+				"Transport Layer" : "88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7"
+			}
 		},
-		"protocols" : "Ethernet:IPv6"
+		"protocols" : "Ethernet:IPv6:ICMPv6"
 	},
 	"Frame 3" : {
 		"frame_info" : {
@@ -69,8 +89,8 @@ var data = {
 				"version" : "4",
 				"hdr_len" : 20,
 				"dsfield" : {
-					"dscp" : 0,
-					"ecn" : 0
+					"dscp" : [ "Routine", "Normal Delay", "Normal Throughput", "Normal Relibility" ],
+					"ecn" : "Not-ECT"
 				},
 				"len" : 10240,
 				"id" : 13509,
@@ -132,8 +152,8 @@ var data = {
 				"version" : "4",
 				"hdr_len" : 20,
 				"dsfield" : {
-					"dscp" : 0,
-					"ecn" : 0
+					"dscp" : [ "Routine", "Normal Delay", "Normal Throughput", "Normal Relibility" ],
+					"ecn" : "Not-ECT"
 				},
 				"len" : 10240,
 				"id" : 0,
@@ -195,8 +215,8 @@ var data = {
 				"version" : "4",
 				"hdr_len" : 20,
 				"dsfield" : {
-					"dscp" : 0,
-					"ecn" : 0
+					"dscp" : [ "Routine", "Normal Delay", "Normal Throughput", "Normal Relibility" ],
+					"ecn" : "Not-ECT"
 				},
 				"len" : 10240,
 				"id" : 0,
@@ -258,8 +278,8 @@ var data = {
 				"version" : "4",
 				"hdr_len" : 20,
 				"dsfield" : {
-					"dscp" : 0,
-					"ecn" : 0
+					"dscp" : [ "Routine", "Normal Delay", "Normal Throughput", "Normal Relibility" ],
+					"ecn" : "Not-ECT"
 				},
 				"len" : 37120,
 				"id" : 0,
