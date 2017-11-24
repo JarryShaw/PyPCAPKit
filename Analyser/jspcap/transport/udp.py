@@ -6,10 +6,11 @@
 # Analyser for UDP header
 
 
-from ..protocol import Info, Protocol
+from .transport import Transport
+from ..protocol import Info
 
 
-class UDP(Protocol):
+class UDP(Transport):
 
     __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer']
 
@@ -62,7 +63,7 @@ class UDP(Protocol):
     def read_udp(self):
         """Read User Datagram Protocol (UDP).
 
-        Structure of UDP header:
+        Structure of UDP header [RFC 768]:
             Octets          Bits          Name                      Discription
               0              0          udp.srcport             Source Port
               2              16         udp.dstport             Destination Port
@@ -70,10 +71,10 @@ class UDP(Protocol):
               6              48         udp.checksum            Checksum
 
         """
-        _srcp = self.read_unpack(self._file, 2)
-        _dstp = self.read_unpack(self._file, 2)
-        _tlen = self.read_unpack(self._file, 2)
-        _csum = self._file.read(2)
+        _srcp = self._read_unpack(2)
+        _dstp = self._read_unpack(2)
+        _tlen = self._read_unpack(2)
+        _csum = self._read_fileng(2)
 
         udp = dict(
             srcport = _srcp,

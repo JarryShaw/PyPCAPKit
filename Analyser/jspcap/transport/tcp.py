@@ -9,7 +9,8 @@ import struct
 # Analyser for TCP header
 
 
-from ..protocol import Info, Protocol
+from .transport import Transport
+from ..protocol import Info
 
 
 """TCP Option Utility Table
@@ -67,14 +68,14 @@ F = False
 nm_len = lambda n: n - 2
 op_len = lambda n: n * 8
 
-chksum_opt = {
+chksum_opt = {  # [RFC 1146]
     0:  'TCP checksum',
     1:  "8-bit Fletcher's algorithm",
     2:  "16-bit Fletcher's algorithm",
     3:  'Redundant Checksum Avoidance',
 }
 
-mptcp_opt = {
+mptcp_opt = {   # [RFC 6824]
     0:  lambda self_, bits, size: self_._read_mptcp_capable(bits, size),    # MP_CAPABLE
     1:  lambda self_, bits, size: self_._read_mptcp_join(bits, size),       # MP_JOIN
     2:  lambda self_, bits, size: self_._read_mptcp_dss(bits, size),        # DSS
@@ -98,32 +99,32 @@ process_opt = {
 }
 
 TCP_OPT = {                         #   kind  length  type  process  comment            name
-    0:  (F, 'eol'),                 #     0      -      -      -                End of Option List
-    1:  (F, 'nop'),                 #     1      -      -      -                No-Operation
-    2:  (T, 'mss', nm_len, 1),      #     2      4      H      1                Maximum Segment Size
-    3:  (T, 'ws', nm_len, 1),       #     3      3      B      1                Window Scale
-    4:  (T, 'sackpmt', nm_len),     #     4      2      ?      -       True     SACK Permitted
-    5:  (T, 'sack', op_len, 0),     #     5      N      P      0      2+8*N     SACK
-    6:  (T, 'echo', nm_len, 0),     #     6      6      P      0                Echo
-    7:  (T, 'echore', nm_len, 0),   #     7      6      P      0                Echo Reply
-    8:  (T, 'ts', nm_len, 2),       #     8     10     II      2                Timestamps
-    9:  (T, 'poc', nm_len),         #     9      2      ?      -       True     POC Permitted
-   10:  (T, 'pocsp', nm_len, 3),    #    10      3    ??P      3                POC Service Profile
-   11:  (T, 'cc', nm_len, 0),       #    11      6      P      0                Connection Count
-   12:  (T, 'ccnew', nm_len, 0),    #    12      6      P      0                CC.NEW
-   13:  (T, 'ccecho', nm_len, 0),   #    13      6      P      0                CC.ECHO
-   14:  (T, 'chkreq', nm_len, 4),   #    14      3      B      4                Alternate Checksum Request
-   15:  (T, 'chksum', nm_len, 0),   #    15      N      P      0                Alternate Checksum Data
-   19:  (T, 'sig', nm_len, 0),      #    19     18      P      0                MD5 Signature Option
-   27:  (T, 'qs', nm_len, 5),       #    27      8      P      5                Quick-Start Response
-   28:  (T, 'timeout', nm_len, 6),  #    28      4      P      6                User Timeout Option
-   29:  (T, 'auth', nm_len, 7),     #    29      N      P      7                TCP Authentication Option
-   30:  (T, 'mp', nm_len, 8),       #    30      N      P      8                Multipath TCP
-   34:  (T, 'fastopen', nm_len, 0), #    34      N      P      0                Fast Open
+    0:  (F, 'eol'),                 #     0      -      -      -                [RFC 793] End of Option List
+    1:  (F, 'nop'),                 #     1      -      -      -                [RFC 793] No-Operation
+    2:  (T, 'mss', nm_len, 1),      #     2      4      H      1                [RFC 793] Maximum Segment Size
+    3:  (T, 'ws', nm_len, 1),       #     3      3      B      1                [RFC 7323] Window Scale
+    4:  (T, 'sackpmt', nm_len),     #     4      2      ?      -       True     [RFC 2018] SACK Permitted
+    5:  (T, 'sack', op_len, 0),     #     5      N      P      0      2+8*N     [RFC 2018] SACK
+    6:  (T, 'echo', nm_len, 0),     #     6      6      P      0                [RFC 1072][RFC 6247] Echo
+    7:  (T, 'echore', nm_len, 0),   #     7      6      P      0                [RFC 1072][RFC 6247] Echo Reply
+    8:  (T, 'ts', nm_len, 2),       #     8     10     II      2                [RFC 7323] Timestamps
+    9:  (T, 'poc', nm_len),         #     9      2      ?      -       True     [RFC 1693][RFC 6247] POC Permitted
+   10:  (T, 'pocsp', nm_len, 3),    #    10      3    ??P      3                [RFC 1693][RFC 6247] POC-Serv Profile
+   11:  (T, 'cc', nm_len, 0),       #    11      6      P      0                [RFC 1693][RFC 6247] Connection Count
+   12:  (T, 'ccnew', nm_len, 0),    #    12      6      P      0                [RFC 1693][RFC 6247] CC.NEW
+   13:  (T, 'ccecho', nm_len, 0),   #    13      6      P      0                [RFC 1693][RFC 6247] CC.ECHO
+   14:  (T, 'chkreq', nm_len, 4),   #    14      3      B      4                [RFC 1146][RFC 6247] Alt-Chksum Request
+   15:  (T, 'chksum', nm_len, 0),   #    15      N      P      0                [RFC 1146][RFC 6247] Alt-Chksum Data
+   19:  (T, 'sig', nm_len, 0),      #    19     18      P      0                [RFC 2385] MD5 Signature Option
+   27:  (T, 'qs', nm_len, 5),       #    27      8      P      5                [RFC 4782] Quick-Start Response
+   28:  (T, 'timeout', nm_len, 6),  #    28      4      P      6                [RFC 5482] User Timeout Option
+   29:  (T, 'ao', nm_len, 7),       #    29      N      P      7                [RFC 5925] TCP Authentication Option
+   30:  (T, 'mp', nm_len, 8),       #    30      N      P      8                [RFC 6824] Multipath TCP
+   34:  (T, 'fastopen', nm_len, 0), #    34      N      P      0                [RFC 7413] Fast Open
 }
 
 
-class TCP(Protocol):
+class TCP(Transport):
 
     __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer']
 
@@ -176,7 +177,7 @@ class TCP(Protocol):
     def read_tcp(self):
         """Read Transmission Control Protocol (TCP).
 
-        Structure of TCP header:
+        Structure of TCP header (RFC 793):
             Octets          Bits          Name                      Discription
               0              0          tcp.srcport             Source Port
               2              16         tcp.dstport             Destination Port
@@ -199,15 +200,15 @@ class TCP(Protocol):
               20             160        tcp.opt                 TCP Options (if data offset > 5)
 
         """
-        _srcp = self.read_unpack(self._file, 2)
-        _dstp = self.read_unpack(self._file, 2)
-        _seqn = self.read_unpack(self._file, 4)
-        _ackn = self.read_unpack(self._file, 4)
-        _lenf = self.read_binary(self._file, 1)
-        _flag = self.read_binary(self._file, 1)
-        _wins = self.read_unpack(self._file, 2)
-        _csum = self._file.read(2)
-        _urgp = self.read_unpack(self._file, 2)
+        _srcp = self._read_unpack(2)
+        _dstp = self._read_unpack(2)
+        _seqn = self._read_unpack(4)
+        _ackn = self._read_unpack(4)
+        _lenf = self._read_binary(1)
+        _flag = self._read_binary(1)
+        _wins = self._read_unpack(2)
+        _csum = self._read_fileng(2)
+        _urgp = self._read_unpack(2)
 
         tcp = dict(
             srcport = _srcp,
@@ -238,7 +239,7 @@ class TCP(Protocol):
         _optl = tcp['hdr_len'] - 20
         if _optl:
             tcp['opt'] = self._read_tcp_options(_optl)
-            # tcp['opt'] = self._file.read(_optl)
+            # tcp['opt'] = self._read_fileng(_optl)
 
         return tcp
 
@@ -250,19 +251,19 @@ class TCP(Protocol):
         )
         while counter < _optl:
             # get option kind
-            kind = self.read_unpack(self._file, 1)
+            kind = self._read_unpack(1)
 
             # fetch corresponding option tuple
             opts = TCP_OPT.get(kind)
             if opts is None:
                 len_ = _optl - counter
-                options['Unknown'] = self._file.read(len_)
+                options['Unknown'] = self._read_fileng(len_)
                 break
 
             # extract option
             dscp = opts[1]
             if opts[0]:
-                len_ = self.read_unpack(self._file, 1)
+                len_ = self._read_unpack(1)
                 byte = opts[2](len_)
                 if byte:    # check option process mode
                     data = process_opt[opts[3]](self, byte, dscp)
@@ -290,14 +291,14 @@ class TCP(Protocol):
             size - int, length of option
             name - str, acronym of option
 
-        Structure of TCP ACopt:
+        Structure of TCP options:
             Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (14)
-              1              8          tcp.opt.length                  Length (3)
+              0              0          tcp.opt.kind                    Kind
+              1              8          tcp.opt.length                  Length
               2             16          tcp.opt.data                    Kind-specific Data
 
         """
-        data = self._file.read(size)
+        data = self._read_fileng(size)
         return data
 
     def _read_mode_unpack(self, size, name):
@@ -307,14 +308,14 @@ class TCP(Protocol):
             size - int, length of option
             name - str, acronym of option
 
-        Structure of TCP ACopt:
+        Structure of TCP options:
             Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (14)
-              1              8          tcp.opt.length                  Length (3)
+              0              0          tcp.opt.kind                    Kind
+              1              8          tcp.opt.length                  Length
               2             16          tcp.opt.data                    Kind-specific Data
 
         """
-        data = self.read_unpack(self._file, size)
+        data = self._read_unpack(size)
         return data
 
     def _read_mode_tsopt(self, size, *args):
@@ -323,7 +324,7 @@ class TCP(Protocol):
         Keyword arguemnts:
             size - int, length of option
 
-        Structure of TCP TSopt:
+        Structure of TCP TSopt [RFC 7323]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (8)
               1              8          tcp.opt.length                  Length (10)
@@ -331,7 +332,7 @@ class TCP(Protocol):
               6             48          tcp.opt.ts.ecr                  Timestamps Echo Reply
 
         """
-        temp = struct.unpack('>II', self._file.read(size))
+        temp = struct.unpack('>II', self._read_fileng(size))
         data = dict(
             val = temp[0],
             ecr = temp[1],
@@ -344,7 +345,7 @@ class TCP(Protocol):
         Keyword arguemnts:
             size - int, length of option
 
-        Structure of TCP POC-SP Option:
+        Structure of TCP POC-SP Option [RFC 1693][RFC 6247]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (10)
               1              8          tcp.opt.length                  Length (3)
@@ -353,12 +354,12 @@ class TCP(Protocol):
               2             18          tcp.opt.pocsp.filler            Filler
 
         """
-        temp = self.read_binary(self._file, size)
+        temp = self._read_binary(size)
 
         data = dict(
             start = True if int(temp[0]) else False,
             end = True if int(temp[1]) else False,
-            filler = bytes(temp[2:], encoding='utf-8'),
+            filler = bytes(chr(int(bits[2:], base=2)), encoding='utf-8'),
         )
 
         return data
@@ -369,14 +370,14 @@ class TCP(Protocol):
         Keyword arguemnts:
             size - int, length of option
 
-        Structure of TCP CHKSUM-REQ:
+        Structure of TCP CHKSUM-REQ [RFC 1146][RFC 6247]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (14)
               1              8          tcp.opt.length                  Length (3)
               2             16          tcp.opt.chksumreq               Checksum Algorithm
 
         """
-        temp = self.read_unpack(self._file, size)
+        temp = self._read_unpack(size)
         algo = chksum_opt.get(temp)
 
         data = dict(
@@ -391,7 +392,7 @@ class TCP(Protocol):
         Keyword arguemnts:
             size - int, length of option
 
-        Structure of TCP QSopt:
+        Structure of TCP QSopt [RFC 4782]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (27)
               1              8          tcp.opt.length                  Length (8)
@@ -402,9 +403,9 @@ class TCP(Protocol):
               7             62          tcp.opt.qs.res                  Reserved (must be zero)
 
         """
-        rvrr = self.read_binary(self._file, 1)
-        ttld = self.read_unpack(self._file, 1)
-        noun = self._file.read(4)
+        rvrr = self._read_binary(1)
+        ttld = self._read_unpack(1)
+        noun = self._read_fileng(4)
 
         data = dict(
             resv = b'\x00' * 4,
@@ -422,7 +423,7 @@ class TCP(Protocol):
         Keyword arguemnts:
             size - int, length of option
 
-        Structure of TCP TIMEOUT:
+        Structure of TCP TIMEOUT [RFC 5482]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (28)
               1              8          tcp.opt.length                  Length (4)
@@ -430,11 +431,11 @@ class TCP(Protocol):
               2             17          tcp.opt.timeout.timeout         User Timeout
 
         """
-        temp = self._file.read(size)
+        temp = self._read_fileng(size)
 
         data = dict(
             granularity = 'minutes' if int(temp[0]) else 'seconds',
-            timeout = bytes(temp[0:], encoding='utf-8'),
+            timeout = bytes(chr(int(bits[0:], base=2)), encoding='utf-8'),
         )
 
         return data
@@ -445,18 +446,18 @@ class TCP(Protocol):
         Keyword arguemnts:
             size - int, length of option
 
-        Structure of TCP AUTH:
+        Structure of TCP AOopt [RFC 5925]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (29)
               1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.auth.keyid              KeyID
-              3             24          tcp.opt.auth.rnextkeyid         RNextKeyID
-              4             32          tcp.opt.auth.mac                Message Authentication Code
+              2             16          tcp.opt.ao.keyid                KeyID
+              3             24          tcp.opt.ao.rnextkeyid           RNextKeyID
+              4             32          tcp.opt.ao.mac                  Message Authentication Code
 
         """
-        key_ = self.read_unpack(self._file, 1)
-        rkey = self.read_unpack(self._file, 1)
-        mac_ = self._file.read(size - 2)
+        key_ = self._read_unpack(1)
+        rkey = self._read_unpack(1)
+        mac_ = self._read_fileng(size - 2)
 
         data = dict(
             keyid = key_,
@@ -472,7 +473,7 @@ class TCP(Protocol):
         Keyword arguemnts:
             size - int, length of option
 
-        Structure of MP-TCP:
+        Structure of MP-TCP [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -480,7 +481,7 @@ class TCP(Protocol):
               2             20          tcp.opt.mp.data                 Subtype-specific Data
 
         """
-        bins = self.read_binary(self._file, 1)
+        bins = self._read_binary(1)
         subt = int(bins[:4], base=2)    # subtype number
         bits = bins[4:]                 # 4-bit data
         dlen = size - 1                 # length of remaining data
@@ -488,10 +489,10 @@ class TCP(Protocol):
         # fetch subtype-specific data
         func = mptcp_opt.get(subt)
         if func is None:    # if subtype not exist, directly read all data
-            temp = self._file.read(dlen)
+            temp = self._read_fileng(dlen)
             data = dict(
                 subtype = 'Unknown',
-                data = bytes(bits[:4], encoding='utf-8') + temp,
+                data = bytes(chr(int(bits[:4], base=2)), encoding='utf-8') + temp,
             )
         else:               # fetch corresponding subtype data dict
             data = func(self, bits, dlen)
@@ -504,7 +505,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of MP_CAPABLE:
+        Structure of MP_CAPABLE [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12/20)
@@ -520,9 +521,9 @@ class TCP(Protocol):
 
         """
         vers = int(bits, base=2)
-        bins = self.read_binary(self._file, 1)
-        skey = self._file.read(8)
-        rkey = self._file.read(8) if size == 17 else None
+        bins = self._read_binary(1)
+        skey = self._read_fileng(8)
+        rkey = self._read_fileng(8) if size == 17 else None
 
         data = dict(
             subtype = 'MP_CAPABLE',
@@ -531,7 +532,7 @@ class TCP(Protocol):
                 flags = dict(
                     req = True if int(bins[0]) else False,
                     ext = True if int(bins[1]) else False,
-                    res = bytes(bins[2:7], encoding='utf-8'),
+                    res = bytes(chr(int(bits[2:7], base=2)), encoding='utf-8'),
                     hsa = True if int(bins[7]) else False,
                 ),
                 skey = skey,
@@ -548,7 +549,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of MP_JOIN:
+        Structure of MP_JOIN [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -562,8 +563,13 @@ class TCP(Protocol):
             return self._read_join_syn(bits, size)
         elif self._ack:             # MP_JOIN-ACK
             return self._read_join_ack(bits, size)
-        else:
-            return {}
+        else:   # illegal MP_JOIN occurred
+            temp = self._read_fileng(dlen)
+            data = dict(
+                subtype = 'MP_JOIN-Unknown',
+                data = bytes(chr(int(bits[:4], base=2)), encoding='utf-8') + temp,
+            )
+            return data
 
     def _read_join_syn(self, bits, size):
         """Read Join Connection Option for Initial SYN.
@@ -572,7 +578,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of MP_JOIN-SYN:
+        Structure of MP_JOIN-SYN [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12)
@@ -584,9 +590,9 @@ class TCP(Protocol):
               8             64          tcp.opt.mp.join.syn.randnum     Sender's Random Number
 
         """
-        adid = self.read_unpack(self._file, 1)
-        rtkn = self._file.read(4)
-        srno = self.read_unpack(self._file, 4)
+        adid = self._read_unpack(1)
+        rtkn = self._read_fileng(4)
+        srno = self._read_unpack(4)
 
         data = dict(
             subtype = 'MP_JOIN-SYN',
@@ -610,7 +616,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of MP_JOIN-SYN/ACK:
+        Structure of MP_JOIN-SYN/ACK [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (16)
@@ -622,9 +628,9 @@ class TCP(Protocol):
               12            96          tcp.opt.mp.join.synack.randnum  Sender's Random Number
 
         """
-        adid = self.read_unpack(self._file, 1)
-        hmac = self._file.read(8)
-        srno = self.read_unpack(self._file, 4)
+        adid = self._read_unpack(1)
+        hmac = self._read_fileng(8)
+        srno = self._read_unpack(4)
 
         data = dict(
             subtype = 'MP_JOIN-SYN/ACK',
@@ -648,7 +654,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of MP_JOIN-ACK:
+        Structure of MP_JOIN-ACK [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (24)
@@ -657,7 +663,7 @@ class TCP(Protocol):
               4             32          tcp.opt.mp.join.ack.hmac        Sender's HMAC
 
         """
-        temp = self._file.read(20)
+        temp = self._read_fileng(20)
         data = dict(
             subtype = 'MP_JOIN-ACK',
             join = dict(
@@ -677,7 +683,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of DSS:
+        Structure of DSS [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -695,16 +701,16 @@ class TCP(Protocol):
               18-26    144-208          tcp.opt.mp.dss.checksum         Checksum
 
         """
-        bits = self.read_binary(self._file, 1)
+        bits = self._read_binary(1)
         mflg = 8 if int(bits[4]) else 4
         Mflg = True if int(bits[5]) else False
         aflg = 8 if int(bits[6]) else 4
         Aflg = True if int(bits[7]) else False
-        ack_ = self._file.read(aflg) if Aflg else None
-        dsn_ = self.read_unpack(self._file, mflg) if Mflg else None
-        ssn_ = self.read_unpack(self._file, 4) if Mflg else None
-        dll_ = self.read_unpack(self._file, 2) if Mflg else None
-        chk_ = self._file.read(2) if Mflg else None
+        ack_ = self._read_fileng(aflg) if Aflg else None
+        dsn_ = self._read_unpack(mflg) if Mflg else None
+        ssn_ = self._read_unpack(4) if Mflg else None
+        dll_ = self._read_unpack(2) if Mflg else None
+        chk_ = self._read_fileng(2) if Mflg else None
 
         data = dict(
             subtype = 'DSS',
@@ -734,7 +740,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of ADD_ADDR:
+        Structure of ADD_ADDR [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -746,11 +752,11 @@ class TCP(Protocol):
 
         """
         vers = int(bits, base=2)
-        adid = self.read_unpack(self._file, 1)
+        adid = self._read_unpack(1)
         ipad = self._read_addr_ipv4() if vers == 4 else self._read_addr_ipv6()
         ip_l = 4 if vers == 4 else 16
         pt_l = size - 1 - ip_l
-        port = self.read_unpack(self._file, 2) if pt_l else None
+        port = self._read_unpack(2) if pt_l else None
 
         data = dict(
             subtype = 'ADD_ADDR',
@@ -765,7 +771,7 @@ class TCP(Protocol):
         return data
 
     def _read_addr_ipv4(self):
-        byte = self._file.read(4)
+        byte = self._read_fileng(4)
         addr = '.'.join([str(_) for _ in byte])
         return addr
 
@@ -777,7 +783,7 @@ class TCP(Protocol):
         ommt = False    # ommitted flag, since IPv6 address can ommit to `::` only once
 
         for _ in range(8):
-            hex_ = _file.read(2).hex().lstrip('0')
+            hex_ = self._read_fileng(2).hex().lstrip('0')
 
             if hex_:    # if hextet is not '', directly append
                 adlt.append(hex_)
@@ -814,7 +820,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of REMOVE_ADDR:
+        Structure of REMOVE_ADDR [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -825,7 +831,7 @@ class TCP(Protocol):
         """
         adid = []
         for _ in size:
-            adid.append(self.read_unpack(self._file, 1))
+            adid.append(self._read_unpack(1))
 
         data = dict(
             subtype = 'REMOVE_ADDR',
@@ -844,7 +850,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of MP_PRIO:
+        Structure of MP_PRIO [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (3/4)
@@ -853,7 +859,7 @@ class TCP(Protocol):
               3             24          tcp.opt.mp.prio.addrid          Address ID (optional)
 
         """
-        temp = self.read_unpack(self._file, 1) if size else None
+        temp = self._read_unpack(1) if size else None
         data = dict(
             subtype = 'MP_PRIO',
             prio = dict(
@@ -871,7 +877,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of MP_FAIL:
+        Structure of MP_FAIL [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12)
@@ -880,8 +886,8 @@ class TCP(Protocol):
               4             32          tcp.opt.mp.fail.dsn             Data Sequence Number
 
         """
-        resv = self._file.read(1)
-        dsn_ = self.read_unpack(self._file, 8)
+        resv = self._read_fileng(1)
+        dsn_ = self._read_unpack(8)
 
         data = dict(
             subtype = 'MP_FAIL',
@@ -900,7 +906,7 @@ class TCP(Protocol):
             bits - str, 4-bit data
             size - int, length of option
 
-        Structure of MP_FASTCLOSE:
+        Structure of MP_FASTCLOSE [RFC 6824]:
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12)
@@ -909,8 +915,8 @@ class TCP(Protocol):
               4             32          tcp.opt.mp.fastclose.rkey       Option Receiver's Key
 
         """
-        resv = self._file.read(1)
-        rkey = self._file.read(8)
+        resv = self._read_fileng(1)
+        rkey = self._read_fileng(8)
 
         data = dict(
             subtype = 'MP_FASTCLOSE',

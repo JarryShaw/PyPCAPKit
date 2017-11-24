@@ -22,7 +22,8 @@ TEMP_SPACES = '      '
 
 MAGIC_TYPES = dict(
     dict = lambda self_, text, file_: self_._append_branch(text, file_),    # branch
-    list = lambda self_, text, file_: self_._append_array(text, file_),     # array
+    list = lambda self_, text, file_: self_._append_list(text, file_),      # array
+    tuple = lambda self_, text, file_: self_._append_tuple(text, file_),    # array
     str = lambda self_, text, file_: self_._append_string(text, file_),     # string
     bytes = lambda self_, text, file_: self_._append_bytes(text, file_),    # string
     datetime = lambda self_, text, file_: self_._append_date(text, file_),  # string
@@ -80,7 +81,7 @@ class Tree(Dumper):
         self._bctr = collections.defaultdict(int)    # blank branch counter dict
         self._append_branch(value, _file)
 
-    def _append_array(self, value, _file):
+    def _append_list(self, value, _file):
         for (_nctr, _item) in enumerate(value):
             _cmma = ',' if _nctr else ''
             _file.write(_cmma)
@@ -88,13 +89,31 @@ class Tree(Dumper):
             _type = type(_item).__name__
             MAGIC_TYPES[_type](self, _item, _file)
 
+    def _append_tuple(self, value, _file):
+        _tabs = ''
+        for _ in range(self._tctr + 1):
+            _tabs += TEMP_SPACES if self._bctr[_] else TEMP_BRANCH
+
+        _tlen = len(value) - 1
+        for (_nctr, _item) in enumerate(value):
+            _bptr = '  |-->'
+            _text = '{tabs}{bptr}'.format(tabs=_tabs, bptr=_bptr)
+            _file.write(_text)
+
+            _type = type(_item).__name__
+            MAGIC_TYPES[_type](self, _item, _file)
+
+            _suff = '\n' if _nctr < _tlen else ''
+            _file.write(_suff)
+
     def _append_branch(self, value, _file):
         self._tctr += 1
 
         _vlen = len(value)
         for (_vctr, (_item, _text)) in enumerate(value.items()):
             _type = type(_text).__name__
-            if _type == 'dict' or (_type == 'bytes' and len(_text) > 16):
+            if _type == 'dict' or _type == 'tuple' or \
+                    (_type == 'bytes' and len(_text) > 16):
                 _pref = '\n'
             else:
                 _pref = ' ->'
@@ -143,7 +162,7 @@ class Tree(Dumper):
         _file.write(_labs)
 
     def _append_date(self, value, _file):
-        _text = value.strftime('%Y-%m-%dT%H:%M:%SZ')
+        _text = value.strftime('%Y-%m-%d %H:%M:%S')
         _labs = ' {text}'.format(text=_text)
         _file.write(_labs)
 

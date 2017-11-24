@@ -20,15 +20,22 @@
 #
 # # and afterwards, we recover the whole scene back to its original state
 # ##############################################################################
-#
-#
-# class Link(Protocol):
-#
-#     __layer__ = 'Link'
 
 
-# Link laywer protocols
+from ..protocol import Protocol
+
+
+class Link(Protocol):
+
+    __layer__ = 'Link'
+
+
+# Link layer protocols
 LINKTYPE = {
-    0: 'Null',
-    1: 'Ethernet',
+    0:  'Null',     # BSD loopback encapsulation
+    1:  'Ethernet', # IEEE 802.3 Ethernet
+  101:  'Raw',      # Raw IP
+  228:  'IPV4',     # Raw IPv4
+  229:  'IPv6',     # Raw IPv6
+  248:  'SCTP',     # SCTP packets
 }

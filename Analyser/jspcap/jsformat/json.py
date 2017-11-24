@@ -26,6 +26,7 @@ MAGIC_TYPES = dict(
     float = lambda self_, text, file_: self_._append_number(text, file_),   # number
     dict = lambda self_, text, file_: self_._append_object(text, file_),    # object
     list = lambda self_, text, file_: self_._append_array(text, file_),     # array
+    tuple = lambda self_, text, file_: self_._append_array(text, file_),    # array
     bool = lambda self_, text, file_: self_._append_bool(text, file_),      # true | false
     NoneType = lambda self_, text, file_: self_._append_none(text, file_),  # null
 )

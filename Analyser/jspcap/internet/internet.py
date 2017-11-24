@@ -20,14 +20,17 @@
 #
 # # and afterwards, we recover the whole scene back to its original state
 # ##############################################################################
-#
-#
-# class Internet(Protocol):
-#
-#     __layer__ = 'Internet'
 
 
-# Internet laywer protocols
+from ..protocol import Protocol
+
+
+class Internet(Protocol):
+
+    __layer__ = 'Internet'
+
+
+# Internet layer protocols
 INTERNET = {
     '0800': 'IPv4',
     '0806': 'ARP',

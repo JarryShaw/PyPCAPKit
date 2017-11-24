@@ -204,7 +204,15 @@ class Analyser:
 
     def _link_layer(self, _ifile, length):
         """Read link layer."""
-        if self._dlink == 'Ethernet':
+        # Other Conditions
+        if self._dlink == 'IPv4':
+            from .internet.ipv4 import IPv4
+            return True, IPv4(_ifile)
+        elif self._dlink == 'IPv6':
+            from .internet.ipv6 import IPv6
+            return True, IPv6(_ifile)
+        # Link Layer
+        elif self._dlink == 'Ethernet':
             from .link.ethernet import Ethernet
             return True, Ethernet(_ifile)
         else:
@@ -217,6 +225,9 @@ class Analyser:
         if self._netwk == 'IPv4':
             from .internet.ipv4 import IPv4
             return True, IPv4(_ifile)
+        elif self._netwk == 'IPv6':
+            from .internet.ipv6 import IPv6
+            return True, IPv6(_ifile)
         else:
             # raise NotImplementedError
             _data = _ifile.read(length) if length else None
@@ -224,7 +235,15 @@ class Analyser:
 
     def _transport_layer(self, _ifile, length):
         """Read transport layer."""
-        if self._trans == 'TCP':
+        # IP Suite
+        if self._trans == 'IPv4':
+            from .internet.ipv4 import IPv4
+            return True, IPv4(_ifile)
+        elif self._trans == 'IPv6':
+            from .internet.ipv6 import IPv6
+            return True, IPv6(_ifile)
+        # Transport Layer
+        elif self._trans == 'TCP':
             from .transport.tcp import TCP
             return True, TCP(_ifile)
         elif self._trans == 'UDP':

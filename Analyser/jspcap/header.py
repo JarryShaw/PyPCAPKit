@@ -97,17 +97,17 @@ class Header(Protocol):
             } pcap_hdr_t;
 
         """
-        _temp = self._file.read(4)
+        _temp = self._read_fileng(4)
         if _temp != b'\xd4\xc3\xb2\xa1':
             raise FileError
 
         _magn = _temp
-        _vmaj = self.read_unpack(self._file, 2, _lttl=True)
-        _vmin = self.read_unpack(self._file, 2, _lttl=True)
-        _zone = self.read_unpack(self._file, 4, _lttl=True, _sign=True)
-        _acts = self.read_unpack(self._file, 4, _lttl=True)
-        _slen = self.read_unpack(self._file, 4, _lttl=True)
-        _type = self.read_unpack(self._file, 4, _lttl=True)
+        _vmaj = self._read_unpack(2, lilendian=True)
+        _vmin = self._read_unpack(2, lilendian=True)
+        _zone = self._read_unpack(4, lilendian=True, sign=True)
+        _acts = self._read_unpack(4, lilendian=True)
+        _slen = self._read_unpack(4, lilendian=True)
+        _type = self._read_unpack(4, lilendian=True)
 
         header = dict(
             magic_number = _magn,
