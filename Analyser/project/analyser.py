@@ -11,10 +11,10 @@ import textwrap
 # Extract parametres from a PCAP file
 
 
-from frame import Frame
-from header import Header
-from protocol import Info
-from jsformat.tree import Tree as output
+from jspcap.frame import Frame
+from jspcap.header import Header
+from jspcap.protocol import Info
+from jspcap.jsformat.tree import Tree as output
 
 
 ABCMeta = abc.ABCMeta
@@ -196,8 +196,16 @@ class Analyser(object):
 
     def _link_layer(self, _ifile, length):
         """Read link layer."""
-        if self._dlink == 'Ethernet':
-            from link.ethernet import Ethernet
+        # Other Conditions
+        if self._dlink == 'IPv4':
+            from jspcap.internet.ipv4 import IPv4
+            return True, IPv4(_ifile)
+        elif self._dlink == 'IPv6':
+            from jspcap.internet.ipv6 import IPv6
+            return True, IPv6(_ifile)
+        # Link Layer
+        elif self._dlink == 'Ethernet':
+            from jspcap.link.ethernet import Ethernet
             return True, Ethernet(_ifile)
         else:
             # raise NotImplementedError
@@ -207,8 +215,11 @@ class Analyser(object):
     def _internet_layer(self, _ifile, length):
         """Read internet layer."""
         if self._netwk == 'IPv4':
-            from internet.ipv4 import IPv4
+            from jspcap.internet.ipv4 import IPv4
             return True, IPv4(_ifile)
+        elif self._netwk == 'IPv6':
+            from jspcap.internet.ipv6 import IPv6
+            return True, IPv6(_ifile)
         else:
             # raise NotImplementedError
             _data = _ifile.read(length) if length else None
@@ -216,11 +227,19 @@ class Analyser(object):
 
     def _transport_layer(self, _ifile, length):
         """Read transport layer."""
-        if self._trans == 'TCP':
-            from transport.tcp import TCP
+        # IP Suite
+        if self._trans == 'IPv4':
+            from jspcap.internet.ipv4 import IPv4
+            return True, IPv4(_ifile)
+        elif self._trans == 'IPv6':
+            from jspcap.internet.ipv6 import IPv6
+            return True, IPv6(_ifile)
+        # Transport Layer
+        elif self._trans == 'TCP':
+            from jspcap.transport.tcp import TCP
             return True, TCP(_ifile)
         elif self._trans == 'UDP':
-            from transport.udp import UDP
+            from jspcap.transport.udp import UDP
             return True, UDP(_ifile)
         else:
             # raise NotImplementedError

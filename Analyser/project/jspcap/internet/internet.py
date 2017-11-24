@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Link Layer Protocols
+# Internet Layer Protocols
 # Table of corresponding protocols
 
 
@@ -20,15 +20,20 @@
 #
 # # and afterwards, we recover the whole scene back to its original state
 # ##############################################################################
-#
-#
-# class Link(Protocol):
-#
-#     __layer__ = 'Link'
 
 
-# Link laywer protocols
-LINKTYPE = {
-    0: 'Null',
-    1: 'Ethernet',
+from ..protocol import Protocol
+
+
+class Internet(Protocol):
+
+    __layer__ = 'Internet'
+
+
+# Internet layer protocols
+INTERNET = {
+    '0800': 'IPv4',
+    '0806': 'ARP',
+    '8137': 'IPX',
+    '86dd': 'IPv6',
 }

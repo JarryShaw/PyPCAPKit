@@ -9,24 +9,12 @@ import textwrap
 # Analyser for ethernet protocol header
 
 
-##############################################################################
-# for unknown reason and never-encountered situation, at current time
-# we have to change the working directory to import from parent folders
-
-import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
-from internet.internet import INTERNET
-from protocol import Info, Protocol
-
-del sys.path[1]
-
-# and afterwards, we recover the whole scene back to its original state
-##############################################################################
+from .link import Link
+from ..internet.internet import INTERNET
+from ..protocol import Info
 
 
-class Ethernet(Protocol):
+class Ethernet(Link):
 
     __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
 
@@ -83,7 +71,7 @@ class Ethernet(Protocol):
     def read_ethernet(self):
         """Read Ethernet Protocol.
 
-        Structure of Ethernet Protocol header:
+        Structure of Ethernet Protocol header [RFC 7042]:
             Octets          Bits          Name                Discription
               0              0          eth.dst           Destination MAC Address
               1              8          eth.src           Source MAC Address
@@ -103,11 +91,11 @@ class Ethernet(Protocol):
         return ethernet
 
     def _read_mac_addr(self):
-        _byte = self._file.read(6)
+        _byte = self._read_fileng(6)
         _addr = '-'.join(textwrap.wrap(_byte.hex(), 2))
         return _addr
 
     def _read_eth_type(self):
-        _byte = self._file.read(2).hex()
+        _byte = self._read_fileng(2).hex()
         _type = INTERNET.get(_byte)
         return _type

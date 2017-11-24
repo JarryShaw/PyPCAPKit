@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-# Internet Layer Protocols
+# Link Layer Protocols
 # Table of corresponding protocols
 
 
@@ -20,17 +20,22 @@
 #
 # # and afterwards, we recover the whole scene back to its original state
 # ##############################################################################
-#
-#
-# class Internet(Protocol):
-#
-#     __layer__ = 'Internet'
 
 
-# Internet laywer protocols
-INTERNET = {
-    '0800': 'IPv4',
-    '0806': 'ARP',
-    '8137': 'IPX',
-    '86dd': 'IPv6',
+from ..protocol import Protocol
+
+
+class Link(Protocol):
+
+    __layer__ = 'Link'
+
+
+# Link layer protocols
+LINKTYPE = {
+    0:  'Null',     # BSD loopback encapsulation
+    1:  'Ethernet', # IEEE 802.3 Ethernet
+  101:  'Raw',      # Raw IP
+  228:  'IPV4',     # Raw IPv4
+  229:  'IPv6',     # Raw IPv6
+  248:  'SCTP',     # SCTP packets
 }

@@ -2,33 +2,54 @@
 # -*- coding: utf-8 -*-
 
 
-import struct
-
-
 # Internet Protocol version 4
 # Analyser for IPv4 header
 
 
-##############################################################################
-# for unknown reason and never-encountered situation, at current time
-# we have to change the working directory to import from parent folders
-
-import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
-from protocol import Info, Protocol
-from transport.transport import TP_PROTO
-
-del sys.path[1]
-
-# and afterwards, we recover the whole scene back to its original state
-##############################################################################
+from .ip import IP
+from ..transport.transport import TP_PROTO
 
 
-class IPv4(Protocol):
+# TOS (DS Field) Precedence
+TOS_PRE = {
+    '111':  'Network Control',
+    '110':  'Internetwork Control',
+    '101':  'CRITIC/ECP',
+    '100':  'Flash Override',
+    '011':  'Flash',
+    '010':  'Immediate',
+    '001':  'Priority',
+    '000':  'Routine',
+}
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
+# TOS (DS Field) Delay
+TOS_DEL = {
+    '0':    'Normal Delay',
+    '1':    'Low Delay',
+}
+
+# TOS (DS Field) Throughput
+TOS_THR = {
+    '0':    'Normal Throughput',
+    '1':    'High Throughput',
+}
+
+# TOS (DS Field) Relibility
+TOS_REL = {
+    '0':    'Normal Relibility',
+    '1':    'High Relibility',
+}
+
+# TOS ECN FIELD
+TOS_ECN = {
+    '00':   'Not-ECT',
+    '01':   'ECT(1)',
+    '10':   'ECT(0)',
+    '11':   'CE',
+}
+
+
+class IPv4(IP):
 
     ##########################################################################
     # Properties.
@@ -39,24 +60,8 @@ class IPv4(Protocol):
         return 'Internet Protocol version 4'
 
     @property
-    def info(self):
-        return self._info
-
-    @property
     def length(self):
         return self._info.hdr_len
-
-    @property
-    def src(self):
-        return self._info.src
-
-    @property
-    def dst(self):
-        return self._info.dst
-
-    @property
-    def layer(self):
-        return self.__layer__
 
     @property
     def protocol(self):
@@ -65,13 +70,6 @@ class IPv4(Protocol):
     ##########################################################################
     # Data models.
     ##########################################################################
-
-    def __init__(self, _file):
-        self._file = _file
-        self._info = Info(self.read_ipv4())
-
-    def __len__(self):
-        return self._info.hdr_len
 
     def __length_hint__(self):
         return 20
@@ -83,9 +81,26 @@ class IPv4(Protocol):
     def read_ipv4(self):
         """Read Internet Protocol version 4 (IPv4).
 
-        Structure of IPv4 header:
+        Structure of IPv4 header [RFC 791]:
+
+             0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |Version|  IHL  |Type of Service|          Total Length         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |         Identification        |Flags|      Fragment Offset    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Time to Live |    Protocol   |         Header Checksum       |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                       Source Address                          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                    Destination Address                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                    Options                    |    Padding    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
             Octets          Bits          Name                Discription
-              0              0          ip.version        Version
+              0              0          ip.version        Version (4)
               0              4          ip.hdr_len        Interal Header Length (IHL)
               1              8          ip.dsfield.dscp   Differentiated Services Code Point (DSCP)
               1              14         ip.dsfield.ecn    Explicit Congestion Notification (ECN)
@@ -103,14 +118,14 @@ class IPv4(Protocol):
               20             160        ip.options        IP Options (if IHL > 5)
 
         """
-        _vihl = self._file.read(1).hex()
-        _dscp = self.read_binary(self._file, 1)
-        _tlen = self.read_unpack(self._file, 2)
-        _iden = self.read_unpack(self._file, 2)
-        _frag = self.read_binary(self._file, 2)
-        _ttol = self.read_unpack(self._file, 1)
+        _vihl = self._read_fileng(1).hex()
+        _dscp = self._read_binary(1)
+        _tlen = self._read_unpack(2)
+        _iden = self._read_unpack(2)
+        _frag = self._read_binary(2)
+        _ttol = self._read_unpack(1)
         _prot = self._read_ip_proto()
-        _csum = self._file.read(2)
+        _csum = self._read_fileng(2)
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
 
@@ -118,8 +133,13 @@ class IPv4(Protocol):
             version = _vihl[0],
             hdr_len = int(_vihl[1], base=16) * 4,
             dsfield = dict(
-                dscp = int(_dscp[:-2], base=2),
-                ecn = int(_dscp[-2:], base=2),
+                dscp = (
+                    TOS_PRE.get(_dscp[:3]),
+                    TOS_DEL.get(_dscp[3]),
+                    TOS_THR.get(_dscp[4]),
+                    TOS_REL.get(_dscp[5]),
+                ),
+                ecn = TOS_ECN.get(_dscp[-2:]),
             ),
             len = _tlen,
             id = _iden,
@@ -138,19 +158,21 @@ class IPv4(Protocol):
 
         _optl = ip['hdr_len'] - 20
         if _optl:
-            ip['options'] = self._read_ipv4_options(_optl)
+            ip['options'] = self._read_ip_options(_optl)
 
         return ip
 
-    def _read_ip_addr(self):
-        _byte = self._file.read(4)
-        _addr = '.'.join([str(_) for _ in _byte])
-        return _addr
+    read_ip = read_ipv4
 
     def _read_ip_proto(self):
-        _byte = struct.unpack('>B', self._file.read(1))[0]
+        _byte = self._read_unpack(1)
         _prot = TP_PROTO.get(_byte)
         return _prot
 
-    def _read_ipv4_options(self, size=None):
-        return self._file.read(size)
+    def _read_ip_addr(self):
+        _byte = self._read_fileng(4)
+        _addr = '.'.join([str(_) for _ in _byte])
+        return _addr
+
+    def _read_ip_options(self, size=None):
+        return self._read_fileng(size)

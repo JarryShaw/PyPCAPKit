@@ -6,23 +6,11 @@
 # Analyser for UDP header
 
 
-##############################################################################
-# for unknown reason and never-encountered situation, at current time
-# we have to change the working directory to import from parent folders
-
-import os
-import sys
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
-
-from protocol import Info, Protocol
-
-del sys.path[1]
-
-# and afterwards, we recover the whole scene back to its original state
-##############################################################################
+from .transport import Transport
+from ..protocol import Info
 
 
-class UDP(Protocol):
+class UDP(Transport):
 
     __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer']
 
@@ -75,7 +63,7 @@ class UDP(Protocol):
     def read_udp(self):
         """Read User Datagram Protocol (UDP).
 
-        Structure of UDP header:
+        Structure of UDP header [RFC 768]:
             Octets          Bits          Name                      Discription
               0              0          udp.srcport             Source Port
               2              16         udp.dstport             Destination Port
@@ -83,10 +71,10 @@ class UDP(Protocol):
               6              48         udp.checksum            Checksum
 
         """
-        _srcp = self.read_unpack(self._file, 2)
-        _dstp = self.read_unpack(self._file, 2)
-        _tlen = self.read_unpack(self._file, 2)
-        _csum = self._file.read(2)
+        _srcp = self._read_unpack(2)
+        _dstp = self._read_unpack(2)
+        _tlen = self._read_unpack(2)
+        _csum = self._read_fileng(2)
 
         udp = dict(
             srcport = _srcp,

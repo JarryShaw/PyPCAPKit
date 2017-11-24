@@ -42,7 +42,7 @@ class Display(Analyser):
         # root window setup
         self.master = Tk()
         self.master.title('PCAP Tree View')
-        self.master.geometry("674x444")
+        self.master.geometry("674x476")
         self.master.resizable(width=False,height=False)
 
         # frame setup
@@ -51,6 +51,7 @@ class Display(Analyser):
 
         # menu setup
         self.menu = Menu(self.master)
+        
 
         self.init()
         self.master.mainloop()
@@ -68,8 +69,8 @@ class Display(Analyser):
         self.listbox.pack(side=LEFT, fill=BOTH)
 
         # start button setup
-        self.button = Button(self.frame, text='Open ...', command=self.open, font=('Courier New', 16))
-        self.button.place(relx=0.8, rely=0.8, anchor=CENTER)
+        self.button = Button(self.frame, text='Open ...', command=self.open, font=('Courier New', 13))
+        self.button.place(relx=0.5, rely=0.93, anchor=CENTER)
 
         with open('init') as file_:
             for line in file_.readlines():
