@@ -9,6 +9,7 @@ out.yml
 out.json
 out.plist
 .DS_Store
+deprecated/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

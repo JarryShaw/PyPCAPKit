@@ -837,7 +837,7 @@ class TCP(Transport):
             subtype = 'REMOVE_ADDR',
             removeaddr = dict(
                 res = b'\x00' * 4,
-                addrid = adid if adid else None,
+                addrid = adid or None,
             ),
         )
 
