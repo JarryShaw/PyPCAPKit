@@ -1,16 +1,10 @@
-test.py
-*.pdf
-*.ini
-in.pcap
-out.js
-out.txt
-out.xml
-out.yml
-out.json
-out.plist
+
 .DS_Store
 deprecated/
 
+# Created by https://www.gitignore.io/api/python
+
+### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -97,6 +91,8 @@ celerybeat-schedule
 env/
 venv/
 ENV/
+env.bak/
+venv.bak/
 
 # Spyder project settings
 .spyderproject
@@ -110,3 +106,5 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# End of https://www.gitignore.io/api/python

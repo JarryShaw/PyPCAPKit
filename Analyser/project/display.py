@@ -9,6 +9,7 @@ from os import remove
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 from tkinter.messagebox import askokcancel
+from tkinter.scrolledtext import ScrolledText
 from time import sleep
 from sys import platform
 
@@ -194,7 +195,7 @@ class Display(Analyser):
         frct_menu = Menu(file_menu, tearoff=0)
         file_menu.add_cascade(label='Open Recent', menu=frct_menu)
         try:
-            with open('recent') as file_:
+            with open('recent', 'r') as file_:
                 file_real = False
                 for file_name in file_.readlines():
                     file_real = True if file_name else False
@@ -283,7 +284,14 @@ class Display(Analyser):
 
     # About PCAP Tree Viewer
     def intr_cmd(self):
-        pass
+        toplevel = Toplevel(self.master)
+        toplevel.title('About PCAP Tree Viewer')
+        scrolledtext = ScrolledText(toplevel, font=('Courier New', 12))
+        scrolledtext.pack()
+        with open('init', 'r') as file_:
+            for line in file_.readlines():
+                scrolledtext.insert(END, line)
+        scrolledtext.config(state=DISABLED)
 
     # Preferences
     def pref_cmd(self, *args):
@@ -383,12 +391,11 @@ class Display(Analyser):
 
     def init_display(self):
         # scrollpad setup
-        self.listbox = Listbox(
-            self.frame, bd=0, font=('Courier New', 12),
-            width=500, height=500, selectmode=EXTENDED,
-            activestyle='none', takefocus=0
+        self.text = Text(
+            self.frame, bd=0, font=('Courier New', 13),
+            width=500, height=500
         )
-        self.listbox.pack(side=LEFT, fill=BOTH)
+        self.text.pack(side=LEFT, fill=BOTH)
 
         # start button setup
         self.button = Button(
@@ -397,10 +404,11 @@ class Display(Analyser):
         )
         self.button.place(relx=0.5, rely=0.93, anchor=CENTER)
 
-        with open('init') as file_:
+        with open('init', 'r') as file_:
             for line in file_.readlines():
-                self.listbox.insert(END, line)
-                self.listbox.update()
+                self.text.insert(END, line)
+                self.text.update()
+        self.text.config(state=DISABLED)
 
     def open_file(self):
         self.button.place_forget()
@@ -414,7 +422,7 @@ class Display(Analyser):
             print(ifnm)
             self._ifile = open(ifnm, 'rb')
             self.record_header(self._ifile)      # read PCAP global header
-            self.listbox.pack_forget()
+            self.text.pack_forget()
             self.load_file()
         except Exception:
             if askokcancel('Unsupported file!', 'Please retry.'):
@@ -459,7 +467,7 @@ class Display(Analyser):
         content = TEXT(percent)
         self.label.config(text=content)
 
-        with open('out') as fout:
+        with open('out', 'r') as fout:
             _ctr = 0
             for (_lctr, line) in enumerate(fout.readlines()):
                 self.listbox.insert(END, line)
