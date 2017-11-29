@@ -1,4 +1,15 @@
 
+*.html
+*.js
+!out.js
+*.json
+!out.json
+*.plist
+!out.plist
+*.tree
+*.txt
+!out.txt
+*.xml
 deprecated/
 
 # Created by https://www.gitignore.io/api/macos,python

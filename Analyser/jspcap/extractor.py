@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import re
 import io
 import textwrap
 
@@ -10,9 +11,15 @@ import textwrap
 # Extract parametres from a PCAP file
 
 
+from .exceptions import FormatError
 from .frame import Frame
 from .header import Header
 from .protocol import Info
+
+
+FILE = re.compile(r'''
+    \A(.+?)[.](?P<exts>.*)\Z
+''', re.VERBOSE | re.IGNORECASE)
 
 
 class Extractor:
@@ -42,11 +49,26 @@ class Extractor:
 
     """
 
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
     @property
     def info(self):
         return self._frame
 
-    def __init__(self, *, fmt, fin=None, fout=None):
+    @property
+    def length(self):
+        return self._frnum
+
+    ##########################################################################
+    # Data modules.
+    ##########################################################################
+
+    # Not hashable
+    __hash__ = None
+
+    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True):
         """Initialise PCAP Reader.
 
         Keyword arguemnts:
@@ -56,39 +78,56 @@ class Extractor:
             fout -- str, file name to be written
 
         """
+        fmt_none = (fmt is None)
+
         if fin is None:
             ifnm = 'in.pcap'
         else:
-            ifnm = '{fin}.pcap'.format(fin=fin)
+            ifnm = fin if '.pcap' in fin else '{fin}.pcap'.format(fin=fin)
+
         if fout is None:
-            fout = 'out'
-        if fmt == 'plist':
-            from .jsformat.plist import PLIST as output
-            ofnm = '{fout}.plist'.format(fout=fout) # output PLIST file
-        elif fmt == 'json':
-            from .jsformat.json import JSON as output
-            ofnm = '{fout}.json'.format(fout=fout)  # output JSON file
-        elif fmt == 'tree':
-            from .jsformat.tree import Tree as output
-            ofnm = '{fout}.txt'.format(fout=fout)   # output treeview text file
-        elif fmt == 'html':
-            from .jsformat.html import JavaScript as output
-            ofnm = '{fout}.js'.format(fout=fout)    # output JavaScript file
-        elif fmt == 'xml':
-            from .jsformat.xml import XML as output
-            ofnm = '{fout}.xml'.format(fout=fout)   # output XML file
+            if fmt_none:
+                raise FormatError('Output format unspecified.')
+            else:
+                ofnm = 'out.{fmt}'.format(fmt=fmt)
         else:
-            raise KeyError
+            ofmt = FILE.match(fout)
+            if ofmt is None:
+                if fmt_none:
+                    raise FormatError('Output format unspecified.')
+                else:
+                    ofnm = '{out}.{fmt}'.format(out=fout, fmt=fmt)
+            else:
+                ofnm = fout
+                fmt = ofmt.group('exts')
+
+        if fmt == 'plist':
+            from .jsformat.plist import PLIST as output     # output PLIST file
+        elif fmt == 'json':
+            from .jsformat.json import JSON as output       # output JSON file
+        elif fmt == 'tree':
+            from .jsformat.tree import Tree as output       # output treeview text file
+        elif fmt == 'html':
+            from .jsformat.html import JavaScript as output # output JavaScript file
+            fmt = 'js'
+        elif fmt == 'xml':
+            from .jsformat.xml import XML as output         # output XML file
+        else:
+            raise FormatError('Unsupported output format: {}'.format(fmt))
 
         self._frnum = 1                     # frame number
         self._frame = []                    # frame record
         self._ofile = output(ofnm)          # output file
 
-        with open(ifnm, 'rb') as _ifile:
-            self.record_header(_ifile)      # read PCAP global header
-            self.record_frames(_ifile)      # read frames
+        self._ifile = open(ifnm, 'rb')
+        self.record_header()         # read PCAP global header
+        self.record_frames(auto)     # read frames
 
-    def record_header(self, _ifile):
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def record_header(self):
         """Read global header.
 
         - Extract global header.
@@ -96,16 +135,27 @@ class Extractor:
         - Append Info.
         - Write plist file.
 
-        Keyword arguments:
-            _ifile -- file object
-
         """
-        self._gbhdr = Header(_ifile)
+        self._gbhdr = Header(self._ifile)
         self._dlink = self._gbhdr.protocol
         self._frame.append(self._gbhdr.info)
         self._ofile(self._gbhdr.info.infotodict(), _name='Global Header')
 
-    def record_frames(self, _ifile):
+    def record_frames(self, auto):
+        if auto:
+            while True:
+                try:
+                    self._read_frame()
+                except EOFError:
+                    # quit when EOF
+                    break
+            self._ifile.close()
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def _read_frame(self):
         """Read frames.
 
         - Extract frames and each layer of packets.
@@ -113,70 +163,63 @@ class Extractor:
         - Append Info.
         - Write plist file.
 
-        Keyword arguments:
-            _ifile -- file object
-
         """
-        while True:
-            self._netwk = None
-            self._trans = None
-            self._applc = None
-            try:
-                # read frame header
-                frame = Frame(_ifile, self._frnum)
-                plist = frame.info.infotodict()
+        self._netwk = None
+        self._trans = None
+        self._applc = None
 
-                # make BytesIO from frame package data
-                length = frame.info.len
-                bytes_ = io.BytesIO(_ifile.read(length))
+        # read frame header
+        frame = Frame(self._ifile, self._frnum)
+        plist = frame.info.infotodict()
 
-                # read link layer
-                dlink = self._link_layer(bytes_, length)
+        # make BytesIO from frame package data
+        length = frame.info.len
+        bytes_ = io.BytesIO(self._ifile.read(length))
 
-                # check link layer protocol
-                if not dlink[0]:
-                    plist['Link Layer'] = dlink[1]
-                    self._write_record(plist)
-                    continue
-                else:
-                    plist[self._dlink] = dlink[1].info.infotodict()
-                    self._netwk = dlink[1].protocol
-                    length -= dlink[1].length
+        # read link layer
+        dlink = self._link_layer(bytes_, length)
 
-                # read internet layer
-                netwk = self._internet_layer(bytes_, length)
+        # check link layer protocol
+        if not dlink[0]:
+            plist['Link Layer'] = dlink[1]
+            self._write_record(plist)
+            return
+        else:
+            plist[self._dlink] = dlink[1].info.infotodict()
+            self._netwk = dlink[1].protocol
+            length -= dlink[1].length
 
-                # check internet layer protocol
-                if not netwk[0]:
-                    plist[self._dlink]['Network Layer'] = netwk[1]
-                    self._write_record(plist)
-                    continue
-                else:
-                    plist[self._dlink][self._netwk] = netwk[1].info.infotodict()
-                    self._trans = netwk[1].protocol
-                    length -= netwk[1].length
+        # read internet layer
+        netwk = self._internet_layer(bytes_, length)
 
-                # read transport layer
-                trans = self._transport_layer(bytes_, length)
+        # check internet layer protocol
+        if not netwk[0]:
+            plist[self._dlink]['Network Layer'] = netwk[1]
+            self._write_record(plist)
+            return
+        else:
+            plist[self._dlink][self._netwk] = netwk[1].info.infotodict()
+            self._trans = netwk[1].protocol
+            length -= netwk[1].length
 
-                # check transport layer protocol
-                if not trans[0]:
-                    plist[self._dlink][self._netwk]['Transport Layer'] = trans[1]
-                    self._write_record(plist)
-                    continue
-                else:
-                    plist[self._dlink][self._netwk][self._trans] = trans[1].info.infotodict()
-                    length -= trans[1].length
+        # read transport layer
+        trans = self._transport_layer(bytes_, length)
 
-                # read application layer
-                applc = self._application_layer(bytes_, length)
+        # check transport layer protocol
+        if not trans[0]:
+            plist[self._dlink][self._netwk]['Transport Layer'] = trans[1]
+            self._write_record(plist)
+            return
+        else:
+            plist[self._dlink][self._netwk][self._trans] = trans[1].info.infotodict()
+            length -= trans[1].length
 
-                # check application layer protocol
-                plist[self._dlink][self._netwk][self._trans]['Application Layer'] = applc[1]
-                self._write_record(plist)
-            except EOFError:
-                # quit when EOF
-                break
+        # read application layer
+        applc = self._application_layer(bytes_, length)
+
+        # check application layer protocol
+        plist[self._dlink][self._netwk][self._trans]['Application Layer'] = applc[1]
+        self._write_record(plist)
 
     def _write_record(self, plist):
         """Write plist & append Info."""
@@ -185,14 +228,14 @@ class Extractor:
         plist['protocols'] = self._merge_protocols()
         self._ofile(plist, _name=_fnum)
 
-        print(_fnum)
-        print(plist['protocols'])
-        print()
+        # print(_fnum)
+        # print(plist['protocols'])
+        # print()
 
         # record frame
         self._frnum += 1
-        info = Info(plist)
-        self._frame.append(info)
+        # info = Info(plist)
+        # self._frame.append(info)
 
     def _merge_protocols(self):
         """Make protocols chain."""

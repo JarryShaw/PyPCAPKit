@@ -14,7 +14,6 @@ class BaseError(Exception):
     * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
-
     def __new__(cls, message):
         self = super(Exception, cls).__new__(cls)
         (self.traceback_3 if ispy3 else self.traceback_2)()
@@ -45,12 +44,20 @@ class BaseError(Exception):
 
 
 class StringError(BaseError):
-    pass
+    def __init__(self, message):
+        raise TypeError(message)
 
 
 class BytesError(BaseError):
-    pass
+    def __init__(self, message):
+        raise TypeError(message)
 
 
 class FileError(BaseError):
-    pass
+    def __init__(self, message):
+        raise TypeError(message)
+
+
+class FormatError(BaseError):
+    def __init__(self, message):
+        raise KeyError(message)
