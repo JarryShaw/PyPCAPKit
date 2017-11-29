@@ -2,26 +2,32 @@
 # -*- coding: utf-8 -*-
 
 
-import extractor
+import analyser
 import functools
 import math
 import os
 import pathlib
 import re
 import shutil
+import subprocess
 import time
 import platform
 
 from tkinter import *
-from tkinter.filedialog import askopenfilename, asksaveasfile
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.messagebox import askokcancel, showerror, showinfo, showwarning
 from tkinter.scrolledtext import ScrolledText
 
 # macOS only:
 #   from Foundation import NSBundle
 
+
 # Platform specific settings
 macOS = (platform.system() == 'Darwin')
+windows = (platform.system() == 'Windows')
+shcoding = 'gbk' if windows else 'utf-8'
+
+# Keyboard accelerator words
 cmdkw = 'Command' if macOS else 'Ctrl'
 delkw = 'Delete'
 optkw = 'Opt' if macOS else 'Alt'
@@ -87,8 +93,12 @@ EXPT = lambda percent: '''
 )
 
 
-class Display(extractor.Extractor):
+class Display(analyser.Analyser):
+    """UI for PCAP Tree Viewer
 
+    
+
+    """
     _cpflg = False
     _cpstr = 1
 
@@ -249,8 +259,8 @@ class Display(extractor.Extractor):
         file_menu.add_command(label='Export...', command=self.expt_cmd)
         file_menu.add_command(label='Export as PDF...', command=functools.partial(self.expt_cmd, 'pdf'))
         file_menu.add_separator()
-        file_menu.add_command(label='Print', command=self.expt_cmd, accelerator=short(cmdkw, 'Ｐ'))
-        self.master.bind(event(cmdbd, 'P'), self.expt_cmd)
+        file_menu.add_command(label='Print', command=functools.partial(self.expt_cmd, 'print'), accelerator=short(cmdkw, 'Ｐ'))
+        self.master.bind(event(cmdbd, 'P'), functools.partial(self.expt_cmd, 'print'))
 
         # edit menu
         edit_menu = Menu(self.menu, tearoff=0)
@@ -405,14 +415,35 @@ class Display(extractor.Extractor):
 
     # Move To...
     def move_cmd(self):
-        file_ = asksaveasfile(mode='w', defaultextension=".txt")
-        if file_ is None:
+        file_ = asksaveasfilename(
+            parent=self.master, title='Please select a directory ...',
+            initialdir='./', defaultextension='.pcap'
+        )
+        if file_ == '':
             return
-        os.rename(self._ifile.name, file_.name)
+        os.rename(self._ifile.name, file_)
 
     # Export...
     def expt_cmd(self, fmt=None):
-        pass
+        if fmt is None:
+            toplevel = Toplevel(self.master)
+            toplevel.title('Export ...')
+            toplevel.resizable(width=False, height=False)
+
+            frame = Frame(toplevel, bd=4)
+            frame.pack()
+
+            fmttext = ['JSON', 'macOS Property List', 'Text Tree View', 'PDF']
+            fmtlist = ['json', 'plist', 'tree', 'pdf']
+
+            var = StringVar()
+            for m in range(4):
+                Radiobutton(frame,
+                    text=fmttext[m], value=fmtlist[m],
+                    variable=var, command=functools.partial(self.save_file, var)
+                ).pack(anchor=W)
+        else:
+            self.save_file(fmt)
 
     # Copy
     def cmdc_cmd(self):
@@ -464,25 +495,31 @@ class Display(extractor.Extractor):
             frame = Frame(toplevel, bd=4)
             frame.pack()
 
-            entry = Entry(frame, font=('Courier New', 12))
+            var = StringVar()
+            var.trace_add('write', lambda name, index, mode, var=var: var.get())
+
+            entry = Entry(frame, textvariable=var, font=('Courier New', 12))
             entry.pack(side=LEFT)
 
             button_next = Button(frame,
                     text='Next',
                     font=('Courier New', 12),
-                    command=functools.partial(self.find_next, entry.get())
+                    command=functools.partial(self.find_next, var)
             )
             button_next.pack(side=RIGHT)
 
             button_prev = Button(frame,
                     text='Previous',
                     font=('Courier New', 12),
-                    command=functools.partial(self.find_prev, entry.get())
+                    command=functools.partial(self.find_prev, var)
             )
             button_prev.pack(side=RIGHT)
 
     # Find Next
     def find_next(self, text):
+        if text.__class__.__name__ == 'StringVar':
+            text = text.get()
+
         if self._nindex >= 0:
             self.listbox.selection_clear(self._nindex)
             self.listbox.update()
@@ -509,6 +546,9 @@ class Display(extractor.Extractor):
 
     # Find Previous
     def find_prev(self, text):
+        if text.__class__.__name__ == 'StringVar':
+            text = text.get()
+
         if self._pindex < self.listbox.size():
             self.listbox.selection_clear(self._pindex)
             self.listbox.update()
@@ -558,14 +598,14 @@ class Display(extractor.Extractor):
         button_next = Button(frame,
                 text='Next',
                 font=('Courier New', 12),
-                command=functools.partial(self.find_next, entry.get())
+                command=functools.partial(self.find_next, text)
         )
         button_next.pack(side=RIGHT)
 
         button_prev = Button(frame,
                 text='Previous',
                 font=('Courier New', 12),
-                command=functools.partial(self.find_prev, entry.get())
+                command=functools.partial(self.find_prev, text)
         )
         button_prev.pack(side=RIGHT)
 
@@ -653,17 +693,21 @@ class Display(extractor.Extractor):
         label = Label(frame, text='Frame ', font=('Courier New', 12))
         label.pack(side=LEFT)
 
-        entry = Entry(frame, font=('Courier New', 12))
+        var = StringVar()
+        var.trace_add('write', lambda name, index, mode, var=var: var.get())
+
+        entry = Entry(frame, textvariable=var, font=('Courier New', 12))
         entry.pack(side=LEFT)
 
         button = Button(frame,
             text='Go',
             font=('Courier New', 12),
-            command=functools.partial(self.goto_frame, entry.get(), window=toplevel)
+            command=functools.partial(self.goto_frame, var, window=toplevel)
         )
         button.pack(side=RIGHT)
 
-    def goto_frame(self, index, *, window):
+    def goto_frame(self, var, *, window):
+        index = int(var.get())
         if (not isinstance(index, int)) or index < 1:
             showerror(
                 'Unsupported Input',
@@ -762,11 +806,12 @@ class Display(extractor.Extractor):
         self.text.config(state=DISABLED)
 
     def open_file(self, name=None):
-        ifnm = name.strip() or askopenfilename(
+        ifnm = name or askopenfilename(
             parent=self.master, title='Please select a file ...',
             filetypes=[('PCAP Files', '*.pcap'), ('All Files', '*.*')],
             initialdir='./', initialfile='in.pcap'
         )
+        ifnm = ifnm.strip()
 
         if pathlib.Path(ifnm).is_file():
             self._ifile = open(ifnm, 'rb')
@@ -790,17 +835,6 @@ class Display(extractor.Extractor):
             else:
                 self.button.place()
                 self.text.pack()
-
-    def save_file(self, fmt=None):
-        if fmt == 'None':
-            file_ = asksaveasfile(mode='w', defaultextension=".txt")
-            if file_ is None:
-                return
-            shutil.copyfile('out', file_.name)
-        elif fmt == 'json':
-            pass
-        else:
-            pass
 
     def load_file(self):
         # scrollpad setup
@@ -829,7 +863,7 @@ class Display(extractor.Extractor):
             except EOFError:
                 break
 
-        time.sleep(1)
+        time.sleep(0.3)
 
         # loading treeview
         percent = 0
@@ -855,7 +889,7 @@ class Display(extractor.Extractor):
         self.label.update()
 
         # loading over
-        time.sleep(2)
+        time.sleep(0.7)
         self.listbox.yview(0)
         self.label.place_forget()
 
@@ -879,6 +913,65 @@ class Display(extractor.Extractor):
         with open('recent', 'w') as file_:
             record = '\n'.join(records)
             file_.write(record)
+
+    def save_file(self, fmt=None):
+        if fmt.__class__.__name__ == 'StringVar':
+            fmt = fmt.get()
+
+        if fmt is None or fmt == 'pdf' or fmt == 'tree':
+            dfext = '.pdf' if fmt == 'pdf' else '.txt'
+            file_ = asksaveasfilename(
+                parent=self.master, title='Please select a directory ...',
+                initialdir='./', defaultextension=dfext
+            )
+            if file_:
+                if fmt == 'pdf':
+                    process = subprocess.Popen(
+                                    ['pandoc', 'out', '-o', file_],
+                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                                )
+                    output, error = process.communicate()
+                    if process.returncode:
+                        showerror('Unable to export PDF', error.decode(shcoding))
+                else:
+                    shutil.copyfile('out', file_)
+        elif fmt == 'json':
+            self.expt_file(fmt)
+        elif fmt == 'plist':
+            self.expt_file(fmt)
+        else: # fmt == 'print'
+            showerror('Unable to print...', 'Heilige, Scheiße! Not implemented yet.')
+
+    def expt_file(self, fmt):
+        file_ = asksaveasfilename(
+            parent=self.master, title='Please select a directory ...',
+            initialdir='./', defaultextension='.{fmt}'.format(fmt=fmt)
+        )
+        if file_:
+            from jspcap.extractor import Extractor
+            ext = Extractor(fmt=fmt, fin=self._ifile.name, fout=file_, auto=False)
+
+            # loading label setup
+            self.label = Label(self.frame, width=40, height=10, bd=4, anchor='w',
+                            justify=LEFT, bg='green', font=('Courier New', 22)
+                        )
+            self.label.place(relx=0.5, rely=0.5, anchor=CENTER)
+
+            # extracting pcap file
+            while True:
+                try:
+                    ext._read_frame()   # read frames
+                    percent = 100.0 * ext.length / self.length
+                    content = EXPT(percent)
+                    self.label.config(text=content)
+                    self.label.update()
+                except EOFError:
+                    ext._ifile.close()
+                    break
+
+            time.sleep(0.5)
+            self.label.place_forget()
+            showinfo('Export done.', 'File stored in {dir}.'.format(dir=file_))
 
 
 if __name__ == '__main__':

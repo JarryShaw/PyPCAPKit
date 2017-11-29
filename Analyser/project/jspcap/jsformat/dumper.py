@@ -58,6 +58,8 @@ class Dumper(object):
         return self
 
     def __init__(self, fname):
+        if not os.path.isfile(fname):
+            open(fname, 'w+').close()
         self._file = fname          # dump file name
         self.dump_header()          # initialise output file
 

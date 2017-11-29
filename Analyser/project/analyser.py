@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 
 
-import abc
 import io
+import os
 import textwrap
 
 
-# Extractor for PCAP files
+# Analyser for PCAP files
 # Extract parametres from a PCAP file
 
 
@@ -17,13 +17,8 @@ from jspcap.protocol import Info
 from jspcap.jsformat.tree import Tree
 
 
-ABCMeta = abc.ABCMeta
-abstractmethod = abc.abstractmethod
-abstractproperty = abc.abstractproperty
-
-
-class Extractor(object):
-    """Extractor for PCAP files.
+class Analyser(object):
+    """Analyser for PCAP files.
 
     Properties:
         _frame -- int, frame number
@@ -67,6 +62,12 @@ class Extractor(object):
 
     def __new__(cls):
         self = super().__new__(cls)
+
+        # remove cache
+        try:
+            os.remove('out')
+        except FileNotFoundError:
+            pass
 
         self._frnum = 1                     # frame number
         self._frame = []                    # frame record
@@ -177,9 +178,9 @@ class Extractor(object):
         plist['protocols'] = self._merge_protocols()
         self._ofile(plist, _name=_fnum)
 
-        print(_fnum)
-        print(plist['protocols'])
-        print()
+        # print(_fnum)
+        # print(plist['protocols'])
+        # print()
 
         # record frame
         self._frnum += 1
