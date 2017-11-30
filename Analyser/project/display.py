@@ -336,8 +336,8 @@ class Display(Analyser):
             file_real = False
         if file_real:
             frct_menu.add_separator()
-            frct_menu.add_command(label='Clear Menu', menu=frct_menu, fctr=fctr,
-                command=functools.partial(self.rmrf_cmd)
+            frct_menu.add_command(label='Clear Menu',
+                command=functools.partial(self.rmrf_cmd, menu=frct_menu, fctr=fctr)
             )
         else:
             frct_menu.add_command(label='Clear Menu', state='disabled')
