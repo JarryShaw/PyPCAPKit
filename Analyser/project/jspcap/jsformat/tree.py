@@ -15,7 +15,7 @@ from .dumper import Dumper
 
 
 HEADER_START = 'PCAP File Tree-View Format\n'
-HEADER_END = ''
+HEADER_END = ' '
 
 TEMP_BRANCH = '  |   '
 TEMP_SPACES = '      '

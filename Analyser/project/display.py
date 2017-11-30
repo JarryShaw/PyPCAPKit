@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 
-import analyser
 import functools
 import math
 import os
@@ -12,11 +11,15 @@ import shutil
 import subprocess
 import time
 import platform
+import webbrowser
 
 from tkinter import *
 from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.messagebox import askokcancel, showerror, showinfo, showwarning
 from tkinter.scrolledtext import ScrolledText
+
+from analyser import Analyser
+from jspcap.exceptions import FileError
 
 # macOS only:
 #   from Foundation import NSBundle
@@ -52,9 +55,22 @@ brrbd = 'bracketright'
 short = lambda *args: '-'.join(args) if macOS else '+'.join(args)
 event = lambda *args: '<' + '-'.join(args) + '>'
 
+# geometry (window size)
+SIZE = '674x476' if macOS else '850x620'
+
+# background colour
+BGCOLOUR = '#e2c08d'
+
 # File name regex
+# r'''\A(.*?)(\ copy)?(\ [0-9]+)?[.](.*)\Z'''
 FILE = re.compile(r'''
-    \A(?P<name>.*?)(?P<copy>\ copy)?(?P<fctr>\ [0-9]+)?[.](?P<exts>.*)\Z
+    \A                      # begin of string
+    (?P<name>.*?)           # file name
+    (?P<copy>\ copy)?       # copy
+    (?P<fctr>\ [0-9]+)?     # number of duplication
+    [.]                     # dot
+    (?P<exts>.*)            # extension
+    \Z                      # end of string
 ''', re.VERBOSE)
 
 # Extracting Label
@@ -93,10 +109,85 @@ EXPT = lambda percent: '''
 )
 
 
-class Display(analyser.Analyser):
+class Display(Analyser):
     """UI for PCAP Tree Viewer
 
-    
+    This class implemented a UI class for the application. It is based on
+    tkinter, jspcap and jsformat. Its design imitates macOS applications,
+    specificly the menu bar. However, due to the lack of system APIs, some
+    features are not implemented yet. We are trying to migrate to PyObjc,
+    which supports macOS native application with py2app library.
+
+    Properties:
+        * _cpflg -- <bool> copy flag, if the current pcap file is duplicated before
+        * _cpstr -- <str> copy string, the string number of next duplication
+
+        * master -- <tkinter.Tk> root window
+        * frame -- <tkinter.Frame> frame on root
+        * menu -- <tkinter.Menu> menu bar
+        * text -- <tkinter.Text> text for initial display
+        * label -- <tkinter.Label> label for 'Extracting', 'Loading' and 'Exporting'
+        * scrollbar -- <tkinter.Scrollbar> scrollbar for listbox
+        * listbox -- <tkinter.Listbox> listbox for output viewer
+
+    Methods:
+        * menu_setup -- set up menu bar
+            * Home Cascade
+                * intr_cmd -- set up command About PCAP Tree Viewer
+                * pref_cmd -- set up command Preferences
+                * Service Cascade
+                    * sysp_cmd -- set up command System Preferences...
+                * hide_cmd -- set up command Hide PCAP Tree Viewer
+                * wipe_cmd -- set up command Hide Others
+                * show_cmd -- set up command Show All
+                * quit_cmd -- set up command Quit PCAP Tree Viewer
+            * File Cascade
+                * open_cmd -- set up command Open...
+                * Open Recent Cascade
+                    * rmrf_cmd -- set up command Clear Menu
+                * shut_cmd -- set up command Close Window
+                * save_cmd -- set up command Save
+                * copy_cmd -- set up command Duplicate
+                * mvrn_cmd -- set up command Rename...
+                * move_cmd -- set up command Move To...
+                * expt_cmd -- set up command Export...
+            * Edit Cascade
+                * cmdc_cmd -- set up command Copy
+                * cmda_cmd -- set up command Select All
+                * invt_cmd -- set up command Invert Selection
+                * mvsh_cmd -- set up command Move to Trash
+                * Find Cascade
+                    * find_cmd -- set up command Find
+                    * find_prev -- set up command Find Previous
+                    * find_self -- set up command Use Selection for Find
+                    * find_jump -- set up command Jump to Selection
+            * Go Cascade
+                * goto_cmd -- set up command Go
+                * goto_up -- set up command Up
+                * goto_down -- set up command Down
+                * goto_prev -- set up command Previous Frame
+                * goto_next -- set up command Next Frame
+                * goto_go -- set up command Go to Frame...
+                * goto_frame -- set up command
+                * goto_back -- set up command Back
+                * goto_fwd -- set up command Forward
+            * Window Cascade
+                * mini_cmd -- set up command Minimize
+                * zoom_cmd -- set up command Zoom
+            * Help Cascade
+                * srch_cmd -- set up command Search
+                * help_cmd -- set up command PCAP Tree Viewer Help
+                * repo_cmd -- set up command View on GitHub
+        * init_display -- initial page setup
+        * open_file -- ask and open pcap file
+        * load_file -- extract pcap file then load report
+        * keep_file -- update recent files
+        * save_file -- save or export report in certain format
+            * expt_file -- export report to json or plist file
+        * show_error -- show error when not-implemented functions called
+
+    Usage:
+        >>> Display()
 
     """
     _cpflg = False
@@ -110,7 +201,7 @@ class Display(analyser.Analyser):
         # root window setup
         self.master = Tk()
         self.master.title('PCAP Tree Viewer')
-        self.master.geometry('674x476')
+        self.master.geometry(SIZE)
         self.master.resizable(height=False)
 
         # frame setup
@@ -195,6 +286,7 @@ class Display(analyser.Analyser):
             * Search
             -----------------------------------------------
             * PCAP Tree Viewer Help
+            * View on GitHub
 
         """
         if macOS:
@@ -244,7 +336,9 @@ class Display(analyser.Analyser):
             file_real = False
         if file_real:
             frct_menu.add_separator()
-            frct_menu.add_command(label='Clear Menu', command=functools.partial(self.rmrf_cmd, menu=frct_menu, fctr=fctr))
+            frct_menu.add_command(label='Clear Menu', menu=frct_menu, fctr=fctr,
+                command=functools.partial(self.rmrf_cmd)
+            )
         else:
             frct_menu.add_command(label='Clear Menu', state='disabled')
         file_menu.add_separator()
@@ -259,7 +353,9 @@ class Display(analyser.Analyser):
         file_menu.add_command(label='Export...', command=self.expt_cmd)
         file_menu.add_command(label='Export as PDF...', command=functools.partial(self.expt_cmd, 'pdf'))
         file_menu.add_separator()
-        file_menu.add_command(label='Print', command=functools.partial(self.expt_cmd, 'print'), accelerator=short(cmdkw, 'Ｐ'))
+        file_menu.add_command(label='Print', accelerator=short(cmdkw, 'Ｐ'),
+            command=functools.partial(self.expt_cmd, 'print')
+        )
         self.master.bind(event(cmdbd, 'P'), functools.partial(self.expt_cmd, 'print'))
 
         # edit menu
@@ -279,13 +375,21 @@ class Display(analyser.Analyser):
         edit_menu.add_cascade(label='Find', menu=find_menu)
         find_menu.add_command(label='Find...', command=self.find_cmd, accelerator=short(cmdkw, 'Ｆ'))
         self.master.bind(event(cmdbd, 'F'), self.find_cmd)
-        find_menu.add_command(label='Find Next', command=functools.partial(self.find_cmd, 'next'), accelerator=short(cmdkw, 'Ｇ'))
+        find_menu.add_command(label='Find Next', accelerator=short(cmdkw, 'Ｇ'),
+            command=functools.partial(self.find_cmd, 'next')
+        )
         self.master.bind(event(cmdbd, 'G'), functools.partial(self.find_cmd, 'next'))
-        find_menu.add_command(label='Find Previous', command=functools.partial(self.find_cmd, 'prev'), accelerator=short(sftkw, cmdkw, 'Ｇ'))
+        find_menu.add_command(label='Find Previous', accelerator=short(sftkw, cmdkw, 'Ｇ'),
+            command=functools.partial(self.find_cmd, 'prev')
+        )
         self.master.bind(event(sftbd, cmdbd, 'G'), functools.partial(self.find_cmd, 'prev'))
-        find_menu.add_command(label='Use Selection for Find', command=functools.partial(self.find_cmd, 'self'), accelerator=short(cmdkw, 'Ｅ'))
+        find_menu.add_command(label='Use Selection for Find', accelerator=short(cmdkw, 'Ｅ'),
+            command=functools.partial(self.find_cmd, 'self')
+        )
         self.master.bind(event(cmdbd, 'E'), functools.partial(self.find_cmd, 'self'))
-        find_menu.add_command(label='Jump to Selection', command=functools.partial(self.find_cmd, 'jump'), accelerator=short(cmdkw, 'Ｊ'))
+        find_menu.add_command(label='Jump to Selection', accelerator=short(cmdkw, 'Ｊ'),
+            command=functools.partial(self.find_cmd, 'jump')
+        )
         self.master.bind(event(cmdbd, 'J'), functools.partial(self.find_cmd, 'jump'))
 
         # go menu
@@ -295,16 +399,26 @@ class Display(analyser.Analyser):
         self.master.bind(event(upabd), functools.partial(self.goto_cmd, 'up'))
         goto_menu.add_command(label='Down', command=functools.partial(self.goto_cmd, 'down'), accelerator=short(dwnkw))
         self.master.bind(event(dwnbd), functools.partial(self.goto_cmd, 'down'))
-        goto_menu.add_command(label='Previous Frame', command=functools.partial(self.goto_cmd, 'prev'), accelerator=short(optkw, upakw))
+        goto_menu.add_command(label='Previous Frame', accelerator=short(optkw, upakw),
+            command=functools.partial(self.goto_cmd, 'prev')
+        )
         self.master.bind(event(optbd, upabd), functools.partial(self.goto_cmd, 'prev'))
-        goto_menu.add_command(label='Next Frame', command=functools.partial(self.goto_cmd, 'next'), accelerator=short(optkw, dwnkw))
+        goto_menu.add_command(label='Next Frame', accelerator=short(optkw, dwnkw),
+            command=functools.partial(self.goto_cmd, 'next')
+        )
         self.master.bind(event(optbd, dwnbd), functools.partial(self.goto_cmd, 'next'))
-        goto_menu.add_command(label='Go to Frame...', command=functools.partial(self.goto_cmd, 'go'), accelerator=short(optkw, cmdkw, 'Ｇ'))
+        goto_menu.add_command(label='Go to Frame...', accelerator=short(optkw, cmdkw, 'Ｇ'),
+            command=functools.partial(self.goto_cmd, 'go')
+        )
         self.master.bind(event(optbd, cmdbd, 'G'), functools.partial(self.goto_cmd, 'go'))
         goto_menu.add_separator()
-        goto_menu.add_command(label='Back', command=functools.partial(self.goto_cmd, 'back'), accelerator=short(cmdkw, brlkw))
+        goto_menu.add_command(label='Back', accelerator=short(cmdkw, brlkw),
+            command=functools.partial(self.goto_cmd, 'back')
+        )
         self.master.bind(event(cmdbd, brlbd), functools.partial(self.goto_cmd, 'back'))
-        goto_menu.add_command(label='Forward', command=functools.partial(self.goto_cmd, 'fwd'), accelerator=short(cmdkw, brrkw))
+        goto_menu.add_command(label='Forward', accelerator=short(cmdkw, brrkw),
+            command=functools.partial(self.goto_cmd, 'fwd')
+        )
         self.master.bind(event(cmdbd, brrbd), functools.partial(self.goto_cmd, 'fwd'))
 
         # window menu
@@ -321,6 +435,7 @@ class Display(analyser.Analyser):
             help_menu.add_command(label='Search', command=self.srch_cmd)
             help_menu.add_separator()
         help_menu.add_command(label='PCAP Tree Viewer Help', command=self.help_cmd)
+        help_menu.add_command(label='View on GitHub', command=self.repo_cmd)
 
     # About PCAP Tree Viewer
     def intr_cmd(self):
@@ -340,11 +455,11 @@ class Display(analyser.Analyser):
 
     # Preferences
     def pref_cmd(self, *args):
-        pass
+        self.show_error('set preferences')
 
     # System Preferences...
     def sysp_cmd(self):
-        pass
+        self.show_error('open System Preferences')
 
     # Hide PCAP Tree Viewer
     def hide_cmd(self):
@@ -352,7 +467,7 @@ class Display(analyser.Analyser):
 
     # Hide Others
     def wipe_cmd(self):
-        pass
+        self.show_error('hide others')
 
     # Show All
     def show_cmd(self):
@@ -438,10 +553,12 @@ class Display(analyser.Analyser):
 
             var = StringVar()
             for m in range(4):
-                Radiobutton(frame,
-                    text=fmttext[m], value=fmtlist[m],
+                radiobutton = Radiobutton(frame,
+                    text=fmttext[m], value=fmtlist[m], state=NORMAL,
                     variable=var, command=functools.partial(self.save_file, var)
-                ).pack(anchor=W)
+                )
+                radiobutton.pack(anchor=W)
+                radiobutton.deselect()
         else:
             self.save_file(fmt)
 
@@ -778,11 +895,27 @@ class Display(analyser.Analyser):
 
     # Search
     def srch_cmd(self):
-        pass
+        self.show_error('search')
 
     # PCAP Tree Viewer Help
     def help_cmd(self):
-        pass
+        toplevel = Toplevel(self.master)
+        toplevel.title('PCAP Tree Viewer Help')
+        scrolledtext = ScrolledText(
+                toplevel, font=('Courier New', 12),
+                width=50, height=20
+        )
+        scrolledtext.pack()
+        with open('manual', 'r') as file_:
+            for line in file_:
+                scrolledtext.insert(END, line)
+                scrolledtext.update()
+        scrolledtext.config(state=DISABLED)
+        toplevel.resizable(width=False, height=False)
+
+    # View on GitHub
+    def repo_cmd(self):
+        webbrowser.open('https://github.com/JarryShaw/PyProject/')
 
     def init_display(self):
         # scrollpad setup
@@ -815,7 +948,12 @@ class Display(analyser.Analyser):
 
         if pathlib.Path(ifnm).is_file():
             self._ifile = open(ifnm, 'rb')
-            self.record_header(self._ifile)      # read PCAP global header
+            try:
+                self.record_header(self._ifile)      # read PCAP global header
+            except FileError:
+                showerror('Unsupported file format!', 'Please retry.')
+                self.button.place()
+                self.text.pack()
 
             self.button.place_forget()
             self.text.pack_forget()
@@ -849,7 +987,7 @@ class Display(analyser.Analyser):
 
         # loading label setup
         self.label = Label(self.frame, width=40, height=10, bd=4, anchor='w',
-                        justify=LEFT, bg='green', font=('Courier New', 22)
+                        justify=LEFT, bg=BGCOLOUR, font=('Courier New', 22)
                     )
         self.label.place(relx=0.5, rely=0.5, anchor=CENTER)
 
@@ -940,7 +1078,7 @@ class Display(analyser.Analyser):
         elif fmt == 'plist':
             self.expt_file(fmt)
         else: # fmt == 'print'
-            showerror('Unable to print...', 'Heilige, Scheiße! Not implemented yet.')
+            self.show_error('print')
 
     def expt_file(self, fmt):
         file_ = asksaveasfilename(
@@ -953,7 +1091,7 @@ class Display(analyser.Analyser):
 
             # loading label setup
             self.label = Label(self.frame, width=40, height=10, bd=4, anchor='w',
-                            justify=LEFT, bg='green', font=('Courier New', 22)
+                            justify=LEFT, bg=BGCOLOUR, font=('Courier New', 22)
                         )
             self.label.place(relx=0.5, rely=0.5, anchor=CENTER)
 
@@ -972,6 +1110,12 @@ class Display(analyser.Analyser):
             time.sleep(0.5)
             self.label.place_forget()
             showinfo('Export done.', 'File stored in {dir}.'.format(dir=file_))
+
+    def show_error(self, error):
+        showerror(
+            'Unable to {error}...'.format(error=error),
+            'Heilige, Scheiße! Not implemented yet.'
+        )
 
 
 if __name__ == '__main__':
