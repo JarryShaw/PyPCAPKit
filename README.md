@@ -12,6 +12,6 @@
 
  - [`TreeViewer`](https://github.com/JarryShaw/jspcap/tree/master/TreeViewer) -- A `Tkinter` based pcap extractor application
 
-In the core of the `JSPCAP` project, it works with the support of  `jspcap` and `jsformat`, which can both be found in three projects above and are maintained in the [`dev`](https://github.com/JarryShaw/jspcap/tree/dev/) branch.
+In the core of the `JSPCAP` project, it works with the support of  `jspcap` and `jsformat`, which can both be found in three projects above and are maintained in the [`dev`](https://github.com/JarryShaw/jspcap/tree/master/dev/) folder.
 
 &emsp; Notice that the whole project is developed in `Python 3.6` and its compatibility hasn't been tested.
