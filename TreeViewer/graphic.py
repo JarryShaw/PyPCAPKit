@@ -920,7 +920,7 @@ class Display(Analyser):
 
     # View on GitHub
     def repo_cmd(self):
-        webbrowser.open('https://github.com/JarryShaw/PyProject/')
+        webbrowser.open('https://github.com/JarryShaw/jspcap/')
 
     def init_display(self):
         # scrollpad setup
@@ -959,6 +959,7 @@ class Display(Analyser):
                 showerror('Unsupported file format!', 'Please retry.')
                 self.button.place()
                 self.text.pack()
+                return
 
             self.button.place_forget()
             self.text.pack_forget()
@@ -1076,8 +1077,11 @@ class Display(Analyser):
                     output, error = process.communicate()
                     if process.returncode:
                         showerror('Unable to export PDF', error.decode(shcoding))
+                    else:
+                        showinfo('Export done.', 'File stored in {dir}.'.format(dir=file_))
                 else:
                     shutil.copyfile('src/out', file_)
+                    showinfo('Export done.', 'File stored in {dir}.'.format(dir=file_))
         elif fmt == 'json':
             self.expt_file(fmt)
         elif fmt == 'plist':
