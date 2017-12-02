@@ -52,6 +52,10 @@ class Analyser(object):
     def length(self):
         return self._frnum
 
+    @property
+    def protocol(self):
+        return self._proto
+
     ##########################################################################
     # Data modules.
     ##########################################################################
@@ -180,6 +184,7 @@ class Analyser(object):
 
         # record frame
         self._frnum += 1
+        self._proto = plist['protocols']
         # info = Info(plist)
         # self._frame.append(info)
 

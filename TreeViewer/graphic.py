@@ -25,6 +25,7 @@ from tkinter.scrolledtext import ScrolledText
 
 from analyser import Analyser
 from jspcap.exceptions import FileError
+from jspcap.extractor import Extractor
 
 # macOS only:
 #   from Foundation import NSBundle
@@ -944,6 +945,10 @@ class Display(Analyser):
         self.text.config(state=DISABLED)
 
     def open_file(self, name=None):
+        # remove cache
+        self._frnum = 1
+        open('src/out', 'w').close()
+
         ifnm = name or askopenfilename(
             parent=self.master, title='Please select a file ...',
             filetypes=[('PCAP Files', '*.pcap'), ('All Files', '*.*')],
@@ -1095,7 +1100,6 @@ class Display(Analyser):
             initialdir='./', defaultextension='.{fmt}'.format(fmt=fmt)
         )
         if file_:
-            from jspcap.extractor import Extractor
             ext = Extractor(fmt=fmt, fin=self._ifile.name, fout=file_, auto=False)
 
             # loading label setup
@@ -1105,16 +1109,11 @@ class Display(Analyser):
             self.label.place(relx=0.5, rely=0.5, anchor=CENTER)
 
             # extracting pcap file
-            while True:
-                try:
-                    ext._read_frame()   # read frames
-                    percent = 100.0 * ext.length / self.length
-                    content = EXPT(percent)
-                    self.label.config(text=content)
-                    self.label.update()
-                except EOFError:
-                    ext._ifile.close()
-                    break
+            for frame in ext:
+                percent = 100.0 * ext.length / self.length
+                content = EXPT(percent)
+                self.label.config(text=content)
+                self.label.update()
 
             time.sleep(0.5)
             self.label.place_forget()
