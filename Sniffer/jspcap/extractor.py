@@ -61,6 +61,18 @@ class Extractor:
     def length(self):
         return self._frnum
 
+    @property
+    def format(self):
+        return self._ofile.kind
+
+    @property
+    def input(self):
+        return self._ifnm
+
+    @property
+    def output(self):
+        return self._ofnm
+
     ##########################################################################
     # Data modules.
     ##########################################################################
@@ -121,13 +133,30 @@ class Extractor:
         else:
             raise FormatError('Unsupported output format: {}'.format(fmt))
 
+        self._ifnm = ifnm       # input file name
+        self._ofnm = ofnm       # output file name
+
+        self._auto = auto                   # auto extract flag
         self._frnum = 1                     # frame number
         self._frame = []                    # frame record
         self._ofile = output(ofnm)          # output file
 
         self._ifile = open(ifnm, 'rb')
-        self.record_header()         # read PCAP global header
-        self.record_frames(auto)     # read frames
+        self.record_header()        # read PCAP global header
+        self.record_frames()        # read frames
+
+    def __iter__(self):
+        if self._auto:
+            return None
+        else:
+            return self
+
+    def __next__(self):
+        try:
+            return self._read_frame()
+        except EOFError:
+            self._ifile.close()
+            raise StopIteration
 
     ##########################################################################
     # Utilities.
@@ -147,8 +176,8 @@ class Extractor:
         self._frame.append(self._gbhdr.info)
         self._ofile(self._gbhdr.info.infotodict(), _name='Global Header')
 
-    def record_frames(self, auto):
-        if auto:
+    def record_frames(self):
+        if self._auto:
             while True:
                 try:
                     self._read_frame()
@@ -189,7 +218,7 @@ class Extractor:
         if not dlink[0]:
             plist['Link Layer'] = dlink[1]
             self._write_record(plist)
-            return
+            return self._frnum
         else:
             plist[self._dlink] = dlink[1].info.infotodict()
             self._netwk = dlink[1].protocol
@@ -202,7 +231,7 @@ class Extractor:
         if not netwk[0]:
             plist[self._dlink]['Network Layer'] = netwk[1]
             self._write_record(plist)
-            return
+            return self._frnum
         else:
             plist[self._dlink][self._netwk] = netwk[1].info.infotodict()
             self._trans = netwk[1].protocol
@@ -215,7 +244,7 @@ class Extractor:
         if not trans[0]:
             plist[self._dlink][self._netwk]['Transport Layer'] = trans[1]
             self._write_record(plist)
-            return
+            return self._frnum
         else:
             plist[self._dlink][self._netwk][self._trans] = trans[1].info.infotodict()
             length -= trans[1].length
@@ -226,6 +255,7 @@ class Extractor:
         # check application layer protocol
         plist[self._dlink][self._netwk][self._trans]['Application Layer'] = applc[1]
         self._write_record(plist)
+        return self._frnum
 
     def _write_record(self, plist):
         """Write plist & append Info."""
