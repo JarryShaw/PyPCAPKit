@@ -7,8 +7,7 @@
 
 
 try:
-    # from graphic import Display
-    raise ImportError
+    from graphic import Display
 except ImportError:
     from console import Display
 finally:

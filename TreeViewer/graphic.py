@@ -23,7 +23,6 @@ from tkinter.filedialog import askopenfilename, asksaveasfilename
 from tkinter.messagebox import askokcancel, showerror, showinfo, showwarning
 from tkinter.scrolledtext import ScrolledText
 
-from analyser import Analyser
 from jspcap.exceptions import FileError
 from jspcap.extractor import Extractor
 
@@ -115,16 +114,19 @@ EXPT = lambda percent: '''
 )
 
 
-class Display(Analyser):
-    """UI for PCAP Tree Viewer
+class Display:
+    """Graphic UI for PCAP Tree Viewer
 
     This class implemented a UI class for the application. It is based on
     tkinter, jspcap and jsformat. Its design imitates macOS applications,
     specificly the menu bar. However, due to the lack of system APIs, some
-    features are not implemented yet. We are trying to migrate to PyObjc,
+    features are not implemented yet. We are trying to migrate to `PyObjc`,
     which supports macOS native application with py2app library.
 
     Properties:
+        * length -- <int> current frame number of the extracting process
+
+        * _ext -- <jspcap.Extractor> pcap extractor
         * _cpflg -- <bool> copy flag, if the current pcap file is duplicated before
         * _cpstr -- <str> copy string, the string number of next duplication
 
@@ -184,6 +186,8 @@ class Display(Analyser):
                 * srch_cmd -- set up command Search
                 * help_cmd -- set up command PCAP Tree Viewer Help
                 * repo_cmd -- set up command View on GitHub
+
+    Utilities:
         * init_display -- initial page setup
         * open_file -- ask and open pcap file
         * load_file -- extract pcap file then load report
@@ -198,6 +202,14 @@ class Display(Analyser):
     """
     _cpflg = False
     _cpstr = 1
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def length(self):
+        return self._ext.length
 
     ##########################################################################
     # Data modules.
@@ -509,7 +521,7 @@ class Display(Analyser):
 
     # Duplicate
     def copy_cmd(self):
-        ifnm = self._ifile.name
+        ifnm = self._ext.input
         fnmt = FILE.match(ifnm)
         if fnmt is None:
             return
@@ -523,8 +535,8 @@ class Display(Analyser):
             self._cpctr = 1 + (self._cpctr if self._cpflg else int(fctr))
             fctr = ' ' + str(self._cpctr)
         else:
-            self._cpctr = 2 if copy else self._cpctr
-            fctr = (' ' + str(sctr)) if copy else ''
+            self._cpctr = 2 if copy else 1
+            fctr = (' ' + str(self._cpctr)) if copy else ' copy'
         self._cpflg = True
 
         cpnm = name + copy + fctr + '.' + exts
@@ -542,7 +554,7 @@ class Display(Analyser):
         )
         if file_ == '':
             return
-        os.rename(self._ifile.name, file_)
+        os.rename(self._ext.input, file_)
 
     # Export...
     def expt_cmd(self, fmt=None):
@@ -598,7 +610,7 @@ class Display(Analyser):
 
     # Move to Trash
     def mvsh_cmd(self):
-        os.remove(self._ifile.name)
+        os.remove(self._ext.input)
 
     # Find
     def find_cmd(self, cmd=None):
@@ -768,22 +780,22 @@ class Display(Analyser):
 
     # Up
     def goto_up(self, index):
-        if index + 1 >= self.listbox.size():
-            index = -1
-        self.listbox.selection_set(index + 1)
-        self.listbox.yview(index + 1)
-        self.listbox.update()
-
-    # Down
-    def goto_down(self, index):
         if index <= 0:
             index = self.listbox.size() + 1
         self.listbox.selection_set(index - 1)
         self.listbox.yview(index - 1)
         self.listbox.update()
 
+    # Down
+    def goto_down(self, index):
+        if index + 1 >= self.listbox.size():
+            index = -1
+        self.listbox.selection_set(index + 1)
+        self.listbox.yview(index + 1)
+        self.listbox.update()
+
     # Previous Frame
-    def goto_prev(index):
+    def goto_prev(self, index):
         tmp = self.goto_back(index)
         if tmp is None:
             return
@@ -795,7 +807,7 @@ class Display(Analyser):
                 break
 
     # Next Frame
-    def goto_next(index):
+    def goto_next(self, index):
         tmp = self.goto_fwd(index)
         if tmp is None:
             return
@@ -853,7 +865,7 @@ class Display(Analyser):
         window.destroy()
 
     # Back
-    def goto_back(index):
+    def goto_back(self, index):
         if index <= 0:
             index = self.listbox.size() - 1
         for tmp in range(index-1, 0, -1):
@@ -872,7 +884,7 @@ class Display(Analyser):
         return tmp
 
     # Forward
-    def goto_fwd(index):
+    def goto_fwd(self, index):
         if index >= self.listbox.size() - 1:
             index = -1
         for tmp in range(index+1, self.listbox.size()):
@@ -923,6 +935,10 @@ class Display(Analyser):
     def repo_cmd(self):
         webbrowser.open('https://github.com/JarryShaw/jspcap/')
 
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
     def init_display(self):
         # scrollpad setup
         self.text = Text(
@@ -946,7 +962,6 @@ class Display(Analyser):
 
     def open_file(self, name=None):
         # remove cache
-        self._frnum = 1
         open('src/out', 'w').close()
 
         ifnm = name or askopenfilename(
@@ -957,9 +972,8 @@ class Display(Analyser):
         ifnm = ifnm.strip()
 
         if pathlib.Path(ifnm).is_file():
-            self._ifile = open(ifnm, 'rb')
             try:
-                self.record_header(self._ifile)      # read PCAP global header
+                self._ext = Extractor(fin=ifnm, fout='src/out', fmt='tree', auto=False, extension=False)
             except FileError:
                 showerror('Unsupported file format!', 'Please retry.')
                 self.button.place()
@@ -1003,14 +1017,10 @@ class Display(Analyser):
         self.label.place(relx=0.5, rely=0.5, anchor=CENTER)
 
         # extracting pcap file
-        while True:
-            try:
-                self.record_frames(self._ifile)      # read frames
-                content = NUMB(self.length - 1)
-                self.label.config(text=content)
-                self.label.update()
-            except EOFError:
-                break
+        for frame in self._ext:
+            content = NUMB(self._ext.length)
+            self.label.config(text=content)
+            self.label.update()
 
         time.sleep(0.3)
 
@@ -1027,11 +1037,11 @@ class Display(Analyser):
                 self.listbox.yview(END)
                 self.listbox.selection_clear(0, _lctr)
                 if 'Frame' in line:
-                    _ctr += 1
                     percent = 100.0 * _ctr / self.length
                     content = TEXT(percent)
                     self.label.config(text=content)
                     self.label.update()
+                    _ctr += 1
 
         content = TEXT(100)
         self.label.config(text=content)
@@ -1100,7 +1110,7 @@ class Display(Analyser):
             initialdir='./', defaultextension='.{fmt}'.format(fmt=fmt)
         )
         if file_:
-            ext = Extractor(fmt=fmt, fin=self._ifile.name, fout=file_, auto=False)
+            ext = Extractor(fmt=fmt, fin=self._ext.input, fout=file_, auto=False)
 
             # loading label setup
             self.label = Label(self.frame, width=40, height=10, bd=4, anchor='w',

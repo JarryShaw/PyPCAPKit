@@ -10,7 +10,7 @@
 
 &emsp; Monitoring software may use `libpcap` and/or `WinPcap` to capture packets travelling over a network and, in newer versions, to transmit packets on a network at the link layer, as well as to get a list of network interfaces for possible use with `libpcap` or `WinPcap`.
 
- > &emsp; In the core of the `JSPCAP` project, it works with the support of  `jspcap` and `jsformat`, which can both be found in three projects above and are maintained in the [`dev`](https://github.com/JarryShaw/jspcap/tree/dev/) branch.
+ > &emsp; In the core of the `JSPCAP` project, it works with the support of `jspcap` and `jsformat`, which can both be found in three projects above and are maintained in the [`dev`](https://github.com/JarryShaw/jspcap/tree/master/dev/) folder.
 
 &emsp; As for `jspcap` and `jsformat`, they are two open-source library written in Python (version 3.6), with generally no requirements or third-party dependencies.
 

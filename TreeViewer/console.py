@@ -16,7 +16,6 @@ import webbrowser
 # PCAP Viewer Implementation on Console
 
 
-from analyser import Analyser
 from jspcap.exceptions import FileError
 from jspcap.extractor import Extractor
 
@@ -58,12 +57,12 @@ Please select a command:
 
 # dict of root commands
 INIT_CMD = {
-    '1' : lambda self_, *, root: self_.open_cmd(root=root),
-    '2' : lambda self_, *, root: self_.read_cmd('src/about', root=root),
-    '3' : lambda self_, *, root: self_.read_cmd('src/manual', root=root),
-    '4' : lambda self_, *, root: self_.read_cmd('src/init', root=root),
-    '5' : lambda self_, *, root: self_.repo_cmd(root=root),
-    '6' : lambda self_, *, root: None,
+    '1' : lambda self_: self_.open_cmd(),
+    '2' : lambda self_: self_.read_cmd('src/about'),
+    '3' : lambda self_: self_.read_cmd('src/manual'),
+    '4' : lambda self_: self_.read_cmd('src/init'),
+    '5' : lambda self_: self_.repo_cmd(),
+    '6' : lambda self_: None,
 }
 
 # commands after `open_cmd`
@@ -81,13 +80,13 @@ What would you like to do next:
 
 # dict of commands after `open_cmd`
 OPEN_CMD = {
-    '1' : lambda self_, *, root: 'view',
-    '2' : lambda self_, *, root: self_.move_cmd(root=root),
-    '3' : lambda self_, *, root: self_.save_cmd('plist', root=root),
-    '4' : lambda self_, *, root: self_.save_cmd('json', root=root),
-    '5' : lambda self_, *, root: self_.expt_cmd(root=root),
-    '6' : lambda self_, *, root: root,
-    '7' : lambda self_, *, root: None,
+    '1' : lambda self_: self_.view_cmd(),
+    '2' : lambda self_: self_.move_cmd(),
+    '3' : lambda self_: self_.save_cmd('plist'),
+    '4' : lambda self_: self_.save_cmd('json'),
+    '5' : lambda self_: self_.expt_cmd(),
+    '6' : lambda self_: 'init',
+    '7' : lambda self_: None,
 }
 
 # commands after `view_cmd`
@@ -103,11 +102,29 @@ How would you like to view the report?
 
 # dict of commands after `view_cmd`
 VIEW_CMD = {
-    '1' : lambda self_, *, root: self_.read_cmd('src/out', root=root),
-    '2' : lambda self_, *, root: self_.goto_cmd(root=root),
-    '3' : lambda self_, *, root: self_.view_cmd(root=root),
-    '4' : lambda self_, *, root: root,
-    '5' : lambda self_, *, root: None,
+    '1' : lambda self_: self_.read_cmd('src/out', root='view'),
+    '2' : lambda self_: self_.goto_cmd(),
+    '3' : lambda self_: self_.srch_cmd(),
+    '4' : lambda self_: 'open',
+    '5' : lambda self_: None,
+}
+
+# commands after `goto_cmd`
+GOTO = '''
+What would you like to do next?
+
+  1. go to next frame
+  2. go to previous frame
+  3. go back
+  4. quit
+'''
+
+# dict of commands after `goto_cmd`
+GOTO_CMD = {
+    '1' : lambda self_: self_.next_cmd(),
+    '2' : lambda self_: self_.back_cmd(),
+    '3' : lambda self_: 'view',
+    '4' : lambda self_: None,
 }
 
 # dict of all commands
@@ -115,13 +132,79 @@ DICT = dict(
     init = (INIT, INIT_CMD),
     open = (OPEN, OPEN_CMD),
     view = (VIEW, VIEW_CMD),
+    goto = (GOTO, GOTO_CMD),
 )
 
 # tuple of quit commands
 QUIT = ('q', 'quit', 'exit')
 
 
-class Display(Analyser):
+class Display:
+    """Console UI for PCAP Tree Viewer
+
+    This class implemented a UI class for the application. It is a pure
+    console/terminal ASCII flavour program. Whilst it has already implemented
+    most functions supported in the graphic UI, we are still trying to make
+    a cross-platform console graphic UI using `curses` from the Python
+    standard library.
+
+    Properties:
+        * length -- <int> current frame number of the extracting process
+        * protocol -- <str> current frame protocol chain of the extracting process
+
+        * __ext -- <jspcap.Extractor> pcap extractor
+        * __now -- <int> pointer of the current frame number
+        * __frames -- <list> list of line number where frames start in the report
+
+    Utilities:
+        * show_cmd -- print instruction and call corresponding command
+        * read_cmd -- print certain file then go back to root
+        * save_cmd -- export report to certain format and path
+
+    Methods:
+        * root -> init
+            * open_cmd -- open then extract requested pcap file
+            * read_cmd -> about
+            * read_cmd -> manual
+            * read_cmd -> init
+            * repo_cmd -- open web browser and go to GitHub page
+            * exit
+        * root -> open (after open_cmd)
+            * view_cmd -- pretreat report
+            * move_cmd -- move report to requested path
+            * save_cmd -> plist
+            * save_cmd -> json
+            * expt_cmd -- export report as PDF
+            * root -> init
+            * exit
+        * root -> view (after view_cmd)
+            * read_cmd -> out
+            * goto_cmd -- go to certain frame
+            * srch_cmd -- search and go to corresponding frame
+            * root -> open
+            * exit
+        * root -> goto (after goto_cmd)
+            * next_cmd -- go to next frame
+            * back_cmd -- go to previous frame
+            * root -> view
+            * exit
+
+    """
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def length(self):
+        return self.__ext.length
+
+    @property
+    def protocol(self):
+        return self.__ext.protocol
+
+    ##########################################################################
+    # Data modules.
+    ##########################################################################
 
     def __init__(self):
         self.read_cmd('src/init')
@@ -133,6 +216,10 @@ class Display(Analyser):
         os.remove('src/out')
         exit()
 
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
     def show_cmd(self, kind, *, root='init'):
         cmds = DICT.get(kind)
 
@@ -142,13 +229,9 @@ class Display(Analyser):
         while func is None:
             if cmd in QUIT:
                 return None
-            cmd = input('⚠️Invalid command.\nPlease retry: ')
+            cmd = input('Invalid command.\nPlease retry: ')
             func = cmds[1].get(cmd)
-        return func(self, root=root)
-
-    def repo_cmd(self, *, root='init'):
-        webbrowser.open('https://github.com/JarryShaw/jspcap/')
-        return root
+        return func(self)
 
     def read_cmd(self, name, *, root='init'):
         with open(name, 'r') as file_:
@@ -157,83 +240,14 @@ class Display(Analyser):
                 print(content)
         return root
 
-    def open_cmd(self, *, root='init'):
-        # remove cache
-        self._frnum = 1
-        open('src/out', 'w').close()
-
-        fin = input('\nWhich file would you like to open: ')
-        if '.pcap' not in fin:
-            fin = '{}.pcap'.format(fin)
-
-        while not os.path.isfile(fin):
-            if fin in QUIT:
-                return None
-            fin = input('Invalid file.\nPlease retry: ')
-            if '.pcap' not in fin:
-                fin = '{}.pcap'.format(fin)
-
-        self.__file = fin
-        self.__frames = []
-        with open(fin, 'rb') as file_:
-            try:
-                print('🚨Loading file {}...'.format(fin))
-                self.record_header(file_)
-                print('🍺Extracting...')
-
-                while True:
-                    try:
-                        self.record_frames(file_)
-                        content = NUMB((self.length - 1), self.protocol)
-                        print(content)
-                    except EOFError:
-                        break
-
-                print(end='\r', flush=True)
-                print('🍻Extraction done.')
-                return 'open'
-            except FileError:
-                print('Unsupported file format.')
-                return root
-
-    def move_cmd(self, *, root='open'):
-        path = input('Where would you like to export: ')
-        while True:
-            if path in QUIT:
-                return None
-            try:
-                shutil.copyfile('src/out', path)
-                print('The report has been stored in {}'.format(path))
-                return root
-            except:
-                path = input('Invalid file name!\nPlease retry: ')
-
-    def expt_cmd(self, *, root='open'):
-        path = input('The exported file name: ')
-        if path in QUIT:
-            return None
-
-        process = subprocess.Popen(
-                        ['pandoc', 'src/out', '-o', file_],
-                        stdout=subprocess.PIPE, stderr=subprocess.PIPE
-                    )
-
-        output, error = process.communicate()
-        if process.returncode:
-            print('Unable to export PDF: {}'.format(error.decode(shcoding)))
-        else:
-            print('Export done.')
-            print('The report has been stored in {}'.format(path))
-        return root
-
     def save_cmd(self, fmt, *, root='open'):
-        path = input('The exported file name: ')
+        path = input('\nWhere would you like to export: ')
         while True:
             if path in QUIT:
                 return None
             try:
-                ext = Extractor(fmt=fmt, fin=self.__file, fout=path, auto=False)
-                print('🍺Exporting...')
+                ext = Extractor(fmt=fmt, fin=self.__ext.input, fout=path, auto=False)
+                print('\n🍺Exporting...')
 
                 # extracting pcap file
                 for frame in ext:
@@ -248,13 +262,140 @@ class Display(Analyser):
             except:
                 path = input('Invalid file name!\nPlease retry: ')
 
-    def goto_cmd(self, *, root='view'):
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def repo_cmd(self, *, root='init'):
+        webbrowser.open('https://github.com/JarryShaw/jspcap/')
+        return root
+
+    def open_cmd(self, *, root='init'):
+        # remove cache
+        open('src/out', 'w').close()
+
+        fin = input('\nWhich file would you like to open: ')
+        if '.pcap' not in fin:
+            fin = '{}.pcap'.format(fin)
+
+        while not os.path.isfile(fin):
+            if fin in QUIT:
+                return None
+            fin = input('Invalid file.\nPlease retry: ')
+            if '.pcap' not in fin:
+                fin = '{}.pcap'.format(fin)
+
+        self.__frames = []
+        with open(fin, 'rb') as file_:
+            try:
+                print('\n🚨Loading file {}...'.format(fin))
+                self.__ext = Extractor(fin=fin, fout='src/out', fmt='tree', auto=False, extension=False)
+
+                # extracting pcap file
+                print('🍺Extracting...')
+                for frame in self.__ext:
+                    content = NUMB(self.length, self.protocol)
+                    print(content)
+
+                print(end='\r', flush=True)
+                print('🍻Extraction done.')
+                return 'open'
+            except FileError:
+                print('Unsupported file format.')
+                return root
+
+    def expt_cmd(self, *, root='open'):
+        path = input('\nWhere would you like to export: ')
+        if path in QUIT:
+            return None
+
+        print('\n🍺Exporting...')
+        process = subprocess.Popen(
+                        ['pandoc', 'src/out', '-o', path],
+                        stdout=subprocess.PIPE, stderr=subprocess.PIPE
+                    )
+        output, error = process.communicate()
+        if process.returncode:
+            print('Unable to export PDF: {}'.format(error.decode(shcoding)))
+        else:
+            print('🍻Export done.')
+            print('The report has been stored in {}'.format(path))
+        return root
+
+    def move_cmd(self, *, root='open'):
+        path = input('\nWhere would you like to export: ')
+        while True:
+            if path in QUIT:
+                return None
+            try:
+                shutil.copyfile('src/out', path)
+                print('🍺Exporting...')
+                print('🍻Export done.')
+                print('The report has been stored in {}'.format(path))
+                return root
+            except:
+                path = input('Invalid file name!\nPlease retry: ')
+
+    def view_cmd(self, *, root='open'):
+        if not self.__frames:
+            with open('src/out', 'r') as file_:
+                for _ctr, line in enumerate(file_):
+                    if 'Frame' in line:
+                        self.__frames.append(_ctr)
+                self.__frames.append(_ctr+1)
+        return 'view'
+
+    def srch_cmd(self, *, root='view'):
+        topic = input('\nWhat keyword would you to search in frames: ')
+        pattern = re.escape(topic)
+        result = []
+
+        print('\n🍺Searching...')
         with open('src/out', 'r') as file_:
             for _ctr, line in enumerate(file_):
-                if 'Frame' in line:
-                    frames.append(_ctr)
+                if re.findall(pattern, line, re.I):
+                    result.append(_ctr)
 
-        num = input('Which frame in range would you like to view: ')
+        if not result:
+            print("🍻No keyword '{}' found.".format(topic))
+            return root
+
+        now = 1
+        frame = []
+        this = 0
+        that = self.__frames[0]
+
+        for ctr in result:
+            try:
+                while not (this <= ctr < that):
+                    now += 1
+                    this = self.__frames[now-1]
+                    that = self.__frames[now]
+                frame.append(now)
+            except IndexError:
+                continue
+
+
+        this = self.__frames[frame[0]-1] if frame[0] > 0 else 0
+        that = self.__frames[frame[0]] if frame[0] > 0 else self.__frames[0]
+
+        with open('src/out', 'r') as file_:
+            print()
+            for _ctr, line in enumerate(file_):
+                if _ctr >= this:
+                    print(line.strip('\n'))
+                if _ctr >= that - 2:
+                    if len(frame) - 1:
+                        frame.pop(0)
+                        this = self.__frames[frame[0]-1] if frame[0] > 0 else 0
+                        that = self.__frames[frame[0]]
+                    else:
+                        break
+
+        return root
+
+    def goto_cmd(self, *, root='view'):
+        num = input('\nWhich frame in range would you like to view: ')
         while True:
             if num in QUIT:
                 return None
@@ -268,17 +409,58 @@ class Display(Analyser):
                     break
             num = input('Invalid frame number!\nPlease retry: ')
 
-        this = self.__frames[ctr-1] if isinstance(ctr, int) else 0
-        that = self.__frames[ctr] if isinstance(ctr, int) else self.__frames[0]
+        this = self.__frames[ctr-1] if ctr > 0 else 0
+        that = self.__frames[ctr] if ctr > 0 else self.__frames[0]
 
         with open('src/out', 'r') as file_:
+            print()
             for _ctr, line in enumerate(file_):
                 if _ctr >= this:
-                    print(line)
-                if _ctr >= that:
+                    print(line.strip('\n'))
+                if _ctr >= that - 2:
                     break
 
+        self.__now = ctr
+        return 'goto'
+
+    def back_cmd(self, *, root='goto'):
+        if self.__now == 0:
+            self.__now = self.length - 1
+        else:
+            self.__now -= 1
+
+        ctr = self.__now
+        this = self.__frames[ctr-1] if ctr > 0 else 1
+        that = self.__frames[ctr] if ctr > 0 else self.__frames[0]
+
+        with open('src/out', 'r') as file_:
+            print()
+            for _ctr, line in enumerate(file_):
+                if _ctr >= this:
+                    print(line.strip('\n'))
+                if _ctr >= that - 2:
+                    break
+
+        self.__now = ctr
         return root
 
-    def view_cmd(self, mode, *, root='view'):
-        topic = input('What keyword would you to search in frames: ')
+    def next_cmd(self, *, root='goto'):
+        if self.__now == self.length - 1:
+            self.__now = 0
+        else:
+            self.__now += 1
+
+        ctr = self.__now
+        this = self.__frames[ctr-1] if ctr > 0 else 0
+        that = self.__frames[ctr] if ctr > 0 else self.__frames[0]
+
+        with open('src/out', 'r') as file_:
+            print()
+            for _ctr, line in enumerate(file_):
+                if _ctr >= this:
+                    print(line.strip('\n'))
+                if _ctr >= that - 2:
+                    break
+
+        self.__now = ctr
+        return root
