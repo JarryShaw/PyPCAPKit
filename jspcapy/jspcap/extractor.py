@@ -59,7 +59,7 @@ class Extractor:
 
     @property
     def length(self):
-        return self._frnum
+        return self._frnum - 1
 
     @property
     def format(self):
@@ -73,6 +73,10 @@ class Extractor:
     def output(self):
         return self._ofnm
 
+    @property
+    def protocol(self):
+        return self._protocol
+
     ##########################################################################
     # Data modules.
     ##########################################################################
@@ -80,7 +84,7 @@ class Extractor:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True):
+    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True, extension=True):
         """Initialise PCAP Reader.
 
         Keyword arguemnts:
@@ -90,34 +94,7 @@ class Extractor:
             fout -- str, file name to be written
 
         """
-        fmt_none = (fmt is None)
-
-        if fin is None:
-            ifnm = 'in.pcap'
-        else:
-            ifnm = fin if '.pcap' in fin else '{fin}.pcap'.format(fin=fin)
-
-        if fout is None:
-            if fmt_none:
-                raise FormatError('Output format unspecified.')
-            else:
-                if fmt == 'html':   ext = 'js'
-                elif fmt == 'tree': ext = 'txt'
-                else:               ext = fmt
-                ofnm = 'out.{ext}'.format(ext=ext)
-        else:
-            ofmt = FILE.match(fout)
-            if ofmt is None:
-                if fmt_none:
-                    raise FormatError('Output format unspecified.')
-                else:
-                    if fmt == 'html':   ext = 'js'
-                    elif fmt == 'tree': ext = 'txt'
-                    else:               ext = fmt
-                    ofnm = '{out}.{ext}'.format(out=fout, ext=ext)
-            else:
-                ofnm = fout
-                fmt = fmt or ofmt.group('exts')
+        ifnm, ofnm, fmt = self.make_name(fin, fout, fmt, extension)
 
         if fmt == 'plist':
             from .jsformat.plist import PLIST as output     # output PLIST file
@@ -161,6 +138,42 @@ class Extractor:
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @classmethod
+    def make_name(cls, fin, fout, fmt, extension):
+        fmt_none = (fmt is None)
+
+        if fin is None:
+            ifnm = 'in.pcap'
+        else:
+            ifnm = fin if '.pcap' in fin else '{fin}.pcap'.format(fin=fin)
+
+        if fout is None:
+            if fmt_none:
+                raise FormatError('Output format unspecified.')
+            else:
+                if fmt == 'html':   ext = 'js'
+                elif fmt == 'tree': ext = 'txt'
+                else:               ext = fmt
+                ofnm = 'out.{ext}'.format(ext=ext)
+        else:
+            ofmt = FILE.match(fout)
+            if ofmt is None:
+                if fmt_none:
+                    raise FormatError('Output format unspecified.')
+                else:
+                    if extension:
+                        if fmt == 'html':   ext = 'js'
+                        elif fmt == 'tree': ext = 'txt'
+                        else:               ext = fmt
+                        ofnm = '{out}.{ext}'.format(out=fout, ext=ext)
+                    else:
+                        ofnm = fout
+            else:
+                ofnm = fout
+                fmt = fmt or ofmt.group('exts')
+
+        return ifnm, ofnm, fmt
 
     def record_header(self):
         """Read global header.
@@ -264,14 +277,20 @@ class Extractor:
         plist['protocols'] = self._merge_protocols()
         self._ofile(plist, _name=_fnum)
 
-        # print(_fnum)
-        # print(plist['protocols'])
-        # print()
-
         # record frame
+        if self._trans == 'TCP':
+            data = dict(
+                src = (plist[self._dlink][self._netwk]['src'],
+                       plist[self._dlink][self._netwk][self._trans]['srcport']),
+                dst = (plist[self._dlink][self._netwk]['dst'],
+                       plist[self._dlink][self._netwk][self._trans]['dstport']),
+                dsn = plist[self._dlink][self._netwk][self._trans]['seq'],
+                raw = plist[self._dlink][self._netwk][self._trans]['Application Layer'],
+            )
+            info = Info(data)
+            self._frame.append(info)
         self._frnum += 1
-        # info = Info(plist)
-        # self._frame.append(info)
+        self._protocol = plist['protocols']
 
     def _merge_protocols(self):
         """Make protocols chain."""
