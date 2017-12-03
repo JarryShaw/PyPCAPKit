@@ -329,19 +329,19 @@ class Display:
         serv_menu.add_command(label='System Preferences...', command=self.sysp_cmd)
         home_menu.add_separator()
         home_menu.add_command(label='Hide PCAP Tree Viewer', command=self.hide_cmd, accelerator=short(cmdkw, 'Ｈ'))
-        self.master.bind(event(cmdbd, 'H'), self.hide_cmd)
+        self.master.bind(event(cmdbd, 'h'), self.hide_cmd)
         home_menu.add_command(label='Hide Others', command=self.wipe_cmd, accelerator=short(optkw, cmdkw, 'Ｈ'))
-        self.master.bind(event(optbd, cmdbd, 'H'), self.wipe_cmd)
+        self.master.bind(event(optbd, cmdbd, 'h'), self.wipe_cmd)
         home_menu.add_command(label='Show All', command=self.show_cmd)
         home_menu.add_separator()
         home_menu.add_command(label='Quit PCAP Tree Viewer', command=self.quit_cmd, accelerator=short(cmdkw, 'Ｑ'))
-        self.master.bind(event(cmdbd, 'Q'), self.quit_cmd)
+        self.master.bind(event(cmdbd, 'q'), self.quit_cmd)
 
         # file menu
         file_menu = Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label='File', menu=file_menu)
         file_menu.add_command(label='Open...', command=self.open_cmd, accelerator=short(cmdkw, 'Ｏ'))
-        self.master.bind(event(cmdbd, 'O'), self.open_cmd)
+        self.master.bind(event(cmdbd, 'o'), self.open_cmd)
         frct_menu = Menu(file_menu, tearoff=0)
         file_menu.add_cascade(label='Open Recent', menu=frct_menu)
         try:
@@ -349,7 +349,7 @@ class Display:
                 file_real = False
                 for (fctr, file_name) in enumerate(file_):
                     file_real = True if file_name else False
-                    frct_menu.add_command(label=file_name, command=functools.partial(self.open_cmd, file_name))
+                    frct_menu.add_command(label=file_name, command=functools.partial(self.open_cmd, name=file_name))
         except Exception:
             file_real = False
         if file_real:
@@ -361,30 +361,30 @@ class Display:
             frct_menu.add_command(label='Clear Menu', state='disabled')
         file_menu.add_separator()
         file_menu.add_command(label='Close Window', command=self.shut_cmd, accelerator=short(cmdkw, 'Ｗ'))
-        self.master.bind(event(cmdbd, 'W'), self.shut_cmd)
+        self.master.bind(event(cmdbd, 'w'), self.shut_cmd)
         file_menu.add_command(label='Save', command=self.save_cmd, accelerator=short(cmdkw, 'Ｓ'))
-        self.master.bind(event(cmdbd, 'S'), self.save_cmd)
+        self.master.bind(event(cmdbd, 's'), self.save_cmd)
         file_menu.add_command(label='Duplicate', command=self.copy_cmd, accelerator=short(sftkw, cmdkw, 'Ｓ'))
-        self.master.bind(event(sftbd, cmdbd, 'S'), self.copy_cmd)
+        self.master.bind(event(sftbd, cmdbd, 's'), self.copy_cmd)
         file_menu.add_command(label='Rename...', command=self.mvrn_cmd)
         file_menu.add_command(label='Move To...', command=self.move_cmd)
         file_menu.add_command(label='Export...', command=self.expt_cmd)
-        file_menu.add_command(label='Export as PDF...', command=functools.partial(self.expt_cmd, 'pdf'))
+        file_menu.add_command(label='Export as PDF...', command=functools.partial(self.expt_cmd, fmt='pdf'))
         file_menu.add_separator()
         file_menu.add_command(label='Print', accelerator=short(cmdkw, 'Ｐ'),
-            command=functools.partial(self.expt_cmd, 'print')
+            command=functools.partial(self.expt_cmd, fmt='print')
         )
-        self.master.bind(event(cmdbd, 'P'), functools.partial(self.expt_cmd, 'print'))
+        self.master.bind(event(cmdbd, 'p'), functools.partial(self.expt_cmd, 'print'))
 
         # edit menu
         edit_menu = Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label='Edit', menu=edit_menu)
         edit_menu.add_command(label='Copy', command=self.cmdc_cmd, accelerator=short(cmdkw, 'Ｃ'))
-        self.master.bind(event(cmdbd, 'C'), self.cmdc_cmd)
+        self.master.bind(event(cmdbd, 'c'), self.cmdc_cmd)
         edit_menu.add_command(label='Select All', command=self.cmda_cmd, accelerator=short(cmdkw, 'Ａ'))
-        self.master.bind(event(cmdbd, 'A'), self.cmda_cmd)
+        self.master.bind(event(cmdbd, 'a'), self.cmda_cmd)
         edit_menu.add_command(label='Invert Selection', command=self.invt_cmd, accelerator=short(sftkw, cmdkw, 'Ｉ'))
-        self.master.bind(event(sftbd, cmdbd, 'I'), self.invt_cmd)
+        self.master.bind(event(sftbd, cmdbd, 'i'), self.invt_cmd)
         edit_menu.add_separator()
         edit_menu.add_command(label='Move to Trash', command=self.mvsh_cmd, accelerator=short(cmdkw, delkw))
         self.master.bind(event(cmdbd, delbd), self.mvsh_cmd)
@@ -392,58 +392,58 @@ class Display:
         find_menu = Menu(edit_menu, tearoff=0)
         edit_menu.add_cascade(label='Find', menu=find_menu)
         find_menu.add_command(label='Find...', command=self.find_cmd, accelerator=short(cmdkw, 'Ｆ'))
-        self.master.bind(event(cmdbd, 'F'), self.find_cmd)
+        self.master.bind(event(cmdbd, 'f'), self.find_cmd)
         find_menu.add_command(label='Find Next', accelerator=short(cmdkw, 'Ｇ'),
-            command=functools.partial(self.find_cmd, 'next')
+            command=functools.partial(self.find_cmd, cmd='next')
         )
-        self.master.bind(event(cmdbd, 'G'), functools.partial(self.find_cmd, 'next'))
+        self.master.bind(event(cmdbd, 'g'), functools.partial(self.find_cmd, cmd='next'))
         find_menu.add_command(label='Find Previous', accelerator=short(sftkw, cmdkw, 'Ｇ'),
-            command=functools.partial(self.find_cmd, 'prev')
+            command=functools.partial(self.find_cmd, cmd='prev')
         )
-        self.master.bind(event(sftbd, cmdbd, 'G'), functools.partial(self.find_cmd, 'prev'))
+        self.master.bind(event(sftbd, cmdbd, 'g'), functools.partial(self.find_cmd, cmd='prev'))
         find_menu.add_command(label='Use Selection for Find', accelerator=short(cmdkw, 'Ｅ'),
-            command=functools.partial(self.find_cmd, 'self')
+            command=functools.partial(self.find_cmd, cmd='self')
         )
-        self.master.bind(event(cmdbd, 'E'), functools.partial(self.find_cmd, 'self'))
+        self.master.bind(event(cmdbd, 'e'), functools.partial(self.find_cmd, cmd='self'))
         find_menu.add_command(label='Jump to Selection', accelerator=short(cmdkw, 'Ｊ'),
-            command=functools.partial(self.find_cmd, 'jump')
+            command=functools.partial(self.find_cmd, cmd='jump')
         )
-        self.master.bind(event(cmdbd, 'J'), functools.partial(self.find_cmd, 'jump'))
+        self.master.bind(event(cmdbd, 'j'), functools.partial(self.find_cmd, cmd='jump'))
 
         # go menu
         goto_menu = Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label='Go', menu=goto_menu)
-        goto_menu.add_command(label='Up', command=functools.partial(self.goto_cmd, 'up'), accelerator=short(upakw))
-        self.master.bind(event(upabd), functools.partial(self.goto_cmd, 'up'))
-        goto_menu.add_command(label='Down', command=functools.partial(self.goto_cmd, 'down'), accelerator=short(dwnkw))
-        self.master.bind(event(dwnbd), functools.partial(self.goto_cmd, 'down'))
+        goto_menu.add_command(label='Up', command=functools.partial(self.goto_cmd, cmd='up'), accelerator=short(upakw))
+        self.master.bind(event(upabd), functools.partial(self.goto_cmd, cmd='up'))
+        goto_menu.add_command(label='Down', command=functools.partial(self.goto_cmd, cmd='down'), accelerator=short(dwnkw))
+        self.master.bind(event(dwnbd), functools.partial(self.goto_cmd, cmd='down'))
         goto_menu.add_command(label='Previous Frame', accelerator=short(optkw, upakw),
-            command=functools.partial(self.goto_cmd, 'prev')
+            command=functools.partial(self.goto_cmd, cmd='prev')
         )
-        self.master.bind(event(optbd, upabd), functools.partial(self.goto_cmd, 'prev'))
+        self.master.bind(event(optbd, upabd), functools.partial(self.goto_cmd, cmd='prev'))
         goto_menu.add_command(label='Next Frame', accelerator=short(optkw, dwnkw),
-            command=functools.partial(self.goto_cmd, 'next')
+            command=functools.partial(self.goto_cmd, cmd='next')
         )
-        self.master.bind(event(optbd, dwnbd), functools.partial(self.goto_cmd, 'next'))
+        self.master.bind(event(optbd, dwnbd), functools.partial(self.goto_cmd, cmd='next'))
         goto_menu.add_command(label='Go to Frame...', accelerator=short(optkw, cmdkw, 'Ｇ'),
-            command=functools.partial(self.goto_cmd, 'go')
+            command=functools.partial(self.goto_cmd, cmd='go')
         )
-        self.master.bind(event(optbd, cmdbd, 'G'), functools.partial(self.goto_cmd, 'go'))
+        self.master.bind(event(optbd, cmdbd, 'g'), functools.partial(self.goto_cmd, cmd='go'))
         goto_menu.add_separator()
         goto_menu.add_command(label='Back', accelerator=short(cmdkw, brlkw),
-            command=functools.partial(self.goto_cmd, 'back')
+            command=functools.partial(self.goto_cmd, cmd='back')
         )
-        self.master.bind(event(cmdbd, brlbd), functools.partial(self.goto_cmd, 'back'))
+        self.master.bind(event(cmdbd, brlbd), functools.partial(self.goto_cmd, cmd='back'))
         goto_menu.add_command(label='Forward', accelerator=short(cmdkw, brrkw),
-            command=functools.partial(self.goto_cmd, 'fwd')
+            command=functools.partial(self.goto_cmd, cmd='fwd')
         )
-        self.master.bind(event(cmdbd, brrbd), functools.partial(self.goto_cmd, 'fwd'))
+        self.master.bind(event(cmdbd, brrbd), functools.partial(self.goto_cmd, cmd='fwd'))
 
         # window menu
         wind_menu = Menu(self.menu, tearoff=0)
         self.menu.add_cascade(label='Window', menu=wind_menu)
         wind_menu.add_command(label='Minimize', command=self.mini_cmd, accelerator=short(cmdkw, 'Ｍ'))
-        self.master.bind(event(cmdbd, 'M'), self.mini_cmd)
+        self.master.bind(event(cmdbd, 'm'), self.mini_cmd)
         wind_menu.add_command(label='Zoom', command=self.zoom_cmd)
 
         # help menu
@@ -480,11 +480,11 @@ class Display:
         self.show_error('open System Preferences')
 
     # Hide PCAP Tree Viewer
-    def hide_cmd(self):
+    def hide_cmd(self, *args):
         self.master.withdraw()
 
     # Hide Others
-    def wipe_cmd(self):
+    def wipe_cmd(self, *args):
         self.show_error('hide others')
 
     # Show All
@@ -492,12 +492,12 @@ class Display:
         self.zoom_cmd()
 
     # Quit PCAP Tree Viewer
-    def quit_cmd(self):
+    def quit_cmd(self, *args):
         os.remove('src/out')
         self.master.destroy()
 
     # Open...
-    def open_cmd(self, name=None):
+    def open_cmd(self, event=None, *, name=None):
         self.open_file(name)
 
     # Clear Menu
@@ -507,7 +507,7 @@ class Display:
         menu.add_command(label='Clear Menu', state=DISABLED)
 
     # Close Window
-    def shut_cmd(self):
+    def shut_cmd(self, *args):
         if askokcancel(
                 'Close Window',
                 'Do you really want to close?'
@@ -516,11 +516,11 @@ class Display:
             self.master.destroy()
 
     # Save
-    def save_cmd(self):
+    def save_cmd(self, *args):
         self.save_file()
 
     # Duplicate
-    def copy_cmd(self):
+    def copy_cmd(self, *args):
         ifnm = self._ext.input
         fnmt = FILE.match(ifnm)
         if fnmt is None:
@@ -557,7 +557,7 @@ class Display:
         os.rename(self._ext.input, file_)
 
     # Export...
-    def expt_cmd(self, fmt=None):
+    def expt_cmd(self, event=None, *, fmt=None):
         if fmt is None:
             toplevel = Toplevel(self.master)
             toplevel.title('Export ...')
@@ -581,7 +581,7 @@ class Display:
             self.save_file(fmt)
 
     # Copy
-    def cmdc_cmd(self):
+    def cmdc_cmd(self, *args):
         data = []
         for index in range(self.listbox.size()):
             if self.listbox.selection_includes(index):
@@ -592,14 +592,14 @@ class Display:
         self.master.clipboard_append(data)
 
     # Select All
-    def cmda_cmd(self):
+    def cmda_cmd(self, *args):
         for index in range(self.listbox.size()):
             self.listbox.selection_set(index)
             self.listbox.yview(index)
             self.listbox.update()
 
     # Invert Selection
-    def invt_cmd(self):
+    def invt_cmd(self, *args):
         for index in range(self.listbox.size()):
             if self.listbox.selection_includes(index):
                 self.listbox.selection_clear(index)
@@ -609,11 +609,11 @@ class Display:
             self.listbox.update()
 
     # Move to Trash
-    def mvsh_cmd(self):
+    def mvsh_cmd(self, *args):
         os.remove(self._ext.input)
 
     # Find
-    def find_cmd(self, cmd=None):
+    def find_cmd(self, event=None, *, cmd=None):
         if cmd == 'next':
             pass
         elif cmd == 'prev':
@@ -753,7 +753,7 @@ class Display:
         self.listbox.update()
 
     # Go
-    def goto_cmd(self, cmd=None):
+    def goto_cmd(self, event=None, *, cmd=None):
         for index in range(self.listbox.size()):
             if self.listbox.selection_includes(index):
                 self.listbox.selection_clear(index)
@@ -903,7 +903,7 @@ class Display:
         return tmp
 
     # Minimize
-    def mini_cmd(self):
+    def mini_cmd(self, *args):
         self.master.iconify()
 
     # Zoom
