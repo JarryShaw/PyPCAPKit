@@ -111,6 +111,7 @@ $ jspcapy in -f plist -V
  - export to a text tree view file (without extension autocorrect)
 
  ```bash
+ $ jspcapy in -o out -f tree -V
  🚨Loading file 'in.pcap'
  - Frame   1: Ethernet:IPv6:ICMPv6
  - Frame   2: Ethernet:IPv6:ICMPv6
