@@ -146,11 +146,11 @@ class TCP(Transport):
 
     @property
     def src(self):
-        return self._info.src
+        return self._info.srcport
 
     @property
     def dst(self):
-        return self._info.dst
+        return self._info.dstport
 
     @property
     def layer(self):
