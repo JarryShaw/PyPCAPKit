@@ -220,7 +220,7 @@ class Display:
         self.master = Tk()
         self.master.title('PCAP Tree Viewer')
         self.master.geometry(SIZE)
-        self.master.resizable(height=False)
+        self.master.resizable(False, False)
 
         # frame setup
         self.frame = Frame(bd=8)
@@ -921,7 +921,7 @@ class Display:
         toplevel.title('PCAP Tree Viewer Help')
         scrolledtext = ScrolledText(
                 toplevel, font=('Courier New', 12),
-                width=50, height=20
+                width=57, height=20
         )
         scrolledtext.pack()
         with open('src/manual', 'r') as file_:

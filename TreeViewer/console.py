@@ -213,7 +213,10 @@ class Display:
         while kind:
             kind = self.show_cmd(kind)
 
-        os.remove('src/out')
+        try:
+            os.remove('src/out')
+        except FileNotFoundError:
+            pass
         exit()
 
     ##########################################################################

@@ -8,7 +8,7 @@
 
 try:
     from graphic import Display
+    display = Display()
 except ImportError:
     from console import Display
-finally:
     display = Display()
