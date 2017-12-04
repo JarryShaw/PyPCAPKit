@@ -82,17 +82,17 @@ optional arguments:
 
  - export to a macOS Property List (`Xcode` has special support for this format)
 
-```bash
-$ jspcapy in -f plist -V
-🚨Loading file 'in.pcap'
- - Frame   1: Ethernet:IPv6:ICMPv6
- - Frame   2: Ethernet:IPv6:ICMPv6
- - Frame   3: Ethernet:IPv4:TCP
- - Frame   4: Ethernet:IPv4:TCP
- - Frame   5: Ethernet:IPv4:TCP
- - Frame   6: Ethernet:IPv4:UDP
-🍺Report file stored in 'out.plist'
-```
+ ```bash
+ $ jspcapy in -f plist -V
+ 🚨Loading file 'in.pcap'
+  - Frame   1: Ethernet:IPv6:ICMPv6
+  - Frame   2: Ethernet:IPv6:ICMPv6
+  - Frame   3: Ethernet:IPv4:TCP
+  - Frame   4: Ethernet:IPv4:TCP
+  - Frame   5: Ethernet:IPv4:TCP
+  - Frame   6: Ethernet:IPv4:UDP
+ 🍺Report file stored in 'out.plist'
+ ```
 
  - export to a json file (with no format specified)
 
