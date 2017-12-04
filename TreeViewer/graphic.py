@@ -66,6 +66,18 @@ SIZE = '674x476' if macOS else '850x620'
 # background colour
 BGCOLOUR = '#e2c08d'
 
+# embeded spaces
+EMSP = '                   '
+
+# file names
+NAME = {
+    'src/about'  : 'ABOUT',
+    'src/init'   : 'README',
+    'src/manual' : 'MANUAL',
+    'src/out'    : 'REPORT',
+    'src/recent' : 'LOG',
+}
+
 # File name regex
 # r'''\A(.*?)(\ copy)?(\ [0-9]+)?[.](.*)\Z'''
 FILE = re.compile(r'''
@@ -216,6 +228,11 @@ class Display:
     ##########################################################################
 
     def __init__(self):
+        try:
+            os.remove('src/out')
+        except FileNotFoundError:
+            pass
+
         # root window setup
         self.master = Tk()
         self.master.title('PCAP Tree Viewer')
@@ -464,12 +481,15 @@ class Display:
                 width=50, height=20
         )
         scrolledtext.pack()
-        with open('src/about', 'r') as file_:
-            for line in file_:
-                scrolledtext.insert(END, line)
-                scrolledtext.update()
-        scrolledtext.config(state=DISABLED)
-        toplevel.resizable(width=False, height=False)
+        try:
+            with open('src/about', 'r') as file_:
+                for line in file_:
+                    scrolledtext.insert(END, line)
+                    scrolledtext.update()
+            scrolledtext.config(state=DISABLED)
+            toplevel.resizable(width=False, height=False)
+        except FileNotFoundError:
+            showerror("Something's missing.", 'Unable to fine ABOUT.')
 
     # Preferences
     def pref_cmd(self, *args):
@@ -493,7 +513,10 @@ class Display:
 
     # Quit PCAP Tree Viewer
     def quit_cmd(self, *args):
-        os.remove('src/out')
+        try:
+            os.remove('src/out')
+        except FileNotFoundError:
+            pass
         self.master.destroy()
 
     # Open...
@@ -512,16 +535,26 @@ class Display:
                 'Close Window',
                 'Do you really want to close?'
             ):
-            os.remove('src/out')
+            try:
+                os.remove('src/out')
+            except FileNotFoundError:
+                pass
             self.master.destroy()
 
     # Save
     def save_cmd(self, *args):
-        self.save_file()
+        try:
+            self.save_file()
+        except FileNotFoundError:
+            self.show_warning('Save')
 
     # Duplicate
     def copy_cmd(self, *args):
-        ifnm = self._ext.input
+        try:
+            ifnm = self._ext.input
+        except AttributeError:
+            self.show_warning('Duplicate')
+            return
         fnmt = FILE.match(ifnm)
         if fnmt is None:
             return
@@ -544,20 +577,50 @@ class Display:
 
     # Rename...
     def mvrn_cmd(self):
-        self.move_cmd()
+        self.move_cmd(rename=True)
 
     # Move To...
-    def move_cmd(self):
+    def move_cmd(self, *, rename=False):
+        try:
+            tmp = self._ext
+        except AttributeError:
+            cmd = 'rename' if rename else 'move'
+            self.show_warning(cmd)
+            return
+
         file_ = asksaveasfilename(
             parent=self.master, title='Please select a directory ...',
             initialdir='./', defaultextension='.pcap'
         )
         if file_ == '':
             return
-        os.rename(self._ext.input, file_)
+        try:
+            os.rename(self._ext.input, file_)
+        except FileNotFoundError:
+            showerror(
+                'Unable to {cmd} {fin} to {fout}'.format(
+                    cmd='rename' if rename else 'move',
+                    fin=self._ext.input, fout=file_
+                ),
+                'The original file is missing.'
+            )
+        except:
+            showerror(
+                'Unable to {cmd} {fin} to {fout}'.format(
+                    cmd='rename' if rename else 'move',
+                    fin=self._ext.input, fout=file_
+                ),
+                'Invalid destination file name.'
+            )
 
     # Export...
     def expt_cmd(self, event=None, *, fmt=None):
+        try:
+            tmp = self._ext
+        except AttributeError:
+            self.show_warning('Export')
+            return
+
         if fmt is None:
             toplevel = Toplevel(self.master)
             toplevel.title('Export ...')
@@ -582,73 +645,90 @@ class Display:
 
     # Copy
     def cmdc_cmd(self, *args):
-        data = []
-        for index in range(self.listbox.size()):
-            if self.listbox.selection_includes(index):
-                data.append(self.listbox.get(index))
+        try:
+            data = []
+            for index in range(self.listbox.size()):
+                if self.listbox.selection_includes(index):
+                    data.append(self.listbox.get(index))
 
-        data = '\n'.join(data)
-        self.master.clipboard_clear()
-        self.master.clipboard_append(data)
+            data = '\n'.join(data)
+            self.master.clipboard_clear()
+            self.master.clipboard_append(data)
+        except AttributeError:
+            self.master.clipboard_clear()
 
     # Select All
     def cmda_cmd(self, *args):
-        for index in range(self.listbox.size()):
-            self.listbox.selection_set(index)
-            self.listbox.yview(index)
-            self.listbox.update()
+        try:
+            for index in range(self.listbox.size()):
+                self.listbox.selection_set(index)
+                self.listbox.yview(index)
+                self.listbox.update()
+        except AttributeError:
+            self.show_warning('Select All')
 
     # Invert Selection
     def invt_cmd(self, *args):
-        for index in range(self.listbox.size()):
-            if self.listbox.selection_includes(index):
-                self.listbox.selection_clear(index)
-            else:
-                self.listbox.selection_set(index)
-            self.listbox.yview(index)
-            self.listbox.update()
+        try:
+            for index in range(self.listbox.size()):
+                if self.listbox.selection_includes(index):
+                    self.listbox.selection_clear(index)
+                else:
+                    self.listbox.selection_set(index)
+                self.listbox.yview(index)
+                self.listbox.update()
+        except AttributeError:
+            self.show_warning('Invert Selection')
 
     # Move to Trash
     def mvsh_cmd(self, *args):
-        os.remove(self._ext.input)
+        try:
+            os.remove(self._ext.input)
+        except FileNotFoundError:
+            pass
+        except AttributeError:
+            self.show_warning('Move to Trash')
 
     # Find
     def find_cmd(self, event=None, *, cmd=None):
-        if cmd == 'next':
-            pass
-        elif cmd == 'prev':
-            pass
-        elif cmd == 'self':
-            self.find_self()
-        elif cmd == 'jump':
-            self.find_jump()
-        else:
-            self._nindex = -1
-            self._pindex = self.listbox.size()
-            toplevel = Toplevel(self.master)
+        try:
+            if cmd == 'next':
+                pass
+            elif cmd == 'prev':
+                pass
+            elif cmd == 'self':
+                self.find_self()
+            elif cmd == 'jump':
+                self.find_jump()
+            else:
+                self._nindex = -1
+                self._pindex = self.listbox.size()
+                toplevel = Toplevel(self.master)
 
-            frame = Frame(toplevel, bd=4)
-            frame.pack()
+                frame = Frame(toplevel, bd=4)
+                frame.pack()
 
-            var = StringVar()
-            var.trace_add('write', lambda name, index, mode, var=var: var.get())
+                var = StringVar()
+                var.trace_add('write', lambda name, index, mode, var=var: var.get())
 
-            entry = Entry(frame, textvariable=var, font=('Courier New', 12))
-            entry.pack(side=LEFT)
+                entry = Entry(frame, textvariable=var, font=('Courier New', 12))
+                entry.pack(side=LEFT)
 
-            button_next = Button(frame,
-                    text='Next',
-                    font=('Courier New', 12),
-                    command=functools.partial(self.find_next, var)
-            )
-            button_next.pack(side=RIGHT)
+                button_next = Button(frame,
+                        text='Next',
+                        font=('Courier New', 12),
+                        command=functools.partial(self.find_next, var)
+                )
+                button_next.pack(side=RIGHT)
 
-            button_prev = Button(frame,
-                    text='Previous',
-                    font=('Courier New', 12),
-                    command=functools.partial(self.find_prev, var)
-            )
-            button_prev.pack(side=RIGHT)
+                button_prev = Button(frame,
+                        text='Previous',
+                        font=('Courier New', 12),
+                        command=functools.partial(self.find_prev, var)
+                )
+                button_prev.pack(side=RIGHT)
+        except AttributeError:
+            self.show_warning('Find')
 
     # Find Next
     def find_next(self, text):
@@ -673,7 +753,7 @@ class Display:
             if self._nindex == -1:
                 showerror(
                     'Find nothing...',
-                    'No result on {text}'.format(text=text)
+                    "No result on '{text}'.".format(text=text)
                 )
             else:
                 self._nindex = -1
@@ -702,7 +782,7 @@ class Display:
             if self._pindex == 0:
                 showinfo(
                     'Find nothing...',
-                    'No result on {text}.'.format(text=text)
+                    "No result on '{text}'.".format(text=text)
                 )
             else:
                 self._pindex = self.listbox.size()
@@ -754,12 +834,16 @@ class Display:
 
     # Go
     def goto_cmd(self, event=None, *, cmd=None):
-        for index in range(self.listbox.size()):
-            if self.listbox.selection_includes(index):
-                self.listbox.selection_clear(index)
-                break
-        else:
-            index = 0
+        try:
+            for index in range(self.listbox.size()):
+                if self.listbox.selection_includes(index):
+                    self.listbox.selection_clear(index)
+                    break
+            else:
+                index = 0
+        except AttributeError:
+            self.show_warning('Go')
+            return
 
         if cmd == 'up':
             self.goto_up(index)
@@ -860,7 +944,7 @@ class Display:
         else:
             showerror(
                 'Not Found',
-                'No frame ranged {index}.'.format(index=index)
+                "No frame ranged '{index}'.".format(index=index)
             )
         window.destroy()
 
@@ -924,10 +1008,14 @@ class Display:
                 width=57, height=20
         )
         scrolledtext.pack()
-        with open('src/manual', 'r') as file_:
-            for line in file_:
-                scrolledtext.insert(END, line)
-                scrolledtext.update()
+        try:
+            with open('src/manual', 'r') as file_:
+                for line in file_:
+                    scrolledtext.insert(END, line)
+                    scrolledtext.update()
+        except FileNotFoundError:
+            showerror("Something's missing!", 'Unable to find MANUAL.')
+            return
         scrolledtext.config(state=DISABLED)
         toplevel.resizable(width=False, height=False)
 
@@ -953,11 +1041,15 @@ class Display:
             command=self.open_file, font=('Courier New', 13)
         )
         self.button.place(relx=0.5, rely=0.93, anchor=CENTER)
-
-        with open('src/init', 'r') as file_:
-            for line in file_:
-                self.text.insert(END, line)
-                self.text.update()
+        try:
+            with open('src/init', 'r') as file_:
+                for line in file_:
+                    content = EMSP + line
+                    self.text.insert(END, content)
+                    self.text.update()
+        except FileNotFoundError:
+            showerror("Something's missing!", 'Unable to find README.')
+            self.quit_cmd()
         self.text.config(state=DISABLED)
 
     def open_file(self, name=None):
@@ -1029,34 +1121,41 @@ class Display:
         content = TEXT(percent)
         self.label.config(text=content)
 
-        with open('src/out', 'r') as fout:
-            _ctr = 0
-            for (_lctr, line) in enumerate(fout):
-                self.listbox.insert(END, line)
-                self.listbox.update()
-                self.listbox.yview(END)
-                self.listbox.selection_clear(0, _lctr)
-                if 'Frame' in line:
-                    percent = 100.0 * _ctr / self.length
-                    content = TEXT(percent)
-                    self.label.config(text=content)
-                    self.label.update()
-                    _ctr += 1
+        try:
+            with open('src/out', 'r') as fout:
+                _ctr = 0
+                for (_lctr, line) in enumerate(fout):
+                    self.listbox.insert(END, line)
+                    self.listbox.update()
+                    self.listbox.yview(END)
+                    self.listbox.selection_clear(0, _lctr)
+                    if 'Frame' in line:
+                        percent = 100.0 * _ctr / self.length
+                        content = TEXT(percent)
+                        self.label.config(text=content)
+                        self.label.update()
+                        _ctr += 1
 
-        content = TEXT(100)
-        self.label.config(text=content)
-        self.label.update()
+            content = TEXT(100)
+            self.label.config(text=content)
+            self.label.update()
 
-        # loading over
-        time.sleep(0.7)
-        self.listbox.yview(0)
-        self.label.place_forget()
+            # loading over
+            time.sleep(0.7)
+            self.listbox.yview(0)
+            self.label.place_forget()
+        except FileNotFoundError:
+            showerror("Something's missing!", 'Unable to find REPORT.')
+            self.open_file(self._ext.input)
 
     def keep_file(self, name):
         records = []
-        with open('src/recent', 'r') as file_:
-            for line in file_:
-                records.append(line.strip())
+        try:
+            with open('src/recent', 'r') as file_:
+                for line in file_:
+                    records.append(line.strip())
+        except FileNotFoundError:
+            open('src/recent', 'w').close()
 
         try:
             index = records.index(name)
@@ -1077,6 +1176,12 @@ class Display:
         if fmt.__class__.__name__ == 'StringVar':
             fmt = fmt.get()
 
+        try:
+            tmp = self._ext
+        except AttributeError:
+            self.show_warning('Export')
+            return
+
         if fmt is None or fmt == 'pdf' or fmt == 'tree':
             dfext = '.pdf' if fmt == 'pdf' else '.txt'
             file_ = asksaveasfilename(
@@ -1093,10 +1198,14 @@ class Display:
                     if process.returncode:
                         showerror('Unable to export PDF', error.decode(shcoding))
                     else:
-                        showinfo('Export done.', 'File stored in {dir}.'.format(dir=file_))
+                        showinfo('Export done.', "File stored in '{dir}'.".format(dir=file_))
                 else:
-                    shutil.copyfile('src/out', file_)
-                    showinfo('Export done.', 'File stored in {dir}.'.format(dir=file_))
+                    try:
+                        shutil.copyfile('src/out', file_)
+                    except FileNotFoundError:
+                        showerror('Unable to export.', 'Report file is missing.')
+                    else:
+                        showinfo('Export done.', "File stored in '{dir}'.".format(dir=file_))
         elif fmt == 'json':
             self.expt_file(fmt)
         elif fmt == 'plist':
@@ -1110,29 +1219,38 @@ class Display:
             initialdir='./', defaultextension='.{fmt}'.format(fmt=fmt)
         )
         if file_:
-            ext = Extractor(fmt=fmt, fin=self._ext.input, fout=file_, auto=False)
+            try:
+                ext = Extractor(fmt=fmt, fin=self._ext.input, fout=file_, auto=False)
+            except FileNotFoundError:
+                showerror('Unable to export.', "Original file '{}' is missing.".format(self._ext.input))
+            else:
+                # loading label setup
+                self.label = Label(self.frame, width=40, height=10, bd=4, anchor='w',
+                                justify=LEFT, bg=BGCOLOUR, font=('Courier New', 22)
+                            )
+                self.label.place(relx=0.5, rely=0.5, anchor=CENTER)
 
-            # loading label setup
-            self.label = Label(self.frame, width=40, height=10, bd=4, anchor='w',
-                            justify=LEFT, bg=BGCOLOUR, font=('Courier New', 22)
-                        )
-            self.label.place(relx=0.5, rely=0.5, anchor=CENTER)
+                # extracting pcap file
+                for frame in ext:
+                    percent = 100.0 * ext.length / self.length
+                    content = EXPT(percent)
+                    self.label.config(text=content)
+                    self.label.update()
 
-            # extracting pcap file
-            for frame in ext:
-                percent = 100.0 * ext.length / self.length
-                content = EXPT(percent)
-                self.label.config(text=content)
-                self.label.update()
-
-            time.sleep(0.5)
-            self.label.place_forget()
-            showinfo('Export done.', 'File stored in {dir}.'.format(dir=file_))
+                time.sleep(0.5)
+                self.label.place_forget()
+                showinfo('Export done.', "File stored in '{dir}'.".format(dir=file_))
 
     def show_error(self, error):
         showerror(
             'Unable to {error}...'.format(error=error),
             'Heilige, Scheiße! Not implemented yet.'
+        )
+
+    def show_warning(self, warning):
+        showwarning(
+            "Disabled command '{warning}'...".format(warning=warning),
+            'Níam olc! Wrong time to call me.'
         )
 
 

@@ -31,9 +31,6 @@ GH = re.compile(r'(global).*?(header)', re.I)
 SIZE = shutil.get_terminal_size()[0] - 15
 LONG = SIZE if SIZE > 10 else 0
 
-# embeded spaces
-EMSP = '                   '
-
 # extracting label
 NUMB = lambda number, protocol: ' - Frame {:>3d}: {}'.format(number, protocol)
 
@@ -138,6 +135,15 @@ DICT = dict(
 # tuple of quit commands
 QUIT = ('q', 'quit', 'exit')
 
+# dict of file names
+NAME = {
+    'src/about'  : 'ABOUT',
+    'src/init'   : 'README',
+    'src/manual' : 'MANUAL',
+    'src/out'    : 'REPORT',
+    'src/recent' : 'LOG',
+}
+
 
 class Display:
     """Console UI for PCAP Tree Viewer
@@ -207,7 +213,11 @@ class Display:
     ##########################################################################
 
     def __init__(self):
-        self.read_cmd('src/init')
+        try:
+            self.read_cmd('src/init')
+        except FileNotFoundError:
+            print('\n❌Unable to find README.')
+            exit()
 
         kind = 'init'
         while kind:
@@ -237,11 +247,15 @@ class Display:
         return func(self)
 
     def read_cmd(self, name, *, root='init'):
-        with open(name, 'r') as file_:
-            for line in file_:
-                content = line.strip('\n').replace(EMSP, '')
-                print(content)
-        return root
+        try:
+            with open(name, 'r') as file_:
+                for line in file_:
+                    content = line
+                    print(content, end='')
+        except FileNotFoundError:
+            print('\n❌Unable to find {}.'.format(NAME.get(name)))
+        finally:
+            return root
 
     def save_cmd(self, fmt, *, root='open'):
         path = input('\nWhere would you like to export: ')
@@ -289,23 +303,25 @@ class Display:
                 fin = '{}.pcap'.format(fin)
 
         self.__frames = []
-        with open(fin, 'rb') as file_:
-            try:
-                print('\n🚨Loading file {}...'.format(fin))
-                self.__ext = Extractor(fin=fin, fout='src/out', fmt='tree', auto=False, extension=False)
+        try:
+            print('\n🚨Loading file {}...'.format(fin))
+            self.__ext = Extractor(fin=fin, fout='src/out', fmt='tree', auto=False, extension=False)
 
-                # extracting pcap file
-                print('🍺Extracting...')
-                for frame in self.__ext:
-                    content = NUMB(self.length, self.protocol)
-                    print(content)
+            # extracting pcap file
+            print('🍺Extracting...')
+            for frame in self.__ext:
+                content = NUMB(self.length, self.protocol)
+                print(content)
 
-                print(end='\r', flush=True)
-                print('🍻Extraction done.')
-                return 'open'
-            except FileError:
-                print('Unsupported file format.')
-                return root
+            print(end='\r', flush=True)
+            print('🍻Extraction done.')
+            return 'open'
+        except FileError:
+            print('Unsupported file format.')
+            return root
+        except FileNotFoundError:
+            print("❌Invalid input file '{}'.".format(fin))
+            return root
 
     def expt_cmd(self, *, root='open'):
         path = input('\nWhere would you like to export: ')
@@ -322,7 +338,7 @@ class Display:
             print('Unable to export PDF: {}'.format(error.decode(shcoding)))
         else:
             print('🍻Export done.')
-            print('The report has been stored in {}'.format(path))
+            print("The report has been stored in '{}'".format(path))
         return root
 
     def move_cmd(self, *, root='open'):
@@ -331,15 +347,24 @@ class Display:
             if path in QUIT:
                 return None
             try:
-                shutil.copyfile('src/out', path)
                 print('🍺Exporting...')
+                shutil.copyfile('src/out', path)
                 print('🍻Export done.')
                 print('The report has been stored in {}'.format(path))
+                return root
+            except FileNotFoundError:
+                print('\n❌Unable to find REPORT.')
                 return root
             except:
                 path = input('Invalid file name!\nPlease retry: ')
 
     def view_cmd(self, *, root='open'):
+        try:
+            open('src/out', 'r').close()
+        except FileNotFoundError:
+            print('\n❌Unable to find REPORT.')
+            return root
+
         if not self.__frames:
             with open('src/out', 'r') as file_:
                 for _ctr, line in enumerate(file_):
@@ -349,6 +374,12 @@ class Display:
         return 'view'
 
     def srch_cmd(self, *, root='view'):
+        try:
+            open('src/out', 'r').close()
+        except FileNotFoundError:
+            print('\n❌Unable to find REPORT.')
+            return root
+
         topic = input('\nWhat keyword would you to search in frames: ')
         pattern = re.escape(topic)
         result = []
@@ -398,6 +429,12 @@ class Display:
         return root
 
     def goto_cmd(self, *, root='view'):
+        try:
+            open('src/out', 'r').close()
+        except FileNotFoundError:
+            print('\n❌Unable to find REPORT.')
+            return root
+
         num = input('\nWhich frame in range would you like to view: ')
         while True:
             if num in QUIT:
@@ -427,6 +464,12 @@ class Display:
         return 'goto'
 
     def back_cmd(self, *, root='goto'):
+        try:
+            open('src/out', 'r').close()
+        except FileNotFoundError:
+            print('\n❌Unable to find REPORT.')
+            return root
+
         if self.__now == 0:
             self.__now = self.length - 1
         else:
@@ -448,6 +491,12 @@ class Display:
         return root
 
     def next_cmd(self, *, root='goto'):
+        try:
+            open('src/out', 'r').close()
+        except FileNotFoundError:
+            print('\n❌Unable to find REPORT.')
+            return root
+
         if self.__now == self.length - 1:
             self.__now = 0
         else:
@@ -467,3 +516,7 @@ class Display:
 
         self.__now = ctr
         return root
+
+
+if __name__ == '__main__':
+    Display()
