@@ -59,7 +59,7 @@
     * [Python 标准库](https://docs.python.org/3.6/library/)
     * [`Tkinter` 文档](http://infohost.nmt.edu/tcc/help/pubs/tkinter/)
     * [RFC 文献](https://tools.ietf.org/)
-    * 其他，如 StackOverflow、CSDN 及 独立开发者博客等
+    * 其他，如 StackOverflow、CSDN 及独立开发者博客等
 
 &nbsp;
 
