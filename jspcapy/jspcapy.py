@@ -88,8 +88,6 @@ def main():
     else:
         fmt = None
 
-    print(args.verbose)
-
     try:
         ext = Extractor(fin=args.fin, fout=args.fout, fmt=fmt,
                         auto=args.verbose, extension=args.auto_extension)
