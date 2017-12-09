@@ -177,7 +177,29 @@ class TCP(Transport):
     def read_tcp(self):
         """Read Transmission Control Protocol (TCP).
 
-        Structure of TCP header (RFC 793):
+        Structure of TCP header [RFC 793]:
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Source Port          |       Destination Port        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                        Sequence Number                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                    Acknowledgment Number                      |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Data |           |U|A|P|R|S|F|                               |
+           | Offset| Reserved  |R|C|S|S|Y|I|            Window             |
+           |       |           |G|K|H|T|N|N|                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |           Checksum            |         Urgent Pointer        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                    Options                    |    Padding    |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                             data                              |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
             Octets          Bits          Name                      Discription
               0              0          tcp.srcport             Source Port
               2              16         tcp.dstport             Destination Port
@@ -325,6 +347,12 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of TCP TSopt [RFC 7323]:
+
+           +-------+-------+---------------------+---------------------+
+           |Kind=8 |  10   |   TS Value (TSval)  |TS Echo Reply (TSecr)|
+           +-------+-------+---------------------+---------------------+
+               1       1              4                     4
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (8)
               1              8          tcp.opt.length                  Length (10)
@@ -346,6 +374,12 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of TCP POC-SP Option [RFC 1693][RFC 6247]:
+
+                                      1 bit        1 bit    6 bits
+            +----------+----------+------------+----------+--------+
+            |  Kind=10 | Length=3 | Start_flag | End_flag | Filler |
+            +----------+----------+------------+----------+--------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (10)
               1              8          tcp.opt.length                  Length (3)
@@ -371,6 +405,11 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of TCP CHKSUM-REQ [RFC 1146][RFC 6247]:
+
+           +----------+----------+----------+
+           |  Kind=14 | Length=3 |  chksum  |
+           +----------+----------+----------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (14)
               1              8          tcp.opt.length                  Length (3)
@@ -393,6 +432,16 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of TCP QSopt [RFC 4782]:
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Kind      |  Length=8     | Resv. | Rate  |   TTL Diff    |
+           |               |               |       |Request|               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                   QS Nonce                                | R |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (27)
               1              8          tcp.opt.length                  Length (8)
@@ -424,6 +473,13 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of TCP TIMEOUT [RFC 5482]:
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Kind = 28   |   Length = 4  |G|        User Timeout         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (28)
               1              8          tcp.opt.length                  Length (4)
@@ -447,6 +503,17 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of TCP AOopt [RFC 5925]:
+
+           +------------+------------+------------+------------+
+           |  Kind=29   |   Length   |   KeyID    | RNextKeyID |
+           +------------+------------+------------+------------+
+           |                     MAC           ...
+           +-----------------------------------...
+
+           ...-----------------+
+           ...  MAC (con't)    |
+           ...-----------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (29)
               1              8          tcp.opt.length                  Length
@@ -474,6 +541,16 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of MP-TCP [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----------------------+
+           |     Kind      |    Length     |Subtype|                       |
+           +---------------+---------------+-------+                       |
+           |                     Subtype-specific data                     |
+           |                       (variable length)                       |
+           +---------------------------------------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -506,6 +583,21 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of MP_CAPABLE [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-------+---------------+
+           |     Kind      |    Length     |Subtype|Version|A|B|C|D|E|F|G|H|
+           +---------------+---------------+-------+-------+---------------+
+           |                   Option Sender's Key (64 bits)               |
+           |                                                               |
+           |                                                               |
+           +---------------------------------------------------------------+
+           |                  Option Receiver's Key (64 bits)              |
+           |                     (if option Length == 20)                  |
+           |                                                               |
+           +---------------------------------------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12/20)
@@ -579,6 +671,17 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of MP_JOIN-SYN [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----+-+---------------+
+           |     Kind      |  Length = 12  |Subtype|     |B|   Address ID  |
+           +---------------+---------------+-------+-----+-+---------------+
+           |                   Receiver's Token (32 bits)                  |
+           +---------------------------------------------------------------+
+           |                Sender's Random Number (32 bits)               |
+           +---------------------------------------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12)
@@ -617,6 +720,19 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of MP_JOIN-SYN/ACK [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----+-+---------------+
+           |     Kind      |  Length = 16  |Subtype|     |B|   Address ID  |
+           +---------------+---------------+-------+-----+-+---------------+
+           |                                                               |
+           |                Sender's Truncated HMAC (64 bits)              |
+           |                                                               |
+           +---------------------------------------------------------------+
+           |                Sender's Random Number (32 bits)               |
+           +---------------------------------------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (16)
@@ -655,6 +771,19 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of MP_JOIN-ACK [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----------------------+
+           |     Kind      |  Length = 24  |Subtype|      (reserved)       |
+           +---------------+---------------+-------+-----------------------+
+           |                                                               |
+           |                                                               |
+           |                   Sender's HMAC (160 bits)                    |
+           |                                                               |
+           |                                                               |
+           +---------------------------------------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (24)
@@ -684,6 +813,33 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of DSS [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+----------------------+
+           |     Kind      |    Length     |Subtype| (reserved) |F|m|M|a|A|
+           +---------------+---------------+-------+----------------------+
+           |           Data ACK (4 or 8 octets, depending on flags)       |
+           +--------------------------------------------------------------+
+           |   Data sequence number (4 or 8 octets, depending on flags)   |
+           +--------------------------------------------------------------+
+           |              Subflow Sequence Number (4 octets)              |
+           +-------------------------------+------------------------------+
+           |  Data-Level Length (2 octets) |      Checksum (2 octets)     |
+           +-------------------------------+------------------------------+
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +--------------------------------------------------------------+
+           |                                                              |
+           |                Data Sequence Number (8 octets)               |
+           |                                                              |
+           +--------------------------------------------------------------+
+           |              Subflow Sequence Number (4 octets)              |
+           +-------------------------------+------------------------------+
+           |  Data-Level Length (2 octets) |        Zeros (2 octets)      |
+           +-------------------------------+------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -741,6 +897,17 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of ADD_ADDR [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-------+---------------+
+           |     Kind      |     Length    |Subtype| IPVer |  Address ID   |
+           +---------------+---------------+-------+-------+---------------+
+           |          Address (IPv4 - 4 octets / IPv6 - 16 octets)         |
+           +-------------------------------+-------------------------------+
+           |   Port (2 octets, optional)   |
+           +-------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -821,6 +988,14 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of REMOVE_ADDR [RFC 6824]:
+
+                               1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-------+---------------+
+           |     Kind      |  Length = 3+n |Subtype|(resvd)|   Address ID  | ...
+           +---------------+---------------+-------+-------+---------------+
+                                      (followed by n-1 Address IDs, if required)
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
@@ -851,6 +1026,13 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of MP_PRIO [RFC 6824]:
+
+                              1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----+-+--------------+
+           |     Kind      |     Length    |Subtype|     |B| AddrID (opt) |
+           +---------------+---------------+-------+-----+-+--------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (3/4)
@@ -878,6 +1060,17 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of MP_FAIL [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+----------------------+
+           |     Kind      |   Length=12   |Subtype|      (reserved)      |
+           +---------------+---------------+-------+----------------------+
+           |                                                              |
+           |                 Data Sequence Number (8 octets)              |
+           |                                                              |
+           +--------------------------------------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12)
@@ -907,6 +1100,17 @@ class TCP(Transport):
             size - int, length of option
 
         Structure of MP_FASTCLOSE [RFC 6824]:
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----------------------+
+           |     Kind      |    Length     |Subtype|      (reserved)       |
+           +---------------+---------------+-------+-----------------------+
+           |                      Option Receiver's Key                    |
+           |                            (64 bits)                          |
+           |                                                               |
+           +---------------------------------------------------------------+
+
             Octets          Bits            Name                            Discription
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12)

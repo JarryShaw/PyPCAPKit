@@ -64,6 +64,20 @@ class UDP(Transport):
         """Read User Datagram Protocol (UDP).
 
         Structure of UDP header [RFC 768]:
+
+
+            0      7 8     15 16    23 24    31
+           +--------+--------+--------+--------+
+           |     Source      |   Destination   |
+           |      Port       |      Port       |
+           +--------+--------+--------+--------+
+           |                 |                 |
+           |     Length      |    Checksum     |
+           +--------+--------+--------+--------+
+           |
+           |          data octets ...
+           +---------------- ...
+
             Octets          Bits          Name                      Discription
               0              0          udp.srcport             Source Port
               2              16         udp.dstport             Destination Port
