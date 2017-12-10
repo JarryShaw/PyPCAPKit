@@ -22,7 +22,7 @@
 # ##############################################################################
 
 
-from ..protocol import Protocol
+from ..protocols import Protocol
 
 
 class Link(Protocol):
@@ -32,10 +32,10 @@ class Link(Protocol):
 
 # Link layer protocols
 LINKTYPE = {
-    0:  'Null',     # BSD loopback encapsulation
-    1:  'Ethernet', # IEEE 802.3 Ethernet
-  101:  'Raw',      # Raw IP
-  228:  'IPV4',     # Raw IPv4
-  229:  'IPv6',     # Raw IPv6
-  248:  'SCTP',     # SCTP packets
+    0 : 'Null',     # BSD loopback encapsulation
+    1 : 'Ethernet', # IEEE 802.3 Ethernet
+  101 : 'Raw',      # Raw IP
+  228 : 'IPv4',     # Raw IPv4
+  229 : 'IPv6',     # Raw IPv6
+  248 : 'SCTP',     # SCTP packets
 }

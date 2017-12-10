@@ -11,7 +11,7 @@ import textwrap
 
 from .link import Link
 from ..internet.internet import INTERNET
-from ..protocol import Info
+from ..protocols import Info
 
 
 class Ethernet(Link):
@@ -44,7 +44,7 @@ class Ethernet(Link):
 
     @property
     def layer(self):
-        return 'Link Layer'
+        return self.__layer__
 
     @property
     def protocol(self):

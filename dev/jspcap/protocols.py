@@ -96,7 +96,7 @@ class Protocol(object):
     def _read_fileng(self, size, *args, **kwargs):
         return self._file.read(size, *args, **kwargs)
 
-    def _read_unpack(self, size=1, *, sign=False, lilendian=True):
+    def _read_unpack(self, size=1, *, sign=False, lilendian=False):
         """Read bytes and unpack for integers.
 
         Keyword arguemnts:

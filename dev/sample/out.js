@@ -29,12 +29,13 @@ var data = {
 				"version" : "6",
 				"tclass" : 96,
 				"label" : 0,
-				"len" : 8192,
+				"len" : 32,
 				"next" : "ICMPv6",
 				"limit" : 255,
 				"src" : "fe80::a6:87f9:2793:16ee",
 				"dst" : "fe80::1ccd:7c77:bac7:46b7",
-				"Transport Layer" : "87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97"
+				"padding" : "87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97",
+				"Transport Layer" : ""
 			}
 		},
 		"protocols" : "Ethernet:IPv6:ICMPv6"
@@ -59,12 +60,13 @@ var data = {
 				"version" : "6",
 				"tclass" : 96,
 				"label" : 0,
-				"len" : 6144,
+				"len" : 24,
 				"next" : "ICMPv6",
 				"limit" : 255,
 				"src" : "fe80::1ccd:7c77:bac7:46b7",
 				"dst" : "fe80::a6:87f9:2793:16ee",
-				"Transport Layer" : "88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7"
+				"padding" : "88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7",
+				"Transport Layer" : ""
 			}
 		},
 		"protocols" : "Ethernet:IPv6:ICMPv6"
@@ -92,8 +94,8 @@ var data = {
 					"dscp" : [ "Routine", "Normal Delay", "Normal Throughput", "Normal Relibility" ],
 					"ecn" : "Not-ECT"
 				},
-				"len" : 10240,
-				"id" : 13509,
+				"len" : 40,
+				"id" : 50484,
 				"flags" : {
 					"rb" : "00",
 					"df" : true,
@@ -106,10 +108,10 @@ var data = {
 				"src" : "123.129.210.135",
 				"dst" : "192.168.1.100",
 				"TCP" : {
-					"srcport" : 20480,
-					"dstport" : 49367,
-					"seq" : 1420926933,
-					"ack" : 4288707238,
+					"srcport" : 80,
+					"dstport" : 55232,
+					"seq" : 3584012628,
+					"ack" : 2793054463,
 					"hdr_len" : 20,
 					"flags" : {
 						"res" : "00 00 00",
@@ -123,7 +125,7 @@ var data = {
 						"syn" : false,
 						"fin" : true
 					},
-					"window_size" : 45180,
+					"window_size" : 31920,
 					"checksum" : "7c 8e",
 					"urgent_pointer" : 0,
 					"Application Layer" : null
@@ -155,7 +157,7 @@ var data = {
 					"dscp" : [ "Routine", "Normal Delay", "Normal Throughput", "Normal Relibility" ],
 					"ecn" : "Not-ECT"
 				},
-				"len" : 10240,
+				"len" : 40,
 				"id" : 0,
 				"flags" : {
 					"rb" : "00",
@@ -169,10 +171,10 @@ var data = {
 				"src" : "192.168.1.100",
 				"dst" : "123.129.210.135",
 				"TCP" : {
-					"srcport" : 49367,
-					"dstport" : 20480,
-					"seq" : 4288707238,
-					"ack" : 1437704149,
+					"srcport" : 55232,
+					"dstport" : 80,
+					"seq" : 2793054463,
+					"ack" : 3584012629,
 					"hdr_len" : 20,
 					"flags" : {
 						"res" : "00 00 00",
@@ -218,7 +220,7 @@ var data = {
 					"dscp" : [ "Routine", "Normal Delay", "Normal Throughput", "Normal Relibility" ],
 					"ecn" : "Not-ECT"
 				},
-				"len" : 10240,
+				"len" : 40,
 				"id" : 0,
 				"flags" : {
 					"rb" : "00",
@@ -232,10 +234,10 @@ var data = {
 				"src" : "192.168.1.100",
 				"dst" : "123.129.210.135",
 				"TCP" : {
-					"srcport" : 45271,
-					"dstport" : 20480,
-					"seq" : 562943021,
-					"ack" : 1853121901,
+					"srcport" : 55216,
+					"dstport" : 80,
+					"seq" : 768904481,
+					"ack" : 1835365486,
 					"hdr_len" : 20,
 					"flags" : {
 						"res" : "00 00 00",
@@ -281,7 +283,7 @@ var data = {
 					"dscp" : [ "Routine", "Normal Delay", "Normal Throughput", "Normal Relibility" ],
 					"ecn" : "Not-ECT"
 				},
-				"len" : 37120,
+				"len" : 145,
 				"id" : 0,
 				"flags" : {
 					"rb" : "00",
@@ -295,9 +297,9 @@ var data = {
 				"src" : "192.168.1.1",
 				"dst" : "255.255.255.255",
 				"UDP" : {
-					"srcport" : 17554,
-					"dstport" : 35091,
-					"len" : 32000,
+					"srcport" : 37444,
+					"dstport" : 5001,
+					"len" : 125,
 					"checksum" : "63 b1",
 					"Application Layer" : "01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34"
 				}

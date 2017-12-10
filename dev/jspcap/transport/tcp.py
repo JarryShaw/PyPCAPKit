@@ -10,7 +10,7 @@ import struct
 
 
 from .transport import Transport
-from ..protocol import Info
+from ..protocols import Info
 
 
 """TCP Option Utility Table
@@ -279,6 +279,7 @@ class TCP(Transport):
             opts = TCP_OPT.get(kind)
             if opts is None:
                 len_ = _optl - counter
+                counter = _optl
                 options['Unknown'] = self._read_fileng(len_)
                 break
 
@@ -303,6 +304,11 @@ class TCP(Transport):
 
             # break when eol triggered
             if not kind:    break
+
+        # get padding
+        if counter < _optl:
+            len_ = _optl - counter
+            options['padding'] = self._read_fileng(len_)
 
         return options
 

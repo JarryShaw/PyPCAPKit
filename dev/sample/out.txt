@@ -28,14 +28,15 @@ Frame 1
   |           |-- version -> 6
   |           |-- tclass -> 96
   |           |-- label -> 0
-  |           |-- len -> 8192
+  |           |-- len -> 32
   |           |-- next -> ICMPv6
   |           |-- limit -> 255
   |           |-- src -> fe80::a6:87f9:2793:16ee
   |           |-- dst -> fe80::1ccd:7c77:bac7:46b7
-  |           |-- Transport Layer
-  |                 |--> 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
-  |                      1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
+  |           |-- padding
+  |           |     |--> 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
+  |           |          1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
+  |           |-- Transport Layer -> 
   |-- protocols -> Ethernet:IPv6:ICMPv6
 
 Frame 2
@@ -57,14 +58,15 @@ Frame 2
   |           |-- version -> 6
   |           |-- tclass -> 96
   |           |-- label -> 0
-  |           |-- len -> 6144
+  |           |-- len -> 24
   |           |-- next -> ICMPv6
   |           |-- limit -> 255
   |           |-- src -> fe80::1ccd:7c77:bac7:46b7
   |           |-- dst -> fe80::a6:87f9:2793:16ee
-  |           |-- Transport Layer
-  |                 |--> 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
-  |                      1c cd 7c 77 ba c7 46 b7
+  |           |-- padding
+  |           |     |--> 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
+  |           |          1c cd 7c 77 ba c7 46 b7
+  |           |-- Transport Layer -> 
   |-- protocols -> Ethernet:IPv6:ICMPv6
 
 Frame 3
@@ -92,8 +94,8 @@ Frame 3
   |           |     |     |--> Normal Throughput
   |           |     |     |--> Normal Relibility
   |           |     |-- ecn -> Not-ECT
-  |           |-- len -> 10240
-  |           |-- id -> 13509
+  |           |-- len -> 40
+  |           |-- id -> 50484
   |           |-- flags
   |           |     |-- rb -> 00
   |           |     |-- df -> True
@@ -105,10 +107,10 @@ Frame 3
   |           |-- src -> 123.129.210.135
   |           |-- dst -> 192.168.1.100
   |           |-- TCP
-  |                 |-- srcport -> 20480
-  |                 |-- dstport -> 49367
-  |                 |-- seq -> 1420926933
-  |                 |-- ack -> 4288707238
+  |                 |-- srcport -> 80
+  |                 |-- dstport -> 55232
+  |                 |-- seq -> 3584012628
+  |                 |-- ack -> 2793054463
   |                 |-- hdr_len -> 20
   |                 |-- flags
   |                 |     |-- res -> 00 00 00
@@ -121,7 +123,7 @@ Frame 3
   |                 |     |-- reset -> False
   |                 |     |-- syn -> False
   |                 |     |-- fin -> True
-  |                 |-- window_size -> 45180
+  |                 |-- window_size -> 31920
   |                 |-- checksum -> 7c 8e
   |                 |-- urgent_pointer -> 0
   |                 |-- Application Layer -> N/A
@@ -152,7 +154,7 @@ Frame 4
   |           |     |     |--> Normal Throughput
   |           |     |     |--> Normal Relibility
   |           |     |-- ecn -> Not-ECT
-  |           |-- len -> 10240
+  |           |-- len -> 40
   |           |-- id -> 0
   |           |-- flags
   |           |     |-- rb -> 00
@@ -165,10 +167,10 @@ Frame 4
   |           |-- src -> 192.168.1.100
   |           |-- dst -> 123.129.210.135
   |           |-- TCP
-  |                 |-- srcport -> 49367
-  |                 |-- dstport -> 20480
-  |                 |-- seq -> 4288707238
-  |                 |-- ack -> 1437704149
+  |                 |-- srcport -> 55232
+  |                 |-- dstport -> 80
+  |                 |-- seq -> 2793054463
+  |                 |-- ack -> 3584012629
   |                 |-- hdr_len -> 20
   |                 |-- flags
   |                 |     |-- res -> 00 00 00
@@ -212,7 +214,7 @@ Frame 5
   |           |     |     |--> Normal Throughput
   |           |     |     |--> Normal Relibility
   |           |     |-- ecn -> Not-ECT
-  |           |-- len -> 10240
+  |           |-- len -> 40
   |           |-- id -> 0
   |           |-- flags
   |           |     |-- rb -> 00
@@ -225,10 +227,10 @@ Frame 5
   |           |-- src -> 192.168.1.100
   |           |-- dst -> 123.129.210.135
   |           |-- TCP
-  |                 |-- srcport -> 45271
-  |                 |-- dstport -> 20480
-  |                 |-- seq -> 562943021
-  |                 |-- ack -> 1853121901
+  |                 |-- srcport -> 55216
+  |                 |-- dstport -> 80
+  |                 |-- seq -> 768904481
+  |                 |-- ack -> 1835365486
   |                 |-- hdr_len -> 20
   |                 |-- flags
   |                 |     |-- res -> 00 00 00
@@ -272,7 +274,7 @@ Frame 6
   |           |     |     |--> Normal Throughput
   |           |     |     |--> Normal Relibility
   |           |     |-- ecn -> Not-ECT
-  |           |-- len -> 37120
+  |           |-- len -> 145
   |           |-- id -> 0
   |           |-- flags
   |           |     |-- rb -> 00
@@ -285,9 +287,9 @@ Frame 6
   |           |-- src -> 192.168.1.1
   |           |-- dst -> 255.255.255.255
   |           |-- UDP
-  |                 |-- srcport -> 17554
-  |                 |-- dstport -> 35091
-  |                 |-- len -> 32000
+  |                 |-- srcport -> 37444
+  |                 |-- dstport -> 5001
+  |                 |-- len -> 125
   |                 |-- checksum -> 63 b1
   |                 |-- Application Layer
   |                       |--> 01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06

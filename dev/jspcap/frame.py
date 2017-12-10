@@ -9,7 +9,7 @@ import datetime
 # Analyser for record/package headers
 
 
-from .protocol import Info, Protocol
+from .protocols import Info, Protocol
 
 
 class Frame(Protocol):
