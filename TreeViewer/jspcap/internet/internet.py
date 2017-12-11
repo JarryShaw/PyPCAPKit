@@ -22,7 +22,7 @@
 # ##############################################################################
 
 
-from ..protocol import Protocol
+from ..protocols import Protocol
 
 
 class Internet(Protocol):
@@ -32,8 +32,12 @@ class Internet(Protocol):
 
 # Internet layer protocols
 INTERNET = {
-    '0800': 'IPv4',
-    '0806': 'ARP',
-    '8137': 'IPX',
-    '86dd': 'IPv6',
+    # Link Layer
+    '0806' : 'ARP',     # Address Resolution Protocol
+    '8035' : 'RARP',    # Reverse Address Resolution Protocol
+
+    # Internet Layer
+    '0800' : 'IPv4',    # Internet Protocol version 4
+    '8137' : 'IPX',     # Internetwork Packet Exchange
+    '86dd' : 'IPv6',    # Internet Protocol version 6
 }

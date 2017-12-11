@@ -7,6 +7,7 @@
 
 
 from .ip import IP
+from ..protocols import Info
 from ..transport.transport import TP_PROTO
 
 
@@ -71,6 +72,13 @@ class IPv4(IP):
     # Data models.
     ##########################################################################
 
+    def __init__(self, _file):
+        self._file = _file
+        self._info = Info(self.read_ipv4())
+
+    def __len__(self):
+        return self._info.hdr_len
+
     def __length_hint__(self):
         return 20
 
@@ -129,7 +137,7 @@ class IPv4(IP):
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
 
-        ip = dict(
+        ipv4 = dict(
             version = _vihl[0],
             hdr_len = int(_vihl[1], base=16) * 4,
             dsfield = dict(
@@ -148,7 +156,7 @@ class IPv4(IP):
                 df = True if _frag[1] else False,
                 mf = True if _frag[2] else False,
             ),
-            frag_offset = int(_frag[3:], base=2),
+            frag_offset = int(_frag[3:], base=2) * 8,
             ttl = _ttol,
             proto = _prot,
             checksum = _csum,
@@ -156,13 +164,11 @@ class IPv4(IP):
             dst = _dsta,
         )
 
-        _optl = ip['hdr_len'] - 20
+        _optl = ipv4['hdr_len'] - 20
         if _optl:
-            ip['options'] = self._read_ip_options(_optl)
+            ipv4['options'] = self._read_ip_options(_optl)
 
-        return ip
-
-    read_ip = read_ipv4
+        return ipv4
 
     def _read_ip_proto(self):
         _byte = self._read_unpack(1)

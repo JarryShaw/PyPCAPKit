@@ -26,26 +26,29 @@ class Extractor:
     """Extractor for PCAP files.
 
     Properties:
-        _frame -- int, frame number
+        _auto -- bool, if run automatically to the end
+        _ifnm -- str, input file name (aka _ifile.name)
+        _ofnm -- str, output file name (aka _ofile.name)
+
+        _ifile -- FileIO, input file object
         _ofile -- object, temperory output writer
 
-        _dlink -- str, data link layer protocol
-        _netwk -- str, network layer protocol
-        _trans -- str, transport layer protocol
-        _applc -- str, application layer protocol
-
+        _frnum -- int, frame number
         _frame -- list, each item contains `Info` of a record/package
             |--> gbhdr -- Info object, global header
             |--> frame 1 -- Info object, record/package header
-            |       |--> dlink -- Info object, link layer header
-            |       |--> netwk -- Info object, internet layer header
-            |       |--> trans -- Info object, transport layer header
-            |       |--> applc -- Info object, application layer datagram
+            |       |--> Info object, first (link layer) header
+            |       |--> Info object, next protocol header
+            |       |--> ......
+            |       |--> Info object, optional protocol trailer
             |--> frame 2 -- Info object, record/package header
             |       |--> ......
 
+        _gbhdr -- Info object, the global header
+        _proto -- str, protocol chain of current frame
+
     Usage:
-        reader = Analyer(fmt='plist', fin='in', fout='out')
+        reader = Analyer(fmt='plist', fin='in', fout='out', auto=False, extension=False)
 
     """
 
@@ -74,6 +77,10 @@ class Extractor:
         return self._ofnm
 
     @property
+    def header(self):
+        return self._gbhdr
+
+    @property
     def protocol(self):
         return self._protocol
 
@@ -92,6 +99,9 @@ class Extractor:
                     <keyword> 'plist' / 'json' / 'tree' / 'html'
             fin  -- str, file name to be read; if file not exist, raise error
             fout -- str, file name to be written
+
+            auto -- bool, if automatically run till EOF
+            extension -- bool, if check and append axtensions to output file
 
         """
         ifnm, ofnm, fmt = self.make_name(fin, fout, fmt, extension)
@@ -134,6 +144,14 @@ class Extractor:
         except EOFError:
             self._ifile.close()
             raise StopIteration
+
+    def __call__(self):
+        if not self._auto:
+            try:
+                return self._read_frame()
+            except EOFError:
+                self._ifile.close()
+                raise EOFError
 
     ##########################################################################
     # Utilities.
@@ -212,10 +230,6 @@ class Extractor:
         - Write plist file.
 
         """
-        self._netwk = None
-        self._trans = None
-        self._applc = None
-
         # read frame header
         frame = Frame(self._ifile, self._frnum)
         plist = frame.info.infotodict()
@@ -224,51 +238,14 @@ class Extractor:
         length = frame.info.len
         bytes_ = io.BytesIO(self._ifile.read(length))
 
-        # read link layer
-        dlink = self._link_layer(bytes_, length)
+        # start extraction
+        proto = self._read_protocol(bytes_, length)
 
-        # check link layer protocol
-        if not dlink[0]:
-            plist['Link Layer'] = dlink[1]
-            self._write_record(plist)
-            return self._frnum
+        if proto[0]:
+            plist[proto.protocol] = proto[1].info.infotodict()
         else:
-            plist[self._dlink] = dlink[1].info.infotodict()
-            self._netwk = dlink[1].protocol
-            length -= dlink[1].length
-
-        # read internet layer
-        netwk = self._internet_layer(bytes_, length)
-
-        # check internet layer protocol
-        if not netwk[0]:
-            plist[self._dlink]['Network Layer'] = netwk[1]
-            self._write_record(plist)
-            return self._frnum
-        else:
-            plist[self._dlink][self._netwk] = netwk[1].info.infotodict()
-            self._trans = netwk[1].protocol
-            length -= netwk[1].length
-
-        # read transport layer
-        trans = self._transport_layer(bytes_, length)
-
-        # check transport layer protocol
-        if not trans[0]:
-            plist[self._dlink][self._netwk]['Transport Layer'] = trans[1]
-            self._write_record(plist)
-            return self._frnum
-        else:
-            plist[self._dlink][self._netwk][self._trans] = trans[1].info.infotodict()
-            length -= trans[1].length
-
-        # read application layer
-        applc = self._application_layer(bytes_, length)
-
-        # check application layer protocol
-        plist[self._dlink][self._netwk][self._trans]['Application Layer'] = applc[1]
-        self._write_record(plist)
-        return self._frnum
+            plist['Link Layer'] = proto[1]
+        self._write_record(plist, proto[2])
 
     def _write_record(self, plist):
         """Write plist & append Info."""
@@ -278,7 +255,7 @@ class Extractor:
         self._ofile(plist, _name=_fnum)
 
         # record frame
-        if self._trans == 'TCP':
+        if Flag_TCP:
             data = dict(
                 src = (plist[self._dlink][self._netwk]['src'],
                        plist[self._dlink][self._netwk][self._trans]['srcport']),
