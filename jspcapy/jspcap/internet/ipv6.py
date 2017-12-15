@@ -7,6 +7,7 @@
 
 
 from .ip import IP
+from ..protocols import Info
 from ..transport.transport import TP_PROTO
 
 
@@ -46,6 +47,13 @@ class IPv6(IP):
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    def __init__(self, _file):
+        self._file = _file
+        self._info = Info(self.read_ipv6())
+
+    def __len__(self):
+        return self._info.len
 
     def __length_hint__(self):
         return 40
@@ -101,7 +109,7 @@ class IPv6(IP):
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
 
-        ip = dict(
+        ipv6 = dict(
             version = _htet[0],
             tclass = _htet[1],
             label = _htet[2],
@@ -112,15 +120,25 @@ class IPv6(IP):
             dst = _dsta,
         )
 
-        if _next[0]:
-            # _size = ip['len'] - ip['hdr_len']
-            # ip['proto'] = _prot[1]
-            # ip[_prot[1]] = self._read_ip_nxthdr(_prot[1], _size)
-            pass
+        # length after standard header
+        _hlen = _plen - 40
 
-        return ip
+        if _next[0]:    # Extension Headers
+            while _hlen:
+                if _next == 'AH':
+                    from .ah import AH
+                    _exth = AH(self._file, version=6)
+                    ipv6['ext'][_next] = _exth.info
+                    _hlen -= _exth.length
+                else:
+                    _exth = self._read_fileng(_hlen)
+                    ipv6['ext']['Unknown'] = _exth
+                    _hlen -= _hlen
 
-    read_ip = read_ipv6
+        if _hlen:   # Paddings
+            ipv6['padding'] = self._read_fileng(_hlen)
+
+        return ipv6
 
     def _read_ip_hextet(self):
         _htet = self._read_fileng(4).hex()

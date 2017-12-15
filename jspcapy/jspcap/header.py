@@ -7,7 +7,7 @@
 
 
 from .exceptions import FileError
-from .protocol import Info, Protocol
+from .protocols import Info, Protocol
 
 from .link.link import LINKTYPE
 
