@@ -14,7 +14,7 @@ import textwrap
 from .exceptions import FormatError
 from .frame import Frame
 from .header import Header
-from .protocol import Info
+from .protocols import Info
 
 
 FILE = re.compile(r'''
@@ -134,6 +134,14 @@ class Extractor:
         except EOFError:
             self._ifile.close()
             raise StopIteration
+
+    def __call__(self):
+        if not self._auto:
+            try:
+                return self._read_frame()
+            except EOFError:
+                self._ifile.close()
+                raise EOFError
 
     ##########################################################################
     # Utilities.
@@ -320,12 +328,23 @@ class Extractor:
 
     def _internet_layer(self, _ifile, length):
         """Read internet layer."""
-        if self._netwk == 'IPv4':
+        # Other Conditions
+        if self._netwk == 'ARP':
+            from .link.arp import ARP
+            return True, ARP(_ifile)
+        elif self._netwk == 'RARP':
+            from .link.rarp import RARP
+            return True, RARP(_ifile)
+        # Internet Layer
+        elif self._netwk == 'IPv4':
             from .internet.ipv4 import IPv4
             return True, IPv4(_ifile)
         elif self._netwk == 'IPv6':
             from .internet.ipv6 import IPv6
             return True, IPv6(_ifile)
+        elif self._netwk == 'IPX':
+            from .internet.ipx import IPX
+            return True, IPX(_ifile)
         else:
             # raise NotImplementedError
             _data = _ifile.read(length) if length else None

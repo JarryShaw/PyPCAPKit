@@ -7,7 +7,7 @@
 
 
 from .exceptions import FileError
-from .protocol import Info, Protocol
+from .protocols import Info, Protocol
 
 from .link.link import LINKTYPE
 
@@ -99,7 +99,7 @@ class Header(Protocol):
         """
         _temp = self._read_fileng(4)
         if _temp != b'\xd4\xc3\xb2\xa1':
-            raise FileError('Unsopported file format.')
+            raise FileError
 
         _magn = _temp
         _vmaj = self._read_unpack(2, lilendian=True)
