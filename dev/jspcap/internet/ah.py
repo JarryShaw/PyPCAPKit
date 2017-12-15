@@ -7,7 +7,6 @@
 
 
 from .ipsec import IPsec
-from ..transport import TP_PROTO
 
 
 class AH(IPsec):
@@ -75,7 +74,7 @@ class AH(IPsec):
               12             96         ah.icv          Integrity Check Value (ICV)
 
         """
-        _next = self._read_ip_proto()
+        _next = self._read_protos(1)
         _plen = self._read_unpack(1)
         _resv = self._read_fileng(2)
         _scpi = self._read_unpack(4)
@@ -102,9 +101,4 @@ class AH(IPsec):
         if _plen:   # explicit padding in need
             ah['padding'] = self._read_fileng(_plen)
 
-        return ah
-
-    def _read_ip_proto(self):
-        _byte = self._read_unpack(1)
-        _prot = TP_PROTO.get(_byte)
-        return _prot
+        return self._read_next_layer(ah, _next)

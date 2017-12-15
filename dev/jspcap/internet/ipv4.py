@@ -7,8 +7,7 @@
 
 
 from .ip import IP
-from ..protocols import Info
-from ..transport.transport import TP_PROTO
+from ..protocol import Info
 
 
 # TOS (DS Field) Precedence
@@ -132,7 +131,7 @@ class IPv4(IP):
         _iden = self._read_unpack(2)
         _frag = self._read_binary(2)
         _ttol = self._read_unpack(1)
-        _prot = self._read_ip_proto()
+        _prot = self._read_protos(1)
         _csum = self._read_fileng(2)
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
@@ -153,8 +152,8 @@ class IPv4(IP):
             id = _iden,
             flags = dict(
                 rb = b'\x00',
-                df = True if _frag[1] else False,
-                mf = True if _frag[2] else False,
+                df = True if int(_frag[1]) else False,
+                mf = True if int(_frag[2]) else False,
             ),
             frag_offset = int(_frag[3:], base=2) * 8,
             ttl = _ttol,
@@ -168,12 +167,7 @@ class IPv4(IP):
         if _optl:
             ipv4['options'] = self._read_ip_options(_optl)
 
-        return ipv4
-
-    def _read_ip_proto(self):
-        _byte = self._read_unpack(1)
-        _prot = TP_PROTO.get(_byte)
-        return _prot
+        return self._read_next_layer(ipv4, _prot)
 
     def _read_ip_addr(self):
         _byte = self._read_fileng(4)

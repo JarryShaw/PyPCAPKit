@@ -3,7 +3,7 @@
 
 
 # Reverse Address Resolution Protocol
-# Analyser for ARP/RARP/DRARP/IARP header
+# Analyser for RARP/DRARP header
 
 
 from .arp import ARP
@@ -11,10 +11,4 @@ from .arp import ARP
 
 class RARP(ARP):
 
-    ##########################################################################
-    # Properties.
-    ##########################################################################
-
-    @property
-    def name(self):
-        return 'Reverse Address Resolution Protocol'
+    _name = 'Reverse Address Resolution Protocol'

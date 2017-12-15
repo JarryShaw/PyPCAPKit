@@ -10,7 +10,7 @@ import struct
 
 
 from .transport import Transport
-from ..protocols import Info
+from ..protocol import Info
 
 
 """TCP Option Utility Table
@@ -126,7 +126,7 @@ TCP_OPT = {                         #   kind  length  type  process  comment    
 
 class TCP(Transport):
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -261,9 +261,8 @@ class TCP(Transport):
         _optl = tcp['hdr_len'] - 20
         if _optl:
             tcp['opt'] = self._read_tcp_options(_optl)
-            # tcp['opt'] = self._read_fileng(_optl)
 
-        return tcp
+        return self._read_next_layer(tcp)
 
     def _read_tcp_options(self, _optl):
         counter = 0     # length of read option list

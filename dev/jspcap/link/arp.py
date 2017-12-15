@@ -3,12 +3,12 @@
 
 
 # Address Resolution Protocol
-# Analyser for ARP/RARP/DRARP/IARP header
+# Analyser for ARP/IARP header
 
 
 from .link import Link, LINKTYPE
-from ..internet.internet import INTERNET
-from ..protocols import Info
+from ..internet import ETHERTYPE
+from ..protocol import Info
 
 
 # Operation Codes [RFC 826][RFC 5494]
@@ -38,7 +38,7 @@ class ARP(Link):
 
     """
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -46,7 +46,7 @@ class ARP(Link):
 
     @property
     def name(self):
-        return 'Address Resolution Protocol'
+        return self._name
 
     @property
     def info(self):
@@ -115,9 +115,16 @@ class ARP(Link):
         _thwa = self._read_addr_resolve(_hlen, _hwty)
         _hpta = self._read_proto_resolve(_plen, _ptty)
 
+        if _oper in (5, 6, 7):
+            self._name = 'Dynamic Reverse Address Resolution Protocol'
+        elif _oper in (8, 9):
+            self._name = 'Inverse Address Resolution Protocol'
+        else:
+            self._name = 'Address Resolution Protocol'
+
         arp = dict(
-            htype = LINKTYPE.get(_hwty) or _hwty,
-            ptype = INTERNET.get(_ptty) or _ptty,
+            htype = LINKTYPE.get(_hwty),
+            ptype = ETHERTYPE.get(_ptty),
             hlen = _hlen,
             plen = _plen,
             oper = OPER.get(_oper),
@@ -128,9 +135,9 @@ class ARP(Link):
             len = 8 + _hlen * 2 + _plen * 2,
         )
 
-        return arp
+        return self._read_next_layer(arp, arp['ptype'])
 
-    def _read_addr_resolve(length, htype):
+    def _read_addr_resolve(self, length, htype):
         if htype == 1:  # Ethernet
             _byte = self._read_fileng(6)
             _addr = '-'.join(textwrap.wrap(_byte.hex(), 2))
@@ -138,7 +145,7 @@ class ARP(Link):
             _addr = self._read_fileng(length)
         return _addr
 
-    def _read_proto_resolve(length, ptype):
+    def _read_proto_resolve(self, length, ptype):
         if ptype == '0800':     # IPv4
             _byte = self._read_fileng(4)
             _addr = '.'.join([str(_) for _ in _byte])

@@ -9,10 +9,11 @@
 from .exceptions import FileError
 from .protocols import Info, Protocol
 
-from .link.link import LINKTYPE
+from .link import LINKTYPE
 
 
 class VersionInfo(Info):
+    """Version Info alikes `sys.version_info`."""
 
     def __init__(self, vmaj, vmin):
         self._vers = (vmaj, vmin)
@@ -65,6 +66,15 @@ class Header(Protocol):
         return self.info.network
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def _read_protos(self, size):
+        _byte = self._read_unpack(4, lilendian=True)
+        _prot = LINKTYPE.get(_byte)
+        return _prot
+
+    ##########################################################################
     # Data models.
     ##########################################################################
 
@@ -107,7 +117,7 @@ class Header(Protocol):
         _zone = self._read_unpack(4, lilendian=True, sign=True)
         _acts = self._read_unpack(4, lilendian=True)
         _slen = self._read_unpack(4, lilendian=True)
-        _type = self._read_unpack(4, lilendian=True)
+        _type = self._read_protos(4)
 
         header = dict(
             magic_number = _magn,
@@ -116,7 +126,7 @@ class Header(Protocol):
             thiszone = _zone,
             sigfigs = _acts,
             snaplen = _slen,
-            network = LINKTYPE.get(_type),
+            network = _type,
         )
 
         return header
