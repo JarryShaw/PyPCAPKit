@@ -7,23 +7,7 @@
 
 
 from .ip import IP
-from ..protocols import Info
-from ..transport.transport import TP_PROTO
-
-
-# IPv6 Extension Header Types
-EXT_HDR = {
-    0:  'HOPOPT',       # IPv6 Hop-by-Hop Option
-   43:  'IPv6-Route',   # Routing Header for IPv6
-   44:  'IPv6-Frag',    # Fragment Header for IPv6
-   50:  'ESP',          # Encapsulating Security Payload
-   51:  'AH',           # Authentication Header
-   59:  'IPv6-NoNxt',   # No Next Header for IPv6
-   60:  'IPv6-Opts',    # Destination Options for IPv6 (before routing / upper-layer header)
-  135:  'Mobility',     # Mobility Extension Header for IPv6 (currently without upper-layer header)
-  139:  'HIP',          # Host Identity Protocol
-  140:  'Shim6',        # Site Multihoming by IPv6 Intermediation
-}
+from ..protocol import Info
 
 
 class IPv6(IP):
@@ -104,7 +88,7 @@ class IPv6(IP):
         """
         _htet = self._read_ip_hextet()
         _plen = self._read_unpack(2)
-        _next = self._read_ip_proto()
+        _next = self._read_protos(1)
         _hlmt = self._read_unpack(1)
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
@@ -120,25 +104,7 @@ class IPv6(IP):
             dst = _dsta,
         )
 
-        # length after standard header
-        _hlen = _plen - 40
-
-        if _next[0]:    # Extension Headers
-            while _hlen:
-                if _next == 'AH':
-                    from .ah import AH
-                    _exth = AH(self._file, version=6)
-                    ipv6['ext'][_next] = _exth.info
-                    _hlen -= _exth.length
-                else:
-                    _exth = self._read_fileng(_hlen)
-                    ipv6['ext']['Unknown'] = _exth
-                    _hlen -= _hlen
-
-        if _hlen:   # Paddings
-            ipv6['padding'] = self._read_fileng(_hlen)
-
-        return ipv6
+        return self._read_next_layer(ipv6, _next)
 
     def _read_ip_hextet(self):
         _htet = self._read_fileng(4).hex()
@@ -147,14 +113,6 @@ class IPv6(IP):
         _flow = int(_htet[2:], base=16)     # flow label
 
         return (_vers, _tcls, _flow)
-
-    def _read_ip_proto(self):
-        _byte = self._read_unpack(1)
-        _prot = EXT_HDR.get(_byte)          # check IPv6 extension headers
-        if _prot is None:
-            _prot = TP_PROTO.get(_byte) # get transport layer protocol
-            return False, _prot
-        return True, _prot
 
     def _read_ip_addr(self):
         adlt = []       # list of IPv6 hexadecimal address

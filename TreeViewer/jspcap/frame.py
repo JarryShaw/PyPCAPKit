@@ -3,18 +3,19 @@
 
 
 import datetime
+import io
 
 
 # Frame Header
 # Analyser for record/package headers
 
 
-from .protocols import Info, Protocol
+from .protocol import Info, ProtoChain, Protocol
 
 
 class Frame(Protocol):
 
-    __all__ = ['name', 'info', 'length']
+    __all__ = ['name', 'info', 'length', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -32,17 +33,22 @@ class Frame(Protocol):
     def length(self):
         return 16
 
+    @property
+    def protochain(self):
+        return self._proto
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __new__(cls, _file, _fnum):
+    def __new__(cls, _file, *, num, proto):
         self = super().__new__(cls, _file)
         return self
 
-    def __init__(self, _file, _fnum):
+    def __init__(self, _file, *, num, proto):
+        self._fnum = num
+        self._prot = proto
         self._file = _file
-        self._fnum = _fnum
         self._info = Info(self.read_header())
 
     def __len__(self):
@@ -93,4 +99,33 @@ class Frame(Protocol):
             cap_len = _olen,
         )
 
-        return frame
+        return self._read_next_layer(frame)
+
+    def _read_next_layer(self, dict_):
+        # make next layer protocol name
+        proto = self._prot or ''
+        name_ = proto.lower() or 'Unknown'
+
+        # make BytesIO from frame package data
+        bytes_ = io.BytesIO(self._file.read(dict_['len']))
+        next_ = self._import_next_layer(bytes_)
+
+        # write info and protocol chain into dict
+        self._proto = ProtoChain(self._prot, next_[1])
+        dict_[name_] = next_[0]
+        dict_['protocols'] = self._proto.chain
+
+        return dict_
+
+    def _import_next_layer(self, file_):
+        if self._prot == 'Ethernet':
+            from .link import Ethernet as Protocol
+        elif self._prot == 'IPv4':
+            from .internet import IPv4 as Protocol
+        elif self._prot == 'IPv6':
+            from .internet import IPv6 as Protocol
+        else:
+            data = file_.read() or None
+            return data, None
+        next_ = Protocol(file_)
+        return next_.info, next_.protochain

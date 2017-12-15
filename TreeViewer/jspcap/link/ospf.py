@@ -7,7 +7,7 @@
 
 
 from .link import Link
-from ..protocols import Info
+from ..protocol import Info
 
 
 # OSPF Packet Types
@@ -30,7 +30,7 @@ AUTH = {
 
 class OSPF(Link):
 
-    __all__ = ['name', 'info', 'length', 'layer', 'type']
+    __all__ = ['name', 'info', 'length', 'layer', 'type', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -129,7 +129,7 @@ class OSPF(Link):
         else:
             ospf['auth'] = self._read_fileng(8)
 
-        return ospf
+        return self._read_next_layer(ospf)
 
     def _read_id_numbers(self):
         _byte = self._read_fileng(4)

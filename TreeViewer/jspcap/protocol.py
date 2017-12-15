@@ -21,7 +21,46 @@ abstractmethod = abc.abstractmethod
 abstractproperty = abc.abstractproperty
 
 
+class ProtoChain:
+    """Protocols chain."""
+
+    __all__ = ['proto', 'chain']
+    __slots__ = ('_tuple',)
+
+    @property
+    def tuple(self):
+        return self._tuple
+
+    @property
+    def proto(self):
+        tuple_ = copy.deepcopy(self._tuple)
+        protos = tuple((proto.lower() for proto in tuple_))
+        return protos
+
+    @property
+    def chain(self):
+        return self.__str__()
+
+    def __init__(self, proto, other=None):
+        if other is None:
+            self._tuple = (proto,)
+        else:
+            self._tuple = (proto,) + other.tuple
+
+    def __repr__(self):
+        proto = ', '.join(self.proto)
+        repr_ = 'ProtoChain({})'.format(proto)
+        return repr_
+
+    def __str__(self):
+        for (i, proto) in enumerate(self._tuple):
+            if proto is None:
+                return ':'.join(self._tuple[:i])
+        return ':'.join(self._tuple)
+
+
 class Info:
+    """Turn dictionaries into object-like instances."""
 
     def __init__(self, dict_):
         for key in dict_:
@@ -93,7 +132,12 @@ class Protocol(object):
             return return_
         return seekcur
 
+    def _read_protos(self, size):
+        """Read next layer protocol type."""
+        pass
+
     def _read_fileng(self, size, *args, **kwargs):
+        """Read file buffer."""
         return self._file.read(size, *args, **kwargs)
 
     def _read_unpack(self, size=1, *, sign=False, lilendian=False):
@@ -182,3 +226,25 @@ class Protocol(object):
         else:
             self._file.seek(os.SEEK_SET)
             raise StopIteration
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _read_next_layer(self, dict_, proto=None):
+        """Extract next layer protocol."""
+        next_ = self._import_next_layer(proto)
+
+        # make next layer protocol name
+        proto = proto or ''
+        name_ = proto.lower() or 'raw'
+
+        # write info and protocol chain into dict
+        dict_[name_] = next_[0]
+        self._protos = ProtoChain(proto, next_[1])
+
+        return dict_
+
+    def _import_next_layer(self, proto):
+        """Import next layer extracotr."""
+        pass

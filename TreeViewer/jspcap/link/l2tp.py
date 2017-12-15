@@ -7,12 +7,12 @@
 
 
 from .link import Link
-from ..protocols import Info
+from ..protocol import Info
 
 
 class L2TP(Link):
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -134,4 +134,4 @@ class L2TP(Link):
             l2tp['padding'] = self._read_fileng(_size * 8)
             l2tp['len'] += _size * 8
 
-        return l2tp
+        return self._read_next_layer(l2tp)
