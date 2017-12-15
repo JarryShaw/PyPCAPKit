@@ -7,7 +7,7 @@
 
 
 from .internet import Internet
-from ..protocols import Info
+from ..protocol import Info
 
 
 # IPX Packet Types
@@ -20,7 +20,6 @@ TYPE = {
     5 : 'SPX',          # Sequenced Packet Exchange
     6 : 'NCP',          # NetWare Core Protocol
 }
-
 
 # Socket Types
 SOCK = {
@@ -43,7 +42,7 @@ SOCK = {
 
 class IPX(Internet):
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -124,7 +123,7 @@ class IPX(Internet):
             src = _srca,
         )
 
-        return ipx
+        return self._read_next_layer(ipx, ipx['type'])
 
     def _read_ipx_address(self):
         """Read IPX address field.

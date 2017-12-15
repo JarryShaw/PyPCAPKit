@@ -10,7 +10,7 @@ import abc
 
 
 from .internet import Internet
-from ..protocols import Info
+from ..protocol import Info
 
 
 abstractmethod = abc.abstractmethod
@@ -19,7 +19,7 @@ abstractproperty = abc.abstractproperty
 
 class IP(Internet):
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -76,8 +76,4 @@ class IP(Internet):
 
     @abstractmethod
     def _read_ip_addr(self):
-        pass
-
-    @abstractmethod
-    def _read_ip_proto(self):
         pass

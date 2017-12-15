@@ -7,12 +7,12 @@
 
 
 from .transport import Transport
-from ..protocols import Info
+from ..protocol import Info
 
 
 class UDP(Transport):
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -97,4 +97,4 @@ class UDP(Transport):
             checksum = _csum,
         )
 
-        return udp
+        return self._read_next_layer(udp)

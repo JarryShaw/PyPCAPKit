@@ -6,6 +6,9 @@
 # Table of corresponding protocols
 
 
+from ..protocol import Protocol
+
+
 # ##############################################################################
 # # for unknown reason and never-encountered situation, at current time
 # # we have to change the working directory to import from parent folders
@@ -22,15 +25,7 @@
 # ##############################################################################
 
 
-from ..protocols import Protocol
-
-
-class Transport(Protocol):
-
-    __layer__ = 'Transport'
-
-
-# Transport layer protocols
+# Transport Layer Protocol Numbers
 TP_PROTO = {
     # Internet Layer
     1:  'ICMP',     # Internet Control Message Protocol
@@ -57,3 +52,24 @@ TP_PROTO = {
    89:  'OSPF',     # Open Shortest Path First
   132:  'SCTP',     # Stream Control Transmission Protocol
 }
+
+
+class Transport(Protocol):
+
+    __layer__ = 'Transport'
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def protochain(self):
+        return self._protos
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _import_next_layer(self, proto):
+        data = self._file.read() or None
+        return data, None
