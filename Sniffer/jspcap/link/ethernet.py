@@ -10,13 +10,12 @@ import textwrap
 
 
 from .link import Link
-from ..internet.internet import INTERNET
 from ..protocol import Info
 
 
 class Ethernet(Link):
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -44,7 +43,7 @@ class Ethernet(Link):
 
     @property
     def layer(self):
-        return 'Link Layer'
+        return self.__layer__
 
     @property
     def protocol(self):
@@ -80,7 +79,7 @@ class Ethernet(Link):
         """
         _dstm = self._read_mac_addr()
         _srcm = self._read_mac_addr()
-        _type = self._read_eth_type()
+        _type = self._read_protos(2)
 
         ethernet = dict(
             dst = _dstm,
@@ -88,14 +87,9 @@ class Ethernet(Link):
             type = _type,
         )
 
-        return ethernet
+        return self._read_next_layer(ethernet, _type)
 
     def _read_mac_addr(self):
         _byte = self._read_fileng(6)
         _addr = '-'.join(textwrap.wrap(_byte.hex(), 2))
         return _addr
-
-    def _read_eth_type(self):
-        _byte = self._read_fileng(2).hex()
-        _type = INTERNET.get(_byte)
-        return _type

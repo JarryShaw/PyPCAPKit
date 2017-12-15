@@ -19,7 +19,7 @@ abstractproperty = abc.abstractproperty
 
 class IP(Internet):
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol']
+    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
 
     ##########################################################################
     # Properties.
@@ -57,12 +57,14 @@ class IP(Internet):
     # Data models.
     ##########################################################################
 
+    @abstractmethod
     def __init__(self, _file):
         self._file = _file
         self._info = Info(self.read_ip())
 
+    @abstractmethod
     def __len__(self):
-        return self._info.hdr_len
+        pass
 
     @abstractmethod
     def __length_hint__(self):
@@ -73,16 +75,5 @@ class IP(Internet):
     ##########################################################################
 
     @abstractmethod
-    def read_ip(self):
-        pass
-
-    @abstractmethod
     def _read_ip_addr(self):
         pass
-
-    @abstractmethod
-    def _read_ip_proto(self):
-        pass
-
-    # def _read_ip_options(self):
-    #     pass
