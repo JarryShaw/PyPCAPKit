@@ -35,7 +35,7 @@ class Frame(Protocol):
 
     @property
     def protochain(self):
-        return self._info.protocols
+        return self._proto
 
     ##########################################################################
     # Data models.
@@ -111,8 +111,9 @@ class Frame(Protocol):
         next_ = self._import_next_layer(bytes_)
 
         # write info and protocol chain into dict
+        self._proto = ProtoChain(self._prot, next_[1])
         dict_[name_] = next_[0]
-        dict_['protocols'] = ProtoChain(self._prot, next_[1])
+        dict_['protocols'] = self._proto.chain
 
         return dict_
 

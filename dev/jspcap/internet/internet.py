@@ -72,9 +72,9 @@ class Internet(Protocol):
         elif proto == 'AH':
             from .ah import AH as Protocol
         elif proto == 'TCP':
-            from .transport import TCP as Protocol
+            from ..transport import TCP as Protocol
         elif proto == 'UDP':
-            from .transport import UDP as Protocol
+            from ..transport import UDP as Protocol
         else:
             data = self._file.read() or None
             return data, None

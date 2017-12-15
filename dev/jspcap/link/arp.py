@@ -3,7 +3,7 @@
 
 
 # Address Resolution Protocol
-# Analyser for ARP/IARP header
+# Analyser for ARP/InARP header
 
 
 from .link import Link, LINKTYPE

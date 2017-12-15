@@ -68,11 +68,11 @@ class Link(Protocol):
         elif proto == 'RARP':
             from .rarp import RARP as Protocol
         elif proto == 'IPv4':
-            from .internet import IPv4 as Protocol
+            from ..internet import IPv4 as Protocol
         elif proto == 'IPv6':
-            from .internet import IPv6 as Protocol
+            from ..internet import IPv6 as Protocol
         elif proto == 'IPX':
-            from .internet import IPX as Protocol
+            from ..internet import IPX as Protocol
         else:
             data = self._file.read() or None
             return data, None

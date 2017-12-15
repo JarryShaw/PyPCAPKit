@@ -15,5 +15,5 @@ from .ipx import IPX
 from .internet import ETHERTYPE
 
 # Deprecated / Base Classes
-from ip import IP
-from ipsec import IPsec
+from .ip import IP
+from .ipsec import IPsec

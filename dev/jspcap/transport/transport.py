@@ -65,3 +65,11 @@ class Transport(Protocol):
     @property
     def protochain(self):
         return self._protos
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _import_next_layer(self, proto):
+        data = self._file.read() or None
+        return data, None

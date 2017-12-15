@@ -42,7 +42,7 @@
 		<integer>86</integer>
 		<key>cap_len</key>
 		<integer>86</integer>
-		<key>Ethernet</key>
+		<key>ethernet</key>
 		<dict>
 			<key>dst</key>
 			<string>40-33-1a-d1-85-1c</string>
@@ -50,7 +50,7 @@
 			<string>a4-5e-60-d9-6b-97</string>
 			<key>type</key>
 			<string>IPv6</string>
-			<key>IPv6</key>
+			<key>ipv6</key>
 			<dict>
 				<key>version</key>
 				<string>6</string>
@@ -61,21 +61,17 @@
 				<key>len</key>
 				<integer>32</integer>
 				<key>next</key>
-				<string>ICMPv6</string>
+				<string>C</string>
 				<key>limit</key>
 				<integer>255</integer>
 				<key>src</key>
 				<string>fe80::a6:87f9:2793:16ee</string>
 				<key>dst</key>
 				<string>fe80::1ccd:7c77:bac7:46b7</string>
-				<key>padding</key>
+				<key>icmpv6</key>
 				<data>
 					87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
 					1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
-				</data>
-				<key>Transport Layer</key>
-				<data>
-
 				</data>
 			</dict>
 		</dict>
@@ -105,7 +101,7 @@
 		<integer>78</integer>
 		<key>cap_len</key>
 		<integer>78</integer>
-		<key>Ethernet</key>
+		<key>ethernet</key>
 		<dict>
 			<key>dst</key>
 			<string>a4-5e-60-d9-6b-97</string>
@@ -113,7 +109,7 @@
 			<string>40-33-1a-d1-85-1c</string>
 			<key>type</key>
 			<string>IPv6</string>
-			<key>IPv6</key>
+			<key>ipv6</key>
 			<dict>
 				<key>version</key>
 				<string>6</string>
@@ -124,21 +120,17 @@
 				<key>len</key>
 				<integer>24</integer>
 				<key>next</key>
-				<string>ICMPv6</string>
+				<string>C</string>
 				<key>limit</key>
 				<integer>255</integer>
 				<key>src</key>
 				<string>fe80::1ccd:7c77:bac7:46b7</string>
 				<key>dst</key>
 				<string>fe80::a6:87f9:2793:16ee</string>
-				<key>padding</key>
+				<key>icmpv6</key>
 				<data>
 					88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
 					1c cd 7c 77 ba c7 46 b7
-				</data>
-				<key>Transport Layer</key>
-				<data>
-
 				</data>
 			</dict>
 		</dict>
@@ -168,7 +160,7 @@
 		<integer>54</integer>
 		<key>cap_len</key>
 		<integer>54</integer>
-		<key>Ethernet</key>
+		<key>ethernet</key>
 		<dict>
 			<key>dst</key>
 			<string>a4-5e-60-d9-6b-97</string>
@@ -176,7 +168,7 @@
 			<string>b8-f8-83-a5-f9-47</string>
 			<key>type</key>
 			<string>IPv4</string>
-			<key>IPv4</key>
+			<key>ipv4</key>
 			<dict>
 				<key>version</key>
 				<string>4</string>
@@ -207,7 +199,7 @@
 					<key>df</key>
 					<true/>
 					<key>mf</key>
-					<true/>
+					<false/>
 				</dict>
 				<key>frag_offset</key>
 				<integer>0</integer>
@@ -223,7 +215,7 @@
 				<string>123.129.210.135</string>
 				<key>dst</key>
 				<string>192.168.1.100</string>
-				<key>TCP</key>
+				<key>tcp</key>
 				<dict>
 					<key>srcport</key>
 					<integer>80</integer>
@@ -272,7 +264,7 @@
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:TCP</string>
+		<string>Ethernet:IPv4:TCP:</string>
 	</frame>
 	<name>Frame 4</name>
 	<frame>
@@ -297,7 +289,7 @@
 		<integer>54</integer>
 		<key>cap_len</key>
 		<integer>54</integer>
-		<key>Ethernet</key>
+		<key>ethernet</key>
 		<dict>
 			<key>dst</key>
 			<string>b8-f8-83-a5-f9-47</string>
@@ -305,7 +297,7 @@
 			<string>a4-5e-60-d9-6b-97</string>
 			<key>type</key>
 			<string>IPv4</string>
-			<key>IPv4</key>
+			<key>ipv4</key>
 			<dict>
 				<key>version</key>
 				<string>4</string>
@@ -336,7 +328,7 @@
 					<key>df</key>
 					<true/>
 					<key>mf</key>
-					<true/>
+					<false/>
 				</dict>
 				<key>frag_offset</key>
 				<integer>0</integer>
@@ -352,7 +344,7 @@
 				<string>192.168.1.100</string>
 				<key>dst</key>
 				<string>123.129.210.135</string>
-				<key>TCP</key>
+				<key>tcp</key>
 				<dict>
 					<key>srcport</key>
 					<integer>55232</integer>
@@ -401,7 +393,7 @@
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:TCP</string>
+		<string>Ethernet:IPv4:TCP:</string>
 	</frame>
 	<name>Frame 5</name>
 	<frame>
@@ -426,7 +418,7 @@
 		<integer>54</integer>
 		<key>cap_len</key>
 		<integer>54</integer>
-		<key>Ethernet</key>
+		<key>ethernet</key>
 		<dict>
 			<key>dst</key>
 			<string>b8-f8-83-a5-f9-47</string>
@@ -434,7 +426,7 @@
 			<string>a4-5e-60-d9-6b-97</string>
 			<key>type</key>
 			<string>IPv4</string>
-			<key>IPv4</key>
+			<key>ipv4</key>
 			<dict>
 				<key>version</key>
 				<string>4</string>
@@ -465,7 +457,7 @@
 					<key>df</key>
 					<true/>
 					<key>mf</key>
-					<true/>
+					<false/>
 				</dict>
 				<key>frag_offset</key>
 				<integer>0</integer>
@@ -481,7 +473,7 @@
 				<string>192.168.1.100</string>
 				<key>dst</key>
 				<string>123.129.210.135</string>
-				<key>TCP</key>
+				<key>tcp</key>
 				<dict>
 					<key>srcport</key>
 					<integer>55216</integer>
@@ -530,7 +522,7 @@
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:TCP</string>
+		<string>Ethernet:IPv4:TCP:</string>
 	</frame>
 	<name>Frame 6</name>
 	<frame>
@@ -555,7 +547,7 @@
 		<integer>159</integer>
 		<key>cap_len</key>
 		<integer>159</integer>
-		<key>Ethernet</key>
+		<key>ethernet</key>
 		<dict>
 			<key>dst</key>
 			<string>ff-ff-ff-ff-ff-ff</string>
@@ -563,7 +555,7 @@
 			<string>b8-f8-83-a5-f9-47</string>
 			<key>type</key>
 			<string>IPv4</string>
-			<key>IPv4</key>
+			<key>ipv4</key>
 			<dict>
 				<key>version</key>
 				<string>4</string>
@@ -594,7 +586,7 @@
 					<key>df</key>
 					<true/>
 					<key>mf</key>
-					<true/>
+					<false/>
 				</dict>
 				<key>frag_offset</key>
 				<integer>0</integer>
@@ -610,7 +602,7 @@
 				<string>192.168.1.1</string>
 				<key>dst</key>
 				<string>255.255.255.255</string>
-				<key>UDP</key>
+				<key>udp</key>
 				<dict>
 					<key>srcport</key>
 					<integer>37444</integer>
@@ -622,7 +614,7 @@
 					<data>
 						63 b1
 					</data>
-					<key>Application Layer</key>
+					<key>raw</key>
 					<data>
 						01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06
 						00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03
@@ -637,6 +629,6 @@
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:UDP</string>
+		<string>Ethernet:IPv4:UDP:</string>
 	</frame>
 </packet>

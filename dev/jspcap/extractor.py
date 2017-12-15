@@ -14,7 +14,7 @@ import textwrap
 from .exceptions import FormatError
 from .frame import Frame
 from .header import Header
-from .protocols import Info
+from .protocol import Info
 
 
 FILE = re.compile(r'''
@@ -82,7 +82,7 @@ class Extractor:
 
     @property
     def protocol(self):
-        return self._protocol
+        return self._proto
 
     ##########################################################################
     # Data modules.
@@ -107,16 +107,16 @@ class Extractor:
         ifnm, ofnm, fmt = self.make_name(fin, fout, fmt, extension)
 
         if fmt == 'plist':
-            from .jsformat.plist import PLIST as output     # output PLIST file
+            from jsformat import PLIST as output     # output PLIST file
         elif fmt == 'json':
-            from .jsformat.json import JSON as output       # output JSON file
+            from jsformat import JSON as output       # output JSON file
         elif fmt == 'tree':
-            from .jsformat.tree import Tree as output       # output treeview text file
+            from jsformat import Tree as output       # output treeview text file
         elif fmt == 'html':
-            from .jsformat.html import JavaScript as output # output JavaScript file
+            from jsformat import JavaScript as output # output JavaScript file
             fmt = 'js'
         elif fmt == 'xml':
-            from .jsformat.xml import XML as output         # output XML file
+            from jsformat import XML as output         # output XML file
         else:
             raise FormatError('Unsupported output format: {}'.format(fmt))
 
@@ -205,7 +205,7 @@ class Extractor:
         self._gbhdr = Header(self._ifile)
         self._dlink = self._gbhdr.protocol
         self._frame.append(self._gbhdr.info)
-        self._ofile(self._gbhdr.info.infotodict(), _name='Global Header')
+        self._ofile(self._gbhdr.info.infotodict(), name='Global Header')
 
     def record_frames(self):
         if self._auto:
@@ -227,120 +227,29 @@ class Extractor:
         - Extract frames and each layer of packets.
         - Make Info object out of frame properties.
         - Append Info.
-        - Write plist file.
+        - Write plist & append Info.
 
         """
         # read frame header
-        frame = Frame(self._ifile, self._frnum)
-        plist = frame.info.infotodict()
+        frame = Frame(self._ifile, num=self._frnum, proto=self._dlink)
 
-        # make BytesIO from frame package data
-        length = frame.info.len
-        bytes_ = io.BytesIO(self._ifile.read(length))
-
-        # start extraction
-        proto = self._read_protocol(bytes_, length)
-
-        if proto[0]:
-            plist[proto.protocol] = proto[1].info.infotodict()
-        else:
-            plist['Link Layer'] = proto[1]
-        self._write_record(plist, proto[2])
-
-    def _write_record(self, plist):
-        """Write plist & append Info."""
         # write plist
         _fnum = 'Frame {fnum}'.format(fnum=self._frnum)
-        plist['protocols'] = self._merge_protocols()
-        self._ofile(plist, _name=_fnum)
+        plist = frame.info.infotodict()
+        self._ofile(plist, name=_fnum)
 
         # record frame
-        if Flag_TCP:
+        proto = frame.protochain.proto
+        if 'tcp' in proto:
             data = dict(
-                src = (plist[self._dlink][self._netwk]['src'],
-                       plist[self._dlink][self._netwk][self._trans]['srcport']),
-                dst = (plist[self._dlink][self._netwk]['dst'],
-                       plist[self._dlink][self._netwk][self._trans]['dstport']),
-                dsn = plist[self._dlink][self._netwk][self._trans]['seq'],
-                raw = plist[self._dlink][self._netwk][self._trans]['Application Layer'],
+                src = (plist[proto[0]][proto[1]]['src'],
+                       plist[proto[0]][proto[1]][proto[2]]['srcport']),
+                dst = (plist[proto[0]][proto[1]]['dst'],
+                       plist[proto[0]][proto[1]][proto[2]]['dstport']),
+                dsn = plist[proto[0]][proto[1]][proto[2]]['seq'],
+                raw = plist[proto[0]][proto[1]][proto[2]]['raw'],
             )
             info = Info(data)
             self._frame.append(info)
         self._frnum += 1
-        self._protocol = plist['protocols']
-
-    def _merge_protocols(self):
-        """Make protocols chain."""
-        list_ = [self._dlink, self._netwk, self._trans, self._applc]
-        for (i, proto) in enumerate(list_):
-            if proto is None:
-                return ':'.join(list_[:i])
-        return ':'.join(list_)
-
-    def _link_layer(self, _ifile, length):
-        """Read link layer."""
-        # Other Conditions
-        if self._dlink == 'IPv4':
-            from .internet.ipv4 import IPv4
-            return True, IPv4(_ifile)
-        elif self._dlink == 'IPv6':
-            from .internet.ipv6 import IPv6
-            return True, IPv6(_ifile)
-        # Link Layer
-        elif self._dlink == 'Ethernet':
-            from .link.ethernet import Ethernet
-            return True, Ethernet(_ifile)
-        else:
-            # raise NotImplementedError
-            _data = _ifile.read(length) if length else None
-            return False, _data
-
-    def _internet_layer(self, _ifile, length):
-        """Read internet layer."""
-        # Other Conditions
-        if self._netwk == 'ARP':
-            from .link.arp import ARP
-            return True, ARP(_ifile)
-        elif self._netwk == 'RARP':
-            from .link.rarp import RARP
-            return True, RARP(_ifile)
-        # Internet Layer
-        elif self._netwk == 'IPv4':
-            from .internet.ipv4 import IPv4
-            return True, IPv4(_ifile)
-        elif self._netwk == 'IPv6':
-            from .internet.ipv6 import IPv6
-            return True, IPv6(_ifile)
-        elif self._netwk == 'IPX':
-            from .internet.ipx import IPX
-            return True, IPX(_ifile)
-        else:
-            # raise NotImplementedError
-            _data = _ifile.read(length) if length else None
-            return False, _data
-
-    def _transport_layer(self, _ifile, length):
-        """Read transport layer."""
-        # IP Suite
-        if self._trans == 'IPv4':
-            from .internet.ipv4 import IPv4
-            return True, IPv4(_ifile)
-        elif self._trans == 'IPv6':
-            from .internet.ipv6 import IPv6
-            return True, IPv6(_ifile)
-        # Transport Layer
-        elif self._trans == 'TCP':
-            from .transport.tcp import TCP
-            return True, TCP(_ifile)
-        elif self._trans == 'UDP':
-            from .transport.udp import UDP
-            return True, UDP(_ifile)
-        else:
-            # raise NotImplementedError
-            _data = _ifile.read(length) if length else None
-            return False, _data
-
-    def _application_layer(self, _ifile, length):
-        """Read application layer."""
-        _data = _ifile.read(length) if length else None
-        return False, _data
+        self._proto = frame.protochain.chain

@@ -25,11 +25,17 @@ class ProtoChain:
     """Protocols chain."""
 
     __all__ = ['proto', 'chain']
-    __slots__ = (_tuple,)
+    __slots__ = ('_tuple',)
+
+    @property
+    def tuple(self):
+        return self._tuple
 
     @property
     def proto(self):
-        return self._tuple
+        tuple_ = copy.deepcopy(self._tuple)
+        protos = tuple((proto.lower() for proto in tuple_))
+        return protos
 
     @property
     def chain(self):
@@ -37,12 +43,13 @@ class ProtoChain:
 
     def __init__(self, proto, other=None):
         if other is None:
-            self._tuple = (proto.lower(),)
+            self._tuple = (proto,)
         else:
-            self._tuple = (proto.lower(),) + other.proto
+            self._tuple = (proto,) + other.tuple
 
     def __repr__(self):
-        repr_ = 'ProtoChain{}'.format(self._tuple)
+        proto = ', '.join(self.proto)
+        repr_ = 'ProtoChain({})'.format(proto)
         return repr_
 
     def __str__(self):
@@ -234,7 +241,7 @@ class Protocol(object):
 
         # write info and protocol chain into dict
         dict_[name_] = next_[0]
-        self._protos = ProtoChain(proto, _next[1])
+        self._protos = ProtoChain(proto, next_[1])
 
         return dict_
 

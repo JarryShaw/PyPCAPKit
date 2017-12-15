@@ -97,4 +97,4 @@ class UDP(Transport):
             checksum = _csum,
         )
 
-        return self._read_next_layer(tcp)
+        return self._read_next_layer(udp)
