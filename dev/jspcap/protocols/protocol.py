@@ -4,6 +4,7 @@
 
 import abc
 import copy
+import numbers
 import os
 import struct
 import textwrap
@@ -13,7 +14,7 @@ import textwrap
 # Pre-define useful arguments and methods of protocols
 
 
-from .exceptions import BytesError
+from ..exceptions import BytesError
 
 
 ABCMeta = abc.ABCMeta
@@ -21,45 +22,7 @@ abstractmethod = abc.abstractmethod
 abstractproperty = abc.abstractproperty
 
 
-class ProtoChain:
-    """Protocols chain."""
-
-    __all__ = ['proto', 'chain']
-    __slots__ = ('_tuple',)
-
-    @property
-    def tuple(self):
-        return self._tuple
-
-    @property
-    def proto(self):
-        tuple_ = copy.deepcopy(self._tuple)
-        protos = tuple((proto.lower() for proto in tuple_))
-        return protos
-
-    @property
-    def chain(self):
-        return self.__str__()
-
-    def __init__(self, proto, other=None):
-        if other is None:
-            self._tuple = (proto,)
-        else:
-            self._tuple = (proto,) + other.tuple
-
-    def __repr__(self):
-        proto = ', '.join(self.proto)
-        repr_ = 'ProtoChain({})'.format(proto)
-        return repr_
-
-    def __str__(self):
-        for (i, proto) in enumerate(self._tuple):
-            if proto is None:
-                return ':'.join(self._tuple[:i])
-        return ':'.join(self._tuple)
-
-
-class Info:
+class Info(dict):
     """Turn dictionaries into object-like instances."""
 
     def __init__(self, dict_):
@@ -67,6 +30,8 @@ class Info:
             if isinstance(dict_[key], dict):
                 self.__dict__[key] = Info(dict_[key])
             else:
+                if isinstance(key, str):
+                    key = key.replace('-', '_')
                 self.__dict__[key] = dict_[key]
 
     def __repr__(self):
@@ -93,6 +58,100 @@ class Info:
             else:
                 dict_[key] = self.__dict__[key]
         return dict_
+
+
+class ProtoChain(tuple):
+    """Protocols chain."""
+
+    __all__ = ['tuple', 'proto', 'chain']
+
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def tuple(self):
+        return self._tuple
+
+    @property
+    def proto(self):
+        tuple_ = copy.deepcopy(self._tuple)
+        protos = tuple((proto.lower() for proto in tuple_))
+        return protos
+
+    @property
+    def chain(self):
+        return self.__str__()
+
+    ##########################################################################
+    # Data modules.
+    ##########################################################################
+
+    def __new__(cls, proto, other=None):
+        self = super().__new__(cls)
+        return self
+
+    def __init__(self, proto, other=None):
+        if other is None:
+            self._tuple = (proto,)
+        else:
+            self._tuple = (proto,) + other.tuple
+
+    def __repr__(self):
+        proto = ', '.join(self.proto)
+        repr_ = 'ProtoChain({})'.format(proto)
+        return repr_
+
+    def __str__(self):
+        for (i, proto) in enumerate(self._tuple):
+            if proto is None:
+                return ':'.join(self._tuple[:i])
+        return ':'.join(self._tuple)
+
+    def __index__(self, name, start=None, stop=None):
+        try:
+            start = start or 0
+            stop = stop or -1
+
+            if isinstance(name, str):
+                name = name.lower()
+            if isinstance(start, str):
+                start = self.index(start)
+            if isinstance(stop, str):
+                stop = self.index(stop)
+            return self.proto.index(name, start, stop)
+        except ValueError:
+            raise ValueError
+        except TypeError:
+            raise TypeError
+
+    def __getitem__(self, key):
+        try:
+            if isinstance(key, slice):
+                start = key.start
+                stop = key.stop
+                step = key.step
+
+                if not isinstance(start, numbers.Number):
+                    start = self.index(start)
+                if not isinstance(stop, numbers.Number):
+                    stop = self.index(stop)
+                if not isinstance(step, numbers.Number):
+                    step = self.index(step)
+                key = slice(start, stop, step)
+            else:
+                key = self.index(key)
+            return self._tuple[key]
+        except (ValueError, IndexError):
+            raise IndexError
+        except TypeError:
+            raise TypeError
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    index = __index__
 
 
 class Protocol(object):

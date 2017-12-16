@@ -6,7 +6,7 @@
 # Analyser for PCAP global headers
 
 
-from .exceptions import FileError
+from ..exceptions import FileError
 from .protocol import Info, Protocol
 
 from .link import LINKTYPE

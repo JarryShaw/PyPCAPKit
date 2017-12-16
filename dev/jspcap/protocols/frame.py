@@ -38,6 +38,13 @@ class Frame(Protocol):
         return self._proto
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def index(self, name):
+        return self._proto.index(name)
+
+    ##########################################################################
     # Data models.
     ##########################################################################
 
@@ -56,6 +63,31 @@ class Frame(Protocol):
 
     def __length_hint__(self):
         return 16
+
+    def __getitem__(self, key):
+        proto = self._proto[key]
+
+        if not proto:
+            raise IndexError
+        elif isinstance(proto, tuple):
+            if len(proto) > 1:
+                raise TypeError
+            else:
+                start = proto[0]
+        else:
+            start = self._proto.index(proto)
+
+        dict_ = self._info.infotodict()
+        for (level, proto) in enumerate(self._proto.tuple):
+            proto = proto or 'raw'
+            dict_ = dict_[proto.lower()]
+            if level >= start:
+                break
+
+        return Info(dict_)
+
+    def __index__(self, name):
+        return self._proto.index(name)
 
     ##########################################################################
     # Utilities.
@@ -104,7 +136,7 @@ class Frame(Protocol):
     def _read_next_layer(self, dict_):
         # make next layer protocol name
         proto = self._prot or ''
-        name_ = proto.lower() or 'Unknown'
+        name_ = proto.lower() or 'raw'
 
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
