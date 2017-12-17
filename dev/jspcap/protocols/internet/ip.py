@@ -10,7 +10,7 @@ import abc
 
 
 from .internet import Internet
-from ..protocol import Info
+from ..protocol import Info, seekset
 
 
 abstractmethod = abc.abstractmethod
@@ -77,3 +77,7 @@ class IP(Internet):
     @abstractmethod
     def _read_ip_addr(self):
         pass
+
+    @seekset
+    def _read_ip_header(self, length):
+        return self._read_fileng(length)

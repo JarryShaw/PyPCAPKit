@@ -167,7 +167,14 @@ class IPv4(IP):
         if _optl:
             ipv4['options'] = self._read_ip_options(_optl)
 
-        return self._read_next_layer(ipv4, _prot)
+        if ipv4['flags']['df']:
+            return self._read_next_layer(ipv4, _prot)
+        else:
+            hdr_len = ipv4['hdr_len']
+            raw_len = ipv4['len'] - hdr_len
+            ipv4['header'] = self._read_ip_header(hdr_len)
+            ipv4['raw'] = self._read_fileng(raw_len)
+            return ipv4
 
     def _read_ip_addr(self):
         _byte = self._read_fileng(4)

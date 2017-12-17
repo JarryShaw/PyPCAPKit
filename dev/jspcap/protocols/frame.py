@@ -65,6 +65,9 @@ class Frame(Protocol):
         return 16
 
     def __getitem__(self, key):
+        if key in self._info:
+            return self._info[key]
+
         proto = self._proto[key]
 
         if not proto:
@@ -88,6 +91,9 @@ class Frame(Protocol):
 
     def __index__(self, name):
         return self._proto.index(name)
+
+    def __contains__(self, name):
+        return any(((name in self._info), (name in self._proto)))
 
     ##########################################################################
     # Utilities.
@@ -146,7 +152,6 @@ class Frame(Protocol):
         self._proto = ProtoChain(self._prot, next_[1])
         dict_[name_] = next_[0]
         dict_['protocols'] = self._proto.chain
-
         return dict_
 
     def _import_next_layer(self, file_):

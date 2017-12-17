@@ -30,10 +30,13 @@ var data = {
 				"tclass" : 96,
 				"label" : 0,
 				"len" : 32,
-				"next" : "C",
+				"next" : "ICMPv6",
 				"limit" : 255,
 				"src" : "fe80::a6:87f9:2793:16ee",
 				"dst" : "fe80::1ccd:7c77:bac7:46b7",
+				"hdr_len" : 40,
+				"raw_len" : 32,
+				"proto" : "ICMPv6",
 				"icmpv6" : "87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97"
 			}
 		},
@@ -60,10 +63,13 @@ var data = {
 				"tclass" : 96,
 				"label" : 0,
 				"len" : 24,
-				"next" : "C",
+				"next" : "ICMPv6",
 				"limit" : 255,
 				"src" : "fe80::1ccd:7c77:bac7:46b7",
 				"dst" : "fe80::a6:87f9:2793:16ee",
+				"hdr_len" : 40,
+				"raw_len" : 24,
+				"proto" : "ICMPv6",
 				"icmpv6" : "88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7"
 			}
 		},
@@ -130,7 +136,7 @@ var data = {
 				}
 			}
 		},
-		"protocols" : "Ethernet:IPv4:TCP:"
+		"protocols" : "Ethernet:IPv4:TCP"
 	},
 	"Frame 4" : {
 		"frame_info" : {
@@ -193,7 +199,7 @@ var data = {
 				}
 			}
 		},
-		"protocols" : "Ethernet:IPv4:TCP:"
+		"protocols" : "Ethernet:IPv4:TCP"
 	},
 	"Frame 5" : {
 		"frame_info" : {
@@ -256,7 +262,7 @@ var data = {
 				}
 			}
 		},
-		"protocols" : "Ethernet:IPv4:TCP:"
+		"protocols" : "Ethernet:IPv4:TCP"
 	},
 	"Frame 6" : {
 		"frame_info" : {
@@ -303,7 +309,7 @@ var data = {
 				}
 			}
 		},
-		"protocols" : "Ethernet:IPv4:UDP:"
+		"protocols" : "Ethernet:IPv4:UDP"
 	}
 }
 

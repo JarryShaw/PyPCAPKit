@@ -10,6 +10,20 @@ from .ip import IP
 from ..protocol import Info
 
 
+# IPv6 Extension Header Types
+EXT_HDR = (
+    'HOPOPT',       # IPv6 Hop-by-Hop Option
+    'IPv6-Route',   # Routing Header for IPv6
+    'IPv6-Frag',    # Fragment Header for IPv6
+    'ESP',          # Encapsulating Security Payload
+    'AH',           # Authentication Header
+    'IPv6-NoNxt',   # No Next Header for IPv6
+    'IPv6-Opts',    # Destination Options for IPv6 (before routing / upper-layer header)
+    'Mobility',     # Mobility Extension Header for IPv6 (currently without upper-layer header)
+    'HIP',          # Host Identity Protocol
+    'Shim6',        # Site Multihoming by IPv6 Intermediation
+)
+
 class IPv6(IP):
 
     ##########################################################################
@@ -98,7 +112,7 @@ class IPv6(IP):
             tclass = _htet[1],
             label = _htet[2],
             len = _plen,
-            next = _next[1],
+            next = _next,
             limit = _hlmt,
             src = _srca,
             dst = _dsta,
@@ -151,3 +165,27 @@ class IPv6(IP):
 
         addr = ':'.join(adlt)
         return addr
+
+    def _read_next_layer(self, dict_, proto=None):
+        # recurse if next header is an extensive header
+        ext_len = 0
+        while proto in EXT_HDR:
+            name_ = proto.replace('IPv6-', '').lower()
+            next_ = self._import_next_layer(proto)
+            dict_[name_] = next_[0]
+            proto = next_[0].next
+            ext_len += next_[2]
+
+        # record real payload length (all headers exclude)
+        hdr_len = 40 + ext_len
+        raw_len = dict_['len'] - ext_len
+        dict_['hdr_len'] = hdr_len
+        dict_['raw_len'] = raw_len
+
+        # keep original data after fragment header
+        if proto == 'IPv6-Frag':
+            dict_['header'] = self._read_ip_header(hdr_len)
+            dict_['raw'] = self._read_fileng(raw_len)
+
+        dict_['proto'] = proto
+        return super()._read_next_layer(dict_, proto)

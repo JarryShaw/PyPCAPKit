@@ -275,8 +275,8 @@ class Extractor:
 
     def _tcp_reassembly(self, frame):
         """Store data for TCP reassembly."""
-        try:
-            ip = frame['IPv4'] if 'IPv4' in tuple_ else frame['IPv6']
+        if 'TCP' in frame:
+            ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
             tcp = frame['TCP']
             data = dict(
                 src = (ip.src, tcp.srcport),
@@ -287,13 +287,13 @@ class Extractor:
             )
             info = Info(data)
             self._frame[0].append(info)
-        except IndexError:
-            pass
 
     def _ipv4_reassembly(self, frame):
         """Store data for IPv4 reassembly."""
-        try:
+        if 'IPv4' in frame:
             ipv4 = frame['IPv4']
+            if ipv4.flags.df:
+                return
             data = dict(
                 bufid = (
                     ipv4.src,   # source
@@ -303,29 +303,27 @@ class Extractor:
                 ),
                 ipv4 = ipv4,
                 raw = ipv4.raw,
-                header = bytes(),
+                header = ipv4.header,
             )
             info = Info(data)
             self._frame[1].append(info)
-        except IndexError:
-            pass
 
     def _ipv6_reassembly(self, frame):
         """Store data for IPv6 reassembly."""
-        try:
+        if 'IPv6' in frame:
             ipv6 = frame['IPv6']
+            if 'frag' not in ipv6:
+                return
             data = dict(
                 bufid = (
                     ipv6.src,   # source
                     ipv6.dst,   # destination
-                    ipv6.next,  # protocol
+                    ipv6.proto, # protocol
                     ipv6.label, # identification
                 ),
                 ipv6 = ipv6,
-                raw = ipv6.ipv6_frag.raw,
-                header = bytes(),
+                raw = ipv6.raw,
+                header = ipv6.header,
             )
             info = Info(data)
             self._frame[2].append(info)
-        except IndexError:
-            pass
