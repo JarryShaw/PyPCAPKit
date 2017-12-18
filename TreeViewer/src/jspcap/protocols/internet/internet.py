@@ -6,8 +6,8 @@
 # Table of corresponding protocols
 
 
-from ..protocol import Protocol
 from ..transport import TP_PROTO
+from ..protocol import Protocol
 
 
 # ##############################################################################
@@ -79,4 +79,4 @@ class Internet(Protocol):
             data = self._file.read() or None
             return data, None
         next_ = Protocol(self._file)
-        return next_.info, next_.protochain
+        return next_.info, next_.protochain, next_.length

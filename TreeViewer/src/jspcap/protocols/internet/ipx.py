@@ -7,7 +7,7 @@
 
 
 from .internet import Internet
-from ..protocol import Info
+from ..utilities import Info
 
 
 # IPX Packet Types
