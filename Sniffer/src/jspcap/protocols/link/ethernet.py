@@ -10,7 +10,7 @@ import textwrap
 
 
 from .link import Link
-from ..protocol import Info
+from ..utilities import Info
 
 
 class Ethernet(Link):

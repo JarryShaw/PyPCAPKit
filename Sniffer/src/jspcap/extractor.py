@@ -12,9 +12,7 @@ import textwrap
 
 
 from .exceptions import FormatError
-from .frame import Frame
-from .header import Header
-from .protocol import Info
+from .protocols import Info, Frame, Header
 
 
 FILE = re.compile(r'''
@@ -58,7 +56,7 @@ class Extractor:
 
     @property
     def info(self):
-        return self._frame
+        return self._vinfo
 
     @property
     def length(self):
@@ -84,6 +82,15 @@ class Extractor:
     def protocol(self):
         return self._proto
 
+    @property
+    def frame(self):
+        dict_ = {}
+        dict_['tcp'] = tuple(self._frame[0])
+        dict_['ipv4'] = tuple(self._frame[1])
+        dict_['ipv6'] = tuple(self._frame[2])
+
+        return Info(dict_)
+
     ##########################################################################
     # Data modules.
     ##########################################################################
@@ -91,7 +98,8 @@ class Extractor:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True, extension=True):
+    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True, extension=True,
+                    ipv4_reassembly=False, ipv6_reassembly=False, tcp_reassembly=False):
         """Initialise PCAP Reader.
 
         Keyword arguemnts:
@@ -100,8 +108,17 @@ class Extractor:
             fin  -- str, file name to be read; if file not exist, raise error
             fout -- str, file name to be written
 
-            auto -- bool, if automatically run till EOF
-            extension -- bool, if check and append axtensions to output file
+            auto -- bool, if automatically run till EOF (default is True)
+                    <keyword> True / False
+            extension -- bool, if check and append axtensions to output file (default is True)
+                         <keyword> True / False
+
+            ipv4_reassembly -- bool, if record data for IPv4 reassembly (default is False)
+                               <keyword> True / False
+            ipv6_reassembly -- bool, if record data for IPv6 reassembly (default is False)
+                               <keyword> True / False
+            tcp_reassembly -- bool, if record data for TCP reassembly (default is False)
+                              <keyword> True / False
 
         """
         ifnm, ofnm, fmt = self.make_name(fin, fout, fmt, extension)
@@ -125,8 +142,12 @@ class Extractor:
 
         self._auto = auto                   # auto extract flag
         self._frnum = 1                     # frame number
-        self._frame = []                    # frame record
+        self._frame = [[], [], []]          # frame record (TCP / IPv4 / IPv6)
         self._ofile = output(ofnm)          # output file
+
+        self._ipv4 = ipv4_reassembly    # IPv4 Reassembly
+        self._ipv6 = ipv6_reassembly    # IPv6 Reassembly
+        self._tcp = tcp_reassembly      # TCP Reassembly
 
         self._ifile = open(ifnm, 'rb')
         self.record_header()        # read PCAP global header
@@ -204,7 +225,7 @@ class Extractor:
         """
         self._gbhdr = Header(self._ifile)
         self._dlink = self._gbhdr.protocol
-        self._frame.append(self._gbhdr.info)
+        self._vinfo = self._gbhdr.info
         self._ofile(self._gbhdr.info.infotodict(), name='Global Header')
 
     def record_frames(self):
@@ -234,22 +255,75 @@ class Extractor:
         frame = Frame(self._ifile, num=self._frnum, proto=self._dlink)
 
         # write plist
-        _fnum = 'Frame {fnum}'.format(fnum=self._frnum)
+        frnum = 'Frame {fnum}'.format(fnum=self._frnum)
         plist = frame.info.infotodict()
-        self._ofile(plist, name=_fnum)
+        self._ofile(plist, name=frnum)
 
         # record frame
-        proto = frame.protochain.proto
-        if 'tcp' in proto:
+        protos = frame.protochain
+        tuple_ = protos.tuple
+
+        if self._tcp:
+            self._tcp_reassembly(frame)
+        if self._ipv4:
+            self._ipv4_reassembly(frame)
+        if self._ipv6:
+            self._ipv6_reassembly(frame)
+
+        self._frnum += 1
+        self._proto = protos.chain
+
+    def _tcp_reassembly(self, frame):
+        """Store data for TCP reassembly."""
+        if 'TCP' in frame:
+            ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
+            tcp = frame['TCP']
             data = dict(
-                src = (plist[proto[0]][proto[1]]['src'],
-                       plist[proto[0]][proto[1]][proto[2]]['srcport']),
-                dst = (plist[proto[0]][proto[1]]['dst'],
-                       plist[proto[0]][proto[1]][proto[2]]['dstport']),
-                dsn = plist[proto[0]][proto[1]][proto[2]]['seq'],
-                raw = plist[proto[0]][proto[1]][proto[2]]['raw'],
+                src = (ip.src, tcp.srcport),
+                dst = (ip.dst, tcp.dstport),
+                dsn = tcp.seq,
+                raw = tcp.raw,
+                tcp = tcp,
             )
             info = Info(data)
-            self._frame.append(info)
-        self._frnum += 1
-        self._proto = frame.protochain.chain
+            self._frame[0].append(info)
+
+    def _ipv4_reassembly(self, frame):
+        """Store data for IPv4 reassembly."""
+        if 'IPv4' in frame:
+            ipv4 = frame['IPv4']
+            if ipv4.flags.df:
+                return
+            data = dict(
+                bufid = (
+                    ipv4.src,   # source
+                    ipv4.dst,   # destination
+                    ipv4.proto, # protocol
+                    ipv4.id,    # identification
+                ),
+                ipv4 = ipv4,
+                raw = ipv4.raw,
+                header = ipv4.header,
+            )
+            info = Info(data)
+            self._frame[1].append(info)
+
+    def _ipv6_reassembly(self, frame):
+        """Store data for IPv6 reassembly."""
+        if 'IPv6' in frame:
+            ipv6 = frame['IPv6']
+            if 'frag' not in ipv6:
+                return
+            data = dict(
+                bufid = (
+                    ipv6.src,   # source
+                    ipv6.dst,   # destination
+                    ipv6.proto, # protocol
+                    ipv6.label, # identification
+                ),
+                ipv6 = ipv6,
+                raw = ipv6.raw,
+                header = ipv6.header,
+            )
+            info = Info(data)
+            self._frame[2].append(info)

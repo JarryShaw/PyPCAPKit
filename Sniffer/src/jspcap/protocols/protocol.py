@@ -4,6 +4,7 @@
 
 import abc
 import copy
+import numbers
 import os
 import struct
 import textwrap
@@ -13,86 +14,13 @@ import textwrap
 # Pre-define useful arguments and methods of protocols
 
 
-from .exceptions import BytesError
+from .utilities import seekset, Info, ProtoChain
+from ..exceptions import BytesError
 
 
 ABCMeta = abc.ABCMeta
 abstractmethod = abc.abstractmethod
 abstractproperty = abc.abstractproperty
-
-
-class ProtoChain:
-    """Protocols chain."""
-
-    __all__ = ['proto', 'chain']
-    __slots__ = ('_tuple',)
-
-    @property
-    def tuple(self):
-        return self._tuple
-
-    @property
-    def proto(self):
-        tuple_ = copy.deepcopy(self._tuple)
-        protos = tuple((proto.lower() for proto in tuple_))
-        return protos
-
-    @property
-    def chain(self):
-        return self.__str__()
-
-    def __init__(self, proto, other=None):
-        if other is None:
-            self._tuple = (proto,)
-        else:
-            self._tuple = (proto,) + other.tuple
-
-    def __repr__(self):
-        proto = ', '.join(self.proto)
-        repr_ = 'ProtoChain({})'.format(proto)
-        return repr_
-
-    def __str__(self):
-        for (i, proto) in enumerate(self._tuple):
-            if proto is None:
-                return ':'.join(self._tuple[:i])
-        return ':'.join(self._tuple)
-
-
-class Info:
-    """Turn dictionaries into object-like instances."""
-
-    def __init__(self, dict_):
-        for key in dict_:
-            if isinstance(dict_[key], dict):
-                self.__dict__[key] = Info(dict_[key])
-            else:
-                self.__dict__[key] = dict_[key]
-
-    def __repr__(self):
-        list_ = []
-        for (key, value) in self.__dict__.items():
-            str_ = '{key}={value}'.format(key=key, value=value)
-            list_.append(str_)
-        repr_ = 'Info(' + ', '.join(list_) + ')'
-        return repr_
-
-    __str__ = __repr__
-
-    def __setattr__(self, name, value):
-        raise AttributeError('can\'t set attribute')
-
-    def __delattr__(self, name):
-        raise AttributeError('can\'t delete attribute')
-
-    def infotodict(self):
-        dict_ = {}
-        for key in self.__dict__:
-            if isinstance(self.__dict__[key], Info):
-                dict_[key] = self.__dict__[key].infotodict()
-            else:
-                dict_[key] = self.__dict__[key]
-        return dict_
 
 
 class Protocol(object):
@@ -122,15 +50,6 @@ class Protocol(object):
     ##########################################################################
     # Methods.
     ##########################################################################
-
-    def seekset(func):
-        def seekcur(self, *args, **kw):
-            seek_cur = self._file.tell()
-            self._file.seek(os.SEEK_SET)
-            return_ = func(self, *args, **kw)
-            self._file.seek(seek_cur, os.SEEK_SET)
-            return return_
-        return seekcur
 
     def _read_protos(self, size):
         """Read next layer protocol type."""
@@ -227,6 +146,9 @@ class Protocol(object):
             self._file.seek(os.SEEK_SET)
             raise StopIteration
 
+    def __getitem__(self, key):
+        return self._info[key]
+
     ##########################################################################
     # Utilities.
     ##########################################################################
@@ -236,13 +158,14 @@ class Protocol(object):
         next_ = self._import_next_layer(proto)
 
         # make next layer protocol name
-        proto = proto or ''
+        if proto is None:
+            proto = ''
         name_ = proto.lower() or 'raw'
+        proto = proto or None
 
         # write info and protocol chain into dict
         dict_[name_] = next_[0]
         self._protos = ProtoChain(proto, next_[1])
-
         return dict_
 
     def _import_next_layer(self, proto):

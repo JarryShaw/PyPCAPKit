@@ -3,12 +3,12 @@
 
 
 # Address Resolution Protocol
-# Analyser for ARP/IARP header
+# Analyser for ARP/InARP header
 
 
 from .link import Link, LINKTYPE
 from ..internet import ETHERTYPE
-from ..protocol import Info
+from ..utilities import Info
 
 
 # Operation Codes [RFC 826][RFC 5494]

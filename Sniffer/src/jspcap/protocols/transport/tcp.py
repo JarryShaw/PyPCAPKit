@@ -10,7 +10,7 @@ import struct
 
 
 from .transport import Transport
-from ..protocol import Info
+from ..utilities import Info
 
 
 """TCP Option Utility Table
@@ -254,9 +254,6 @@ class TCP(Transport):
             checksum = _csum,
             urgent_pointer = _urgp,
         )
-
-        self._syn = tcp['flags']['syn']
-        self._ack = tcp['flags']['ack']
 
         _optl = tcp['hdr_len'] - 20
         if _optl:

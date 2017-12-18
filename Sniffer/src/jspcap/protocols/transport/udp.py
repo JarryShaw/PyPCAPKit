@@ -7,7 +7,7 @@
 
 
 from .transport import Transport
-from ..protocol import Info
+from ..utilities import Info
 
 
 class UDP(Transport):

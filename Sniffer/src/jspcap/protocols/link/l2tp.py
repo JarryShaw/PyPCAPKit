@@ -7,7 +7,7 @@
 
 
 from .link import Link
-from ..protocol import Info
+from ..utilities import Info
 
 
 class L2TP(Link):
