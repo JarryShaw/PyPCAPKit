@@ -10,7 +10,7 @@ import abc
 
 
 from .internet import Internet
-from ..protocol import Info, seekset
+from ..utilities import Info, seekset
 
 
 abstractmethod = abc.abstractmethod

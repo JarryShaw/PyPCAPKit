@@ -8,7 +8,7 @@
 
 from .link import Link, LINKTYPE
 from ..internet import ETHERTYPE
-from ..protocol import Info
+from ..utilities import Info
 
 
 # Operation Codes [RFC 826][RFC 5494]

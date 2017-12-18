@@ -10,7 +10,8 @@ import io
 # Analyser for record/package headers
 
 
-from .protocol import Info, ProtoChain, Protocol
+from .protocol import Protocol
+from .utilities import Info, ProtoChain
 
 
 class Frame(Protocol):

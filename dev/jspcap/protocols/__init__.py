@@ -14,8 +14,8 @@ from .transport import *
 from .application import *
 
 # Ptotocol Chain
-from .protocol import ProtoChain
+from .utilities import ProtoChain
 
 # Info Classes
-from .protocol import Info
+from .utilities import Info
 from .header import VersionInfo

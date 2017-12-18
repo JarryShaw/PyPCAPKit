@@ -6,8 +6,8 @@
 # Table of corresponding protocols
 
 
-from ..protocol import Protocol
 from ..transport import TP_PROTO
+from ..protocol import Protocol
 
 
 # ##############################################################################

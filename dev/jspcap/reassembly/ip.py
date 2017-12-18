@@ -54,7 +54,7 @@ class IP_Reassembly(Reassembler):
             # set RCVBT bits (in 8 octets)
             start = FO // 8
             stop = FO // 8 + (TL - IHL + 7) // 8
-            buffer[BUFID][RCVBT][cnt] = b'\x01' * (stop - start + 1)
+            buffer[BUFID][RCVBT][start:stop] = b'\x01' * (stop - start + 1)
 
             # get total data length (header excludes)
             if MF == 0:

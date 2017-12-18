@@ -7,7 +7,7 @@
 
 
 from .ip import IP
-from ..protocol import Info
+from ..utilities import Info
 
 
 # TOS (DS Field) Precedence
@@ -167,13 +167,17 @@ class IPv4(IP):
         if _optl:
             ipv4['options'] = self._read_ip_options(_optl)
 
+        hdr_len = ipv4['hdr_len']
+        raw_len = ipv4['len'] - hdr_len
+
         if ipv4['flags']['df']:
             return self._read_next_layer(ipv4, _prot)
         else:
-            hdr_len = ipv4['hdr_len']
-            raw_len = ipv4['len'] - hdr_len
             ipv4['header'] = self._read_ip_header(hdr_len)
             ipv4['raw'] = self._read_fileng(raw_len)
+            padding = self._read_fileng()
+            if padding:
+                ipv4['padding'] = padding
             return ipv4
 
     def _read_ip_addr(self):

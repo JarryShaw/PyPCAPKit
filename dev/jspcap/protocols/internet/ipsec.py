@@ -10,7 +10,7 @@ import abc
 
 
 from .ip import IP
-from ..protocol import Info
+from ..utilities import Info
 
 
 abstractmethod = abc.abstractmethod

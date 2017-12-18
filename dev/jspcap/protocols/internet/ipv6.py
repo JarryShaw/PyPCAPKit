@@ -7,7 +7,7 @@
 
 
 from .ip import IP
-from ..protocol import Info
+from ..utilities import Info
 
 
 # IPv6 Extension Header Types
@@ -186,6 +186,9 @@ class IPv6(IP):
         if proto == 'IPv6-Frag':
             dict_['header'] = self._read_ip_header(hdr_len)
             dict_['raw'] = self._read_fileng(raw_len)
+            padding = self._read_fileng()
+            if padding:
+                ipv6['padding'] = padding
 
         dict_['proto'] = proto
         return super()._read_next_layer(dict_, proto)
