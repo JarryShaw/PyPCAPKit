@@ -10,7 +10,8 @@ import io
 # Analyser for record/package headers
 
 
-from .protocol import Info, ProtoChain, Protocol
+from .protocol import Protocol
+from .utilities import Info, ProtoChain
 
 
 class Frame(Protocol):
@@ -38,6 +39,13 @@ class Frame(Protocol):
         return self._proto
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def index(self, name):
+        return self._proto.index(name)
+
+    ##########################################################################
     # Data models.
     ##########################################################################
 
@@ -56,6 +64,37 @@ class Frame(Protocol):
 
     def __length_hint__(self):
         return 16
+
+    def __getitem__(self, key):
+        if key in self._info:
+            return self._info[key]
+
+        proto = self._proto[key]
+
+        if not proto:
+            raise IndexError
+        elif isinstance(proto, tuple):
+            if len(proto) > 1:
+                raise TypeError
+            else:
+                start = proto[0]
+        else:
+            start = self._proto.index(proto)
+
+        dict_ = self._info.infotodict()
+        for (level, proto) in enumerate(self._proto.tuple):
+            proto = proto or 'raw'
+            dict_ = dict_[proto.lower()]
+            if level >= start:
+                break
+
+        return Info(dict_)
+
+    def __index__(self, name):
+        return self._proto.index(name)
+
+    def __contains__(self, name):
+        return any(((name in self._info), (name in self._proto)))
 
     ##########################################################################
     # Utilities.
@@ -104,7 +143,7 @@ class Frame(Protocol):
     def _read_next_layer(self, dict_):
         # make next layer protocol name
         proto = self._prot or ''
-        name_ = proto.lower() or 'Unknown'
+        name_ = proto.lower() or 'raw'
 
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
@@ -114,7 +153,6 @@ class Frame(Protocol):
         self._proto = ProtoChain(self._prot, next_[1])
         dict_[name_] = next_[0]
         dict_['protocols'] = self._proto.chain
-
         return dict_
 
     def _import_next_layer(self, file_):
