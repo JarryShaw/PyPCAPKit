@@ -58,9 +58,9 @@ class IP(Internet):
     ##########################################################################
 
     @abstractmethod
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_ip())
+        self._info = Info(self.read_ip(length))
 
     @abstractmethod
     def __len__(self):

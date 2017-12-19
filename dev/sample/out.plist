@@ -60,7 +60,7 @@
 				<integer>96</integer>
 				<key>label</key>
 				<integer>0</integer>
-				<key>len</key>
+				<key>payload</key>
 				<integer>32</integer>
 				<key>next</key>
 				<string>ICMPv6</string>
@@ -125,7 +125,7 @@
 				<integer>96</integer>
 				<key>label</key>
 				<integer>0</integer>
-				<key>len</key>
+				<key>payload</key>
 				<integer>24</integer>
 				<key>next</key>
 				<string>ICMPv6</string>

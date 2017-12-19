@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import collections
 import struct
 
 
@@ -160,9 +161,9 @@ class TCP(Transport):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_tcp())
+        self._info = Info(self.read_tcp(length))
 
     def __len__(self):
         return self._info.hdr_len
@@ -174,7 +175,7 @@ class TCP(Transport):
     # Utilities.
     ##########################################################################
 
-    def read_tcp(self):
+    def read_tcp(self, length):
         """Read Transmission Control Protocol (TCP).
 
         Structure of TCP header [RFC 793]:
@@ -259,13 +260,15 @@ class TCP(Transport):
         if _optl:
             tcp['opt'] = self._read_tcp_options(_optl)
 
-        return self._read_next_layer(tcp)
+        if length is not None:
+            length -= tcp['hdr_len']
+        return self._read_next_layer(tcp, None, length)
 
     def _read_tcp_options(self, _optl):
         counter = 0     # length of read option list
         options = dict( # dict of option data
-            kind = [],      # option kind list
-            length = {},    # option length dict
+            kind = tuple(),                             # option kind list
+            length = collections.defaultdict(tuple),    # option length dict
         )
         while counter < _optl:
             # get option kind
@@ -295,8 +298,8 @@ class TCP(Transport):
             # record option data
             counter += len_
             options[dscp] = data
-            options['kind'].append(kind)
-            options['length'].update({kind: len_})
+            options['kind'] += (dscp,)
+            options['length'][dscp] += (len_,)
 
             # break when eol triggered
             if not kind:    break

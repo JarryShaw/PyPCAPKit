@@ -61,14 +61,26 @@ class Internet(Protocol):
         return _prot
 
     ##########################################################################
+    # Data modules.
+    ##########################################################################
+
+    def __new__(cls, _file, length=None):
+        self = super().__new__(cls, _file)
+        return self
+
+    ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _import_next_layer(self, proto):
+    def _import_next_layer(self, proto, length):
         if proto == 'IPv4':
-            from .ipv4 import IPv4 as Protocol
+            from .ipv4 import IPv4
+            next_ = IPv4(self._file, length, version=4)
+            return next_.info, next_.protochain
         elif proto == 'IPv6':
-            from .ipv6 import IPv6 as Protocol
+            from .ipv6 import IPv6
+            next_ = IPv6(self._file, length, version=6)
+            return next_.info, next_.protochain
         elif proto == 'AH':
             from .ah import AH as Protocol
         elif proto == 'TCP':
@@ -76,7 +88,7 @@ class Internet(Protocol):
         elif proto == 'UDP':
             from ..transport import UDP as Protocol
         else:
-            data = self._file.read() or None
+            data = self._file.read(*[length]) or None
             return data, None
-        next_ = Protocol(self._file)
-        return next_.info, next_.protochain, next_.length
+        next_ = Protocol(self._file, length)
+        return next_.info, next_.protochain

@@ -5,8 +5,8 @@
 import abc
 
 
-# Reassembler for Packets
-# Abstract Base Class for Packet Reassembly
+# Reassembly of Packets
+# Abstract Base Class for Reassembly
 
 
 ABCMeta = abc.ABCMeta
@@ -14,7 +14,7 @@ abstractmethod = abc.abstractmethod
 abstractproperty = abc.abstractproperty
 
 
-class Reassembler(tuple):
+class Reassembly(tuple):
 
     __metaclass__ = ABCMeta
 
@@ -28,7 +28,6 @@ class Reassembler(tuple):
         pass
 
     # total number of reassembled packets
-    @abstractproperty
     def count(self):
         return len(self._data)
 
@@ -38,10 +37,6 @@ class Reassembler(tuple):
 
     @abstractmethod
     def reassembly(self, info):
-        pass
-
-    @abstractmethod
-    def extraction(self):
         pass
 
     ##########################################################################

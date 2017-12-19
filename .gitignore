@@ -9,6 +9,8 @@
 !out.txt
 *.xml
 !out.xml
+*.pcap
+!in.pcap
 
 out/
 deprecated/

@@ -36,7 +36,7 @@ class IPv6(IP):
 
     @property
     def length(self):
-        return self._info.len
+        return self._info.hdr_len
 
     @property
     def protocol(self):
@@ -46,12 +46,12 @@ class IPv6(IP):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_ipv6())
+        self._info = Info(self.read_ipv6(length))
 
     def __len__(self):
-        return self._info.len
+        return self._info.hdr_len
 
     def __length_hint__(self):
         return 40
@@ -60,7 +60,7 @@ class IPv6(IP):
     # Utilities.
     ##########################################################################
 
-    def read_ipv6(self):
+    def read_ipv6(self, length):
         """Read Internet Protocol version 6 (IPv6).
 
         Structure of IPv6 header [RFC 2460]:
@@ -93,7 +93,7 @@ class IPv6(IP):
               0              0          ip.version        Version (6)
               0              4          ip.class          Traffic Class
               1              12         ip.label          Flow Label
-              4              32         ip.len            Payload Length
+              4              32         ip.payload        Payload Length (header excludes)
               6              48         ip.next           Next Header
               7              56         ip.limit          Hop Limit
               8              64         ip.src            Source Address
@@ -111,14 +111,14 @@ class IPv6(IP):
             version = _htet[0],
             tclass = _htet[1],
             label = _htet[2],
-            len = _plen,
+            payload = _plen,
             next = _next,
             limit = _hlmt,
             src = _srca,
             dst = _dsta,
         )
 
-        return self._read_next_layer(ipv6, _next)
+        return self._read_next_layer(ipv6, _next, length)
 
     def _read_ip_hextet(self):
         _htet = self._read_fileng(4).hex()
@@ -166,7 +166,7 @@ class IPv6(IP):
         addr = ':'.join(adlt)
         return addr
 
-    def _read_next_layer(self, dict_, proto=None):
+    def _read_next_layer(self, dict_, proto=None, length=None):
         # recurse if next header is an extensive header
         ext_len = 0
         while proto in EXT_HDR:
@@ -178,7 +178,7 @@ class IPv6(IP):
 
         # record real payload length (all headers exclude)
         hdr_len = 40 + ext_len
-        raw_len = dict_['len'] - ext_len
+        raw_len = dict_['payload'] - ext_len
         dict_['hdr_len'] = hdr_len
         dict_['raw_len'] = raw_len
 
@@ -191,4 +191,4 @@ class IPv6(IP):
                 ipv6['padding'] = padding
 
         dict_['proto'] = proto
-        return super()._read_next_layer(dict_, proto)
+        return super()._read_next_layer(dict_, proto, raw_len)

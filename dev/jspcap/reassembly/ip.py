@@ -9,13 +9,13 @@ import abc
 # Base class for IPv4 & IPv6 reassembly
 
 
-from .reassembler import Reassembler
+from .reassembler import Reassembly
 
 
 abstractmethod = abc.abstractmethod
 
 
-class IP_Reassembly(Reassembler):
+class IP_Reassembly(Reassembly):
 
     ##########################################################################
     # Methods.
@@ -29,11 +29,15 @@ class IP_Reassembly(Reassembler):
             FO, IHL, MF, TL, BUFID = self._ip_reassembly(buf)
 
             # when unfragmented (possibly discarded) packet received
-            if FO == 0 and MF == 0:
+            if not FO and not MF:
                 if BUFID in buffer:
-                    header = buffer[BUFID]['header'][:IHL+1] or None
-                    data = buffer[BUFID]['data'][:TL]
-                    datagram.append((bytes(header), bytes(data)))
+                    header = buffer[BUFID]['header']
+                    data = buffer[BUFID]['data'][IHL:TL]
+                    packet = dict(
+                        header = bytes(header),
+                        payload = bytes(data),
+                    )
+                    datagram.append(Info(packet))
                     del buffer[BUFID]
                     continue
 
@@ -43,7 +47,7 @@ class IP_Reassembly(Reassembler):
                     TDL = 0,                    # Total Data Length
                     RCVBT = bytearray(8191),    # Fragment Received Bit Table
                     data = bytearray(65535),    # data buffer
-                    header = bytearray(64),     # header buffer
+                    header = bytearray(),       # header buffer
                 )
 
             # put data into data buffer
@@ -57,21 +61,25 @@ class IP_Reassembly(Reassembler):
             buffer[BUFID][RCVBT][start:stop] = b'\x01' * (stop - start + 1)
 
             # get total data length (header excludes)
-            if MF == 0:
+            if not MF:
                 TDL = TL - IHL + FO
 
             # put header into header buffer
-            if FO == 0:
+            if not FO:
                 buffer[BUFID][header] = buf.header
 
             # when datagram is reassembled
             start = 0
             stop = (TDL + 7) // 8
-            if TDL != 0 and all(RCVBT[start:stop]):
+            if TDL and all(RCVBT[start:stop]):
                 TL = TDL + IHL
-                header = buffer[BUFID]['header'][:IHL+1] or None
-                data = buffer[BUFID]['data'][:TL]
-                datagram.append((bytes(header), bytes(data)))
+                header = buffer[BUFID]['header']
+                data = buffer[BUFID]['data'][IHL:TL]
+                packet = dict(
+                    header = bytes(header),
+                    payload = bytes(data),
+                )
+                datagram.append(Info(packet))
                 del buffer[BUFID]
 
         return tuple(datagram)

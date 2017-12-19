@@ -278,12 +278,18 @@ class Extractor:
         if 'TCP' in frame:
             ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
             tcp = frame['TCP']
+            if 'raw' not in tcp:
+                return
             data = dict(
-                src = (ip.src, tcp.srcport),
-                dst = (ip.dst, tcp.dstport),
-                dsn = tcp.seq,
-                raw = tcp.raw,
+                bufid = (
+                    ip.src,         # source ip
+                    tcp.srcport,    # source port
+                    ip.dst,         # destination ip
+                    tcp.dstport,    # destination port
+                    tcp.ack,        # acknowledgment number
+                ),
                 tcp = tcp,
+                raw = tcp.raw,
             )
             info = Info(data)
             self._frame[0].append(info)

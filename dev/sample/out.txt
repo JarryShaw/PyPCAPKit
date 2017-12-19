@@ -28,7 +28,7 @@ Frame 1
   |           |-- version -> 6
   |           |-- tclass -> 96
   |           |-- label -> 0
-  |           |-- len -> 32
+  |           |-- payload -> 32
   |           |-- next -> ICMPv6
   |           |-- limit -> 255
   |           |-- src -> fe80::a6:87f9:2793:16ee
@@ -60,7 +60,7 @@ Frame 2
   |           |-- version -> 6
   |           |-- tclass -> 96
   |           |-- label -> 0
-  |           |-- len -> 24
+  |           |-- payload -> 24
   |           |-- next -> ICMPv6
   |           |-- limit -> 255
   |           |-- src -> fe80::1ccd:7c77:bac7:46b7
