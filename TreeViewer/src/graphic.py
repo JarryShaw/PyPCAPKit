@@ -71,11 +71,11 @@ EMSP = '                   '
 
 # file names
 NAME = {
-    'src/about'  : 'ABOUT',
-    'src/init'   : 'README',
-    'src/manual' : 'MANUAL',
-    'src/out'    : 'REPORT',
-    'src/recent' : 'LOG',
+    'assets/about'  : 'ABOUT',
+    'assets/init'   : 'README',
+    'assets/manual' : 'MANUAL',
+    'assets/out'    : 'REPORT',
+    'assets/recent' : 'LOG',
 }
 
 # File name regex
@@ -229,7 +229,7 @@ class Display:
 
     def __init__(self):
         try:
-            os.remove('src/out')
+            os.remove('assets/out')
         except FileNotFoundError:
             pass
 
@@ -362,7 +362,7 @@ class Display:
         frct_menu = Menu(file_menu, tearoff=0)
         file_menu.add_cascade(label='Open Recent', menu=frct_menu)
         try:
-            with open('src/recent', 'r') as file_:
+            with open('assets/recent', 'r') as file_:
                 file_real = False
                 for (fctr, file_name) in enumerate(file_):
                     file_real = True if file_name else False
@@ -482,7 +482,7 @@ class Display:
         )
         scrolledtext.pack()
         try:
-            with open('src/about', 'r') as file_:
+            with open('assets/about', 'r') as file_:
                 for line in file_:
                     scrolledtext.insert(END, line)
                     scrolledtext.update()
@@ -514,7 +514,7 @@ class Display:
     # Quit PCAP Tree Viewer
     def quit_cmd(self, *args):
         try:
-            os.remove('src/out')
+            os.remove('assets/out')
         except FileNotFoundError:
             pass
         self.master.destroy()
@@ -525,7 +525,7 @@ class Display:
 
     # Clear Menu
     def rmrf_cmd(self, *, menu, fctr):
-        open('src/recent', 'w').close()
+        open('assets/recent', 'w').close()
         menu.delete(0, fctr+2)
         menu.add_command(label='Clear Menu', state=DISABLED)
 
@@ -536,7 +536,7 @@ class Display:
                 'Do you really want to close?'
             ):
             try:
-                os.remove('src/out')
+                os.remove('assets/out')
             except FileNotFoundError:
                 pass
             self.master.destroy()
@@ -1009,7 +1009,7 @@ class Display:
         )
         scrolledtext.pack()
         try:
-            with open('src/manual', 'r') as file_:
+            with open('assets/manual', 'r') as file_:
                 for line in file_:
                     scrolledtext.insert(END, line)
                     scrolledtext.update()
@@ -1042,7 +1042,7 @@ class Display:
         )
         self.button.place(relx=0.5, rely=0.93, anchor=CENTER)
         try:
-            with open('src/init', 'r') as file_:
+            with open('assets/init', 'r') as file_:
                 for line in file_:
                     content = EMSP + line
                     self.text.insert(END, content)
@@ -1054,7 +1054,7 @@ class Display:
 
     def open_file(self, name=None):
         # remove cache
-        open('src/out', 'w').close()
+        open('assets/out', 'w').close()
 
         ifnm = name or askopenfilename(
             parent=self.master, title='Please select a file ...',
@@ -1065,7 +1065,7 @@ class Display:
 
         if pathlib.Path(ifnm).is_file():
             try:
-                self._ext = Extractor(fin=ifnm, fout='src/out', fmt='tree', auto=False, extension=False)
+                self._ext = Extractor(fin=ifnm, fout='assets/out', fmt='tree', auto=False, extension=False)
             except FileError:
                 showerror('Unsupported file format!', 'Please retry.')
                 self.button.place()
@@ -1122,7 +1122,7 @@ class Display:
         self.label.config(text=content)
 
         try:
-            with open('src/out', 'r') as fout:
+            with open('assets/out', 'r') as fout:
                 _ctr = 0
                 for (_lctr, line) in enumerate(fout):
                     self.listbox.insert(END, line)
@@ -1151,11 +1151,11 @@ class Display:
     def keep_file(self, name):
         records = []
         try:
-            with open('src/recent', 'r') as file_:
+            with open('assets/recent', 'r') as file_:
                 for line in file_:
                     records.append(line.strip())
         except FileNotFoundError:
-            open('src/recent', 'w').close()
+            open('assets/recent', 'w').close()
 
         try:
             index = records.index(name)
@@ -1168,7 +1168,7 @@ class Display:
         finally:
             records.insert(0, name)
 
-        with open('src/recent', 'w') as file_:
+        with open('assets/recent', 'w') as file_:
             record = '\n'.join(records)
             file_.write(record)
 
@@ -1191,7 +1191,7 @@ class Display:
             if file_:
                 if fmt == 'pdf':
                     process = subprocess.Popen(
-                                    ['pandoc', 'src/out', '-o', file_],
+                                    ['pandoc', 'assets/out', '-o', file_],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE
                                 )
                     output, error = process.communicate()
@@ -1201,7 +1201,7 @@ class Display:
                         showinfo('Export done.', "File stored in '{dir}'.".format(dir=file_))
                 else:
                     try:
-                        shutil.copyfile('src/out', file_)
+                        shutil.copyfile('assets/out', file_)
                     except FileNotFoundError:
                         showerror('Unable to export.', 'Report file is missing.')
                     else:

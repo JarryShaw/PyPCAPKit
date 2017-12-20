@@ -67,9 +67,17 @@ class Transport(Protocol):
         return self._protos
 
     ##########################################################################
+    # Data modules.
+    ##########################################################################
+
+    def __new__(cls, _file, length=None):
+        self = super().__new__(cls, _file)
+        return self
+
+    ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _import_next_layer(self, proto):
-        data = self._file.read() or None
+    def _import_next_layer(self, proto, length):
+        data = self._file.read(*[length]) or None
         return data, None

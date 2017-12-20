@@ -55,9 +55,9 @@ Please select a command:
 # dict of root commands
 INIT_CMD = {
     '1' : lambda self_: self_.open_cmd(),
-    '2' : lambda self_: self_.read_cmd('src/about'),
-    '3' : lambda self_: self_.read_cmd('src/manual'),
-    '4' : lambda self_: self_.read_cmd('src/init'),
+    '2' : lambda self_: self_.read_cmd('assets/about'),
+    '3' : lambda self_: self_.read_cmd('assets/manual'),
+    '4' : lambda self_: self_.read_cmd('assets/init'),
     '5' : lambda self_: self_.repo_cmd(),
     '6' : lambda self_: None,
 }
@@ -99,7 +99,7 @@ How would you like to view the report?
 
 # dict of commands after `view_cmd`
 VIEW_CMD = {
-    '1' : lambda self_: self_.read_cmd('src/out', root='view'),
+    '1' : lambda self_: self_.read_cmd('assets/out', root='view'),
     '2' : lambda self_: self_.goto_cmd(),
     '3' : lambda self_: self_.srch_cmd(),
     '4' : lambda self_: 'open',
@@ -137,11 +137,11 @@ QUIT = ('q', 'quit', 'exit')
 
 # dict of file names
 NAME = {
-    'src/about'  : 'ABOUT',
-    'src/init'   : 'README',
-    'src/manual' : 'MANUAL',
-    'src/out'    : 'REPORT',
-    'src/recent' : 'LOG',
+    'assets/about'  : 'ABOUT',
+    'assets/init'   : 'README',
+    'assets/manual' : 'MANUAL',
+    'assets/out'    : 'REPORT',
+    'assets/recent' : 'LOG',
 }
 
 
@@ -214,7 +214,7 @@ class Display:
 
     def __init__(self):
         try:
-            self.read_cmd('src/init')
+            self.read_cmd('assets/init')
         except FileNotFoundError:
             print('\n❌Unable to find README.')
             exit()
@@ -224,7 +224,7 @@ class Display:
             kind = self.show_cmd(kind)
 
         try:
-            os.remove('src/out')
+            os.remove('assets/out')
         except FileNotFoundError:
             pass
         exit()
@@ -289,7 +289,7 @@ class Display:
 
     def open_cmd(self, *, root='init'):
         # remove cache
-        open('src/out', 'w').close()
+        open('assets/out', 'w').close()
 
         fin = input('\nWhich file would you like to open: ')
         if '.pcap' not in fin:
@@ -305,7 +305,7 @@ class Display:
         self.__frames = []
         try:
             print('\n🚨Loading file {}...'.format(fin))
-            self.__ext = Extractor(fin=fin, fout='src/out', fmt='tree', auto=False, extension=False)
+            self.__ext = Extractor(fin=fin, fout='assets/out', fmt='tree', auto=False, extension=False)
 
             # extracting pcap file
             print('🍺Extracting...')
@@ -330,7 +330,7 @@ class Display:
 
         print('\n🍺Exporting...')
         process = subprocess.Popen(
-                        ['pandoc', 'src/out', '-o', path],
+                        ['pandoc', 'assets/out', '-o', path],
                         stdout=subprocess.PIPE, stderr=subprocess.PIPE
                     )
         output, error = process.communicate()
@@ -348,7 +348,7 @@ class Display:
                 return None
             try:
                 print('🍺Exporting...')
-                shutil.copyfile('src/out', path)
+                shutil.copyfile('assets/out', path)
                 print('🍻Export done.')
                 print('The report has been stored in {}'.format(path))
                 return root
@@ -360,13 +360,13 @@ class Display:
 
     def view_cmd(self, *, root='open'):
         try:
-            open('src/out', 'r').close()
+            open('assets/out', 'r').close()
         except FileNotFoundError:
             print('\n❌Unable to find REPORT.')
             return root
 
         if not self.__frames:
-            with open('src/out', 'r') as file_:
+            with open('assets/out', 'r') as file_:
                 for _ctr, line in enumerate(file_):
                     if 'Frame' in line:
                         self.__frames.append(_ctr)
@@ -375,7 +375,7 @@ class Display:
 
     def srch_cmd(self, *, root='view'):
         try:
-            open('src/out', 'r').close()
+            open('assets/out', 'r').close()
         except FileNotFoundError:
             print('\n❌Unable to find REPORT.')
             return root
@@ -385,7 +385,7 @@ class Display:
         result = []
 
         print('\n🍺Searching...')
-        with open('src/out', 'r') as file_:
+        with open('assets/out', 'r') as file_:
             for _ctr, line in enumerate(file_):
                 if re.findall(pattern, line, re.I):
                     result.append(_ctr)
@@ -413,7 +413,7 @@ class Display:
         this = self.__frames[frame[0]-1] if frame[0] > 0 else 0
         that = self.__frames[frame[0]] if frame[0] > 0 else self.__frames[0]
 
-        with open('src/out', 'r') as file_:
+        with open('assets/out', 'r') as file_:
             print()
             for _ctr, line in enumerate(file_):
                 if _ctr >= this:
@@ -430,7 +430,7 @@ class Display:
 
     def goto_cmd(self, *, root='view'):
         try:
-            open('src/out', 'r').close()
+            open('assets/out', 'r').close()
         except FileNotFoundError:
             print('\n❌Unable to find REPORT.')
             return root
@@ -452,7 +452,7 @@ class Display:
         this = self.__frames[ctr-1] if ctr > 0 else 0
         that = self.__frames[ctr] if ctr > 0 else self.__frames[0]
 
-        with open('src/out', 'r') as file_:
+        with open('assets/out', 'r') as file_:
             print()
             for _ctr, line in enumerate(file_):
                 if _ctr >= this:
@@ -465,7 +465,7 @@ class Display:
 
     def back_cmd(self, *, root='goto'):
         try:
-            open('src/out', 'r').close()
+            open('assets/out', 'r').close()
         except FileNotFoundError:
             print('\n❌Unable to find REPORT.')
             return root
@@ -479,7 +479,7 @@ class Display:
         this = self.__frames[ctr-1] if ctr > 0 else 1
         that = self.__frames[ctr] if ctr > 0 else self.__frames[0]
 
-        with open('src/out', 'r') as file_:
+        with open('assets/out', 'r') as file_:
             print()
             for _ctr, line in enumerate(file_):
                 if _ctr >= this:
@@ -492,7 +492,7 @@ class Display:
 
     def next_cmd(self, *, root='goto'):
         try:
-            open('src/out', 'r').close()
+            open('assets/out', 'r').close()
         except FileNotFoundError:
             print('\n❌Unable to find REPORT.')
             return root
@@ -506,7 +506,7 @@ class Display:
         this = self.__frames[ctr-1] if ctr > 0 else 0
         that = self.__frames[ctr] if ctr > 0 else self.__frames[0]
 
-        with open('src/out', 'r') as file_:
+        with open('assets/out', 'r') as file_:
             print()
             for _ctr, line in enumerate(file_):
                 if _ctr >= this:

@@ -80,9 +80,9 @@ class IPX(Internet):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_ipx())
+        self._info = Info(self.read_ipx(length))
 
     def __len__(self):
         return 30
@@ -94,7 +94,7 @@ class IPX(Internet):
     # Utilities.
     ##########################################################################
 
-    def read_ipx(self):
+    def read_ipx(self, length):
         """Read Internetwork Packet Exchange.
 
         Structure of IPX header [RFC 1132]:
@@ -123,7 +123,9 @@ class IPX(Internet):
             src = _srca,
         )
 
-        return self._read_next_layer(ipx, ipx['type'])
+        proto = ipx['type']
+        length = ipx['len'] - 30
+        return self._read_next_layer(ipx, proto, length)
 
     def _read_ipx_address(self):
         """Read IPX address field.

@@ -28,7 +28,7 @@ class L2TP(Link):
 
     @property
     def length(self):
-        return self._info.len
+        return self._info.hdr_len
 
     @property
     def src(self):
@@ -50,12 +50,12 @@ class L2TP(Link):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_l2tp())
+        self._info = Info(self.read_l2tp(length))
 
     def __len__(self):
-        return self._info.len
+        return self._info.hdr_len
 
     def __length_hint__(self):
         return 16
@@ -64,7 +64,7 @@ class L2TP(Link):
     # Utilities.
     ##########################################################################
 
-    def read_l2tp(self):
+    def read_l2tp(self, length):
         """Read Layer Two Tunneling Protocol.
 
         Structure of L2TP header [RFC 2661]:
@@ -129,9 +129,10 @@ class L2TP(Link):
             offset = _size * 8,
         )
 
-        l2tp['len'] = _hlen or (6 + 2*(int(_flag[1]) + 2*int(_flag[4]) + int(_flag[6])))
+        l2tp['hdr_len'] = _hlen or (6 + 2*(int(_flag[1]) + 2*int(_flag[4]) + int(_flag[6])))
         if _size:
             l2tp['padding'] = self._read_fileng(_size * 8)
-            l2tp['len'] += _size * 8
-
-        return self._read_next_layer(l2tp)
+            l2tp['hdr_len'] += _size * 8
+        if length is not None:
+            length -= l2tp['hdr_len']
+        return self._read_next_layer(l2tp, length)

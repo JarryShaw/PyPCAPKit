@@ -46,9 +46,9 @@ class UDP(Transport):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_udp())
+        self._info = Info(self.read_udp(length))
 
     def __len__(self):
         return 8
@@ -60,7 +60,7 @@ class UDP(Transport):
     # Utilities.
     ##########################################################################
 
-    def read_udp(self):
+    def read_udp(self, length):
         """Read User Datagram Protocol (UDP).
 
         Structure of UDP header [RFC 768]:
@@ -81,7 +81,7 @@ class UDP(Transport):
             Octets          Bits          Name                      Discription
               0              0          udp.srcport             Source Port
               2              16         udp.dstport             Destination Port
-              4              32         udp.len                 Length
+              4              32         udp.len                 Length (header includes)
               6              48         udp.checksum            Checksum
 
         """
@@ -97,4 +97,5 @@ class UDP(Transport):
             checksum = _csum,
         )
 
-        return self._read_next_layer(udp)
+        length = udp['len'] - 8
+        return self._read_next_layer(udp, None, length)
