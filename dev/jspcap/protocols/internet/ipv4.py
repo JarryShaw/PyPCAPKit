@@ -170,8 +170,8 @@ class IPv4(IP):
         hdr_len = ipv4['hdr_len']
         raw_len = ipv4['len'] - hdr_len
 
-        if ipv4['flags']['df']:
-            return self._read_next_layer(ipv4, _prot, raw_len)
+        if not ipv4['flags']['df']:
+            ipv4 = self._read_ip_seekset(ipv4, hdr_len, raw_len)
 
         # make next layer protocol name
         proto = ipv4['proto']
@@ -181,13 +181,7 @@ class IPv4(IP):
         proto = proto or None
         self._protos = ProtoChain(proto)
 
-        # when fragmented, read payload directly
-        ipv4['header'] = self._read_ip_header(hdr_len)
-        ipv4['raw'] = self._read_fileng(raw_len)
-        padding = self._read_fileng()
-        if padding:
-            ipv4['padding'] = padding
-        return ipv4
+        return self._read_next_layer(ipv4, _prot, raw_len)
 
     def _read_ip_addr(self):
         _byte = self._read_fileng(4)

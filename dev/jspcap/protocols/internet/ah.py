@@ -31,10 +31,13 @@ class AH(IPsec):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, version=None):
+    def __new__(cls, _file, length=None, *, version=4):
+        self = super().__new__(cls, _file)
+        return self
+
+    def __init__(self, _file, length=None, *, version=4):
         self._file = _file
-        self._vers = version or 4
-        self._info = Info(self.read_ah(length))
+        self._info = Info(self.read_ah(length, version))
 
     def __len__(self):
         return self._info.len
@@ -46,7 +49,7 @@ class AH(IPsec):
     # Utilities.
     ##########################################################################
 
-    def read_ah(self, length):
+    def read_ah(self, length, version):
         """Read Authentication Header.
 
         Structure of AH header [RFC 4302]:
@@ -94,7 +97,7 @@ class AH(IPsec):
             icv = _chkv,
         )
 
-        if version in (6, '6'):
+        if version == 6:
             _plen = 8 - (_vlen % 8)
         else:   # version == 4
             _plen = 4 - (_tlen % 4)

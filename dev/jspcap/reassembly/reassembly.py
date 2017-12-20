@@ -14,7 +14,7 @@ abstractmethod = abc.abstractmethod
 abstractproperty = abc.abstractproperty
 
 
-class Reassembly(tuple):
+class Reassembly(object):
 
     __metaclass__ = ABCMeta
 
@@ -28,8 +28,14 @@ class Reassembly(tuple):
         pass
 
     # total number of reassembled packets
+    @property
     def count(self):
         return len(self._data)
+
+    # reassembled datagram
+    @property
+    def datagram(self):
+        return self._data
 
     ##########################################################################
     # Methods.
@@ -52,5 +58,6 @@ class Reassembly(tuple):
 
     def __init__(self, info, *, extraction=False):
         self._data = self.reassembly(info)
-        if extraction:
-            self.extraction()
+        __import__('pprint').pprint(self._data)
+        # if extraction:
+        #     self.extraction()

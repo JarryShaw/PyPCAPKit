@@ -34,12 +34,7 @@ class IPsec(IP):
     # Data models.
     ##########################################################################
 
-    def __new__(cls, _file, length=None, *, version=None):
-        self = super().__new__(cls, _file)
-        return self
-
     @abstractmethod
-    def __init__(self, _file, length=None, *, version=None):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._vers = version or 4
         self._info = Info(self.read_ipsec(length))

@@ -6,11 +6,58 @@
 # Reconstruct IPv4 packets back to origin
 
 
-from .ip import IP_Reassembler
+from .ip import IP_Reassembly
 
 
-class IPv4_Reassembly(IP_Reassembler):
+class IPv4_Reassembly(IP_Reassembly):
+    """Reassembly for IPv4 payload.
 
+    Terminology:
+     - info : list, contains IPv4 fragments
+        |--> fragment : Info, utitlity for reassembly
+        |       |--> bufid : tuple, unique seesion descriptor
+        |       |       |--> ipv4.src : source IP address
+        |       |       |--> ipv4.dst : destination IP address
+        |       |       |--> ipv4.proto : payload protocol type
+        |       |       |--> ipv4.id : identification
+        |       |--> ipv4 : Info, extracted IPv4 infomation
+        |       |--> raw : bytearray, raw IPv4 payload
+        |       |--> header : bytearray, raw IPv4 header
+        |--> fragment ...
+        |--> ...
+     - buffer : dict, memory buffer for reassembly
+        |--> buf : dict, buffer by BUFID
+        |       |       |--> bufid : tuple, buffer id introduced above
+        |       |               |--> ipv4.src : source IP address
+        |       |               |--> ipv4.dst : destination IP address
+        |       |               |--> ipv4.proto : payload protocol type
+        |       |               |--> ipv4.id : identification
+        |       |--> TDL : int, total data length
+        |       |--> RCVBT : bytearray, fragment received bit table
+        |       |       |--> bit : bytes, if this 8-octet unit received
+        |       |       |       |--> "\x00" : bytes, not received
+        |       |       |       |--> "\x01" : bytes, received
+        |       |       |--> bit ...
+        |       |       |--> ...
+        |       |--> data : bytearray, data buffer (65535 in length)
+        |       |--> header : bytearray, header buffer
+        |--> buf ...
+        |--> ...
+     - datagram : tuple, contains reassembly results
+        |--> data : Info, reassembled application layer datagram
+        |       |--> NotImplemented : bool, if this datagram is implemented
+        |               |--> Implemented
+        |               |       |--> packet : bytes, original packet
+        |               |--> Not Implemented
+        |                       |--> header : bytes, partially reassembled data
+        |                       |--> payload : tuple, datagram fragments
+        |                               |--> fragment : bytes, partially reassembled datagram
+        |                               |--> fragment ...
+        |                               |--> ...
+        |--> data ...
+        |--> ...
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################

@@ -276,21 +276,24 @@ class Extractor:
     def _tcp_reassembly(self, frame):
         """Store data for TCP reassembly."""
         if 'TCP' in frame:
+            # print(frame.name, '\n', frame.info, '\n')
+            # print(frame.name, '\n', frame['TCP'], '\n')
             ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
             tcp = frame['TCP']
-            if 'raw' not in tcp:
-                return
             data = dict(
                 bufid = (
                     ip.src,         # source ip
                     tcp.srcport,    # source port
                     ip.dst,         # destination ip
                     tcp.dstport,    # destination port
-                    tcp.ack,        # acknowledgment number
                 ),
                 tcp = tcp,
-                raw = tcp.raw,
+                raw = bytearray() if tcp.raw is None else bytearray(tcp.raw),
             )
+            len_ = 0 if tcp.raw is None else len(tcp.raw)
+            data['first'] = tcp.seq
+            data['last'] = tcp.seq + len_
+            data['len'] = len_
             info = Info(data)
             self._frame[0].append(info)
 
@@ -308,8 +311,8 @@ class Extractor:
                     ipv4.id,    # identification
                 ),
                 ipv4 = ipv4,
-                raw = ipv4.raw,
-                header = ipv4.header,
+                raw = bytearray() if ipv4.raw is None else (ipv4.raw),
+                header = bytearray(ipv4.header),
             )
             info = Info(data)
             self._frame[1].append(info)
@@ -328,8 +331,8 @@ class Extractor:
                     ipv6.label, # identification
                 ),
                 ipv6 = ipv6,
-                raw = ipv6.raw,
-                header = ipv6.header,
+                raw = bytearray() if ipv6.raw is None else (ipv6.raw),
+                header = bytearray(ipv6.header),
             )
             info = Info(data)
             self._frame[2].append(info)
