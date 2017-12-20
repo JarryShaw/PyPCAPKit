@@ -31,10 +31,13 @@ class AH(IPsec):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, *, version):
+    def __new__(cls, _file, length=None, *, version=4):
+        self = super().__new__(cls, _file)
+        return self
+
+    def __init__(self, _file, length=None, *, version=4):
         self._file = _file
-        self._vers = version
-        self._info = Info(self.read_ah())
+        self._info = Info(self.read_ah(length, version))
 
     def __len__(self):
         return self._info.len
@@ -46,7 +49,7 @@ class AH(IPsec):
     # Utilities.
     ##########################################################################
 
-    def read_ah(self):
+    def read_ah(self, length, version):
         """Read Authentication Header.
 
         Structure of AH header [RFC 4302]:
@@ -67,7 +70,7 @@ class AH(IPsec):
 
             Octets          Bits          Name                Discription
               0              0          ah.next         Next Header
-              1              8          ah.len          Payload Length
+              1              8          ah.hdr_len      Payload Length
               2              16         ah.resv         Reserved (must be zero)
               4              32         ah.spi          Security Parameters Index (SPI)
               8              64         ah.seq          Sequence Number Field
@@ -87,18 +90,19 @@ class AH(IPsec):
 
         ah = dict(
             next = _next,
-            len = _tlen,
+            hdr_len = _tlen,
             resv = _resv,
             spi = _scpi,
             seq = dsnf,
             icv = _chkv,
         )
 
-        if version == 4:
-            _plen = 4 - (_vlen % 4)
-        else:   # version == 6
-            _plen = 8 - (_tlen % 8)
+        if version == 6:
+            _plen = 8 - (_vlen % 8)
+        else:   # version == 4
+            _plen = 4 - (_tlen % 4)
         if _plen:   # explicit padding in need
             ah['padding'] = self._read_fileng(_plen)
-
-        return self._read_next_layer(ah, _next)
+        if length is not None:
+            length -= ah['hdr_len']
+        return self._read_next_layer(ah, _next, length)

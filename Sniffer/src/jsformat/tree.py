@@ -22,8 +22,8 @@ TEMP_SPACES = '      '
 
 MAGIC_TYPES = dict(
     dict = lambda self_, text, file_: self_._append_branch(text, file_),    # branch
-    list = lambda self_, text, file_: self_._append_list(text, file_),      # array
-    tuple = lambda self_, text, file_: self_._append_tuple(text, file_),    # array
+    list = lambda self_, text, file_: self_._append_array(text, file_),     # array
+    tuple = lambda self_, text, file_: self_._append_array(text, file_),    # array
     str = lambda self_, text, file_: self_._append_string(text, file_),     # string
     bytes = lambda self_, text, file_: self_._append_bytes(text, file_),    # string
     datetime = lambda self_, text, file_: self_._append_date(text, file_),  # string
@@ -81,22 +81,19 @@ class Tree(Dumper):
         self._bctr = collections.defaultdict(int)    # blank branch counter dict
         self._append_branch(value, _file)
 
-    def _append_list(self, value, _file):
-        for (_nctr, _item) in enumerate(value):
-            _cmma = ',' if _nctr else ''
-            _file.write(_cmma)
+    def _append_array(self, value, _file):
+        if not value:
+            self._append_none(None, _file)
 
-            _type = type(_item).__name__
-            MAGIC_TYPES[_type](self, _item, _file)
-
-    def _append_tuple(self, value, _file):
+        _bptr = ''
         _tabs = ''
-        for _ in range(self._tctr + 1):
-            _tabs += TEMP_SPACES if self._bctr[_] else TEMP_BRANCH
-
         _tlen = len(value) - 1
-        for (_nctr, _item) in enumerate(value):
+        if _tlen:
             _bptr = '  |-->'
+            for _ in range(self._tctr + 1):
+                _tabs += TEMP_SPACES if self._bctr[_] else TEMP_BRANCH
+
+        for (_nctr, _item) in enumerate(value):
             _text = '{tabs}{bptr}'.format(tabs=_tabs, bptr=_bptr)
             _file.write(_text)
 
@@ -107,13 +104,18 @@ class Tree(Dumper):
             _file.write(_suff)
 
     def _append_branch(self, value, _file):
-        self._tctr += 1
+        if not value:
+            self._append_none(None, _file)
 
+        self._tctr += 1
         _vlen = len(value)
         for (_vctr, (_item, _text)) in enumerate(value.items()):
             _type = type(_text).__name__
-            if _type == 'dict' or _type == 'tuple' or \
-                    (_type == 'bytes' and len(_text) > 16):
+
+            flag_dict = (_type == 'dict')
+            flag_tuple = (_type == 'tuple' and len(_text) > 1)
+            flag_bytes = (_type == 'bytes' and len(_text) > 16)
+            if any((flag_dict, flag_tuple, flag_bytes)):
                 _pref = '\n'
             else:
                 _pref = ' ->'
@@ -121,11 +123,12 @@ class Tree(Dumper):
             _labs = ''
             for _ in range(self._tctr):
                 _labs += TEMP_SPACES if self._bctr[_] else TEMP_BRANCH
-            if _vctr == _vlen - 1:
-                self._bctr[self._tctr] = 1
 
             _keys = '{labs}  |-- {item}{pref}'.format(labs=_labs, item=_item, pref=_pref)
             _file.write(_keys)
+
+            if _vctr == _vlen - 1:
+                self._bctr[self._tctr] = 1
 
             MAGIC_TYPES[_type](self, _text, _file)
 
@@ -136,6 +139,9 @@ class Tree(Dumper):
         self._tctr -= 1
 
     def _append_string(self, value, _file):
+        if not value:
+            self._append_none(None, _file)
+
         _text = value
         _labs = ' {text}'.format(text=_text)
         _file.write(_labs)
@@ -143,6 +149,8 @@ class Tree(Dumper):
     def _append_bytes(self, value, _file):
         # binascii.b2a_base64(value) -> plistlib.Data
         # binascii.a2b_base64(Data) -> value(bytes)
+        if not value:
+            self._append_none(None, _file)
 
         if len(value) > 16:
             _tabs = ''

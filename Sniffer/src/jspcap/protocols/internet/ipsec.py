@@ -35,7 +35,6 @@ class IPsec(IP):
     ##########################################################################
 
     @abstractmethod
-    def __init__(self, _file, *, version):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._vers = version
-        self._info = Info(self.read_ipsec())
+        self._info = Info(self.read_ipsec(length))

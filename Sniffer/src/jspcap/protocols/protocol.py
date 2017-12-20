@@ -55,9 +55,9 @@ class Protocol(object):
         """Read next layer protocol type."""
         pass
 
-    def _read_fileng(self, size, *args, **kwargs):
+    def _read_fileng(self, *args, **kwargs):
         """Read file buffer."""
-        return self._file.read(size, *args, **kwargs)
+        return self._file.read(*args, **kwargs)
 
     def _read_unpack(self, size=1, *, sign=False, lilendian=False):
         """Read bytes and unpack for integers.
@@ -153,9 +153,9 @@ class Protocol(object):
     # Utilities.
     ##########################################################################
 
-    def _read_next_layer(self, dict_, proto=None):
+    def _read_next_layer(self, dict_, proto=None, length=None):
         """Extract next layer protocol."""
-        next_ = self._import_next_layer(proto)
+        next_ = self._import_next_layer(proto, length)
 
         # make next layer protocol name
         if proto is None:
@@ -168,6 +168,6 @@ class Protocol(object):
         self._protos = ProtoChain(proto, next_[1])
         return dict_
 
-    def _import_next_layer(self, proto):
+    def _import_next_layer(self, proto, length=None):
         """Import next layer extracotr."""
         pass

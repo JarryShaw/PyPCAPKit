@@ -8,6 +8,7 @@
 
 from ..transport import TP_PROTO
 from ..protocol import Protocol
+from ..utilities import ProtoChain
 
 
 # ##############################################################################
@@ -61,22 +62,45 @@ class Internet(Protocol):
         return _prot
 
     ##########################################################################
+    # Data modules.
+    ##########################################################################
+
+    def __new__(cls, _file, length=None):
+        self = super().__new__(cls, _file)
+        return self
+
+    ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _import_next_layer(self, proto):
+    def _read_next_layer(self, dict_, proto=None, length=None, *, version=4):
+        next_ = self._import_next_layer(proto, length, version=version)
+
+        # make next layer protocol name
+        if proto is None:
+            proto = ''
+        name_ = proto.lower() or 'raw'
+        proto = proto or None
+
+        # write info and protocol chain into dict
+        dict_[name_] = next_[0]
+        self._protos = ProtoChain(proto, next_[1])
+        return dict_
+
+    def _import_next_layer(self, proto, length, version):
         if proto == 'IPv4':
             from .ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
             from .ipv6 import IPv6 as Protocol
         elif proto == 'AH':
-            from .ah import AH as Protocol
+            from .ah import AH
+            next_ = AH(self._file, length, version=version)
         elif proto == 'TCP':
             from ..transport import TCP as Protocol
         elif proto == 'UDP':
             from ..transport import UDP as Protocol
         else:
-            data = self._file.read() or None
+            data = self._file.read(*[length]) or None
             return data, None
-        next_ = Protocol(self._file)
-        return next_.info, next_.protochain, next_.length
+        next_ = Protocol(self._file, length)
+        return next_.info, next_.protochain

@@ -53,9 +53,9 @@ class Ethernet(Link):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_ethernet())
+        self._info = Info(self.read_ethernet(length))
 
     def __len__(self):
         return 14
@@ -67,7 +67,7 @@ class Ethernet(Link):
     # Utilities.
     ##########################################################################
 
-    def read_ethernet(self):
+    def read_ethernet(self, length):
         """Read Ethernet Protocol.
 
         Structure of Ethernet Protocol header [RFC 7042]:
@@ -87,7 +87,9 @@ class Ethernet(Link):
             type = _type,
         )
 
-        return self._read_next_layer(ethernet, _type)
+        if length is not None:
+            length -= 14
+        return self._read_next_layer(ethernet, _type, length)
 
     def _read_mac_addr(self):
         _byte = self._read_fileng(6)

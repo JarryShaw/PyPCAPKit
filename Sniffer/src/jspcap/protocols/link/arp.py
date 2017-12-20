@@ -76,9 +76,9 @@ class ARP(Link):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_arp())
+        self._info = Info(self.read_arp(length))
 
     def __len__(self):
         return self._info.len
@@ -90,7 +90,7 @@ class ARP(Link):
     # Utilities.
     ##########################################################################
 
-    def read_arp(self):
+    def read_arp(self, length):
         """Read Address Resolution Protocol.
 
         Structure of ARP header [RFC 826]:
@@ -135,7 +135,10 @@ class ARP(Link):
             len = 8 + _hlen * 2 + _plen * 2,
         )
 
-        return self._read_next_layer(arp, arp['ptype'])
+        proto = arp['ptype']
+        if length is not None:
+            length -= arp['len']
+        return self._read_next_layer(arp, proto, length)
 
     def _read_addr_resolve(self, length, htype):
         if htype == 1:  # Ethernet

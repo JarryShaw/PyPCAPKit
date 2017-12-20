@@ -59,10 +59,18 @@ class Link(Protocol):
         return _prot
 
     ##########################################################################
+    # Data modules.
+    ##########################################################################
+
+    def __new__(cls, _file, length=None):
+        self = super().__new__(cls, _file)
+        return self
+
+    ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _import_next_layer(self, proto):
+    def _import_next_layer(self, proto, length):
         if proto == 'ARP':
             from .arp import ARP as Protocol
         elif proto == 'RARP':
@@ -74,7 +82,7 @@ class Link(Protocol):
         elif proto == 'IPX':
             from ..internet import IPX as Protocol
         else:
-            data = self._file.read() or None
+            data = self._file.read(*[length]) or None
             return data, None
-        next_ = Protocol(self._file)
+        next_ = Protocol(self._file, length)
         return next_.info, next_.protochain

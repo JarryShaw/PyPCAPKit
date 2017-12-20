@@ -7,7 +7,7 @@
 
 
 from .ip import IP
-from ..utilities import Info
+from ..utilities import Info, ProtoChain
 
 
 # TOS (DS Field) Precedence
@@ -71,9 +71,9 @@ class IPv4(IP):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_ipv4())
+        self._info = Info(self.read_ipv4(length))
 
     def __len__(self):
         return self._info.hdr_len
@@ -85,7 +85,7 @@ class IPv4(IP):
     # Utilities.
     ##########################################################################
 
-    def read_ipv4(self):
+    def read_ipv4(self, length):
         """Read Internet Protocol version 4 (IPv4).
 
         Structure of IPv4 header [RFC 791]:
@@ -170,15 +170,18 @@ class IPv4(IP):
         hdr_len = ipv4['hdr_len']
         raw_len = ipv4['len'] - hdr_len
 
-        if ipv4['flags']['df']:
-            return self._read_next_layer(ipv4, _prot)
-        else:
-            ipv4['header'] = self._read_ip_header(hdr_len)
-            ipv4['raw'] = self._read_fileng(raw_len)
-            padding = self._read_fileng()
-            if padding:
-                ipv4['padding'] = padding
-            return ipv4
+        if not ipv4['flags']['df']:
+            ipv4 = self._read_ip_seekset(ipv4, hdr_len, raw_len)
+
+        # make next layer protocol name
+        proto = ipv4['proto']
+        if proto is None:
+            proto = ''
+        name_ = proto.lower() or 'raw'
+        proto = proto or None
+        self._protos = ProtoChain(proto)
+
+        return self._read_next_layer(ipv4, _prot, raw_len)
 
     def _read_ip_addr(self):
         _byte = self._read_fileng(4)
