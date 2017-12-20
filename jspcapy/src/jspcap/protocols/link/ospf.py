@@ -60,9 +60,9 @@ class OSPF(Link):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
+    def __init__(self, _file, length=None):
         self._file = _file
-        self._info = Info(self.read_ospf())
+        self._info = Info(self.read_ospf(length))
 
     def __len__(self):
         return 24
@@ -74,7 +74,7 @@ class OSPF(Link):
     # Utilities.
     ##########################################################################
 
-    def read_ospf(self):
+    def read_ospf(self, length):
         """Read Open Shortest Path First.
 
         Structure of OSPF header [RFC 2328]:
@@ -129,7 +129,8 @@ class OSPF(Link):
         else:
             ospf['auth'] = self._read_fileng(8)
 
-        return self._read_next_layer(ospf)
+        length = ospf['len'] - 24
+        return self._read_next_layer(ospf, length)
 
     def _read_id_numbers(self):
         _byte = self._read_fileng(4)

@@ -138,16 +138,17 @@ class Frame(Protocol):
             cap_len = _olen,
         )
 
-        return self._read_next_layer(frame)
+        length = frame['cap_len']
+        return self._read_next_layer(frame, length)
 
-    def _read_next_layer(self, dict_):
+    def _read_next_layer(self, dict_, length=None):
         # make next layer protocol name
         proto = self._prot or ''
         name_ = proto.lower() or 'raw'
 
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
-        next_ = self._import_next_layer(bytes_)
+        next_ = self._import_next_layer(bytes_, length)
 
         # write info and protocol chain into dict
         self._proto = ProtoChain(self._prot, next_[1])
@@ -155,7 +156,7 @@ class Frame(Protocol):
         dict_['protocols'] = self._proto.chain
         return dict_
 
-    def _import_next_layer(self, file_):
+    def _import_next_layer(self, file_, length):
         if self._prot == 'Ethernet':
             from .link import Ethernet as Protocol
         elif self._prot == 'IPv4':
@@ -163,7 +164,7 @@ class Frame(Protocol):
         elif self._prot == 'IPv6':
             from .internet import IPv6 as Protocol
         else:
-            data = file_.read() or None
+            data = file_.read(*[length]) or None
             return data, None
-        next_ = Protocol(file_)
+        next_ = Protocol(file_, length)
         return next_.info, next_.protochain
