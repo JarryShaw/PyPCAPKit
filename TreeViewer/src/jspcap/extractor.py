@@ -84,12 +84,12 @@ class Extractor:
 
     @property
     def frame(self):
-        dict_ = {}
-        dict_['tcp'] = tuple(self._frame[0])
-        dict_['ipv4'] = tuple(self._frame[1])
-        dict_['ipv6'] = tuple(self._frame[2])
-
-        return Info(dict_)
+        frame = Info(dict(
+            tcp = tuple(self._frame[0]),
+            ipv4 = tuple(self._frame[1]),
+            ipv6 = tuple(self._frame[2]),
+        ))
+        return frame
 
     ##########################################################################
     # Data modules.
