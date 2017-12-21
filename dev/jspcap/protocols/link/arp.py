@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
+import collections
+
+
 # Address Resolution Protocol
 # Analyser for ARP/InARP header
 
@@ -154,7 +157,8 @@ class ARP(Link):
             _addr = '.'.join([str(_) for _ in _byte])
         elif ptype == '86dd':   # IPv6
             adlt = []       # list of IPv6 hexadecimal address
-            ctr_ = {}       # counter for consecutive groups of zero value
+            ctr_ = collections.defaultdict(int)
+                            # counter for consecutive groups of zero value
             ptr_ = 0        # start pointer of consecutive groups of zero value
             last = False    # if last hextet/group is zero value
             ommt = False    # ommitted flag, since IPv6 address can ommit to `::` only once
@@ -174,8 +178,8 @@ class ARP(Link):
                         last = True
                         ctr_[ptr_] = 1
 
-            ptr_ = max(ctr_, key=ctr_.get)  # fetch start pointer with longest zero values
-            end_ = ptr_ + ctr_[ptr_]        # calculate end pointer
+            ptr_ = max(ctr_, key=ctr_.get) if ctr_ else 0   # fetch start pointer with longest zero values
+            end_ = ptr_ + ctr_[ptr_]                        # calculate end pointer
 
             if ctr_[ptr_] > 1:      # only ommit if zero values are in a consecutive group
                 del adlt[ptr_:end_] # remove zero values
@@ -187,7 +191,7 @@ class ARP(Link):
                 else:                           # insert '' otherwise
                     adlt.insert(ptr_, '')
 
-            _addr = ':'.join(adlt)
+            addr = ':'.join(adlt)
         else:
             _addr = self._read_fileng(length)
         return _addr
