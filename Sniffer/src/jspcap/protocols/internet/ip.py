@@ -81,7 +81,7 @@ class IP(Internet):
     @seekset
     def _read_ip_seekset(self, ip, hdr_len, raw_len):
         """when fragmented, read payload throughout first."""
-        ip['header'] = self._read_ip_header(hdr_len)
+        ip['header'] = self._read_fileng(hdr_len)
         ip['raw'] = self._read_fileng(raw_len)
         padding = self._read_fileng()
         if padding:
