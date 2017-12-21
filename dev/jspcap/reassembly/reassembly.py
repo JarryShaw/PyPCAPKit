@@ -58,6 +58,5 @@ class Reassembly(object):
 
     def __init__(self, info, *, extraction=False):
         self._data = self.reassembly(info)
-        __import__('pprint').pprint(self._data)
         # if extraction:
         #     self.extraction()

@@ -12,6 +12,9 @@
 *.pcap
 !in.pcap
 
+test*.py
+!test.py
+
 out/
 deprecated/
 
