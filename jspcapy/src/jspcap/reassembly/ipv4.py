@@ -12,50 +12,61 @@ from .ip import IP_Reassembly
 class IPv4_Reassembly(IP_Reassembly):
     """Reassembly for IPv4 payload.
 
+    Usage:
+        >>> from reassembly import IPv4_Reassembly
+        # Initialise instance:
+        >>> ipv4_reassembly = IPv4_Reassembly()
+        # Call reassembly:
+        >>> ipv4_reassembly(packet_dict)
+        # Fetch result:
+        >>> result = ipv4_reassembly.datagram
+
     Terminology:
-     - info : list, contains IPv4 fragments
-        |--> fragment : Info, utitlity for reassembly
-        |       |--> bufid : tuple, unique seesion descriptor
-        |       |       |--> ipv4.src : source IP address
-        |       |       |--> ipv4.dst : destination IP address
-        |       |       |--> ipv4.proto : payload protocol type
-        |       |       |--> ipv4.id : identification
-        |       |--> ipv4 : Info, extracted IPv4 infomation
-        |       |--> raw : bytearray, raw IPv4 payload
-        |       |--> header : bytearray, raw IPv4 header
-        |--> fragment ...
-        |--> ...
-     - buffer : dict, memory buffer for reassembly
-        |--> buf : dict, buffer by BUFID
-        |       |       |--> bufid : tuple, buffer id introduced above
-        |       |               |--> ipv4.src : source IP address
-        |       |               |--> ipv4.dst : destination IP address
-        |       |               |--> ipv4.proto : payload protocol type
-        |       |               |--> ipv4.id : identification
-        |       |--> TDL : int, total data length
-        |       |--> RCVBT : bytearray, fragment received bit table
-        |       |       |--> bit : bytes, if this 8-octet unit received
-        |       |       |       |--> "\x00" : bytes, not received
-        |       |       |       |--> "\x01" : bytes, received
-        |       |       |--> bit ...
-        |       |       |--> ...
-        |       |--> data : bytearray, data buffer (65535 in length)
-        |       |--> header : bytearray, header buffer
-        |--> buf ...
-        |--> ...
-     - datagram : tuple, contains reassembly results
-        |--> data : Info, reassembled application layer datagram
-        |       |--> NotImplemented : bool, if this datagram is implemented
-        |               |--> Implemented
-        |               |       |--> packet : bytes, original packet
-        |               |--> Not Implemented
-        |                       |--> header : bytes, partially reassembled data
-        |                       |--> payload : tuple, datagram fragments
-        |                               |--> fragment : bytes, partially reassembled datagram
-        |                               |--> fragment ...
-        |                               |--> ...
-        |--> data ...
-        |--> ...
+     - packet_dict = dict(
+            bufid = tuple(
+                ipv4.src,                   # source IP address
+                ipv4.dst,                   # destination IP address
+                ipv4.id,                    # identification
+                ipv4.proto,                 # payload protocol type
+            ),
+            num = frame.number,             # original packet range number
+            fo = ipv4.frag_offset,          # fragment offset
+            ihl = ipv4.hdr_len,             # internet header length
+            mf = ipv4.flags.mf,             # more fragment flag
+            tl = ipv4.len,                  # total length, header includes
+            header = ipv4.header,           # raw bytearray type header
+            payload = ipv4.payload,         # raw bytearray type payload
+       )
+     - (tuple) datagram
+            |--> (dict) data
+            |       |--> 'NotImplemented' : (bool) True --> implemented
+            |       |--> 'index' : (tuple) packet numbers
+            |       |                |--> (int) original packet range number
+            |       |--> 'packet' : (bytes/None) reassembled IPv4 packet
+            |--> (dict) data
+            |       |--> 'NotImplemented' : (bool) False --> not implemented
+            |       |--> 'index' : (tuple) packet numbers
+            |       |                |--> (int) original packet range number
+            |       |--> 'header' : (bytes/None) IPv4 header
+            |       |--> 'payload' : (tuple/None) partially reassembled IPv4 payload
+            |                        |--> (bytes/None) IPv4 payload fragment
+            |--> (dict) data ...
+     - (dict) buffer --> memory buffer for reassembly
+            |--> (tuple) BUFID : (dict)
+            |       |--> ipv4.src    |
+            |       |--> ipc4.dst    |
+            |       |--> ipv4.id     |
+            |       |--> ipv4.proto  |
+            |                        |--> 'TDL' : (int) total data length
+            |                        |--> RCVBT : (bytearray) fragment received bit table
+            |                        |               |--> (bytes) b\x00' not received
+            |                        |               |--> (bytes) b\x01' received
+            |                        |               |--> (bytes) ...
+            |                        |--> 'index' : (list) list of reassembled packets
+            |                        |               |--> (int) packet range number
+            |                        |--> 'header' : (bytearray) header buffer
+            |                        |--> 'datagram' : (bytearray) data buffer, holes set to b'\x00'
+            |--> (tuple) BUFID ...
 
     """
     ##########################################################################
@@ -65,23 +76,3 @@ class IPv4_Reassembly(IP_Reassembly):
     @property
     def name(self):
         return 'Internet Protocol version 4'
-
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    def extraction(self):
-        pass
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    def _ip_reassembly(self, buf):
-        FO = buf.ipv4.frag_offset   # Fragment Offset
-        IHL = buf.ipv4.hdr_len      # Internet Header Length
-        MF = buf.ipv4.flags.mf      # More Fragments flag
-        TL = buf.ipv4.len           # Total Length
-        BUFID = buf.bufid           # Buffer Identifier
-
-        return FO, IHL, MF, TL, BUFID

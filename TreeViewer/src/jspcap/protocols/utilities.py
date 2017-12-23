@@ -27,7 +27,6 @@ def seekset(func):
 
 class Info(dict):
     """Turn dictionaries into object-like instances."""
-
     def __new__(cls, dict_=None, **kwargs):
         self = super().__new__(cls, **kwargs)
 
@@ -110,6 +109,27 @@ class ProtoChain(tuple):
         return self.__str__()
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def index(self, name, start=None, stop=None):
+        try:
+            start = start or 0
+            stop = stop or -1
+
+            if isinstance(name, str):
+                name = name.lower()
+            if isinstance(start, str):
+                start = self.index(start)
+            if isinstance(stop, str):
+                stop = self.index(stop)
+            return self.proto.index(name, start, stop)
+        except ValueError:
+            raise ValueError
+        except TypeError:
+            raise TypeError
+
+    ##########################################################################
     # Data modules.
     ##########################################################################
 
@@ -133,23 +153,6 @@ class ProtoChain(tuple):
             if proto is None:
                 return ':'.join(self._tuple[:i])
         return ':'.join(self._tuple)
-
-    def __index__(self, name, start=None, stop=None):
-        try:
-            start = start or 0
-            stop = stop or -1
-
-            if isinstance(name, str):
-                name = name.lower()
-            if isinstance(start, str):
-                start = self.index(start)
-            if isinstance(stop, str):
-                stop = self.index(stop)
-            return self.proto.index(name, start, stop)
-        except ValueError:
-            raise ValueError
-        except TypeError:
-            raise TypeError
 
     def __getitem__(self, key):
         try:
@@ -180,9 +183,3 @@ class ProtoChain(tuple):
         if isinstance(name, str):
             name = name.lower()
         return (name in self.proto)
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    index = __index__

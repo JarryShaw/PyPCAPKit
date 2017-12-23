@@ -90,8 +90,8 @@ class Frame(Protocol):
 
         return Info(dict_)
 
-    def __index__(self, name):
-        return self._proto.index(name)
+    def __index__(self):
+        return self._fnum
 
     def __contains__(self, name):
         return any(((name in self._info), (name in self._proto)))
