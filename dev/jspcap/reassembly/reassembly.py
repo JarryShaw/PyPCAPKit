@@ -37,6 +37,7 @@ class Reassembly(object):
      - submit : submit reassembled payload
      - fetch : fetch datagram
      - index : return datagram index
+     - run : run automatically
 
     """
     __metaclass__ = ABCMeta
@@ -58,7 +59,8 @@ class Reassembly(object):
     # reassembled datagram
     @property
     def datagram(self):
-        return self.fetch()
+        datagram = self.fetch()
+        return datagram
 
     ##########################################################################
     # Methods.
@@ -86,6 +88,14 @@ class Reassembly(object):
                 return counter
         return None
 
+    # run automatically
+    def run(self, packets):
+        for packet in packets:
+            if not isinstance(packet, dict):
+                raise AssertionError
+            info = Info(packet)
+            self.reassembly(info)
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -103,5 +113,7 @@ class Reassembly(object):
         self._dtgram = tuple()  # reassembled datagram
 
     def __call__(self, packet_dict):
+        if not isinstance(packet_dict, dict):
+            raise AssertionError
         info = Info(packet_dict)
         self.reassembly(info)

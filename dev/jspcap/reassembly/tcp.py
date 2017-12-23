@@ -54,10 +54,10 @@ class TCP_Reassembly(Reassembly):
             bufid = tuple(
                 ip.src,                     # source IP address
                 ip.dst,                     # destination IP address
-                tcp.secport,                # source port
+                tcp.srcport,                # source port
                 tcp.dstport,                # destination port
             ),
-            num = frame.num,                # original packet range number
+            num = frame.number,             # original packet range number
             ack = tcp.ack,                  # acknowledgement
             dsn = tcp.seq,                  # data sequence number
             syn = tcp.flags.syn,            # synchronise flag
@@ -65,7 +65,6 @@ class TCP_Reassembly(Reassembly):
             len = tcp.raw_len,              # payload length, header excludes
             first = tcp.seq,                # this sequence number
             last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
-            header = tcp.header,            # raw bytearray type header
             payload = tcp.raw,              # raw bytearray type payload
        )
      - (tuple) datagram

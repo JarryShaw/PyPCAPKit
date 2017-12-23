@@ -28,14 +28,14 @@ class IPv4_Reassembly(IP_Reassembly):
                 ipv4.dst,                   # destination IP address
                 ipv4.id,                    # identification
                 ipv4.proto,                 # payload protocol type
-                ),
-                num = frame.num             # original packet range number
-                fo = ipv4.frag_offset,      # fragment offset
-                ihl = ipv4.hdr_len,         # internet header length
-                mf = ipv4.flags.mf,         # more fragment flag
-                tl = ipv4.len,              # total length, header includes
-                header = ipv4.header,       # raw bytearray type header
-                payload = ipv4.payload,     # raw bytearray type payload
+            ),
+            num = frame.number,             # original packet range number
+            fo = ipv4.frag_offset,          # fragment offset
+            ihl = ipv4.hdr_len,             # internet header length
+            mf = ipv4.flags.mf,             # more fragment flag
+            tl = ipv4.len,                  # total length, header includes
+            header = ipv4.header,           # raw bytearray type header
+            payload = ipv4.payload,         # raw bytearray type payload
        )
      - (tuple) datagram
             |--> (dict) data

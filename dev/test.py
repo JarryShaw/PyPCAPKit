@@ -17,9 +17,12 @@ json = Extractor(fin='sample/in.pcap', fout='sample/out.xml', fmt='xml')
 
 pprint(tree.frame)
 
-ipv4 = IPv4_Reassembly(tree.frame.ipv4)
-ipv6 = IPv6_Reassembly(tree.frame.ipv6)
-tcp = TCP_Reassembly(tree.frame.tcp)
+ipv4 = IPv4_Reassembly(strict=True)
+ipv4.run(tree.frame.ipv4)
+ipv6 = IPv6_Reassembly(strict=True)
+ipv6.run(tree.frame.ipv6)
+tcp = TCP_Reassembly(strict=True)
+tcp.run(tree.frame.tcp)
 
 pprint(ipv4.datagram)
 pprint(ipv6.datagram)

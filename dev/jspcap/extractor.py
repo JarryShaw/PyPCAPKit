@@ -276,26 +276,28 @@ class Extractor:
     def _tcp_reassembly(self, frame):
         """Store data for TCP reassembly."""
         if 'TCP' in frame:
-            # print(frame.name, '\n', frame.info, '\n')
-            # print(frame.name, '\n', frame['TCP'], '\n')
             ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
             tcp = frame['TCP']
             data = dict(
                 bufid = (
-                    ip.src,         # source ip
-                    tcp.srcport,    # source port
-                    ip.dst,         # destination ip
-                    tcp.dstport,    # destination port
+                    ip.src,                     # source IP address
+                    ip.dst,                     # destination IP address
+                    tcp.srcport,                # source port
+                    tcp.dstport,                # destination port
                 ),
-                tcp = tcp,
-                raw = bytearray() if tcp.raw is None else bytearray(tcp.raw),
-            )
-            len_ = 0 if tcp.raw is None else len(tcp.raw)
-            data['first'] = tcp.seq
-            data['last'] = tcp.seq + len_
-            data['len'] = len_
-            info = Info(data)
-            self._frame[0].append(info)
+                num = frame.info.number,        # original packet range number
+                ack = tcp.ack,                  # acknowledgement
+                dsn = tcp.seq,                  # data sequence number
+                syn = tcp.flags.syn,            # synchronise flag
+                fin = tcp.flags.fin,            # finish flag
+                payload = bytearray() if tcp.raw is None else bytearray(tcp.raw),
+                                                # raw bytearray type payload
+           )
+            raw_len = 0 if tcp.raw is None else len(tcp.raw)
+            data['first'] = tcp.seq             # this sequence number
+            data['last'] = tcp.seq + raw_len    # next (wanted) sequence number
+            data['len'] = raw_len               # payload length, header excludes
+            self._frame[0].append(data)
 
     def _ipv4_reassembly(self, frame):
         """Store data for IPv4 reassembly."""
@@ -305,17 +307,22 @@ class Extractor:
                 return
             data = dict(
                 bufid = (
-                    ipv4.src,   # source
-                    ipv4.dst,   # destination
-                    ipv4.proto, # protocol
-                    ipv4.id,    # identification
-                ),
-                ipv4 = ipv4,
-                raw = bytearray() if ipv4.raw is None else (ipv4.raw),
+                    ipv4.src,               # source IP address
+                    ipv4.dst,               # destination IP address
+                    ipv4.id,                # identification
+                    ipv4.proto,             # payload protocol type
+                    ),
+                num = frame.info.number,    # original packet range number
+                fo = ipv4.frag_offset,      # fragment offset
+                ihl = ipv4.hdr_len,         # internet header length
+                mf = ipv4.flags.mf,         # more fragment flag
+                tl = ipv4.len,              # total length, header includes
                 header = bytearray(ipv4.header),
+                                            # raw bytearray type header
+                payload = bytearray() if ipv4.raw is None else (ipv4.raw),
+                                            # raw bytearray type payload
             )
-            info = Info(data)
-            self._frame[1].append(info)
+            self._frame[1].append(data)
 
     def _ipv6_reassembly(self, frame):
         """Store data for IPv6 reassembly."""
@@ -325,14 +332,20 @@ class Extractor:
                 return
             data = dict(
                 bufid = (
-                    ipv6.src,   # source
-                    ipv6.dst,   # destination
-                    ipv6.proto, # protocol
-                    ipv6.label, # identification
+                    ipv6.src,               # source IP address
+                    ipv6.dst,               # destination IP address
+                    ipv6.label,             # label
+                    ipv6.ipv6_frag.next,    # next header field in IPv6 Fragment Header
                 ),
-                ipv6 = ipv6,
-                raw = bytearray() if ipv6.raw is None else (ipv6.raw),
+                num = frame.info.number,    # original packet range number
+                fo = ipv6.ipv6_frag.offset, # fragment offset
+                ihl = ipv6.hdr_len,         # header length, only headers before IPv6-Frag
+                mf = ipv6.ipv6_frag.mf,     # more fragment flag
+                tl = ipv6.hdr_len + ipv6.raw_len,
+                                            # total length, header includes
                 header = bytearray(ipv6.header),
+                                            # raw bytearray type header before IPv6-Frag
+                payload = bytearray() if ipv6.raw is None else (ipv6.raw),
+                                            # raw bytearray type payload after IPv6-Frag
             )
-            info = Info(data)
-            self._frame[2].append(info)
+            self._frame[2].append(data)

@@ -28,14 +28,14 @@ class IPv6_Reassembly(IP_Reassembly):
                 ipv6.dst,                   # destination IP address
                 ipv6.label,                 # label
                 ipv6_frag.next,             # next header field in IPv6 Fragment Header
-                ),
-                num = frame.num             # original packet range number
-                fo = ipv6_frag.offset,      # fragment offset
-                ihl = ipv6.hdr_len,         # header length, only headers before IPv6-Frag
-                mf = ipv6_frag.mf,          # more fragment flag
-                tl = ipv6.len,              # total length, header includes
-                header = ipv6.header,       # raw bytearray type header before IPv6-Frag
-                payload = ipv6.payload,     # raw bytearray type payload after IPv6-Frag
+            ),
+            num = frame.number,             # original packet range number
+            fo = ipv6_frag.offset,          # fragment offset
+            ihl = ipv6.hdr_len,             # header length, only headers before IPv6-Frag
+            mf = ipv6_frag.mf,              # more fragment flag
+            tl = ipv6.len,                  # total length, header includes
+            header = ipv6.header,           # raw bytearray type header before IPv6-Frag
+            payload = ipv6.payload,         # raw bytearray type payload after IPv6-Frag
        )
      - (tuple) datagram
             |--> (dict) data
