@@ -12,53 +12,64 @@ from .ip import IP_Reassembly
 class IPv6_Reassembly(IP_Reassembly):
     """Reassembly for IPv6 payload.
 
+    Usage:
+        >>> from reassembly import IPv6_Reassembly
+        # Initialise instance:
+        >>> ipv6_reassembly = IPv6_Reassembly()
+        # Call reassembly:
+        >>> ipv6_reassembly(packet_dict)
+        # Fetch result:
+        >>> result = ipv6_reassembly.datagram
+
     Terminology:
-     - info : list, contains IPv6 fragments
-        |--> fragment : Info, utitlity for reassembly
-        |       |--> bufid : tuple, unique seesion descriptor
-        |       |       |--> ipv6.src : source IP address
-        |       |       |--> ipv6.dst : destination IP address
-        |       |       |--> ipv6.proto : payload protocol type
-        |       |       |--> ipv6.label : identification
-        |       |--> ipv6 : Info, extracted IPv6 infomation
-        |       |--> raw : bytearray, raw IPv6 payload
-        |       |--> header : bytearray, raw IPv6 header
-        |--> fragment ...
-        |--> ...
-     - buffer : dict, memory buffer for reassembly
-        |--> buf : dict, buffer by BUFID
-        |       |       |--> bufid : tuple, buffer id introduced above
-        |       |               |--> ipv6.src : source IP address
-        |       |               |--> ipv6.dst : destination IP address
-        |       |               |--> ipv6.proto : payload protocol type
-        |       |               |--> ipv6.label : identification
-        |       |--> TDL : int, total data length
-        |       |--> RCVBT : bytearray, fragment received bit table
-        |       |       |--> bit : bytes, if this 8-octet unit received
-        |       |       |       |--> "\x00" : bytes, not received
-        |       |       |       |--> "\x01" : bytes, received
-        |       |       |--> bit ...
-        |       |       |--> ...
-        |       |--> data : bytearray, data buffer (65535 in length)
-        |       |--> header : bytearray, header buffer
-        |--> buf ...
-        |--> ...
-     - datagram : tuple, contains reassembly results
-        |--> data : Info, reassembled application layer datagram
-        |       |--> NotImplemented : bool, if this datagram is implemented
-        |               |--> Implemented
-        |               |       |--> packet : bytes, original packet
-        |               |--> Not Implemented
-        |                       |--> header : bytes, partially reassembled data
-        |                       |--> payload : tuple, datagram fragments
-        |                               |--> fragment : bytes, partially reassembled datagram
-        |                               |--> fragment ...
-        |                               |--> ...
-        |--> data ...
-        |--> ...
+     - packet_dict = dict(
+            bufid = tuple(
+                ipv6.src,                   # source IP address
+                ipv6.dst,                   # destination IP address
+                ipv6.label,                 # label
+                ipv6_frag.next,             # next header field in IPv6 Fragment Header
+                ),
+                num = frame.num             # original packet range number
+                fo = ipv6_frag.offset,      # fragment offset
+                ihl = ipv6.hdr_len,         # header length, only headers before IPv6-Frag
+                mf = ipv6_frag.mf,          # more fragment flag
+                tl = ipv6.len,              # total length, header includes
+                header = ipv6.header,       # raw bytearray type header before IPv6-Frag
+                payload = ipv6.payload,     # raw bytearray type payload after IPv6-Frag
+       )
+     - (tuple) datagram
+            |--> (dict) data
+            |       |--> 'NotImplemented' : (bool) True --> implemented
+            |       |--> 'index' : (tuple) packet numbers
+            |       |                |--> (int) original packet range number
+            |       |--> 'packet' : (bytes/None) reassembled IPv6 packet
+            |--> (dict) data
+            |       |--> 'NotImplemented' : (bool) False --> not implemented
+            |       |--> 'index' : (tuple) packet numbers
+            |       |                |--> (int) original packet range number
+            |       |--> 'header' : (bytes/None) IPv4 header
+            |       |--> 'payload' : (tuple/None) partially reassembled IPv6 payload
+            |                        |--> (bytes/None) IPv4 payload fragment
+            |--> (dict) data ...
+     - (dict) buffer --> memory buffer for reassembly
+            |--> (tuple) BUFID : (dict)
+            |       |--> ipv6.src       |
+            |       |--> ipc6.dst       |
+            |       |--> ipv6.label     |
+            |       |--> ipv6_frag.next |
+            |                           |--> 'TDL' : (int) total data length
+            |                           |--> RCVBT : (bytearray) fragment received bit table
+            |                           |               |--> (bytes) b\x00' not received
+            |                           |               |--> (bytes) b\x01' received
+            |                           |               |--> (bytes) ...
+            |                           |--> 'index' : (list) list of reassembled packets
+            |                           |               |--> (int) packet range number
+            |                           |--> 'header' : (bytearray) header buffer
+            |                           |--> 'datagram' : (bytearray) data buffer,
+            |                                               holes set to b'\x00'
+            |--> (tuple) BUFID ...
 
     """
-
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -66,21 +77,3 @@ class IPv6_Reassembly(IP_Reassembly):
     @property
     def name(self):
         return 'Internet Protocol version 6'
-
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    def extraction(self):
-        pass
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    def _ip_reassembly(self, buf):
-        FO = buf.ipv6.frag.offset   # Fragment Offset
-        IHL = buf.ipv6.hdr_len      # Internet Header Length
-        MF = buf.ipv6.frag.mf       # More Fragments flag
-        TL = buf.ipv6.len + 40      # Total Length
-        BUFID = buf.bufid           # Buffer Identifier

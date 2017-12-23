@@ -11,7 +11,7 @@ import sys
 
 
 from .reassembly import Reassembly
-from ..protocols import Info
+from .utilities import Info
 
 
 class TCP_Reassembly(Reassembly):
@@ -40,43 +40,67 @@ class TCP_Reassembly(Reassembly):
       complete. Pass it on to the higher level protocol processor
       for further handling. Otherwise, return.
 
+    Usage:
+        >>> from reassembly import TCP_Reassembly
+        # Initialise instance:
+        >>> tcp_reassembly = TCP_Reassembly()
+        # Call reassembly:
+        >>> tcp_reassembly(packet_dict)
+        # Fetch result:
+        >>> result = tcp_reassembly.datagram
+
     Terminology:
-     - info : list, contains TCP fragments
-        |--> fragment : Info, utitlity for reassembly
-        |       |--> bufid : tuple, unique seesion descriptor
-        |       |       |--> ip.src : source IP address
-        |       |       |--> tcp.srcport : source TCP port
-        |       |       |--> ip.dst : destination IP address
-        |       |       |--> tcp.dstport : destination TCP port
-        |       |--> tcp : Info, extracted TCP infomation
-        |       |--> raw : bytearray, raw TCP payload
-        |       |--> first : int, DSN of current TCP, i.e. tcp.seq
-        |       |--> last : int, DSN of next TCP
-        |       |--> len : int, length of raw TCP payload
-        |--> fragment ...
-        |--> ...
-     - buffer : dict, memory buffer for reassembly
-        |--> hdl : list, hole descriptor list
-        |       |--> hole : Info, hole descriptor
-        |               |--> first : int, start of this hole
-        |               |--> last : int, stop of this hole
-        |--> ack : dict, ACK of current TCP, i.e. tcp.ack
-        |       |--> isn : int, ISN of this payload buffer
-        |       |--> len : int, length of this payload buffer
-        |       |--> raw : bytearray, reassembled payload (zero for holes)
-        |--> ack ...
-        |--> ...
-     - datagram : tuple, contains reassembly results
-        |--> data : Info, reassembled application layer datagram
-        |       |--> NotImplemented : bool, if this datagram is implemented
-        |       |--> payload
-        |               |--> Implemented : bytes, original datagram
-        |               |--> Not Implemented : tuple, datagram fragments
-        |                       |--> fragment : bytes, partially reassembled data
-        |                       |--> fragment ...
-        |                       |--> ...
-        |--> data ...
-        |--> ...
+     - packet_dict = dict(
+            bufid = tuple(
+                ip.src,                     # source IP address
+                ip.dst,                     # destination IP address
+                tcp.secport,                # source port
+                tcp.dstport,                # destination port
+            ),
+            num = frame.num,                # original packet range number
+            ack = tcp.ack,                  # acknowledgement
+            dsn = tcp.seq,                  # data sequence number
+            syn = tcp.flags.syn,            # synchronise flag
+            fin = tcp.flags.fin,            # finish flag
+            len = tcp.raw_len,              # payload length, header excludes
+            first = tcp.seq,                # this sequence number
+            last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
+            header = tcp.header,            # raw bytearray type header
+            payload = tcp.raw,              # raw bytearray type payload
+       )
+     - (tuple) datagram
+           |--> (dict) data
+           |       |--> 'NotImplemented' : (bool) True --> implemented
+           |       |--> 'index' : (tuple) packet numbers
+           |       |                |--> (int) original packet range number
+           |       |--> 'payload' : (bytes/None) reassembled application layer data
+           |--> (dict) data
+           |       |--> 'NotImplemented' : (bool) False --> not implemented
+           |       |--> 'index' : (tuple) packet numbers
+           |       |                |--> (int) original packet range number
+           |       |--> 'payload' : (tuple/None) partially reassembled payload
+           |                        |--> (bytes/None) payload fragment
+           |--> (dict) data ...
+     - (dict) buffer --> memory buffer for reassembly
+           |--> (tuple) BUFID : (dict)
+           |       |--> ip.src      |
+           |       |--> ip.dst      |
+           |       |--> tcp.secport |
+           |       |--> tcp.dstport |
+           |                        |--> 'hdl' : (list) hole descriptor list
+           |                        |               |--> (Info) hole --> hole descriptor
+           |                        |                       |--> "first" --> (int) start of hole
+           |                        |                       |--> "last" --> (int) stop ofhole
+           |                        |--> (int) ACK : (dict)
+           |                        |               |--> 'ind' : (list) list of reassembled packets
+           |                        |               |               |--> (int) packet range number
+           |                        |               |--> 'isn' : (int) ISN of payload buffer
+           |                        |               |--> 'len' : (int) length of payload buffer
+           |                        |               |--> 'raw' : (bytearray) reassembled payload,
+           |                        |                               holes set to b'\x00'
+           |                        |--> (int) ACK ...
+           |                        |--> ...
+           |--> (tuple) BUFID ...
 
     """
     ##########################################################################
@@ -92,92 +116,86 @@ class TCP_Reassembly(Reassembly):
     ##########################################################################
 
     def reassembly(self, info):
-        buffer = {}         # buffer field
-        datagram = ()       # reassembled datagram
+        BUFID = info.bufid  # Buffer Identifier
+        DSN = info.dsn      # Data Sequence Number
+        ACK = info.ack      # Acknowledgement Number
+        FIN = info.fin      # Finish Flag (Termination)
+        SYN = info.syn      # Synchronise Flag (Establishment)
 
-        # examine every fragment in info
-        for buf in info:
-            BUFID = buf.bufid       # Buffer ID
-            DSN = buf.tcp.seq       # Data Sequence Number
-            ACK = buf.tcp.ack       # Acknowledgement Number
-            FIN = buf.tcp.flags.fin # Finish Flag (Termination)
-            SYN = buf.tcp.flags.syn # Synchronise Flag (Establishment)
+        # when SYN is set, reset buffer of this session
+        # initialise buffer with BUFID & ACK then recurse
+        if SYN or BUFID not in self._buffer:
+            self._buffer[BUFID] = {
+                'hdl' : [Info(dict(first=info.len, last=sys.maxsize)),],
+                ACK : dict(
+                    ind = list(),
+                    isn = info.dsn,
+                    len = info.len,
+                    raw = info.payload,
+                ),
+            }
+            return
 
-            # when SYN is set, reset buffer of this session
-            # initialise buffer with BUFID & ACK then recurse
-            if SYN or BUFID not in buffer:
-                buffer[BUFID] = {
-                    'hdl' : [Info(dict(first=buf.len, last=sys.maxsize)),],
-                    ACK : dict(
-                        isn=buf.tcp.seq,
-                        len=buf.len,
-                        raw=buf.raw,
-                    ),
-                }
+        # initialise buffer with ACK
+        if ACK not in self._buffer[BUFID]:
+            self._buffer[BUFID][ACK] = dict(
+                ind = list(),
+                isn = info.dsn,
+                len = info.len,
+                raw = info.payload,
+            )
+
+        # append packet index
+        self._buffer[BUFID][ACK]['ind'].append(info.num)
+
+        # record fragment payload
+        ISN = self._buffer[BUFID][ACK]['isn']   # Initial Sequence Number
+        RAW = self._buffer[BUFID][ACK]['raw']   # Raw Payload Data
+        if DSN >= ISN:  # if fragment goes after exsisting payload
+            LEN = self._buffer[BUFID][ACK]['len']
+            GAP = DSN - (ISN + LEN)     # gap length between payloads
+            if GAP >= 0:    # if fragment goes after exsisting payload
+                RAW += bytearray(GAP) + info.payload
+            else:           # if fragment partially overlaps exsisting payload
+                RAW[DSN:] = info.payload
+        else:           # if fragment exceeds exsisting payload
+            LEN = info.len
+            GAP = ISN - (DSN + LEN)     # gap length between payloads
+            self._buffer[BUFID][ACK]['isn'] = DSN
+            if GAP >= 0:    # if fragment exceeds exsisting payload
+                RAW += bytearray(GAP) + info.payload
+            else:           # if fragment partially overlaps exsisting payload
+                RAW = info.payload + RAW[-GAP:]
+        self._buffer[BUFID][ACK]['raw'] = RAW       # update payload datagram
+        self._buffer[BUFID][ACK]['len'] = len(RAW)  # update payload length
+
+        # update hole descriptor list
+        HDL = copy.deepcopy(self._buffer[BUFID]['hdl'])
+        for (index, hole) in enumerate(self._buffer[BUFID]['hdl']): # step one
+            if info.first > hole.last:                              # step two
                 continue
+            if info.last < hole.first:                              # step three
+                continue
+            del HDL[index]                                          # step four
+            if info.first > hole.first:                             # step five
+                new_hole = Info(dict(
+                    first = hole.first,
+                    last = info.first - 1,
+                ))
+                HDL.insert(index, new_hole)
+            if info.last < hole.last and not FIN:                   # step six
+                new_hole = Info(dict(
+                    first = info.last + 1,
+                    last = hole.last
+                ))
+                HDL.insert(index+1, new_hole)
+            break                                                   # step seven
+        self._buffer[BUFID]['hdl'] = HDL                            # update HDL
 
-            # initialise buffer with ACK
-            if ACK not in buffer[BUFID]:
-                buffer[BUFID][ACK] = dict(
-                    isn=buf.tcp.seq,
-                    len=buf.len,
-                    raw=buf.raw,
-                )
-
-            # record fragment payload
-            ISN = buffer[BUFID][ACK]['isn'] # Initial Sequence Number
-            RAW = buffer[BUFID][ACK]['raw'] # Raw Payload Data
-            if DSN >= ISN:  # if fragment goes after exsisting payload
-                LEN = buffer[BUFID][ACK]['len']
-                GAP = DSN - (ISN + LEN)     # gap length between payloads
-                if GAP >= 0:    # if fragment goes after exsisting payload
-                    RAW += bytearray(GAP) + buf.raw
-                else:           # if fragment partially overlaps exsisting payload
-                    RAW[DSN:] = buf.raw
-            else:           # if fragment exceeds exsisting payload
-                LEN = buf.len
-                GAP = ISN - (DSN + LEN)     # gap length between payloads
-                buffer[BUFID][ACK]['isn'] = DSN
-                if GAP >= 0:    # if fragment exceeds exsisting payload
-                    RAW += bytearray(GAP) + buf.raw
-                else:           # if fragment partially overlaps exsisting payload
-                    RAW = buf.raw + RAW[-GAP:]
-            buffer[BUFID][ACK]['raw'] = RAW         # update payload datagram
-            buffer[BUFID][ACK]['len'] = len(RAW)    # update payload length
-
-            # update hole descriptor list
-            HDL = copy.deepcopy(buffer[BUFID]['hdl'])
-            for (index, hole) in enumerate(buffer[BUFID]['hdl']):   # step one
-                if buf.first > hole.last:                           # step two
-                    continue
-                if buf.last < hole.first:                           # step three
-                    continue
-                del HDL[index]                                      # step four
-                if buf.first > hole.first:                          # step five
-                    new_hole = Info(dict(
-                        first = hole.first,
-                        last = buf.first - 1,
-                    ))
-                    HDL.insert(index, new_hole)
-                if buf.last < hole.last and not FIN:                # step six
-                    new_hole = Info(dict(
-                        first = buf.last + 1,
-                        last = hole.last
-                    ))
-                    HDL.insert(index+1, new_hole)
-                break                                               # step seven
-            buffer[BUFID]['hdl'] = HDL  # update HDL
-
-            # when FIN is set, submit buffer of this session
-            if FIN:
-                datagram += self.submit(buffer[BUFID])
-                del buffer[BUFID]
-
-        # submit all buffers after processed every packet
-        for buf in buffer:
-            datagram += self.submit(buffer[buf])
-
-        return datagram
+        # when FIN is set, submit buffer of this session
+        if FIN:
+            self._dtgram += self.submit(self._buffer[BUFID])
+            del self._buffer[BUFID]
 
     def submit(self, buf):
         datagram = []           # reassembled datagram
@@ -202,7 +220,8 @@ class TCP_Reassembly(Reassembly):
                 if data:    # strip empty buffer
                     packet = Info(dict(
                         NotImplemented = True,
-                        payload = tuple(data),
+                        index = tuple(buffer['ind']),
+                        payload = tuple(data) or None,
                     ))
                     datagram.append(packet)
             # if this buffer is implemented
@@ -212,7 +231,17 @@ class TCP_Reassembly(Reassembly):
                 if data:    # strip empty buffer
                     packet = Info(dict(
                         NotImplemented = False,
-                        payload = bytes(data),
+                        index = tuple(buffer['ind']),
+                        payload = bytes(data) or None,
                     ))
                     datagram.append(packet)
         return tuple(datagram)
+
+    def fetch(self):
+        # submit all buffers in strict mode
+        if self._strflg:
+            tmp_dtgram = copy.deepcopy(self._dtgram)
+            for buffer in self._buffer.values():
+                tmp_dtgram += self.submit(buffer)
+            return tmp_dtgram
+        return self._dtgram

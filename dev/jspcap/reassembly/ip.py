@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-import abc
+import copy
 
 
 # Reassembly IP Fragments
@@ -10,10 +10,7 @@ import abc
 
 
 from .reassembly import Reassembly
-from ..protocols import Info
-
-
-abstractmethod = abc.abstractmethod
+from .utilities import Info
 
 
 class IP_Reassembly(Reassembly):
@@ -25,16 +22,16 @@ class IP_Reassembly(Reassembly):
     this implementment still used the elder one. And here is the pseudo-code:
 
     Notation:
-        FO    -  Fragment Offset
-        IHL   -  Internet Header Length
-        MF    -  More Fragments flag
-        TTL   -  Time To Live
-        NFB   -  Number of Fragment Blocks
-        TL    -  Total Length
-        TDL   -  Total Data Length
-        BUFID -  Buffer Identifier
-        RCVBT -  Fragment Received Bit Table
-        TLB   -  Timer Lower Bound
+        FO    - Fragment Offset
+        IHL   - Internet Header Length
+        MF    - More Fragments flag
+        TTL   - Time To Live
+        NFB   - Number of Fragment Blocks
+        TL    - Total Length
+        TDL   - Total Data Length
+        BUFID - Buffer Identifier
+        RCVBT - Fragment Received Bit Table
+        TLB   - Timer Lower Bound
 
     Procedure:
         DO {
@@ -87,95 +84,103 @@ class IP_Reassembly(Reassembly):
     ##########################################################################
 
     def reassembly(self, info):
-        buffer = {}         # buffer field
-        datagram = []       # reassembled datagram
-        for buf in info:
-            # get descriptors
-            FO, IHL, MF, TL, BUFID = self._ip_reassembly(buf)
+        BUFID = info.bufid  # Buffer Identifier
+        FO = info.fo        # Fragment Offset
+        IHL = info.ihl      # Internet Header Length
+        MF = info.mf        # More Fragments flag
+        TL = info.tl        # Total Length
 
-            # when unfragmented (possibly discarded) packet received
-            if not FO and not MF:
-                if BUFID in buffer:
-                    header = buffer[BUFID]['header']
-                    data = buffer[BUFID]['data'][IHL:TL]
-                    packet = Info(dict(
-                        NotImplemented = False,
-                        packet = bytes(header) + bytes(data),
-                    ))
-                    datagram.append(packet)
-                    del buffer[BUFID]
-                    continue
+        # when unfragmented (possibly discarded) packet received
+        if not FO and not MF:
+            if BUFID in self._buffer:
+                self._dtgram += self.submit(self._buffer[BUFID])
+                del self._buffer[BUFID]
+                return
 
-            # initialise buffer with BUFID
-            if BUFID not in buffer:
-                buffer[BUFID] = dict(
-                    TDL = 0,                    # Total Data Length
-                    RCVBT = bytearray(8191),    # Fragment Received Bit Table
-                    data = bytearray(65535),    # data buffer
-                    header = bytearray(),       # header buffer
-                )
+        # initialise buffer with BUFID
+        if BUFID not in self._buffer:
+            self._buffer[BUFID] = dict(
+                TDL = 0,                        # Total Data Length
+                RCVBT = bytearray(8191),        # Fragment Received Bit Table
+                index = list(),                 # index record
+                header = bytearray(),           # header buffer
+                datagram = bytearray(65535),    # data buffer
+            )
 
-            # put data into data buffer
-            start = FO
-            stop = TL - IHL + FO
-            buffer[BUFID]['data'][start:stop] = buf.raw
+        # append packet index
+        self._buffer[BUFID]['index'].append(info.num)
 
-            # set RCVBT bits (in 8 octets)
-            start = FO // 8
-            stop = FO // 8 + (TL - IHL + 7) // 8
-            buffer[BUFID][RCVBT][start:stop] = b'\x01' * (stop - start + 1)
+        # put data into data buffer
+        start = FO
+        stop = TL - IHL + FO
+        self._buffer[BUFID]['datagram'][start:stop] = info.payload
 
-            # get total data length (header excludes)
-            if not MF:
-                TDL = TL - IHL + FO
+        # set RCVBT bits (in 8 octets)
+        start = FO // 8
+        stop = FO // 8 + (TL - IHL + 7) // 8
+        self._buffer[BUFID]['RCVBT'][start:stop] = b'\x01' * (stop - start + 1)
 
-            # put header into header buffer
-            if not FO:
-                buffer[BUFID]['header'] = buf.header
+        # get total data length (header excludes)
+        if not MF:
+            TDL = TL - IHL + FO
 
-            # when datagram is reassembled in whole
-            start = 0
-            stop = (TDL + 7) // 8
-            if TDL and all(RCVBT[start:stop]):
-                TL = TDL + IHL
-                header = buffer[BUFID]['header']
-                data = buffer[BUFID]['data'][IHL:TL]
-                packet = Info(dict(
-                    NotImplemented = False,
-                    packet = bytes(header) + bytes(data),
-                ))
-                datagram.append(packet)
-                del buffer[BUFID]
+        # put header into header buffer
+        if not FO:
+            self._buffer[BUFID]['header'] = info.header
 
-        # after processed every packet
-        for buf in buffer.values():
-            data = []
+        # when datagram is reassembled in whole
+        start = 0
+        stop = (TDL + 7) // 8
+        if TDL and all(self._buffer[BUFID]['RCVBT'][start:stop]):
+            self._dtgram += self.submit(self._buffer[BUFID])
+            del self._buffer[BUFID]
+
+    def submit(self, buf):
+        TDL = buf['TDL']
+        RCVBT = buf['RCVBT']
+        index = buf['index']
+        header = buf['header']
+        datagram = buf['datagram']
+
+        start = 0
+        stop = (TDL + 7) // 8
+        # if datagram is reassembled in whole
+        if TDL and all(RCVBT[start:stop]):
+            payload = datagram[:TDL]
+            packet = Info(dict(
+                NotImplemented = False,
+                index = tuple(index),
+                packet = (bytes(header) + bytes(payload)) or None,
+            ))
+        # if datagram is not implemented
+        else:
+            data = list()
             byte = bytearray()
             # extract received payload
             for (bctr, bit) in enumerate(RCVBT):
                 if bit: # received bit
                     this = bctr * 8
                     that = this + 8
-                    byte += buf['data'][this:that]
-                else:   # unreceived bit
+                    byte += datagram[this:that]
+                else:   # missing bit
                     if byte:    # strip empty payload
                         data.append(bytes(byte))
                     byte = bytearray()
-            # strip empty datagram
-            if data and buf['header']:
+            # strip empty packets
+            if data or header:
                 packet = Info(dict(
                     NotImplemented = True,
-                    header = buf['header'] or None,
-                    payload = tuple(data),
+                    index = tuple(index),
+                    header = header or None,
+                    payload = tuple(data) or None,
                 ))
-                datagram.append(packet)
+        return (packet,)
 
-        return tuple(datagram)
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    @abstractmethod
-    def _ip_reassembly(self, buf):
-        pass
+    def fetch(self):
+        # submit all buffers in strict mode
+        if self._strflg:
+            tmp_dtgram = copy.deepcopy(self._dtgram)
+            for buffer in self._buffer.values():
+                tmp_dtgram += self.submit(buffer)
+            return tmp_dtgram
+        return self._dtgram
