@@ -13,8 +13,8 @@ if sys.version_info[0] < 3:
     sys.exit()
 
 try:
-    from graphic import Display
-    display = Display()
+    from ui import Graphic as Display
 except ImportError:
-    from console import Display
+    from ui import Console as Display
+finally:
     display = Display()
