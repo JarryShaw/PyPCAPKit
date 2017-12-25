@@ -59,8 +59,7 @@ class Reassembly(object):
     # reassembled datagram
     @property
     def datagram(self):
-        datagram = self.fetch()
-        return datagram
+        return self.fetch()
 
     ##########################################################################
     # Methods.
@@ -77,9 +76,14 @@ class Reassembly(object):
         pass
 
     # fetch datagram
-    @abstractmethod
     def fetch(self):
-        pass
+        # submit all buffers in strict mode
+        if self._strflg:
+            tmp_dtgram = copy.deepcopy(self._dtgram)
+            for buffer in self._buffer.values():
+                tmp_dtgram += self.submit(buffer)
+            return tmp_dtgram
+        return self._dtgram
 
     # return datagram index
     def index(self, pkt_num):

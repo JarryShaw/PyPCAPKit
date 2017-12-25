@@ -175,12 +175,3 @@ class IP_Reassembly(Reassembly):
                     payload = tuple(data) or None,
                 ))
         return (packet,)
-
-    def fetch(self):
-        # submit all buffers in strict mode
-        if self._strflg:
-            tmp_dtgram = copy.deepcopy(self._dtgram)
-            for buffer in self._buffer.values():
-                tmp_dtgram += self.submit(buffer)
-            return tmp_dtgram
-        return self._dtgram

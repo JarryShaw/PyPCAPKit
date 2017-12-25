@@ -156,15 +156,15 @@ class TCP_Reassembly(Reassembly):
             if GAP >= 0:    # if fragment goes after exsisting payload
                 RAW += bytearray(GAP) + info.payload
             else:           # if fragment partially overlaps exsisting payload
-                RAW[DSN:] = info.payload
+                RAW[DSN-ISN:] = info.payload
         else:           # if fragment exceeds exsisting payload
             LEN = info.len
             GAP = ISN - (DSN + LEN)     # gap length between payloads
             self._buffer[BUFID][ACK]['isn'] = DSN
             if GAP >= 0:    # if fragment exceeds exsisting payload
-                RAW += bytearray(GAP) + info.payload
+                RAW = info.payload + bytearray(GAP) + RAW
             else:           # if fragment partially overlaps exsisting payload
-                RAW = info.payload + RAW[-GAP:]
+                RAW = info.payload + RAW[ISN-GAP:]
         self._buffer[BUFID][ACK]['raw'] = RAW       # update payload datagram
         self._buffer[BUFID][ACK]['len'] = len(RAW)  # update payload length
 
@@ -235,12 +235,3 @@ class TCP_Reassembly(Reassembly):
                     ))
                     datagram.append(packet)
         return tuple(datagram)
-
-    def fetch(self):
-        # submit all buffers in strict mode
-        if self._strflg:
-            tmp_dtgram = copy.deepcopy(self._dtgram)
-            for buffer in self._buffer.values():
-                tmp_dtgram += self.submit(buffer)
-            return tmp_dtgram
-        return self._dtgram
