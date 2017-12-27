@@ -1,0 +1,26 @@
+ ________  ________  ________  ________
+|\   __  \|\   ____\|\   __  \|\   __  \
+\ \  \|\  \ \  \___|\ \  \|\  \ \  \|\  \
+ \ \   ____\ \  \    \ \   __  \ \   ____\
+  \ \  \___|\ \  \____\ \  \ \  \ \  \___|
+   \ \__\    \ \_______\ \__\ \__\ \__\
+    \|__|     \|_______|\|__|\|__|\|__|
+
+
+
+  PCAP Tree Viewer is a Python-based pcap
+file extractor. With support of jspcap and
+jsformat, we can present you a pleasant yet
+clear reveal of a validated pcap file.
+
+  We support, up to now, various internet
+protocols, for instance Ethernet, IPv4, TCP,
+UDP, et al. Plus, you can save the analysis
+report for later usage in an assortment of
+output formats, from text tree-view to json,
+and even macOS Property List (plist).
+
+  For further information, please go to
+GitHub page of this repository, where other
+two repository, jspcap and jsformat is also
+maintained. Link in the menu.
