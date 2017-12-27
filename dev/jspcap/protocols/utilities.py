@@ -3,6 +3,7 @@
 
 
 import copy
+import functools
 import numbers
 import os
 
@@ -16,6 +17,7 @@ __all__ = ['seekset', 'Info', 'ProtoChain']
 
 def seekset(func):
     """Rean file from start then set back to original."""
+    @functools.wraps(func)
     def seekcur(self, *args, **kw):
         seek_cur = self._file.tell()
         self._file.seek(os.SEEK_SET)

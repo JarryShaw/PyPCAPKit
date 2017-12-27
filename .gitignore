@@ -15,6 +15,9 @@
 test*.py
 !test.py
 
+*.docx
+*.pages
+
 out/
 deprecated/
 
