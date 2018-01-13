@@ -18,7 +18,6 @@ test*.py
 *.docx
 *.pages
 
-out/
 deprecated/
 
 # Created by https://www.gitignore.io/api/macos,python
