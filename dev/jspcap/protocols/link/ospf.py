@@ -29,9 +29,34 @@ AUTH = {
 
 
 class OSPF(Link):
+    """This class implements Open Shortest Path First.
 
-    __all__ = ['name', 'info', 'length', 'layer', 'type', 'protochain']
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * length -- int, header length of corresponding protocol
+        * layer -- str, `Link`
+        * protochain -- ProtoChain, protocol chain of current instance
+        * type -- str, OSPF packet type
 
+    Methods:
+        * read_ospf -- read Open Shortest Path First
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+        * _read_id_numbers -- read router and area IDs
+        * _read_encrypt_auth -- read Authentication field when CA employed
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -41,37 +66,15 @@ class OSPF(Link):
         return 'Open Shortest Path First'
 
     @property
-    def info(self):
-        return self._info
-
-    @property
     def length(self):
         return 24
-
-    @property
-    def layer(self):
-        return self.__layer__
 
     @property
     def type(self):
         return self._info.type
 
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None):
-        self._file = _file
-        self._info = Info(self.read_ospf(length))
-
-    def __len__(self):
-        return 24
-
-    def __length_hint__(self):
-        return 24
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_ospf(self, length):
@@ -132,7 +135,26 @@ class OSPF(Link):
         length = ospf['len'] - 24
         return self._read_next_layer(ospf, length)
 
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None):
+        self._file = _file
+        self._info = Info(self.read_ospf(length))
+
+    def __len__(self):
+        return 24
+
+    def __length_hint__(self):
+        return 24
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
     def _read_id_numbers(self):
+        """Read router and area IDs."""
         _byte = self._read_fileng(4)
         _addr = '.'.join([str(_) for _ in _byte])
         return _addr

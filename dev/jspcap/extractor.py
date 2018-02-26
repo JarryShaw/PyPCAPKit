@@ -13,8 +13,10 @@ import textwrap
 
 from .exceptions import FormatError
 from .protocols import Info, Frame, Header
+from .validations import bool_check, str_check
 
 
+# file name match regex
 FILE = re.compile(r'''
     \A(.+?)[.](?P<exts>.*)\Z
 ''', re.VERBOSE | re.IGNORECASE)
@@ -24,15 +26,33 @@ class Extractor:
     """Extractor for PCAP files.
 
     Properties:
-        _auto -- bool, if run automatically to the end
-        _ifnm -- str, input file name (aka _ifile.name)
-        _ofnm -- str, output file name (aka _ofile.name)
+        * info -- VerionInfo, version of input PCAP file
+        * length -- int, frame number (of current extracted frame or all)
+        * format -- str, format of output file
+        * input -- str, name of input PCAP file
+        * output -- str, name of output file
+        * header -- Info, global header
+        * protocol -- ProtoChain, protocol chain of current/last frame
+        * frame -- Info, frame record for reassembly
+            |--> tcp -- tuple, TCP payload fragments
+            |--> ipv4 -- tuple, IPv4 frame fragments
+            |--> ipv6 -- tuple, IPv6 frame fragments
 
-        _ifile -- FileIO, input file object
-        _ofile -- object, temperory output writer
+    Methods:
+        * make_name -- formatting input & output file name
+        * record_header -- extract global header
+        * record_frames -- extract frames
 
-        _frnum -- int, frame number
-        _frame -- list, each item contains `Info` of a record/package
+    Attributes:
+        * _auto -- bool, if run automatically to the end
+        * _ifnm -- str, input file name (aka _ifile.name)
+        * _ofnm -- str, output file name (aka _ofile.name)
+
+        * _ifile -- FileIO, input file object
+        * _ofile -- object, temperory output writer
+
+        * _frnum -- int, frame number
+        * _frame -- list, each item contains `Info` of a record/package
             |--> gbhdr -- Info object, global header
             |--> frame 1 -- Info object, record/package header
             |       |--> Info object, first (link layer) header
@@ -42,11 +62,21 @@ class Extractor:
             |--> frame 2 -- Info object, record/package header
             |       |--> ......
 
-        _gbhdr -- Info object, the global header
-        _proto -- str, protocol chain of current frame
+        * _gbhdr -- Info object, the global header
+        * _dlink -- str, data link layer protocol of input file
+        * _vinfo -- VersionInfo, version of input file
+        * _proto -- str, protocol chain of current frame
 
-    Usage:
-        reader = Analyer(fmt='plist', fin='in', fout='out', auto=False, extension=False)
+        * _ip -- bool, flag if perform IPv4 & IPv6 reassembly
+        * _ipv4 -- bool, flag if perform IPv4 reassembly
+        * _ipv6 -- bool, flag if perform IPv6 reassembly
+        * _tcp -- bool, flag if perform TCP payload reassembly
+
+    Utilities:
+        * _read_frame -- read frames
+        * _tcp_reassembly -- store data for TCP reassembly
+        * _ipv4_reassembly -- store data for IPv4 reassembly
+        * _ipv6_reassembly -- store data for IPv6 reassembly
 
     """
 
@@ -84,11 +114,11 @@ class Extractor:
 
     @property
     def frame(self):
-        frame = Info(dict(
+        frame = Info(
             tcp = tuple(self._frame[0]),
             ipv4 = tuple(self._frame[1]),
             ipv6 = tuple(self._frame[2]),
-        ))
+        )
         return frame
 
     ##########################################################################
@@ -98,11 +128,11 @@ class Extractor:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True, extension=True,
-                    ipv4_reassembly=False, ipv6_reassembly=False, tcp_reassembly=False):
+    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True, files=False
+                    extension=True, ip=False, ipv4=False, ipv6=False, tcp=False):
         """Initialise PCAP Reader.
 
-        Keyword arguemnts:
+        Keyword arguments:
             fmt  -- str, file format of output
                     <keyword> 'plist' / 'json' / 'tree' / 'html'
             fin  -- str, file name to be read; if file not exist, raise error
@@ -110,17 +140,22 @@ class Extractor:
 
             auto -- bool, if automatically run till EOF (default is True)
                     <keyword> True / False
+            files -- bool, if split each frame into different files (default is False)
+                        <keyword> True/False
             extension -- bool, if check and append axtensions to output file (default is True)
                          <keyword> True / False
 
-            ipv4_reassembly -- bool, if record data for IPv4 reassembly (default is False)
-                               <keyword> True / False
-            ipv6_reassembly -- bool, if record data for IPv6 reassembly (default is False)
-                               <keyword> True / False
-            tcp_reassembly -- bool, if record data for TCP reassembly (default is False)
-                              <keyword> True / False
+            ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
+                    <keyword> True / False
+            ipv4 -- bool, if record data for IPv4 reassembly (default is False)
+                    <keyword> True / False
+            ipv6 -- bool, if record data for IPv6 reassembly (default is False)
+                    <keyword> True / False
+            tcp -- bool, if record data for TCP reassembly (default is False)
+                    <keyword> True / False
 
         """
+        bool_check(ip, ipv4, ipv6, tcp, auto, extension)
         ifnm, ofnm, fmt = self.make_name(fin, fout, fmt, extension)
 
         if fmt == 'plist':
@@ -135,7 +170,7 @@ class Extractor:
         elif fmt == 'xml':
             from jsformat import XML as output         # output XML file
         else:
-            raise FormatError('Unsupported output format: {}'.format(fmt))
+            raise FormatError(f'Unsupported output format: {fmt}')
 
         self._ifnm = ifnm       # input file name
         self._ofnm = ofnm       # output file name
@@ -145,9 +180,9 @@ class Extractor:
         self._frame = [[], [], []]          # frame record (TCP / IPv4 / IPv6)
         self._ofile = output(ofnm)          # output file
 
-        self._ipv4 = ipv4_reassembly    # IPv4 Reassembly
-        self._ipv6 = ipv6_reassembly    # IPv6 Reassembly
-        self._tcp = tcp_reassembly      # TCP Reassembly
+        self._ipv4 = ipv4 or ip     # IPv4 Reassembly
+        self._ipv6 = ipv6 or ip     # IPv6 Reassembly
+        self._tcp = tcp             # TCP Reassembly
 
         self._ifile = open(ifnm, 'rb')
         self.record_header()        # read PCAP global header
@@ -155,7 +190,7 @@ class Extractor:
 
     def __iter__(self):
         if self._auto:
-            return None
+            raise TypeError("'Extractor_auto' object is not iterable")
         else:
             return self
 
@@ -170,22 +205,25 @@ class Extractor:
         if not self._auto:
             try:
                 return self._read_frame()
-            except EOFError:
+            except EOFError as error:
                 self._ifile.close()
-                raise EOFError
+                raise error
 
     ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     @classmethod
     def make_name(cls, fin, fout, fmt, extension):
         fmt_none = (fmt is None)
+        if not fmt_none:
+            str_check(fmt)
 
         if fin is None:
             ifnm = 'in.pcap'
         else:
-            ifnm = fin if '.pcap' in fin else '{fin}.pcap'.format(fin=fin)
+            str_check(fin)
+            ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
 
         if fout is None:
             if fmt_none:
@@ -196,6 +234,7 @@ class Extractor:
                 else:               ext = fmt
                 ofnm = 'out.{ext}'.format(ext=ext)
         else:
+            str_check(fout)
             ofmt = FILE.match(fout)
             if ofmt is None:
                 if fmt_none:
@@ -205,7 +244,7 @@ class Extractor:
                         if fmt == 'html':   ext = 'js'
                         elif fmt == 'tree': ext = 'txt'
                         else:               ext = fmt
-                        ofnm = '{out}.{ext}'.format(out=fout, ext=ext)
+                        ofnm = f'{fout}.{ext}'
                     else:
                         ofnm = fout
             else:
@@ -226,7 +265,7 @@ class Extractor:
         self._gbhdr = Header(self._ifile)
         self._dlink = self._gbhdr.protocol
         self._vinfo = self._gbhdr.info
-        self._ofile(self._gbhdr.info.infotodict(), name='Global Header')
+        self._ofile(self._gbhdr.info, name='Global Header')
 
     def record_frames(self):
         if self._auto:
@@ -239,7 +278,7 @@ class Extractor:
             self._ifile.close()
 
     ##########################################################################
-    # Methods.
+    # Utilities.
     ##########################################################################
 
     def _read_frame(self):
@@ -280,23 +319,22 @@ class Extractor:
             tcp = frame['TCP']
             data = dict(
                 bufid = (
-                    ip.src,                     # source IP address
-                    ip.dst,                     # destination IP address
-                    tcp.srcport,                # source port
-                    tcp.dstport,                # destination port
+                    ip.src,                             # source IP address
+                    ip.dst,                             # destination IP address
+                    tcp.srcport,                        # source port
+                    tcp.dstport,                        # destination port
                 ),
-                num = frame.info.number,        # original packet range number
-                ack = tcp.ack,                  # acknowledgement
-                dsn = tcp.seq,                  # data sequence number
-                syn = tcp.flags.syn,            # synchronise flag
-                fin = tcp.flags.fin,            # finish flag
-                payload = bytearray() if tcp.raw is None else bytearray(tcp.raw),
-                                                # raw bytearray type payload
+                num = frame.info.number,                # original packet range number
+                ack = tcp.ack,                          # acknowledgement
+                dsn = tcp.seq,                          # data sequence number
+                syn = tcp.flags.syn,                    # synchronise flag
+                fin = tcp.flags.fin,                    # finish flag
+                payload = bytearray(tcp.raw or b''),    # raw bytearray type payload
            )
-            raw_len = 0 if tcp.raw is None else len(tcp.raw)
-            data['first'] = tcp.seq             # this sequence number
-            data['last'] = tcp.seq + raw_len    # next (wanted) sequence number
-            data['len'] = raw_len               # payload length, header excludes
+            raw_len = len(tcp.raw or b'')
+            data['first'] = tcp.seq                     # this sequence number
+            data['last'] = tcp.seq + raw_len            # next (wanted) sequence number
+            data['len'] = raw_len                       # payload length, header excludes
             self._frame[0].append(data)
 
     def _ipv4_reassembly(self, frame):
@@ -307,20 +345,18 @@ class Extractor:
                 return
             data = dict(
                 bufid = (
-                    ipv4.src,               # source IP address
-                    ipv4.dst,               # destination IP address
-                    ipv4.id,                # identification
-                    ipv4.proto,             # payload protocol type
+                    ipv4.src,                           # source IP address
+                    ipv4.dst,                           # destination IP address
+                    ipv4.id,                            # identification
+                    ipv4.proto,                         # payload protocol type
                     ),
-                num = frame.info.number,    # original packet range number
-                fo = ipv4.frag_offset,      # fragment offset
-                ihl = ipv4.hdr_len,         # internet header length
-                mf = ipv4.flags.mf,         # more fragment flag
-                tl = ipv4.len,              # total length, header includes
-                header = bytearray(ipv4.header),
-                                            # raw bytearray type header
-                payload = bytearray() if ipv4.raw is None else (ipv4.raw),
-                                            # raw bytearray type payload
+                num = frame.info.number,                # original packet range number
+                fo = ipv4.frag_offset,                  # fragment offset
+                ihl = ipv4.hdr_len,                     # internet header length
+                mf = ipv4.flags.mf,                     # more fragment flag
+                tl = ipv4.len,                          # total length, header includes
+                header = bytearray(ipv4.header),        # raw bytearray type header
+                payload = bytearray(ipv4.raw or b''),   # raw bytearray type payload
             )
             self._frame[1].append(data)
 
@@ -332,20 +368,17 @@ class Extractor:
                 return
             data = dict(
                 bufid = (
-                    ipv6.src,               # source IP address
-                    ipv6.dst,               # destination IP address
-                    ipv6.label,             # label
-                    ipv6.ipv6_frag.next,    # next header field in IPv6 Fragment Header
+                    ipv6.src,                           # source IP address
+                    ipv6.dst,                           # destination IP address
+                    ipv6.label,                         # label
+                    ipv6.ipv6_frag.next,                # next header field in IPv6 Fragment Header
                 ),
-                num = frame.info.number,    # original packet range number
-                fo = ipv6.ipv6_frag.offset, # fragment offset
-                ihl = ipv6.hdr_len,         # header length, only headers before IPv6-Frag
-                mf = ipv6.ipv6_frag.mf,     # more fragment flag
-                tl = ipv6.hdr_len + ipv6.raw_len,
-                                            # total length, header includes
-                header = bytearray(ipv6.header),
-                                            # raw bytearray type header before IPv6-Frag
-                payload = bytearray() if ipv6.raw is None else (ipv6.raw),
-                                            # raw bytearray type payload after IPv6-Frag
+                num = frame.info.number,                # original packet range number
+                fo = ipv6.ipv6_frag.offset,             # fragment offset
+                ihl = ipv6.hdr_len,                     # header length, only headers before IPv6-Frag
+                    mf = ipv6.ipv6_frag.mf,             # more fragment flag
+                tl = ipv6.hdr_len + ipv6.raw_len,       # total length, header includes
+                header = bytearray(ipv6.header),        # raw bytearray type header before IPv6-Frag
+                payload = bytearray(ipv6.raw or b''),   # raw bytearray type payload after IPv6-Frag
             )
             self._frame[2].append(data)

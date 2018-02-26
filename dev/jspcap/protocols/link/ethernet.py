@@ -14,9 +14,32 @@ from ..utilities import Info
 
 
 class Ethernet(Link):
+    """This class implements Ethernet Protocol.
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * length -- int, header length of corresponding protocol
+        * layer -- str, `Link`
+        * protocol -- str, next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+        * src -- str, source mac address
+        * dst -- str, destination mac address
 
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+        * _read_mac_addr -- read MAC address
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -34,37 +57,21 @@ class Ethernet(Link):
         return 14
 
     @property
+    def protocol(self):
+        return self._info.type
+
+    # source mac address
+    @property
     def src(self):
         return self._info.src
 
+    # destination mac address
     @property
     def dst(self):
         return self._info.dst
 
-    @property
-    def layer(self):
-        return self.__layer__
-
-    @property
-    def protocol(self):
-        return self._info.type
-
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None):
-        self._file = _file
-        self._info = Info(self.read_ethernet(length))
-
-    def __len__(self):
-        return 14
-
-    def __length_hint__(self):
-        return 14
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_ethernet(self, length):
@@ -89,9 +96,28 @@ class Ethernet(Link):
 
         if length is not None:
             length -= 14
-        return self._read_next_layer(ethernet, _type, length)
+        return self._decode_next_layer(ethernet, _type, length)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None):
+        self._file = _file
+        self._info = Info(self.read_ethernet(length))
+
+    def __len__(self):
+        return 14
+
+    def __length_hint__(self):
+        return 14
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
 
     def _read_mac_addr(self):
+        """Read MAC address."""
         _byte = self._read_fileng(6)
         _addr = '-'.join(textwrap.wrap(_byte.hex(), 2))
         return _addr

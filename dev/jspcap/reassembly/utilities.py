@@ -9,42 +9,45 @@ import copy
 # Several useful functions & classes
 
 
-__all__ = ['Info']
+from .exceptions import UnsupportedCall
 
 
 class Info(dict):
     """Turn dictionaries into object-like instances."""
     def __new__(cls, dict_=None, **kwargs):
-        self = super().__new__(cls, **kwargs)
+        def __read__(dict_):
+            __dict__ = dict()
+            for (key, value) in dict_.items():
+                if isinstance(value, dict):
+                    __dict__[key] = Info(value)
+                else:
+                    if isinstance(key, str):
+                        key = key.replace('-', '_')
+                    __dict__[key] = value
+            return __dict__
 
-        if dict_ is None:
-            return self
-
-        if isinstance(dict_, Info):
-            self = copy.deepcopy(dict_)
-            return self
-
-        for key in dict_:
-            if isinstance(dict_[key], Info):
-                self.__dict__[key] = dict_[key]
-            elif isinstance(dict_[key], dict):
-                self.__dict__[key] = Info(dict_[key])
+        self = super().__new__(cls)
+        if dict_ is not None:
+            if isinstance(dict_, Info):
+                self = copy.deepcopy(dict_)
             else:
-                if isinstance(key, str):
-                    key = key.replace('-', '_')
-                self.__dict__[key] = dict_[key]
+                dict_check(dict_)
+                self.__dict__.update(__read__(dict_))
 
+        self.__dict__.update(__read__(kwargs))
         return self
 
     def __repr__(self):
-        list_ = []
+        temp = list()
         for (key, value) in self.__dict__.items():
-            str_ = '{key}={value}'.format(key=key, value=str(value))
-            list_.append(str_)
-        repr_ = 'Info(' + ', '.join(list_) + ')'
-        return repr_
+            temp.append(f'{key}={value}')
+        args = ', '.join(temp)
+        return f'Info({args})'
 
     __str__ = __repr__
+
+    def __iter__(self):
+        return iter(self.__dict__)
 
     def __getitem__(self, key):
         return self.__dict__[key]
@@ -53,16 +56,16 @@ class Info(dict):
         return (name in self.__dict__)
 
     def __setattr__(self, name, value):
-        raise AttributeError('can\'t set attribute')
+        raise UnsupportedCall("can't set attribute")
 
     def __delattr__(self, name):
-        raise AttributeError('can\'t delete attribute')
+        raise UnsupportedCall("can't delete attribute")
 
     def infotodict(self):
-        dict_ = {}
-        for key in self.__dict__:
-            if isinstance(self.__dict__[key], Info):
-                dict_[key] = self.__dict__[key].infotodict()
+        dict_ = dict()
+        for (key, value) in self.__dict__.items():
+            if isinstance(value, Info):
+                dict_[key] = value.infotodict()
             else:
-                dict_[key] = self.__dict__[key]
+                dict_[key] = value
         return dict_

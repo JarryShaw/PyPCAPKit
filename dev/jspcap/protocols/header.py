@@ -6,41 +6,40 @@
 # Analyser for PCAP global headers
 
 
+from .exceptions import FileError, UnsupportedCall
 from .link import LINKTYPE
 from .protocol import Protocol
-from .utilities import Info
-from ..exceptions import FileError
-
-
-class VersionInfo(Info):
-    """Version Info alikes `sys.version_info`."""
-
-    def __init__(self, vmaj, vmin):
-        self._vers = (vmaj, vmin)
-
-    def __str__(self):
-        str_ = 'pcap version {major}.{minor}'.format(
-                    major=self._vers[0], minor=self._vers[1]
-                )
-        return str_
-
-    def __repr__(self):
-        repr_ = 'pcap.version_info(major={major}, minor={minor})'.format(
-                    major=self._vers[0], minor=self._vers[1]
-                )
-        return repr_
-
-    def __getattribute__(self, name):
-        raise AttributeError("'VersionInfo' object has no attribute '{name}'".format(name=name))
-
-    def __getitem__(self, key):
-        return self._vers[key]
+from .utilities import Info, VersionInfo
+from .validations import int_check
 
 
 class Header(Protocol):
+    """PCAP file global header extractor.
 
-    __all__ = ['name', 'info', 'length', 'version', 'protocol']
+    Properties:
+        * name -- str, `Global Header`
+        * info -- Info, info dict of current instance
+        * length -- int, header length of global header, i.e. 24
+        * version -- VersionInfo, version infomation of input PCAP file
+        * protocol -- str, data link type
 
+    Methods:
+        * index -- call `ProtoChain.index`
+        * read_header -- read global header of PCAP file
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -48,10 +47,6 @@ class Header(Protocol):
     @property
     def name(self):
         return 'Global Header'
-
-    @property
-    def info(self):
-        return self._info
 
     @property
     def length(self):
@@ -63,37 +58,14 @@ class Header(Protocol):
 
     @property
     def protocol(self):
-        return self.info.network
+        return self._info.network
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def _read_protos(self, size):
-        _byte = self._read_unpack(4, lilendian=True)
-        _prot = LINKTYPE.get(_byte)
-        return _prot
-
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file):
-        self._file = _file
-        self._info = Info(self.read_header())
-
-    def __len__(self):
-        return 24
-
-    def __length_hint__(self):
-        return 24
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
     def read_header(self):
-        """Read global header of *.pcap file.
+        """Read global header of PCAP file.
 
         Structure of global header (C):
             typedef struct pcap_hdr_s {
@@ -109,7 +81,7 @@ class Header(Protocol):
         """
         _temp = self._read_fileng(4)
         if _temp != b'\xd4\xc3\xb2\xa1':
-            raise FileError
+            raise FileError('unknown file format.')
 
         _magn = _temp
         _vmaj = self._read_unpack(2, lilendian=True)
@@ -130,3 +102,32 @@ class Header(Protocol):
         )
 
         return header
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file):
+        self._file = _file
+        self._info = Info(self.read_header())
+
+    def __len__(self):
+        return 24
+
+    def __length_hint__(self):
+        return 24
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _read_protos(self, size):
+        """Read next layer protocol type.
+
+        Keyword arguemnts:
+            size  -- int, buffer size
+
+        """
+        _byte = self._read_unpack(4, lilendian=True)
+        _prot = LINKTYPE.get(_byte)
+        return _prot

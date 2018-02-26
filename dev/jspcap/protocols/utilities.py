@@ -12,11 +12,12 @@ import os
 # Several useful functions & classes
 
 
-__all__ = ['seekset', 'Info', 'ProtoChain']
+from .exceptions import UnsupportedCall
+from .validations import dict_check, int_check
 
 
 def seekset(func):
-    """Rean file from start then set back to original."""
+    """Read file from start then set back to original."""
     @functools.wraps(func)
     def seekcur(self, *args, **kw):
         seek_cur = self._file.tell()
@@ -28,38 +29,52 @@ def seekset(func):
 
 
 class Info(dict):
-    """Turn dictionaries into object-like instances."""
+    """Turn dictionaries into object-like instances.
+
+    Methods:
+        * infotodict -- reverse Info object into dict type
+
+    Notes:
+        * Info objects inherit from `dict` type
+        * Info objects are iterable, and support all functions as `dict`
+        * Info objects are one-time-modeling, thus cannot set or delete
+            attributes after initialisation
+
+    """
     def __new__(cls, dict_=None, **kwargs):
-        self = super().__new__(cls, **kwargs)
+        def __read__(dict_):
+            __dict__ = dict()
+            for (key, value) in dict_.items():
+                if isinstance(value, dict):
+                    __dict__[key] = Info(value)
+                else:
+                    if isinstance(key, str):
+                        key = key.replace('-', '_')
+                    __dict__[key] = value
+            return __dict__
 
-        if dict_ is None:
-            return self
-
-        if isinstance(dict_, Info):
-            self = copy.deepcopy(dict_)
-            return self
-
-        for key in dict_:
-            if isinstance(dict_[key], Info):
-                self.__dict__[key] = dict_[key]
-            elif isinstance(dict_[key], dict):
-                self.__dict__[key] = Info(dict_[key])
+        self = super().__new__(cls)
+        if dict_ is not None:
+            if isinstance(dict_, Info):
+                self = copy.deepcopy(dict_)
             else:
-                if isinstance(key, str):
-                    key = key.replace('-', '_')
-                self.__dict__[key] = dict_[key]
+                dict_check(dict_)
+                self.__dict__.update(__read__(dict_))
 
+        self.__dict__.update(__read__(kwargs))
         return self
 
     def __repr__(self):
-        list_ = []
+        temp = list()
         for (key, value) in self.__dict__.items():
-            str_ = '{key}={value}'.format(key=key, value=str(value))
-            list_.append(str_)
-        repr_ = 'Info(' + ', '.join(list_) + ')'
-        return repr_
+            temp.append(f'{key}={value}')
+        args = ', '.join(temp)
+        return f'Info({args})'
 
     __str__ = __repr__
+
+    def __iter__(self):
+        return iter(self.__dict__)
 
     def __getitem__(self, key):
         return self.__dict__[key]
@@ -68,43 +83,75 @@ class Info(dict):
         return (name in self.__dict__)
 
     def __setattr__(self, name, value):
-        raise AttributeError('can\'t set attribute')
+        raise UnsupportedCall("can't set attribute")
 
     def __delattr__(self, name):
-        raise AttributeError('can\'t delete attribute')
+        raise UnsupportedCall("can't delete attribute")
 
     def infotodict(self):
-        dict_ = {}
-        for key in self.__dict__:
-            if isinstance(self.__dict__[key], Info):
-                dict_[key] = self.__dict__[key].infotodict()
+        dict_ = dict()
+        for (key, value) in self.__dict__.items():
+            if isinstance(value, Info):
+                dict_[key] = value.infotodict()
             else:
-                dict_[key] = self.__dict__[key]
+                dict_[key] = value
         return dict_
 
 
+class VersionInfo(Info, tuple):
+    """VersionInfo alikes `sys.version_info`."""
+
+    def __init__(self, vmaj, vmin):
+        self._vers = (vmaj, vmin)
+
+    def __str__(self):
+        str_ = f'pcap version {self._vers[0]}.{self._vers[1]}'
+        return str_
+
+    def __repr__(self):
+        repr_ = f'pcap.version_info(major={self._vers[0]}, minor={self._vers[1]})'
+        return repr_
+
+    def __getattribute__(self, name):
+        raise UnsupportedCall(f"'VersionInfo' object has no attribute '{name}'")
+
+    def __getattr__(self, name):
+        raise UnsupportedCall("can't get attribute")
+
+    def __getitem__(self, key):
+        int_check(key)
+        return self._vers[key]
+
+
 class ProtoChain(tuple):
-    """Protocols chain."""
+    """Protocols chain.
 
-    __all__ = ['tuple', 'proto', 'chain']
+    Properties:
+        * tuple -- tuple, name of protocols in chain
+        * proto -- tuple, lowercase name of protocols in chain
+        * chain -- str, chain of protocols seperated by colons
 
+    Methods:
+        * index -- same as `index` function of `tuple` type
+
+    Attributes:
+        * __data__ -- tuple, name of protocols in chain
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def tuple(self):
-        return self._tuple
+        return self.__data__
 
     @property
     def proto(self):
-        list_ = []
-        tuple_ = copy.deepcopy(self._tuple)
-        for proto in tuple_:
-            proto = None if proto is None else proto.lower()
-            list_.append(proto)
-        protos = tuple(list_)
-        return protos
+        proto = list()
+        for name in self.__data__:
+            proto.append(str(name).lower().replace('none', 'raw'))
+        return tuple(proto)
 
     @property
     def chain(self):
@@ -125,36 +172,32 @@ class ProtoChain(tuple):
                 start = self.index(start)
             if isinstance(stop, str):
                 stop = self.index(stop)
+            int_check(start, stop)
             return self.proto.index(name, start, stop)
-        except ValueError:
-            raise ValueError
-        except TypeError:
-            raise TypeError
+        except ValueError as value_error:
+            raise value_error
+        except TypeError as type_error:
+            raise type_error
 
     ##########################################################################
     # Data modules.
     ##########################################################################
 
-    def __new__(cls, proto, other=None):
-        self = super().__new__(cls)
-        return self
-
     def __init__(self, proto, other=None):
         if other is None:
-            self._tuple = (proto,)
+            self.__data__ = (proto,)
         else:
-            self._tuple = (proto,) + other.tuple
+            self.__data__ = (proto,) + other.tuple
 
     def __repr__(self):
         proto = ', '.join(self.proto)
-        repr_ = 'ProtoChain({})'.format(proto)
-        return repr_
+        return f'ProtoChain({proto})'
 
     def __str__(self):
-        for (i, proto) in enumerate(self._tuple):
+        for (i, proto) in enumerate(self.__data__):
             if proto is None:
-                return ':'.join(self._tuple[:i])
-        return ':'.join(self._tuple)
+                return ':'.join(self.__data__[:i])
+        return ':'.join(self.__data__)
 
     def __getitem__(self, key):
         try:
@@ -167,19 +210,17 @@ class ProtoChain(tuple):
                     start = self.index(start)
                 if not isinstance(stop, numbers.Number):
                     stop = self.index(stop)
-                if not isinstance(step, numbers.Number):
-                    step = self.index(step)
                 key = slice(start, stop, step)
             else:
                 key = self.index(key)
-            return self._tuple[key]
-        except (ValueError, IndexError):
-            raise IndexError
-        except TypeError:
-            raise TypeError
+            return self.__data__[key]
+        except (ValueError, IndexError) as index_error:
+            raise index_error
+        except TypeError as type_error:
+            raise type_error
 
     def __iter__(self):
-        return (name for name in self._tuple)
+        return iter(self.__data__)
 
     def __contains__(self, name):
         if isinstance(name, str):

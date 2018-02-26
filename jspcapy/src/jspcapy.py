@@ -22,7 +22,7 @@ NUMB = lambda number, protocol: ' - Frame {:>3d}: {}'.format(number, protocol)
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(description=(
+    parser = argparse.ArgumentParser(prog='jspcapy', description=(
         'PCAP file extractor and formatted exporter'
     ))
     parser.add_argument('-v', '--version', action='version',

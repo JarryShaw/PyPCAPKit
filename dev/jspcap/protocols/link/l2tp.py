@@ -11,9 +11,32 @@ from ..utilities import Info
 
 
 class L2TP(Link):
+    """This class implements Layer Two Tunneling Protocol.
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * length -- int, header length of corresponding protocol
+        * layer -- str, `Link`
+        * protochain -- ProtoChain, protocol chain of current instance
+        * type -- str, L2TP packet type
 
+    Methods:
+        * read_l2tp -- read Layer Two Tunneling Protocol
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -23,45 +46,15 @@ class L2TP(Link):
         return 'Layer 2 Tunneling Protocol'
 
     @property
-    def info(self):
-        return self._info
-
-    @property
     def length(self):
         return self._info.hdr_len
 
     @property
-    def src(self):
-        return (self._info.sha, self._info.spa)
-
-    @property
-    def dst(self):
-        return (self._info.tha, self._info.tpa)
-
-    @property
-    def layer(self):
-        return self.__layer__
-
-    @property
-    def protocol(self):
-        return (self._info.htype, self._info.ptype)
+    def type(self):
+        return self._info.flags.type
 
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None):
-        self._file = _file
-        self._info = Info(self.read_l2tp(length))
-
-    def __len__(self):
-        return self._info.hdr_len
-
-    def __length_hint__(self):
-        return 16
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_l2tp(self, length):
@@ -111,7 +104,7 @@ class L2TP(Link):
 
         l2tp = dict(
             flags = dict(
-                type = 'control' if int(_flag[0]) else 'data',
+                type = 'Control' if int(_flag[0]) else 'Data',
                 len = True if int(_flag[1]) else False,
                 res = b'\x00\x00',
                 seq = True if int(_flag[4]) else False,
@@ -136,3 +129,17 @@ class L2TP(Link):
         if length is not None:
             length -= l2tp['hdr_len']
         return self._read_next_layer(l2tp, length)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None):
+        self._file = _file
+        self._info = Info(self.read_l2tp(length))
+
+    def __len__(self):
+        return self._info.hdr_len
+
+    def __length_hint__(self):
+        return 16

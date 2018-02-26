@@ -40,23 +40,8 @@ class BaseError(Exception):
 # TypeError session.
 ##############################################################################
 
-class DigitError(BaseError, TypeError):
-    """The argument(s) must be (a) number(s)."""
-    pass
-
-
-class IntError(BaseError, TypeError):
-    """The argument(s) must be integral."""
-    pass
-
-
-class RealError(BaseError, TypeError):
-    """The function is not defined for real number."""
-    pass
-
-
-class ComplexError(BaseError, TypeError):
-    """The function is not defined for complex instance."""
+class BoolError(BaseError, TypeError):
+    """The argument(s) must be bool type."""
     pass
 
 
@@ -64,37 +49,14 @@ class BytesError(BaseError, TypeError):
     """The argument(s) must be bytes type."""
     pass
 
-class BoolError(BaseError, TypeError):
-    """The argument(s) must be bool type."""
-    pass
-
-class StringError(BaseError, TypeError):
-    """The argument(s) must be str type."""
-    pass
-
-
-class DictError(BaseError, TypeError):
-    """The argument(s) must be dict type."""
-    pass
-
-
-class ListError(BaseError, TypeError):
-    """The argument(s) must be list type."""
-    pass
-
-
-class TupleError(BaseError, TypeError):
-    """The argument(s) must be tuple type."""
+class ProtocolUnbound(BaseError, TypeError):
+    """Protocol slice unbound."""
     pass
 
 
 ##############################################################################
 # AttributeError session.
 ##############################################################################
-
-class FormatError(BaseError, AttributeError):
-    """Unknow format(s)."""
-    pass
 
 class UnsupportedCall(BaseError, AttributeError):
     """Unsupported function or property call."""
@@ -107,4 +69,13 @@ class UnsupportedCall(BaseError, AttributeError):
 
 class FileError(BaseError, IOError):
     """Wrong file format."""
+    pass
+
+
+##############################################################################
+# IndexError session.
+##############################################################################
+
+class ProtocolNotFound(BaseError, IndexError):
+    """Protocol not found in ProtoChain."""
     pass

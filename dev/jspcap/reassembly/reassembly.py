@@ -11,6 +11,7 @@ import copy
 
 
 from .utilities import Info
+from .validations import bool_check, dict_check, int_check
 
 
 ABCMeta = abc.ABCMeta
@@ -87,6 +88,7 @@ class Reassembly(object):
 
     # return datagram index
     def index(self, pkt_num):
+        int_check(pkt_num)
         for counter, datagram in enumerate(self.datagram):
             if pkt_num in datagram.index:
                 return counter
@@ -95,8 +97,7 @@ class Reassembly(object):
     # run automatically
     def run(self, packets):
         for packet in packets:
-            if not isinstance(packet, dict):
-                raise AssertionError
+            dict_check(packet)
             info = Info(packet)
             self.reassembly(info)
 
@@ -107,17 +108,13 @@ class Reassembly(object):
     # Not hashable
     __hash__ = None
 
-    def __new__(cls, *, strict=False):
-        self = super().__new__(cls)
-        return self
-
     def __init__(self, *, strict=False):
+        bool_check(strict)
         self._strflg = strict   # stirct mode flag
         self._buffer = dict()   # buffer field
         self._dtgram = tuple()  # reassembled datagram
 
     def __call__(self, packet_dict):
-        if not isinstance(packet_dict, dict):
-            raise AssertionError
+        dict_check(packet_dict)
         info = Info(packet_dict)
         self.reassembly(info)
