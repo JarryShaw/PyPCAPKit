@@ -126,9 +126,58 @@ TCP_OPT = {                         #   kind  length  type  process  comment    
 
 
 class TCP(Transport):
+    """This class implements Transmission Control Protocol.
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protochain']
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * layer -- str, `Transport`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+        * src -- int, source port
+        * dst -- int, destination port
 
+    Methods:
+        * read_tcp -- read Transmission Control Protocol (TCP)
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+        * _read_tcp_options -- read TCP option list
+        * _read_mode_donone -- read options request no process
+        * _read_mode_unpack -- read options request unpack process
+        * _read_mode_tsopt -- read Timestamps option
+        * _read_mode_pocsp -- read Partial Order Connection Service Profile Option
+        * _read_mode_acopt -- read Alternate Checksum Request Option
+        * _read_mode_qsopt -- read Quick-Start Response Option
+        * _read_mode_utopt -- read User Timeout Option
+        * _read_mode_tcpao -- read Authentication Option
+        * _read_mode_mptcp -- read Multipath TCP Option
+        * _read_mptcp_capable -- read Multipath Capable Option
+        * _read_mptcp_join -- read Join Connection Option
+        * _read_join_syn -- read Join Connection Option for Initial SYN
+        * _read_join_synack -- read Join Connection Option for Responding SYN/ACK
+        * _read_join_ack -- read Join Connection Option for Third ACK
+        * _read_mptcp_dss -- read Data Sequence Signal (Data ACK and Data Sequence Mapping) Option
+        * _read_mptcp_add -- read Add Address Option
+        * _read_addr_ipv4 -- read IPv4 address
+        * _read_addr_ipv6 -- read IPv6 address
+        * _read_mptcp_remove -- read Remove Address Option
+        * _read_mptcp_prio -- read Change Subflow Priority Option
+        * _read_mptcp_fail -- read Fallback Option
+        * _read_mptcp_fastclose -- read Fast Close Option
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -136,10 +185,6 @@ class TCP(Transport):
     @property
     def name(self):
         return 'Transmission Control Protocol'
-
-    @property
-    def info(self):
-        return self._info
 
     @property
     def length(self):
@@ -153,26 +198,8 @@ class TCP(Transport):
     def dst(self):
         return self._info.dstport
 
-    @property
-    def layer(self):
-        return self.__layer__
-
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None):
-        self._file = _file
-        self._info = Info(self.read_tcp(length))
-
-    def __len__(self):
-        return self._info.hdr_len
-
-    def __length_hint__(self):
-        return 20
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_tcp(self, length):
@@ -262,9 +289,33 @@ class TCP(Transport):
 
         if length is not None:
             length -= tcp['hdr_len']
-        return self._read_next_layer(tcp, None, length)
+        return self._decode_next_layer(tcp, None, length)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None):
+        self._file = _file
+        self._info = Info(self.read_tcp(length))
+
+    def __len__(self):
+        return self._info.hdr_len
+
+    def __length_hint__(self):
+        return 20
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
 
     def _read_tcp_options(self, _optl):
+        """Read TCP option list.
+
+        Keyword arguments:
+            * _optl -- int, length of option list
+
+        """
         counter = 0     # length of read option list
         options = dict( # dict of option data
             kind = tuple(),                             # option kind list
@@ -943,11 +994,13 @@ class TCP(Transport):
         return data
 
     def _read_addr_ipv4(self):
+        """Read IPv4 address."""
         byte = self._read_fileng(4)
         addr = '.'.join([str(_) for _ in byte])
         return addr
 
     def _read_addr_ipv6(self):
+        """Read IPv6 address."""
         adlt = []       # list of IPv6 hexadecimal address
         ctr_ = collections.defaultdict(int)
                         # counter for consecutive groups of zero value

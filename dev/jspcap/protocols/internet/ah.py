@@ -7,10 +7,38 @@
 
 
 from .ipsec import IPsec
+from ..exceptions import VersionError
 
 
 class AH(IPsec):
+    """This class implements Authentication Header.
 
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * layer -- str, `Internet`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+
+    Methods:
+        * read_ah -- read Authentication Header
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+        * _read_ip_seekset -- when fragmented, read payload throughout first
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -28,25 +56,7 @@ class AH(IPsec):
         return self._info.next
 
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __new__(cls, _file, length=None, *, version=4):
-        self = super().__new__(cls, _file)
-        return self
-
-    def __init__(self, _file, length=None, *, version=4):
-        self._file = _file
-        self._info = Info(self.read_ah(length, version))
-
-    def __len__(self):
-        return self._info.len
-
-    def __length_hint__(self):
-        return 20
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_ah(self, length, version):
@@ -99,10 +109,27 @@ class AH(IPsec):
 
         if version == 6:
             _plen = 8 - (_vlen % 8)
-        else:   # version == 4
+        elif version == 4:
             _plen = 4 - (_tlen % 4)
+        else:
+            raise VersionError(f'Unknown IP version {version}')
+
         if _plen:   # explicit padding in need
             ah['padding'] = self._read_fileng(_plen)
         if length is not None:
             length -= ah['hdr_len']
-        return self._read_next_layer(ah, _next, length)
+        return self._decode_next_layer(ah, _next, length)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None, *, version=4):
+        self._file = _file
+        self._info = Info(self.read_ah(length, version))
+
+    def __len__(self):
+        return self._info.len
+
+    def __length_hint__(self):
+        return 20

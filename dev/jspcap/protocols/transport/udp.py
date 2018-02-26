@@ -11,9 +11,35 @@ from ..utilities import Info
 
 
 class UDP(Transport):
+    """This class implements Transmission Control Protocol.
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protochain']
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * layer -- str, `Transport`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+        * src -- int, source port
+        * dst -- int, destination port
 
+    Methods:
+        * read_udp -- read User Datagram Protocol (UDP)
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -21,10 +47,6 @@ class UDP(Transport):
     @property
     def name(self):
         return 'User Datagram Protocol'
-
-    @property
-    def info(self):
-        return self._info
 
     @property
     def length(self):
@@ -38,26 +60,8 @@ class UDP(Transport):
     def dst(self):
         return self._info.dst
 
-    @property
-    def layer(self):
-        return self.__layer__
-
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None):
-        self._file = _file
-        self._info = Info(self.read_udp(length))
-
-    def __len__(self):
-        return 8
-
-    def __length_hint__(self):
-        return 8
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_udp(self, length):
@@ -98,4 +102,18 @@ class UDP(Transport):
         )
 
         length = udp['len'] - 8
-        return self._read_next_layer(udp, None, length)
+        return self._decode_next_layer(udp, None, length)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None):
+        self._file = _file
+        self._info = Info(self.read_udp(length))
+
+    def __len__(self):
+        return 8
+
+    def __length_hint__(self):
+        return 8

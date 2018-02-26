@@ -60,6 +60,10 @@ class Header(Protocol):
     def protocol(self):
         return self._info.network
 
+    @property
+    def protochain(self):
+        raise UnsupportedCall("'Header' object has no attribute 'protochain'")
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -124,7 +128,7 @@ class Header(Protocol):
     def _read_protos(self, size):
         """Read next layer protocol type.
 
-        Keyword arguemnts:
+        Keyword arguments:
             size  -- int, buffer size
 
         """

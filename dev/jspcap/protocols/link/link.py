@@ -43,13 +43,15 @@ class Link(Protocol):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
-        * length -- int, header length of corresponding protocol
         * layer -- str, `Link`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
 
     Utilities:
         * _read_protos -- read next layer protocol type
@@ -71,16 +73,6 @@ class Link(Protocol):
     def layer(self):
         return self.__layer__
 
-    # next layer procotol
-    @property
-    def protocol(self):
-        return None
-
-    # protocol chain
-    @property
-    def protochain(self):
-        return self._protos
-
     ##########################################################################
     # Utilities.
     ##########################################################################
@@ -88,7 +80,7 @@ class Link(Protocol):
     def _read_protos(self, size):
         """Read next layer protocol type.
 
-        Keyword arguemnts:
+        Keyword arguments:
             size  -- int, buffer size
 
         """
@@ -99,7 +91,7 @@ class Link(Protocol):
     def _import_next_layer(self, proto, length):
         """Import next layer extractor.
 
-        Keyword arguemnts:
+        Keyword arguments:
             proto -- str, next layer protocol name
             length -- int, valid (not padding) length
 

@@ -41,9 +41,36 @@ SOCK = {
 
 
 class IPX(Internet):
+    """This class implements Internetwork Packet Exchange.
 
-    __all__ = ['name', 'info', 'length', 'src', 'dst', 'layer', 'protocol', 'protochain']
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * layer -- str, `Internet`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+        * src -- Info, source IPX address
+        * dst -- Info, destination IPX address
 
+    Methods:
+        * read_ipx -- read Internetwork Packet Exchange
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+        * _read_ipx_address -- read IPX address field
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -53,12 +80,12 @@ class IPX(Internet):
         return 'Internetwork Packet Exchange'
 
     @property
-    def info(self):
-        return self._info
-
-    @property
     def length(self):
         return 30
+
+    @property
+    def protocol(self):
+        return self._info.type
 
     @property
     def src(self):
@@ -68,30 +95,8 @@ class IPX(Internet):
     def dst(self):
         return self._info.dst.addr
 
-    @property
-    def layer(self):
-        return self.__layer__
-
-    @property
-    def protocol(self):
-        return self._info.type
-
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None):
-        self._file = _file
-        self._info = Info(self.read_ipx(length))
-
-    def __len__(self):
-        return 30
-
-    def __length_hint__(self):
-        return 30
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_ipx(self, length):
@@ -126,6 +131,24 @@ class IPX(Internet):
         proto = ipx['type']
         length = ipx['len'] - 30
         return self._read_next_layer(ipx, proto, length)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None):
+        self._file = _file
+        self._info = Info(self.read_ipx(length))
+
+    def __len__(self):
+        return 30
+
+    def __length_hint__(self):
+        return 30
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
 
     def _read_ipx_address(self):
         """Read IPX address field.

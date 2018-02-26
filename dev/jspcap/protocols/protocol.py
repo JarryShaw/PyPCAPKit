@@ -31,10 +31,13 @@ class Protocol:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
         * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
 
     Utilities:
         * _read_protos -- read next layer protocol type
@@ -65,6 +68,19 @@ class Protocol:
     @abstractproperty
     def length(self):
         pass
+
+    # name of next layer protocol
+    @property
+    def protocol(self):
+        try:
+            return self._protos[1]
+        except IndexError:
+            return None
+
+    # protocol chain of current instance
+    @property
+    def protochain(self):
+        return self._protos
 
     ##########################################################################
     # Data models.
@@ -123,7 +139,7 @@ class Protocol:
     def _read_protos(self, size):
         """Read next layer protocol type.
 
-        Keyword arguemnts:
+        Keyword arguments:
             size  -- int, buffer size
 
         """
@@ -136,7 +152,7 @@ class Protocol:
     def _read_unpack(self, size=1, *, sign=False, lilendian=False):
         """Read bytes and unpack for integers.
 
-        Keyword arguemnts:
+        Keyword arguments:
             size       -- int, buffer size (default is 1)
             sign       -- bool, signed flag (default is False)
                            <keyword> True / False
@@ -165,7 +181,7 @@ class Protocol:
     def _read_binary(self, size=1):
         """Read bytes and convert into binaries.
 
-        Keyword arguemnts:
+        Keyword arguments:
             size  -- int, buffer size (default is 1)
 
         """
@@ -178,7 +194,7 @@ class Protocol:
     def _decode_next_layer(self, dict_, proto=None, length=None):
         """Decode next layer protocol.
 
-        Keyword arguemnts:
+        Keyword arguments:
             dict_ -- dict, info buffer
             proto -- str, next layer protocol name
             length -- int, valid (not padding) length
@@ -187,10 +203,7 @@ class Protocol:
         next_ = self._import_next_layer(proto, length)
 
         # make next layer protocol name
-        if proto is None:
-            proto = ''
-        name_ = proto.lower() or 'raw'
-        proto = proto or None
+        name_ = str(proto  or 'Raw').lower()
 
         # write info and protocol chain into dict
         dict_[name_] = next_[0]
@@ -200,7 +213,7 @@ class Protocol:
     def _import_next_layer(self, proto, length=None):
         """Import next layer extractor.
 
-        Keyword arguemnts:
+        Keyword arguments:
             proto -- str, next layer protocol name
             length -- int, valid (not padding) length
 

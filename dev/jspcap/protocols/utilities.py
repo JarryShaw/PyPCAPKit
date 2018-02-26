@@ -200,24 +200,21 @@ class ProtoChain(tuple):
         return ':'.join(self.__data__)
 
     def __getitem__(self, key):
-        try:
-            if isinstance(key, slice):
-                start = key.start
-                stop = key.stop
-                step = key.step
+        if isinstance(key, slice):
+            start = key.start
+            stop = key.stop
+            step = key.step
 
-                if not isinstance(start, numbers.Number):
-                    start = self.index(start)
-                if not isinstance(stop, numbers.Number):
-                    stop = self.index(stop)
-                key = slice(start, stop, step)
-            else:
-                key = self.index(key)
-            return self.__data__[key]
-        except (ValueError, IndexError) as index_error:
-            raise index_error
-        except TypeError as type_error:
-            raise type_error
+            if not isinstance(start, numbers.Number):
+                start = self.index(start)
+            if not isinstance(stop, numbers.Number):
+                stop = self.index(stop)
+            int_check(start, stop, step)
+            key = slice(start, stop, step)
+        else:
+            int_check(key)
+            key = self.index(key)
+        return self.__data__[key]
 
     def __iter__(self):
         return iter(self.__data__)

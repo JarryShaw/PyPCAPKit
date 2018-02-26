@@ -34,8 +34,8 @@ class OSPF(Link):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
-        * length -- int, header length of corresponding protocol
         * layer -- str, `Link`
+        * length -- int, header length of corresponding protocol
         * protochain -- ProtoChain, protocol chain of current instance
         * type -- str, OSPF packet type
 
@@ -45,6 +45,7 @@ class OSPF(Link):
     Attributes:
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
 
     Utilities:
         * _read_protos -- read next layer protocol type
@@ -133,7 +134,7 @@ class OSPF(Link):
             ospf['auth'] = self._read_fileng(8)
 
         length = ospf['len'] - 24
-        return self._read_next_layer(ospf, length)
+        return self._decode_next_layer(ospf, length)
 
     ##########################################################################
     # Data models.

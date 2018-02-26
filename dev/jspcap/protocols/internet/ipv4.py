@@ -50,7 +50,38 @@ TOS_ECN = {
 
 
 class IPv4(IP):
+    """This class implements Internet Protocol version 4.
 
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * layer -- str, `Internet`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+        * src -- str, source IP address
+        * dst -- str, destination IP address
+
+    Methods:
+        * read_ipv4 -- read Internet Protocol version 4 (IPv4)
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+        * _read_ip_seekset -- when fragmented, read payload throughout first
+        * _read_ip_addr -- read IP address
+        * _read_ip_options -- read IP option list
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -68,21 +99,7 @@ class IPv4(IP):
         return self._info.proto
 
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None):
-        self._file = _file
-        self._info = Info(self.read_ipv4(length))
-
-    def __len__(self):
-        return self._info.hdr_len
-
-    def __length_hint__(self):
-        return 20
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_ipv4(self, length):
@@ -181,12 +198,37 @@ class IPv4(IP):
         proto = proto or None
         self._protos = ProtoChain(proto)
 
-        return self._read_next_layer(ipv4, _prot, raw_len)
+        return self._decode_next_layer(ipv4, _prot, raw_len)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None):
+        self._file = _file
+        self._info = Info(self.read_ipv4(length))
+
+    def __len__(self):
+        return self._info.hdr_len
+
+    def __length_hint__(self):
+        return 20
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
 
     def _read_ip_addr(self):
+        """Read IP address."""
         _byte = self._read_fileng(4)
         _addr = '.'.join([str(_) for _ in _byte])
         return _addr
 
     def _read_ip_options(self, size=None):
+        """Read IP option list.
+
+        Keyword arguments:
+            * size -- int, buffer size
+
+        """
         return self._read_fileng(size)

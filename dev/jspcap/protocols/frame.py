@@ -22,6 +22,7 @@ class Frame(Protocol):
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
         * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current frame
 
     Methods:
@@ -31,6 +32,7 @@ class Frame(Protocol):
     Attributes:
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
 
     Utilities:
         * _read_protos -- read next layer protocol type
@@ -52,10 +54,6 @@ class Frame(Protocol):
     @property
     def length(self):
         return 16
-
-    @property
-    def protochain(self):
-        return self._proto
 
     ##########################################################################
     # Methods.
@@ -157,29 +155,29 @@ class Frame(Protocol):
     def _decode_next_layer(self, dict_, length=None):
         """Decode next layer protocol.
 
-        Keyword arguemnts:
+        Keyword arguments:
             dict_ -- dict, info buffer
             proto -- str, next layer protocol name
             length -- int, valid (not padding) length
 
         """
         # make next layer protocol name
-        proto = str(self._prot).lower().replace('none', 'raw')
+        proto = str(self._prot or 'Raw').lower()
 
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
         info, protochain = self._import_next_layer(bytes_, length)
 
         # write info and protocol chain into dict
-        self._proto = ProtoChain(self._prot, protochain)
+        self._protos = ProtoChain(self._prot, protochain)
         dict_[proto] = info
-        dict_['protocols'] = self._proto.chain
+        dict_['protocols'] = self._protos.chain
         return dict_
 
     def _import_next_layer(self, file_, length):
         """Import next layer extractor.
 
-        Keyword arguemnts:
+        Keyword arguments:
             proto -- str, next layer protocol name
             length -- int, valid (not padding) length
 

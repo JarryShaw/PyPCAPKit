@@ -28,7 +28,39 @@ EXT_HDR = (
 )
 
 class IPv6(IP):
+    """This class implements Internet Protocol version 6.
 
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * layer -- str, `Internet`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+        * src -- str, source IP address
+        * dst -- str, destination IP address
+
+    Methods:
+        * read_ipv4 -- read Internet Protocol version 6 (IPv6)
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+        * _read_ip_seekset -- when fragmented, read payload throughout first
+        * _read_ip_hextet -- read first four hextets of IPv6
+        * _read_ip_addr -- read IP address
+        * _read_ip_options -- read IP option list
+
+    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -46,21 +78,7 @@ class IPv6(IP):
         return self._info.next
 
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None):
-        self._file = _file
-        self._info = Info(self.read_ipv6(length))
-
-    def __len__(self):
-        return self._info.hdr_len
-
-    def __length_hint__(self):
-        return 40
-
-    ##########################################################################
-    # Utilities.
+    # Methods.
     ##########################################################################
 
     def read_ipv6(self, length):
@@ -121,9 +139,28 @@ class IPv6(IP):
             dst = _dsta,
         )
 
-        return self._read_next_layer(ipv6, _next, length)
+        return self._decode_next_layer(ipv6, _next, length)
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __init__(self, _file, length=None):
+        self._file = _file
+        self._info = Info(self.read_ipv6(length))
+
+    def __len__(self):
+        return self._info.hdr_len
+
+    def __length_hint__(self):
+        return 40
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
 
     def _read_ip_hextet(self):
+        """Read first four hextets of IPv6."""
         _htet = self._read_fileng(4).hex()
         _vers = _htet[0]                    # version number (6)
         _tcls = int(_htet[0:2], base=16)    # traffic class
@@ -132,6 +169,7 @@ class IPv6(IP):
         return (_vers, _tcls, _flow)
 
     def _read_ip_addr(self):
+        """Read IP address."""
         adlt = []       # list of IPv6 hexadecimal address
         ctr_ = collections.defaultdict(int)
                         # counter for consecutive groups of zero value
@@ -170,7 +208,15 @@ class IPv6(IP):
         addr = ':'.join(adlt)
         return addr
 
-    def _read_next_layer(self, ipv6, proto=None, length=None):
+    def _decode_next_layer(self, ipv6, proto=None, length=None):
+        """Decode next layer extractor.
+
+        Keyword arguments:
+            ipv6 -- dict, info buffer
+            proto -- str, next layer protocol name
+            length -- int, valid (not padding) length
+
+        """
         # recurse if next header is an extensive header
         hdr_len = 40                # header length
         raw_len = ipv6['payload']   # payload length
@@ -195,4 +241,4 @@ class IPv6(IP):
 
         # update next header
         ipv6['proto'] = proto
-        return super()._read_next_layer(ipv6, proto, raw_len)
+        return super()._decode_next_layer(ipv6, proto, raw_len)

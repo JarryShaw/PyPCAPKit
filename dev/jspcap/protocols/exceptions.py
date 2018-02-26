@@ -79,3 +79,12 @@ class FileError(BaseError, IOError):
 class ProtocolNotFound(BaseError, IndexError):
     """Protocol not found in ProtoChain."""
     pass
+
+
+##############################################################################
+# ValueError session.
+##############################################################################
+
+class VersionError(BaseError, ValueError):
+    """Unknown IP version."""
+    pass

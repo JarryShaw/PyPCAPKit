@@ -42,12 +42,13 @@ class ARP(Link):
      Properties:
          * name -- str, name of corresponding procotol
          * info -- Info, info dict of current instance
-         * length -- int, header length of corresponding protocol
          * layer -- str, `Link`
+         * length -- int, header length of corresponding protocol
+         * protocol -- str, name of next layer protocol
          * protochain -- ProtoChain, protocol chain of current instance
-         * protocol -- tuple(str, str), hardware & protocol type
          * src -- tuple(str, str), sender hardware & protocol address
          * dst -- tuple(str, str), target hardware & protocol address
+         * type -- tuple(str, str), hardware & protocol type
 
     Methods:
         * read_arp -- read Address Resolution Protocol
@@ -55,6 +56,7 @@ class ARP(Link):
      Attributes:
          * _file -- BytesIO, bytes to be extracted
          * _info -- Info, info dict of current instance
+         * _protos -- ProtoChain, protocol chain of current instance
 
      Utilities:
          * _read_protos -- read next layer protocol type
@@ -80,16 +82,16 @@ class ARP(Link):
         return self._info.len
 
     @property
-    def protocol(self):
-        return (self._info.htype, self._info.ptype)
-
-    @property
     def src(self):
         return (self._info.sha, self._info.spa)
 
     @property
     def dst(self):
         return (self._info.tha, self._info.tpa)
+
+    @property
+    def type(self):
+        return (self._info.htype, self._info.ptype)
 
     ##########################################################################
     # Methods.
@@ -166,7 +168,7 @@ class ARP(Link):
     def _read_addr_resolve(self, length, htype):
         """Resolve MAC address according to protocol.
 
-        Keyword arguemnts:
+        Keyword arguments:
             * length -- int, hardware address length
             * htype -- int, hardware type
 
@@ -181,7 +183,7 @@ class ARP(Link):
     def _read_proto_resolve(self, length, ptype):
         """Resolve IP address according to protocol.
 
-        Keyword arguemnts:
+        Keyword arguments:
             * length -- int, protocol address length
             * hptype -- int, protocol type
 

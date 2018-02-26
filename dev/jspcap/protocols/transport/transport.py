@@ -55,29 +55,52 @@ TP_PROTO = {
 
 
 class Transport(Protocol):
+    """Abstract base class for transport layer protocol family.
 
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * layer -- str, `Transport`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+
+    """
     __layer__ = 'Transport'
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
+    # protocol layer
     @property
-    def protochain(self):
-        return self._protos
-
-    ##########################################################################
-    # Data modules.
-    ##########################################################################
-
-    def __new__(cls, _file, length=None):
-        self = super().__new__(cls, _file)
-        return self
+    def layer(self):
+        return self.__layer__
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
     def _import_next_layer(self, proto, length):
+        """Import next layer extractor.
+
+        Keyword arguments:
+            proto -- str, next layer protocol name
+            length -- int, valid (not padding) length
+
+        """
         data = self._file.read(*[length]) or None
         return data, None

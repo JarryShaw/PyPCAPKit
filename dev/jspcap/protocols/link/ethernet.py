@@ -19,8 +19,8 @@ class Ethernet(Link):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
-        * length -- int, header length of corresponding protocol
         * layer -- str, `Link`
+        * length -- int, header length of corresponding protocol
         * protocol -- str, next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
         * src -- str, source mac address
@@ -29,6 +29,7 @@ class Ethernet(Link):
     Attributes:
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
 
     Utilities:
         * _read_protos -- read next layer protocol type
@@ -47,10 +48,6 @@ class Ethernet(Link):
     @property
     def name(self):
         return 'Ethernet Protocol'
-
-    @property
-    def info(self):
-        return self._info
 
     @property
     def length(self):

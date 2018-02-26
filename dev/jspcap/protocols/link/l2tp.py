@@ -16,10 +16,12 @@ class L2TP(Link):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
-        * length -- int, header length of corresponding protocol
         * layer -- str, `Link`
-        * protochain -- ProtoChain, protocol chain of current instance
+        * length -- int, header length of corresponding protocol
         * type -- str, L2TP packet type
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+        * type -- str, L2TP type
 
     Methods:
         * read_l2tp -- read Layer Two Tunneling Protocol
@@ -27,6 +29,7 @@ class L2TP(Link):
     Attributes:
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
 
     Utilities:
         * _read_protos -- read next layer protocol type
@@ -128,7 +131,7 @@ class L2TP(Link):
             l2tp['hdr_len'] += _size * 8
         if length is not None:
             length -= l2tp['hdr_len']
-        return self._read_next_layer(l2tp, length)
+        return self._decode_next_layer(l2tp, length)
 
     ##########################################################################
     # Data models.

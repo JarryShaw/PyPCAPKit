@@ -41,46 +41,71 @@ ETHERTYPE = {
 
 
 class Internet(Protocol):
+    """Abstract base class for internet layer protocol family.
 
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * layer -- str, `Internet`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+
+    """
     __layer__ = 'Internet'
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
+    # protocol layer
     @property
-    def protochain(self):
-        return self._protos
-
-    ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    def _read_protos(self, size):
-        _byte = self._read_unpack(size)
-        _prot = TP_PROTO.get(_byte)
-        return _prot
-
-    ##########################################################################
-    # Data modules.
-    ##########################################################################
-
-    def __new__(cls, _file, length=None):
-        self = super().__new__(cls, _file)
-        return self
+    def layer(self):
+        return self.__layer__
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_next_layer(self, dict_, proto=None, length=None, *, version=4):
+    def _read_protos(self, size):
+        """Read next layer protocol type.
+
+        Keyword arguments:
+            size  -- int, buffer size
+
+        """
+        _byte = self._read_unpack(size)
+        _prot = TP_PROTO.get(_byte)
+        return _prot
+
+    def _decode_next_layer(self, dict_, proto=None, length=None, *, version=4):
+        """Decode next layer extractor.
+
+        Keyword arguments:
+            dict_ -- dict, info buffer
+            proto -- str, next layer protocol name
+            length -- int, valid (not padding) length
+            version -- int, IP version
+                        <4 / 6>
+
+        """
         next_ = self._import_next_layer(proto, length, version=version)
 
         # make next layer protocol name
-        if proto is None:
-            proto = ''
-        name_ = proto.lower() or 'raw'
-        proto = proto or None
+        name_ = str(proto  or 'Raw').lower()
 
         # write info and protocol chain into dict
         dict_[name_] = next_[0]
@@ -88,6 +113,21 @@ class Internet(Protocol):
         return dict_
 
     def _import_next_layer(self, proto, length, version):
+        """Import next layer extractor.
+
+        Keyword arguments:
+            proto -- str, next layer protocol name
+            length -- int, valid (not padding) length
+            version -- int, IP version (4/6)
+
+        Protocols:
+            * IPv4 -- internet layer
+            * IPv6 -- internet layer
+            * AH -- internet layer
+            * TCP -- transport layer
+            * UDP -- transport layer
+
+        """
         if proto == 'IPv4':
             from .ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
