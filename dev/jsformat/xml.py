@@ -23,15 +23,15 @@ HEADER_END = '''\
 '''
 
 MAGIC_TYPES = dict(
-    list = lambda self_, text, file_: self_._append_array(text, file_),     # array
-    tuple = lambda self_, text, file_: self_._append_array(text, file_),  # array
-    dict = lambda self_, text, file_: self_._append_dict(text, file_),      # dict
-    str = lambda self_, text, file_: self_._append_string(text, file_),     # string
-    bytes = lambda self_, text, file_: self_._append_data(text, file_),     # data
-    datetime = lambda self_, text, file_: self_._append_date(text, file_),  # date
-    int = lambda self_, text, file_: self_._append_integer(text, file_),    # integer
-    float = lambda self_, text, file_: self_._append_real(text, file_),     # real
-    bool = lambda self_, text, file_: self_._append_bool(text, file_),      # true | false
+    list = lambda self, text, file: self._append_array(text, file),     # array
+    tuple = lambda self, text, file: self._append_array(text, file),  # array
+    dict = lambda self, text, file: self._append_dict(text, file),      # dict
+    str = lambda self, text, file: self._append_string(text, file),     # string
+    bytes = lambda self, text, file: self._append_data(text, file),     # data
+    datetime = lambda self, text, file: self._append_date(text, file),  # date
+    int = lambda self, text, file: self._append_integer(text, file),    # integer
+    float = lambda self, text, file: self._append_real(text, file),     # real
+    bool = lambda self, text, file: self._append_bool(text, file),      # true | false
 )
 
 

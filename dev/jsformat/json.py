@@ -19,16 +19,16 @@ HEADER_START = '{\n'
 HEADER_END = '\n}'
 
 MAGIC_TYPES = dict(
-    str = lambda self_, text, file_: self_._append_string(text, file_),     # string
-    bytes = lambda self_, text, file_: self_._append_bytes(text, file_),    # string
-    datetime = lambda self_, text, file_: self_._append_date(text, file_),  # string
-    int = lambda self_, text, file_: self_._append_number(text, file_),     # number
-    float = lambda self_, text, file_: self_._append_number(text, file_),   # number
-    dict = lambda self_, text, file_: self_._append_object(text, file_),    # object
-    list = lambda self_, text, file_: self_._append_array(text, file_),     # array
-    tuple = lambda self_, text, file_: self_._append_array(text, file_),    # array
-    bool = lambda self_, text, file_: self_._append_bool(text, file_),      # true | false
-    NoneType = lambda self_, text, file_: self_._append_none(text, file_),  # null
+    str = lambda self, text, file: self._append_string(text, file),     # string
+    bytes = lambda self, text, file: self._append_bytes(text, file),    # string
+    datetime = lambda self, text, file: self._append_date(text, file),  # string
+    int = lambda self, text, file: self._append_number(text, file),     # number
+    float = lambda self, text, file: self._append_number(text, file),   # number
+    dict = lambda self, text, file: self._append_object(text, file),    # object
+    list = lambda self, text, file: self._append_array(text, file),     # array
+    tuple = lambda self, text, file: self._append_array(text, file),    # array
+    bool = lambda self, text, file: self._append_bool(text, file),      # true | false
+    NoneType = lambda self, text, file: self._append_none(text, file),  # null
 )
 
 

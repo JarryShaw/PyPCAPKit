@@ -21,16 +21,16 @@ TEMP_BRANCH = '  |   '
 TEMP_SPACES = '      '
 
 MAGIC_TYPES = dict(
-    dict = lambda self_, text, file_: self_._append_branch(text, file_),    # branch
-    list = lambda self_, text, file_: self_._append_array(text, file_),     # array
-    tuple = lambda self_, text, file_: self_._append_array(text, file_),    # array
-    str = lambda self_, text, file_: self_._append_string(text, file_),     # string
-    bytes = lambda self_, text, file_: self_._append_bytes(text, file_),    # string
-    datetime = lambda self_, text, file_: self_._append_date(text, file_),  # string
-    int = lambda self_, text, file_: self_._append_number(text, file_),     # number
-    float = lambda self_, text, file_: self_._append_number(text, file_),   # number
-    bool = lambda self_, text, file_: self_._append_bool(text, file_),      # True | False
-    NoneType = lambda self_, text, file_: self_._append_none(text, file_),  # N/A
+    dict = lambda self, text, file: self._append_branch(text, file),    # branch
+    list = lambda self, text, file: self._append_array(text, file),     # array
+    tuple = lambda self, text, file: self._append_array(text, file),    # array
+    str = lambda self, text, file: self._append_string(text, file),     # string
+    bytes = lambda self, text, file: self._append_bytes(text, file),    # string
+    datetime = lambda self, text, file: self._append_date(text, file),  # string
+    int = lambda self, text, file: self._append_number(text, file),     # number
+    float = lambda self, text, file: self._append_number(text, file),   # number
+    bool = lambda self, text, file: self._append_bool(text, file),      # True | False
+    NoneType = lambda self, text, file: self._append_none(text, file),  # N/A
 )
 
 
