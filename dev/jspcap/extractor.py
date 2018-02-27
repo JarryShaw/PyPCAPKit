@@ -122,13 +122,81 @@ class Extractor:
         return frame
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def make_name(cls, fin, fout, fmt, extension):
+        fmt_none = (fmt is None)
+        if not fmt_none:
+            str_check(fmt)
+
+        if fin is None:
+            ifnm = 'in.pcap'
+        else:
+            str_check(fin)
+            ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
+
+        if fout is None:
+            if fmt_none:
+                raise FormatError('Output format unspecified.')
+            else:
+                if fmt == 'html':   ext = 'js'
+                elif fmt == 'tree': ext = 'txt'
+                else:               ext = fmt
+                ofnm = 'out.{ext}'.format(ext=ext)
+        else:
+            str_check(fout)
+            ofmt = FILE.match(fout)
+            if ofmt is None:
+                if fmt_none:
+                    raise FormatError('Output format unspecified.')
+                else:
+                    if extension:
+                        if fmt == 'html':   ext = 'js'
+                        elif fmt == 'tree': ext = 'txt'
+                        else:               ext = fmt
+                        ofnm = f'{fout}.{ext}'
+                    else:
+                        ofnm = fout
+            else:
+                ofnm = fout
+                fmt = fmt or ofmt.group('exts')
+
+        return ifnm, ofnm, fmt
+
+    def record_header(self):
+        """Read global header.
+
+        - Extract global header.
+        - Make Info object out of header properties.
+        - Append Info.
+        - Write plist file.
+
+        """
+        self._gbhdr = Header(self._ifile)
+        self._dlink = self._gbhdr.protocol
+        self._vinfo = self._gbhdr.info
+        self._ofile(self._gbhdr.info, name='Global Header')
+
+    def record_frames(self):
+        if self._auto:
+            while True:
+                try:
+                    self._read_frame()
+                except EOFError:
+                    # quit when EOF
+                    break
+            self._ifile.close()
+
+    ##########################################################################
     # Data modules.
     ##########################################################################
 
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True, files=False
+    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True, files=False,
                     extension=True, ip=False, ipv4=False, ipv6=False, tcp=False):
         """Initialise PCAP Reader.
 
@@ -210,74 +278,6 @@ class Extractor:
                 raise error
 
     ##########################################################################
-    # Methods.
-    ##########################################################################
-
-    @classmethod
-    def make_name(cls, fin, fout, fmt, extension):
-        fmt_none = (fmt is None)
-        if not fmt_none:
-            str_check(fmt)
-
-        if fin is None:
-            ifnm = 'in.pcap'
-        else:
-            str_check(fin)
-            ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
-
-        if fout is None:
-            if fmt_none:
-                raise FormatError('Output format unspecified.')
-            else:
-                if fmt == 'html':   ext = 'js'
-                elif fmt == 'tree': ext = 'txt'
-                else:               ext = fmt
-                ofnm = 'out.{ext}'.format(ext=ext)
-        else:
-            str_check(fout)
-            ofmt = FILE.match(fout)
-            if ofmt is None:
-                if fmt_none:
-                    raise FormatError('Output format unspecified.')
-                else:
-                    if extension:
-                        if fmt == 'html':   ext = 'js'
-                        elif fmt == 'tree': ext = 'txt'
-                        else:               ext = fmt
-                        ofnm = f'{fout}.{ext}'
-                    else:
-                        ofnm = fout
-            else:
-                ofnm = fout
-                fmt = fmt or ofmt.group('exts')
-
-        return ifnm, ofnm, fmt
-
-    def record_header(self):
-        """Read global header.
-
-        - Extract global header.
-        - Make Info object out of header properties.
-        - Append Info.
-        - Write plist file.
-
-        """
-        self._gbhdr = Header(self._ifile)
-        self._dlink = self._gbhdr.protocol
-        self._vinfo = self._gbhdr.info
-        self._ofile(self._gbhdr.info, name='Global Header')
-
-    def record_frames(self):
-        if self._auto:
-            while True:
-                try:
-                    self._read_frame()
-                except EOFError:
-                    # quit when EOF
-                    break
-            self._ifile.close()
-
-    ##########################################################################
     # Utilities.
     ##########################################################################
 
@@ -292,6 +292,9 @@ class Extractor:
         """
         # read frame header
         frame = Frame(self._ifile, num=self._frnum, proto=self._dlink)
+        # with open('sample/out', 'a') as file:
+        #     print(self._frnum, frame.protochain)
+        #     file.write(f'{self._frnum} {frame.protochain}\n')
 
         # write plist
         frnum = 'Frame {fnum}'.format(fnum=self._frnum)

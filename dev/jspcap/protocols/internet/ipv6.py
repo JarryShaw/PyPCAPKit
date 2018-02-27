@@ -221,9 +221,6 @@ class IPv6(IP):
         hdr_len = 40                # header length
         raw_len = ipv6['payload']   # payload length
         while proto in EXT_HDR:
-            hdr_len += next_.hdr_len
-            raw_len -= next_.hdr_len
-
             # break & keep original data after fragment header
             if proto == 'IPv6-Frag':
                 ipv6 = self._read_ip_seekset(ipv6, hdr_len, raw_len)
@@ -233,7 +230,13 @@ class IPv6(IP):
             name_ = proto.replace('IPv6-', '').lower()
             next_ = self._import_next_layer(proto)
             ipv6[name_] = next_[0]
+            if next_[1] is None:
+                break
             proto = next_[0].next
+
+            # update header & payload length
+            hdr_len += next_[0].hdr_len
+            raw_len -= next_[0].hdr_len
 
         # record real header & payload length (headers exclude)
         ipv6['hdr_len'] = hdr_len

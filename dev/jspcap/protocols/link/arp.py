@@ -3,6 +3,7 @@
 
 
 import collections
+import textwrap
 
 
 # Address Resolution Protocol
@@ -120,7 +121,7 @@ class ARP(Link):
         _shwa = self._read_addr_resolve(_hlen, _hwty)
         _spta = self._read_proto_resolve(_plen, _ptty)
         _thwa = self._read_addr_resolve(_hlen, _hwty)
-        _hpta = self._read_proto_resolve(_plen, _ptty)
+        _tpta = self._read_proto_resolve(_plen, _ptty)
 
         if _oper in (5, 6, 7):
             self._name = 'Dynamic Reverse Address Resolution Protocol'
@@ -142,7 +143,7 @@ class ARP(Link):
             len = 8 + _hlen * 2 + _plen * 2,
         )
 
-        proto = arp['ptype']
+        proto = None
         if length is not None:
             length -= arp['len']
         return self._decode_next_layer(arp, proto, length)

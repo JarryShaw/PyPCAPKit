@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import sys
 import traceback
 
 
@@ -87,6 +88,10 @@ class TupleError(BaseError, TypeError):
     """The argument(s) must be tuple type."""
     pass
 
+class ProtocolUnbound(BaseError, TypeError):
+    """Protocol slice unbound."""
+    pass
+
 
 ##############################################################################
 # AttributeError session.
@@ -107,4 +112,26 @@ class UnsupportedCall(BaseError, AttributeError):
 
 class FileError(BaseError, IOError):
     """Wrong file format."""
+    pass
+
+
+##############################################################################
+# IndexError session.
+##############################################################################
+
+class ProtocolNotFound(BaseError, IndexError):
+    """Protocol not found in ProtoChain."""
+    pass
+
+
+##############################################################################
+# ValueError session.
+##############################################################################
+
+class VersionError(BaseError, ValueError):
+    """Unknown IP version."""
+    pass
+
+class IndexNotFound(BaseError, ValueError):
+    """Protocol not in ProtoChain."""
     pass

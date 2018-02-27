@@ -112,7 +112,7 @@ class Internet(Protocol):
         self._protos = ProtoChain(proto, next_[1])
         return dict_
 
-    def _import_next_layer(self, proto, length, version):
+    def _import_next_layer(self, proto, length=None, version=4):
         """Import next layer extractor.
 
         Keyword arguments:

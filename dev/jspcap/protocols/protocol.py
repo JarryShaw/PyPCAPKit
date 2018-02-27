@@ -167,7 +167,7 @@ class Protocol:
         elif size == 1: kind = 'b' if sign else 'B' # unpack to 1-byte integer (char)
         else:           kind = None                 # do not unpack
 
-        if format_ is None:
+        if kind is None:
             buf = self._file.read(size)
         else:
             try:
@@ -175,7 +175,7 @@ class Protocol:
                 mem = self._file.read(size)
                 buf = struct.unpack(fmt, mem)[0]
             except struct.error:
-                return mem
+                return None
         return buf
 
     def _read_binary(self, size=1):

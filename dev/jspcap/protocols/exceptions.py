@@ -2,89 +2,22 @@
 # -*- coding: utf-8 -*-
 
 
-import traceback
+# TypeError session
+from ..exceptions import DigitError, IntError, RealError, ComplexError, \
+                        BoolError, BytesError, StringError, DictError, \
+                        ListError, TupleError, ProtocolUnbound
 
+# AttributeError session
+from ..exceptions import FormatError, UnsupportedCall
 
-# user defined exceptions
-# show refined infomation when exceptions raised
+# IOError session
+from ..exceptions import FileError
 
+# IndexError session
+from ..exceptions import ProtocolNotFound
 
-##############################################################################
-# BaseError (abc of exceptions) session.
-##############################################################################
+# ValueError session
+from ..exceptions import VersionError, IndexNotFound
 
-class BaseError(Exception):
-    """Base error class of all kinds.
-
-    Cautions:
-
-    * Turn off system-default traceback function by set `sys.tracebacklimit` to 0.
-    * But bugs appear in Python 3.6, so we have to set `sys.tracebacklimit` to None.
-    * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
-
-    """
-    def __init__(self, message):
-        tb = traceback.extract_stack()
-        for tbitem in tb:
-            if 'jspcap' in tbitem[0]:
-                break
-        index = tb.index(tbitem)
-
-        print('Traceback (most recent call last):')
-        traceback.print_stack(limit=-index)
-        sys.tracebacklimit = None
-        super().__init__(message)
-
-
-##############################################################################
-# TypeError session.
-##############################################################################
-
-class BoolError(BaseError, TypeError):
-    """The argument(s) must be bool type."""
-    pass
-
-
-class BytesError(BaseError, TypeError):
-    """The argument(s) must be bytes type."""
-    pass
-
-class ProtocolUnbound(BaseError, TypeError):
-    """Protocol slice unbound."""
-    pass
-
-
-##############################################################################
-# AttributeError session.
-##############################################################################
-
-class UnsupportedCall(BaseError, AttributeError):
-    """Unsupported function or property call."""
-    pass
-
-
-##############################################################################
-# IOError session.
-##############################################################################
-
-class FileError(BaseError, IOError):
-    """Wrong file format."""
-    pass
-
-
-##############################################################################
-# IndexError session.
-##############################################################################
-
-class ProtocolNotFound(BaseError, IndexError):
-    """Protocol not found in ProtoChain."""
-    pass
-
-
-##############################################################################
-# ValueError session.
-##############################################################################
-
-class VersionError(BaseError, ValueError):
-    """Unknown IP version."""
-    pass
+# Deprecated / Base classes
+from ..exceptions import BaseError

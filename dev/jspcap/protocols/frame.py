@@ -122,7 +122,7 @@ class Frame(Protocol):
             return self._info[key]
 
         # fetch slice start point from ProtoChain
-        proto = self._proto[key]
+        proto = self._protos[key]
         if not proto:
             raise ProtocolNotFound('ProtoChain index out of range')
         elif isinstance(proto, tuple):
@@ -131,11 +131,11 @@ class Frame(Protocol):
             else:
                 start = proto[0]
         else:
-            start = self._proto.index(proto)
+            start = self._protos.index(proto)
 
         # make return Info item
         dict_ = self._info.infotodict()
-        for (level, proto) in enumerate(self.proto):
+        for (level, proto) in enumerate(self._protos):
             proto = proto or 'raw'
             dict_ = dict_[proto.lower()]
             if level >= start:
@@ -146,7 +146,7 @@ class Frame(Protocol):
         return self._fnum
 
     def __contains__(self, name):
-        return ((name in self._info) or (name in self._proto))
+        return ((name in self._info) or (name in self._protos))
 
     ##########################################################################
     # Utilities.

@@ -19,6 +19,7 @@ test*.py
 *.pages
 
 deprecated/
+dev/sample/
 
 # Created by https://www.gitignore.io/api/macos,python
 
