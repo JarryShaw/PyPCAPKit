@@ -22,6 +22,7 @@ TEMP_SPACES = '      '
 
 MAGIC_TYPES = dict(
     dict = lambda self, text, file: self._append_branch(text, file),    # branch
+    Info = lambda self, text, file: self._append_branch(text, file),    # branch
     list = lambda self, text, file: self._append_array(text, file),     # array
     tuple = lambda self, text, file: self._append_array(text, file),    # array
     str = lambda self, text, file: self._append_string(text, file),     # string

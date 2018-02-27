@@ -24,8 +24,9 @@ HEADER_END = '''\
 
 MAGIC_TYPES = dict(
     list = lambda self, text, file: self._append_array(text, file),     # array
-    tuple = lambda self, text, file: self._append_array(text, file),  # array
+    tuple = lambda self, text, file: self._append_array(text, file),    # array
     dict = lambda self, text, file: self._append_dict(text, file),      # dict
+    Info = lambda self, text, file: self._append_dict(text, file),      # dict
     str = lambda self, text, file: self._append_string(text, file),     # string
     bytes = lambda self, text, file: self._append_data(text, file),     # data
     datetime = lambda self, text, file: self._append_date(text, file),  # date
