@@ -11,9 +11,7 @@ system('> sample/out')
 
 plist = Extractor(fin='sample/in.pcap', fout='sample/out.plist', fmt='plist')
 html = Extractor(fin='sample/in.pcap', fout='sample/out.js', fmt='html')
-tree = Extractor(
-        fin='sample/in.pcap', fout='sample/out.txt', fmt='tree', ip=True, tcp=True
-    )
+tree = Extractor(fin='sample/in.pcap', fout='sample/out.txt', fmt='tree', ip=True, tcp=True)
 json = Extractor(fin='sample/in.pcap', fout='sample/out.xml', fmt='xml')
 
 with open('sample/out', 'a') as file:

@@ -12,9 +12,6 @@
 *.pcap
 !in.pcap
 
-test*.py
-!test.py
-
 *.docx
 *.pages
 
