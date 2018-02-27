@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 
-import collections
 import struct
 
 
@@ -77,30 +76,30 @@ chksum_opt = {  # [RFC 1146]
 }
 
 mptcp_opt = {   # [RFC 6824]
-    0:  lambda self_, bits, size: self_._read_mptcp_capable(bits, size),    # MP_CAPABLE
-    1:  lambda self_, bits, size: self_._read_mptcp_join(bits, size),       # MP_JOIN
-    2:  lambda self_, bits, size: self_._read_mptcp_dss(bits, size),        # DSS
-    3:  lambda self_, bits, size: self_._read_mptcp_add(bits, size),        # ADD_ADDR
-    4:  lambda self_, bits, size: self_._read_mptcp_remove(bits, size),     # REMOVE_ADDR
-    5:  lambda self_, bits, size: self_._read_mptcp_prio(bits, size),       # MP_PRIO
-    6:  lambda self_, bits, size: self_._read_mptcp_fail(bits, size),       # MP_FAIL
-    7:  lambda self_, bits, size: self_._read_mptcp_fastclose(bits, size),  # MP_FASTCLOSE
+    0:  lambda self, bits, size: self._read_mptcp_capable(bits, size),      # MP_CAPABLE
+    1:  lambda self, bits, size: self._read_mptcp_join(bits, size),         # MP_JOIN
+    2:  lambda self, bits, size: self._read_mptcp_dss(bits, size),          # DSS
+    3:  lambda self, bits, size: self._read_mptcp_add(bits, size),          # ADD_ADDR
+    4:  lambda self, bits, size: self._read_mptcp_remove(bits, size),       # REMOVE_ADDR
+    5:  lambda self, bits, size: self._read_mptcp_prio(bits, size),         # MP_PRIO
+    6:  lambda self, bits, size: self._read_mptcp_fail(bits, size),         # MP_FAIL
+    7:  lambda self, bits, size: self._read_mptcp_fastclose(bits, size),    # MP_FASTCLOSE
 }
 
 process_opt = {
-    0:  lambda self_, size, name: self_._read_mode_donone(size, name),    # do nothing
-    1:  lambda self_, size, name: self_._read_mode_unpack(size, name),    # unpack according to size
-    2:  lambda self_, size, name: self_._read_mode_tsopt(size, name),     # Timestamps
-    3:  lambda self_, size, name: self_._read_mode_pocsp(size, name),     # POC Service Profile
-    4:  lambda self_, size, name: self_._read_mode_acopt(size, name),     # Alternate Checksum Request
-    5:  lambda self_, size, name: self_._read_mode_qsopt(size, name),     # Quick-Start Response
-    6:  lambda self_, size, name: self_._read_mode_utopt(size, name),     # User Timeout Option
-    7:  lambda self_, size, name: self_._read_mode_tcpao(size, name),     # TCP Authentication Option
-    8:  lambda self_, size, name: self_._read_mode_mptcp(size, name),     # Multipath TCP
+    0:  lambda self, size, kind: self._read_mode_donone(size, kind),    # do nothing
+    1:  lambda self, size, kind: self._read_mode_unpack(size, kind),    # unpack according to size
+    2:  lambda self, size, kind: self._read_mode_tsopt(size, kind),     # Timestamps
+    3:  lambda self, size, kind: self._read_mode_pocsp(size, kind),     # POC Service Profile
+    4:  lambda self, size, kind: self._read_mode_acopt(size, kind),     # Alternate Checksum Request
+    5:  lambda self, size, kind: self._read_mode_qsopt(size, kind),     # Quick-Start Response
+    6:  lambda self, size, kind: self._read_mode_utopt(size, kind),     # User Timeout Option
+    7:  lambda self, size, kind: self._read_mode_tcpao(size, kind),     # TCP Authentication Option
+    8:  lambda self, size, kind: self._read_mode_mptcp(size, kind),     # Multipath TCP
 }
 
 TCP_OPT = {                         #   kind  length  type  process  comment            name
-    0:  (F, 'eol'),                 #     0      -      -      -                [RFC 793] End of Option List
+    0:  (F, 'eool'),                #     0      -      -      -                [RFC 793] End of Option List
     1:  (F, 'nop'),                 #     1      -      -      -                [RFC 793] No-Operation
     2:  (T, 'mss', nm_len, 1),      #     2      4      H      1                [RFC 793] Maximum Segment Size
     3:  (T, 'ws', nm_len, 1),       #     3      3      B      1                [RFC 7323] Window Scale
@@ -285,7 +284,9 @@ class TCP(Transport):
 
         _optl = tcp['hdr_len'] - 20
         if _optl:
-            tcp['opt'] = self._read_tcp_options(_optl)
+            options = self._read_tcp_options(_optl)
+            tcp['opt'] = options[0]     # tuple of option acronyms
+            tcp.update(options[1])      # merge option info to buffer
 
         if length is not None:
             length -= tcp['hdr_len']
@@ -309,27 +310,26 @@ class TCP(Transport):
     # Utilities.
     ##########################################################################
 
-    def _read_tcp_options(self, _optl):
+    def _read_tcp_options(self, size):
         """Read TCP option list.
 
         Keyword arguments:
-            * _optl -- int, length of option list
+            * size -- int, length of option list
 
         """
-        counter = 0     # length of read option list
-        options = dict( # dict of option data
-            kind = tuple(),                             # option kind list
-            length = collections.defaultdict(tuple),    # option length dict
-        )
-        while counter < _optl:
+        counter = 0         # length of read option list
+        optkind = tuple()   # option kind list
+        options = dict()    # dict of option data
+
+        while counter < size:
             # get option kind
             kind = self._read_unpack(1)
 
             # fetch corresponding option tuple
             opts = TCP_OPT.get(kind)
             if opts is None:
-                len_ = _optl - counter
-                counter = _optl
+                len_ = size - counter
+                counter = size
                 options['Unknown'] = self._read_fileng(len_)
                 break
 
@@ -339,35 +339,47 @@ class TCP(Transport):
                 len_ = self._read_unpack(1)
                 byte = opts[2](len_)
                 if byte:    # check option process mode
-                    data = process_opt[opts[3]](self, byte, dscp)
+                    data = process_opt[opts[3]](self, byte, kind)
                 else:       # permission options (length is 2)
-                    data = True
+                    data = dict(
+                        kind = kind,    # option kind
+                        length = 2,     # option length
+                        flag = True,    # permission flag
+                    )
             else:           # 1-bytes options
                 len_ = 1
-                data = True
+                data = dict(
+                    kind = kind,    # option kind
+                    length = 1,     # option length
+                )
 
             # record option data
             counter += len_
-            options[dscp] = data
-            options['kind'] += (dscp,)
-            options['length'][dscp] += (len_,)
+            if dscp in optkind:
+                if isinstance(options[dscp], tuple):
+                    options[dscp] += (Info(data),)
+                else:
+                    options[dscp] = (Info(options[dscp]), Info(data))
+            else:
+                optkind += (dscp,)
+                options[dscp] = data
 
             # break when eol triggered
             if not kind:    break
 
         # get padding
-        if counter < _optl:
-            len_ = _optl - counter
+        if counter < size:
+            len_ = size - counter
             options['padding'] = self._read_fileng(len_)
 
-        return options
+        return optkind, options
 
-    def _read_mode_donone(self, size, name):
+    def _read_mode_donone(self, size, kind):
         """Read options request no process.
 
         Keyword arguemnts:
             size - int, length of option
-            name - str, acronym of option
+            kind - int, option kind value
 
         Structure of TCP options:
             Octets          Bits            Name                            Discription
@@ -376,15 +388,19 @@ class TCP(Transport):
               2             16          tcp.opt.data                    Kind-specific Data
 
         """
-        data = self._read_fileng(size)
+        data = dict(
+            kind = kind,
+            length = size,
+            data = self._read_fileng(size),
+        )
         return data
 
-    def _read_mode_unpack(self, size, name):
+    def _read_mode_unpack(self, size, kind):
         """Read options request unpack process.
 
         Keyword arguemnts:
             size - int, length of option
-            name - str, acronym of option
+            kind - int, option kind value
 
         Structure of TCP options:
             Octets          Bits            Name                            Discription
@@ -393,14 +409,19 @@ class TCP(Transport):
               2             16          tcp.opt.data                    Kind-specific Data
 
         """
-        data = self._read_unpack(size)
+        data = dict(
+            kind = kind,
+            length = size,
+            data = self._read_unpack(size),
+        )
         return data
 
-    def _read_mode_tsopt(self, size, *args):
+    def _read_mode_tsopt(self, size, kind):
         """Read Timestamps option.
 
         Keyword arguemnts:
             size - int, length of option
+            kind - int, 8 (Timestamps)
 
         Structure of TCP TSopt [RFC 7323]:
 
@@ -409,25 +430,28 @@ class TCP(Transport):
            +-------+-------+---------------------+---------------------+
                1       1              4                     4
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (8)
-              1              8          tcp.opt.length                  Length (10)
-              2             16          tcp.opt.ts.val                  Timestamp Value
-              6             48          tcp.opt.ts.ecr                  Timestamps Echo Reply
+            Octets          Bits            Name                        Discription
+              0              0          tcp.ts.kind                 Kind (8)
+              1              8          tcp.ts.length               Length (10)
+              2             16          tcp.ts.val                  Timestamp Value
+              6             48          tcp.ts.ecr                  Timestamps Echo Reply
 
         """
         temp = struct.unpack('>II', self._read_fileng(size))
         data = dict(
+            kind = kind,
+            length = size,
             val = temp[0],
             ecr = temp[1],
         )
         return data
 
-    def _read_mode_pocsp(self, size, *args):
+    def _read_mode_pocsp(self, size, kind):
         """Read Partial Order Connection Service Profile Option.
 
         Keyword arguemnts:
             size - int, length of option
+            kind - int, 10 (POC-Serv Profile)
 
         Structure of TCP POC-SP Option [RFC 1693][RFC 6247]:
 
@@ -436,17 +460,19 @@ class TCP(Transport):
             |  Kind=10 | Length=3 | Start_flag | End_flag | Filler |
             +----------+----------+------------+----------+--------+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (10)
-              1              8          tcp.opt.length                  Length (3)
-              2             16          tcp.opt.pocsp.start             Start Flag
-              2             17          tcp.opt.pocsp.end               End Flag
-              2             18          tcp.opt.pocsp.filler            Filler
+            Octets          Bits            Name                        Discription
+              0              0          tcp.pocsp.kind              Kind (10)
+              1              8          tcp.pocsp.length            Length (3)
+              2             16          tcp.pocsp.start             Start Flag
+              2             17          tcp.pocsp.end               End Flag
+              2             18          tcp.pocsp.filler            Filler
 
         """
         temp = self._read_binary(size)
 
         data = dict(
+            kind = kind,
+            length = size,
             start = True if int(temp[0]) else False,
             end = True if int(temp[1]) else False,
             filler = bytes(chr(int(bits[2:], base=2)), encoding='utf-8'),
@@ -454,11 +480,12 @@ class TCP(Transport):
 
         return data
 
-    def _read_mode_acopt(self, size, *args):
+    def _read_mode_acopt(self, size, kind):
         """Read Alternate Checksum Request Option.
 
         Keyword arguemnts:
             size - int, length of option
+            kind - int, 14 (Alt-Chksum Request)
 
         Structure of TCP CHKSUM-REQ [RFC 1146][RFC 6247]:
 
@@ -467,25 +494,28 @@ class TCP(Transport):
            +----------+----------+----------+
 
             Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (14)
-              1              8          tcp.opt.length                  Length (3)
-              2             16          tcp.opt.chksumreq               Checksum Algorithm
+              0              0          tcp.chksumreq.kind             Kind (14)
+              1              8          tcp.chksumreq.length           Length (3)
+              2             16          tcp.chksumreq.ac               Checksum Algorithm
 
         """
         temp = self._read_unpack(size)
         algo = chksum_opt.get(temp)
 
         data = dict(
+            kind = kind,
+            length = size,
             ac = algo,
         )
 
         return data
 
-    def _read_mode_qsopt(self, size, *args):
+    def _read_mode_qsopt(self, size, kind):
         """Read Quick-Start Response Option.
 
         Keyword arguemnts:
             size - int, length of option
+            kind - int, 27 (Quick-Start Response)
 
         Structure of TCP QSopt [RFC 4782]:
 
@@ -498,14 +528,14 @@ class TCP(Transport):
            |                   QS Nonce                                | R |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (27)
-              1              8          tcp.opt.length                  Length (8)
-              2             16          tcp.opt.qs.resv                 Reserved (must be zero)
-              2             20          tcp.opt.qs.req_rate             Request Rate
-              3             24          tcp.opt.qs.ttl_diff             TTL Difference
-              4             32          tcp.opt.qs.nounce               QS Nounce
-              7             62          tcp.opt.qs.res                  Reserved (must be zero)
+            Octets          Bits            Name                        Discription
+              0              0          tcp.qs.kind                 Kind (27)
+              1              8          tcp.qs.length               Length (8)
+              2             16          tcp.qs.resv                 Reserved (must be zero)
+              2             20          tcp.qs.req_rate             Request Rate
+              3             24          tcp.qs.ttl_diff             TTL Difference
+              4             32          tcp.qs.nounce               QS Nounce
+              7             62          tcp.qs.res                  Reserved (must be zero)
 
         """
         rvrr = self._read_binary(1)
@@ -513,6 +543,8 @@ class TCP(Transport):
         noun = self._read_fileng(4)
 
         data = dict(
+            kind = kind,
+            length = size,
             resv = b'\x00' * 4,
             req_rate = int(rvrr[4:], base=2),
             ttl_diff = ttld,
@@ -522,11 +554,12 @@ class TCP(Transport):
 
         return data
 
-    def _read_mode_utopt(self, size, *args):
+    def _read_mode_utopt(self, size, kind):
         """Read User Timeout Option.
 
         Keyword arguemnts:
             size - int, length of option
+            kind - int, 28 (User Timeout Option)
 
         Structure of TCP TIMEOUT [RFC 5482]:
 
@@ -536,27 +569,30 @@ class TCP(Transport):
            |   Kind = 28   |   Length = 4  |G|        User Timeout         |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (28)
-              1              8          tcp.opt.length                  Length (4)
-              2             16          tcp.opt.timeout.granularity     Granularity
-              2             17          tcp.opt.timeout.timeout         User Timeout
+            Octets          Bits            Name                        Discription
+              0              0          tcp.timeout.kind            Kind (28)
+              1              8          tcp.timeout.length          Length (4)
+              2             16          tcp.timeout.granularity     Granularity
+              2             17          tcp.timeout.timeout         User Timeout
 
         """
         temp = self._read_fileng(size)
 
         data = dict(
+            kind = kind,
+            length = size,
             granularity = 'minutes' if int(temp[0]) else 'seconds',
             timeout = bytes(chr(int(bits[0:], base=2)), encoding='utf-8'),
         )
 
         return data
 
-    def _read_mode_tcpao(self, size, *args):
+    def _read_mode_tcpao(self, size, kind):
         """Read Authentication Option.
 
         Keyword arguemnts:
             size - int, length of option
+            kind - int, 29 (TCP Authentication Option)
 
         Structure of TCP AOopt [RFC 5925]:
 
@@ -570,12 +606,12 @@ class TCP(Transport):
            ...  MAC (con't)    |
            ...-----------------+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (29)
-              1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.ao.keyid                KeyID
-              3             24          tcp.opt.ao.rnextkeyid           RNextKeyID
-              4             32          tcp.opt.ao.mac                  Message Authentication Code
+            Octets          Bits            Name                        Discription
+              0              0          tcp.ao.kind                 Kind (29)
+              1              8          tcp.ao.length               Length
+              2             16          tcp.ao.keyid                KeyID
+              3             24          tcp.ao.rnextkeyid           RNextKeyID
+              4             32          tcp.ao.mac                  Message Authentication Code
 
         """
         key_ = self._read_unpack(1)
@@ -583,6 +619,8 @@ class TCP(Transport):
         mac_ = self._read_fileng(size - 2)
 
         data = dict(
+            kind = kind,
+            length = size,
             keyid = key_,
             rnextkeyid = rkey,
             mac = mac_,
@@ -590,11 +628,12 @@ class TCP(Transport):
 
         return data
 
-    def _read_mode_mptcp(self, size, *args):
+    def _read_mode_mptcp(self, size, kind):
         """Read Multipath TCP Option.
 
         Keyword arguemnts:
             size - int, length of option
+            kind - int, 30 (Multipath TCP)
 
         Structure of MP-TCP [RFC 6824]:
 
@@ -607,11 +646,11 @@ class TCP(Transport):
            |                       (variable length)                       |
            +---------------------------------------------------------------+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.mp.subtype              Subtype
-              2             20          tcp.opt.mp.data                 Subtype-specific Data
+            Octets          Bits            Name                        Discription
+              0              0          tcp.mp.kind                 Kind (30)
+              1              8          tcp.mp.length               Length
+              2             16          tcp.mp.subtype              Subtype
+              2             20          tcp.mp.data                 Subtype-specific Data
 
         """
         bins = self._read_binary(1)
@@ -624,19 +663,22 @@ class TCP(Transport):
         if func is None:    # if subtype not exist, directly read all data
             temp = self._read_fileng(dlen)
             data = dict(
+                kind = kind,
+                length = size,
                 subtype = 'Unknown',
                 data = bytes(chr(int(bits[:4], base=2)), encoding='utf-8') + temp,
             )
         else:               # fetch corresponding subtype data dict
-            data = func(self, bits, dlen)
+            data = func(self, bits, dlen, kind)
         return data
 
-    def _read_mptcp_capable(self, bits, size):
+    def _read_mptcp_capable(self, bits, size, kind):
         """Read Multipath Capable Option.
 
         Keyword arguemnts:
             bits - str, 4-bit data
             size - int, length of option
+            kind - int, 30 (Multipath TCP)
 
         Structure of MP_CAPABLE [RFC 6824]:
 
@@ -654,17 +696,17 @@ class TCP(Transport):
            |                                                               |
            +---------------------------------------------------------------+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length (12/20)
-              2             16          tcp.opt.mp.subtype              Subtype (0)
-              2             20          tcp.opt.mp.capable.version      Version
-              3             24          tcp.opt.mp.capable.flags.req    Checksum Require Flag (A)
-              3             25          tcp.opt.mp.capable.flags.ext    Extensibility Flag (B)
-              3             26          tcp.opt.mp.capable.flags.res    Unassigned (C-G)
-              3             31          tcp.opt.mp.capable.flags.hsa    HMAC-SHA1 Flag (H)
-              4             32          tcp.opt.mp.capable.skey         Option Sender's Key
-              12            96          tcp.opt.mp.capable.rkey         Option Receiver's Key
+            Octets          Bits            Name                        Discription
+              0              0          tcp.mp.kind                 Kind (30)
+              1              8          tcp.mp.length               Length (12/20)
+              2             16          tcp.mp.subtype              Subtype (0)
+              2             20          tcp.mp.capable.version      Version
+              3             24          tcp.mp.capable.flags.req    Checksum Require Flag (A)
+              3             25          tcp.mp.capable.flags.ext    Extensibility Flag (B)
+              3             26          tcp.mp.capable.flags.res    Unassigned (C-G)
+              3             31          tcp.mp.capable.flags.hsa    HMAC-SHA1 Flag (H)
+              4             32          tcp.mp.capable.skey         Option Sender's Key
+              12            96          tcp.mp.capable.rkey         Option Receiver's Key
                                                                         (if option Length == 20)
 
         """
@@ -674,6 +716,8 @@ class TCP(Transport):
         rkey = self._read_fileng(8) if size == 17 else None
 
         data = dict(
+            kind = kind,
+            length = size + 1,
             subtype = 'MP_CAPABLE',
             capable = dict(
                 version = vers,
@@ -690,19 +734,20 @@ class TCP(Transport):
 
         return data
 
-    def _read_mptcp_join(self, bits, size):
+    def _read_mptcp_join(self, bits, size, kind):
         """Read Join Connection Option.
 
         Keyword arguemnts:
             bits - str, 4-bit data
             size - int, length of option
+            kind - int, 30 (Multipath TCP)
 
         Structure of MP_JOIN [RFC 6824]:
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.mp.subtype              Subtype (1)
-              2             20          tcp.opt.mp.data                 Handshake-specific Data
+            Octets          Bits            Name                        Discription
+              0              0          tcp.mp.kind                 Kind (30)
+              1              8          tcp.mp.length               Length
+              2             16          tcp.mp.subtype              Subtype (1)
+              2             20          tcp.mp.data                 Handshake-specific Data
 
         """
         if self._syn and self._ack: # MP_JOIN-SYN/ACK
@@ -714,17 +759,20 @@ class TCP(Transport):
         else:   # illegal MP_JOIN occurred
             temp = self._read_fileng(dlen)
             data = dict(
+                kind = kind,
+                length = size + 1,
                 subtype = 'MP_JOIN-Unknown',
                 data = bytes(chr(int(bits[:4], base=2)), encoding='utf-8') + temp,
             )
             return data
 
-    def _read_join_syn(self, bits, size):
+    def _read_join_syn(self, bits, size, kind):
         """Read Join Connection Option for Initial SYN.
 
         Keyword arguemnts:
             bits - str, 4-bit data
             size - int, length of option
+            kind - int, 30 (Multipath TCP)
 
         Structure of MP_JOIN-SYN [RFC 6824]:
 
@@ -738,15 +786,15 @@ class TCP(Transport):
            |                Sender's Random Number (32 bits)               |
            +---------------------------------------------------------------+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length (12)
-              2             16          tcp.opt.mp.subtype              Subtype (1|SYN)
-              2             20          tcp.opt.mp.join.syn.res         Reserved (must be zero)
-              2             23          tcp.opt.mp.join.syn.backup      Backup Path (B)
-              3             24          tcp.opt.mp.join.syn.addrid      Address ID
-              4             32          tcp.opt.mp.join.syn.token       Receiver's Token
-              8             64          tcp.opt.mp.join.syn.randnum     Sender's Random Number
+            Octets          Bits            Name                        Discription
+              0              0          tcp.mp.kind                 Kind (30)
+              1              8          tcp.mp.length               Length (12)
+              2             16          tcp.mp.subtype              Subtype (1|SYN)
+              2             20          tcp.mp.join.syn.res         Reserved (must be zero)
+              2             23          tcp.mp.join.syn.backup      Backup Path (B)
+              3             24          tcp.mp.join.syn.addrid      Address ID
+              4             32          tcp.mp.join.syn.token       Receiver's Token
+              8             64          tcp.mp.join.syn.randnum     Sender's Random Number
 
         """
         adid = self._read_unpack(1)
@@ -754,6 +802,8 @@ class TCP(Transport):
         srno = self._read_unpack(4)
 
         data = dict(
+            kind = kind,
+            length = size + 1,
             subtype = 'MP_JOIN-SYN',
             join = dict(
                 syn = dict(
@@ -768,12 +818,13 @@ class TCP(Transport):
 
         return data
 
-    def _read_join_synack(self, bits, size):
+    def _read_join_synack(self, bits, size, kind):
         """Read Join Connection Option for Responding SYN/ACK.
 
         Keyword arguemnts:
             bits - str, 4-bit data
             size - int, length of option
+            kind - int, 30 (Multipath TCP)
 
         Structure of MP_JOIN-SYN/ACK [RFC 6824]:
 
@@ -790,14 +841,14 @@ class TCP(Transport):
            +---------------------------------------------------------------+
 
             Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length (16)
-              2             16          tcp.opt.mp.subtype              Subtype (1|SYN/ACK)
-              2             20          tcp.opt.mp.join.synack.res      Reserved (must be zero)
-              2             23          tcp.opt.mp.join.synack.backup   Backup Path (B)
-              3             24          tcp.opt.mp.join.synack.addrid   Address ID
-              4             32          tcp.opt.mp.join.synack.hmac     Sender's Truncated HMAC
-              12            96          tcp.opt.mp.join.synack.randnum  Sender's Random Number
+              0              0          tcp.mp.kind                    Kind (30)
+              1              8          tcp.mp.length                  Length (16)
+              2             16          tcp.mp.subtype              Subtype (1|SYN/ACK)
+              2             20          tcp.mp.join.synack.res      Reserved (must be zero)
+              2             23          tcp.mp.join.synack.backup   Backup Path (B)
+              3             24          tcp.mp.join.synack.addrid   Address ID
+              4             32          tcp.mp.join.synack.hmac     Sender's Truncated HMAC
+              12            96          tcp.mp.join.synack.randnum  Sender's Random Number
 
         """
         adid = self._read_unpack(1)
@@ -805,6 +856,8 @@ class TCP(Transport):
         srno = self._read_unpack(4)
 
         data = dict(
+            kind = kind,
+            length = size + 1,
             subtype = 'MP_JOIN-SYN/ACK',
             join = dict(
                 synack = dict(
@@ -819,12 +872,13 @@ class TCP(Transport):
 
         return data
 
-    def _read_join_ack(self, bits, size):
+    def _read_join_ack(self, bits, size, kind):
         """Read Join Connection Option for Third ACK.
 
         Keyword arguemnts:
             bits - str, 4-bit data
             size - int, length of option
+            kind - int, 30 (Multipath TCP)
 
         Structure of MP_JOIN-ACK [RFC 6824]:
 
@@ -841,15 +895,17 @@ class TCP(Transport):
            +---------------------------------------------------------------+
 
             Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length (24)
-              2             16          tcp.opt.mp.subtype              Subtype (1|ACK)
-              2             20          tcp.opt.mp.join.ack.res         Reserved (must be zero)
-              4             32          tcp.opt.mp.join.ack.hmac        Sender's HMAC
+              0              0          tcp.mp.kind                    Kind (30)
+              1              8          tcp.mp.length                  Length (24)
+              2             16          tcp.mp.subtype              Subtype (1|ACK)
+              2             20          tcp.mp.join.ack.res         Reserved (must be zero)
+              4             32          tcp.mp.join.ack.hmac        Sender's HMAC
 
         """
         temp = self._read_fileng(20)
         data = dict(
+            kind = kind,
+            length = size + 1,
             subtype = 'MP_JOIN-ACK',
             join = dict(
                 ack = dict(
@@ -861,12 +917,13 @@ class TCP(Transport):
 
         return data
 
-    def _read_mptcp_dss(self, bits, size):
+    def _read_mptcp_dss(self, bits, size, kind):
         """Read Data Sequence Signal (Data ACK and Data Sequence Mapping) Option.
 
         Keyword arguemnts:
             bits - str, 4-bit data
             size - int, length of option
+            kind - int, 30 (Multipath TCP)
 
         Structure of DSS [RFC 6824]:
 
@@ -896,21 +953,21 @@ class TCP(Transport):
            |  Data-Level Length (2 octets) |        Zeros (2 octets)      |
            +-------------------------------+------------------------------+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.mp.subtype              Subtype (2)
-              2             20          tcp.opt.mp.dss.flags.res        Reserved (must be zero)
-              3             27          tcp.opt.mp.dss.flags.fin        DATA_FIN (F)
-              3             28          tcp.opt.mp.dss.flags.dsn_len    DSN Length (m)
-              3             29          tcp.opt.mp.dss.flags.data_pre   DSN, SSN, Data-Level Length, CHKSUM Present (M)
-              3             30          tcp.opt.mp.dss.flags.ack_len    ACK Length (a)
-              3             31          tcp.opt.mp.dss.flags.ack_pre    Data ACK Present (A)
-              4             32          tcp.opt.mp.dss.ack              Data ACK (4/8 octets)
-              8-12       64-96          tcp.opt.mp.dss.dsn              DSN (4/8 octets)
-              12-20     48-160          tcp.opt.mp.dss.ssn              Subflow Sequence Number
-              16-24    128-192          tcp.opt.mp.dss.dl_len           Data-Level Length
-              18-26    144-208          tcp.opt.mp.dss.checksum         Checksum
+            Octets          Bits            Name                        Discription
+              0              0          tcp.mp.kind                 Kind (30)
+              1              8          tcp.mp.length               Length
+              2             16          tcp.mp.subtype              Subtype (2)
+              2             20          tcp.mp.dss.flags.res        Reserved (must be zero)
+              3             27          tcp.mp.dss.flags.fin        DATA_FIN (F)
+              3             28          tcp.mp.dss.flags.dsn_len    DSN Length (m)
+              3             29          tcp.mp.dss.flags.data_pre   DSN, SSN, Data-Level Length, CHKSUM Present (M)
+              3             30          tcp.mp.dss.flags.ack_len    ACK Length (a)
+              3             31          tcp.mp.dss.flags.ack_pre    Data ACK Present (A)
+              4             32          tcp.mp.dss.ack              Data ACK (4/8 octets)
+              8-12       64-96          tcp.mp.dss.dsn              DSN (4/8 octets)
+              12-20     48-160          tcp.mp.dss.ssn              Subflow Sequence Number
+              16-24    128-192          tcp.mp.dss.dl_len           Data-Level Length
+              18-26    144-208          tcp.mp.dss.checksum         Checksum
 
         """
         bits = self._read_binary(1)
@@ -925,6 +982,8 @@ class TCP(Transport):
         chk_ = self._read_fileng(2) if Mflg else None
 
         data = dict(
+            kind = kind,
+            length = size + 1,
             subtype = 'DSS',
             dss = dict(
                 flags = dict(
@@ -945,12 +1004,13 @@ class TCP(Transport):
 
         return data
 
-    def _read_mptcp_add(self, bits, size):
+    def _read_mptcp_add(self, bits, size, kind):
         """Read Add Address Option.
 
         Keyword arguemnts:
             bits - str, 4-bit data
             size - int, length of option
+            kind - int, 30 (Multipath TCP)
 
         Structure of ADD_ADDR [RFC 6824]:
 
@@ -964,14 +1024,14 @@ class TCP(Transport):
            |   Port (2 octets, optional)   |
            +-------------------------------+
 
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.mp.subtype              Subtype (3)
-              2             20          tcp.opt.mp.addaddr.ipver        IP Version
-              3             24          tcp.opt.mp.addaddr.addrid       Address ID
-              4             32          tcp.opt.mp.addaddr.addr         IP Address (4/16)
-              8-20      64-160          tcp.opt.mp.addaddr.port         Port (optional)
+            Octets          Bits            Name                        Discription
+              0              0          tcp.mp.kind                 Kind (30)
+              1              8          tcp.mp.length               Length
+              2             16          tcp.mp.subtype              Subtype (3)
+              2             20          tcp.mp.addaddr.ipver        IP Version
+              3             24          tcp.mp.addaddr.addrid       Address ID
+              4             32          tcp.mp.addaddr.addr         IP Address (4/16)
+              8-20      64-160          tcp.mp.addaddr.port         Port (optional)
 
         """
         vers = int(bits, base=2)
@@ -982,6 +1042,8 @@ class TCP(Transport):
         port = self._read_unpack(2) if pt_l else None
 
         data = dict(
+            kind = kind,
+            length = size + 1,
             subtype = 'ADD_ADDR',
             addaddr = dict(
                 ipver = vers,
