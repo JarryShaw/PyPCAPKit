@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
+# TODO: Implements IPv6 extension headers.
+
+
 import collections
 
 

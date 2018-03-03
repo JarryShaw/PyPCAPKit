@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
+# TODO: Implements DSL, FDDI, ISDN, NDP, PPP.
+
+
 # Link Layer Protocols
 # Table of corresponding protocols
 

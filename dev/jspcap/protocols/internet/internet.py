@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
+# TODO: Implements ECN, ESP, HIP, HOPOPT, ICMP, ICMPv6, IGMP, IPv6_Frag, IPv6_NoNxt, IPv6_Opts, IPv6_Route, Mobility, Shim6.
+
+
 # Internet Layer Protocols
 # Table of corresponding protocols
 
