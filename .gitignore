@@ -18,6 +18,9 @@
 deprecated/
 dev/sample/
 
+bin/
+*.app
+
 # Created by https://www.gitignore.io/api/macos,python
 
 ### macOS ###
