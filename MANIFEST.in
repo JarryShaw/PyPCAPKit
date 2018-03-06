@@ -1,2 +1,5 @@
 global-include *.py
 prune deprecated
+prune test
+prune sample
+prune src

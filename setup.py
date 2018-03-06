@@ -5,14 +5,15 @@
 import setuptools
 
 
+# README
 with open('./README.rst', 'r', encoding='utf-8') as file:
     long_desc = file.read()
 
 
 # set-up script for pip distribution
 setuptools.setup(
-    name = 'jspcapy',
-    version = '0.1.3',
+    name = 'jspcap',
+    version = '0.1.0',
     author = 'Jarry Shaw',
     author_email = 'jarryshaw@icloud.com',
     url = 'https://github.com/JarryShaw/jspcap',
@@ -21,6 +22,7 @@ setuptools.setup(
     description = 'A stream PCAP file extractor.',
     long_description = long_desc,
     python_requires = '>=3.6',
+    install_requires = ['jsformat'],
     py_modules = ['jspcap'],
     packages = [
         'jspcap',
@@ -37,7 +39,6 @@ setuptools.setup(
             'README.md',
             'README.rst',
         ],
-        'jspcap': ['*.py'],
     },
     classifiers = [
         'Development Status :: 5 - Production/Stable',
