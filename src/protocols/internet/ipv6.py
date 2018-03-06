@@ -12,8 +12,11 @@ import collections
 # Analyser for IPv6 header
 
 
-from .ip import IP
-from ..utilities import Info
+from jspcap.utilities import Info
+from jspcap.protocols.internet.ip import IP
+
+
+__all__ = ['IPv6']
 
 
 # IPv6 Extension Header Types

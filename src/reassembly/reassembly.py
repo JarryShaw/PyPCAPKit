@@ -10,8 +10,11 @@ import copy
 # Abstract Base Class for Reassembly
 
 
-from .utilities import Info
-from .validations import bool_check, dict_check, int_check
+from jspcap.utilities import Info
+from jspcap.validations import bool_check, dict_check, int_check
+
+
+__all__ = ['Reassembly']
 
 
 ABCMeta = abc.ABCMeta

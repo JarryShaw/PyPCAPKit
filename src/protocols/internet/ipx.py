@@ -6,8 +6,11 @@
 # Analyser for IPX header
 
 
-from .internet import Internet
-from ..utilities import Info
+from jspcap.utilities import Info
+from jspcap.protocols.internet.internet import Internet
+
+
+__all__ = ['IPX']
 
 
 # IPX Packet Types

@@ -3,11 +3,11 @@
 
 
 # Base Class for Transport Layer
-from .transport import Transport
+from jspcap.protocols.transport.transport import Transport
 
 # Utility Classes for Protocols
-from .tcp import TCP
-from .udp import UDP
+from jspcap.protocols.transport.tcp import TCP
+from jspcap.protocols.transport.udp import UDP
 
 # Transport Layer Protocol Numbers
-from .transport import TP_PROTO
+from jspcap.protocols.transport.transport import TP_PROTO

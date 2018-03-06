@@ -3,14 +3,14 @@
 
 
 # Base Class for Link Layer
-from .link import Link
+from jspcap.protocols.link.link import Link
 
 # Utility Classes for Protocols
-from .arp import ARP
-from .ethernet import Ethernet
-from .l2tp import L2TP
-from .ospf import OSPF
-from .rarp import RARP
+from jspcap.protocols.link.arp import ARP
+from jspcap.protocols.link.ethernet import Ethernet
+from jspcap.protocols.link.l2tp import L2TP
+from jspcap.protocols.link.ospf import OSPF
+from jspcap.protocols.link.rarp import RARP
 
 # Link-Layer Header Type Values
-from .link import LINKTYPE
+from jspcap.protocols.link.link import LINKTYPE

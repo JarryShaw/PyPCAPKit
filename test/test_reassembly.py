@@ -3,25 +3,21 @@
 
 
 import chardet
+import jspcap
 import os
 import pprint
 import textwrap
 
-from jspcap import Extractor, TCP_Reassembly
 
+os.system('> ../sample/out')
 
-os.system('> sample/out')
-
-tree = Extractor(fin='sample/test.pcap', fout='sample/test', fmt='tree', ip=False, tcp=True)
+tree = jspcap.Extractor(
+    fin='../sample/test.pcap', fout='../sample/test', format='tree', ip=False, tcp=True, verbose=True, files=True
+)
 # pprint.pprint(tree.frame)
 
-with open('sample/out', 'a') as file:
-    print()
-    file.write('\n\n')
-    file.write('—' * 80)
-    file.write('\n\n')
-
-    tcp = TCP_Reassembly(strict=True)
+with open('../sample/out', 'a') as file:
+    tcp = jspcap.TCP_Reassembly(strict=True)
     tcp.run(tree.frame.tcp)
     # pprint.pprint(tcp.datagram)
     for datagram in tcp.datagram:

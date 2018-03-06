@@ -6,8 +6,11 @@
 # Analyser for L2TP header
 
 
-from .link import Link
-from ..utilities import Info
+from jspcap.utilities import Info
+from jspcap.protocols.link.link import Link
+
+
+__all__ = ['L2TP']
 
 
 class L2TP(Link):

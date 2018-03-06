@@ -6,8 +6,11 @@
 # Analyser for AH header
 
 
-from .ipsec import IPsec
-from ..exceptions import VersionError
+from jspcap.exceptions import VersionError
+from jspcap.protocols.internet.ipsec import IPsec
+
+
+__all__ = ['AH']
 
 
 class AH(IPsec):

@@ -9,8 +9,11 @@
 # Table of corresponding protocols
 
 
-from ..internet import ETHERTYPE
-from ..protocol import Protocol
+from jspcap.protocols.protocol import Protocol
+from jspcap.protocols.internet.internet import ETHERTYPE
+
+
+__all__ = ['Link', 'LINKTYPE']
 
 
 # ##############################################################################

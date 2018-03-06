@@ -5,30 +5,24 @@
 import setuptools
 
 
-with open('./README.rst', 'r') as file:
+with open('./README.rst', 'r', encoding='utf-8') as file:
     long_desc = file.read()
 
 
 # set-up script for pip distribution
 setuptools.setup(
     name = 'jspcapy',
-    version = '0.1.2',
+    version = '0.1.3',
     author = 'Jarry Shaw',
     author_email = 'jarryshaw@icloud.com',
-    url = 'https://github.com/JarryShaw/jspcap/jspcapy/',
+    url = 'https://github.com/JarryShaw/jspcap',
     license = 'GNU General Public License v3 (GPLv3)',
     keywords = 'computer-networking pcap-analyzer pcap-parser',
-    description = 'Project Assignment of Python 101 & Computer Networking (SJTU)',
+    description = 'A stream PCAP file extractor.',
     long_description = long_desc,
-    python_requires = '>=3.4',
-    py_modules = ['jspcap', 'jsformat'],
-    entry_points = {
-        'console_scripts': [
-            'jspcapy = src.jspcapy:main',
-        ]
-    },
+    python_requires = '>=3.6',
+    py_modules = ['jspcap'],
     packages = [
-        'jsformat',
         'jspcap',
         'jspcap.protocols',
         'jspcap.protocols.application',
@@ -43,7 +37,6 @@ setuptools.setup(
             'README.md',
             'README.rst',
         ],
-        'jsformat': ['*.py'],
         'jspcap': ['*.py'],
     },
     classifiers = [
@@ -59,8 +52,6 @@ setuptools.setup(
         'Operating System :: Unix',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: Implementation',

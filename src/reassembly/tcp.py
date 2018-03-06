@@ -10,8 +10,11 @@ import sys
 # Reconstruct application layer packets
 
 
-from .reassembly import Reassembly
-from .utilities import Info
+from jspcap.utilities import Info
+from jspcap.reassembly.reassembly import Reassembly
+
+
+__all__ = ['TCP_Reassembly']
 
 
 class TCP_Reassembly(Reassembly):

@@ -102,8 +102,8 @@ var data = {
 				"id" : 50484,
 				"flags" : {
 					"rb" : "00",
-					"df" : true,
-					"mf" : false
+					"df" : True,
+					"mf" : False
 				},
 				"frag_offset" : 0,
 				"ttl" : 43,
@@ -119,15 +119,15 @@ var data = {
 					"hdr_len" : 20,
 					"flags" : {
 						"res" : "00 00 00",
-						"ns" : false,
-						"cwr" : false,
-						"ecn" : false,
-						"urg" : false,
-						"ack" : true,
-						"push" : false,
-						"reset" : false,
-						"syn" : false,
-						"fin" : true
+						"ns" : False,
+						"cwr" : False,
+						"ecn" : False,
+						"urg" : False,
+						"ack" : True,
+						"push" : False,
+						"reset" : False,
+						"syn" : False,
+						"fin" : True
 					},
 					"window_size" : 31920,
 					"checksum" : "7c 8e",
@@ -165,8 +165,8 @@ var data = {
 				"id" : 0,
 				"flags" : {
 					"rb" : "00",
-					"df" : true,
-					"mf" : false
+					"df" : True,
+					"mf" : False
 				},
 				"frag_offset" : 0,
 				"ttl" : 64,
@@ -182,15 +182,15 @@ var data = {
 					"hdr_len" : 20,
 					"flags" : {
 						"res" : "00 00 00",
-						"ns" : false,
-						"cwr" : false,
-						"ecn" : false,
-						"urg" : false,
-						"ack" : true,
-						"push" : false,
-						"reset" : false,
-						"syn" : false,
-						"fin" : false
+						"ns" : False,
+						"cwr" : False,
+						"ecn" : False,
+						"urg" : False,
+						"ack" : True,
+						"push" : False,
+						"reset" : False,
+						"syn" : False,
+						"fin" : False
 					},
 					"window_size" : 65535,
 					"checksum" : "f9 3e",
@@ -228,8 +228,8 @@ var data = {
 				"id" : 0,
 				"flags" : {
 					"rb" : "00",
-					"df" : true,
-					"mf" : false
+					"df" : True,
+					"mf" : False
 				},
 				"frag_offset" : 0,
 				"ttl" : 64,
@@ -245,15 +245,15 @@ var data = {
 					"hdr_len" : 20,
 					"flags" : {
 						"res" : "00 00 00",
-						"ns" : false,
-						"cwr" : false,
-						"ecn" : false,
-						"urg" : false,
-						"ack" : true,
-						"push" : false,
-						"reset" : false,
-						"syn" : false,
-						"fin" : true
+						"ns" : False,
+						"cwr" : False,
+						"ecn" : False,
+						"urg" : False,
+						"ack" : True,
+						"push" : False,
+						"reset" : False,
+						"syn" : False,
+						"fin" : True
 					},
 					"window_size" : 65535,
 					"checksum" : "2a f4",
@@ -291,8 +291,8 @@ var data = {
 				"id" : 0,
 				"flags" : {
 					"rb" : "00",
-					"df" : true,
-					"mf" : false
+					"df" : True,
+					"mf" : False
 				},
 				"frag_offset" : 0,
 				"ttl" : 64,

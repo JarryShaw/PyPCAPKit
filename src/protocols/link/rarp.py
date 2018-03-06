@@ -6,7 +6,10 @@
 # Analyser for RARP/DRARP header
 
 
-from .arp import ARP
+from jspcap.protocols.link.arp import ARP
+
+
+__all__ = ['RARP']
 
 
 class RARP(ARP):

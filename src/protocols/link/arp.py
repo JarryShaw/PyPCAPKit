@@ -10,9 +10,12 @@ import textwrap
 # Analyser for ARP/InARP header
 
 
-from .link import Link, LINKTYPE
-from ..internet import ETHERTYPE
-from ..utilities import Info
+from jspcap.utilities import Info
+from jspcap.protocols.internet.internet import ETHERTYPE
+from jspcap.protocols.link.link import Link, LINKTYPE
+
+
+__all__ = ['ARP']
 
 
 # Operation Codes [RFC 826][RFC 5494]

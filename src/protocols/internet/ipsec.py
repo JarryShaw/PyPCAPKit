@@ -6,9 +6,12 @@
 # Analyser for IPsec header
 
 
-from .ip import IP
-from ..exceptions import UnsupportedCall
-from ..utilities import Info
+from jspcap.exceptions import UnsupportedCall
+from jspcap.utilities import Info
+from jspcap.protocols.internet.ip import IP
+
+
+__all__ = 'IPsec'
 
 
 class IPsec(IP):

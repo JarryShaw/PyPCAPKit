@@ -9,8 +9,11 @@ import copy
 # Base class for IPv4 & IPv6 reassembly
 
 
-from .reassembly import Reassembly
-from .utilities import Info
+from jspcap.utilities import Info
+from jspcap.reassembly.reassembly import Reassembly
+
+
+__all__ = ['IP_Reassembly']
 
 
 class IP_Reassembly(Reassembly):

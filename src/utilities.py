@@ -12,8 +12,11 @@ import os
 # Several useful functions & classes
 
 
-from .exceptions import IndexNotFound, UnsupportedCall
-from .validations import dict_check, int_check
+from jspcap.exceptions import IndexNotFound, UnsupportedCall
+from jspcap.validations import dict_check, int_check
+
+
+__all__ = ['seekset', 'Info', 'VersionInfo', 'ProtoChain']
 
 
 def seekset(func):
@@ -93,6 +96,14 @@ class Info(dict):
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
                 dict_[key] = value.infotodict()
+            elif isinstance(value, (tuple, list)):
+                temp = list()
+                for item in value:
+                    if isinstance(item, Info):
+                        temp.append(item.infotodict())
+                    else:
+                        temp.append(item)
+                dict_[key] = value.__class__(temp)
             else:
                 dict_[key] = value
         return dict_

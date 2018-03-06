@@ -10,9 +10,12 @@ import io
 # Analyser for record/package headers
 
 
-from .exceptions import ProtocolNotFound, ProtocolUnbound
-from .protocol import Protocol
-from .utilities import Info, ProtoChain
+from jspcap.exceptions import ProtocolNotFound, ProtocolUnbound
+from jspcap.utilities import Info, ProtoChain
+from jspcap.protocols.protocol import Protocol
+
+
+__all__ = ['Frame']
 
 
 class Frame(Protocol):

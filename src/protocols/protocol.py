@@ -14,9 +14,12 @@ import textwrap
 # Pre-define useful arguments and methods of protocols
 
 
-from .utilities import seekset, Info, ProtoChain
-from .exceptions import BoolError, BytesError
-from .validations import bool_check, int_check
+from jspcap.utilities import seekset, Info, ProtoChain
+from jspcap.exceptions import BoolError, BytesError
+from jspcap.validations import bool_check, int_check
+
+
+__all__ = ['Protocol']
 
 
 ABCMeta = abc.ABCMeta

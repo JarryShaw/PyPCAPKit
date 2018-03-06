@@ -6,8 +6,11 @@
 # Analyser for UDP header
 
 
-from .transport import Transport
-from ..utilities import Info
+from jspcap.utilities import Info
+from jspcap.protocols.transport.transport import Transport
+
+
+__all__ = ['UDP']
 
 
 class UDP(Transport):

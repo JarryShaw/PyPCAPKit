@@ -6,11 +6,14 @@
 # Analyser for PCAP global headers
 
 
-from .exceptions import FileError, UnsupportedCall
-from .link import LINKTYPE
-from .protocol import Protocol
-from .utilities import Info, VersionInfo
-from .validations import int_check
+from jspcap.exceptions import FileError, UnsupportedCall
+from jspcap.utilities import Info, VersionInfo
+from jspcap.validations import int_check
+from jspcap.protocols.link import LINKTYPE
+from jspcap.protocols.protocol import Protocol
+
+
+__all__ = ['Header']
 
 
 class Header(Protocol):

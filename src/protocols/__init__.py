@@ -3,19 +3,12 @@
 
 
 # Base Class for Protocols
-from .protocol import Protocol
+from jspcap.protocols.protocol import Protocol
 
 # Utility Classes for Protocols
-from .header import Header
-from .frame import Frame
-from .link import *
-from .internet import *
-from .transport import *
-from .application import *
-
-# Ptotocol Chain
-from .utilities import ProtoChain
-
-# Info Classes
-from .utilities import Info
-from .header import VersionInfo
+from jspcap.protocols.header import Header
+from jspcap.protocols.frame import Frame
+from jspcap.protocols.link import *
+from jspcap.protocols.internet import *
+from jspcap.protocols.transport import *
+from jspcap.protocols.application import *

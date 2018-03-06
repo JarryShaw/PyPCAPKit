@@ -10,6 +10,17 @@ import traceback
 # show refined infomation when exceptions raised
 
 
+__all__ = [
+    'BaseError',
+    'DigitError', 'IntError', 'RealError', 'ComplexError', 'BoolError',
+    'BytesError', 'StringError', 'DictError', 'ListError', 'TupleError', 'ProtocolUnbound',
+    'FormatError', 'UnsupportedCall',
+    'FileError',
+    'ProtocolNotFound',
+    'VersionError', 'IndexNotFound',
+]
+
+
 ##############################################################################
 # BaseError (abc of exceptions) session.
 ##############################################################################

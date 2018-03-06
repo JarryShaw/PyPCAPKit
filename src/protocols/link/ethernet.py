@@ -9,8 +9,11 @@ import textwrap
 # Analyser for ethernet protocol header
 
 
-from .link import Link
-from ..utilities import Info
+from jspcap.utilities import Info
+from jspcap.protocols.link.link import Link
+
+
+__all__ = ['Ethernet']
 
 
 class Ethernet(Link):

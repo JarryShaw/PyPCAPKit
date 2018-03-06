@@ -6,7 +6,10 @@
 # Reconstruct IPv4 packets back to origin
 
 
-from .ip import IP_Reassembly
+from jspcap.reassembly.ip import IP_Reassembly
+
+
+__all__ = ['IPv4_Reassembly']
 
 
 class IPv4_Reassembly(IP_Reassembly):

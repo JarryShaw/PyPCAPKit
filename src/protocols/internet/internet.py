@@ -9,9 +9,12 @@
 # Table of corresponding protocols
 
 
-from ..transport import TP_PROTO
-from ..protocol import Protocol
-from ..utilities import ProtoChain
+from jspcap.utilities import ProtoChain
+from jspcap.protocols.protocol import Protocol
+from jspcap.protocols.transport.transport import TP_PROTO
+
+
+__all__ = ['Internet', 'ETHERTYPE']
 
 
 # ##############################################################################

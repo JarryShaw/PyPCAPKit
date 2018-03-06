@@ -9,7 +9,10 @@
 # Table of corresponding protocols
 
 
-from ..protocol import Protocol
+from jspcap.protocols.protocol import Protocol
+
+
+__all__ = ['Transport', 'TP_PROTO']
 
 
 # ##############################################################################

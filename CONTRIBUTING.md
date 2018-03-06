@@ -1,9 +1,8 @@
 How to Contribute
 =================
 
-  The JSPCAP project is an open source Python3 program focus on PCAP
-parsing and analysis, which includes three different independent
-projects: jspcapy, Sniffer and TreeViewer.
+  The `jspcap` project is an open source Python program focus on PCAP
+parsing and analysis.
 
 Pull Requests
 -------------

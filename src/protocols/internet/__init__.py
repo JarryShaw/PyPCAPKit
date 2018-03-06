@@ -3,17 +3,17 @@
 
 
 # Base Class for Internet Layer
-from .internet import Internet
+from jspcap.protocols.internet.internet import Internet
 
 # Utility Classes for Protocols
-from .ah import AH
-from .ipv4 import IPv4
-from .ipv6 import IPv6
-from .ipx import IPX
+from jspcap.protocols.internet.ah import AH
+from jspcap.protocols.internet.ipv4 import IPv4
+from jspcap.protocols.internet.ipv6 import IPv6
+from jspcap.protocols.internet.ipx import IPX
 
 # Ethertype IEEE 802 Numbers
-from .internet import ETHERTYPE
+from jspcap.protocols.internet.internet import ETHERTYPE
 
 # Deprecated / Base Classes
-from .ip import IP
-from .ipsec import IPsec
+from jspcap.protocols.internet.ip import IP
+from jspcap.protocols.internet.ipsec import IPsec

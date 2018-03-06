@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
-import re
 import io
+import pathlib
+import re
 import textwrap
 
 
@@ -11,14 +12,18 @@ import textwrap
 # Extract parametres from a PCAP file
 
 
-from .exceptions import FormatError
-from .protocols import Info, Frame, Header
-from .validations import bool_check, str_check
+from jspcap.exceptions import FormatError
+from jspcap.protocols import Frame, Header
+from jspcap.utilities import Info
+from jspcap.validations import bool_check, str_check
+
+
+__all__ = ['Extractor']
 
 
 # file name match regex
 FILE = re.compile(r'''
-    \A(.+?)[.](?P<exts>.*)\Z
+    \A(\.?\./)+?(.+?)[.](?P<ext>.*)\Z
 ''', re.VERBOSE | re.IGNORECASE)
 
 
@@ -47,6 +52,7 @@ class Extractor:
         * _auto -- bool, if run automatically to the end
         * _ifnm -- str, input file name (aka _ifile.name)
         * _ofnm -- str, output file name (aka _ofile.name)
+        * _fext -- str, output file extension
 
         * _ifile -- FileIO, input file object
         * _ofile -- object, temperory output writer
@@ -126,7 +132,7 @@ class Extractor:
     ##########################################################################
 
     @classmethod
-    def make_name(cls, fin, fout, fmt, extension):
+    def make_name(cls, fin, fout, fmt, extension, *, files=False):
         fmt_none = (fmt is None)
         if not fmt_none:
             str_check(fmt)
@@ -137,33 +143,43 @@ class Extractor:
             str_check(fin)
             ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
 
+        if fmt == 'html':
+            ext = 'js'
+        elif fmt == 'tree':
+            ext = 'txt'
+        else:
+            ext = fmt
+
         if fout is None:
             if fmt_none:
                 raise FormatError('Output format unspecified.')
+            elif files:
+                ofnm = 'out'
+                pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
             else:
-                if fmt == 'html':   ext = 'js'
-                elif fmt == 'tree': ext = 'txt'
-                else:               ext = fmt
-                ofnm = 'out.{ext}'.format(ext=ext)
+                ofnm = f'out.{ext}'
         else:
             str_check(fout)
             ofmt = FILE.match(fout)
             if ofmt is None:
                 if fmt_none:
                     raise FormatError('Output format unspecified.')
+                elif files:
+                    ofnm = fout
+                    pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
                 else:
                     if extension:
-                        if fmt == 'html':   ext = 'js'
-                        elif fmt == 'tree': ext = 'txt'
-                        else:               ext = fmt
                         ofnm = f'{fout}.{ext}'
                     else:
                         ofnm = fout
             else:
+                files = False
                 ofnm = fout
-                fmt = fmt or ofmt.group('exts')
+                fmt = fmt or ofmt.group('ext')
+                if fmt is None:
+                    raise FormatError('Output format unspecified.')
 
-        return ifnm, ofnm, fmt
+        return ifnm, ofnm, fmt, ext, files
 
     def record_header(self):
         """Read global header.
@@ -177,7 +193,11 @@ class Extractor:
         self._gbhdr = Header(self._ifile)
         self._dlink = self._gbhdr.protocol
         self._vinfo = self._gbhdr.info
-        self._ofile(self._gbhdr.info, name='Global Header')
+        if self._flag_f:
+            ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
+            ofile(self._gbhdr.info, name='Global Header')
+        else:
+            self._ofile(self._gbhdr.info, name='Global Header')
 
     def record_frames(self):
         if self._auto:
@@ -196,22 +216,25 @@ class Extractor:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fmt=None, fin=None, fout=None, auto=True, files=False,
-                    extension=True, ip=False, ipv4=False, ipv6=False, tcp=False):
+    def __init__(self, *, fin=None, fout=None, format=None, auto=True, files=False,
+                    extension=True, ip=False, ipv4=False, ipv6=False, tcp=False, verbose=False):
         """Initialise PCAP Reader.
 
         Keyword arguments:
-            fmt  -- str, file format of output
-                    <keyword> 'plist' / 'json' / 'tree' / 'html'
             fin  -- str, file name to be read; if file not exist, raise error
             fout -- str, file name to be written
+            format  -- str, file format of output
+                    <keyword> 'plist' / 'json' / 'tree' / 'html'
 
             auto -- bool, if automatically run till EOF (default is True)
                     <keyword> True / False
-            files -- bool, if split each frame into different files (default is False)
-                        <keyword> True/False
             extension -- bool, if check and append axtensions to output file (default is True)
                          <keyword> True / False
+
+            files -- bool, if split each frame into different files (default is False)
+                        <keyword> True / False
+            verbose -- bool, if print verbose output information (default is True)
+                        <keyword> True / False
 
             ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
                     <keyword> True / False
@@ -223,8 +246,8 @@ class Extractor:
                     <keyword> True / False
 
         """
-        bool_check(ip, ipv4, ipv6, tcp, auto, extension)
-        ifnm, ofnm, fmt = self.make_name(fin, fout, fmt, extension)
+        bool_check(ip, ipv4, ipv6, tcp, auto, files, extension, verbose)
+        ifnm, ofnm, fmt, ext, files = self.make_name(fin, fout, format, extension, files=files)
 
         if fmt == 'plist':
             from jsformat import PLIST as output     # output PLIST file
@@ -240,21 +263,27 @@ class Extractor:
         else:
             raise FormatError(f'Unsupported output format: {fmt}')
 
-        self._ifnm = ifnm       # input file name
-        self._ofnm = ofnm       # output file name
+        self._ifnm = ifnm               # input file name
+        self._ofnm = ofnm               # output file name
+        self._fext = ext                # output file extension
 
-        self._auto = auto                   # auto extract flag
-        self._frnum = 1                     # frame number
-        self._frame = [[], [], []]          # frame record (TCP / IPv4 / IPv6)
-        self._ofile = output(ofnm)          # output file
+        self._flag_f = files            # split file flag
+        self._flag_v = verbose          # verbose output flag
 
-        self._ipv4 = ipv4 or ip     # IPv4 Reassembly
-        self._ipv6 = ipv6 or ip     # IPv6 Reassembly
-        self._tcp = tcp             # TCP Reassembly
+        self._auto = auto               # auto extract flag
+        self._frnum = 1                 # frame number
+        self._frame = [[], [], []]      # frame record (TCP / IPv4 / IPv6)
 
-        self._ifile = open(ifnm, 'rb')
-        self.record_header()        # read PCAP global header
-        self.record_frames()        # read frames
+        self._ipv4 = ipv4 or ip         # IPv4 Reassembly
+        self._ipv6 = ipv6 or ip         # IPv6 Reassembly
+        self._tcp = tcp                 # TCP Reassembly
+
+        self._ifile = open(ifnm, 'rb')  # input file
+        self._ofile = output if self._flag_f else output(ofnm)
+                                        # output file
+
+        self.record_header()            # read PCAP global header
+        self.record_frames()            # read frames
 
     def __iter__(self):
         if self._auto:
@@ -292,14 +321,16 @@ class Extractor:
         """
         # read frame header
         frame = Frame(self._ifile, num=self._frnum, proto=self._dlink)
-        # with open('sample/out', 'a') as file:
-        #     print(self._frnum, frame.protochain)
-        #     file.write(f'{self._frnum} {frame.protochain}\n')
+        if self._flag_v:
+            print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
 
         # write plist
-        frnum = 'Frame {fnum}'.format(fnum=self._frnum)
-        plist = frame.info.infotodict()
-        self._ofile(plist, name=frnum)
+        frnum = f'Frame {self._frnum}'
+        if self._flag_f:
+            ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+            ofile(frame.info, name=frnum)
+        else:
+            self._ofile(frame.info, name=frnum)
 
         # record frame
         protos = frame.protochain

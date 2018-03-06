@@ -13,8 +13,11 @@ import datetime
 # Analyser for IPv4 header
 
 
-from .ip import IP
-from ..utilities import Info, ProtoChain
+from jspcap.utilities import Info, ProtoChain
+from jspcap.protocols.internet.ip import IP
+
+
+__all__ = ['IPv4']
 
 
 # TOS (DS Field) Precedence

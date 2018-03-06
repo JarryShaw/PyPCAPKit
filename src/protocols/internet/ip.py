@@ -6,8 +6,11 @@
 # Analyser for IP header
 
 
-from .internet import Internet
-from ..utilities import Info, seekset
+from jspcap.utilities import Info, seekset
+from jspcap.protocols.internet.internet import Internet
+
+
+__all__ = ['IP']
 
 
 class IP(Internet):
