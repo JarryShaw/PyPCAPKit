@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
+import pathlib
 import sys
 import traceback
 
@@ -16,6 +17,7 @@ __all__ = [
     'BytesError', 'StringError', 'DictError', 'ListError', 'TupleError', 'ProtocolUnbound',
     'FormatError', 'UnsupportedCall',
     'FileError',
+    'FileNotFound',
     'ProtocolNotFound',
     'VersionError', 'IndexNotFound',
 ]
@@ -35,16 +37,16 @@ class BaseError(Exception):
     * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
-    def __init__(self, message):
+    def __init__(cls, message):
         tb = traceback.extract_stack()
         for tbitem in tb:
-            if 'jspcap' in tbitem[0]:
+            if pathlib.Path(tbitem[0]).match('*/jspcap/*'):
                 break
         index = tb.index(tbitem)
 
         print('Traceback (most recent call last):')
         traceback.print_stack(limit=-index)
-        sys.tracebacklimit = None
+        sys.tracebacklimit = 0
         super().__init__(message)
 
 
@@ -76,9 +78,11 @@ class BytesError(BaseError, TypeError):
     """The argument(s) must be bytes type."""
     pass
 
+
 class BoolError(BaseError, TypeError):
     """The argument(s) must be bool type."""
     pass
+
 
 class StringError(BaseError, TypeError):
     """The argument(s) must be str type."""
@@ -99,6 +103,7 @@ class TupleError(BaseError, TypeError):
     """The argument(s) must be tuple type."""
     pass
 
+
 class ProtocolUnbound(BaseError, TypeError):
     """Protocol slice unbound."""
     pass
@@ -112,6 +117,7 @@ class FormatError(BaseError, AttributeError):
     """Unknow format(s)."""
     pass
 
+
 class UnsupportedCall(BaseError, AttributeError):
     """Unsupported function or property call."""
     pass
@@ -123,6 +129,15 @@ class UnsupportedCall(BaseError, AttributeError):
 
 class FileError(BaseError, IOError):
     """Wrong file format."""
+    pass
+
+
+##############################################################################
+# FileNotFoundError session.
+##############################################################################
+
+class FileNotFound(BaseError, FileNotFoundError):
+    """File not found."""
     pass
 
 
@@ -142,6 +157,7 @@ class ProtocolNotFound(BaseError, IndexError):
 class VersionError(BaseError, ValueError):
     """Unknown IP version."""
     pass
+
 
 class IndexNotFound(BaseError, ValueError):
     """Protocol not in ProtoChain."""

@@ -3,6 +3,7 @@
 
 
 import io
+import os
 import pathlib
 import re
 import textwrap
@@ -12,7 +13,7 @@ import textwrap
 # Extract parametres from a PCAP file
 
 
-from jspcap.exceptions import FormatError
+from jspcap.exceptions import FormatError, FileNotFound
 from jspcap.protocols import Frame, Header
 from jspcap.utilities import Info
 from jspcap.validations import bool_check, str_check
@@ -23,7 +24,7 @@ __all__ = ['Extractor']
 
 # file name match regex
 FILE = re.compile(r'''
-    \A(\.?\./)+?(.+?)[.](?P<ext>.*)\Z
+    \A(.+?)[.](?P<ext>.*)\Z
 ''', re.VERBOSE | re.IGNORECASE)
 
 
@@ -143,6 +144,9 @@ class Extractor:
             str_check(fin)
             ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
 
+        if not os.path.isfile(ifnm):
+            raise FileNotFound(f"[Errno 2] No such file or directory: '{ifnm}'")
+
         if fmt == 'html':
             ext = 'js'
         elif fmt == 'tree':
@@ -160,7 +164,8 @@ class Extractor:
                 ofnm = f'out.{ext}'
         else:
             str_check(fout)
-            ofmt = FILE.match(fout)
+            path, name = os.path.split(fout)
+            ofmt = FILE.match(name)
             if ofmt is None:
                 if fmt_none:
                     raise FormatError('Output format unspecified.')

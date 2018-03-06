@@ -13,7 +13,7 @@ with open('./README.rst', 'r', encoding='utf-8') as file:
 # set-up script for pip distribution
 setuptools.setup(
     name = 'jspcap',
-    version = '0.1.0',
+    version = '0.1.1',
     author = 'Jarry Shaw',
     author_email = 'jarryshaw@icloud.com',
     url = 'https://github.com/JarryShaw/jspcap',
