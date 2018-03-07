@@ -37,12 +37,14 @@ class BaseError(Exception):
     * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
-    def __init__(cls, message):
+    def __init__(self, message):
         tb = traceback.extract_stack()
         for tbitem in tb:
             if pathlib.Path(tbitem[0]).match('*/jspcap/*'):
+                index = tb.index(tbitem)
                 break
-        index = tb.index(tbitem)
+        else:
+            index = len(tb)
 
         print('Traceback (most recent call last):')
         traceback.print_stack(limit=-index)
