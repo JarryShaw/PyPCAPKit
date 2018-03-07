@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-import setuptools
+from distutils.core import setup
 
 
 # README
@@ -11,9 +11,9 @@ with open('./README.rst', 'r') as file:
 
 
 # set-up script for pip distribution
-setuptools.setup(
+setup(
     name = 'jspcap',
-    version = '0.1.2',
+    version = '0.1.3',
     author = 'Jarry Shaw',
     author_email = 'jarryshaw@icloud.com',
     url = 'https://github.com/JarryShaw/jspcap',

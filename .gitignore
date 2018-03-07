@@ -13,8 +13,8 @@ out
 *.pcap
 !in.pcap
 
-jspcap
-jsformat
+test/jspcap
+test/jsformat
 deprecated/
 
 # Created by https://www.gitignore.io/api/macos,python
