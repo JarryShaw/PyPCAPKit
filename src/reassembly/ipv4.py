@@ -24,8 +24,31 @@ class IPv4_Reassembly(IP_Reassembly):
         # Fetch result:
         >>> result = ipv4_reassembly.datagram
 
+    Keyword arguments:
+        * strict -- bool, if strict set to True, all datagram will return
+                    else only implemented ones will submit (False in default)
+                    < True / False >
+
+    Properties:
+        * name -- str, protocol of current packet
+        * count -- int, total number of reassembled packets
+        * datagram -- tuple, reassembled datagram, which structure may vary
+                        according to its protocol
+
+    Methods:
+        * reassembly -- perform the reassembly procedure
+        * submit -- submit reassembled payload
+        * fetch -- fetch datagram
+        * index -- return datagram index
+        * run -- run automatically
+
+    Attributes:
+        * _strflg -- bool, stirct mode flag
+        * _buffer -- dict, buffer field
+        * _dtgram -- tuple, reassembled datagram
+
     Terminology:
-     - packet_dict = dict(
+        * packet_dict = dict(
             bufid = tuple(
                 ipv4.src,                   # source IP address
                 ipv4.dst,                   # destination IP address
@@ -39,8 +62,8 @@ class IPv4_Reassembly(IP_Reassembly):
             tl = ipv4.len,                  # total length, header includes
             header = ipv4.header,           # raw bytearray type header
             payload = ipv4.payload,         # raw bytearray type payload
-       )
-     - (tuple) datagram
+        )
+        * (tuple) datagram
             |--> (dict) data
             |       |--> 'NotImplemented' : (bool) True --> implemented
             |       |--> 'index' : (tuple) packet numbers
@@ -54,7 +77,7 @@ class IPv4_Reassembly(IP_Reassembly):
             |       |--> 'payload' : (tuple/None) partially reassembled IPv4 payload
             |                        |--> (bytes/None) IPv4 payload fragment
             |--> (dict) data ...
-     - (dict) buffer --> memory buffer for reassembly
+        * (dict) buffer --> memory buffer for reassembly
             |--> (tuple) BUFID : (dict)
             |       |--> ipv4.src    |
             |       |--> ipc4.dst    |
@@ -78,4 +101,5 @@ class IPv4_Reassembly(IP_Reassembly):
 
     @property
     def name(self):
+        """Protocol of current packet."""
         return 'Internet Protocol version 4'

@@ -77,6 +77,7 @@ class Link(Protocol):
     # protocol layer
     @property
     def layer(self):
+        """Protocol layer."""
         return self.__layer__
 
     ##########################################################################

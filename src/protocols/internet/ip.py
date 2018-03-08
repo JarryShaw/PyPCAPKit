@@ -53,11 +53,13 @@ class IP(Internet):
     # source IP address
     @property
     def src(self):
+        """Source IP address."""
         return self._info.src
 
     # destination IP address
     @property
     def dst(self):
+        """Destination IP address."""
         return self._info.dst
 
     ##########################################################################

@@ -60,21 +60,25 @@ class Protocol:
     # name of current protocol
     @abstractproperty
     def name(self):
+        """Name of current protocol."""
         pass
 
     # info dict of current instance
     @property
     def info(self):
+        """Info dict of current instance."""
         return self._info
 
     # header length of current protocol
     @abstractproperty
     def length(self):
+        """Header length of current protocol."""
         pass
 
     # name of next layer protocol
     @property
     def protocol(self):
+        """Name of next layer protocol."""
         try:
             return self._protos[1]
         except IndexError:
@@ -83,6 +87,7 @@ class Protocol:
     # protocol chain of current instance
     @property
     def protochain(self):
+        """Protocol chain of current instance."""
         return self._protos
 
     ##########################################################################

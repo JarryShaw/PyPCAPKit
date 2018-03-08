@@ -24,8 +24,31 @@ class IPv6_Reassembly(IP_Reassembly):
         # Fetch result:
         >>> result = ipv6_reassembly.datagram
 
+    Keyword arguments:
+        * strict -- bool, if strict set to True, all datagram will return
+                    else only implemented ones will submit (False in default)
+                    < True / False >
+
+    Properties:
+        * name -- str, protocol of current packet
+        * count -- int, total number of reassembled packets
+        * datagram -- tuple, reassembled datagram, which structure may vary
+                        according to its protocol
+
+    Methods:
+        * reassembly -- perform the reassembly procedure
+        * submit -- submit reassembled payload
+        * fetch -- fetch datagram
+        * index -- return datagram index
+        * run -- run automatically
+
+    Attributes:
+        * _strflg -- bool, stirct mode flag
+        * _buffer -- dict, buffer field
+        * _dtgram -- tuple, reassembled datagram
+
     Terminology:
-     - packet_dict = dict(
+        * packet_dict = dict(
             bufid = tuple(
                 ipv6.src,                   # source IP address
                 ipv6.dst,                   # destination IP address
@@ -39,8 +62,8 @@ class IPv6_Reassembly(IP_Reassembly):
             tl = ipv6.len,                  # total length, header includes
             header = ipv6.header,           # raw bytearray type header before IPv6-Frag
             payload = ipv6.payload,         # raw bytearray type payload after IPv6-Frag
-       )
-     - (tuple) datagram
+        )
+        * (tuple) datagram
             |--> (dict) data
             |       |--> 'NotImplemented' : (bool) True --> implemented
             |       |--> 'index' : (tuple) packet numbers
@@ -54,7 +77,7 @@ class IPv6_Reassembly(IP_Reassembly):
             |       |--> 'payload' : (tuple/None) partially reassembled IPv6 payload
             |                        |--> (bytes/None) IPv4 payload fragment
             |--> (dict) data ...
-     - (dict) buffer --> memory buffer for reassembly
+        * (dict) buffer --> memory buffer for reassembly
             |--> (tuple) BUFID : (dict)
             |       |--> ipv6.src       |
             |       |--> ipc6.dst       |
@@ -79,4 +102,5 @@ class IPv6_Reassembly(IP_Reassembly):
 
     @property
     def name(self):
+        """Protocol of current packet."""
         return 'Internet Protocol version 6'

@@ -49,14 +49,17 @@ class L2TP(Link):
 
     @property
     def name(self):
+        """Name of current protocol."""
         return 'Layer 2 Tunneling Protocol'
 
     @property
     def length(self):
+        """Header length of current protocol."""
         return self._info.hdr_len
 
     @property
     def type(self):
+        """L2TP type."""
         return self._info.flags.type
 
     ##########################################################################

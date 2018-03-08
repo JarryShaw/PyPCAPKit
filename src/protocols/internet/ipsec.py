@@ -49,8 +49,10 @@ class IPsec(IP):
 
     @property
     def src(self):
+        """NotImplemented"""
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'src'")
 
     @property
     def dst(self):
+        """NotImplemented"""
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'dst'")

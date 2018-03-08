@@ -80,22 +80,27 @@ class IPX(Internet):
 
     @property
     def name(self):
+        """Name of corresponding procotol."""
         return 'Internetwork Packet Exchange'
 
     @property
     def length(self):
+        """Header length of corresponding protocol."""
         return 30
 
     @property
     def protocol(self):
+        """Name of next layer protocol."""
         return self._info.type
 
     @property
     def src(self):
+        """Source IPX address."""
         return self._info.src.addr
 
     @property
     def dst(self):
+        """Destination IPX address."""
         return self._info.dst.addr
 
     ##########################################################################

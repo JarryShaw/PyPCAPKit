@@ -17,3 +17,9 @@ from jspcap.protocols.internet.internet import ETHERTYPE
 # Deprecated / Base Classes
 from jspcap.protocols.internet.ip import IP
 from jspcap.protocols.internet.ipsec import IPsec
+
+
+__all__ = [
+    'ETHERTYPE',                    # Protocol Numbers
+    'AH', 'IPv4', 'IPv6', 'IPX',    # Internet Layer Protocols
+]

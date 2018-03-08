@@ -67,14 +67,17 @@ class OSPF(Link):
 
     @property
     def name(self):
+        """Name of current protocol."""
         return 'Open Shortest Path First'
 
     @property
     def length(self):
+        """Header length of current protocol."""
         return 24
 
     @property
     def type(self):
+        """OSPF packet type."""
         return self._info.type
 
     ##########################################################################

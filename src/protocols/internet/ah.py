@@ -48,14 +48,17 @@ class AH(IPsec):
 
     @property
     def name(self):
+        """Name of corresponding procotol."""
         return 'Authentication Header'
 
     @property
     def length(self):
+        """Info dict of current instance."""
         return self._info.len
 
     @property
     def protocol(self):
+        """Name of next layer protocol."""
         return self._info.next
 
     ##########################################################################

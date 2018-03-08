@@ -50,24 +50,29 @@ class Ethernet(Link):
 
     @property
     def name(self):
+        """Name of current protocol."""
         return 'Ethernet Protocol'
 
     @property
     def length(self):
+        """Header length of current protocol."""
         return 14
 
     @property
     def protocol(self):
+        """Name of next layer protocol."""
         return self._info.type
 
     # source mac address
     @property
     def src(self):
+        """Source mac address."""
         return self._info.src
 
     # destination mac address
     @property
     def dst(self):
+        """Destination mac address."""
         return self._info.dst
 
     ##########################################################################

@@ -20,6 +20,38 @@ __all__ = ['TCP_Reassembly']
 class TCP_Reassembly(Reassembly):
     """Reassembly for TCP payload.
 
+    Usage:
+        >>> from reassembly import TCP_Reassembly
+        # Initialise instance:
+        >>> tcp_reassembly = TCP_Reassembly()
+        # Call reassembly:
+        >>> tcp_reassembly(packet_dict)
+        # Fetch result:
+        >>> result = tcp_reassembly.datagram
+
+    Keyword arguments:
+        * strict -- bool, if strict set to True, all datagram will return
+                    else only implemented ones will submit (False in default)
+                    < True / False >
+
+    Properties:
+        * name -- str, protocol of current packet
+        * count -- int, total number of reassembled packets
+        * datagram -- tuple, reassembled datagram, which structure may vary
+                        according to its protocol
+
+    Methods:
+        * reassembly -- perform the reassembly procedure
+        * submit -- submit reassembled payload
+        * fetch -- fetch datagram
+        * index -- return datagram index
+        * run -- run automatically
+
+    Attributes:
+        * _strflg -- bool, stirct mode flag
+        * _buffer -- dict, buffer field
+        * _dtgram -- tuple, reassembled datagram
+
     The following algorithm implementment is based on `IP Datagram
     Reassembly Algorithm` introduced in RFC 815. It descripted an
     algorithm dealing with `RCVBT` (fragment received bit table)
@@ -43,17 +75,8 @@ class TCP_Reassembly(Reassembly):
       complete. Pass it on to the higher level protocol processor
       for further handling. Otherwise, return.
 
-    Usage:
-        >>> from reassembly import TCP_Reassembly
-        # Initialise instance:
-        >>> tcp_reassembly = TCP_Reassembly()
-        # Call reassembly:
-        >>> tcp_reassembly(packet_dict)
-        # Fetch result:
-        >>> result = tcp_reassembly.datagram
-
     Terminology:
-     - packet_dict = dict(
+        - packet_dict = dict(
             bufid = tuple(
                 ip.src,                     # source IP address
                 ip.dst,                     # destination IP address
@@ -69,8 +92,8 @@ class TCP_Reassembly(Reassembly):
             first = tcp.seq,                # this sequence number
             last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
             payload = tcp.raw,              # raw bytearray type payload
-       )
-     - (tuple) datagram
+        )
+        - (tuple) datagram
            |--> (dict) data
            |       |--> 'NotImplemented' : (bool) True --> implemented
            |       |--> 'index' : (tuple) packet numbers
@@ -83,7 +106,7 @@ class TCP_Reassembly(Reassembly):
            |       |--> 'payload' : (tuple/None) partially reassembled payload
            |                        |--> (bytes/None) payload fragment
            |--> (dict) data ...
-     - (dict) buffer --> memory buffer for reassembly
+        - (dict) buffer --> memory buffer for reassembly
            |--> (tuple) BUFID : (dict)
            |       |--> ip.src      |
            |       |--> ip.dst      |
@@ -111,6 +134,7 @@ class TCP_Reassembly(Reassembly):
 
     @property
     def name(self):
+        """Protocol of current packet."""
         return 'Transmission Control Protocol'
 
     ##########################################################################
@@ -118,6 +142,12 @@ class TCP_Reassembly(Reassembly):
     ##########################################################################
 
     def reassembly(self, info):
+        """Reassembly procedure.
+
+        Keyword arguments:
+            * info - Info, info dict of packets to be reassembled
+
+        """
         BUFID = info.bufid  # Buffer Identifier
         DSN = info.dsn      # Data Sequence Number
         ACK = info.ack      # Acknowledgement Number
@@ -200,6 +230,12 @@ class TCP_Reassembly(Reassembly):
             del self._buffer[BUFID]
 
     def submit(self, buf):
+        """Submit reassembled payload.
+
+        Keyword arguments:
+            * buf -- dict, buffer dict of reassembled packets
+
+        """
         datagram = []           # reassembled datagram
         HDL = buf.pop('hdl')    # hole descriptor list (remove from dict)
 

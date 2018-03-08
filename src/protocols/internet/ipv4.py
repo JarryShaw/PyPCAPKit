@@ -170,14 +170,17 @@ class IPv4(IP):
 
     @property
     def name(self):
+        """Name of corresponding procotol."""
         return 'Internet Protocol version 4'
 
     @property
     def length(self):
+        """Header length of corresponding protocol."""
         return self._info.hdr_len
 
     @property
     def protocol(self):
+        """Name of next layer protocol."""
         return self._info.proto
 
     ##########################################################################

@@ -11,3 +11,9 @@ from jspcap.reassembly.ipv6 import IPv6_Reassembly
 
 # Reassembly for TCP
 from jspcap.reassembly.tcp import TCP_Reassembly
+
+
+__all__ = [
+    'IPv4_Reassembly', 'IPv6_Reassembly',   # IP Reassembly
+    'TCP_Reassembly',                       # TCP Reassembly
+]

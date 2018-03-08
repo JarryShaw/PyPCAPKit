@@ -20,7 +20,7 @@ class Header(Protocol):
     """PCAP file global header extractor.
 
     Properties:
-        * name -- str, `Global Header`
+        * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
         * length -- int, header length of global header, i.e. 24
         * version -- VersionInfo, version infomation of input PCAP file
@@ -49,22 +49,27 @@ class Header(Protocol):
 
     @property
     def name(self):
+        """Name of corresponding procotol."""
         return 'Global Header'
 
     @property
     def length(self):
+        """Header length of corresponding protocol."""
         return 24
 
     @property
     def version(self):
+        """Version infomation of input PCAP file."""
         return VersionInfo(self._info.version_major, self._info.version_minor)
 
     @property
     def protocol(self):
+        """Data link type."""
         return self._info.network
 
     @property
     def protochain(self):
+        """NotImplemented"""
         raise UnsupportedCall("'Header' object has no attribute 'protochain'")
 
     ##########################################################################

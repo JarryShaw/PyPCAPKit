@@ -49,18 +49,22 @@ class UDP(Transport):
 
     @property
     def name(self):
+        """Name of current protocol."""
         return 'User Datagram Protocol'
 
     @property
     def length(self):
+        """Header length of current protocol."""
         return 8
 
     @property
     def src(self):
+        """Source port."""
         return self._info.src
 
     @property
     def dst(self):
+        """Destination port."""
         return self._info.dst
 
     ##########################################################################

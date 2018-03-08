@@ -12,14 +12,15 @@ import traceback
 
 
 __all__ = [
-    'BaseError',
-    'DigitError', 'IntError', 'RealError', 'ComplexError', 'BoolError',
-    'BytesError', 'StringError', 'DictError', 'ListError', 'TupleError', 'ProtocolUnbound',
-    'FormatError', 'UnsupportedCall',
-    'FileError',
-    'FileNotFound',
-    'ProtocolNotFound',
-    'VersionError', 'IndexNotFound',
+    'BaseError',                                                # Exception
+    'DigitError', 'IntError', 'RealError', 'ComplexError',      # TypeError
+    'BoolError', 'BytesError', 'StringError',                   # TypeError
+    'DictError', 'ListError', 'TupleError', 'ProtocolUnbound',  # TypeError
+    'FormatError', 'UnsupportedCall',                           # AttributeError
+    'FileError',                                                # IOError
+    'FileNotFound',                                             # FileNotFoundError
+    'ProtocolNotFound',                                         # IndexError
+    'VersionError', 'IndexNotFound',                            # ValueError
 ]
 
 

@@ -11,3 +11,9 @@ from jspcap.protocols.transport.udp import UDP
 
 # Transport Layer Protocol Numbers
 from jspcap.protocols.transport.transport import TP_PROTO
+
+
+__all__ = [
+    'TP_PROTO',     # Protocol Numbers
+    'TCP', 'UDP',   # Transport Layer Protocols
+]

@@ -186,18 +186,22 @@ class TCP(Transport):
 
     @property
     def name(self):
+        """Name of current protocol."""
         return 'Transmission Control Protocol'
 
     @property
     def length(self):
+        """Header length of current protocol."""
         return self._info.hdr_len
 
     @property
     def src(self):
+        """Source port."""
         return self._info.srcport
 
     @property
     def dst(self):
+        """Destination port."""
         return self._info.dstport
 
     ##########################################################################

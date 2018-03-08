@@ -12,3 +12,12 @@ from jspcap.protocols.link import *
 from jspcap.protocols.internet import *
 from jspcap.protocols.transport import *
 from jspcap.protocols.application import *
+
+
+__all__ = [
+    'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',        # Protocol Numbers
+    'Header', 'Frame',                          # Headers
+    'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP',  # Link Layer
+    'AH', 'IPv4', 'IPv6', 'IPX',                # Internet Layer
+    'TCP', 'UDP',                               # Transport Layer
+]

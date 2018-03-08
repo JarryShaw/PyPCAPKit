@@ -79,22 +79,27 @@ class ARP(Link):
 
     @property
     def name(self):
+        """Name of current protocol."""
         return self._name
 
     @property
     def length(self):
+        """Header length of current protocol."""
         return self._info.len
 
     @property
     def src(self):
+        """Sender hardware & protocol address."""
         return (self._info.sha, self._info.spa)
 
     @property
     def dst(self):
+        """Target hardware & protocol address."""
         return (self._info.tha, self._info.tpa)
 
     @property
     def type(self):
+        """Hardware & protocol type."""
         return (self._info.htype, self._info.ptype)
 
     ##########################################################################

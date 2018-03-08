@@ -111,7 +111,6 @@ class Info(dict):
 
 class VersionInfo:
     """VersionInfo alikes `sys.version_info`."""
-
     def __init__(self, vmaj, vmin):
         self._vers = (vmaj, vmin)
 
