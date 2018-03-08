@@ -7,9 +7,9 @@ import pprint
 
 
 plist = jspcap.Extractor(fin='../sample/in.pcap', fout='../sample/out.plist', format='plist')
-html = jspcap.Extractor(fin='../sample/in.pcap', fout='../sample/out.js', format='html')
+# html = jspcap.Extractor(fin='../sample/in.pcap', fout='../sample/out.js', format='html')
 tree = jspcap.Extractor(fin='../sample/in.pcap', fout='../sample/out.txt', format='tree', ip=True, tcp=True)
-json = jspcap.Extractor(fin='../sample/in.pcap', fout='../sample/out.xml', format='xml')
+# json = jspcap.Extractor(fin='../sample/in.pcap', fout='../sample/out.xml', format='xml')
 
 pprint.pprint(tree.frame)
 

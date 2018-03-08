@@ -305,4 +305,3 @@ Frame 6
   |                            2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05
   |                            31 2e 37 2e 34
   |-- protocols -> Ethernet:IPv4:UDP
- 

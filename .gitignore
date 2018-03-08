@@ -13,6 +13,7 @@ out
 *.pcap
 !in.pcap
 
+sample/test
 test/jspcap
 test/jsformat
 deprecated/
