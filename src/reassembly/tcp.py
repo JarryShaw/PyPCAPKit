@@ -1,7 +1,87 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""reassembly TCP datagram
 
+``jspcap.reassembly.tcp`` contains ``TCP_Reassembly`` only,
+which reconstructs fragmented TCP packets back to origin.
+The algorithm for TCP reassembly is decribed as below.
 
+    FO    - Fragment Offset
+    IHL   - Internet Header Length
+    MF    - More Fragments flag
+    TTL   - Time To Live
+    NFB   - Number of Fragment Blocks
+    TL    - Total Length
+    TDL   - Total Data Length
+    BUFID - Buffer Identifier
+    RCVBT - Fragment Received Bit Table
+    TLB   - Timer Lower Bound
+
+DO {
+    BUFID <- source|destination|protocol|identification;
+
+    IF (FO = 0 AND MF = 0) {
+        IF (buffer with BUFID is allocated) {
+            flush all reassembly for this BUFID;
+            Submit datagram to next step;
+            DONE.
+        }
+    }
+
+    IF (no buffer with BUFID is allocated) {
+        allocate reassembly resources with BUFID;
+        TIMER <- TLB;
+        TDL <- 0;
+        put data from fragment into data buffer with BUFID
+            [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
+        set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
+    }
+
+    IF (MF = 0) {
+        TDL <- TL-(IHL*4)+(FO*8)
+    }
+
+    IF (FO = 0) {
+        put header in header buffer
+    }
+
+    IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
+        TL <- TDL+(IHL*4)
+        Submit datagram to next step;
+        free all reassembly resources for this BUFID;
+        DONE.
+    }
+
+    TIMER <- MAX(TIMER,TTL);
+
+} give up until (next fragment or timer expires);
+
+timer expires: {
+    flush all reassembly with this BUFID;
+    DONE.
+}
+
+And as for ``RCVBT``, there is an alternative algorithm
+described below.
+
+1. Select the next hole descriptor from the hole descriptor
+  list. If there are no more entries, go to step eight.
+2. If fragment.first is greater than hole.last, go to step one.
+3. If fragment.last is less than hole.first, go to step one.
+4. Delete the current entry from the hole descriptor list.
+5. If fragment.first is greater than hole.first, then create a
+  new hole descriptor "new_hole" with new_hole.first equal to
+  hole.first, and new_hole.last equal to fragment.first  minus
+  one.
+6. If fragment.last is less than hole.last and fragment.more
+  fragments is true, then create a new hole descriptor
+  "new_hole", with new_hole.first equal to fragment.last plus
+  one and new_hole.last equal to hole.last.
+7. Go to step one.
+8. If the hole descriptor list is now empty, the datagram is now
+  complete. Pass it on to the higher level protocol processor
+  for further handling. Otherwise, return.
+
+"""
 import copy
 import sys
 

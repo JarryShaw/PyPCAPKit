@@ -1,7 +1,23 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""user datagram protocol
 
+``jspcap.protocols.transport.udp`` contains ``UDP`` only,
+which implements extractor for User Datagram Protocol (UDP),
+whose structure is described as below.
 
+     0      7 8     15 16    23 24    31
+    +--------+--------+--------+--------+
+    |     Source      |   Destination   |
+    |      Port       |      Port       |
+    +--------+--------+--------+--------+
+    |                 |                 |
+    |     Length      |    Checksum     |
+    +--------+--------+--------+--------+
+    |
+    |          data octets ...
+    +---------------- ...
+
+"""
 # User Datagram Protocol
 # Analyser for UDP header
 
@@ -14,7 +30,7 @@ __all__ = ['UDP']
 
 
 class UDP(Transport):
-    """This class implements Transmission Control Protocol.
+    """This class implements User Datagram Protocol.
 
     Properties:
         * name -- str, name of corresponding procotol

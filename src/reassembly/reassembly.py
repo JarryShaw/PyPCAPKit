@@ -1,7 +1,13 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""reassembly fragmented packets
 
+``jspcap.reassembly.reassembly`` contains ``Reassembly``
+only, which is an abstract base class for all reassembly
+classes, bases on algorithms described in
+```RFC 815`` <https://tools.ietf.org/html/rfc815>`__,
+implements datagram reassembly of IP and TCP packets.
 
+"""
 import abc
 import copy
 

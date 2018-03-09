@@ -1,7 +1,10 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""link layer protocols
 
+``jspcap.protocols.link`` is collection of all protocols in
+link layer, with detailed implementation and methods.
 
+"""
 # Base Class for Link Layer
 from jspcap.protocols.link.link import Link
 

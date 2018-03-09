@@ -1,7 +1,12 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""extractor for PCAP files
 
+``jspcap.extractor`` contains ``Extractor`` only, which
+synthesises file I/O and protocol analysis, coordinates
+information exchange in all network layers, extracst
+parametres from a PCAP file.
 
+"""
 import io
 import os
 import pathlib

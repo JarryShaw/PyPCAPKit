@@ -1,7 +1,23 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""layer two tunneling protocol
 
+``jspcap.protocols.link.l2tp`` contains ``L2TP`` only,
+which implements extractor for Layer Two Tunneling Protocol
+(L2TP), whose structure is described as below.
 
+     0                   1                   2                   3
+     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |T|L|x|x|S|x|O|P|x|x|x|x|  Ver  |          Length (opt)         |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |           Tunnel ID           |           Session ID          |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |             Ns (opt)          |             Nr (opt)          |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |      Offset Size (opt)        |    Offset pad... (opt)
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+"""
 # Layer Two Tunneling Protocol
 # Analyser for L2TP header
 

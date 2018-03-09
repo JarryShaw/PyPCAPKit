@@ -1,7 +1,13 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""root transport layer protocol
 
+``jspcap.protocols.transport.transport`` contains both
+``TP_PROTO`` and ``Transport``. The former is a dictionary
+of transport layer protocol numbers, registered in IANA.
+And the latter is a base class for transport layer
+protocols, eg. TCP and UDP.
 
+"""
 # TODO: Implements DCCP, RSVP, STCP.
 
 

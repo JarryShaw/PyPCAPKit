@@ -1,7 +1,13 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""root link layer protocol
 
+``jspcap.protocols.link.link`` contains both ``LINKTYPE``
+and ``Link``. The former is a dictionary of link layer header
+type values, registered in IANA. And the latter is a base
+class for link layer protocols, eg. ARP/InARP, Ethernet,
+L2TP, OSPF, RARP/DRARP.
 
+"""
 # TODO: Implements DSL, FDDI, ISDN, NDP, PPP.
 
 

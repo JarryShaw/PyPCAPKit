@@ -1,7 +1,11 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""internet protocol security
 
+``jspcap.protocols.internet.ipsec`` contains ``IPsec``
+only, which is a base class for Internet Protocol Security
+(IPsec) protocol family, eg. AH.
 
+"""
 # Internet Protocol Security
 # Analyser for IPsec header
 

@@ -1,7 +1,13 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""root internet layer protocol
 
+``jspcap.protocols.internet.internet`` contains both
+``ETHERTYPE`` and ``Internet``. The former is a dictionary
+of ethertype IEEE 802 numbers, registered in IANA. And the
+latter is a base class for internet layer protocols, eg.
+AH, IP, IPsec, IPv4, IPv6, and IPX.
 
+"""
 # TODO: Implements ECN, ESP, HIP, HOPOPT, ICMP, ICMPv6, IGMP, IPv6_Frag, IPv6_NoNxt, IPv6_Opts, IPv6_Route, Mobility, Shim6.
 
 

@@ -1,7 +1,11 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""internet layer protocols
 
+``jspcap.protocols.internet`` is collection of all
+protocols in internet layer, with detailed implementation
+and methods.
 
+"""
 # Base Class for Internet Layer
 from jspcap.protocols.internet.internet import Internet
 

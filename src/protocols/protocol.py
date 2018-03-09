@@ -1,7 +1,12 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""root protocol
 
+``jspcap.protocols.protocol`` contains ``Protocol`` only,
+which is an abstract base clss for all protocol family,
+with pre-defined utility arguments and methods of specified
+protocols.
 
+"""
 import abc
 import copy
 import numbers

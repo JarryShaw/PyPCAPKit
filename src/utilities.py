@@ -1,7 +1,13 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""utility functions and classes
 
+``jspcap.utilities`` contains several useful functions and
+classes which are fundations of ``jspcap``, including
+decorater function ``seekset``, dict-like class ``Info``,
+tuple-like class ``VersionInfo``, and special class
+``ProtoChain``.
 
+"""
 import copy
 import functools
 import numbers

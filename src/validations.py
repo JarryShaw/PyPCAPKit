@@ -1,7 +1,12 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""validation utilities
 
+``jspcap.validations`` contains functions to validate
+arguments for functions and classes. It was first used in
+```jsntlib`` <https://github.com/JarryShaw/jspcapy>`__ as
+validaters.
 
+"""
 import inspect
 import numbers
 

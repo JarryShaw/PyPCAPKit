@@ -65,8 +65,8 @@ memory, as well as enhance efficiency in some way.
 -  Exceptions (``jspcap.exceptions``) -- collection of refined custom
    exceptions
 
-.. figure:: /Users/jarryshaw/Documents/GitHub/TreeViewer/src/jspcap/./doc/jspcap.png
-   :alt: 
+.. figure:: ./doc/jspcap.png
+   :alt:
 
 .. _header-n64:
 
@@ -75,7 +75,7 @@ Installation
 
     Note that ``jspcap`` only supports Python verions **since 3.6**
 
-.. code:: 
+.. code::
 
     pip install jspcap
 

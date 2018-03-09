@@ -1,7 +1,10 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""protocol family
 
+``jspcap.protocols`` is collection of all protocol family,
+with detailed implementation and methods.
 
+"""
 # Base Class for Protocols
 from jspcap.protocols.protocol import Protocol
 

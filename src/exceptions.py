@@ -1,7 +1,11 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
+"""user defined exceptions
 
+``jspcap.exceptions`` refined built-in exceptions. Make it
+possible to show only user error stack infomation, when
+exception raised on user's operation.
 
+"""
 import pathlib
 import sys
 import traceback
@@ -32,10 +36,10 @@ class BaseError(Exception):
     """Base error class of all kinds.
 
     Cautions:
-
-    * Turn off system-default traceback function by set `sys.tracebacklimit` to 0.
-    * But bugs appear in Python 3.6, so we have to set `sys.tracebacklimit` to None.
-    * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
+        * Turn off system-default traceback function by set `sys.tracebacklimit` to 0.
+        * But bugs appear in Python 3.6, so we have to set `sys.tracebacklimit` to None.
+            > this note is deprecated since Python fixed the problem above
+        * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
     def __init__(self, message):
