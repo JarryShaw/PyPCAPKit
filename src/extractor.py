@@ -10,7 +10,6 @@ parametres from a PCAP file.
 import io
 import os
 import pathlib
-import re
 import textwrap
 
 
@@ -27,10 +26,12 @@ from jspcap.validations import bool_check, str_check
 __all__ = ['Extractor']
 
 
-# file name match regex
-FILE = re.compile(r'''
-    \A(.+?)[.](?P<ext>.*)\Z
-''', re.VERBOSE | re.IGNORECASE)
+# import re
+#
+# # file name match regex
+# FILE = re.compile(r'''
+#     \A(.+?)[.](?P<ext>.*)\Z
+# ''', re.VERBOSE | re.IGNORECASE)
 
 
 class Extractor:
@@ -152,12 +153,9 @@ class Extractor:
         if not os.path.isfile(ifnm):
             raise FileNotFound(f"[Errno 2] No such file or directory: '{ifnm}'")
 
-        if fmt == 'html':
-            ext = 'js'
-        elif fmt == 'tree':
-            ext = 'txt'
-        else:
-            ext = fmt
+        if fmt == 'html':   ext = 'js'
+        elif fmt == 'tree': ext = 'txt'
+        else:               ext = fmt
 
         if fout is None:
             if fmt_none:
@@ -169,25 +167,20 @@ class Extractor:
                 ofnm = f'out.{ext}'
         else:
             str_check(fout)
-            path, name = os.path.split(fout)
-            ofmt = FILE.match(name)
-            if ofmt is None:
-                if fmt_none:
-                    raise FormatError('Output format unspecified.')
-                elif files:
-                    ofnm = fout
-                    pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
-                else:
-                    if extension:
-                        ofnm = f'{fout}.{ext}'
-                    else:
-                        ofnm = fout
-            else:
+            name, fext = os.path.splitext(fout)
+            if fext:
                 files = False
                 ofnm = fout
-                fmt = fmt or ofmt.group('ext')
+                fmt = fmt or fext[1:] or None
                 if fmt is None:
                     raise FormatError('Output format unspecified.')
+            elif fmt_none:
+                raise FormatError('Output format unspecified.')
+            elif files:
+                ofnm = fout
+                pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
+            elif extension: ofnm = f'{fout}.{ext}'
+            else:           ofnm = fout
 
         return ifnm, ofnm, fmt, ext, files
 

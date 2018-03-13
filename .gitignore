@@ -1,4 +1,6 @@
 
+*.icloud
+
 out
 *.js
 !out.js
