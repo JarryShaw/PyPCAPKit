@@ -44,6 +44,7 @@ ETHERTYPE = {
     # Link Layer
     '0806' : 'ARP',     # Address Resolution Protocol
     '8035' : 'RARP',    # Reverse Address Resolution Protocol
+    '8100' : 'CTag',    # 802.1Q Customer VLAN Tag Type
 
     # Internet Layer
     '0800' : 'IPv4',    # Internet Protocol version 4
@@ -142,16 +143,16 @@ class Internet(Protocol):
 
         """
         if proto == 'IPv4':
-            from .ipv4 import IPv4 as Protocol
+            from jspcap.protocols.internet.ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
-            from .ipv6 import IPv6 as Protocol
+            from jspcap.protocols.internet.ipv6 import IPv6 as Protocol
         elif proto == 'AH':
-            from .ah import AH
+            from jspcap.protocols.internet.ah import AH
             next_ = AH(self._file, length, version=version)
         elif proto == 'TCP':
-            from ..transport import TCP as Protocol
+            from jspcap.protocols.transport.tcp import TCP as Protocol
         elif proto == 'UDP':
-            from ..transport import UDP as Protocol
+            from jspcap.protocols.transport.udp import UDP as Protocol
         else:
             data = self._file.read(*[length]) or None
             return data, None

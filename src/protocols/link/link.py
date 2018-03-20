@@ -111,21 +111,24 @@ class Link(Protocol):
         Protocols:
             * ARP -- data link layer
             * RARP -- data link layer
+            * CTag -- data link layer
             * IPv4 -- internet layer
             * IPv6 -- internet layer
             * IPX -- internet layer
 
         """
         if proto == 'ARP':
-            from .arp import ARP as Protocol
+            from jspcap.protocols.link.arp import ARP as Protocol
         elif proto == 'RARP':
-            from .rarp import RARP as Protocol
+            from jspcap.protocols.link.rarp import RARP as Protocol
+        elif proto == 'CTag':
+            from jspcap.protocols.link.ctag import CTag as Protocol
         elif proto == 'IPv4':
-            from ..internet import IPv4 as Protocol
+            from jspcap.protocols.internet.ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
-            from ..internet import IPv6 as Protocol
+            from jspcap.protocols.internet.ipv6 import IPv6 as Protocol
         elif proto == 'IPX':
-            from ..internet import IPX as Protocol
+            from jspcap.protocols.internet.ipx import IPX as Protocol
         else:
             data = self._file.read(*[length]) or None
             return data, None

@@ -287,9 +287,10 @@ class IPv4(IP):
 
         _optl = ipv4['hdr_len'] - 20
         if _optl:
-            options = self._read_ipv4_options(_optl)
-            ipv4['opt'] = options[0]    # tuple of option acronyms
-            ipv4.update(options[1])     # merge option info to buffer
+            # options = self._read_ipv4_options(_optl)
+            # ipv4['opt'] = options[0]    # tuple of option acronyms
+            # ipv4.update(options[1])     # merge option info to buffer
+            ipv4['opt'] = self._read_fileng(_optl) or None
 
         hdr_len = ipv4['hdr_len']
         raw_len = ipv4['len'] - hdr_len

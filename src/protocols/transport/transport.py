@@ -15,6 +15,7 @@ protocols, eg. TCP and UDP.
 # Table of corresponding protocols
 
 
+from jspcap.analyser import analyse
 from jspcap.protocols.protocol import Protocol
 
 
@@ -115,5 +116,5 @@ class Transport(Protocol):
             length -- int, valid (not padding) length
 
         """
-        data = self._file.read(*[length]) or None
-        return data, None
+        next_ = analyse(self._file, length)
+        return next_.info, next_.protochain

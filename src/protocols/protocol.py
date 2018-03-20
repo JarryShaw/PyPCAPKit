@@ -213,14 +213,19 @@ class Protocol:
             length -- int, valid (not padding) length
 
         """
-        next_ = self._import_next_layer(proto, length)
+        info, chain = self._import_next_layer(proto, length)
 
         # make next layer protocol name
-        name_ = str(proto  or 'Raw').lower()
+        if proto is None and chain:
+            layer = chain.tuple[-1].lower()
+            proto, chain = chain.tuple[0], None
+            print(proto, chain, ProtoChain(proto, chain))
+        else:
+            layer = str(proto or 'Raw').lower()
 
         # write info and protocol chain into dict
-        dict_[name_] = next_[0]
-        self._protos = ProtoChain(proto, next_[1])
+        dict_[layer] = info
+        self._protos = ProtoChain(proto, chain)
         return dict_
 
     def _import_next_layer(self, proto, length=None):

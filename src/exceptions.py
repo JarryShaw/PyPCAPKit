@@ -24,7 +24,7 @@ __all__ = [
     'FileError',                                                # IOError
     'FileNotFound',                                             # FileNotFoundError
     'ProtocolNotFound',                                         # IndexError
-    'VersionError', 'IndexNotFound',                            # ValueError
+    'VersionError', 'IndexNotFound', 'ProtocolError',           # ValueError
 ]
 
 
@@ -42,7 +42,7 @@ class BaseError(Exception):
         * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
-    def __init__(self, message):
+    def __init__(self, message, *args, **kwargs):
         tb = traceback.extract_stack()
         for tbitem in tb:
             if pathlib.Path(tbitem[0]).match('*/jspcap/*'):
@@ -51,10 +51,13 @@ class BaseError(Exception):
         else:
             index = len(tb)
 
-        print('Traceback (most recent call last):')
-        traceback.print_stack(limit=-index)
+        quiet = kwargs.pop('quiet', None)
+        if not quiet:
+            print('Traceback (most recent call last):')
+            traceback.print_stack(limit=-index)
+
         sys.tracebacklimit = 0
-        super().__init__(message)
+        super().__init__(message, *args, **kwargs)
 
 
 ##############################################################################
@@ -168,4 +171,8 @@ class VersionError(BaseError, ValueError):
 
 class IndexNotFound(BaseError, ValueError):
     """Protocol not in ProtoChain."""
+    pass
+
+class ProtocolError(BaseError, ValueError):
+    """Invalid protocol format."""
     pass
