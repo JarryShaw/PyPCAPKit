@@ -58,14 +58,17 @@ class Analysis:
 
 def analyse(file, length):
     """Analyse application layer packets."""
+    temp = file.tell()
     flag, http = _analyse_httpv1(file, length)
     if flag:
         return Analysis(http.info, http.protochain, http.alias)
 
+    # file.seek(temp)
     # flag, http = _analyse_httpv2(file, length)
     # if flag:
     #     return Analysis(http.info, http.protochain, http.alias)
 
+    file.seek(temp)
     data = file.read(*[length]) or None
     return Analysis(data, None, None)
 
