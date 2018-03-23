@@ -31,12 +31,17 @@ class Analysis:
             return self._ptch.tuple[0]
 
     @property
+    def alias(self):
+        return self._acnm
+
+    @property
     def protochain(self):
         return self._ptch
 
-    def __init__(self, info, ptch):
+    def __init__(self, info, ptch, acnm):
         self._info = info
         self._ptch = ptch
+        self._acnm = acnm
 
     def __str__(self):
         if self._ptch is None:
@@ -53,16 +58,16 @@ class Analysis:
 
 def analyse(file, length):
     """Analyse application layer packets."""
-    flag, httpv1 = _analyse_httpv1(file, length)
+    flag, http = _analyse_httpv1(file, length)
     if flag:
-        return Analysis(httpv1.info, httpv1.protochain)
+        return Analysis(http.info, http.protochain, http.alias)
 
-    # flag, httpv2 = _analyse_httpv2(file, length)
+    # flag, http = _analyse_httpv2(file, length)
     # if flag:
-    #     return Analysis(httpv2.info, httpv2.protochain)
+    #     return Analysis(http.info, http.protochain, http.alias)
 
     data = file.read(*[length]) or None
-    return Analysis(data, None)
+    return Analysis(data, None, None)
 
 
 def _analyse_httpv1(file, length):

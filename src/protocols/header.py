@@ -36,6 +36,7 @@ class Header(Protocol):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * length -- int, header length of global header, i.e. 24
         * version -- VersionInfo, version infomation of input PCAP file
         * protocol -- str, data link type
@@ -53,8 +54,6 @@ class Header(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
 
     """
     ##########################################################################
@@ -157,3 +156,11 @@ class Header(Protocol):
         _byte = self._read_unpack(4, lilendian=True)
         _prot = LINKTYPE.get(_byte)
         return _prot
+
+    def _decode_next_layer(self, dict_, proto=None, length=None):
+        """Deprecated."""
+        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
+
+    def _import_next_layer(self, proto, length):
+        """Deprecated."""
+        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_import_next_layer'")

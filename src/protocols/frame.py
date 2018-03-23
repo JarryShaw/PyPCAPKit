@@ -35,6 +35,7 @@ class Frame(Protocol):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current frame
@@ -182,10 +183,10 @@ class Frame(Protocol):
 
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
-        info, protochain = self._import_next_layer(bytes_, length)
+        info, chain, alias = self._import_next_layer(bytes_, length)
 
         # write info and protocol chain into dict
-        self._protos = ProtoChain(self._prot, protochain)
+        self._protos = ProtoChain(self._prot, chain, alias)
         dict_[proto] = info
         dict_['protocols'] = self._protos.chain
         return dict_
@@ -211,6 +212,6 @@ class Frame(Protocol):
             from .internet import IPv6 as Protocol
         else:
             data = file_.read(*[length]) or None
-            return data, None
+            return data, None, None
         next_ = Protocol(file_, length)
-        return next_.info, next_.protochain
+        return next_.info, next_.protochain, next_.alias

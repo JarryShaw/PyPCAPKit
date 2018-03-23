@@ -157,6 +157,7 @@ class TCP(Transport):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Transport`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol

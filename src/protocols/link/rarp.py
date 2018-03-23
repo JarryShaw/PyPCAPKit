@@ -34,6 +34,7 @@ class RARP(ARP):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protochain -- ProtoChain, protocol chain of current instance
@@ -48,6 +49,8 @@ class RARP(ARP):
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
         * _protos -- ProtoChain, protocol chain of current instance
+        * _acnm -- str, acronym of corresponding procotol
+        * _name -- str, name of corresponding procotol
 
     Utilities:
         * _read_protos -- read next layer protocol type
@@ -60,4 +63,5 @@ class RARP(ARP):
         * _read_proto_resolve -- solve IP address according to protocol
 
     """
+    _acnm = 'RARP'
     _name = 'Reverse Address Resolution Protocol'

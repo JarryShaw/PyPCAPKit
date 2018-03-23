@@ -57,6 +57,7 @@ class OSPF(Link):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protochain -- ProtoChain, protocol chain of current instance

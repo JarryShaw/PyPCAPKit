@@ -11,6 +11,9 @@ protocols, eg. TCP and UDP.
 # TODO: Implements DCCP, RSVP, STCP.
 
 
+import io
+
+
 # Transport Layer Protocols
 # Table of corresponding protocols
 
@@ -117,4 +120,4 @@ class Transport(Protocol):
 
         """
         next_ = analyse(self._file, length)
-        return next_.info, next_.protochain
+        return next_.info, next_.protochain, next_.alias

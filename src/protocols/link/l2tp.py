@@ -35,6 +35,7 @@ class L2TP(Link):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * type -- str, L2TP packet type

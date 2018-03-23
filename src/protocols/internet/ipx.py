@@ -61,6 +61,7 @@ class IPX(Internet):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol

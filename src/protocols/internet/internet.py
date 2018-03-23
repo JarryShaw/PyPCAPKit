@@ -59,6 +59,7 @@ class Internet(Protocol):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -155,6 +156,6 @@ class Internet(Protocol):
             from jspcap.protocols.transport.udp import UDP as Protocol
         else:
             data = self._file.read(*[length]) or None
-            return data, None
+            return data, None, None
         next_ = Protocol(self._file, length)
-        return next_.info, next_.protochain
+        return next_.info, next_.protochain, next_.alias

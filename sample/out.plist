@@ -211,9 +211,9 @@
 						00
 					</data>
 					<key>df</key>
-					<integer>True</integer>
+					<true/>
 					<key>mf</key>
-					<integer>False</integer>
+					<false/>
 				</dict>
 				<key>frag_offset</key>
 				<integer>0</integer>
@@ -248,23 +248,23 @@
 							00 00 00
 						</data>
 						<key>ns</key>
-						<integer>False</integer>
+						<false/>
 						<key>cwr</key>
-						<integer>False</integer>
+						<false/>
 						<key>ecn</key>
-						<integer>False</integer>
+						<false/>
 						<key>urg</key>
-						<integer>False</integer>
+						<false/>
 						<key>ack</key>
-						<integer>True</integer>
+						<true/>
 						<key>push</key>
-						<integer>False</integer>
+						<false/>
 						<key>reset</key>
-						<integer>False</integer>
+						<false/>
 						<key>syn</key>
-						<integer>False</integer>
+						<false/>
 						<key>fin</key>
-						<integer>True</integer>
+						<true/>
 					</dict>
 					<key>window_size</key>
 					<integer>31920</integer>
@@ -340,9 +340,9 @@
 						00
 					</data>
 					<key>df</key>
-					<integer>True</integer>
+					<true/>
 					<key>mf</key>
-					<integer>False</integer>
+					<false/>
 				</dict>
 				<key>frag_offset</key>
 				<integer>0</integer>
@@ -377,23 +377,23 @@
 							00 00 00
 						</data>
 						<key>ns</key>
-						<integer>False</integer>
+						<false/>
 						<key>cwr</key>
-						<integer>False</integer>
+						<false/>
 						<key>ecn</key>
-						<integer>False</integer>
+						<false/>
 						<key>urg</key>
-						<integer>False</integer>
+						<false/>
 						<key>ack</key>
-						<integer>True</integer>
+						<true/>
 						<key>push</key>
-						<integer>False</integer>
+						<false/>
 						<key>reset</key>
-						<integer>False</integer>
+						<false/>
 						<key>syn</key>
-						<integer>False</integer>
+						<false/>
 						<key>fin</key>
-						<integer>False</integer>
+						<false/>
 					</dict>
 					<key>window_size</key>
 					<integer>65535</integer>
@@ -469,9 +469,9 @@
 						00
 					</data>
 					<key>df</key>
-					<integer>True</integer>
+					<true/>
 					<key>mf</key>
-					<integer>False</integer>
+					<false/>
 				</dict>
 				<key>frag_offset</key>
 				<integer>0</integer>
@@ -506,23 +506,23 @@
 							00 00 00
 						</data>
 						<key>ns</key>
-						<integer>False</integer>
+						<false/>
 						<key>cwr</key>
-						<integer>False</integer>
+						<false/>
 						<key>ecn</key>
-						<integer>False</integer>
+						<false/>
 						<key>urg</key>
-						<integer>False</integer>
+						<false/>
 						<key>ack</key>
-						<integer>True</integer>
+						<true/>
 						<key>push</key>
-						<integer>False</integer>
+						<false/>
 						<key>reset</key>
-						<integer>False</integer>
+						<false/>
 						<key>syn</key>
-						<integer>False</integer>
+						<false/>
 						<key>fin</key>
-						<integer>True</integer>
+						<true/>
 					</dict>
 					<key>window_size</key>
 					<integer>65535</integer>
@@ -598,9 +598,9 @@
 						00
 					</data>
 					<key>df</key>
-					<integer>True</integer>
+					<true/>
 					<key>mf</key>
-					<integer>False</integer>
+					<false/>
 				</dict>
 				<key>frag_offset</key>
 				<integer>0</integer>

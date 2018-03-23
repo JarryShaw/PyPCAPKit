@@ -1,8 +1,8 @@
-"""hypertext transfer protocol (HTTP/1.1)
+"""hypertext transfer protocol (HTTP/1.*)
 
 ``jspcap.protocols.application.httpv1`` contains ``HTTPv1``
 only, which implements extractor for Hypertext Transfer
-Protocol (HTTP/1.1), whose structure is described as
+Protocol (HTTP/1.*), whose structure is described as
 below.
 
 METHOD URL HTTP/VERSION\r\n :==: REQUEST LINE
@@ -21,8 +21,8 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 import re
 
 
-# Hypertext Transfer Protocol (HTTP/1.1)
-# Analyser for HTTP/1.1 request & response
+# Hypertext Transfer Protocol (HTTP/1.*)
+# Analyser for HTTP/1.* request & response
 
 
 from jspcap.exceptions import ProtocolError
@@ -40,17 +40,18 @@ _RE_STATUS = re.compile(rb'\d{3}')
 
 
 class HTTPv1(HTTP):
-    """This class implements Hypertext Transfer Protocol (HTTP/1.1).
+    """This class implements Hypertext Transfer Protocol (HTTP/1.*).
 
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Application`
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
 
     Methods:
-        * read_http -- read Hypertext Transfer Protocol (HTTP/1.1)
+        * read_http -- read Hypertext Transfer Protocol (HTTP/1.*)
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
@@ -62,18 +63,28 @@ class HTTPv1(HTTP):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
-        * _read_http_header -- read HTTP/1.1 header
-        * _read_http_body -- read HTTP/1.1 body
+        * _make_protochain -- make ProtoChain instance for corresponding protocol
+        * _read_http_header -- read HTTP/1.* header
+        * _read_http_body -- read HTTP/1.* body
 
     """
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def alias(self):
+        """Acronym of current protocol."""
+        return f'HTTP/{self._info.header[self._info.receipt].version}'
+
     ##########################################################################
     # Methods.
     ##########################################################################
 
     def read_http(self, length):
-        """Read Hypertext Transfer Protocol (HTTP/1.1).
+        """Read Hypertext Transfer Protocol (HTTP/1.*).
 
-        Structure of HTTP/1.1 packet [RFC 7230]:
+        Structure of HTTP/1.* packet [RFC 7230]:
             HTTP-message    :==:    start-line
                                     *( header-field CRLF )
                                     CRLF
@@ -102,9 +113,9 @@ class HTTPv1(HTTP):
     ##########################################################################
 
     def _read_http_header(self, header):
-        """Read HTTP/1.1 header.
+        """Read HTTP/1.* header.
 
-        Structure of HTTP/1.1 header [RFC 7230]:
+        Structure of HTTP/1.* header [RFC 7230]:
             start-line      :==:    request-line / status-line
             request-line    :==:    method SP request-target SP HTTP-version CRLF
             status-line     :==:    HTTP-version SP status-code SP reason-phrase CRLF
@@ -127,18 +138,18 @@ class HTTPv1(HTTP):
             receipt = 'request'
             header = dict(
                 request = dict(
-                    method = para1,
-                    target = para2,
-                    version = match2.group('version'),
+                    method = para1.decode(),
+                    target = para2.decode(),
+                    version = match2.group('version').decode(),
                 ),
             )
         elif match3 and match4:
             receipt = 'response'
             header = dict(
                 response = dict(
-                    version = match3.group('version'),
-                    status = para2,
-                    phrase = para3,
+                    version = match3.group('version').decode(),
+                    status = para2.decode(),
+                    phrase = para3.decode(),
                 ),
             )
         else:
@@ -148,13 +159,13 @@ class HTTPv1(HTTP):
             for item in list_:
                 key = item[0];  value = item[1]
                 if key in ('request', 'response'):
-                    key = f'{key}_field'
-                header[key] = value
+                    key = f'{key.decode()}_field'
+                header[key.decode()] = value.decode()
         except IndexError:
             raise ProtocolError(f'{self.__class__.__name__}: invalid format', quiet=True)
 
         return header, receipt
 
     def _read_http_body(self, body):
-        """Read HTTP/1.1 body."""
+        """Read HTTP/1.* body."""
         return body

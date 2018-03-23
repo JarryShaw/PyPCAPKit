@@ -38,8 +38,8 @@ OPER = {
     0 : 'Reserved',         # [RFC 5494]
     1 : 'REQUEST',          # [RFC 826][RFC 5227]
     2 : 'REPLY',            # [RFC 826][RFC 5227]
-    3 : 'request Reverse',  # [RFC 826][RFC 5227]
-    4 : 'reply Reverse',    # [RFC 903]
+    3 : 'Request Reverse',  # [RFC 826][RFC 5227]
+    4 : 'Reply Reverse',    # [RFC 903]
     5 : 'DRARP-Request',    # [RFC 1931]
     6 : 'DRARP-Reply',      # [RFC 1931]
     7 : 'DRARP-Error',      # [RFC 1931]
@@ -56,11 +56,12 @@ class ARP(Link):
      - Address Resolution Protocol (ARP) [RFC 826]
      - Reverse Address Resolution Protocol (RARP) [RFC 903]
      - Dynamic Reverse Address Resolution Protocol (DRARP) [RFC 1931]
-     - Inverse Address Resolution Protocol (IARP) [RFC 2390]
+     - Inverse Address Resolution Protocol (InARP) [RFC 2390]
 
      Properties:
          * name -- str, name of corresponding procotol
          * info -- Info, info dict of current instance
+         * alias -- str, acronym of corresponding procotol
          * layer -- str, `Link`
          * length -- int, header length of corresponding protocol
          * protocol -- str, name of next layer protocol
@@ -76,6 +77,8 @@ class ARP(Link):
          * _file -- BytesIO, bytes to be extracted
          * _info -- Info, info dict of current instance
          * _protos -- ProtoChain, protocol chain of current instance
+         * _acnm -- str, acronym of corresponding procotol
+         * _name -- str, name of corresponding procotol
 
      Utilities:
          * _read_protos -- read next layer protocol type
@@ -96,6 +99,11 @@ class ARP(Link):
     def name(self):
         """Name of current protocol."""
         return self._name
+
+    @property
+    def alias(self):
+        """Acronym of corresponding procotol."""
+        return self._acnm
 
     @property
     def length(self):
@@ -147,10 +155,16 @@ class ARP(Link):
         _tpta = self._read_proto_resolve(_plen, _ptty)
 
         if _oper in (5, 6, 7):
+            self._acnm = 'DRARP'
             self._name = 'Dynamic Reverse Address Resolution Protocol'
         elif _oper in (8, 9):
+            self._acnm = 'InARP'
             self._name = 'Inverse Address Resolution Protocol'
+        elif _oper in (3, 4):
+            self._acnm = 'RARP'
+            self._name = 'Reverse Address Resolution Protocol'
         else:
+            self._acnm = 'ARP'
             self._name = 'Address Resolution Protocol'
 
         arp = dict(

@@ -55,6 +55,7 @@ class Link(Protocol):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -133,4 +134,4 @@ class Link(Protocol):
             data = self._file.read(*[length]) or None
             return data, None
         next_ = Protocol(self._file, length)
-        return next_.info, next_.protochain
+        return next_.info, next_.protochain, next_.alias

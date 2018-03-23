@@ -43,6 +43,7 @@ class Application(Protocol):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Application`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -58,6 +59,7 @@ class Application(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _make_protochain -- make ProtoChain instance for corresponding protocol
 
     """
     __layer__ = 'Application'
@@ -73,17 +75,12 @@ class Application(Protocol):
         return self.__layer__
 
     ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __new__(cls, *args, **kwargs):
-        self = super().__new__(cls, *args, **kwargs)
-        self._protos = ProtoChain(self.__class__.__name__)
-        return self
-
-    ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _make_protochain(self):
+        """Make ProtoChain instance for corresponding protocol."""
+        self._protos = ProtoChain(self.__class__.__name__, None, self.alias)
 
     def _decode_next_layer(self, dict_, proto=None, length=None):
         """Deprecated."""

@@ -12,6 +12,7 @@ import copy
 import functools
 import numbers
 import os
+import re
 
 
 # Utility Functions & Classes
@@ -23,6 +24,14 @@ from jspcap.validations import dict_check, int_check
 
 
 __all__ = ['seekset', 'Info', 'VersionInfo', 'ProtoChain']
+
+
+# protocol name replace
+_NAME_REPLACE = {
+    '802.1q'    : 'ctag',
+    'http/1.1'  : 'httpv1',
+    'http/2'    : 'httpv2',
+}
 
 
 def seekset(func):
@@ -58,7 +67,7 @@ class Info(dict):
                     __dict__[key] = Info(value)
                 else:
                     if isinstance(key, str):
-                        key = key.replace('-', '_')
+                        key = re.sub('\W', '_', key)
                     __dict__[key] = value
             return __dict__
 
@@ -194,7 +203,7 @@ class ProtoChain:
             stop = stop or -1
 
             if isinstance(name, str):
-                name = name.lower()
+                name = _NAME_REPLACE.get(name.lower(), name.lower())
             if isinstance(start, str):
                 start = self.index(start)
             if isinstance(stop, str):
@@ -208,15 +217,16 @@ class ProtoChain:
     # Data modules.
     ##########################################################################
 
-    def __init__(self, proto, other=None):
+    def __init__(self, proto, other=None, alias=None):
+        proto = alias or proto
         if other is None:
             self.__data__ = (proto,)
         else:
             self.__data__ = (proto,) + other.tuple
 
     def __repr__(self):
-        proto = ', '.join(self.proto)
-        return f'ProtoChain({proto})'
+        repr_ = ', '.join(self.proto)
+        return f'ProtoChain({repr_})'
 
     def __str__(self):
         for (i, proto) in enumerate(self.__data__):
@@ -236,6 +246,8 @@ class ProtoChain:
                 stop = self.index(stop)
             int_check(start, stop, step)
             key = slice(start, stop, step)
+        elif isinstance(key, numbers.Number):
+            key = key
         else:
             key = self.index(key)
         return self.__data__[key]

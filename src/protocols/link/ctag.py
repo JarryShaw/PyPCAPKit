@@ -44,6 +44,7 @@ class CTag(Link):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protocol -- str, next layer protocol
@@ -71,6 +72,11 @@ class CTag(Link):
     def name(self):
         """Name of current protocol."""
         return '802.1Q Customer VLAN Tag Type'
+
+    @property
+    def alias(self):
+        """Acronym of corresponding procotol."""
+        return '802.1Q'
 
     @property
     def length(self):

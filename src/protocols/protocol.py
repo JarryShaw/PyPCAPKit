@@ -38,6 +38,7 @@ class Protocol:
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
@@ -67,6 +68,12 @@ class Protocol:
     def name(self):
         """Name of current protocol."""
         pass
+
+    # acronym of current protocol
+    @property
+    def alias(self):
+        """Acronym of current protocol."""
+        return self.__class__.__name__
 
     # info dict of current instance
     @property
@@ -213,19 +220,18 @@ class Protocol:
             length -- int, valid (not padding) length
 
         """
-        info, chain = self._import_next_layer(proto, length)
+        info, chain, alias = self._import_next_layer(proto, length)
 
         # make next layer protocol name
         if proto is None and chain:
-            layer = chain.tuple[-1].lower()
+            layer = chain.tuple[0].lower()
             proto, chain = chain.tuple[0], None
-            print(proto, chain, ProtoChain(proto, chain))
         else:
             layer = str(proto or 'Raw').lower()
 
         # write info and protocol chain into dict
         dict_[layer] = info
-        self._protos = ProtoChain(proto, chain)
+        self._protos = ProtoChain(proto, chain, alias)
         return dict_
 
     def _import_next_layer(self, proto, length=None):
@@ -237,4 +243,4 @@ class Protocol:
 
         """
         data = file_.read(*[length]) or None
-        return data, None
+        return data, None, None

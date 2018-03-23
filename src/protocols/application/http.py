@@ -27,6 +27,7 @@ class HTTP(Application):
     Properties:
         * name -- str, name of corresponding procotol
         * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
         * layer -- str, `Application`
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
@@ -41,6 +42,7 @@ class HTTP(Application):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _make_protochain -- make ProtoChain instance for corresponding protocol
 
     """
     ##########################################################################
@@ -64,6 +66,7 @@ class HTTP(Application):
     def __init__(self, _file, length=None):
         self._file = _file
         self._info = Info(self.read_http(length))
+        self._make_protochain()
 
     def __len__(self):
         raise UnsupportedCall(f"object of type '{self.__class__.__name__}' has no len()")
