@@ -33,7 +33,7 @@ import struct
 # Analyser for TCP header
 
 
-from jspcap.utilities import Info
+from jspcap.utilities import Info, seekset
 from jspcap.protocols.transport.transport import Transport
 
 
@@ -180,6 +180,7 @@ class TCP(Transport):
         * _read_binary -- read bytes and convert into binaries
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
+        * _read_tcp_seekset -- when fragmented, read payload throughout first
         * _read_tcp_options -- read TCP option list
         * _read_mode_donone -- read options request no process
         * _read_mode_unpack -- read options request unpack process
@@ -314,14 +315,16 @@ class TCP(Transport):
             urgent_pointer = _urgp,
         )
 
-        _optl = tcp['hdr_len'] - 20
+        _hlen = tcp['hdr_len']
+        _optl = _hlen - 20
         if _optl:
             options = self._read_tcp_options(_optl)
             tcp['opt'] = options[0]     # tuple of option acronyms
             tcp.update(options[1])      # merge option info to buffer
 
-        if length is not None:
-            length -= tcp['hdr_len']
+        tcp['raw'] = self._read_tcp_seekset(_hlen)
+        if length:
+            length -= _hlen
         return self._decode_next_layer(tcp, None, length)
 
     ##########################################################################
@@ -341,6 +344,17 @@ class TCP(Transport):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @seekset
+    def _read_tcp_seekset(self, length):
+        """When fragmented, read payload throughout first.
+
+        Keyword arguments:
+            * length -- int, raw payload length
+
+        """
+        payload = self._read_fileng(length) or None
+        return payload
 
     def _read_tcp_options(self, size):
         """Read TCP option list.
