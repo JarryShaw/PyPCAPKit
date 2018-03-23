@@ -117,14 +117,18 @@ class Internet(Protocol):
                         <4 / 6>
 
         """
-        next_ = self._import_next_layer(proto, length, version=version)
+        info, chain, alias = self._import_next_layer(proto, length, version=version)
 
         # make next layer protocol name
-        name_ = str(proto  or 'Raw').lower()
+        if proto is None and chain:
+            layer = chain.tuple[0].lower()
+            proto, chain = chain.tuple[0], None
+        else:
+            layer = str(proto or 'Raw').lower()
 
         # write info and protocol chain into dict
-        dict_[name_] = next_[0]
-        self._protos = ProtoChain(proto, next_[1])
+        dict_[layer] = info
+        self._protos = ProtoChain(proto, chain, alias)
         return dict_
 
     def _import_next_layer(self, proto, length=None, version=4):
@@ -143,13 +147,14 @@ class Internet(Protocol):
             * UDP -- transport layer
 
         """
-        if proto == 'IPv4':
+        if proto == 'AH':
+            from jspcap.protocols.internet.ah import AH
+            next_ = AH(self._file, length, version=version)
+            return next_.info, next_.protochain, next_.alias
+        elif proto == 'IPv4':
             from jspcap.protocols.internet.ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
             from jspcap.protocols.internet.ipv6 import IPv6 as Protocol
-        elif proto == 'AH':
-            from jspcap.protocols.internet.ah import AH
-            next_ = AH(self._file, length, version=version)
         elif proto == 'TCP':
             from jspcap.protocols.transport.tcp import TCP as Protocol
         elif proto == 'UDP':

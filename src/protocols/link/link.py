@@ -132,6 +132,6 @@ class Link(Protocol):
             from jspcap.protocols.internet.ipx import IPX as Protocol
         else:
             data = self._file.read(*[length]) or None
-            return data, None
+            return data, None, None
         next_ = Protocol(self._file, length)
         return next_.info, next_.protochain, next_.alias

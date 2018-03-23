@@ -17,7 +17,7 @@ import textwrap
 # Extract parametres from a PCAP file
 
 
-from jspcap.exceptions import FormatError, FileNotFound
+from jspcap.exceptions import FormatError, FileNotFound, UnsupportedCall, IterableError
 from jspcap.protocols import Frame, Header
 from jspcap.utilities import Info
 from jspcap.validations import bool_check, str_check
@@ -59,6 +59,7 @@ class Extractor:
         * _auto -- bool, if run automatically to the end
         * _ifnm -- str, input file name (aka _ifile.name)
         * _ofnm -- str, output file name (aka _ofile.name)
+        * _type -- str, output file kind (aka _ofile.kind)
         * _fext -- str, output file extension
 
         * _ifile -- FileIO, input file object
@@ -107,7 +108,10 @@ class Extractor:
 
     @property
     def format(self):
-        return self._ofile.kind
+        if self._flag_q:
+            raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'format'")
+        else:
+            return self._type
 
     @property
     def input(self):
@@ -115,7 +119,10 @@ class Extractor:
 
     @property
     def output(self):
-        return self._ofnm
+        if self._flag_q:
+            raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'format'")
+        else:
+            return self._ofnm
 
     @property
     def header(self):
@@ -139,11 +146,7 @@ class Extractor:
     ##########################################################################
 
     @classmethod
-    def make_name(cls, fin, fout, fmt, extension, *, files=False):
-        fmt_none = (fmt is None)
-        if not fmt_none:
-            str_check(fmt)
-
+    def make_name(cls, fin, fout, fmt, extension, *, files=False, nofile=False):
         if fin is None:
             ifnm = 'in.pcap'
         else:
@@ -153,34 +156,42 @@ class Extractor:
         if not os.path.isfile(ifnm):
             raise FileNotFound(f"[Errno 2] No such file or directory: '{ifnm}'")
 
-        if fmt == 'html':   ext = 'js'
-        elif fmt == 'tree': ext = 'txt'
-        else:               ext = fmt
-
-        if fout is None:
-            if fmt_none:
-                raise FormatError('Output format unspecified.')
-            elif files:
-                ofnm = 'out'
-                pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
-            else:
-                ofnm = f'out.{ext}'
+        if nofile:
+            ofnm = None
+            ext = None
         else:
-            str_check(fout)
-            name, fext = os.path.splitext(fout)
-            if fext:
-                files = False
-                ofnm = fout
-                fmt = fmt or fext[1:] or None
-                if fmt is None:
+            fmt_none = (fmt is None)
+            if not fmt_none:
+                str_check(fmt)
+
+            if fmt == 'html':   ext = 'js'
+            elif fmt == 'tree': ext = 'txt'
+            else:               ext = fmt
+
+            if fout is None:
+                if fmt_none:
                     raise FormatError('Output format unspecified.')
-            elif fmt_none:
-                raise FormatError('Output format unspecified.')
-            elif files:
-                ofnm = fout
-                pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
-            elif extension: ofnm = f'{fout}.{ext}'
-            else:           ofnm = fout
+                elif files:
+                    ofnm = 'out'
+                    pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
+                else:
+                    ofnm = f'out.{ext}'
+            else:
+                str_check(fout)
+                name, fext = os.path.splitext(fout)
+                if fext:
+                    files = False
+                    ofnm = fout
+                    fmt = fmt or fext[1:] or None
+                    if fmt is None:
+                        raise FormatError('Output format unspecified.')
+                elif fmt_none:
+                    raise FormatError('Output format unspecified.')
+                elif files:
+                    ofnm = fout
+                    pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
+                elif extension: ofnm = f'{fout}.{ext}'
+                else:           ofnm = fout
 
         return ifnm, ofnm, fmt, ext, files
 
@@ -196,11 +207,14 @@ class Extractor:
         self._gbhdr = Header(self._ifile)
         self._dlink = self._gbhdr.protocol
         self._vinfo = self._gbhdr.info
-        if self._flag_f:
-            ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
-            ofile(self._gbhdr.info, name='Global Header')
-        else:
-            self._ofile(self._gbhdr.info, name='Global Header')
+        if not self._flag_q:
+            if self._flag_f:
+                ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
+                ofile(self._gbhdr.info, name='Global Header')
+                self._type = ofile.kind
+            else:
+                self._ofile(self._gbhdr.info, name='Global Header')
+                self._type = self._ofile.kind
 
     def record_frames(self):
         if self._auto:
@@ -219,8 +233,9 @@ class Extractor:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fin=None, fout=None, format=None, auto=True, files=False,
-                    extension=True, ip=False, ipv4=False, ipv6=False, tcp=False, verbose=False):
+    def __init__(self, *, fin=None, fout=None, format=None,
+                            auto=True, extension=True, files=False, nofile=False,
+                            ip=False, ipv4=False, ipv6=False, tcp=False, verbose=False):
         """Initialise PCAP Reader.
 
         Keyword arguments:
@@ -236,6 +251,9 @@ class Extractor:
 
             files -- bool, if split each frame into different files (default is False)
                         <keyword> True / False
+            nofile -- bool, if no output file is to be dumped (default is False)
+                        <keyword> True / False
+
             verbose -- bool, if print verbose output information (default is True)
                         <keyword> True / False
 
@@ -249,22 +267,8 @@ class Extractor:
                     <keyword> True / False
 
         """
-        bool_check(ip, ipv4, ipv6, tcp, auto, files, extension, verbose)
-        ifnm, ofnm, fmt, ext, files = self.make_name(fin, fout, format, extension, files=files)
-
-        if fmt == 'plist':
-            from jsformat import PLIST as output     # output PLIST file
-        elif fmt == 'json':
-            from jsformat import JSON as output       # output JSON file
-        elif fmt == 'tree':
-            from jsformat import Tree as output       # output treeview text file
-        elif fmt == 'html':
-            from jsformat import JavaScript as output # output JavaScript file
-            fmt = 'js'
-        elif fmt == 'xml':
-            from jsformat import XML as output         # output XML file
-        else:
-            raise FormatError(f'Unsupported output format: {fmt}')
+        bool_check(ip, ipv4, ipv6, tcp, auto, extension, files, nofile, verbose)
+        ifnm, ofnm, fmt, ext, files = self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
 
         self._ifnm = ifnm               # input file name
         self._ofnm = ofnm               # output file name
@@ -272,6 +276,7 @@ class Extractor:
 
         self._flag_f = files            # split file flag
         self._flag_v = verbose          # verbose output flag
+        self._flag_q = nofile           # no output flag
 
         self._auto = auto               # auto extract flag
         self._frnum = 1                 # frame number
@@ -281,16 +286,30 @@ class Extractor:
         self._ipv6 = ipv6 or ip         # IPv6 Reassembly
         self._tcp = tcp                 # TCP Reassembly
 
-        self._ifile = open(ifnm, 'rb')  # input file
-        self._ofile = output if self._flag_f else output(ofnm)
-                                        # output file
+        self._ifile = open(ifnm, 'rb')                      # input file
+        if not self._flag_q:
+            if fmt == 'plist':
+                from jsformat import PLIST as output        # output PLIST file
+            elif fmt == 'json':
+                from jsformat import JSON as output         # output JSON file
+            elif fmt == 'tree':
+                from jsformat import Tree as output         # output treeview text file
+            elif fmt == 'html':
+                from jsformat import JavaScript as output   # output JavaScript file
+                fmt = 'js'
+            elif fmt == 'xml':
+                from jsformat import XML as output          # output XML file
+            else:
+                raise FormatError(f'Unsupported output format: {fmt}')
+            self._ofile = output if self._flag_f else output(ofnm)
+                                                            # output file
 
         self.record_header()            # read PCAP global header
         self.record_frames()            # read frames
 
     def __iter__(self):
         if self._auto:
-            raise TypeError("'Extractor_auto' object is not iterable")
+            raise IterableError("'Extractor(auto=True)' object is not iterable")
         else:
             return self
 
@@ -329,25 +348,24 @@ class Extractor:
 
         # write plist
         frnum = f'Frame {self._frnum}'
-        if self._flag_f:
-            ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-            ofile(frame.info, name=frnum)
-        else:
-            self._ofile(frame.info, name=frnum)
+        if not self._flag_q:
+            if self._flag_f:
+                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                ofile(frame.info, name=frnum)
+            else:
+                self._ofile(frame.info, name=frnum)
 
-        # record frame
-        protos = frame.protochain
-        tuple_ = protos.tuple
+        # record frames
+        self._frnum += 1
+        self._proto = frame.protochain.chain
 
+        # record fragments
         if self._tcp:
             self._tcp_reassembly(frame)
         if self._ipv4:
             self._ipv4_reassembly(frame)
         if self._ipv6:
             self._ipv6_reassembly(frame)
-
-        self._frnum += 1
-        self._proto = protos.chain
 
     def _tcp_reassembly(self, frame):
         """Store data for TCP reassembly."""

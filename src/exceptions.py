@@ -18,7 +18,7 @@ import traceback
 __all__ = [
     'BaseError',                                                # Exception
     'DigitError', 'IntError', 'RealError', 'ComplexError',      # TypeError
-    'BoolError', 'BytesError', 'StringError',                   # TypeError
+    'BoolError', 'BytesError', 'StringError', 'IterableError',  # TypeError
     'DictError', 'ListError', 'TupleError', 'ProtocolUnbound',  # TypeError
     'FormatError', 'UnsupportedCall',                           # AttributeError
     'FileError',                                                # IOError
@@ -111,6 +111,11 @@ class ListError(BaseError, TypeError):
 
 class TupleError(BaseError, TypeError):
     """The argument(s) must be tuple type."""
+    pass
+
+
+class IterableError(BaseError, TypeError):
+    """The argument(s) must be iterable."""
     pass
 
 

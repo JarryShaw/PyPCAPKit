@@ -12,7 +12,7 @@ import textwrap
 os.system('> ../sample/out')
 
 tree = jspcap.Extractor(
-    fin='../sample/test.pcap', fout='../sample/test', format='tree', ip=False, tcp=True, verbose=True, files=True
+    fin='../sample/test.pcap', fout='../sample/test', format='tree', ip=False, tcp=True, verbose=True, nofile=True,
 )
 # pprint.pprint(tree.frame)
 
