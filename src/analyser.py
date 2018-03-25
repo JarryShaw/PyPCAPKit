@@ -17,6 +17,9 @@ from jspcap.exceptions import ProtocolError
 from jspcap.utilities import ProtoChain
 
 
+__all__ = ['analyse']
+
+
 class Analysis:
     """Analyse report."""
     @property
@@ -63,10 +66,10 @@ def analyse(file, length):
     if flag:
         return Analysis(http.info, http.protochain, http.alias)
 
-    # file.seek(temp)
-    # flag, http = _analyse_httpv2(file, length)
-    # if flag:
-    #     return Analysis(http.info, http.protochain, http.alias)
+    file.seek(temp)
+    flag, http = _analyse_httpv2(file, length)
+    if flag:
+        return Analysis(http.info, http.protochain, http.alias)
 
     file.seek(temp)
     data = file.read(*[length]) or None

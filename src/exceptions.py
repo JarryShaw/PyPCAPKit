@@ -7,6 +7,7 @@ exception raised on user's operation.
 
 """
 import pathlib
+import struct
 import sys
 import traceback
 
@@ -25,6 +26,7 @@ __all__ = [
     'FileNotFound',                                             # FileNotFoundError
     'ProtocolNotFound',                                         # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',           # ValueError
+    'StructError',                                              # struct.error
 ]
 
 
@@ -180,4 +182,13 @@ class IndexNotFound(BaseError, ValueError):
 
 class ProtocolError(BaseError, ValueError):
     """Invalid protocol format."""
+    pass
+
+
+##############################################################################
+# struct.error session.
+##############################################################################
+
+class StructError(BaseError, struct.error):
+    """Unpack failed."""
     pass

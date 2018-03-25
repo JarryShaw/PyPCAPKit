@@ -24,7 +24,7 @@ whose structure is described as below.
 # Analyser for AH header
 
 
-from jspcap.exceptions import VersionError
+from jspcap.exceptions import VersionError, ProtocolError
 from jspcap.protocols.internet.ipsec import IPsec
 
 
@@ -106,7 +106,7 @@ class AH(IPsec):
             Octets          Bits          Name                Discription
               0              0          ah.next         Next Header
               1              8          ah.hdr_len      Payload Length
-              2              16         ah.resv         Reserved (must be zero)
+              2              16         -               Reserved (must be zero)
               4              32         ah.spi          Security Parameters Index (SPI)
               8              64         ah.seq          Sequence Number Field
               12             96         ah.icv          Integrity Check Value (ICV)
@@ -126,7 +126,6 @@ class AH(IPsec):
         ah = dict(
             next = _next,
             hdr_len = _tlen,
-            resv = _resv,
             spi = _scpi,
             seq = dsnf,
             icv = _chkv,
@@ -140,7 +139,9 @@ class AH(IPsec):
             raise VersionError(f'Unknown IP version {version}')
 
         if _plen:   # explicit padding in need
-            ah['padding'] = self._read_fileng(_plen)
+            padding self._read_binary(_plen)
+            if any((int(bit, base=2) for bit in padding)):
+                raise ProtocolError(f'{self.alias}: invalid format')
         if length is not None:
             length -= ah['hdr_len']
         return self._decode_next_layer(ah, _next, length)

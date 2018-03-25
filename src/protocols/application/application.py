@@ -3,7 +3,7 @@
 
 ``jspcap.protocols.application.application`` contains only
 ``Application``, which is a base class for application
-layer protocols, eg. HTTPv1 and etc.
+layer protocols, eg. HTTPv1, HTTPv2 and etc.
 
 """
 # TODO: Implements BGP, DHCP, DNS, FTP, HTTP/2, IMAP, IDAP, MQTT, NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, SSL, TELNET, TLS, XMPP.

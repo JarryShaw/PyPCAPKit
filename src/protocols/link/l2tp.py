@@ -104,12 +104,12 @@ class L2TP(Link):
               0              0          l2tp.flags        Flags and Version Info
               0              0          l2tp.flags.type   Type (0/1)
               0              1          l2tp.flags.len    Length
-              0              2          l2tp.flags.res    Reserved (must be zero)
+              0              2          -                 Reserved (must be zero)
               0              4          l2tp.flags.seq    Sequence
-              0              5          l2tp.flags.x      Reserved (must be zero)
+              0              5          -                 Reserved (must be zero)
               0              6          l2tp.flags.offset Offset
               0              7          l2tp.flags.prio   Priority
-              1              8          l2tp.resv         Reserved (must be zero)
+              1              8          -                 Reserved (must be zero)
               1              12         l2tp.ver          Version (2)
               2              16         l2tp.length       Length (optional by len)
               4              32         l2tp.tunnelid     Tunnel ID
@@ -132,13 +132,10 @@ class L2TP(Link):
             flags = dict(
                 type = 'Control' if int(_flag[0]) else 'Data',
                 len = True if int(_flag[1]) else False,
-                res = b'\x00\x00',
                 seq = True if int(_flag[4]) else False,
-                x = b'\x00',
                 offset = True if int(_flag[6]) else False,
                 prio = True if int(_flag[7]) else False,
             ),
-            resv = b'\x00' * 4,
             ver = int(_vers, base=16),
             length = _hlen,
             tunnelid = _tnnl,

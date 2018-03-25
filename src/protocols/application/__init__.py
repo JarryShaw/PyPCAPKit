@@ -11,9 +11,10 @@ from jspcap.protocols.application.application import Application
 
 # Utility Classes for Protocols
 from jspcap.protocols.application.httpv1 import HTTPv1
+from jspcap.protocols.application.httpv2 import HTTPv2
 
 # Deprecated / Base Classes
 from jspcap.protocols.application.http import HTTP
 
 
-__all__ = ['HTTPv1']
+__all__ = ['HTTPv1', 'HTTPv2']

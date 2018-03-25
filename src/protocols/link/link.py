@@ -98,7 +98,7 @@ class Link(Protocol):
             size  -- int, buffer size
 
         """
-        _byte = self._read_fileng(size).hex()
+        _byte = self._read_unpack(size)
         _prot = ETHERTYPE.get(_byte)
         return _prot
 

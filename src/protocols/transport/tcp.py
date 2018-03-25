@@ -266,7 +266,7 @@ class TCP(Transport):
               4              32         tcp.seq                 Sequence Number
               8              64         tcp.ack                 Acknowledgment Number (if ACK set)
               12             96         tcp.hdr_len             Data Offset
-              12             100        tcp.flags.res           Reserved (must be zero)
+              12             100        -                       Reserved (must be zero)
               12             103        tcp.flags.ns            ECN Concealment Protection (NS)
               13             104        tcp.flags.cwr           Congestion Window Reduced (CWR)
               13             105        tcp.flags.ecn           ECN-Echo (ECE)
@@ -299,7 +299,6 @@ class TCP(Transport):
             ack = _ackn,
             hdr_len = int(_lenf[:4], base=2) * 4,
             flags = dict(
-                res = b'\x00\x00\x00',
                 ns = True if int(_lenf[7]) else False,
                 cwr = True if int(_flag[0]) else False,
                 ecn = True if int(_flag[1]) else False,
@@ -577,11 +576,11 @@ class TCP(Transport):
             Octets          Bits            Name                        Discription
               0              0          tcp.qs.kind                 Kind (27)
               1              8          tcp.qs.length               Length (8)
-              2             16          tcp.qs.resv                 Reserved (must be zero)
+              2             16          -                           Reserved (must be zero)
               2             20          tcp.qs.req_rate             Request Rate
               3             24          tcp.qs.ttl_diff             TTL Difference
               4             32          tcp.qs.nounce               QS Nounce
-              7             62          tcp.qs.res                  Reserved (must be zero)
+              7             62          -                           Reserved (must be zero)
 
         """
         rvrr = self._read_binary(1)
@@ -591,11 +590,9 @@ class TCP(Transport):
         data = dict(
             kind = kind,
             length = size,
-            resv = b'\x00' * 4,
             req_rate = int(rvrr[4:], base=2),
             ttl_diff = ttld,
             nounce = noun[:-2],
-            res = b'\x00\x00',
         )
 
         return data
@@ -836,7 +833,7 @@ class TCP(Transport):
               0              0          tcp.mp.kind                 Kind (30)
               1              8          tcp.mp.length               Length (12)
               2             16          tcp.mp.subtype              Subtype (1|SYN)
-              2             20          tcp.mp.join.syn.res         Reserved (must be zero)
+              2             20          -                           Reserved (must be zero)
               2             23          tcp.mp.join.syn.backup      Backup Path (B)
               3             24          tcp.mp.join.syn.addrid      Address ID
               4             32          tcp.mp.join.syn.token       Receiver's Token
@@ -853,7 +850,6 @@ class TCP(Transport):
             subtype = 'MP_JOIN-SYN',
             join = dict(
                 syn = dict(
-                    res = b'\x00\x00\x00',
                     backup = True if int(bits[3]) else False,
                     addrid = adid,
                     token = rtkn,
@@ -890,7 +886,7 @@ class TCP(Transport):
               0              0          tcp.mp.kind                    Kind (30)
               1              8          tcp.mp.length                  Length (16)
               2             16          tcp.mp.subtype              Subtype (1|SYN/ACK)
-              2             20          tcp.mp.join.synack.res      Reserved (must be zero)
+              2             20          -                           Reserved (must be zero)
               2             23          tcp.mp.join.synack.backup   Backup Path (B)
               3             24          tcp.mp.join.synack.addrid   Address ID
               4             32          tcp.mp.join.synack.hmac     Sender's Truncated HMAC
@@ -907,7 +903,6 @@ class TCP(Transport):
             subtype = 'MP_JOIN-SYN/ACK',
             join = dict(
                 synack = dict(
-                    res = b'\x00\x00\x00',
                     backup = True if int(bits[3]) else False,
                     addrid = adid,
                     hmac = hmac,
@@ -944,7 +939,7 @@ class TCP(Transport):
               0              0          tcp.mp.kind                    Kind (30)
               1              8          tcp.mp.length                  Length (24)
               2             16          tcp.mp.subtype              Subtype (1|ACK)
-              2             20          tcp.mp.join.ack.res         Reserved (must be zero)
+              2             20          -                           Reserved (must be zero)
               4             32          tcp.mp.join.ack.hmac        Sender's HMAC
 
         """
@@ -955,7 +950,6 @@ class TCP(Transport):
             subtype = 'MP_JOIN-ACK',
             join = dict(
                 ack = dict(
-                    res = b'\x00' * 12,
                     hmac = temp,
                 ),
             ),
@@ -1003,7 +997,7 @@ class TCP(Transport):
               0              0          tcp.mp.kind                 Kind (30)
               1              8          tcp.mp.length               Length
               2             16          tcp.mp.subtype              Subtype (2)
-              2             20          tcp.mp.dss.flags.res        Reserved (must be zero)
+              2             20          -                           Reserved (must be zero)
               3             27          tcp.mp.dss.flags.fin        DATA_FIN (F)
               3             28          tcp.mp.dss.flags.dsn_len    DSN Length (m)
               3             29          tcp.mp.dss.flags.data_pre   DSN, SSN, Data-Level Length, CHKSUM Present (M)
@@ -1033,7 +1027,6 @@ class TCP(Transport):
             subtype = 'DSS',
             dss = dict(
                 flags = dict(
-                    res = b'\x00' * 7,
                     fin = True if int(bits[3]) else False,
                     dsn_len = mflg,
                     data_pre = Mflg,
@@ -1167,7 +1160,7 @@ class TCP(Transport):
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length
               2             16          tcp.opt.mp.subtype              Subtype (4)
-              2             20          tcp.opt.mp.removeaddr.res       Reserved (must be zero)
+              2             20          -                               Reserved (must be zero)
               3             24          tcp.opt.mp.removeaddr.addrid    Address ID (optional list)
 
         """
@@ -1178,7 +1171,6 @@ class TCP(Transport):
         data = dict(
             subtype = 'REMOVE_ADDR',
             removeaddr = dict(
-                res = b'\x00' * 4,
                 addrid = adid or None,
             ),
         )
@@ -1242,7 +1234,7 @@ class TCP(Transport):
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12)
               2             16          tcp.opt.mp.subtype              Subtype (6)
-              2             23          tcp.opt.mp.fail.res             Reserved (must be zero)
+              2             23          -                               Reserved (must be zero)
               4             32          tcp.opt.mp.fail.dsn             Data Sequence Number
 
         """
@@ -1252,7 +1244,6 @@ class TCP(Transport):
         data = dict(
             subtype = 'MP_FAIL',
             fail = dict(
-                res = b'\x00' * 12,
                 dsn = dsn_,
             ),
         )
@@ -1282,7 +1273,7 @@ class TCP(Transport):
               0              0          tcp.opt.kind                    Kind (30)
               1              8          tcp.opt.length                  Length (12)
               2             16          tcp.opt.mp.subtype              Subtype (7)
-              2             23          tcp.opt.mp.fastclose.res        Reserved (must be zero)
+              2             23          -                               Reserved (must be zero)
               4             32          tcp.opt.mp.fastclose.rkey       Option Receiver's Key
 
         """
@@ -1292,7 +1283,6 @@ class TCP(Transport):
         data = dict(
             subtype = 'MP_FASTCLOSE',
             fastclose = dict(
-                res = b'\x00' * 12,
                 rkey = rkey,
             ),
         )

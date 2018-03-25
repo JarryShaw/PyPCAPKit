@@ -19,8 +19,8 @@ import textwrap
 # Pre-define useful arguments and methods of protocols
 
 
+from jspcap.exceptions import BoolError, BytesError, StructError
 from jspcap.utilities import seekset, Info, ProtoChain
-from jspcap.exceptions import BoolError, BytesError
 from jspcap.validations import bool_check, int_check
 
 
@@ -169,33 +169,35 @@ class Protocol:
         """Read file buffer."""
         return self._file.read(*args, **kwargs)
 
-    def _read_unpack(self, size=1, *, sign=False, lilendian=False):
+    def _read_unpack(self, size=1, *, signed=False, lilendian=False):
         """Read bytes and unpack for integers.
 
         Keyword arguments:
             size       -- int, buffer size (default is 1)
-            sign       -- bool, signed flag (default is False)
+            signed       -- bool, signed flag (default is False)
                            <keyword> True / False
             lilendian  -- bool, little-endian flag (default is False)
                            <keyword> True / False
 
         """
         endian = '<' if lilendian else '>'
-        if size == 8:   kind = 'q' if sign else 'Q' # unpack to 8-byte integer (long long)
-        elif size == 4: kind = 'i' if sign else 'I' # unpack to 4-byte integer (int / long)
-        elif size == 2: kind = 'h' if sign else 'H' # unpack to 2-byte integer (short)
-        elif size == 1: kind = 'b' if sign else 'B' # unpack to 1-byte integer (char)
+        if size == 8:   kind = 'q' if signed else 'Q' # unpack to 8-byte integer (long long)
+        elif size == 4: kind = 'i' if signed else 'I' # unpack to 4-byte integer (int / long)
+        elif size == 2: kind = 'h' if signed else 'H' # unpack to 2-byte integer (short)
+        elif size == 1: kind = 'b' if signed else 'B' # unpack to 1-byte integer (char)
         else:           kind = None                 # do not unpack
 
         if kind is None:
-            buf = self._file.read(size)
+            mem = self._file.read(size)
+            end = 'little' if lilendian else 'big'
+            buf = int.from_bytes(mem, end, signed=signed)
         else:
             try:
                 fmt = f'{endian}{kind}'
                 mem = self._file.read(size)
                 buf = struct.unpack(fmt, mem)[0]
             except struct.error:
-                return None
+                raise StructError(f'{self.__class__.__name__}: unpack failed')
         return buf
 
     def _read_binary(self, size=1):

@@ -201,7 +201,7 @@ class OSPF(Link):
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
             Octets          Bits          Name                Discription
-              0              0          ospf.auth.resv    Reserved (must be zero)
+              0              0          -                 Reserved (must be zero)
               2              16         ospf.auth.key_id  Key ID
               3              24         ospf.auth.len     Auth Data Length
               4              32         ospf.auth.seq     Cryptographic Aequence Number
@@ -213,7 +213,6 @@ class OSPF(Link):
         _seqn = self._read_unpack(4)
 
         auth = dict(
-            resv = _resv,
             key_id = _keys,
             len = _alen,
             seq = _seqn,

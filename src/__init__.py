@@ -42,6 +42,9 @@ parts.
 # Extraction
 from jspcap.extractor import Extractor
 
+# Analysis
+from jspcap.analyser import analyse
+
 # Reassembly
 from jspcap.reassembly import *
 
@@ -51,6 +54,7 @@ from jspcap.protocols import *
 
 __all__ = [
     'Extractor',                                # Extraction
+    'analyse',                                  # Analysis
     'Header', 'Frame',                          # Headers
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP',  # Link Layer
     'AH', 'IPv4', 'IPv6', 'IPX',                # Internet Layer

@@ -111,7 +111,7 @@ class Header(Protocol):
         _magn = _temp
         _vmaj = self._read_unpack(2, lilendian=True)
         _vmin = self._read_unpack(2, lilendian=True)
-        _zone = self._read_unpack(4, lilendian=True, sign=True)
+        _zone = self._read_unpack(4, lilendian=True, signed=True)
         _acts = self._read_unpack(4, lilendian=True)
         _slen = self._read_unpack(4, lilendian=True)
         _type = self._read_protos(4)

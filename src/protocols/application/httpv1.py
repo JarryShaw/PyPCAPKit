@@ -18,6 +18,7 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 <body>                      :==: RESPONSE BODY (optional)
 
 """
+import chardet
 import re
 
 
@@ -128,7 +129,7 @@ class HTTPv1(HTTP):
             fields = headerfield.split(b'\r\n')
             list_ = [ field.split(b':') for field in fields ]
         except ValueError:
-            raise ProtocolError(f'{self.__class__.__name__}: invalid format', quiet=True)
+            raise ProtocolError('HTTP/1: invalid format', quiet=True)
 
         match1 = re.match(_RE_METHOD, para1)
         match2 = re.match(_RE_VERSION, para3)
@@ -153,19 +154,32 @@ class HTTPv1(HTTP):
                 ),
             )
         else:
-            raise ProtocolError(f'{self.__class__.__name__}: invalid format', quiet=True)
+            raise ProtocolError('HTTP/1: invalid format', quiet=True)
 
         try:
             for item in list_:
-                key = item[0];  value = item[1]
-                if key in ('request', 'response'):
-                    key = f'{key.decode()}_field'
-                header[key.decode()] = value.decode()
+                key = item[0].decode().replace('request', 'request_field').replace('response', 'response_field')
+                value = item[1].decode()
+                if key in header:
+                    if isinstance(header[key], tuple):
+                        header[key] += (value,)
+                    else:
+                        header[key] = (header[key], value)
+                else:
+                    header[key] = value
         except IndexError:
-            raise ProtocolError(f'{self.__class__.__name__}: invalid format', quiet=True)
+            raise ProtocolError('HTTP/1: invalid format', quiet=True)
 
         return header, receipt
 
     def _read_http_body(self, body):
         """Read HTTP/1.* body."""
+        charset = chardet.detect(body)['encoding']
+        if charset:
+            try:
+                temp = body.decode(charset)
+            except UnicodeDecodeError:
+                temp = body
+            finally:
+                body = temp
         return body

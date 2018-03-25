@@ -145,7 +145,7 @@ class ARP(Link):
               24             192        arp.tpa           Target Protocol Address
         """
         _hwty = self._read_unpack(2)
-        _ptty = self._read_fileng(2).hex()
+        _ptty = self._read_unpack(2)
         _hlen = self._read_unpack(1)
         _plen = self._read_unpack(1)
         _oper = self._read_unpack(2)

@@ -42,14 +42,14 @@ __all__ = ['Internet', 'ETHERTYPE']
 # Ethertype IEEE 802 Numbers
 ETHERTYPE = {
     # Link Layer
-    '0806' : 'ARP',     # Address Resolution Protocol
-    '8035' : 'RARP',    # Reverse Address Resolution Protocol
-    '8100' : 'CTag',    # 802.1Q Customer VLAN Tag Type
+    0x0806 : 'ARP',     # Address Resolution Protocol
+    0x8035 : 'RARP',    # Reverse Address Resolution Protocol
+    0x8100 : 'CTag',    # 802.1Q Customer VLAN Tag Type
 
     # Internet Layer
-    '0800' : 'IPv4',    # Internet Protocol version 4
-    '8137' : 'IPX',     # Internetwork Packet Exchange
-    '86dd' : 'IPv6',    # Internet Protocol version 6
+    0x0800 : 'IPv4',    # Internet Protocol version 4
+    0x8137 : 'IPX',     # Internetwork Packet Exchange
+    0x86dd : 'IPv6',    # Internet Protocol version 6
 }
 
 

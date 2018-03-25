@@ -33,13 +33,17 @@ with open('../sample/out', 'a') as file:
                 print(f"encoding = {result['encoding']} ({result['confidence']}, {result['language']})")
                 file.write(f"encoding = {result['encoding']} ({result['confidence']}, {result['language']})")
                 file.write('\n')
-            try:
-                file.write(datagram.payload.decode(result['encoding']))
-                file.write('\n')
-            except:
-                print('/* encoding failed */')
-                file.write('/* encoding failed */')
-                file.write('\n')
+                try:
+                    file.write(datagram.payload.decode(result['encoding']))
+                    file.write('\n')
+                except UnicodeDecodeError:
+                    print('/* encoding failed */')
+                    file.write('/* encoding failed */')
+                    file.write('\n')
+                    for item in textwrap.wrap(datagram.payload.hex(), 64):
+                        file.write(' '.join(textwrap.wrap(item, 2)))
+                        file.write('\n')
+            else:
                 for item in textwrap.wrap(datagram.payload.hex(), 64):
                     file.write(' '.join(textwrap.wrap(item, 2)))
                     file.write('\n')

@@ -13,7 +13,7 @@ with open('./README.rst', 'r') as file:
 # set-up script for pip distribution
 setuptools.setup(
     name = 'jspcap',
-    version = '0.3.0',
+    version = '0.3.1.dev1',
     author = 'Jarry Shaw',
     author_email = 'jarryshaw@icloud.com',
     url = 'https://github.com/JarryShaw/jspcap',
@@ -22,7 +22,7 @@ setuptools.setup(
     description = 'A stream PCAP file extractor.',
     long_description = long_desc,
     python_requires = '>=3.6',
-    install_requires = ['jsformat'],
+    install_requires = ['jsformat', 'chardet'],
     py_modules = ['jspcap'],
     packages = [
         'jspcap',
