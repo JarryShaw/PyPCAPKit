@@ -100,7 +100,6 @@
 				"len" : 40,
 				"id" : 50484,
 				"flags" : {
-					"rb" : "00",
 					"df" : true,
 					"mf" : false
 				},
@@ -117,7 +116,6 @@
 					"ack" : 2793054463,
 					"hdr_len" : 20,
 					"flags" : {
-						"res" : "00 00 00",
 						"ns" : false,
 						"cwr" : false,
 						"ecn" : false,
@@ -163,7 +161,6 @@
 				"len" : 40,
 				"id" : 0,
 				"flags" : {
-					"rb" : "00",
 					"df" : true,
 					"mf" : false
 				},
@@ -180,7 +177,6 @@
 					"ack" : 3584012629,
 					"hdr_len" : 20,
 					"flags" : {
-						"res" : "00 00 00",
 						"ns" : false,
 						"cwr" : false,
 						"ecn" : false,
@@ -226,7 +222,6 @@
 				"len" : 40,
 				"id" : 0,
 				"flags" : {
-					"rb" : "00",
 					"df" : true,
 					"mf" : false
 				},
@@ -243,7 +238,6 @@
 					"ack" : 1835365486,
 					"hdr_len" : 20,
 					"flags" : {
-						"res" : "00 00 00",
 						"ns" : false,
 						"cwr" : false,
 						"ecn" : false,
@@ -289,7 +283,6 @@
 				"len" : 145,
 				"id" : 0,
 				"flags" : {
-					"rb" : "00",
 					"df" : true,
 					"mf" : false
 				},

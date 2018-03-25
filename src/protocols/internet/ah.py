@@ -139,7 +139,7 @@ class AH(IPsec):
             raise VersionError(f'Unknown IP version {version}')
 
         if _plen:   # explicit padding in need
-            padding self._read_binary(_plen)
+            padding = self._read_binary(_plen)
             if any((int(bit, base=2) for bit in padding)):
                 raise ProtocolError(f'{self.alias}: invalid format')
         if length is not None:

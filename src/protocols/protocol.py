@@ -169,14 +169,16 @@ class Protocol:
         """Read file buffer."""
         return self._file.read(*args, **kwargs)
 
-    def _read_unpack(self, size=1, *, signed=False, lilendian=False):
+    def _read_unpack(self, size=1, *, signed=False, lilendian=False, quiet=False):
         """Read bytes and unpack for integers.
 
         Keyword arguments:
             size       -- int, buffer size (default is 1)
-            signed       -- bool, signed flag (default is False)
+            signed     -- bool, signed flag (default is False)
                            <keyword> True / False
             lilendian  -- bool, little-endian flag (default is False)
+                           <keyword> True / False
+            quiet      -- bool, quiet (no exception) flag (default is False)
                            <keyword> True / False
 
         """
@@ -197,7 +199,10 @@ class Protocol:
                 mem = self._file.read(size)
                 buf = struct.unpack(fmt, mem)[0]
             except struct.error:
-                raise StructError(f'{self.__class__.__name__}: unpack failed')
+                if quiet:
+                    return None
+                else:
+                    raise StructError(f'{self.__class__.__name__}: unpack failed')
         return buf
 
     def _read_binary(self, size=1):

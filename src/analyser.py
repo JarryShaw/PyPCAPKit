@@ -66,10 +66,11 @@ def analyse(file, length):
     if flag:
         return Analysis(http.info, http.protochain, http.alias)
 
-    file.seek(temp)
-    flag, http = _analyse_httpv2(file, length)
-    if flag:
-        return Analysis(http.info, http.protochain, http.alias)
+    # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
+    # file.seek(temp)
+    # flag, http = _analyse_httpv2(file, length)
+    # if flag:
+    #     return Analysis(http.info, http.protochain, http.alias)
 
     file.seek(temp)
     data = file.read(*[length]) or None

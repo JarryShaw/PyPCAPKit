@@ -46,8 +46,8 @@ _HTTP_TYPE = {
 
 
 # HTTP/2 Functions
-_read_http_none = lambda self, size, kind: self._read_http_none(size, kind)                 # Unsigned
-_HTTP_FUNC = collections.defaultdict(_read_http_none, {
+_read_http_none = lambda self, size, kind, flag: self._read_http_none(size, kind, flag)     # Unsigned
+_HTTP_FUNC = collections.defaultdict(lambda : _read_http_none, {
     0x00 : lambda self, size, kind, flag: self._read_http_data(size, kind, flag),           # DATA
     0x01 : lambda self, size, kind, flag: self._read_http_headers(size, kind, flag),        # HEADERS
     0x02 : lambda self, size, kind, flag: self._read_http_priority(size, kind, flag),       # PRIORITY
@@ -164,13 +164,14 @@ class HTTPv2(HTTP):
                9              72         http.payload      Frame Payload
 
         """
+        if length < 9:
+            raise ProtocolError(f'HTTP/2: invalid format', quiet=True)
+
         _tlen = self._read_unpack(3)
         _type = self._read_unpack(1)
         _flag = self._read_binary(1)
         _rsid = self._read_binary(4)
 
-        if size <= 9:
-            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
         if int(_rsid[0], base=2):
             raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
 
@@ -712,7 +713,7 @@ class HTTPv2(HTTP):
                9              73         http.window       Window Size Increment
 
         """
-        if _dlen != 4:
+        if size != 4:
             raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
         if any((int(bit, base=2) for bit in flag)):
             raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)

@@ -206,10 +206,6 @@
 				<integer>50484</integer>
 				<key>flags</key>
 				<dict>
-					<key>rb</key>
-					<data>
-						00
-					</data>
 					<key>df</key>
 					<true/>
 					<key>mf</key>
@@ -243,10 +239,6 @@
 					<integer>20</integer>
 					<key>flags</key>
 					<dict>
-						<key>res</key>
-						<data>
-							00 00 00
-						</data>
 						<key>ns</key>
 						<false/>
 						<key>cwr</key>
@@ -335,10 +327,6 @@
 				<integer>0</integer>
 				<key>flags</key>
 				<dict>
-					<key>rb</key>
-					<data>
-						00
-					</data>
 					<key>df</key>
 					<true/>
 					<key>mf</key>
@@ -372,10 +360,6 @@
 					<integer>20</integer>
 					<key>flags</key>
 					<dict>
-						<key>res</key>
-						<data>
-							00 00 00
-						</data>
 						<key>ns</key>
 						<false/>
 						<key>cwr</key>
@@ -464,10 +448,6 @@
 				<integer>0</integer>
 				<key>flags</key>
 				<dict>
-					<key>rb</key>
-					<data>
-						00
-					</data>
 					<key>df</key>
 					<true/>
 					<key>mf</key>
@@ -501,10 +481,6 @@
 					<integer>20</integer>
 					<key>flags</key>
 					<dict>
-						<key>res</key>
-						<data>
-							00 00 00
-						</data>
 						<key>ns</key>
 						<false/>
 						<key>cwr</key>
@@ -593,10 +569,6 @@
 				<integer>0</integer>
 				<key>flags</key>
 				<dict>
-					<key>rb</key>
-					<data>
-						00
-					</data>
 					<key>df</key>
 					<true/>
 					<key>mf</key>

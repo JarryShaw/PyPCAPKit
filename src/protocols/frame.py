@@ -91,7 +91,7 @@ class Frame(Protocol):
             } pcaprec_hdr_t;
 
         """
-        _temp = self._read_unpack(4, lilendian=True)
+        _temp = self._read_unpack(4, lilendian=True, quiet=True)
         if _temp is None:   raise EOFError
 
         _time = datetime.datetime.fromtimestamp(_temp)
