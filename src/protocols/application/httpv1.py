@@ -149,7 +149,7 @@ class HTTPv1(HTTP):
             header = dict(
                 response = dict(
                     version = match3.group('version').decode(),
-                    status = para2.decode(),
+                    status = int(para2.decode()),
                     phrase = para3.decode(),
                 ),
             )

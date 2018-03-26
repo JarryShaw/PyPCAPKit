@@ -26,12 +26,13 @@ from jspcap.validations import dict_check, int_check
 __all__ = ['seekset', 'Info', 'VersionInfo', 'ProtoChain']
 
 
-# protocol name replace
-_NAME_REPLACE = {
-    '802.1q'    : 'ctag',
-    'http/1.1'  : 'httpv1',
-    'http/2'    : 'httpv2',
-}
+# # protocol name replace
+# _NAME_REPLACE = {
+#     '802.1q'    : 'ctag',
+#     'http/1.0'  : 'httpv1',
+#     'http/1.1'  : 'httpv1',
+#     'http/2'    : 'httpv2',
+# }
 
 
 def seekset(func):
@@ -203,7 +204,7 @@ class ProtoChain:
             stop = stop or -1
 
             if isinstance(name, str):
-                name = _NAME_REPLACE.get(name.lower(), name.lower())
+                name = name.lower()
             if isinstance(start, str):
                 start = self.index(start)
             if isinstance(stop, str):

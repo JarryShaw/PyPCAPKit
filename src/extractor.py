@@ -367,6 +367,9 @@ class Extractor:
         if self._ipv6:
             self._ipv6_reassembly(frame)
 
+        # return frame record
+        return frame
+
     def _tcp_reassembly(self, frame):
         """Store data for TCP reassembly."""
         if 'TCP' in frame:

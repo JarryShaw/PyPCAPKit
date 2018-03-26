@@ -76,7 +76,7 @@ class IPv6(IP):
         * dst -- str, destination IP address
 
     Methods:
-        * read_ipv4 -- read Internet Protocol version 6 (IPv6)
+        * read_ipv6 -- read Internet Protocol version 6 (IPv6)
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
@@ -93,7 +93,6 @@ class IPv6(IP):
         * _read_ip_seekset -- when fragmented, read payload throughout first
         * _read_ip_hextet -- read first four hextets of IPv6
         * _read_ip_addr -- read IP address
-        * _read_ip_options -- read IP option list
 
     """
     ##########################################################################
