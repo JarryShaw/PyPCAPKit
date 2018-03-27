@@ -152,6 +152,10 @@ class Protocol:
     def __getitem__(self, key):
         return self._info[key]
 
+    @classmethod
+    def __index__(cls):
+        return cls.__name__
+
     ##########################################################################
     # Utilities.
     ##########################################################################

@@ -61,3 +61,11 @@ class IPsec(IP):
     def dst(self):
         """NotImplemented"""
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'dst'")
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @classmethod
+    def __index__(cls):
+        return ('AH', 'ESP')

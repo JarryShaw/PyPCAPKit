@@ -73,3 +73,7 @@ class HTTP(Application):
 
     def __length_hint__(self):
         pass
+
+    @classmethod
+    def __index__(cls):
+        return ('HTTPv1', 'HTTPv2')

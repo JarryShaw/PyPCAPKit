@@ -59,6 +59,7 @@ __all__ = [
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP',  # Link Layer
     'AH', 'IPv4', 'IPv6', 'IPX',                # Internet Layer
     'TCP', 'UDP',                               # Transport Layer
+    'HTTP',                                     # Application Layer
     'IPv4_Reassembly', 'IPv6_Reassembly',       # IP Reassembly
     'TCP_Reassembly',                           # TCP Reassembly
 ]

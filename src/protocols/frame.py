@@ -138,17 +138,30 @@ class Frame(Protocol):
         if key in self._info:
             return self._info[key]
 
-        # fetch slice start point from ProtoChain
-        proto = self._protos[key]
-        if not proto:
-            raise ProtocolNotFound('ProtoChain index out of range')
-        elif isinstance(proto, tuple):
-            if len(proto) > 1:  # if it's a slice with step & stop
-                raise ProtocolUnbound('frame slice unbound')
+        def _getitem_from_ProtoChain(key):
+            proto = self._protos[key]
+            if not proto:
+                raise ProtocolNotFound('ProtoChain index out of range')
+            elif isinstance(proto, tuple):
+                if len(proto) > 1:  # if it's a slice with step & stop
+                    raise ProtocolUnbound('frame slice unbound')
+                else:
+                    start = proto[0]
             else:
-                start = proto[0]
+                start = self._protos.index(proto)
+            return start
+
+        # fetch slice start point from ProtoChain
+        if isinstance(key, tuple):
+            for item in key:
+                try:
+                    start = _getitem_from_ProtoChain(item)
+                except ProtocolNotFound:
+                    continue
+                else:
+                    break
         else:
-            start = self._protos.index(proto)
+            start = _getitem_from_ProtoChain(key)
 
         # make return Info item
         dict_ = self._info.infotodict()
@@ -163,6 +176,13 @@ class Frame(Protocol):
         return self._fnum
 
     def __contains__(self, name):
+        if issubclass(name, Protocol):
+            name = name.__index__()
+        if isinstance(name, tuple):
+            for item in name:
+                flag = (item in self._protos)
+                if flag:    break
+            return flag
         return ((name in self._info) or (name in self._protos))
 
     ##########################################################################

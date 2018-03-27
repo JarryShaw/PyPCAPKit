@@ -164,6 +164,7 @@ class ProtoChain:
     """Protocols chain.
 
     Properties:
+        * alias -- tuple, aliases of protocols in chain
         * tuple -- tuple, name of protocols in chain
         * proto -- tuple, lowercase name of protocols in chain
         * chain -- str, chain of protocols seperated by colons
@@ -172,12 +173,17 @@ class ProtoChain:
         * index -- same as `index` function of `tuple` type
 
     Attributes:
+        * __damn__ -- tuple, aliase of protocols in chain
         * __data__ -- tuple, name of protocols in chain
 
     """
     ##########################################################################
     # Properties.
     ##########################################################################
+
+    @property
+    def alias(self):
+        return self.__damn__
 
     @property
     def tuple(self):
@@ -219,21 +225,23 @@ class ProtoChain:
     ##########################################################################
 
     def __init__(self, proto, other=None, alias=None):
-        proto = alias or proto
+        alias = alias or proto
         if other is None:
             self.__data__ = (proto,)
+            self.__damn__ = (alias,)
         else:
             self.__data__ = (proto,) + other.tuple
+            self.__damn__ = (alias,) + other.alias
 
     def __repr__(self):
         repr_ = ', '.join(self.proto)
         return f'ProtoChain({repr_})'
 
     def __str__(self):
-        for (i, proto) in enumerate(self.__data__):
+        for (i, proto) in enumerate(self.__damn__):
             if proto is None:
-                return ':'.join(self.__data__[:i])
-        return ':'.join(self.__data__)
+                return ':'.join(self.__damn__[:i])
+        return ':'.join(self.__damn__)
 
     def __getitem__(self, key):
         if isinstance(key, slice):
@@ -254,7 +262,7 @@ class ProtoChain:
         return self.__data__[key]
 
     def __iter__(self):
-        return iter(self.__data__)
+        return iter(self.__damn__)
 
     def __contains__(self, name):
         if isinstance(name, str):
