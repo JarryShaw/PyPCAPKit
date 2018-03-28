@@ -14,12 +14,13 @@ from jspcap.protocols.link.ethernet import Ethernet
 from jspcap.protocols.link.l2tp import L2TP
 from jspcap.protocols.link.ospf import OSPF
 from jspcap.protocols.link.rarp import RARP
+from jspcap.protocols.link.vlan import VLAN
 
 # Link-Layer Header Type Values
 from jspcap.protocols.link.link import LINKTYPE
 
 
 __all__ = [
-    'LINKTYPE',                                 # Protocol Numbers
-    'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP',  # Link Layer Protocols
+    'LINKTYPE',                                         # Protocol Numbers
+    'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',  # Link Layer Protocols
 ]

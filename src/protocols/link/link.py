@@ -5,10 +5,10 @@
 and ``Link``. The former is a dictionary of link layer header
 type values, registered in IANA. And the latter is a base
 class for link layer protocols, eg. ARP/InARP, Ethernet,
-L2TP, OSPF, RARP/DRARP.
+L2TP, OSPF, RARP/DRARP and etc.
 
 """
-# TODO: Implements DSL, FDDI, ISDN, NDP, PPP.
+# TODO: Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.
 
 
 # Link Layer Protocols

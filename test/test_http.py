@@ -5,8 +5,8 @@
 import jspcap
 
 
-test = jspcap.Extractor(fin='../sample/http.pcap', nofile=True, auto=False)
-
+extractor = jspcap.Extractor(fin='../sample/http.pcap', nofile=True, auto=False)
+# extractor = jspcap.Extractor(fin='../sample/http.pcap', fout='../sample/http', files=True, format='tree', auto=False)
 
 for frame in extractor:
     # check if this frame contains HTTP

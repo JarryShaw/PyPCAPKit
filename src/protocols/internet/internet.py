@@ -5,10 +5,10 @@
 ``ETHERTYPE`` and ``Internet``. The former is a dictionary
 of ethertype IEEE 802 numbers, registered in IANA. And the
 latter is a base class for internet layer protocols, eg.
-AH, IP, IPsec, IPv4, IPv6, and IPX.
+AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 
 """
-# TODO: Implements ECN, ESP, HIP, HOPOPT, ICMP, ICMPv6, IGMP, IPv6_Frag, IPv6_NoNxt, IPv6_Opts, IPv6_Route, Mobility, Shim6.
+# TODO: Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.
 
 
 # Internet Layer Protocols
@@ -121,17 +121,17 @@ class Internet(Protocol):
 
         # make next layer protocol name
         if proto is None and chain:
-            layer = chain.tuple[0].lower()
+            layer = chain.alias[0].lower()
             proto, chain = chain.tuple[0], None
         else:
-            layer = str(proto or 'Raw').lower()
+            layer = str(alias or proto or 'Raw').lower()
 
         # write info and protocol chain into dict
         dict_[layer] = info
         self._protos = ProtoChain(proto, chain, alias)
         return dict_
 
-    def _import_next_layer(self, proto, length=None, version=4):
+    def _import_next_layer(self, proto, length=None, *, version=4, extension=False):
         """Import next layer extractor.
 
         Keyword arguments:
@@ -149,7 +149,31 @@ class Internet(Protocol):
         """
         if proto == 'AH':
             from jspcap.protocols.internet.ah import AH
-            next_ = AH(self._file, length, version=version)
+            next_ = AH(self._file, length, version=version, extension=extension)
+            return next_.info, next_.protochain, next_.alias
+        elif proto == 'HIP':
+            from jspcap.protocols.internet.hip import HIP
+            next_ = HIP(self._file, length, extension=extension)
+            return next_.info, next_.protochain, next_.alias
+        elif proto == 'HOPOPT':
+            from jspcap.protocols.internet.hopopt import HOPOPT
+            next_ = HOPOPT(self._file, length, extension=extension)
+            return next_.info, next_.protochain, next_.alias
+        elif proto == 'IPv6-Frag':
+            from jspcap.protocols.internet.ipv6_frag import IPv6_Frag
+            next_ = IPv6_Frag(self._file, length, extension=extension)
+            return next_.info, next_.protochain, next_.alias
+        elif proto == 'IPv6-Opts':
+            from jspcap.protocols.internet.ipv6_opts import IPv6_Opts
+            next_ = IPv6_Opts(self._file, length, extension=extension)
+            return next_.info, next_.protochain, next_.alias
+        elif proto == 'IPv6-Route':
+            from jspcap.protocols.internet.ipv6_route import IPv6_Route
+            next_ = IPv6_Route(self._file, length, extension=extension)
+            return next_.info, next_.protochain, next_.alias
+        elif proto == 'MH':
+            from jspcap.protocols.internet.mh import MH
+            next_ = MH(self._file, length, extension=extension)
             return next_.info, next_.protochain, next_.alias
         elif proto == 'IPv4':
             from jspcap.protocols.internet.ipv4 import IPv4 as Protocol

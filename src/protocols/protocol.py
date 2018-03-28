@@ -206,7 +206,7 @@ class Protocol:
                 if quiet:
                     return None
                 else:
-                    raise StructError(f'{self.__class__.__name__}: unpack failed')
+                    raise StructError(f'{self.__class__.__name__}: unpack failed') from None
         return buf
 
     def _read_binary(self, size=1):
@@ -235,10 +235,10 @@ class Protocol:
 
         # make next layer protocol name
         if proto is None and chain:
-            layer = chain.tuple[0].lower()
+            layer = chain.alias[0].lower()
             proto, chain = chain.tuple[0], None
         else:
-            layer = str(proto or 'Raw').lower()
+            layer = str(alias or proto or 'Raw').lower()
 
         # write info and protocol chain into dict
         dict_[layer] = info

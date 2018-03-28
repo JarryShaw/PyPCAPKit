@@ -15,6 +15,14 @@ from jspcap.protocols.internet.ipv4 import IPv4
 from jspcap.protocols.internet.ipv6 import IPv6
 from jspcap.protocols.internet.ipx import IPX
 
+# IPv6 Extension Headers
+from jspcap.protocols.internet.hip import HIP
+from jspcap.protocols.internet.hopopt import HOPOPT
+from jspcap.protocols.internet.ipv6_frag import IPv6_Frag
+from jspcap.protocols.internet.ipv6_opts import IPv6_Opts
+from jspcap.protocols.internet.ipv6_route import IPv6_Route
+from jspcap.protocols.internet.mh import MH
+
 # Ethertype IEEE 802 Numbers
 from jspcap.protocols.internet.internet import ETHERTYPE
 
@@ -24,6 +32,7 @@ from jspcap.protocols.internet.ipsec import IPsec
 
 
 __all__ = [
-    'ETHERTYPE',                    # Protocol Numbers
-    'AH', 'IPv4', 'IPv6', 'IPX',    # Internet Layer Protocols
+    'ETHERTYPE',                                                    # Protocol Numbers
+    'AH', 'IPv4', 'IPv6', 'IPX',                                    # Internet Layer Protocols
+    'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',  # IPv6 Extension Headers
 ]

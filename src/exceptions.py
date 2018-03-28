@@ -54,7 +54,7 @@ class BaseError(Exception):
             index = len(tb)
 
         quiet = kwargs.pop('quiet', None)
-        if not quiet:
+        if not quiet and index:
             print('Traceback (most recent call last):')
             traceback.print_stack(limit=-index)
 

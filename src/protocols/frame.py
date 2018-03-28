@@ -176,7 +176,7 @@ class Frame(Protocol):
         return self._fnum
 
     def __contains__(self, name):
-        if issubclass(name, Protocol):
+        if isinstance(name, type) and issubclass(name, Protocol):
             name = name.__index__()
         if isinstance(name, tuple):
             for item in name:

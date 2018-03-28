@@ -44,7 +44,7 @@ class AH(IPsec):
         * protochain -- ProtoChain, protocol chain of current instance
 
     Methods:
-        * read_ah -- read Authentication Header
+        * read_ah -- read Authentication Header (AH)
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
@@ -58,7 +58,6 @@ class AH(IPsec):
         * _read_binary -- read bytes and convert into binaries
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
-        * _read_ip_seekset -- when fragmented, read payload throughout first
 
     """
     ##########################################################################
@@ -73,7 +72,7 @@ class AH(IPsec):
     @property
     def length(self):
         """Info dict of current instance."""
-        return self._info.len
+        return self._info.length
 
     @property
     def protocol(self):
@@ -84,7 +83,7 @@ class AH(IPsec):
     # Methods.
     ##########################################################################
 
-    def read_ah(self, length, version):
+    def read_ah(self, length, version, extension):
         """Read Authentication Header.
 
         Structure of AH header [RFC 4302]:
@@ -105,7 +104,7 @@ class AH(IPsec):
 
             Octets          Bits          Name                Discription
               0              0          ah.next         Next Header
-              1              8          ah.hdr_len      Payload Length
+              1              8          ah.length       Payload Length
               2              16         -               Reserved (must be zero)
               4              32         ah.spi          Security Parameters Index (SPI)
               8              64         ah.seq          Sequence Number Field
@@ -125,7 +124,7 @@ class AH(IPsec):
 
         ah = dict(
             next = _next,
-            hdr_len = _tlen,
+            length = _tlen,
             spi = _scpi,
             seq = dsnf,
             icv = _chkv,
@@ -142,20 +141,23 @@ class AH(IPsec):
             padding = self._read_binary(_plen)
             if any((int(bit, base=2) for bit in padding)):
                 raise ProtocolError(f'{self.alias}: invalid format')
+        if extension:
+            self._protos = None
+            return ah
         if length is not None:
-            length -= ah['hdr_len']
+            length -= ah['length']
         return self._decode_next_layer(ah, _next, length)
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, version=4):
+    def __init__(self, _file, length=None, *, version=4, extension=False):
         self._file = _file
-        self._info = Info(self.read_ah(length, version))
+        self._info = Info(self.read_ah(length, version, extension))
 
     def __len__(self):
-        return self._info.len
+        return self._info.length
 
     def __length_hint__(self):
         return 20

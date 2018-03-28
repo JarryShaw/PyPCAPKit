@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """802.1Q customer VLAN tag type
 
-``jspcap.protocols.link.ctag`` contains ``CTag``
+``jspcap.protocols.link.vlan`` contains ``VLAN``
 only, which implements extractor for 802.1QCustomer
 VLAN Tag Type, whose structure is described as below.
 
     Octets          Bits          Name                Discription
-      1              0         ctag.tci          Tag Control Information
-      1              0         ctag.tci.pcp      Priority Code Point
-      1              3         ctag.tci.dei      Drop Eligible Indicator
-      1              4         ctag.tci.vid      VLAN Identifier
-      3              24        ctag.type         Protocol (Internet Layer)
+      1              0         vlan.tci          Tag Control Information
+      1              0         vlan.tci.pcp      Priority Code Point
+      1              3         vlan.tci.dei      Drop Eligible Indicator
+      1              4         vlan.tci.vid      VLAN Identifier
+      3              24        vlan.type         Protocol (Internet Layer)
 
 """
 
@@ -22,7 +22,7 @@ VLAN Tag Type, whose structure is described as below.
 from jspcap.utilities import Info
 from jspcap.protocols.link.link import Link
 
-__all__ = ['CTag']
+__all__ = ['VLAN']
 
 
 # priority levels defined in IEEE 802.1p
@@ -38,7 +38,7 @@ _PCP = {
 }
 
 
-class CTag(Link):
+class VLAN(Link):
     """This class implements 802.1Q Customer VLAN Tag Type.
 
     Properties:
@@ -97,11 +97,11 @@ class CTag(Link):
 
         Structure of 802.1Q Customer VLAN Tag Type [RFC 7042]:
             Octets          Bits          Name                Discription
-              1              0         ctag.tci          Tag Control Information
-              1              0         ctag.tci.pcp      Priority Code Point
-              1              3         ctag.tci.dei      Drop Eligible Indicator
-              1              4         ctag.tci.vid      VLAN Identifier
-              3              24        ctag.type         Protocol (Internet Layer)
+              1              0         vlan.tci          Tag Control Information
+              1              0         vlan.tci.pcp      Priority Code Point
+              1              3         vlan.tci.dei      Drop Eligible Indicator
+              1              4         vlan.tci.vid      VLAN Identifier
+              3              24        vlan.type         Protocol (Internet Layer)
 
         """
         _tcif = self._read_binary(2)

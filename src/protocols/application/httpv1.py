@@ -96,10 +96,10 @@ class HTTPv1(HTTP):
         try:
             header, body = packet.split(b'\r\n\r\n', 1)
         except ValueError:
-            raise ProtocolError(f'{self.__class__.__name__}: invalid format', quiet=True)
+            raise ProtocolError('HTTP: invalid format', quiet=True)
 
         header_unpacked, http_receipt = self._read_http_header(header)
-        body_unpacked = self._read_http_body(body)
+        body_unpacked = self._read_http_body(body) or None
 
         http = dict(
             receipt = http_receipt,
@@ -125,11 +125,11 @@ class HTTPv1(HTTP):
         """
         try:
             startline, headerfield = header.split(b'\r\n', 1)
-            para1, para2, para3 = startline.split(b' ')
+            para1, para2, para3 = re.split(b'\s+', startline, 2)
             fields = headerfield.split(b'\r\n')
-            list_ = [ field.split(b':') for field in fields ]
+            lists = ( re.split(b'\s*:\s*', field, 1) for field in fields )
         except ValueError:
-            raise ProtocolError('HTTP/1: invalid format', quiet=True)
+            raise ProtocolError('HTTP: invalid format', quiet=True)
 
         match1 = re.match(_RE_METHOD, para1)
         match2 = re.match(_RE_VERSION, para3)
@@ -154,12 +154,12 @@ class HTTPv1(HTTP):
                 ),
             )
         else:
-            raise ProtocolError('HTTP/1: invalid format', quiet=True)
+            raise ProtocolError('HTTP: invalid format', quiet=True)
 
         try:
-            for item in list_:
-                key = item[0].decode().replace('request', 'request_field').replace('response', 'response_field')
-                value = item[1].decode()
+            for item in lists:
+                key = item[0].decode().strip().replace('request', 'request_field').replace('response', 'response_field')
+                value = item[1].decode().strip()
                 if key in header:
                     if isinstance(header[key], tuple):
                         header[key] += (value,)
@@ -168,7 +168,7 @@ class HTTPv1(HTTP):
                 else:
                     header[key] = value
         except IndexError:
-            raise ProtocolError('HTTP/1: invalid format', quiet=True)
+            raise ProtocolError('HTTP: invalid format', quiet=True)
 
         return header, receipt
 
@@ -177,9 +177,6 @@ class HTTPv1(HTTP):
         charset = chardet.detect(body)['encoding']
         if charset:
             try:
-                temp = body.decode(charset)
+                return body.decode(charset)
             except UnicodeDecodeError:
-                temp = body
-            finally:
-                body = temp
-        return body
+                return body

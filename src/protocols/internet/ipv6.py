@@ -40,7 +40,7 @@ import collections
 # Analyser for IPv6 header
 
 
-from jspcap.utilities import Info
+from jspcap.utilities import Info, ProtoChain
 from jspcap.protocols.internet.ip import IP
 
 
@@ -56,7 +56,7 @@ EXT_HDR = (
     'AH',           # Authentication Header
     'IPv6-NoNxt',   # No Next Header for IPv6
     'IPv6-Opts',    # Destination Options for IPv6 (before routing / upper-layer header)
-    'Mobility',     # Mobility Extension Header for IPv6 (currently without upper-layer header)
+    'MH',           # Mobility Extension Header for IPv6 (currently without upper-layer header)
     'HIP',          # Host Identity Protocol
     'Shim6',        # Site Multihoming by IPv6 Intermediation
 )
@@ -258,27 +258,35 @@ class IPv6(IP):
         hdr_len = 40                # header length
         raw_len = ipv6['payload']   # payload length
         while proto in EXT_HDR:
-            # break & keep original data after fragment header
+            # keep original data after fragment header
             if proto == 'IPv6-Frag':
                 ipv6 = self._read_ip_seekset(ipv6, hdr_len, raw_len)
+
+            # directly break when No Next Header ocuurs
+            if proto == 'IPv6-NoNxt':
+                proto = None
                 break
 
-            # make & record protocol name
-            name_ = proto.replace('IPv6-', '').lower()
-            next_ = self._import_next_layer(proto)
-            ipv6[name_] = next_[0]
-            if next_[1] is None:
+            # make protocol name
+            name = proto.replace('IPv6-', '').lower()
+            info, chain, alias = self._import_next_layer(proto, version=6, extension=True)
+            ipv6[name] = info
+
+            # record protocol name
+            self._protos = ProtoChain(name, chain, alias)
+            if chain is None:
+                proto = None
                 break
-            proto = next_[0].next
+            proto = info.next
 
             # update header & payload length
-            hdr_len += next_[0].hdr_len
-            raw_len -= next_[0].hdr_len
+            hdr_len += info.length
+            raw_len -= info.length
 
         # record real header & payload length (headers exclude)
         ipv6['hdr_len'] = hdr_len
         ipv6['raw_len'] = raw_len
 
         # update next header
-        ipv6['proto'] = proto
+        ipv6['proto'] = None if proto in EXT_HDR else proto
         return super()._decode_next_layer(ipv6, proto, raw_len)
