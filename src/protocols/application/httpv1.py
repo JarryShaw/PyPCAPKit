@@ -105,6 +105,10 @@ class HTTPv1(HTTP):
             receipt = http_receipt,
             header = header_unpacked,
             body = body_unpacked,
+            raw = dict(
+                header = header,
+                body = body,
+            ),
         )
 
         return http
