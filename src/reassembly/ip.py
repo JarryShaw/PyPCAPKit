@@ -223,14 +223,15 @@ class IP_Reassembly(Reassembly):
         start = 0
         stop = (TDL + 7) // 8
         if TDL and all(self._buffer[BUFID]['RCVBT'][start:stop]):
-            self._dtgram += self.submit(self._buffer[BUFID])
+            self._dtgram += self.submit(self._buffer[BUFID], checked=True)
             del self._buffer[BUFID]
 
-    def submit(self, buf):
+    def submit(self, buf, *, checked=False):
         """Submit reassembled payload.
 
         Keyword arguments:
             * buf -- dict, buffer dict of reassembled packets
+            * checked -- bool, if RCVBT is now checked to be fulfilled
 
         """
         TDL = buf['TDL']
@@ -241,16 +242,9 @@ class IP_Reassembly(Reassembly):
 
         start = 0
         stop = (TDL + 7) // 8
-        # if datagram is reassembled in whole
-        if TDL and all(RCVBT[start:stop]):
-            payload = datagram[:TDL]
-            packet = Info(dict(
-                NotImplemented = False,
-                index = tuple(index),
-                packet = (bytes(header) + bytes(payload)) or None,
-            ))
+        flag = checked or (TDL and all(RCVBT[start:stop]))
         # if datagram is not implemented
-        else:
+        if not flag and self._strflg:
             data = list()
             byte = bytearray()
             # extract received payload
@@ -265,10 +259,18 @@ class IP_Reassembly(Reassembly):
                     byte = bytearray()
             # strip empty packets
             if data or header:
-                packet = Info(dict(
+                packet = Info(
                     NotImplemented = True,
                     index = tuple(index),
                     header = header or None,
                     payload = tuple(data) or None,
-                ))
-        return (packet,)
+                )
+        # if datagram is reassembled in whole
+        else:
+            payload = datagram[:TDL]
+            packet = Info(
+                NotImplemented = False,
+                index = tuple(index),
+                packet = (bytes(header) + bytes(payload)) or None,
+            )
+        return [packet]

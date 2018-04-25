@@ -51,8 +51,9 @@ class Reassembly(object):
 
     Attributes:
         * _strflg -- bool, stirct mode flag
+        * _newflg -- bool, if new packets reassembled flag
         * _buffer -- dict, buffer field
-        * _dtgram -- tuple, reassembled datagram
+        * _dtgram -- list, reassembled datagram
 
     """
     __metaclass__ = ABCMeta
@@ -71,7 +72,7 @@ class Reassembly(object):
     @property
     def count(self):
         """Total number of reassembled packets."""
-        return len(self._dtgram)
+        return len(self.fetch())
 
     # reassembled datagram
     @property
@@ -96,7 +97,7 @@ class Reassembly(object):
 
     # submit reassembled payload
     @abstractmethod
-    def submit(self, buf):
+    def submit(self, buf, **kwargs):
         """Submit reassembled payload.
 
         Keyword arguments:
@@ -108,13 +109,12 @@ class Reassembly(object):
     # fetch datagram
     def fetch(self):
         """Fetch datagram."""
-        # submit all buffers in strict mode
-        if self._strflg:
-            tmp_dtgram = copy.deepcopy(self._dtgram)
-            for buffer in self._buffer.values():
-                tmp_dtgram += self.submit(buffer)
-            return tmp_dtgram
-        return self._dtgram
+        if self._newflg:
+            temp_dtgram = copy.deepcopy(self._dtgram)
+            for (bufid, buffer) in self._buffer.items():
+                temp_dtgram += self.submit(buffer, bufid=bufid)
+            return tuple(temp_dtgram)
+        return tuple(self._dtgram)
 
     # return datagram index
     def index(self, pkt_num):
@@ -137,6 +137,7 @@ class Reassembly(object):
             dict_check(packet)
             info = Info(packet)
             self.reassembly(info)
+        self._newflg = True
 
     ##########################################################################
     # Data models.
@@ -154,9 +155,10 @@ class Reassembly(object):
 
         """
         bool_check(strict)
+        self._newflg = False    # new packets reassembled
         self._strflg = strict   # stirct mode flag
         self._buffer = dict()   # buffer field
-        self._dtgram = tuple()  # reassembled datagram
+        self._dtgram = list()   # reassembled datagram
 
     def __call__(self, packet_dict):
         """Call packet reassembly.
@@ -168,3 +170,4 @@ class Reassembly(object):
         dict_check(packet_dict)
         info = Info(packet_dict)
         self.reassembly(info)
+        self._newflg = True

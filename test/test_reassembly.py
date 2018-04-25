@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 
@@ -7,20 +6,17 @@ import jspcap
 import os
 import pprint
 import textwrap
+import time
 
 
 os.system('> ../sample/out')
 
-tree = jspcap.Extractor(
-    fin='../sample/test.pcap', fout='../sample/test', format='tree', ip=False, tcp=True, verbose=True, nofile=True,
-)
+tree = jspcap.Extractor(fin='../sample/test.pcap', tcp=True, verbose=True, nofile=True, strict=True)
 # pprint.pprint(tree.frame)
 
 with open('../sample/out', 'a') as file:
-    tcp = jspcap.TCP_Reassembly(strict=True)
-    tcp.run(tree.frame.tcp)
     # pprint.pprint(tcp.datagram)
-    for datagram in tcp.datagram:
+    for datagram in tree.reassembly.tcp:
         print(f'NotImplemented = {datagram.NotImplemented}')
         file.write(f'NotImplemented = {datagram.NotImplemented}')
         file.write('\n')
