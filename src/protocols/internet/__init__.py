@@ -33,6 +33,6 @@ from jspcap.protocols.internet.ipsec import IPsec
 
 __all__ = [
     'ETHERTYPE',                                                    # Protocol Numbers
-    'AH', 'IPv4', 'IPv6', 'IPX',                                    # Internet Layer Protocols
+    'AH', 'IP', 'IPX',                                              # Internet Layer Protocols
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',  # IPv6 Extension Headers
 ]

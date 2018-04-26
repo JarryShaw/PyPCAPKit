@@ -57,7 +57,7 @@ __all__ = [
     'analyse',                                          # Analysis
     'Header', 'Frame',                                  # Headers
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',  # Link Layer
-    'AH', 'IPv4', 'IPv6', 'IPX',                        # Internet Layer
+    'AH', 'IP', 'IPX',                                  # Internet Layer
     'TCP', 'UDP',                                       # Transport Layer
     'HTTP',                                             # Application Layer
     'IPv4_Reassembly', 'IPv6_Reassembly',               # IP Reassembly

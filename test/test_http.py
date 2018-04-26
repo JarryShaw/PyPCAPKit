@@ -31,7 +31,7 @@ for frame in extractor:
         # #     # other fields
         # #     ...
         # # )
-        # http = frame[flag]
+        # http = frame[jspcap.HTTP]
         #
         # # fetch HTTP type (request/response)
         # http_type = http.receipt    # or http['receipt']

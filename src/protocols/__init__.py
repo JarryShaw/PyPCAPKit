@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """protocol family
 
-``jspcap.protocols`` is collection of all protocol family,
+``jspcap.protocols`` is collection of all protocol families,
 with detailed implementation and methods.
 
 """
@@ -21,7 +21,7 @@ __all__ = [
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',        # Protocol Numbers
     'Header', 'Frame',                          # Headers
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP',  # Link Layer
-    'AH', 'IPv4', 'IPv6', 'IPX',                # Internet Layer
+    'AH', 'IP', 'IPX',                          # Internet Layer
     'TCP', 'UDP',                               # Transport Layer
     'HTTP',                                     # Application Layer
 ]

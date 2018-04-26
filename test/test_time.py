@@ -7,7 +7,7 @@ import time
 
 
 lid = list()
-for index in range(100):
+for index in range(1, 101):
     now = time.time()
 
     tree = jspcap.Extractor(fin='../sample/test.pcap', tcp=True, store=False, nofile=True, strict=True)
