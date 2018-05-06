@@ -67,8 +67,8 @@ class Info(dict):
                 if isinstance(value, dict):
                     __dict__[key] = Info(value)
                 else:
-                    if isinstance(key, str):
-                        key = re.sub('\W', '_', key)
+                    # if isinstance(key, str):
+                    #     key = re.sub('\W', '_', key)
                     __dict__[key] = value
             return __dict__
 
@@ -207,7 +207,7 @@ class ProtoChain:
     def index(self, name, start=None, stop=None):
         try:
             start = start or 0
-            stop = stop or -1
+            stop = stop or len(self.tuple)
 
             if isinstance(name, str):
                 name = name.lower()
