@@ -44,7 +44,7 @@ ETHERTYPE = {
     # Link Layer
     0x0806 : 'ARP',     # Address Resolution Protocol
     0x8035 : 'RARP',    # Reverse Address Resolution Protocol
-    0x8100 : 'CTag',    # 802.1Q Customer VLAN Tag Type
+    0x8100 : 'VLAN',    # 802.1Q Customer VLAN Tag Type
 
     # Internet Layer
     0x0800 : 'IPv4',    # Internet Protocol version 4
