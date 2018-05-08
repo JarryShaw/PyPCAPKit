@@ -263,7 +263,6 @@ class TCP_Reassembly(Reassembly):
                     raw = info.payload,
                 ),
             }
-            return
 
         # initialise buffer with ACK
         if ACK not in self._buffer[BUFID]:

@@ -11,6 +11,9 @@ AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 # TODO: Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.
 
 
+import io
+
+
 # Internet Layer Protocols
 # Table of corresponding protocols
 
@@ -138,6 +141,7 @@ class Internet(Protocol):
             proto -- str, next layer protocol name
             length -- int, valid (not padding) length
             version -- int, IP version (4/6)
+            extension -- bool, if is extension header (default is False)
 
         Protocols:
             * IPv4 -- internet layer
@@ -149,31 +153,31 @@ class Internet(Protocol):
         """
         if proto == 'AH':
             from jspcap.protocols.internet.ah import AH
-            next_ = AH(self._file, length, version=version, extension=extension)
+            next_ = AH(io.BytesIO(self._file.read(*[length])), length, version=version, extension=extension)
             return next_.info, next_.protochain, next_.alias
         elif proto == 'HIP':
             from jspcap.protocols.internet.hip import HIP
-            next_ = HIP(self._file, length, extension=extension)
+            next_ = HIP(io.BytesIO(self._file.read(*[length])), length, extension=extension)
             return next_.info, next_.protochain, next_.alias
         elif proto == 'HOPOPT':
             from jspcap.protocols.internet.hopopt import HOPOPT
-            next_ = HOPOPT(self._file, length, extension=extension)
+            next_ = HOPOPT(io.BytesIO(self._file.read(*[length])), length, extension=extension)
             return next_.info, next_.protochain, next_.alias
         elif proto == 'IPv6-Frag':
             from jspcap.protocols.internet.ipv6_frag import IPv6_Frag
-            next_ = IPv6_Frag(self._file, length, extension=extension)
+            next_ = IPv6_Frag(io.BytesIO(self._file.read(*[length])), length, extension=extension)
             return next_.info, next_.protochain, next_.alias
         elif proto == 'IPv6-Opts':
             from jspcap.protocols.internet.ipv6_opts import IPv6_Opts
-            next_ = IPv6_Opts(self._file, length, extension=extension)
+            next_ = IPv6_Opts(io.BytesIO(self._file.read(*[length])), length, extension=extension)
             return next_.info, next_.protochain, next_.alias
         elif proto == 'IPv6-Route':
             from jspcap.protocols.internet.ipv6_route import IPv6_Route
-            next_ = IPv6_Route(self._file, length, extension=extension)
+            next_ = IPv6_Route(io.BytesIO(self._file.read(*[length])), length, extension=extension)
             return next_.info, next_.protochain, next_.alias
         elif proto == 'MH':
             from jspcap.protocols.internet.mh import MH
-            next_ = MH(self._file, length, extension=extension)
+            next_ = MH(io.BytesIO(self._file.read(*[length])), length, extension=extension)
             return next_.info, next_.protochain, next_.alias
         elif proto == 'IPv4':
             from jspcap.protocols.internet.ipv4 import IPv4 as Protocol
@@ -186,5 +190,5 @@ class Internet(Protocol):
         else:
             data = self._file.read(*[length]) or None
             return data, None, None
-        next_ = Protocol(self._file, length)
+        next_ = Protocol(io.BytesIO(self._file.read(*[length])), length)
         return next_.info, next_.protochain, next_.alias

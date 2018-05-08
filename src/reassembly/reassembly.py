@@ -110,6 +110,7 @@ class Reassembly(object):
     def fetch(self):
         """Fetch datagram."""
         if self._newflg:
+            self._newflg = False
             temp_dtgram = copy.deepcopy(self._dtgram)
             for (bufid, buffer) in self._buffer.items():
                 temp_dtgram += self.submit(buffer, bufid=bufid)

@@ -6,6 +6,9 @@ only, which is a base class for Hypertext Transfer
 Protocol (HTTP) protocol family, eg. HTTP/1.*, HTTP/2.
 
 """
+import chardet
+
+
 # Hypertext Transfer Protocol
 # Analyser for HTTP request & response
 
@@ -43,6 +46,7 @@ class HTTP(Application):
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
         * _make_protochain -- make ProtoChain instance for corresponding protocol
+        * _http_decode -- test and decode HTTP parameters
 
     """
     ##########################################################################
@@ -77,3 +81,21 @@ class HTTP(Application):
     @classmethod
     def __index__(cls):
         return ('HTTPv1', 'HTTPv2')
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @staticmethod
+    def _http_decode(byte):
+        try:
+            return byte.decode()
+        except UnicodeDecodeError:
+            pass
+        charset = chardet.detect(byte)['encoding']
+        if charset:
+            try:
+                return byte.decode(charset)
+            except UnicodeDecodeError:
+                pass
+        return byte

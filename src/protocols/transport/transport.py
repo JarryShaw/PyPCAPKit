@@ -119,5 +119,5 @@ class Transport(Protocol):
             length -- int, valid (not padding) length
 
         """
-        next_ = analyse(self._file, length)
+        next_ = analyse(io.BytesIO(self._file.read(*[length])), length)
         return next_.info, next_.protochain, next_.alias

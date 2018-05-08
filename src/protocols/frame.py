@@ -216,11 +216,11 @@ class Frame(Protocol):
         dict_['protocols'] = self._protos.chain
         return dict_
 
-    def _import_next_layer(self, file_, length):
+    def _import_next_layer(self, file, length):
         """Import next layer extractor.
 
         Keyword arguments:
-            proto -- str, next layer protocol name
+            file -- BytesIO, packet bytes I/O object
             length -- int, valid (not padding) length
 
         Protocols:
@@ -236,7 +236,7 @@ class Frame(Protocol):
         elif self._prot == 'IPv6':
             from .internet import IPv6 as Protocol
         else:
-            data = file_.read(*[length]) or None
+            data = file.read(*[length]) or None
             return data, None, None
-        next_ = Protocol(file_, length)
+        next_ = Protocol(file, length)
         return next_.info, next_.protochain, next_.alias

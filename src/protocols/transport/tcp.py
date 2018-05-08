@@ -321,9 +321,10 @@ class TCP(Transport):
             tcp['opt'] = options[0]     # tuple of option acronyms
             tcp.update(options[1])      # merge option info to buffer
 
-        tcp['raw'] = self._read_tcp_seekset(_hlen)
         if length:
             length -= _hlen
+        tcp['raw'] = self._read_tcp_seekset(length, _hlen)
+
         return self._decode_next_layer(tcp, None, length)
 
     ##########################################################################
@@ -345,13 +346,15 @@ class TCP(Transport):
     ##########################################################################
 
     @seekset
-    def _read_tcp_seekset(self, length):
+    def _read_tcp_seekset(self, length, hdr_len):
         """When fragmented, read payload throughout first.
 
         Keyword arguments:
             * length -- int, raw payload length
+            * hdr_len -- int, header length
 
         """
+        _ = self._read_fileng(hdr_len)
         payload = self._read_fileng(length) or None
         return payload
 

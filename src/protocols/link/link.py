@@ -11,6 +11,9 @@ L2TP, OSPF, RARP/DRARP and etc.
 # TODO: Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.
 
 
+import io
+
+
 # Link Layer Protocols
 # Table of corresponding protocols
 
@@ -123,7 +126,7 @@ class Link(Protocol):
         elif proto == 'RARP':
             from jspcap.protocols.link.rarp import RARP as Protocol
         elif proto == 'VLAN':
-            from jspcap.protocols.link.VLAN import VLAN as Protocol
+            from jspcap.protocols.link.vlan import VLAN as Protocol
         elif proto == 'IPv4':
             from jspcap.protocols.internet.ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
@@ -133,5 +136,5 @@ class Link(Protocol):
         else:
             data = self._file.read(*[length]) or None
             return data, None, None
-        next_ = Protocol(self._file, length)
+        next_ = Protocol(io.BytesIO(self._file.read(*[length])), length)
         return next_.info, next_.protochain, next_.alias

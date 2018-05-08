@@ -18,7 +18,6 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 <body>                      :==: RESPONSE BODY (optional)
 
 """
-import chardet
 import re
 
 
@@ -65,6 +64,7 @@ class HTTPv1(HTTP):
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
         * _make_protochain -- make ProtoChain instance for corresponding protocol
+        * _http_decode -- test and decode HTTP parameters
         * _read_http_header -- read HTTP/1.* header
         * _read_http_body -- read HTTP/1.* body
 
@@ -143,18 +143,18 @@ class HTTPv1(HTTP):
             receipt = 'request'
             header = dict(
                 request = dict(
-                    method = para1.decode(),
-                    target = para2.decode(),
-                    version = match2.group('version').decode(),
+                    method = self._http_decode(para1),
+                    target = self._http_decode(para2),
+                    version = self._http_decode(match2.group('version')),
                 ),
             )
         elif match3 and match4:
             receipt = 'response'
             header = dict(
                 response = dict(
-                    version = match3.group('version').decode(),
-                    status = int(para2.decode()),
-                    phrase = para3.decode(),
+                    version = self._http_decode(match3.group('version')),
+                    status = int(para2),
+                    phrase = self._http_decode(para3),
                 ),
             )
         else:
@@ -162,8 +162,8 @@ class HTTPv1(HTTP):
 
         try:
             for item in lists:
-                key = item[0].decode().strip().replace('request', 'request_field').replace('response', 'response_field')
-                value = item[1].decode().strip()
+                key = self._http_decode(item[0].strip().replace(b'request', b'request_field').replace(b'response', b'response_field'))
+                value = self._http_decode(item[1].strip())
                 if key in header:
                     if isinstance(header[key], tuple):
                         header[key] += (value,)
@@ -178,9 +178,4 @@ class HTTPv1(HTTP):
 
     def _read_http_body(self, body):
         """Read HTTP/1.* body."""
-        charset = chardet.detect(body)['encoding']
-        if charset:
-            try:
-                return body.decode(charset)
-            except UnicodeDecodeError:
-                return body
+        return self._http_decode(body)

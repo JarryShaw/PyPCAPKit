@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import chardet
 import jspcap
 import os
 import pprint
