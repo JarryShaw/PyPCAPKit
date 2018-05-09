@@ -56,6 +56,7 @@ class HOPOPT(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -113,11 +114,13 @@ class HOPOPT(Protocol):
             options = _opts,
         )
 
+        if length:
+            length -= hopopt['length']
+        hopopt['packet'] = self._read_packet(header=hopopt['length'], payload=length)
+
         if extension:
             self._protos = None
             return hopopt
-        if length:
-            length -= (_hlen + 1)
         return self._decode_next_layer(hopopt, _next, length)
 
     ##########################################################################

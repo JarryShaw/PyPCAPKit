@@ -54,6 +54,7 @@ class Header(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
 
     """
     ##########################################################################

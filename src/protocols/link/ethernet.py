@@ -49,6 +49,7 @@ class Ethernet(Link):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
         * _read_mac_addr -- read MAC address
@@ -111,6 +112,8 @@ class Ethernet(Link):
 
         if length is not None:
             length -= 14
+        ethernet['packet'] = self._read_packet(header=14, payload=length)
+
         return self._decode_next_layer(ethernet, _type, length)
 
     ##########################################################################

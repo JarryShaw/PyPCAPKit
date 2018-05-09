@@ -85,6 +85,7 @@ class ARP(Link):
          * _read_fileng -- read file buffer
          * _read_unpack -- read bytes and unpack to integers
          * _read_binary -- read bytes and convert into binaries
+         * _read_packet -- read raw packet data
          * _decode_next_layer -- decode next layer protocol type
          * _import_next_layer -- import next layer protocol extractor
          * _read_addr_resolve -- resolve MAC address according to protocol
@@ -183,6 +184,8 @@ class ARP(Link):
         proto = None
         if length is not None:
             length -= arp['len']
+        arp['packet'] = self._read_packet(header=arp['len'], payload=length)
+
         return self._decode_next_layer(arp, proto, length)
 
     ##########################################################################

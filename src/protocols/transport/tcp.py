@@ -178,9 +178,9 @@ class TCP(Transport):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
-        * _read_tcp_seekset -- when fragmented, read payload throughout first
         * _read_tcp_options -- read TCP option list
         * _read_mode_donone -- read options request no process
         * _read_mode_unpack -- read options request unpack process
@@ -323,7 +323,7 @@ class TCP(Transport):
 
         if length:
             length -= _hlen
-        tcp['raw'] = self._read_tcp_seekset(length, _hlen)
+        tcp['packet'] = self._read_packet(header=_hlen, payload=length)
 
         return self._decode_next_layer(tcp, None, length)
 
@@ -344,19 +344,6 @@ class TCP(Transport):
     ##########################################################################
     # Utilities.
     ##########################################################################
-
-    @seekset
-    def _read_tcp_seekset(self, length, hdr_len):
-        """When fragmented, read payload throughout first.
-
-        Keyword arguments:
-            * length -- int, raw payload length
-            * hdr_len -- int, header length
-
-        """
-        _ = self._read_fileng(hdr_len)
-        payload = self._read_fileng(length) or None
-        return payload
 
     def _read_tcp_options(self, size):
         """Read TCP option list.

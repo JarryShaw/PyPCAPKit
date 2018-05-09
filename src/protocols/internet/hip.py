@@ -85,6 +85,7 @@ class HIP(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -187,11 +188,13 @@ class HIP(Protocol):
             parameters = _para,
         )
 
+        if length:
+            length -= hip['length']
+        hip['packet'] = self._read_packet(header=hip['length'], payload=length)
+
         if extension:
             self._protos = None
             return hip
-        if length:
-            length -= (_hlen + 1)
         return self._decode_next_layer(hip, _next, length)
 
     ##########################################################################

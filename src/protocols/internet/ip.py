@@ -46,9 +46,9 @@ class IP(Internet):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
-        * _read_ip_seekset -- when fragmented, read payload throughout first
 
     """
     ##########################################################################
@@ -74,24 +74,3 @@ class IP(Internet):
     @classmethod
     def __index__(cls):
         return ('IPv4', 'IPv6', 'AH', 'ESP')
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    @seekset
-    def _read_ip_seekset(self, ip, hdr_len, raw_len):
-        """When fragmented, read payload throughout first.
-
-        Keyword arguments:
-            * ip -- dict, info buffer
-            * hdr_len -- int, internal header length
-            * raw_len -- int, raw payload length
-
-        """
-        ip['header'] = self._read_fileng(hdr_len)
-        ip['raw'] = self._read_fileng(raw_len)
-        padding = self._read_fileng()
-        if padding:
-            ip['padding'] = padding
-        return ip

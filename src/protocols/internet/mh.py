@@ -86,6 +86,7 @@ class MH(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -153,11 +154,13 @@ class MH(Protocol):
             data = _data,
         )
 
+        if length is not None:
+            length -= mh['length']
+        mh['packet'] = self._read_packet(header=mh['length'], payload=length)
+
         if extension:
             self._protos = None
             return mh
-        if length:
-            length -= (_hlen + 1)
         return self._decode_next_layer(mh, _next, length)
 
     ##########################################################################

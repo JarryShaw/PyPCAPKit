@@ -53,6 +53,7 @@ class Protocol:
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -221,6 +222,25 @@ class Protocol:
             byte = self._file.read(1)
             bin_ += bin(ord(byte))[2:].zfill(8)
         return bin_
+
+    @seekset
+    def _read_packet(self, length=None, *, header=None, payload=None, discard=False):
+        """Read raw packet data.
+        
+        Keyword arguments:
+            length -- int, length of the packet
+            header -- int, length of the packet header
+            payload -- int, length of the packet payload
+            discard -- bool, flag if discard header data
+
+        """
+        if header is not None:
+            header = self._read_fileng(header)
+            payload = self._read_fileng(*[payload])
+            if discard:
+                return payload
+            return dict(header=header, payload=payload)
+        return self._read_fileng(*[length])
 
     def _decode_next_layer(self, dict_, proto=None, length=None):
         """Decode next layer protocol.

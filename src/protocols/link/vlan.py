@@ -60,6 +60,7 @@ class VLAN(Link):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -107,7 +108,7 @@ class VLAN(Link):
         _tcif = self._read_binary(2)
         _type = self._read_protos(2)
 
-        ctag = dict(
+        vlan = dict(
             tci = dict(
                 pcp = _PCP.get(_tcif[:3]),
                 dei = True if _tcif[3] else False,
@@ -118,7 +119,9 @@ class VLAN(Link):
 
         if length is not None:
             length -= 4
-        return self._decode_next_layer(ctag, _type, length)
+        vlan['packet'] = self._read_packet(header=4, payload=length)
+
+        return self._decode_next_layer(vlan, _type, length)
 
     ##########################################################################
     # Data models.

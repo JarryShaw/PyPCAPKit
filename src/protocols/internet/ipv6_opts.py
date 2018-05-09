@@ -56,6 +56,7 @@ class IPv6_Opts(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -118,11 +119,13 @@ class IPv6_Opts(Protocol):
             options = _opts,
         )
 
+        if length is not None:
+            length -= ipv6_opts['length']
+        ipv6_opts['packet'] = self._read_packet(header=ipv6_opts['length'], payload=length)
+
         if extension:
             self._protos = None
             return ipv6_opts
-        if length:
-            length -= (_hlen + 1)
         return self._decode_next_layer(ipv6_opts, _next, length)
 
     ##########################################################################

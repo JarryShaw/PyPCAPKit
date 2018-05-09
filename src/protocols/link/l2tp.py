@@ -56,6 +56,7 @@ class L2TP(Link):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -126,7 +127,7 @@ class L2TP(Link):
         _sssn = self._read_unpack(2)
         _nseq = self._read_unpack(2) if int(_flag[4]) else None
         _nrec = self._read_unpack(2) if int(_flag[4]) else None
-        _size = self._read_unpack(2) if int(_flag[6]) else None
+        _size = self._read_unpack(2) if int(_flag[6]) else 0
 
         l2tp = dict(
             flags = dict(
@@ -142,15 +143,18 @@ class L2TP(Link):
             sessionid = _sssn,
             ns = _nseq,
             nr = _nrec,
-            offset = _size * 8,
+            offset = 8*_size or None,
         )
 
-        l2tp['hdr_len'] = _hlen or (6 + 2*(int(_flag[1]) + 2*int(_flag[4]) + int(_flag[6])))
-        if _size:
-            l2tp['padding'] = self._read_fileng(_size * 8)
-            l2tp['hdr_len'] += _size * 8
+        hdr_len = _hlen or (6 + 2*(int(_flag[1]) + 2*int(_flag[4]) + int(_flag[6])))
+        l2tp['hdr_len'] = hdr_len + _size * 8
+        # if _size:
+            # l2tp['padding'] = self._read_fileng(_size * 8)
+
         if length is not None:
             length -= l2tp['hdr_len']
+        l2tp['packet'] = self._read_packet(header=l2tp['hdr_len'], payload=length)
+
         return self._decode_next_layer(l2tp, length)
 
     ##########################################################################

@@ -48,6 +48,7 @@ class IPv6_Frag(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -111,11 +112,13 @@ class IPv6_Frag(Protocol):
             id = _ipid,
         )
 
+        if length is not None:
+            length -= 8
+        ipv6_frag['packet'] = self._read_packet(header=8, payload=length)
+
         if extension:
             self._protos = None
             return ipv6_frag
-        if length:
-            length -= 8
         return self._decode_next_layer(ipv6_frag, _next, length)
 
     ##########################################################################

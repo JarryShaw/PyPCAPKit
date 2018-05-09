@@ -108,6 +108,7 @@ class HTTPv1(HTTP):
             raw = dict(
                 header = header,
                 body = body,
+                packet = self._read_packet(length),
             ),
         )
 

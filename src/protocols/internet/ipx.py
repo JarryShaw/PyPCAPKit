@@ -82,6 +82,7 @@ class IPX(Internet):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
         * _read_ipx_address -- read IPX address field
@@ -151,6 +152,8 @@ class IPX(Internet):
 
         proto = ipx['type']
         length = ipx['len'] - 30
+        ipx['packet'] = self._read_packet(header=30, payload=length)
+
         return self._read_next_layer(ipx, proto, length)
 
     ##########################################################################

@@ -56,6 +56,7 @@ class AH(IPsec):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -141,11 +142,14 @@ class AH(IPsec):
             padding = self._read_binary(_plen)
             if any((int(bit, base=2) for bit in padding)):
                 raise ProtocolError(f'{self.alias}: invalid format')
+
+        if length is not None:
+            length -= ah['length']
+        ah['packet'] = self._read_packet(header=ah['length'], payload=length)
+
         if extension:
             self._protos = None
             return ah
-        if length is not None:
-            length -= ah['length']
         return self._decode_next_layer(ah, _next, length)
 
     ##########################################################################

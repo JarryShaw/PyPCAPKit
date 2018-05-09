@@ -68,6 +68,7 @@ class IPv6_Route(Protocol):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -136,11 +137,13 @@ class IPv6_Route(Protocol):
             data = _data,
         )
 
+        if length is not None:
+            length -= ipv6_route['length']
+        ipv6_route['packet'] = self._read_packet(header=ipv6_route['length'], payload=length)
+
         if extension:
             self._protos = None
             return ipv6_route
-        if length:
-            length -= (_hlen + 1)
         return self._decode_next_layer(ipv6_route, _next, length)
 
     ##########################################################################

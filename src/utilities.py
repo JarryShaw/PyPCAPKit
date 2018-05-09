@@ -21,6 +21,7 @@ import re
 
 from jspcap.exceptions import IndexNotFound, UnsupportedCall
 from jspcap.validations import dict_check, int_check
+# from jspcap.protocols.protocol import Protocol
 
 
 __all__ = ['seekset', 'Info', 'VersionInfo', 'ProtoChain']
@@ -265,6 +266,14 @@ class ProtoChain:
         return iter(self.__damn__)
 
     def __contains__(self, name):
+        from jspcap.protocols.protocol import Protocol
+        if isinstance(name, type) and issubclass(name, Protocol):
+            name = name.__index__()
+        if isinstance(name, tuple):
+            for item in name:
+                flag = (item.lower() in self.proto)
+                if flag:    break
+            return flag
         if isinstance(name, str):
             name = name.lower()
         return (name in self.proto)

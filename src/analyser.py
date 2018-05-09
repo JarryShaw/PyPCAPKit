@@ -6,7 +6,6 @@ match application layer protocol. Then, call corresponding
 modules and functions to extract the attributes.
 
 """
-import textwrap
 
 
 # Analyser for Application Layer
@@ -14,7 +13,6 @@ import textwrap
 
 
 from jspcap.exceptions import ProtocolError
-from jspcap.utilities import ProtoChain
 
 
 __all__ = ['analyse']
@@ -30,8 +28,7 @@ class Analysis:
     def name(self):
         if self._ptch is None:
             return 'Unknown'
-        else:
-            return self._ptch.tuple[0]
+        return self._ptch.tuple[0]
 
     @property
     def alias(self):
@@ -48,15 +45,13 @@ class Analysis:
 
     def __str__(self):
         if self._ptch is None:
-            return self._info
-        else:
-            return f'Analysis({self._ptch.tuple[0]}, info={self._info})'
+            return f'Analysis(None, data="{self._info}")'
+        return f'Analysis({self._ptch.tuple[0]}, info={self._info})'
 
     def __repr__(self):
         if self._ptch is None:
-            return 'Analysis()'
-        else:
-            return f'Analysis({self._ptch.tuple[0]})'
+            return 'Analysis(None)'
+        return f'Analysis({self._ptch.tuple[0]})'
 
 
 def analyse(file, length):

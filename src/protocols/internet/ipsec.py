@@ -43,6 +43,7 @@ class IPsec(IP):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
 
@@ -68,11 +69,3 @@ class IPsec(IP):
     @classmethod
     def __index__(cls):
         return ('AH', 'ESP')
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    def _read_ip_seekset(self, ip, hdr_len, raw_len):
-        """Deprecated."""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_read_ip_seekset'")

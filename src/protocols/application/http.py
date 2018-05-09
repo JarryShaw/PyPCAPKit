@@ -45,6 +45,7 @@ class HTTP(Application):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _make_protochain -- make ProtoChain instance for corresponding protocol
         * _http_decode -- test and decode HTTP parameters
 

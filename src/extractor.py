@@ -423,8 +423,9 @@ class Extractor:
                 ihl = ipv4.hdr_len,                     # internet header length
                 mf = ipv4.flags.mf,                     # more fragment flag
                 tl = ipv4.len,                          # total length, header includes
-                header = bytearray(ipv4.header),        # raw bytearray type header
-                payload = bytearray(ipv4.raw or b''),   # raw bytearray type payload
+                header = bytearray(ipv4.packet.header), # raw bytearray type header
+                payload = bytearray(ipv4.packet.payload or b''),
+                                                        # raw bytearray type payload
             )
             self._reasm[0](data)
 
@@ -446,8 +447,10 @@ class Extractor:
                 ihl = ipv6.hdr_len,                     # header length, only headers before IPv6-Frag
                     mf = ipv6.ipv6_frag.mf,             # more fragment flag
                 tl = ipv6.hdr_len + ipv6.raw_len,       # total length, header includes
-                header = bytearray(ipv6.header),        # raw bytearray type header before IPv6-Frag
-                payload = bytearray(ipv6.raw or b''),   # raw bytearray type payload after IPv6-Frag
+                header = bytearray(ipv6.fragment.header),
+                                                        # raw bytearray type header before IPv6-Frag
+                payload = bytearray(ipv6.fragment.payload or b''),
+                                                        # raw bytearray type payload after IPv6-Frag
             )
             self._reasm[1](data)
 
@@ -468,9 +471,10 @@ class Extractor:
                 dsn = tcp.seq,                          # data sequence number
                 syn = tcp.flags.syn,                    # synchronise flag
                 fin = tcp.flags.fin,                    # finish flag
-                payload = bytearray(tcp.raw or b''),    # raw bytearray type payload
+                payload = bytearray(tcp.packet.payload or b''),
+                                                        # raw bytearray type payload
            )
-            raw_len = len(tcp.raw or b'')
+            raw_len = len(data['payload'])              # payload length, header excludes
             data['first'] = tcp.seq                     # this sequence number
             data['last'] = tcp.seq + raw_len            # next (wanted) sequence number
             data['len'] = raw_len                       # payload length, header excludes

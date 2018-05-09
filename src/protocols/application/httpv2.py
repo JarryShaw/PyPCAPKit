@@ -115,6 +115,7 @@ class HTTPv2(HTTP):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _make_protochain -- make ProtoChain instance for corresponding protocol
         * _http_decode -- test and decode HTTP parameters
         * _read_http_data -- read HTTP/2 DATA frames
@@ -180,6 +181,7 @@ class HTTPv2(HTTP):
             length = _tlen,
             type = _HTTP_TYPE.get(_type, _type),
             sid = int(_rsid[1:], base=2),
+            packet = self._read_packet(_tlen),
         )
 
         if http['type'] in ('SETTINGS', 'PING') and http['sid'] != 0:

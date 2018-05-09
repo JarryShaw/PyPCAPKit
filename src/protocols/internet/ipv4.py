@@ -209,9 +209,9 @@ class IPv4(IP):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
-        * _read_ip_seekset -- when fragmented, read payload throughout first
         * _read_ipv4_addr -- read IPv4 address
         * _read_ipv4_options -- read IPv4 option list
 
@@ -325,17 +325,7 @@ class IPv4(IP):
 
         hdr_len = ipv4['hdr_len']
         raw_len = ipv4['len'] - hdr_len
-
-        if not ipv4['flags']['df']:
-            ipv4 = self._read_ip_seekset(ipv4, hdr_len, raw_len)
-
-        # make next layer protocol name
-        proto = ipv4['proto']
-        if proto is None:
-            proto = ''
-        name_ = proto.lower() or 'raw'
-        proto = proto or None
-        self._protos = ProtoChain(proto)
+        ipv4['packet'] = self._read_packet(header=hdr_len, payload=raw_len)
 
         return self._decode_next_layer(ipv4, _prot, raw_len)
 

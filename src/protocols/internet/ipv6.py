@@ -88,9 +88,9 @@ class IPv6(IP):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
-        * _read_ip_seekset -- when fragmented, read payload throughout first
         * _read_ip_hextet -- read first four hextets of IPv6
         * _read_ip_addr -- read IP address
 
@@ -176,7 +176,11 @@ class IPv6(IP):
             dst = _dsta,
         )
 
-        return self._decode_next_layer(ipv6, _next, length)
+        hdr_len = 40
+        raw_len = ipv6['payload']
+        ipv6['packet'] = self._read_packet(header=hdr_len, payload=raw_len)
+
+        return self._decode_next_layer(ipv6, _next, raw_len)
 
     ##########################################################################
     # Data models.
@@ -260,7 +264,7 @@ class IPv6(IP):
         while proto in EXT_HDR:
             # keep original data after fragment header
             if proto == 'IPv6-Frag':
-                ipv6 = self._read_ip_seekset(ipv6, hdr_len, raw_len)
+                ipv6['fragment'] = self._read_packet(header=hdr_len, payload=raw_len)
 
             # directly break when No Next Header ocuurs
             if proto == 'IPv6-NoNxt':
