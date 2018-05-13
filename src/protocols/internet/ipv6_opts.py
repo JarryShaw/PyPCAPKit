@@ -89,7 +89,7 @@ class IPv6_Opts(Protocol):
     # Methods.
     ##########################################################################
 
-    def read_hopopt(self, length, extension):
+    def read_ipv6_opts(self, length, extension):
         """Read Destination Options for IPv6.
 
         Structure of IPv6-Opts header [RFC 8200]:
@@ -109,6 +109,9 @@ class IPv6_Opts(Protocol):
               2              16         opt.options       Options
 
         """
+        if length is None:
+            length = len(self)
+
         _next = self._read_protos(1)
         _hlen = self._read_unpack(1)
         _opts = self._read_fileng(_hlen - 1)
@@ -135,9 +138,6 @@ class IPv6_Opts(Protocol):
     def __init__(self, _file, length=None, *, extension=False):
         self._file = _file
         self._info = Info(self.read_ipv6_opts(length, extension))
-
-    def __len__(self):
-        return self._info.length
 
     def __length_hint__(self):
         return 2

@@ -104,6 +104,9 @@ class HOPOPT(Protocol):
               2              16         hopopt.options    Options
 
         """
+        if length is None:
+            length = len(self)
+
         _next = self._read_protos(1)
         _hlen = self._read_unpack(1)
         _opts = self._read_fileng(_hlen - 1)
@@ -114,8 +117,7 @@ class HOPOPT(Protocol):
             options = _opts,
         )
 
-        if length:
-            length -= hopopt['length']
+        length -= hopopt['length']
         hopopt['packet'] = self._read_packet(header=hopopt['length'], payload=length)
 
         if extension:
@@ -130,9 +132,6 @@ class HOPOPT(Protocol):
     def __init__(self, _file, length=None, *, extension=False):
         self._file = _file
         self._info = Info(self.read_hopopt(length, extension))
-
-    def __len__(self):
-        return self._info.length
 
     def __length_hint__(self):
         return 2

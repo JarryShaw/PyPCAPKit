@@ -158,6 +158,9 @@ class IPv6(IP):
               24             192        ip.dst            Destination Address
 
         """
+        if length is None:
+            length = len(self)
+
         _htet = self._read_ip_hextet()
         _plen = self._read_unpack(2)
         _next = self._read_protos(1)
@@ -190,11 +193,12 @@ class IPv6(IP):
         self._file = _file
         self._info = Info(self.read_ipv6(length))
 
-    def __len__(self):
-        return self._info.hdr_len
-
     def __length_hint__(self):
         return 40
+
+    @classmethod
+    def __index__(cls):
+        return cls.__name__
 
     ##########################################################################
     # Utilities.

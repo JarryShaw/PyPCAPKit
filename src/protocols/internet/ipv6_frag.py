@@ -100,6 +100,9 @@ class IPv6_Frag(Protocol):
               4              32         frag.id           Identification
 
         """
+        if length is None:
+            length = len(self)
+
         _next = self._read_protos(1)
         _temp = self._read_fileng(1)
         _offm = self._read_binary(2)
@@ -128,9 +131,6 @@ class IPv6_Frag(Protocol):
     def __init__(self, _file, length=None, *, extension=False):
         self._file = _file
         self._info = Info(self.read_ipv6_frag(length, extension))
-
-    def __len__(self):
-        return 8
 
     def __length_hint__(self):
         return 8

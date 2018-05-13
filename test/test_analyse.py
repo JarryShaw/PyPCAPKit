@@ -6,7 +6,10 @@ import jspcap
 import pprint
 
 
-tree = jspcap.Extractor(fin='../sample/http1.pcap', store=False, tcp=True, verbose=True, nofile=True, strict=True)
+tree = jspcap.Extractor(
+    fin='../sample/http6.cap',
+    store=False, tcp=True, verbose=True, nofile=True, strict=True, extension=False
+)
 # pprint.pprint(tree.reassembly.tcp)
 print()
 for packet in tree.reassembly.tcp:

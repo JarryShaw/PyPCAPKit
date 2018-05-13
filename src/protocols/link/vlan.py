@@ -105,6 +105,9 @@ class VLAN(Link):
               3              24        vlan.type         Protocol (Internet Layer)
 
         """
+        if length is None:
+            length = len(self)
+
         _tcif = self._read_binary(2)
         _type = self._read_protos(2)
 
@@ -117,8 +120,7 @@ class VLAN(Link):
             type = _type,
         )
 
-        if length is not None:
-            length -= 4
+        length -= 4
         vlan['packet'] = self._read_packet(header=4, payload=length)
 
         return self._decode_next_layer(vlan, _type, length)
@@ -130,9 +132,6 @@ class VLAN(Link):
     def __init__(self, _file, length=None):
         self._file = _file
         self._info = Info(self.read_ctag(length))
-
-    def __len__(self):
-        return 4
 
     def __length_hint__(self):
         return 4

@@ -160,6 +160,9 @@ class HIP(Protocol):
               40             320        hip.parameters    HIP Parameters
 
         """
+        if length is None:
+            length = len(self)
+
         _next = self._read_protos(1)
         _hlen = self._read_unpack(1)
         _type = self._read_binary(1)
@@ -188,8 +191,7 @@ class HIP(Protocol):
             parameters = _para,
         )
 
-        if length:
-            length -= hip['length']
+        length -= hip['length']
         hip['packet'] = self._read_packet(header=hip['length'], payload=length)
 
         if extension:
@@ -204,9 +206,6 @@ class HIP(Protocol):
     def __init__(self, _file, length=None, *, extension=False):
         self._file = _file
         self._info = Info(self.read_hip(length, extension))
-
-    def __len__(self):
-        return self._info.length
 
     def __length_hint__(self):
         return 40

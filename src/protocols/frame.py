@@ -130,9 +130,6 @@ class Frame(Protocol):
         self._file = _file
         self._info = Info(self.read_frame())
 
-    def __len__(self):
-        return 16
-
     def __length_hint__(self):
         return 16
 

@@ -114,6 +114,9 @@ class UDP(Transport):
               6              48         udp.checksum            Checksum
 
         """
+        if length is None:
+            length = len(self)
+
         _srcp = self._read_unpack(2)
         _dstp = self._read_unpack(2)
         _tlen = self._read_unpack(2)
@@ -138,9 +141,6 @@ class UDP(Transport):
     def __init__(self, _file, length=None):
         self._file = _file
         self._info = Info(self.read_udp(length))
-
-    def __len__(self):
-        return 8
 
     def __length_hint__(self):
         return 8

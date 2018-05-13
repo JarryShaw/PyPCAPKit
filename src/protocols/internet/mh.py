@@ -139,6 +139,9 @@ class MH(Protocol):
               6              48         mh.data           Message Data
 
         """
+        if length is None:
+            length = len(self)
+
         _next = self._read_protos(1)
         _hlen = self._read_unpack(1)
         _type = self._read_unpack(1)
@@ -154,8 +157,7 @@ class MH(Protocol):
             data = _data,
         )
 
-        if length is not None:
-            length -= mh['length']
+        length -= mh['length']
         mh['packet'] = self._read_packet(header=mh['length'], payload=length)
 
         if extension:
@@ -170,9 +172,6 @@ class MH(Protocol):
     def __init__(self, _file, length=None, *, extension=False):
         self._file = _file
         self._info = Info(self.read_mh(length, extension))
-
-    def __len__(self):
-        return self._info.length
 
     def __length_hint__(self):
         return 6

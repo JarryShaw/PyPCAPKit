@@ -138,6 +138,9 @@ class OSPF(Link):
               16             128        ospf.auth         Authentication
 
         """
+        if length is None:
+            length = len(self)
+
         _vers = self._read_unpack(1)
         _type = self._read_unpack(1)
         _tlen = self._read_unpack(2)
@@ -173,9 +176,6 @@ class OSPF(Link):
     def __init__(self, _file, length=None):
         self._file = _file
         self._info = Info(self.read_ospf(length))
-
-    def __len__(self):
-        return 24
 
     def __length_hint__(self):
         return 24

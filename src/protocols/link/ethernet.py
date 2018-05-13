@@ -100,6 +100,9 @@ class Ethernet(Link):
               2              16         eth.type          Protocol (Internet Layer)
 
         """
+        if length is None:
+            length = len(self)
+
         _dstm = self._read_mac_addr()
         _srcm = self._read_mac_addr()
         _type = self._read_protos(2)
@@ -110,8 +113,7 @@ class Ethernet(Link):
             type = _type,
         )
 
-        if length is not None:
-            length -= 14
+        length -= 14
         ethernet['packet'] = self._read_packet(header=14, payload=length)
 
         return self._decode_next_layer(ethernet, _type, length)
@@ -123,9 +125,6 @@ class Ethernet(Link):
     def __init__(self, _file, length=None):
         self._file = _file
         self._info = Info(self.read_ethernet(length))
-
-    def __len__(self):
-        return 14
 
     def __length_hint__(self):
         return 14

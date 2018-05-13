@@ -66,3 +66,11 @@ class RARP(ARP):
     """
     _acnm = 'RARP'
     _name = 'Reverse Address Resolution Protocol'
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @classmethod
+    def __index__(cls):
+        return ('RARP', 'DRARPD')

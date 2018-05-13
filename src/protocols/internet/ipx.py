@@ -134,6 +134,9 @@ class IPX(Internet):
               18             144        ipx.src          Source Address
 
         """
+        if length is None:
+            length = len(self)
+
         _csum = self._read_fileng(2)
         _tlen = self._read_unpack(2)
         _ctrl = self._read_unpack(1)
@@ -163,9 +166,6 @@ class IPX(Internet):
     def __init__(self, _file, length=None):
         self._file = _file
         self._info = Info(self.read_ipx(length))
-
-    def __len__(self):
-        return 30
 
     def __length_hint__(self):
         return 30

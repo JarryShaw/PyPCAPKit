@@ -120,6 +120,9 @@ class L2TP(Link):
               12             96         l2tp.offset       Offset Size (optional by offset)
 
         """
+        if length is None:
+            length = len(self)
+
         _flag = self._read_binary(1)
         _vers = self._read_fileng(1).hex()[1]
         _hlen = self._read_unpack(2) if int(_flag[1]) else None
@@ -151,8 +154,7 @@ class L2TP(Link):
         # if _size:
             # l2tp['padding'] = self._read_fileng(_size * 8)
 
-        if length is not None:
-            length -= l2tp['hdr_len']
+        length -= l2tp['hdr_len']
         l2tp['packet'] = self._read_packet(header=l2tp['hdr_len'], payload=length)
 
         return self._decode_next_layer(l2tp, length)
@@ -164,9 +166,6 @@ class L2TP(Link):
     def __init__(self, _file, length=None):
         self._file = _file
         self._info = Info(self.read_l2tp(length))
-
-    def __len__(self):
-        return self._info.hdr_len
 
     def __length_hint__(self):
         return 16

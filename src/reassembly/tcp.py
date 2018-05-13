@@ -83,6 +83,7 @@ described below.
 
 """
 import copy
+import io
 import sys
 
 
@@ -90,6 +91,7 @@ import sys
 # Reconstruct application layer packets
 
 
+from jspcap.analyser import analyse
 from jspcap.utilities import Info
 from jspcap.reassembly.reassembly import Reassembly
 
@@ -362,6 +364,7 @@ class TCP_Reassembly(Reassembly):
                         ),
                         index = tuple(buffer['ind']),
                         payload = tuple(data) or None,
+                        packets = tuple([ analyse(io.BytesIO(frag), len(frag)) for frag in data ]),
                     )
                     datagram.append(packet)
             # if this buffer is implemented
@@ -378,6 +381,7 @@ class TCP_Reassembly(Reassembly):
                         ),
                         index = tuple(buffer['ind']),
                         payload = bytes(data) or None,
+                        packets = (analyse(io.BytesIO(data), len(data)),),
                     )
                     datagram.append(packet)
         return datagram

@@ -145,6 +145,9 @@ class ARP(Link):
               18             144        arp.tha           Target Hardware Address
               24             192        arp.tpa           Target Protocol Address
         """
+        if length is None:
+            length = len(self)
+
         _hwty = self._read_unpack(2)
         _ptty = self._read_unpack(2)
         _hlen = self._read_unpack(1)
@@ -181,12 +184,10 @@ class ARP(Link):
             len = 8 + _hlen * 2 + _plen * 2,
         )
 
-        proto = None
-        if length is not None:
-            length -= arp['len']
+        length -= arp['len']
         arp['packet'] = self._read_packet(header=arp['len'], payload=length)
 
-        return self._decode_next_layer(arp, proto, length)
+        return self._decode_next_layer(arp, None, length)
 
     ##########################################################################
     # Data models.
@@ -196,11 +197,12 @@ class ARP(Link):
         self._file = _file
         self._info = Info(self.read_arp(length))
 
-    def __len__(self):
-        return self._info.len
-
     def __length_hint__(self):
         return 28
+
+    @classmethod
+    def __index__(cls):
+        return ('ARP', 'InARP')
 
     ##########################################################################
     # Utilities.

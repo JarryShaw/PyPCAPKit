@@ -129,9 +129,10 @@ class Protocol:
         bytes_ = self._file.read()
         return bytes_
 
-    @abstractmethod
+    @seekset
     def __len__(self):
-        pass
+        """Total length of correspoding protocol."""
+        return len(self._read_fileng())
 
     @abstractmethod
     def __length_hint__(self):

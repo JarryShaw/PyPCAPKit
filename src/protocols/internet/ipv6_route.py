@@ -123,6 +123,9 @@ class IPv6_Route(Protocol):
               4              32         route.data        Type-Specific Data
 
         """
+        if length is None:
+            length = len(self)
+
         _next = self._read_protos(1)
         _hlen = self._read_unpack(1)
         _type = self._read_unpack(1)
@@ -153,9 +156,6 @@ class IPv6_Route(Protocol):
     def __init__(self, _file, length=None, *, extension=False):
         self._file = _file
         self._info = Info(self.read_ipv6_route(length, extension))
-
-    def __len__(self):
-        return self._info.length
 
     def __length_hint__(self):
         return 4

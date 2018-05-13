@@ -92,6 +92,9 @@ class HTTPv1(HTTP):
                                     [ message-body ]
 
         """
+        if length is None:
+            length =  len(self)
+
         packet = self._file.read(length)
         try:
             header, body = packet.split(b'\r\n\r\n', 1)
@@ -113,6 +116,17 @@ class HTTPv1(HTTP):
         )
 
         return http
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __length_hint__(self):
+        pass
+
+    @classmethod
+    def __index__(cls):
+        return cls.__name__
 
     ##########################################################################
     # Utilities.

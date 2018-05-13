@@ -166,7 +166,10 @@ class HTTPv2(HTTP):
                9              72         http.payload      Frame Payload
 
         """
-        if length < 9:
+        if length is None:
+            length = len(self)
+
+        if len(self) < 9:
             raise ProtocolError(f'HTTP/2: invalid format', quiet=True)
 
         _tlen = self._read_unpack(3)
@@ -174,15 +177,21 @@ class HTTPv2(HTTP):
         _flag = self._read_binary(1)
         _rsid = self._read_binary(4)
 
+        if _tlen != length:
+            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
+
         if int(_rsid[0], base=2):
             raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
 
         http = dict(
             length = _tlen,
-            type = _HTTP_TYPE.get(_type, _type),
+            type = _HTTP_TYPE.get(_type),
             sid = int(_rsid[1:], base=2),
             packet = self._read_packet(_tlen),
         )
+
+        if http['type'] is None:
+            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
 
         if http['type'] in ('SETTINGS', 'PING') and http['sid'] != 0:
             raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
@@ -191,6 +200,17 @@ class HTTPv2(HTTP):
         http.update(_http)
 
         return http
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __length_hint__(self):
+        return 9
+
+    @classmethod
+    def __index__(cls):
+        return cls.__name__
 
     ##########################################################################
     # Utilities.

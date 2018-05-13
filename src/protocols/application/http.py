@@ -73,12 +73,6 @@ class HTTP(Application):
         self._info = Info(self.read_http(length))
         self._make_protochain()
 
-    def __len__(self):
-        raise UnsupportedCall(f"object of type '{self.__class__.__name__}' has no len()")
-
-    def __length_hint__(self):
-        pass
-
     @classmethod
     def __index__(cls):
         return ('HTTPv1', 'HTTPv2')

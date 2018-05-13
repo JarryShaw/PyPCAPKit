@@ -160,7 +160,10 @@ class Extractor:
             ifnm = 'in.pcap'
         else:
             str_check(fin)
-            ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
+            if extension:
+                ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
+            else:
+                ifnm = fin
 
         if not os.path.isfile(ifnm):
             raise FileNotFound(f"[Errno 2] No such file or directory: '{ifnm}'")

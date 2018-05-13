@@ -279,6 +279,9 @@ class IPv4(IP):
               20             160        ip.options        IP Options (if IHL > 5)
 
         """
+        if length is None:
+            length = len(self)
+
         _vihl = self._read_fileng(1).hex()
         _dscp = self._read_binary(1)
         _tlen = self._read_unpack(2)
@@ -337,11 +340,12 @@ class IPv4(IP):
         self._file = _file
         self._info = Info(self.read_ipv4(length))
 
-    def __len__(self):
-        return self._info.hdr_len
-
     def __length_hint__(self):
         return 20
+
+    @classmethod
+    def __index__(cls):
+        return cls.__name__
 
     ##########################################################################
     # Utilities.

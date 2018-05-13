@@ -112,6 +112,9 @@ class AH(IPsec):
               12             96         ah.icv          Integrity Check Value (ICV)
 
         """
+        if length is None:
+            length = len(self)
+
         _next = self._read_protos(1)
         _plen = self._read_unpack(1)
         _resv = self._read_fileng(2)
@@ -143,8 +146,7 @@ class AH(IPsec):
             if any((int(bit, base=2) for bit in padding)):
                 raise ProtocolError(f'{self.alias}: invalid format')
 
-        if length is not None:
-            length -= ah['length']
+        length -= ah['length']
         ah['packet'] = self._read_packet(header=ah['length'], payload=length)
 
         if extension:
@@ -160,8 +162,9 @@ class AH(IPsec):
         self._file = _file
         self._info = Info(self.read_ah(length, version, extension))
 
-    def __len__(self):
-        return self._info.length
-
     def __length_hint__(self):
         return 20
+
+    @classmethod
+    def __index__(cls):
+        return cls.__name__

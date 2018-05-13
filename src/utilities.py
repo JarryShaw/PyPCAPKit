@@ -3,9 +3,9 @@
 
 ``jspcap.utilities`` contains several useful functions and
 classes which are fundations of ``jspcap``, including
-decorater function ``seekset``, dict-like class ``Info``,
-tuple-like class ``VersionInfo``, and special class
-``ProtoChain``.
+decorater function ``seekset`` and ``seekset_ng``, 
+dict-like class ``Info``, tuple-like class ``VersionInfo``,
+and special class ``ProtoChain``.
 
 """
 import copy
@@ -24,7 +24,7 @@ from jspcap.validations import dict_check, int_check
 # from jspcap.protocols.protocol import Protocol
 
 
-__all__ = ['seekset', 'Info', 'VersionInfo', 'ProtoChain']
+__all__ = ['seekset', 'seekset_ng', 'Info', 'VersionInfo', 'ProtoChain']
 
 
 # # protocol name replace
@@ -44,6 +44,18 @@ def seekset(func):
         self._file.seek(os.SEEK_SET)
         return_ = func(self, *args, **kw)
         self._file.seek(seek_cur, os.SEEK_SET)
+        return return_
+    return seekcur
+
+
+def seekset_ng(func):
+    """Read file from start then set back to original."""
+    @functools.wraps(func)
+    def seekcur(file, *args, **kw):
+        seek_cur = file.tell()
+        file.seek(os.SEEK_SET)
+        return_ = func(file, *args, **kw)
+        file.seek(seek_cur, os.SEEK_SET)
         return return_
     return seekcur
 

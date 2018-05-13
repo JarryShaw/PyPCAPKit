@@ -282,6 +282,9 @@ class TCP(Transport):
               20             160        tcp.opt                 TCP Options (if data offset > 5)
 
         """
+        if length is None:
+            length = len(self)
+
         _srcp = self._read_unpack(2)
         _dstp = self._read_unpack(2)
         _seqn = self._read_unpack(4)
@@ -321,8 +324,7 @@ class TCP(Transport):
             tcp['opt'] = options[0]     # tuple of option acronyms
             tcp.update(options[1])      # merge option info to buffer
 
-        if length:
-            length -= _hlen
+        length -= _hlen
         tcp['packet'] = self._read_packet(header=_hlen, payload=length)
 
         return self._decode_next_layer(tcp, None, length)
@@ -334,9 +336,6 @@ class TCP(Transport):
     def __init__(self, _file, length=None):
         self._file = _file
         self._info = Info(self.read_tcp(length))
-
-    def __len__(self):
-        return self._info.hdr_len
 
     def __length_hint__(self):
         return 20
