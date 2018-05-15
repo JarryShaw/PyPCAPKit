@@ -129,7 +129,7 @@ class VLAN(Link):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None):
+    def __init__(self, _file, length=None, **kwargs):
         self._file = _file
         self._info = Info(self.read_ctag(length))
 

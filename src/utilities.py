@@ -10,6 +10,7 @@ and special class ``ProtoChain``.
 """
 import copy
 import functools
+import io
 import numbers
 import os
 import re
@@ -21,10 +22,17 @@ import re
 
 from jspcap.exceptions import IndexNotFound, UnsupportedCall
 from jspcap.validations import dict_check, int_check
+# from jspcap.analyser import Analysis
 # from jspcap.protocols.protocol import Protocol
+# from jspcap.protocols.raw import Raw
 
 
-__all__ = ['seekset', 'seekset_ng', 'Info', 'VersionInfo', 'ProtoChain']
+__all__ = [
+    'seekset', 'seekset_ng',
+    'beholder', 'beholder_ng',
+    'Info', 'VersionInfo',
+    'ProtoChain'
+]
 
 
 # # protocol name replace
@@ -58,6 +66,39 @@ def seekset_ng(func):
         file.seek(seek_cur, os.SEEK_SET)
         return return_
     return seekcur
+
+
+def beholder(func):
+    """Behold extraction procedure."""
+    @functools.wraps(func)
+    def behold(self, proto, length, **kwargs):
+        seek_cur = self._file.tell()
+        try:
+            return func(self, proto, length)
+        except Exception as error:
+            self._file.seek(seek_cur, os.SEEK_SET)
+            from jspcap.protocols.raw import Raw
+            next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=str(error))
+            return False, next_.info, next_.protochain, next_.alias
+    return behold
+
+
+def beholder_ng(func):
+    """Behold extraction procedure."""
+    @functools.wraps(func)
+    def behold(file, length):
+        seek_cur = file.tell()
+        try:
+            return func(file, length)
+        except Exception as error:
+            from jspcap.analyser import Analysis
+            from jspcap.protocols.raw import Raw
+
+            file.seek(seek_cur, os.SEEK_SET)
+
+            raw = Raw(file, length, error=str(error))
+            return Analysis(raw.info, raw.protochain, raw.alias)
+    return behold
 
 
 class Info(dict):
@@ -252,7 +293,7 @@ class ProtoChain:
 
     def __str__(self):
         for (i, proto) in enumerate(self.__damn__):
-            if proto is None:
+            if proto is None or proto == 'Raw':
                 return ':'.join(self.__damn__[:i])
         return ':'.join(self.__damn__)
 

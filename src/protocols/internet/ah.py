@@ -158,7 +158,7 @@ class AH(IPsec):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, version=4, extension=False):
+    def __init__(self, _file, length=None, *, version=4, extension=False, **kwargs):
         self._file = _file
         self._info = Info(self.read_ah(length, version, extension))
 

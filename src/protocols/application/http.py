@@ -35,6 +35,9 @@ class HTTP(Application):
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
 
+    Methods:
+        * read_http -- read Hypertext Transfer Protocol (HTTP)
+
     Attributes:
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
@@ -68,7 +71,7 @@ class HTTP(Application):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None):
+    def __init__(self, _file, length=None, **kwargs):
         self._file = _file
         self._info = Info(self.read_http(length))
         self._make_protochain()
@@ -83,14 +86,10 @@ class HTTP(Application):
 
     @staticmethod
     def _http_decode(byte):
-        try:
-            return byte.decode()
-        except UnicodeDecodeError:
-            pass
         charset = chardet.detect(byte)['encoding']
         if charset:
             try:
                 return byte.decode(charset)
-            except UnicodeDecodeError:
+            except Exception:
                 pass
         return byte

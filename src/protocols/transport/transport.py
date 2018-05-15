@@ -19,6 +19,7 @@ import io
 
 
 from jspcap.analyser import analyse
+from jspcap.utilities import beholder
 from jspcap.protocols.protocol import Protocol
 
 
@@ -112,6 +113,7 @@ class Transport(Protocol):
     # Utilities.
     ##########################################################################
 
+    @beholder
     def _import_next_layer(self, proto, length):
         """Import next layer extractor.
 
@@ -120,5 +122,5 @@ class Transport(Protocol):
             length -- int, valid (not padding) length
 
         """
-        next_ = analyse(io.BytesIO(self._file.read(*[length])), length)
-        return next_.info, next_.protochain, next_.alias
+        next_ = analyse(io.BytesIO(self._read_fileng(length)), length)
+        return True, next_.info, next_.protochain, next_.alias

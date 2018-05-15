@@ -18,7 +18,7 @@ import io
 # Table of corresponding protocols
 
 
-from jspcap.utilities import ProtoChain
+from jspcap.utilities import beholder, ProtoChain
 from jspcap.protocols.protocol import Protocol
 from jspcap.protocols.transport.transport import TP_PROTO
 
@@ -121,20 +121,24 @@ class Internet(Protocol):
                         <4 / 6>
 
         """
-        info, chain, alias = self._import_next_layer(proto, length, version=version)
+        flag, info, chain, alias = self._import_next_layer(proto, length, version=version)
 
         # make next layer protocol name
-        if proto is None and chain:
-            layer = chain.alias[0].lower()
-            proto, chain = chain.tuple[0], None
+        if flag:
+            if proto is None and chain:
+                layer = chain.alias[0].lower()
+                proto, chain = chain.tuple[0], None
+            else:
+                layer = str(alias or proto or 'Raw').lower()
         else:
-            layer = str(alias or proto or 'Raw').lower()
+            layer, proto = 'raw', 'Raw'
 
         # write info and protocol chain into dict
         dict_[layer] = info
         self._protos = ProtoChain(proto, chain, alias)
         return dict_
 
+    @beholder
     def _import_next_layer(self, proto, length=None, *, version=4, extension=False):
         """Import next layer extractor.
 
@@ -153,33 +157,19 @@ class Internet(Protocol):
 
         """
         if proto == 'AH':
-            from jspcap.protocols.internet.ah import AH
-            next_ = AH(io.BytesIO(self._file.read(*[length])), length, version=version, extension=extension)
-            return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.internet.ah import AH as Protocol
         elif proto == 'HIP':
-            from jspcap.protocols.internet.hip import HIP
-            next_ = HIP(io.BytesIO(self._file.read(*[length])), length, extension=extension)
-            return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.internet.hip import HIP as Protocol
         elif proto == 'HOPOPT':
-            from jspcap.protocols.internet.hopopt import HOPOPT
-            next_ = HOPOPT(io.BytesIO(self._file.read(*[length])), length, extension=extension)
-            return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.internet.hopopt import HOPOPT as Protocol
         elif proto == 'IPv6-Frag':
-            from jspcap.protocols.internet.ipv6_frag import IPv6_Frag
-            next_ = IPv6_Frag(io.BytesIO(self._file.read(*[length])), length, extension=extension)
-            return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.internet.ipv6_frag import IPv6_Frag as Protocol
         elif proto == 'IPv6-Opts':
-            from jspcap.protocols.internet.ipv6_opts import IPv6_Opts
-            next_ = IPv6_Opts(io.BytesIO(self._file.read(*[length])), length, extension=extension)
-            return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.internet.ipv6_opts import IPv6_Opts as Protocol
         elif proto == 'IPv6-Route':
-            from jspcap.protocols.internet.ipv6_route import IPv6_Route
-            next_ = IPv6_Route(io.BytesIO(self._file.read(*[length])), length, extension=extension)
-            return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.internet.ipv6_route import IPv6_Route as Protocol
         elif proto == 'MH':
-            from jspcap.protocols.internet.mh import MH
-            next_ = MH(io.BytesIO(self._file.read(*[length])), length, extension=extension)
-            return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.internet.mh import MH as Protocol
         elif proto == 'IPv4':
             from jspcap.protocols.internet.ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
@@ -189,7 +179,6 @@ class Internet(Protocol):
         elif proto == 'UDP':
             from jspcap.protocols.transport.udp import UDP as Protocol
         else:
-            data = self._file.read(*[length]) or None
-            return data, None, None
-        next_ = Protocol(io.BytesIO(self._file.read(*[length])), length)
-        return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.raw import Raw as Protocol
+        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length, version=version, extension=extension)
+        return True, next_.info, next_.protochain, next_.alias

@@ -169,7 +169,7 @@ class MH(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False):
+    def __init__(self, _file, length=None, *, extension=False, **kwargs):
         self._file = _file
         self._info = Info(self.read_mh(length, extension))
 

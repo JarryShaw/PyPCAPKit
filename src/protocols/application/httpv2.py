@@ -169,7 +169,7 @@ class HTTPv2(HTTP):
         if length is None:
             length = len(self)
 
-        if len(self) < 9:
+        if length < 9:
             raise ProtocolError(f'HTTP/2: invalid format', quiet=True)
 
         _tlen = self._read_unpack(3)

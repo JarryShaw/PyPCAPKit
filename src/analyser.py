@@ -13,7 +13,8 @@ modules and functions to extract the attributes.
 
 
 from jspcap.exceptions import ProtocolError
-from jspcap.utilities import seekset_ng
+from jspcap.utilities import beholder_ng, seekset_ng
+from jspcap.protocols.raw import Raw
 
 
 __all__ = ['analyse']
@@ -27,8 +28,6 @@ class Analysis:
 
     @property
     def name(self):
-        if self._ptch is None:
-            return 'Unknown'
         return self._ptch.tuple[0]
 
     @property
@@ -45,16 +44,13 @@ class Analysis:
         self._acnm = acnm
 
     def __str__(self):
-        if self._ptch is None:
-            return f'Analysis(None, data={str(self._info)[1:]})'
-        return f'Analysis({self._ptch.tuple[0]}, info={self._info})'
+        return f'Analysis({self._ptch.alias[0]}, info={self._info})'
 
     def __repr__(self):
-        if self._ptch is None:
-            return 'Analysis(None)'
-        return f'Analysis({self._ptch.tuple[0]})'
+        return f'Analysis({self._ptch.alias[0]})'
 
 
+@beholder_ng
 def analyse(file, length):
     """Analyse application layer packets."""
     flag, http = _analyse_httpv1(file, length)
@@ -66,8 +62,8 @@ def analyse(file, length):
     if flag:
         return Analysis(http.info, http.protochain, http.alias)
 
-    data = file.read(*[length]) or None
-    return Analysis(data, None, None)
+    raw = Raw(file, length)
+    return Analysis(raw.info, raw.protochain, raw.alias)
 
 
 @seekset_ng

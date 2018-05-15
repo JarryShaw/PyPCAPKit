@@ -18,6 +18,7 @@ import io
 # Table of corresponding protocols
 
 
+from jspcap.utilities import beholder
 from jspcap.protocols.protocol import Protocol
 from jspcap.protocols.internet.internet import ETHERTYPE
 
@@ -106,6 +107,7 @@ class Link(Protocol):
         _prot = ETHERTYPE.get(_byte)
         return _prot
 
+    @beholder
     def _import_next_layer(self, proto, length):
         """Import next layer extractor.
 
@@ -135,7 +137,6 @@ class Link(Protocol):
         elif proto == 'IPX':
             from jspcap.protocols.internet.ipx import IPX as Protocol
         else:
-            data = self._file.read(*[length]) or None
-            return data, None, None
-        next_ = Protocol(io.BytesIO(self._file.read(*[length])), length)
-        return next_.info, next_.protochain, next_.alias
+            from jspcap.protocols.raw import Raw as Protocol
+        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length)
+        return True, next_.info, next_.protochain, next_.alias

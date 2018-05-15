@@ -7,16 +7,15 @@ import pprint
 
 
 tree = jspcap.Extractor(
-    fin='../sample/http6.cap',
+    fin='../sample/http6.cap', # fout='../sample/http.txt', format='tree',
     store=False, tcp=True, verbose=True, nofile=True, strict=True, extension=False
 )
 # pprint.pprint(tree.reassembly.tcp)
 print()
 for packet in tree.reassembly.tcp:
-    payload = packet['payload']
-    report = jspcap.analyse(io.BytesIO(payload), len(payload))
-    if report.protochain and jspcap.HTTP in report.protochain:
-        pprint.pprint(report.info)
-    else:
-        print(report)
+    for reassembly in packet.packets:
+        if jspcap.HTTP in reassembly.protochain:
+            pprint.pprint(reassembly.info)
+        else:
+            print(reassembly)
     print()

@@ -9,6 +9,7 @@ protocols.
 """
 import abc
 import copy
+import io
 import numbers
 import os
 import struct
@@ -22,6 +23,7 @@ import textwrap
 from jspcap.exceptions import BoolError, BytesError, StructError
 from jspcap.utilities import seekset, Info, ProtoChain
 from jspcap.validations import bool_check, int_check
+# from jspcap.protocols.raw import Raw
 
 
 __all__ = ['Protocol']
@@ -252,14 +254,17 @@ class Protocol:
             length -- int, valid (not padding) length
 
         """
-        info, chain, alias = self._import_next_layer(proto, length)
+        flag, info, chain, alias = self._import_next_layer(proto, length)
 
         # make next layer protocol name
-        if proto is None and chain:
-            layer = chain.alias[0].lower()
-            proto, chain = chain.tuple[0], None
+        if flag:
+            if proto is None and chain:
+                layer = chain.alias[0].lower()
+                proto, chain = chain.tuple[0], None
+            else:
+                layer = str(alias or proto or 'Raw').lower()
         else:
-            layer = str(alias or proto or 'Raw').lower()
+            layer, proto = 'raw', 'Raw'
 
         # write info and protocol chain into dict
         dict_[layer] = info
@@ -274,5 +279,6 @@ class Protocol:
             length -- int, valid (not padding) length
 
         """
-        data = file_.read(*[length]) or None
-        return data, None, None
+        from jspcap.protocols.raw import Raw
+        next_ = Raw(io.BytesIO(self._read_fileng(length)), length)
+        return True, next_.info, next_.protochain, next_.alias

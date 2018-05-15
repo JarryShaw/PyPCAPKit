@@ -189,7 +189,7 @@ class IPv6(IP):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None):
+    def __init__(self, _file, length=None, **kwargs):
         self._file = _file
         self._info = Info(self.read_ipv6(length))
 
@@ -276,13 +276,13 @@ class IPv6(IP):
                 break
 
             # make protocol name
-            name = proto.replace('IPv6-', '').lower()
-            info, chain, alias = self._import_next_layer(proto, version=6, extension=True)
+            flag, info, chain, alias = self._import_next_layer(proto, version=6, extension=True)
+            name = proto.replace('IPv6-', '').lower() if flag else 'raw'
             ipv6[name] = info
 
             # record protocol name
             self._protos = ProtoChain(name, chain, alias)
-            if chain is None:
+            if not flag:
                 proto = None
                 break
             proto = info.next

@@ -22,7 +22,7 @@ import io
 
 
 from jspcap.exceptions import ProtocolNotFound, ProtocolUnbound
-from jspcap.utilities import Info, ProtoChain
+from jspcap.utilities import beholder, Info, ProtoChain
 from jspcap.protocols.protocol import Protocol
 
 
@@ -203,19 +203,23 @@ class Frame(Protocol):
             length -- int, valid (not padding) length
 
         """
-        # make next layer protocol name
-        proto = str(self._prot or 'Raw').lower()
-
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
-        info, chain, alias = self._import_next_layer(bytes_, length)
+        flag, info, chain, alias = self._import_next_layer(bytes_, length)
+
+        # make next layer protocol name
+        if flag:
+            proto, name = str(self._prot or 'Raw').lower(), self._prot
+        else:
+            proto, name = 'raw', 'Raw'
 
         # write info and protocol chain into dict
-        self._protos = ProtoChain(self._prot, chain, alias)
+        self._protos = ProtoChain(name, chain, alias)
         dict_[proto] = info
         dict_['protocols'] = self._protos.chain
         return dict_
 
+    @beholder
     def _import_next_layer(self, file, length):
         """Import next layer extractor.
 
@@ -230,13 +234,12 @@ class Frame(Protocol):
 
         """
         if self._prot == 'Ethernet':
-            from .link import Ethernet as Protocol
+            from jspcap.protocols.link import Ethernet as Protocol
         elif self._prot == 'IPv4':
-            from .internet import IPv4 as Protocol
+            from jspcap.protocols.internet import IPv4 as Protocol
         elif self._prot == 'IPv6':
-            from .internet import IPv6 as Protocol
+            from jspcap.protocols.internet import IPv6 as Protocol
         else:
-            data = file.read(*[length]) or None
-            return data, None, None
+            from jspcap.protocols.raw import Raw as Protocol
         next_ = Protocol(file, length)
-        return next_.info, next_.protochain, next_.alias
+        return True, next_.info, next_.protochain, next_.alias
