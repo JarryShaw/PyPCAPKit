@@ -11,15 +11,15 @@ import time
 
 os.system('> ../sample/out')
 
-tree = jspcap.extract(
+extraction = jspcap.extract(
     fin='../sample/test.pcap',
     store=False, tcp=True, verbose=True, strict=True, nofile=True,
 )
-# pprint.pprint(tree.frame)
+# pprint.pprint(extraction.frame)
 
 with open('../sample/out', 'a') as file:
     # pprint.pprint(tcp.datagram)
-    for datagram in tree.reassembly.tcp:
+    for datagram in extraction.reassembly.tcp:
         print(f'NotImplemented = {datagram.NotImplemented}')
         file.write(f'NotImplemented = {datagram.NotImplemented}')
         file.write('\n')

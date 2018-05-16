@@ -159,7 +159,7 @@ class Extractor:
             ifnm = 'in.pcap'
         else:
             if extension:
-                ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
+                ifnm = fin if os.path.splitext(fin)[1] == '.pcap' else f'{fin}.pcap'
             else:
                 ifnm = fin
 

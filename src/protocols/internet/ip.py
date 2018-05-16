@@ -73,4 +73,4 @@ class IP(Internet):
 
     @classmethod
     def __index__(cls):
-        return ('IPv4', 'IPv6', 'AH', 'ESP')
+        return ('IPv4', 'IPv6')
