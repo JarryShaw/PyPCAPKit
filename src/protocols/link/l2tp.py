@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 """layer two tunneling protocol
 
-``jspcap.protocols.link.l2tp`` contains ``L2TP`` only,
+`jspcap.protocols.link.l2tp` contains `L2TP` only,
 which implements extractor for Layer Two Tunneling Protocol
 (L2TP), whose structure is described as below.
 
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |T|L|x|x|S|x|O|P|x|x|x|x|  Ver  |          Length (opt)         |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |           Tunnel ID           |           Session ID          |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |             Ns (opt)          |             Nr (opt)          |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |      Offset Size (opt)        |    Offset pad... (opt)
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|T|L|x|x|S|x|O|P|x|x|x|x|  Ver  |          Length (opt)         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Tunnel ID           |           Session ID          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|             Ns (opt)          |             Nr (opt)          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|      Offset Size (opt)        |    Offset pad... (opt)
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
 # Layer Two Tunneling Protocol
@@ -88,36 +88,35 @@ class L2TP(Link):
         """Read Layer Two Tunneling Protocol.
 
         Structure of L2TP header [RFC 2661]:
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |T|L|x|x|S|x|O|P|x|x|x|x|  Ver  |          Length (opt)         |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |           Tunnel ID           |           Session ID          |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |             Ns (opt)          |             Nr (opt)          |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |      Offset Size (opt)        |    Offset pad... (opt)
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |T|L|x|x|S|x|O|P|x|x|x|x|  Ver  |          Length (opt)         |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Tunnel ID           |           Session ID          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |             Ns (opt)          |             Nr (opt)          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |      Offset Size (opt)        |    Offset pad... (opt)
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-            Octets          Bits          Name                Discription
-              0              0          l2tp.flags        Flags and Version Info
-              0              0          l2tp.flags.type   Type (0/1)
-              0              1          l2tp.flags.len    Length
-              0              2          -                 Reserved (must be zero)
-              0              4          l2tp.flags.seq    Sequence
-              0              5          -                 Reserved (must be zero)
-              0              6          l2tp.flags.offset Offset
-              0              7          l2tp.flags.prio   Priority
-              1              8          -                 Reserved (must be zero)
-              1              12         l2tp.ver          Version (2)
-              2              16         l2tp.length       Length (optional by len)
-              4              32         l2tp.tunnelid     Tunnel ID
-              6              48         l2tp.sessionid    Session ID
-              8              64         l2tp.ns           Sequence Number (optional by seq)
-              10             80         l2tp.nr           Next Sequence Number (optional by seq)
-              12             96         l2tp.offset       Offset Size (optional by offset)
+            Octets      Bits        Name                    Discription
+              0           0     l2tp.flags              Flags and Version Info
+              0           0     l2tp.flags.type         Type (0/1)
+              0           1     l2tp.flags.len          Length
+              0           2     -                       Reserved (must be zero)
+              0           4     l2tp.flags.seq          Sequence
+              0           5     -                       Reserved (must be zero)
+              0           6     l2tp.flags.offset       Offset
+              0           7     l2tp.flags.prio         Priority
+              1           8     -                       Reserved (must be zero)
+              1          12     l2tp.ver                Version (2)
+              2          16     l2tp.length             Length (optional by len)
+              4          32     l2tp.tunnelid           Tunnel ID
+              6          48     l2tp.sessionid          Session ID
+              8          64     l2tp.ns                 Sequence Number (optional by seq)
+              10         80     l2tp.nr                 Next Sequence Number (optional by seq)
+              12         96     l2tp.offset             Offset Size (optional by offset)
 
         """
         if length is None:

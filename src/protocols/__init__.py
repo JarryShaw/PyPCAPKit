@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """protocol family
 
-``jspcap.protocols`` is collection of all protocol families,
+`jspcap.protocols` is collection of all protocol families,
 with detailed implementation and methods.
 
 """

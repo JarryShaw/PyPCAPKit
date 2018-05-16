@@ -1,33 +1,33 @@
 # -*- coding: utf-8 -*-
 """internet protocol version 6
 
-``jspcap.protocols.internet.ipv6`` contains ``IPv6`` only,
+`jspcap.protocols.internet.ipv6` contains `IPv6` only,
 which implements extractor for Internet Protocol version 6
 (IPv6), whose structure is described as below.
 
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |Version| Traffic Class |           Flow Label                  |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |         Payload Length        |  Next Header  |   Hop Limit   |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                                                               |
-    +                                                               +
-    |                                                               |
-    +                         Source Address                        +
-    |                                                               |
-    +                                                               +
-    |                                                               |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                                                               |
-    +                                                               +
-    |                                                               |
-    +                      Destination Address                      +
-    |                                                               |
-    +                                                               +
-    |                                                               |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version| Traffic Class |           Flow Label                  |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Payload Length        |  Next Header  |   Hop Limit   |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                         Source Address                        +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                                                               |
++                                                               +
+|                                                               |
++                      Destination Address                      +
+|                                                               |
++                                                               +
+|                                                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
 # TODO: Implements IPv6 extension headers.
@@ -60,6 +60,7 @@ EXT_HDR = (
     'HIP',          # Host Identity Protocol
     'Shim6',        # Site Multihoming by IPv6 Intermediation
 )
+
 
 class IPv6(IP):
     """This class implements Internet Protocol version 6.
@@ -123,39 +124,39 @@ class IPv6(IP):
 
         Structure of IPv6 header [RFC 2460]:
 
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |Version| Traffic Class |           Flow Label                  |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |         Payload Length        |  Next Header  |   Hop Limit   |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                                                               |
-           +                                                               +
-           |                                                               |
-           +                         Source Address                        +
-           |                                                               |
-           +                                                               +
-           |                                                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                                                               |
-           +                                                               +
-           |                                                               |
-           +                      Destination Address                      +
-           |                                                               |
-           +                                                               +
-           |                                                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |Version| Traffic Class |           Flow Label                  |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |         Payload Length        |  Next Header  |   Hop Limit   |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +                         Source Address                        +
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +                      Destination Address                      +
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits          Name                Discription
-              0              0          ip.version        Version (6)
-              0              4          ip.class          Traffic Class
-              1              12         ip.label          Flow Label
-              4              32         ip.payload        Payload Length (header excludes)
-              6              48         ip.next           Next Header
-              7              56         ip.limit          Hop Limit
-              8              64         ip.src            Source Address
-              24             192        ip.dst            Destination Address
+            Octets      Bits        Name                    Discription
+              0           0     ip.version              Version (6)
+              0           4     ip.class                Traffic Class
+              1          12     ip.label                Flow Label
+              4          32     ip.payload              Payload Length (header excludes)
+              6          48     ip.next                 Next Header
+              7          56     ip.limit                Hop Limit
+              8          64     ip.src                  Source Address
+              24        192     ip.dst                  Destination Address
 
         """
         if length is None:
@@ -256,10 +257,13 @@ class IPv6(IP):
     def _decode_next_layer(self, ipv6, proto=None, length=None):
         """Decode next layer extractor.
 
-        Keyword arguments:
-            ipv6 -- dict, info buffer
-            proto -- str, next layer protocol name
-            length -- int, valid (not padding) length
+        Positional arguments:
+            * ipv6 -- dict, info buffer
+            * proto -- str, next layer protocol name
+            * length -- int, valid (not padding) length
+
+        Returns:
+            * dict -- current protocol with next layer extracted
 
         """
         # recurse if next header is an extensive header

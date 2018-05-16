@@ -1,30 +1,27 @@
 # -*- coding: utf-8 -*-
 """internet protocol version 4
 
-``jspcap.protocols.internet.ipv4`` contains ``IPv4`` only,
+`jspcap.protocols.internet.ipv4` contains `IPv4` only,
 which implements extractor for Internet Protocol version 4
 (IPv4), whose structure is described as below.
 
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |Version|  IHL  |Type of Service|          Total Length         |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |         Identification        |Flags|      Fragment Offset    |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |  Time to Live |    Protocol   |         Header Checksum       |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                       Source Address                          |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                    Destination Address                        |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                    Options                    |    Padding    |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Version|  IHL  |Type of Service|          Total Length         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|         Identification        |Flags|      Fragment Offset    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Time to Live |    Protocol   |         Header Checksum       |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Source Address                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Destination Address                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Options                    |    Padding    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-# TODO: Implements IPv4 option list extractor.
-
-
 import collections
 import datetime
 
@@ -244,39 +241,39 @@ class IPv4(IP):
 
         Structure of IPv4 header [RFC 791]:
 
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |Version|  IHL  |Type of Service|          Total Length         |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |         Identification        |Flags|      Fragment Offset    |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |  Time to Live |    Protocol   |         Header Checksum       |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                       Source Address                          |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                    Destination Address                        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                    Options                    |    Padding    |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |Version|  IHL  |Type of Service|          Total Length         |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |         Identification        |Flags|      Fragment Offset    |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |  Time to Live |    Protocol   |         Header Checksum       |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                       Source Address                          |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                    Destination Address                        |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                    Options                    |    Padding    |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits          Name                Discription
-              0              0          ip.version        Version (4)
-              0              4          ip.hdr_len        Interal Header Length (IHL)
-              1              8          ip.dsfield.dscp   Differentiated Services Code Point (DSCP)
-              1              14         ip.dsfield.ecn    Explicit Congestion Notification (ECN)
-              2              16         ip.len            Total Length
-              4              32         ip.id             Identification
-              6              48         -                 Reserved Bit (must be zero)
-              6              49         ip.flags.df       Don't Fragment (DF)
-              6              50         ip.flags.mf       More Fragments (MF)
-              6              51         ip.frag_offset    Fragment Offset
-              8              64         ip.ttl            Time To Live (TTL)
-              9              72         ip.proto          Protocol (Transport Layer)
-              10             80         ip.checksum       Header Checksum
-              12             96         ip.src            Source IP Address
-              16             128        ip.dst            Destination IP Address
-              20             160        ip.options        IP Options (if IHL > 5)
+            Octets      Bits        Name                    Discription
+              0           0     ip.version              Version (4)
+              0           4     ip.hdr_len              Interal Header Length (IHL)
+              1           8     ip.dsfield.dscp         Differentiated Services Code Point (DSCP)
+              1          14     ip.dsfield.ecn          Explicit Congestion Notification (ECN)
+              2          16     ip.len                  Total Length
+              4          32     ip.id                   Identification
+              6          48     -                       Reserved Bit (must be zero)
+              6          49     ip.flags.df             Don't Fragment (DF)
+              6          50     ip.flags.mf             More Fragments (MF)
+              6          51     ip.frag_offset          Fragment Offset
+              8          64     ip.ttl                  Time To Live (TTL)
+              9          72     ip.proto                Protocol (Transport Layer)
+              10         80     ip.checksum             Header Checksum
+              12         96     ip.src                  Source IP Address
+              16        128     ip.dst                  Destination IP Address
+              20        160     ip.options              IP Options (if IHL > 5)
 
         """
         if length is None:
@@ -360,15 +357,18 @@ class IPv4(IP):
     def _read_opt_type(self, kind):
         """Read option type field.
 
-        Keyword arguments:
-            kind -- int, option kind value
+        Positional arguments:
+            * kind -- int, option kind value
+
+        Returns:
+            * dict -- extracted IPv4 option
 
         Structure of option type field [RFC 791]:
 
-            Octets          Bits          Name                       Discription
-              0              0          ip.opt.type.copy         Copied Flag (0/1)
-              0              1          ip.opt.type.class        Option Class (0-3)
-              0              3          ip.opt.type.number       Option Number
+            Octets      Bits        Name                    Discriptions
+              0           0     ip.opt.type.copy        Copied Flag (0/1)
+              0           1     ip.opt.type.class       Option Class (0-3)
+              0           3     ip.opt.type.number      Option Number
 
         """
         bin_ = bin(kind)[2:].zfill(8)
@@ -449,18 +449,21 @@ class IPv4(IP):
     def _read_mode_donone(self, size, kind):
         """Read options request no process.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, option kind value
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, option kind value
+
+        Returns:
+            * dict -- extracted option
 
         Structure of TCP options:
-            Octets          Bits            Name                            Discription
-              0              0          ip.opt.kind                     Kind
-              0              0          ip.ts.type.copy                 Copied Flag
-              0              1          ip.ts.type.class                Option Class
-              0              3          ip.ts.type.number               Option Number
-              1              8          ip.opt.length                   Length
-              2             16          ip.opt.data                     Kind-specific Data
+            Octets      Bits        Name                    Discription
+              0           0     ip.opt.kind             Kind
+              0           0     ip.ts.type.copy         Copied Flag
+              0           1     ip.ts.type.class        Option Class
+              0           3     ip.ts.type.number       Option Number
+              1           8     ip.opt.length           Length
+              2          16     ip.opt.data             Kind-specific Data
 
         """
         if size < 3:
@@ -477,18 +480,21 @@ class IPv4(IP):
     def _read_mode_unpack(self, size, kind):
         """Read options request unpack process.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, option kind value
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, option kind value
+
+        Returns:
+            * dict -- extracted option
 
         Structure of TCP options:
-            Octets          Bits            Name                            Discription
-              0              0          ip.opt.kind                     Kind
-              0              0          ip.ts.type.copy                 Copied Flag
-              0              1          ip.ts.type.class                Option Class
-              0              3          ip.ts.type.number               Option Number
-              1              8          ip.opt.length                   Length
-              2             16          ip.opt.data                     Kind-specific Data
+            Octets      Bits        Name                    Discription
+              0           0     ip.opt.kind             Kind
+              0           0     ip.ts.type.copy         Copied Flag
+              0           1     ip.ts.type.class        Option Class
+              0           3     ip.ts.type.number       Option Number
+              1           8     ip.opt.length           Length
+              2          16     ip.opt.data             Kind-specific Data
 
         """
         if size < 3:
@@ -505,9 +511,12 @@ class IPv4(IP):
     def _read_mode_route(self, size, kind):
         """Read options with route data.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 7/131/137 (RR/LSR/SSR)
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, 7/131/137 (RR/LSR/SSR)
+
+        Returns:
+            * dict -- extracted option with route data
 
         Structure of these options:
             * [RFC 791] Loose Source Route
@@ -523,14 +532,14 @@ class IPv4(IP):
                 |00000111| length | pointer|     route data    |
                 +--------+--------+--------+---------//--------+
 
-           Octets          Bits          Name                       Discription
-             0              0          ip.opt.kind              Kind (7/131/137)
-             0              0          ip.opt.type.copy         Copied Flag (0)
-             0              1          ip.opt.type.class        Option Class (0/1)
-             0              3          ip.opt.type.number       Option Number (3/7/9)
-             1              8          ip.opt.length            Length
-             2              16         ip.opt.pointer           Pointer (≥4)
-             3              24         ip.opt.data              Route Data
+            Octets      Bits        Name                    Discription
+              0           0     ip.opt.kind             Kind (7/131/137)
+              0           0     ip.opt.type.copy        Copied Flag (0)
+              0           1     ip.opt.type.class       Option Class (0/1)
+              0           3     ip.opt.type.number      Option Number (3/7/9)
+              1           8     ip.opt.length           Length
+              2          16     ip.opt.pointer          Pointer (≥4)
+              3          24     ip.opt.data             Route Data
 
         """
         if size < 3 or (size - 3) % 4 != 0:
@@ -561,41 +570,44 @@ class IPv4(IP):
     def _read_mode_qs(self, size, kind):
         """Read Quick Start option.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 25 (QS)
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, 25 (QS)
+
+        Returns:
+            * dict -- extracted Quick Start (QS) option
 
         Structure of Quick-Start (QS) option [RFC 4782]:
             * A Quick-Start Request.
-                0                   1                   2                   3
-                0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-               |   Option      |  Length=8     | Func. | Rate  |   QS TTL      |
-               |               |               | 0000  |Request|               |
-               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-               |                        QS Nonce                           | R |
-               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                 0                   1                   2                   3
+                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                |   Option      |  Length=8     | Func. | Rate  |   QS TTL      |
+                |               |               | 0000  |Request|               |
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                |                        QS Nonce                           | R |
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             * Report of Approved Rate.
-                0                   1                   2                   3
-                0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-               |   Option      |  Length=8     | Func. | Rate  |   Not Used    |
-               |               |               | 1000  | Report|               |
-               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-               |                        QS Nonce                           | R |
-               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                 0                   1                   2                   3
+                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                |   Option      |  Length=8     | Func. | Rate  |   Not Used    |
+                |               |               | 1000  | Report|               |
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                |                        QS Nonce                           | R |
+                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-           Octets          Bits          Name                       Discription
-             0              0          ip.qs.kind               Kind (25)
-             0              0          ip.qs.type.copy          Copied Flag (0)
-             0              1          ip.qs.type.class         Option Class (0)
-             0              3          ip.qs.type.number        Option Number (25)
-             1              8          ip.qs.length             Length (8)
-             2              16         ip.qs.func               Function (0/8)
-             2              20         ip.qs.rate               Rate Request / Report (in Kbps)
-             3              24         ip.qs.ttl                QS TTL / None
-             4              32         ip.qs.nounce             QS Nounce
-             7              62         -                        Reserved (\x00\x00)
+            Octets      Bits        Name                    Discription
+              0           0     ip.qs.kind              Kind (25)
+              0           0     ip.qs.type.copy         Copied Flag (0)
+              0           1     ip.qs.type.class        Option Class (0)
+              0           3     ip.qs.type.number       Option Number (25)
+              1           8     ip.qs.length            Length (8)
+              2          16     ip.qs.func              Function (0/8)
+              2          20     ip.qs.rate              Rate Request / Report (in Kbps)
+              3          24     ip.qs.ttl               QS TTL / None
+              4          32     ip.qs.nounce            QS Nounce
+              7          62     -                       Reserved (\x00\x00)
 
         """
         if size != 8:
@@ -627,9 +639,12 @@ class IPv4(IP):
     def _read_mode_ts(self, size, kind):
         """Read Time Stamp option.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 68 (TS)
+        Positional asrguemnts:
+            * size - int, length of option
+            * kind - int, 68 (TS)
+
+        Returns:
+            * dict -- extracted Time Stamp (TS) option
 
         Structure of Timestamp (TS) option [RFC 791]:
             +--------+--------+--------+--------+
@@ -643,17 +658,17 @@ class IPv4(IP):
                               .
                               .
 
-           Octets          Bits          Name                       Discription
-             0              0          ip.ts.kind               Kind (25)
-             0              0          ip.ts.type.copy          Copied Flag (0)
-             0              1          ip.ts.type.class         Option Class (0)
-             0              3          ip.ts.type.number        Option Number (25)
-             1              8          ip.ts.length             Length (≤40)
-             2              16         ip.ts.pointer            Pointer (≥5)
-             3              24         ip.ts.overflow           Overflow Octets
-             3              28         ip.ts.flag               Flag
-             4              32         ip.ts.ip                 Internet Address
-             8              64         ip.ts.timestamp          Timestamp
+            Octets      Bits        Name                    Discription
+              0           0     ip.ts.kind              Kind (25)
+              0           0     ip.ts.type.copy         Copied Flag (0)
+              0           1     ip.ts.type.class        Option Class (0)
+              0           3     ip.ts.type.number       Option Number (25)
+              1           8     ip.ts.length            Length (≤40)
+              2          16     ip.ts.pointer           Pointer (≥5)
+              3          24     ip.ts.overflow          Overflow Octets
+              3          28     ip.ts.flag              Flag
+              4          32     ip.ts.ip                Internet Address
+              8          64     ip.ts.timestamp         Timestamp
 
         """
         if size > 40 or size < 4:
@@ -708,9 +723,12 @@ class IPv4(IP):
     def _read_mode_tr(self, size, kind):
         """Read Traceroute option.
 
-        Keyword arguemnts:
+        Positional arguemnts:
             size - int, length of option
             kind - int, 82 (TR)
+
+        Returns:
+            * dict -- extracted Traceroute (TR) option
 
         Structure of Traceroute (TR) option [RFC 1393][RFC 6814]:
              0               8              16              24
@@ -722,16 +740,16 @@ class IPv4(IP):
             |                     Originator IP Address                     |
             +---------------+---------------+---------------+---------------+
 
-           Octets          Bits          Name                       Discription
-             0              0          ip.tr.kind               Kind (82)
-             0              0          ip.tr.type.copy          Copied Flag (0)
-             0              1          ip.tr.type.class         Option Class (0)
-             0              3          ip.tr.type.number        Option Number (18)
-             1              8          ip.tr.length             Length (12)
-             2              16         ip.tr.id                 ID Number
-             4              32         ip.tr.ohc                Outbound Hop Count
-             6              48         ip.tr.rhc                Return Hop Count
-             8              64         ip.tr.ip                 Originator IP Address
+            Octets      Bits        Name                    Discription
+              0           0     ip.tr.kind              Kind (82)
+              0           0     ip.tr.type.copy         Copied Flag (0)
+              0           1     ip.tr.type.class        Option Class (0)
+              0           3     ip.tr.type.number       Option Number (18)
+              1           8     ip.tr.length            Length (12)
+              2          16     ip.tr.id                ID Number
+              4          32     ip.tr.ohc               Outbound Hop Count
+              6          48     ip.tr.rhc               Return Hop Count
+              8          64     ip.tr.ip                Originator IP Address
 
         """
         if size != 12:
@@ -757,9 +775,12 @@ class IPv4(IP):
     def _read_mode_sec(self, size, kind):
         """Read options with security info.
 
-        Keyword arguemnts:
+        Positional arguemnts:
             size - int, length of option
-            kind - int, 82 (TR)
+            kind - int, 130 (SEC )/ 133 (ESEC)
+
+        Returns:
+            * dict -- extracted option with security info (E/SEC)
 
         Structure of these options:
             * [RFC 1108] Security (SEC)
@@ -778,14 +799,14 @@ class IPv4(IP):
                                            SECURITY INFO     SECURITY
                                             FORMAT CODE        INFO
 
-           Octets          Bits          Name                       Discription
-             0              0          ip.sec.kind              Kind (130)
-             0              0          ip.sec.type.copy         Copied Flag (1)
-             0              1          ip.sec.type.class        Option Class (0)
-             0              3          ip.sec.type.number       Option Number (2)
-             1              8          ip.sec.length            Length (≥3)
-             2              16         ip.sec.level             Classification Level
-             3              24         ip.sec.flags             Protection Authority Flags
+            Octets      Bits        Name                    Discription
+              0           0     ip.sec.kind             Kind (130)
+              0           0     ip.sec.type.copy        Copied Flag (1)
+              0           1     ip.sec.type.class       Option Class (0)
+              0           3     ip.sec.type.number      Option Number (2)
+              1           8     ip.sec.length           Length (≥3)
+              2          16     ip.sec.level            Classification Level
+              3          24     ip.sec.flags            Protection Authority Flags
 
         """
         if size < 3:
@@ -820,23 +841,26 @@ class IPv4(IP):
     def _read_mode_rsralt(self, size, kind):
         """Read Router Alert option.
 
-        Keyword arguemnts:
+        Positional arguemnts:
             size - int, length of option
-            kind - int, 82 (TR)
+            kind - int, 148 (RTRALT)
+
+        Returns:
+            * dict -- extracted Router Alert (RTRALT) option
 
         Structure of Router Alert (RTRALT) option [RFC 2113]:
             +--------+--------+--------+--------+
             |10010100|00000100|  2 octet value  |
             +--------+--------+--------+--------+
 
-           Octets          Bits          Name                       Discription
-             0              0          ip.rsralt.kind           Kind (148)
-             0              0          ip.rsralt.type.copy      Copied Flag (1)
-             0              1          ip.rsralt.type.class     Option Class (0)
-             0              3          ip.rsralt.type.number    Option Number (20)
-             1              8          ip.rsralt.length         Length (4)
-             2              16         ip.rsralt.alert          Alert
-             2              16         ip.rsralt.code           Alert Code
+            Octets      Bits        Name                    Discription
+              0           0     ip.rsralt.kind          Kind (148)
+              0           0     ip.rsralt.type.copy     Copied Flag (1)
+              0           1     ip.rsralt.type.class    Option Class (0)
+              0           3     ip.rsralt.type.number   Option Number (20)
+              1           8     ip.rsralt.length        Length (4)
+              2          16     ip.rsralt.alert         Alert
+              2          16     ip.rsralt.code          Alert Code
 
         """
         if size != 4:

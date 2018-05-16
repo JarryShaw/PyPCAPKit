@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """global header
 
-``jspcap.protocols.header`` contains ``Header`` only,
+`jspcap.protocols.header` contains `Header` only,
 which implements extractor for global headers of PCAP,
 whose structure is described as below.
 
-    typedef struct pcap_hdr_s {
+typedef struct pcap_hdr_s {
     guint32 magic_number;   /* magic number */
     guint16 version_major;  /* major version number */
     guint16 version_minor;  /* minor version number */
@@ -13,7 +13,7 @@ whose structure is described as below.
     guint32 sigfigs;        /* accuracy of timestamps */
     guint32 snaplen;        /* max length of captured packets, in octets */
     guint32 network;        /* data link type */
-    } pcap_hdr_t;
+} pcap_hdr_t;
 
 """
 # Global Header
@@ -95,19 +95,19 @@ class Header(Protocol):
 
         Structure of global header (C):
             typedef struct pcap_hdr_s {
-            guint32 magic_number;   /* magic number */
-            guint16 version_major;  /* major version number */
-            guint16 version_minor;  /* minor version number */
-            gint32  thiszone;       /* GMT to local correction */
-            guint32 sigfigs;        /* accuracy of timestamps */
-            guint32 snaplen;        /* max length of captured packets, in octets */
-            guint32 network;        /* data link type */
+                guint32 magic_number;   /* magic number */
+                guint16 version_major;  /* major version number */
+                guint16 version_minor;  /* minor version number */
+                gint32  thiszone;       /* GMT to local correction */
+                guint32 sigfigs;        /* accuracy of timestamps */
+                guint32 snaplen;        /* max length of captured packets, in octets */
+                guint32 network;        /* data link type */
             } pcap_hdr_t;
 
         """
         _temp = self._read_fileng(4)
         if _temp != b'\xd4\xc3\xb2\xa1':
-            raise FileError('unknown file format.')
+            raise FileError('Unknown file format.')
 
         _magn = _temp
         _vmaj = self._read_unpack(2, lilendian=True)
@@ -150,8 +150,11 @@ class Header(Protocol):
     def _read_protos(self, size):
         """Read next layer protocol type.
 
-        Keyword arguments:
-            size  -- int, buffer size
+        Positional arguments:
+            * size  -- int, buffer size
+
+        Returns:
+            * str -- link layer protocol name
 
         """
         _byte = self._read_unpack(4, lilendian=True)

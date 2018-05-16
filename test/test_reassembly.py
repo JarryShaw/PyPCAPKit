@@ -11,7 +11,7 @@ import time
 
 os.system('> ../sample/out')
 
-tree = jspcap.Extractor(
+tree = jspcap.extract(
     fin='../sample/test.pcap',
     store=False, tcp=True, verbose=True, strict=True, nofile=True,
 )

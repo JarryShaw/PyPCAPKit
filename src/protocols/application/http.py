@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """hypertext transfer protocol
 
-``jspcap.protocols.application.http`` contains ``HTTP``
+`jspcap.protocols.application.http` contains `HTTP`
 only, which is a base class for Hypertext Transfer
 Protocol (HTTP) protocol family, eg. HTTP/1.*, HTTP/2.
 

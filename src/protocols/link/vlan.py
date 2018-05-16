@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """802.1Q customer VLAN tag type
 
-``jspcap.protocols.link.vlan`` contains ``VLAN``
+`jspcap.protocols.link.vlan` contains `VLAN`
 only, which implements extractor for 802.1QCustomer
 VLAN Tag Type, whose structure is described as below.
 
-    Octets          Bits          Name                Discription
-      1              0         vlan.tci          Tag Control Information
-      1              0         vlan.tci.pcp      Priority Code Point
-      1              3         vlan.tci.dei      Drop Eligible Indicator
-      1              4         vlan.tci.vid      VLAN Identifier
-      3              24        vlan.type         Protocol (Internet Layer)
+Octets      Bits        Name                    Discription
+  1           0     vlan.tci                Tag Control Information
+  1           0     vlan.tci.pcp            Priority Code Point
+  1           3     vlan.tci.dei            Drop Eligible Indicator
+  1           4     vlan.tci.vid            VLAN Identifier
+  3          24     vlan.type               Protocol (Internet Layer)
 
 """
 
@@ -97,12 +97,12 @@ class VLAN(Link):
         """Read 802.1Q Customer VLAN Tag Type.
 
         Structure of 802.1Q Customer VLAN Tag Type [RFC 7042]:
-            Octets          Bits          Name                Discription
-              1              0         vlan.tci          Tag Control Information
-              1              0         vlan.tci.pcp      Priority Code Point
-              1              3         vlan.tci.dei      Drop Eligible Indicator
-              1              4         vlan.tci.vid      VLAN Identifier
-              3              24        vlan.type         Protocol (Internet Layer)
+            Octets      Bits        Name                    Discription
+              1           0     vlan.tci                Tag Control Information
+              1           0     vlan.tci.pcp            Priority Code Point
+              1           3     vlan.tci.dei            Drop Eligible Indicator
+              1           4     vlan.tci.vid            VLAN Identifier
+              3          24     vlan.type               Protocol (Internet Layer)
 
         """
         if length is None:

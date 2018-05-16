@@ -1,6 +1,6 @@
 """hypertext transfer protocol (HTTP/2)
 
-``jspcap.protocols.application.httpv2`` contains ``HTTPv2``
+`jspcap.protocols.application.httpv2` contains `HTTPv2`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/2), whose structure is described as below.
 
@@ -157,13 +157,13 @@ class HTTPv2(HTTP):
             |                   Frame Payload (0...)                      ...
             +---------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         http.payload      Frame Payload
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     http.payload            Frame Payload
 
         """
         if length is None:
@@ -246,15 +246,15 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (0)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         http.pad_len      Pad Length (Optional)
-               10             80         http.data         Data
-               ?              ?          -                 Padding (Optional)
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (0)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     http.pad_len            Pad Length (Optional)
+              10         80     http.data               Data
+              ?           ?     -                       Padding (Optional)
 
         """
         _plen = 0
@@ -320,18 +320,18 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (1)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         http.pad_len      Pad Length (Optional)
-               10             80         http.exclusive    Exclusive Flag
-               10             81         http.deps         Stream Dependency (Optional)
-               14             112        http.weight       Weight (Optional)
-               15             120        http.frag         Header Block Fragment
-               ?              ?          -                 Padding (Optional)
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (1)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     http.pad_len            Pad Length (Optional)
+              10         80     http.exclusive          Exclusive Flag
+              10         81     http.deps               Stream Dependency (Optional)
+              14        112     http.weight             Weight (Optional)
+              15        120     http.frag               Header Block Fragment
+              ?           ?     -                       Padding (Optional)
 
         """
         _plen = 0
@@ -402,15 +402,15 @@ class HTTPv2(HTTP):
             |   Weight (8)  |
             +-+-------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (2)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         http.exclusive    Exclusive Flag
-               9              73         http.deps         Stream Dependency
-               13             104        http.weight       Weight
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (2)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     http.exclusive          Exclusive Flag
+              9          73     http.deps               Stream Dependency
+              13        104     http.weight             Weight
 
         """
         if size != 9:
@@ -444,13 +444,13 @@ class HTTPv2(HTTP):
             |                        Error Code (32)                        |
             +---------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (2)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         http.error        Error Code
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (2)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     http.error              Error Code
 
         """
         if size != 8:
@@ -484,15 +484,15 @@ class HTTPv2(HTTP):
             +---------------------------------------------------------------+
             |                          ......                               |
 
-             Octets          Bits          Name                     Discription
-               0              0          http.length            Length
-               3              24         http.type              Type (2)
-               4              32         http.flags             Flags
-               5              40         -                      Reserved
-               5              41         http.sid               Stream Identifier
-               9              72         http.settings          Settings
-               9              72         http.settings.id       Identifier
-               10             80         http.settings.value    Value
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (2)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     http.settings           Settings
+              9          72     http.settings.id        Identifier
+              10         80     http.settings.value     Value
 
         """
         if size % 5 != 0:
@@ -553,17 +553,17 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (1)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         http.pad_len      Pad Length (Optional)
-               10             80         -                 Reserved
-               10             81         http.pid          Promised Stream ID
-               14             112        http.frag         Header Block Fragment
-               ?              ?          -                 Padding (Optional)
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (1)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     http.pad_len            Pad Length (Optional)
+              10         80     -                       Reserved
+              10         81     http.pid                Promised Stream ID
+              14        112     http.frag               Header Block Fragment
+              ?           ?     -                       Padding (Optional)
 
         """
         if size < 4:
@@ -628,13 +628,13 @@ class HTTPv2(HTTP):
             |                                                               |
             +---------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (2)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         http.data         Opaque Data
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (2)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     http.data               Opaque Data
 
         """
         if size != 8:
@@ -678,16 +678,16 @@ class HTTPv2(HTTP):
             |                  Additional Debug Data (*)                    |
             +---------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (2)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         -                 Reserved
-               9              73         http.last_sid     Last Stream ID
-               13             104        http.error        Error Code
-               17             136        http.data         Additional Debug Data (Optional)
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (2)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     -                       Reserved
+              9          73     http.last_sid           Last Stream ID
+              13        104     http.error              Error Code
+              17        136     http.data               Additional Debug Data (Optional)
 
         """
         _dlen = size - 8
@@ -726,14 +726,14 @@ class HTTPv2(HTTP):
             |R|              Window Size Increment (31)                     |
             +-+-------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (2)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              72         -                 Reserved
-               9              73         http.window       Window Size Increment
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (2)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          72     -                       Reserved
+              9          73     http.window             Window Size Increment
 
         """
         if size != 4:
@@ -767,13 +767,13 @@ class HTTPv2(HTTP):
             |                   Header Block Fragment (*)                 ...
             +---------------------------------------------------------------+
 
-             Octets          Bits          Name                Discription
-               0              0          http.length       Length
-               3              24         http.type         Type (2)
-               4              32         http.flags        Flags
-               5              40         -                 Reserved
-               5              41         http.sid          Stream Identifier
-               9              73         http.frag         Header Block Fragment
+            Octets      Bits        Name                    Discription
+              0           0     http.length             Length
+              3          24     http.type               Type (2)
+              4          32     http.flags              Flags
+              5          40     -                       Reserved
+              5          41     http.sid                Stream Identifier
+              9          73     http.frag               Header Block Fragment
 
         """
         _flag = dict(

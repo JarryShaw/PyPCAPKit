@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
 """transmission control protocol
 
-``jspcap.protocols.transport.tcp`` contains ``TCP`` only,
+`jspcap.protocols.transport.tcp` contains `TCP` only,
 which implements extractor for Transmission Control
 Protocol (TCP), whose structure is described as below.
 
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |          Source Port          |       Destination Port        |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                        Sequence Number                        |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                    Acknowledgment Number                      |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |  Data |           |U|A|P|R|S|F|                               |
-    | Offset| Reserved  |R|C|S|S|Y|I|            Window             |
-    |       |           |G|K|H|T|N|N|                               |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |           Checksum            |         Urgent Pointer        |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                    Options                    |    Padding    |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                             data                              |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|          Source Port          |       Destination Port        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                        Sequence Number                        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Acknowledgment Number                      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|  Data |           |U|A|P|R|S|F|                               |
+| Offset| Reserved  |R|C|S|S|Y|I|            Window             |
+|       |           |G|K|H|T|N|N|                               |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Checksum            |         Urgent Pointer        |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                    Options                    |    Padding    |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                             data                              |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
 import struct
@@ -239,47 +239,47 @@ class TCP(Transport):
 
         Structure of TCP header [RFC 793]:
 
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |          Source Port          |       Destination Port        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                        Sequence Number                        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                    Acknowledgment Number                      |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |  Data |           |U|A|P|R|S|F|                               |
-           | Offset| Reserved  |R|C|S|S|Y|I|            Window             |
-           |       |           |G|K|H|T|N|N|                               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |           Checksum            |         Urgent Pointer        |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                    Options                    |    Padding    |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                             data                              |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |          Source Port          |       Destination Port        |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                        Sequence Number                        |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                    Acknowledgment Number                      |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |  Data |           |U|A|P|R|S|F|                               |
+            | Offset| Reserved  |R|C|S|S|Y|I|            Window             |
+            |       |           |G|K|H|T|N|N|                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |           Checksum            |         Urgent Pointer        |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                    Options                    |    Padding    |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                             data                              |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-            Octets          Bits          Name                      Discription
-              0              0          tcp.srcport             Source Port
-              2              16         tcp.dstport             Destination Port
-              4              32         tcp.seq                 Sequence Number
-              8              64         tcp.ack                 Acknowledgment Number (if ACK set)
-              12             96         tcp.hdr_len             Data Offset
-              12             100        -                       Reserved (must be zero)
-              12             103        tcp.flags.ns            ECN Concealment Protection (NS)
-              13             104        tcp.flags.cwr           Congestion Window Reduced (CWR)
-              13             105        tcp.flags.ecn           ECN-Echo (ECE)
-              13             106        tcp.flags.urg           Urgent (URG)
-              13             107        tcp.flags.ack           Acknowledgment (ACK)
-              13             108        tcp.flags.push          Push Function (PSH)
-              13             109        tcp.flags.reset         Reset Connection (RST)
-              13             110        tcp.flags.syn           Synchronize Sequence Numbers (SYN)
-              13             111        tcp.flags.fin           Last Packet from Sender (FIN)
-              14             112        tcp.window_size         Size of Receive Window
-              16             128        tcp.checksum            Checksum
-              18             144        tcp.urgent_pointer      Urgent Pointer (if URG set)
-              20             160        tcp.opt                 TCP Options (if data offset > 5)
+            Octets      Bits        Name                    Discription
+              0           0     tcp.srcport             Source Port
+              2          16     tcp.dstport             Destination Port
+              4          32     tcp.seq                 Sequence Number
+              8          64     tcp.ack                 Acknowledgment Number (if ACK set)
+              12         96     tcp.hdr_len             Data Offset
+              12        100     -                       Reserved (must be zero)
+              12        103     tcp.flags.ns            ECN Concealment Protection (NS)
+              13        104     tcp.flags.cwr           Congestion Window Reduced (CWR)
+              13        105     tcp.flags.ecn           ECN-Echo (ECE)
+              13        106     tcp.flags.urg           Urgent (URG)
+              13        107     tcp.flags.ack           Acknowledgment (ACK)
+              13        108     tcp.flags.push          Push Function (PSH)
+              13        109     tcp.flags.reset         Reset Connection (RST)
+              13        110     tcp.flags.syn           Synchronize Sequence Numbers (SYN)
+              13        111     tcp.flags.fin           Last Packet from Sender (FIN)
+              14        112     tcp.window_size         Size of Receive Window
+              16        128     tcp.checksum            Checksum
+              18        144     tcp.urgent_pointer      Urgent Pointer (if URG set)
+              20        160     tcp.opt                 TCP Options (if data offset > 5)
 
         """
         if length is None:
@@ -347,8 +347,11 @@ class TCP(Transport):
     def _read_tcp_options(self, size):
         """Read TCP option list.
 
-        Keyword arguments:
+        Positional arguments:
             * size -- int, length of option list
+
+        Returns:
+            * dict -- extracted TCP option
 
         """
         counter = 0         # length of read option list
@@ -411,15 +414,18 @@ class TCP(Transport):
     def _read_mode_donone(self, size, kind):
         """Read options request no process.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, option kind value
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, option kind value
+
+        Returns:
+            * dict -- extracted option with no operation
 
         Structure of TCP options:
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind
-              1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.data                    Kind-specific Data
+            Octets      Bits        Name                    Discription
+              0           0     tcp.opt.kind            Kind
+              1           8     tcp.opt.length          Length
+              2          16     tcp.opt.data            Kind-specific Data
 
         """
         data = dict(
@@ -436,11 +442,14 @@ class TCP(Transport):
             size - int, length of option
             kind - int, option kind value
 
+        Returns:
+            * dict -- extracted option which unpacked
+
         Structure of TCP options:
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind
-              1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.data                    Kind-specific Data
+            Octets      Bits        Name                    Discription
+              0           0     tcp.opt.kind            Kind
+              1           8     tcp.opt.length          Length
+              2          16     tcp.opt.data            Kind-specific Data
 
         """
         data = dict(
@@ -453,22 +462,24 @@ class TCP(Transport):
     def _read_mode_tsopt(self, size, kind):
         """Read Timestamps option.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 8 (Timestamps)
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, 8 (Timestamps)
+
+        Returns:
+            * dict -- extracted Timestamps (TS) option
 
         Structure of TCP TSopt [RFC 7323]:
+            +-------+-------+---------------------+---------------------+
+            |Kind=8 |  10   |   TS Value (TSval)  |TS Echo Reply (TSecr)|
+            +-------+-------+---------------------+---------------------+
+                1       1              4                     4
 
-           +-------+-------+---------------------+---------------------+
-           |Kind=8 |  10   |   TS Value (TSval)  |TS Echo Reply (TSecr)|
-           +-------+-------+---------------------+---------------------+
-               1       1              4                     4
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.ts.kind                 Kind (8)
-              1              8          tcp.ts.length               Length (10)
-              2             16          tcp.ts.val                  Timestamp Value
-              6             48          tcp.ts.ecr                  Timestamps Echo Reply
+            Octets      Bits        Name                    Discription
+              0           0     tcp.ts.kind             Kind (8)
+              1           8     tcp.ts.length           Length (10)
+              2          16     tcp.ts.val              Timestamp Value
+              6          48     tcp.ts.ecr              Timestamps Echo Reply
 
         """
         temp = struct.unpack('>II', self._read_fileng(size))
@@ -481,25 +492,27 @@ class TCP(Transport):
         return data
 
     def _read_mode_pocsp(self, size, kind):
-        """Read Partial Order Connection Service Profile Option.
+        """Read Partial Order Connection Service Profile option.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 10 (POC-Serv Profile)
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, 10 (POC-Serv Profile)
+
+        Returns:
+            * dict -- extracted Partial Order Connection Service Profile (POC-SP) option
 
         Structure of TCP POC-SP Option [RFC 1693][RFC 6247]:
-
                                       1 bit        1 bit    6 bits
             +----------+----------+------------+----------+--------+
             |  Kind=10 | Length=3 | Start_flag | End_flag | Filler |
             +----------+----------+------------+----------+--------+
 
-            Octets          Bits            Name                        Discription
-              0              0          tcp.pocsp.kind              Kind (10)
-              1              8          tcp.pocsp.length            Length (3)
-              2             16          tcp.pocsp.start             Start Flag
-              2             17          tcp.pocsp.end               End Flag
-              2             18          tcp.pocsp.filler            Filler
+            Octets      Bits        Name                    Discription
+              0           0     tcp.pocsp.kind          Kind (10)
+              1           8     tcp.pocsp.length        Length (3)
+              2          16     tcp.pocsp.start         Start Flag
+              2          17     tcp.pocsp.end           End Flag
+              2          18     tcp.pocsp.filler        Filler
 
         """
         temp = self._read_binary(size)
@@ -515,22 +528,24 @@ class TCP(Transport):
         return data
 
     def _read_mode_acopt(self, size, kind):
-        """Read Alternate Checksum Request Option.
+        """Read Alternate Checksum Request option.
 
-        Keyword arguemnts:
+        Positional arguemnts:
             size - int, length of option
             kind - int, 14 (Alt-Chksum Request)
 
+        Returns:
+            * dict -- extracted Alternate Checksum Request (CHKSUM-REQ) option
+
         Structure of TCP CHKSUM-REQ [RFC 1146][RFC 6247]:
+            +----------+----------+----------+
+            |  Kind=14 | Length=3 |  chksum  |
+            +----------+----------+----------+
 
-           +----------+----------+----------+
-           |  Kind=14 | Length=3 |  chksum  |
-           +----------+----------+----------+
-
-            Octets          Bits            Name                            Discription
-              0              0          tcp.chksumreq.kind             Kind (14)
-              1              8          tcp.chksumreq.length           Length (3)
-              2             16          tcp.chksumreq.ac               Checksum Algorithm
+            Octets      Bits        Name                    Discription
+              0           0     tcp.chksumreq.kind      Kind (14)
+              1           8     tcp.chksumreq.length    Length (3)
+              2          16     tcp.chksumreq.ac        Checksum Algorithm
 
         """
         temp = self._read_unpack(size)
@@ -545,31 +560,33 @@ class TCP(Transport):
         return data
 
     def _read_mode_qsopt(self, size, kind):
-        """Read Quick-Start Response Option.
+        """Read Quick-Start Response option.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 27 (Quick-Start Response)
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, 27 (Quick-Start Response)
+
+        Returns:
+            * dict -- extracted Quick-Start Response (QS) option
 
         Structure of TCP QSopt [RFC 4782]:
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |     Kind      |  Length=8     | Resv. | Rate  |   TTL Diff    |
+            |               |               |       |Request|               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                   QS Nonce                                | R |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |     Kind      |  Length=8     | Resv. | Rate  |   TTL Diff    |
-           |               |               |       |Request|               |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                   QS Nonce                                | R |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.qs.kind                 Kind (27)
-              1              8          tcp.qs.length               Length (8)
-              2             16          -                           Reserved (must be zero)
-              2             20          tcp.qs.req_rate             Request Rate
-              3             24          tcp.qs.ttl_diff             TTL Difference
-              4             32          tcp.qs.nounce               QS Nounce
-              7             62          -                           Reserved (must be zero)
+            Octets      Bits        Name                    Discription
+              0           0     tcp.qs.kind             Kind (27)
+              1           8     tcp.qs.length           Length (8)
+              2          16     -                       Reserved (must be zero)
+              2          20     tcp.qs.req_rate         Request Rate
+              3          24     tcp.qs.ttl_diff         TTL Difference
+              4          32     tcp.qs.nounce           QS Nounce
+              7          62     -                       Reserved (must be zero)
 
         """
         rvrr = self._read_binary(1)
@@ -587,25 +604,27 @@ class TCP(Transport):
         return data
 
     def _read_mode_utopt(self, size, kind):
-        """Read User Timeout Option.
+        """Read User Timeout option.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 28 (User Timeout Option)
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, 28 (User Timeout Option)
+
+        Returns:
+            * dict -- extracted User Timeout (TIMEOUT) option
 
         Structure of TCP TIMEOUT [RFC 5482]:
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |   Kind = 28   |   Length = 4  |G|        User Timeout         |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |   Kind = 28   |   Length = 4  |G|        User Timeout         |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.timeout.kind            Kind (28)
-              1              8          tcp.timeout.length          Length (4)
-              2             16          tcp.timeout.granularity     Granularity
-              2             17          tcp.timeout.timeout         User Timeout
+            Octets      Bits        Name                    Discription
+              0           0     tcp.timeout.kind        Kind (28)
+              1           8     tcp.timeout.length      Length (4)
+              2          16     tcp.timeout.granularity Granularity
+              2          17     tcp.timeout.timeout     User Timeout
 
         """
         temp = self._read_fileng(size)
@@ -620,30 +639,32 @@ class TCP(Transport):
         return data
 
     def _read_mode_tcpao(self, size, kind):
-        """Read Authentication Option.
+        """Read Authentication option.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 29 (TCP Authentication Option)
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, 29 (TCP Authentication Option)
+
+        Returns:
+            * dict -- extracted Authentication (AO) option
 
         Structure of TCP AOopt [RFC 5925]:
+            +------------+------------+------------+------------+
+            |  Kind=29   |   Length   |   KeyID    | RNextKeyID |
+            +------------+------------+------------+------------+
+            |                     MAC           ...
+            +-----------------------------------...
 
-           +------------+------------+------------+------------+
-           |  Kind=29   |   Length   |   KeyID    | RNextKeyID |
-           +------------+------------+------------+------------+
-           |                     MAC           ...
-           +-----------------------------------...
+            ...-----------------+
+            ...  MAC (con't)    |
+            ...-----------------+
 
-           ...-----------------+
-           ...  MAC (con't)    |
-           ...-----------------+
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.ao.kind                 Kind (29)
-              1              8          tcp.ao.length               Length
-              2             16          tcp.ao.keyid                KeyID
-              3             24          tcp.ao.rnextkeyid           RNextKeyID
-              4             32          tcp.ao.mac                  Message Authentication Code
+            Octets      Bits        Name                    Discription
+              0           0     tcp.ao.kind             Kind (29)
+              1           8     tcp.ao.length           Length
+              2          16     tcp.ao.keyid            KeyID
+              3          24     tcp.ao.rnextkeyid       RNextKeyID
+              4          32     tcp.ao.mac              Message Authentication Code
 
         """
         key_ = self._read_unpack(1)
@@ -661,28 +682,30 @@ class TCP(Transport):
         return data
 
     def _read_mode_mptcp(self, size, kind):
-        """Read Multipath TCP Option.
+        """Read Multipath TCP option.
 
-        Keyword arguemnts:
-            size - int, length of option
-            kind - int, 30 (Multipath TCP)
+        Positional arguemnts:
+            * size - int, length of option
+            * kind - int, 30 (Multipath TCP)
+
+        Returns:
+            * dict -- extracted Multipath TCP (MP-TCP) option
 
         Structure of MP-TCP [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-----------------------+
+            |     Kind      |    Length     |Subtype|                       |
+            +---------------+---------------+-------+                       |
+            |                     Subtype-specific data                     |
+            |                       (variable length)                       |
+            +---------------------------------------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----------------------+
-           |     Kind      |    Length     |Subtype|                       |
-           +---------------+---------------+-------+                       |
-           |                     Subtype-specific data                     |
-           |                       (variable length)                       |
-           +---------------------------------------------------------------+
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.mp.kind                 Kind (30)
-              1              8          tcp.mp.length               Length
-              2             16          tcp.mp.subtype              Subtype
-              2             20          tcp.mp.data                 Subtype-specific Data
+            Octets      Bits        Name                    Discription
+              0           0     tcp.mp.kind             Kind (30)
+              1           8     tcp.mp.length           Length
+              2          16     tcp.mp.subtype          Subtype
+              2          20     tcp.mp.data             Subtype-specific Data
 
         """
         bins = self._read_binary(1)
@@ -705,41 +728,43 @@ class TCP(Transport):
         return data
 
     def _read_mptcp_capable(self, bits, size, kind):
-        """Read Multipath Capable Option.
+        """Read Multipath Capable option.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
-            kind - int, 30 (Multipath TCP)
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+            * kind - int, 30 (Multipath TCP)
+
+        Returns:
+            * dict -- extracted Multipath Capable (MP_CAPABLE) option
 
         Structure of MP_CAPABLE [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-------+---------------+
+            |     Kind      |    Length     |Subtype|Version|A|B|C|D|E|F|G|H|
+            +---------------+---------------+-------+-------+---------------+
+            |                   Option Sender's Key (64 bits)               |
+            |                                                               |
+            |                                                               |
+            +---------------------------------------------------------------+
+            |                  Option Receiver's Key (64 bits)              |
+            |                     (if option Length == 20)                  |
+            |                                                               |
+            +---------------------------------------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-------+---------------+
-           |     Kind      |    Length     |Subtype|Version|A|B|C|D|E|F|G|H|
-           +---------------+---------------+-------+-------+---------------+
-           |                   Option Sender's Key (64 bits)               |
-           |                                                               |
-           |                                                               |
-           +---------------------------------------------------------------+
-           |                  Option Receiver's Key (64 bits)              |
-           |                     (if option Length == 20)                  |
-           |                                                               |
-           +---------------------------------------------------------------+
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.mp.kind                 Kind (30)
-              1              8          tcp.mp.length               Length (12/20)
-              2             16          tcp.mp.subtype              Subtype (0)
-              2             20          tcp.mp.capable.version      Version
-              3             24          tcp.mp.capable.flags.req    Checksum Require Flag (A)
-              3             25          tcp.mp.capable.flags.ext    Extensibility Flag (B)
-              3             26          tcp.mp.capable.flags.res    Unassigned (C-G)
-              3             31          tcp.mp.capable.flags.hsa    HMAC-SHA1 Flag (H)
-              4             32          tcp.mp.capable.skey         Option Sender's Key
-              12            96          tcp.mp.capable.rkey         Option Receiver's Key
-                                                                        (if option Length == 20)
+            Octets      Bits        Name                        Discription
+              0           0     tcp.mp.kind                 Kind (30)
+              1           8     tcp.mp.length               Length (12/20)
+              2          16     tcp.mp.subtype              Subtype (0)
+              2          20     tcp.mp.capable.version      Version
+              3          24     tcp.mp.capable.flags.req    Checksum Require Flag (A)
+              3          25     tcp.mp.capable.flags.ext    Extensibility Flag (B)
+              3          26     tcp.mp.capable.flags.res    Unassigned (C-G)
+              3          31     tcp.mp.capable.flags.hsa    HMAC-SHA1 Flag (H)
+              4          32     tcp.mp.capable.skey         Option Sender's Key
+              12         96     tcp.mp.capable.rkey         Option Receiver's Key
+                                                            (if option Length == 20)
 
         """
         vers = int(bits, base=2)
@@ -767,19 +792,22 @@ class TCP(Transport):
         return data
 
     def _read_mptcp_join(self, bits, size, kind):
-        """Read Join Connection Option.
+        """Read Join Connection option.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
-            kind - int, 30 (Multipath TCP)
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+            * kind - int, 30 (Multipath TCP)
+
+        Returns:
+            * dict -- extracted Join Connection (MP_JOIN) option
 
         Structure of MP_JOIN [RFC 6824]:
-            Octets          Bits            Name                        Discription
-              0              0          tcp.mp.kind                 Kind (30)
-              1              8          tcp.mp.length               Length
-              2             16          tcp.mp.subtype              Subtype (1)
-              2             20          tcp.mp.data                 Handshake-specific Data
+            Octets      Bits        Name                        Discription
+              0           0     tcp.mp.kind                 Kind (30)
+              1           8     tcp.mp.length               Length
+              2          16     tcp.mp.subtype              Subtype (1)
+              2          20     tcp.mp.data                 Handshake-specific Data
 
         """
         if self._syn and self._ack: # MP_JOIN-SYN/ACK
@@ -799,34 +827,36 @@ class TCP(Transport):
             return data
 
     def _read_join_syn(self, bits, size, kind):
-        """Read Join Connection Option for Initial SYN.
+        """Read Join Connection option for Initial SYN.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
-            kind - int, 30 (Multipath TCP)
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+            * kind - int, 30 (Multipath TCP)
+
+        Returns:
+            * dict -- extracted Join Connection (MP_JOIN-SYN) option for Initial SYN
 
         Structure of MP_JOIN-SYN [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-----+-+---------------+
+            |     Kind      |  Length = 12  |Subtype|     |B|   Address ID  |
+            +---------------+---------------+-------+-----+-+---------------+
+            |                   Receiver's Token (32 bits)                  |
+            +---------------------------------------------------------------+
+            |                Sender's Random Number (32 bits)               |
+            +---------------------------------------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----+-+---------------+
-           |     Kind      |  Length = 12  |Subtype|     |B|   Address ID  |
-           +---------------+---------------+-------+-----+-+---------------+
-           |                   Receiver's Token (32 bits)                  |
-           +---------------------------------------------------------------+
-           |                Sender's Random Number (32 bits)               |
-           +---------------------------------------------------------------+
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.mp.kind                 Kind (30)
-              1              8          tcp.mp.length               Length (12)
-              2             16          tcp.mp.subtype              Subtype (1|SYN)
-              2             20          -                           Reserved (must be zero)
-              2             23          tcp.mp.join.syn.backup      Backup Path (B)
-              3             24          tcp.mp.join.syn.addrid      Address ID
-              4             32          tcp.mp.join.syn.token       Receiver's Token
-              8             64          tcp.mp.join.syn.randnum     Sender's Random Number
+            Octets      Bits        Name                        Discription
+              0           0     tcp.mp.kind                 Kind (30)
+              1           8     tcp.mp.length               Length (12)
+              2          16     tcp.mp.subtype              Subtype (1|SYN)
+              2          20     -                           Reserved (must be zero)
+              2          23     tcp.mp.join.syn.backup      Backup Path (B)
+              3          24     tcp.mp.join.syn.addrid      Address ID
+              4          32     tcp.mp.join.syn.token       Receiver's Token
+              8          64     tcp.mp.join.syn.randnum     Sender's Random Number
 
         """
         adid = self._read_unpack(1)
@@ -850,36 +880,38 @@ class TCP(Transport):
         return data
 
     def _read_join_synack(self, bits, size, kind):
-        """Read Join Connection Option for Responding SYN/ACK.
+        """Read Join Connection option for Responding SYN/ACK.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
-            kind - int, 30 (Multipath TCP)
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+            * kind - int, 30 (Multipath TCP)
+
+        Returns:
+            * dict -- extracted Join Connection (MP_JOIN-SYN/ACK) option for Responding SYN/ACK
 
         Structure of MP_JOIN-SYN/ACK [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-----+-+---------------+
+            |     Kind      |  Length = 16  |Subtype|     |B|   Address ID  |
+            +---------------+---------------+-------+-----+-+---------------+
+            |                                                               |
+            |                Sender's Truncated HMAC (64 bits)              |
+            |                                                               |
+            +---------------------------------------------------------------+
+            |                Sender's Random Number (32 bits)               |
+            +---------------------------------------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----+-+---------------+
-           |     Kind      |  Length = 16  |Subtype|     |B|   Address ID  |
-           +---------------+---------------+-------+-----+-+---------------+
-           |                                                               |
-           |                Sender's Truncated HMAC (64 bits)              |
-           |                                                               |
-           +---------------------------------------------------------------+
-           |                Sender's Random Number (32 bits)               |
-           +---------------------------------------------------------------+
-
-            Octets          Bits            Name                            Discription
-              0              0          tcp.mp.kind                    Kind (30)
-              1              8          tcp.mp.length                  Length (16)
-              2             16          tcp.mp.subtype              Subtype (1|SYN/ACK)
-              2             20          -                           Reserved (must be zero)
-              2             23          tcp.mp.join.synack.backup   Backup Path (B)
-              3             24          tcp.mp.join.synack.addrid   Address ID
-              4             32          tcp.mp.join.synack.hmac     Sender's Truncated HMAC
-              12            96          tcp.mp.join.synack.randnum  Sender's Random Number
+            Octets      Bits        Name                        Discription
+              0           0     tcp.mp.kind                 Kind (30)
+              1           8     tcp.mp.length               Length (16)
+              2          16     tcp.mp.subtype              Subtype (1|SYN/ACK)
+              2          20     -                           Reserved (must be zero)
+              2          23     tcp.mp.join.synack.backup   Backup Path (B)
+              3          24     tcp.mp.join.synack.addrid   Address ID
+              4          32     tcp.mp.join.synack.hmac     Sender's Truncated HMAC
+              12         96     tcp.mp.join.synack.randnum  Sender's Random Number
 
         """
         adid = self._read_unpack(1)
@@ -903,33 +935,35 @@ class TCP(Transport):
         return data
 
     def _read_join_ack(self, bits, size, kind):
-        """Read Join Connection Option for Third ACK.
+        """Read Join Connection option for Third ACK.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
-            kind - int, 30 (Multipath TCP)
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+            * kind - int, 30 (Multipath TCP)
+
+        Returns:
+            * dict -- extracted Join Connection (MP_JOIN-ACK) option for Third ACK
 
         Structure of MP_JOIN-ACK [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-----------------------+
+            |     Kind      |  Length = 24  |Subtype|      (reserved)       |
+            +---------------+---------------+-------+-----------------------+
+            |                                                               |
+            |                                                               |
+            |                   Sender's HMAC (160 bits)                    |
+            |                                                               |
+            |                                                               |
+            +---------------------------------------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----------------------+
-           |     Kind      |  Length = 24  |Subtype|      (reserved)       |
-           +---------------+---------------+-------+-----------------------+
-           |                                                               |
-           |                                                               |
-           |                   Sender's HMAC (160 bits)                    |
-           |                                                               |
-           |                                                               |
-           +---------------------------------------------------------------+
-
-            Octets          Bits            Name                            Discription
-              0              0          tcp.mp.kind                    Kind (30)
-              1              8          tcp.mp.length                  Length (24)
-              2             16          tcp.mp.subtype              Subtype (1|ACK)
-              2             20          -                           Reserved (must be zero)
-              4             32          tcp.mp.join.ack.hmac        Sender's HMAC
+            Octets      Bits        Name                        Discription
+              0           0     tcp.mp.kind                 Kind (30)
+              1           8     tcp.mp.length               Length (24)
+              2          16     tcp.mp.subtype              Subtype (1|ACK)
+              2          20     -                           Reserved (must be zero)
+              4          32     tcp.mp.join.ack.hmac        Sender's HMAC
 
         """
         temp = self._read_fileng(20)
@@ -947,56 +981,58 @@ class TCP(Transport):
         return data
 
     def _read_mptcp_dss(self, bits, size, kind):
-        """Read Data Sequence Signal (Data ACK and Data Sequence Mapping) Option.
+        """Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
-            kind - int, 30 (Multipath TCP)
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+            * kind - int, 30 (Multipath TCP)
+
+        Returns:
+            * dict -- extracted Data Sequence Signal (DSS) option
 
         Structure of DSS [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+----------------------+
+            |     Kind      |    Length     |Subtype| (reserved) |F|m|M|a|A|
+            +---------------+---------------+-------+----------------------+
+            |           Data ACK (4 or 8 octets, depending on flags)       |
+            +--------------------------------------------------------------+
+            |   Data sequence number (4 or 8 octets, depending on flags)   |
+            +--------------------------------------------------------------+
+            |              Subflow Sequence Number (4 octets)              |
+            +-------------------------------+------------------------------+
+            |  Data-Level Length (2 octets) |      Checksum (2 octets)     |
+            +-------------------------------+------------------------------+
 
                                 1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+----------------------+
-           |     Kind      |    Length     |Subtype| (reserved) |F|m|M|a|A|
-           +---------------+---------------+-------+----------------------+
-           |           Data ACK (4 or 8 octets, depending on flags)       |
-           +--------------------------------------------------------------+
-           |   Data sequence number (4 or 8 octets, depending on flags)   |
-           +--------------------------------------------------------------+
-           |              Subflow Sequence Number (4 octets)              |
-           +-------------------------------+------------------------------+
-           |  Data-Level Length (2 octets) |      Checksum (2 octets)     |
-           +-------------------------------+------------------------------+
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +--------------------------------------------------------------+
+            |                                                              |
+            |                Data Sequence Number (8 octets)               |
+            |                                                              |
+            +--------------------------------------------------------------+
+            |              Subflow Sequence Number (4 octets)              |
+            +-------------------------------+------------------------------+
+            |  Data-Level Length (2 octets) |        Zeros (2 octets)      |
+            +-------------------------------+------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +--------------------------------------------------------------+
-           |                                                              |
-           |                Data Sequence Number (8 octets)               |
-           |                                                              |
-           +--------------------------------------------------------------+
-           |              Subflow Sequence Number (4 octets)              |
-           +-------------------------------+------------------------------+
-           |  Data-Level Length (2 octets) |        Zeros (2 octets)      |
-           +-------------------------------+------------------------------+
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.mp.kind                 Kind (30)
-              1              8          tcp.mp.length               Length
-              2             16          tcp.mp.subtype              Subtype (2)
-              2             20          -                           Reserved (must be zero)
-              3             27          tcp.mp.dss.flags.fin        DATA_FIN (F)
-              3             28          tcp.mp.dss.flags.dsn_len    DSN Length (m)
-              3             29          tcp.mp.dss.flags.data_pre   DSN, SSN, Data-Level Length, CHKSUM Present (M)
-              3             30          tcp.mp.dss.flags.ack_len    ACK Length (a)
-              3             31          tcp.mp.dss.flags.ack_pre    Data ACK Present (A)
-              4             32          tcp.mp.dss.ack              Data ACK (4/8 octets)
-              8-12       64-96          tcp.mp.dss.dsn              DSN (4/8 octets)
-              12-20     48-160          tcp.mp.dss.ssn              Subflow Sequence Number
-              16-24    128-192          tcp.mp.dss.dl_len           Data-Level Length
-              18-26    144-208          tcp.mp.dss.checksum         Checksum
+            Octets      Bits        Name                        Discription
+              0           0     tcp.mp.kind                 Kind (30)
+              1           8     tcp.mp.length               Length
+              2          16     tcp.mp.subtype              Subtype (2)
+              2          20     -                           Reserved (must be zero)
+              3          27     tcp.mp.dss.flags.fin        DATA_FIN (F)
+              3          28     tcp.mp.dss.flags.dsn_len    DSN Length (m)
+              3          29     tcp.mp.dss.flags.data_pre   DSN, SSN, Data-Level Length, CHKSUM Present (M)
+              3          30     tcp.mp.dss.flags.ack_len    ACK Length (a)
+              3          31     tcp.mp.dss.flags.ack_pre    Data ACK Present (A)
+              4          32     tcp.mp.dss.ack              Data ACK (4/8 octets)
+              8-12    64-96     tcp.mp.dss.dsn              DSN (4/8 octets)
+              12-20  48-160     tcp.mp.dss.ssn              Subflow Sequence Number
+              16-24 128-192     tcp.mp.dss.dl_len           Data-Level Length
+              18-26 144-208     tcp.mp.dss.checksum         Checksum
 
         """
         bits = self._read_binary(1)
@@ -1033,33 +1069,35 @@ class TCP(Transport):
         return data
 
     def _read_mptcp_add(self, bits, size, kind):
-        """Read Add Address Option.
+        """Read Add Address option.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
-            kind - int, 30 (Multipath TCP)
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+            * kind - int, 30 (Multipath TCP)
+
+        Returns:
+            * dict -- extracted Add Address (ADD_ADDR) option
 
         Structure of ADD_ADDR [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-------+---------------+
+            |     Kind      |     Length    |Subtype| IPVer |  Address ID   |
+            +---------------+---------------+-------+-------+---------------+
+            |          Address (IPv4 - 4 octets / IPv6 - 16 octets)         |
+            +-------------------------------+-------------------------------+
+            |   Port (2 octets, optional)   |
+            +-------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-------+---------------+
-           |     Kind      |     Length    |Subtype| IPVer |  Address ID   |
-           +---------------+---------------+-------+-------+---------------+
-           |          Address (IPv4 - 4 octets / IPv6 - 16 octets)         |
-           +-------------------------------+-------------------------------+
-           |   Port (2 octets, optional)   |
-           +-------------------------------+
-
-            Octets          Bits            Name                        Discription
-              0              0          tcp.mp.kind                 Kind (30)
-              1              8          tcp.mp.length               Length
-              2             16          tcp.mp.subtype              Subtype (3)
-              2             20          tcp.mp.addaddr.ipver        IP Version
-              3             24          tcp.mp.addaddr.addrid       Address ID
-              4             32          tcp.mp.addaddr.addr         IP Address (4/16)
-              8-20      64-160          tcp.mp.addaddr.port         Port (optional)
+            Octets      Bits        Name                        Discription
+              0           0     tcp.mp.kind                 Kind (30)
+              1           8     tcp.mp.length               Length
+              2          16     tcp.mp.subtype              Subtype (3)
+              2          20     tcp.mp.addaddr.ipver        IP Version
+              3          24     tcp.mp.addaddr.addrid       Address ID
+              4          32     tcp.mp.addaddr.addr         IP Address (4/16)
+              8-20   64-160     tcp.mp.addaddr.port         Port (optional)
 
         """
         vers = int(bits, base=2)
@@ -1130,27 +1168,29 @@ class TCP(Transport):
         return addr
 
     def _read_mptcp_remove(self, bits, size):
-        """Read Remove Address Option.
+        """Read Remove Address option.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+
+        Returns:
+            * dict -- extracted Remove Address (REMOVE_ADDR) option
 
         Structure of REMOVE_ADDR [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-------+---------------+
+            |     Kind      |  Length = 3+n |Subtype|(resvd)|   Address ID  | ...
+            +---------------+---------------+-------+-------+---------------+
+                                       (followed by n-1 Address IDs, if required)
 
-                               1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-------+---------------+
-           |     Kind      |  Length = 3+n |Subtype|(resvd)|   Address ID  | ...
-           +---------------+---------------+-------+-------+---------------+
-                                      (followed by n-1 Address IDs, if required)
-
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length
-              2             16          tcp.opt.mp.subtype              Subtype (4)
-              2             20          -                               Reserved (must be zero)
-              3             24          tcp.opt.mp.removeaddr.addrid    Address ID (optional list)
+            Octets      Bits        Name                            Discription
+              0           0     tcp.opt.kind                    Kind (30)
+              1           8     tcp.opt.length                  Length
+              2          16     tcp.opt.mp.subtype              Subtype (4)
+              2          20     -                               Reserved (must be zero)
+              3          24     tcp.opt.mp.removeaddr.addrid    Address ID (optional list)
 
         """
         adid = []
@@ -1167,26 +1207,28 @@ class TCP(Transport):
         return data
 
     def _read_mptcp_prio(self, bits, size):
-        """Read Change Subflow Priority Option.
+        """Read Change Subflow Priority option.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+
+        Returns:
+            * dict -- extracted Change Subflow Priority (MP_PRIO) option
 
         Structure of MP_PRIO [RFC 6824]:
+                                  1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-----+-+--------------+
+            |     Kind      |     Length    |Subtype|     |B| AddrID (opt) |
+            +---------------+---------------+-------+-----+-+--------------+
 
-                              1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----+-+--------------+
-           |     Kind      |     Length    |Subtype|     |B| AddrID (opt) |
-           +---------------+---------------+-------+-----+-+--------------+
-
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length (3/4)
-              2             16          tcp.opt.mp.subtype              Subtype (5)
-              2             23          tcp.opt.mp.prio.backup          Backup Path (B)
-              3             24          tcp.opt.mp.prio.addrid          Address ID (optional)
+            Octets      Bits        Name                    Discription
+              0           0     tcp.opt.kind            Kind (30)
+              1           8     tcp.opt.length          Length (3/4)
+              2          16     tcp.opt.mp.subtype      Subtype (5)
+              2          23     tcp.opt.mp.prio.backup  Backup Path (B)
+              3          24     tcp.opt.mp.prio.addrid  Address ID (optional)
 
         """
         temp = self._read_unpack(1) if size else None
@@ -1201,30 +1243,32 @@ class TCP(Transport):
         return data
 
     def _read_mptcp_fail(self, bits, size):
-        """Read Fallback Option.
+        """Read Fallback option.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+
+        Returns:
+            * dict -- extracted Fallback (MP_FAIL) option
 
         Structure of MP_FAIL [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+----------------------+
+            |     Kind      |   Length=12   |Subtype|      (reserved)      |
+            +---------------+---------------+-------+----------------------+
+            |                                                              |
+            |                 Data Sequence Number (8 octets)              |
+            |                                                              |
+            +--------------------------------------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+----------------------+
-           |     Kind      |   Length=12   |Subtype|      (reserved)      |
-           +---------------+---------------+-------+----------------------+
-           |                                                              |
-           |                 Data Sequence Number (8 octets)              |
-           |                                                              |
-           +--------------------------------------------------------------+
-
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length (12)
-              2             16          tcp.opt.mp.subtype              Subtype (6)
-              2             23          -                               Reserved (must be zero)
-              4             32          tcp.opt.mp.fail.dsn             Data Sequence Number
+            Octets      Bits        Name                    Discription
+              0           0     tcp.opt.kind            Kind (30)
+              1           8     tcp.opt.length          Length (12)
+              2          16     tcp.opt.mp.subtype      Subtype (6)
+              2          23     -                       Reserved (must be zero)
+              4          32     tcp.opt.mp.fail.dsn     Data Sequence Number
 
         """
         resv = self._read_fileng(1)
@@ -1240,30 +1284,32 @@ class TCP(Transport):
         return data
 
     def _read_mptcp_fastclose(self, bits, size):
-        """Read Fast Close Option.
+        """Read Fast Close option.
 
-        Keyword arguemnts:
-            bits - str, 4-bit data
-            size - int, length of option
+        Positional arguemnts:
+            * bits - str, 4-bit data
+            * size - int, length of option
+
+        Returns:
+            * dict -- extracted Fast Close (MP_FASTCLOSE) option
 
         Structure of MP_FASTCLOSE [RFC 6824]:
+                                 1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +---------------+---------------+-------+-----------------------+
+            |     Kind      |    Length     |Subtype|      (reserved)       |
+            +---------------+---------------+-------+-----------------------+
+            |                      Option Receiver's Key                    |
+            |                            (64 bits)                          |
+            |                                                               |
+            +---------------------------------------------------------------+
 
-                                1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +---------------+---------------+-------+-----------------------+
-           |     Kind      |    Length     |Subtype|      (reserved)       |
-           +---------------+---------------+-------+-----------------------+
-           |                      Option Receiver's Key                    |
-           |                            (64 bits)                          |
-           |                                                               |
-           +---------------------------------------------------------------+
-
-            Octets          Bits            Name                            Discription
-              0              0          tcp.opt.kind                    Kind (30)
-              1              8          tcp.opt.length                  Length (12)
-              2             16          tcp.opt.mp.subtype              Subtype (7)
-              2             23          -                               Reserved (must be zero)
-              4             32          tcp.opt.mp.fastclose.rkey       Option Receiver's Key
+            Octets      Bits        Name                        Discription
+              0           0     tcp.opt.kind                Kind (30)
+              1           8     tcp.opt.length              Length (12)
+              2          16     tcp.opt.mp.subtype          Subtype (7)
+              2          23     -                           Reserved (must be zero)
+              4          32     tcp.opt.mp.fastclose.rkey   Option Receiver's Key
 
         """
         resv = self._read_fileng(1)

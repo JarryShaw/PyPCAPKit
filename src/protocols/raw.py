@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """raw packet data
 
-``jspcap.protocols.raw`` contains ``Raw`` only, which
+`jspcap.protocols.raw` contains `Raw` only, which
 implements extractor for unknown protocol, and constructs
-a ``Protocol`` like object.
+a `Protocol` like object.
 
 """
-
-
 # Raw Packet Data
 # Analyser for unknown protocol data
 
@@ -15,6 +13,9 @@ a ``Protocol`` like object.
 from jspcap.exceptions import UnsupportedCall
 from jspcap.utilities import Info, ProtoChain
 from jspcap.protocols.protocol import Protocol
+
+
+__all__ = ['Raw']
 
 
 class Raw(Protocol):

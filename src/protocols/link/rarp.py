@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 """(dynamic) reverse address resolution protocol
 
-``jspcap.protocols.link.rarp`` contains ``RARP`` only,
+`jspcap.protocols.link.rarp` contains `RARP` only,
 which implements extractor for (Dynamic) Reverse Address
 Resolution Protocol (RARP/DRARP), whose structure is
 described as below.
 
-    Octets          Bits          Name                Discription
-      0              0          rarp.htype        Hardware Type
-      2              16         rarp.ptype        Protocol Type
-      4              32         rarp.hlen         Hardware Address Length
-      5              40         rarp.plen         Protocol Address Length
-      6              48         rarp.oper         Operation
-      8              64         rarp.sha          Sender Hardware Address
-      14             112        rarp.spa          Sender Protocol Address
-      18             144        rarp.tha          Target Hardware Address
-      24             192        rarp.tpa          Target Protocol Address
+Octets      Bits        Name                    Discription
+  0           0     rarp.htype              Hardware Type
+  2          16     rarp.ptype              Protocol Type
+  4          32     rarp.hlen               Hardware Address Length
+  5          40     rarp.plen               Protocol Address Length
+  6          48     rarp.oper               Operation
+  8          64     rarp.sha                Sender Hardware Address
+  14        112     rarp.spa                Sender Protocol Address
+  18        144     rarp.tha                Target Hardware Address
+  24        192     rarp.tpa                Target Protocol Address
 
 """
 # Reverse Address Resolution Protocol

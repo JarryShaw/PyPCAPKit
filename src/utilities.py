@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """utility functions and classes
 
-``jspcap.utilities`` contains several useful functions and
-classes which are fundations of ``jspcap``, including
-decorater function ``seekset`` and ``seekset_ng``, 
-dict-like class ``Info``, tuple-like class ``VersionInfo``,
-and special class ``ProtoChain``.
+`jspcap.utilities` contains several useful functions and
+classes which are fundations of `jspcap`, including
+decorater function `seekset` and `seekset_ng`, 
+dict-like class `Info`, tuple-like class `VersionInfo`,
+and special class `ProtoChain`.
 
 """
 import copy

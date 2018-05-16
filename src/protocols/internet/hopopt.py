@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """IPv6 hop-by-hop options
 
-``jspcap.protocols.internet.hopopt`` contains ``HOPOPT``
+`jspcap.protocols.internet.hopopt` contains `HOPOPT`
 only, which implements extractor for IPv6 Hop-by-Hop
 Options header (HOPOPT), whose structure is described
 as below.
@@ -98,10 +98,10 @@ class HOPOPT(Protocol):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits          Name                Discription
-              0              0          hopopt.next       Next Header
-              1              8          hopopt.length     Header Extensive Length
-              2              16         hopopt.options    Options
+            Octets      Bits        Name                    Discription
+              0           0     hopopt.next             Next Header
+              1           8     hopopt.length           Header Extensive Length
+              2          16     hopopt.options          Options
 
         """
         if length is None:

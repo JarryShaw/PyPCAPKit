@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """application layer protocols
 
-``jspcap.protocols.application`` is collection of all
+`jspcap.protocols.application` is collection of all
 protocols in application layer, with detailed
 implementation and methods.
 

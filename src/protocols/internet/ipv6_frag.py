@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """fragment header for IPv6
 
-``jspcap.protocols.internet.ipv6_frag`` contains
-``IPv6_Frag`` only, which implements extractor for Fragment
-Header for IPv6 (IPv6-Frag), whose structure is described as below.
+`jspcap.protocols.internet.ipv6_frag` contains `IPv6_Frag`
+only, which implements extractor for Fragment Header for
+IPv6 (IPv6-Frag), whose structure is described as below.
 
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |  Next Header  |   Reserved    |      Fragment Offset    |Res|M|
@@ -91,13 +91,13 @@ class IPv6_Frag(Protocol):
             |                         Identification                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits          Name                Discription
-              0              0          frag.next         Next Header
-              1              8          -                 Reserved
-              2              16         frag.offset       Fragment Offset
-              3              29         -                 Reserved
-              3              31         frag.mf           More Flag
-              4              32         frag.id           Identification
+            Octets      Bits        Name                    Discription
+              0           0     frag.next               Next Header
+              1           8     -                       Reserved
+              2          16     frag.offset             Fragment Offset
+              3          29     -                       Reserved
+              3          31     frag.mf                 More Flag
+              4          32     frag.id                 Identification
 
         """
         if length is None:

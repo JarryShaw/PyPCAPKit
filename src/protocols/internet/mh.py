@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """mobility header
 
-``jspcap.protocols.internet.mh`` contains ``MH`` only,
+`jspcap.protocols.internet.mh` contains `MH` only,
 which implements extractor for Mobility Header (MH),
 whose structure is described as below.
 
@@ -130,13 +130,13 @@ class MH(Protocol):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits          Name                Discription
-              0              0          mh.next           Next Header
-              1              8          mh.length         Header Length
-              2              16         mh.type           Mobility Header Type
-              3              24         -                 Reserved
-              4              32         mh.chksum         Checksum
-              6              48         mh.data           Message Data
+            Octets      Bits        Name                    Discription
+              0           0     mh.next                 Next Header
+              1           8     mh.length               Header Length
+              2          16     mh.type                 Mobility Header Type
+              3          24     -                       Reserved
+              4          32     mh.chksum               Checksum
+              6          48     mh.data                 Message Data
 
         """
         if length is None:

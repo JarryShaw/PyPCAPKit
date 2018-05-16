@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """internet protocol security
 
-``jspcap.protocols.internet.ipsec`` contains ``IPsec``
+`jspcap.protocols.internet.ipsec` contains `IPsec`
 only, which is a base class for Internet Protocol Security
-(IPsec) protocol family, eg. AH.
+(IPsec) protocol family, eg. AH and ESP (NotImplemented).
 
 """
 # Internet Protocol Security

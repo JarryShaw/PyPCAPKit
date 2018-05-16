@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """internetwork packet exchange
 
-``jspcap.protocols.internet.ipx`` contains ``IPX`` only,
-which implements extractor for Internetwork Packet Exchange
-(IPX), whose structure is described as below.
+`jspcap.protocols.internet.ipx` contains `IPX` only,
+which implements extractor for Internetwork Packet
+Exchange (IPX), whose structure is described as below.
 
-    Octets          Bits          Name                Discription
-      0              0          ipx.cksum        Checksum
-      2              16         ipx.len          Packet Length (header includes)
-      4              32         ipx.count        Transport Control (hop count)
-      5              40         ipx.type         Packet Type
-      6              48         ipx.dst          Destination Address
-      18             144        ipx.src          Source Address
+Octets      Bits        Name                    Discription
+  0           0     ipx.cksum               Checksum
+  2          16     ipx.len                 Packet Length (header includes)
+  4          32     ipx.count               Transport Control (hop count)
+  5          40     ipx.type                Packet Type
+  6          48     ipx.dst                 Destination Address
+  18        144     ipx.src                 Source Address
 
 """
 # Internetwork Packet Exchange
@@ -125,13 +125,13 @@ class IPX(Internet):
         """Read Internetwork Packet Exchange.
 
         Structure of IPX header [RFC 1132]:
-            Octets          Bits          Name                Discription
-              0              0          ipx.cksum        Checksum
-              2              16         ipx.len          Packet Length (header includes)
-              4              32         ipx.count        Transport Control (hop count)
-              5              40         ipx.type         Packet Type
-              6              48         ipx.dst          Destination Address
-              18             144        ipx.src          Source Address
+            Octets      Bits        Name                    Discription
+              0           0     ipx.cksum               Checksum
+              2          16     ipx.len                 Packet Length (header includes)
+              4          32     ipx.count               Transport Control (hop count)
+              5          40     ipx.type                Packet Type
+              6          48     ipx.dst                 Destination Address
+              18        144     ipx.src                 Source Address
 
         """
         if length is None:
@@ -178,10 +178,10 @@ class IPX(Internet):
         """Read IPX address field.
 
         Structure of IPX address:
-            Octets          Bits          Name                Discription
-              0              0          ipx.addr.network Network Number
-              4              32         ipx.addr.node    Node Number
-              10             80         ipx.addr.socket  Socket Number
+            Octets      Bits        Name                    Discription
+              0           0     ipx.addr.network        Network Number
+              4          32     ipx.addr.node           Node Number
+              10         80     ipx.addr.socket         Socket Number
 
         """
         # Adress Number

@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 """open shortest path first
 
-``jspcap.protocols.link.ospf`` contains ``OSPF`` only,
+`jspcap.protocols.link.ospf` contains `OSPF` only,
 which implements extractor for Open Shortest Path First
 (OSPF), whose structure is described as below.
 
-     0                   1                   2                   3
-     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |   Version #   |     Type      |         Packet length         |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                          Router ID                            |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                           Area ID                             |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |           Checksum            |             AuType            |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                       Authentication                          |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-    |                       Authentication                          |
-    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Version #   |     Type      |         Packet length         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                          Router ID                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Area ID                             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Checksum            |             AuType            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Authentication                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Authentication                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
 # Open Shortest Path First
@@ -110,7 +110,6 @@ class OSPF(Link):
         """Read Open Shortest Path First.
 
         Structure of OSPF header [RFC 2328]:
-
             0                   1                   2                   3
             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -127,15 +126,15 @@ class OSPF(Link):
            |                       Authentication                          |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits          Name                Discription
-              0              0          ospf.version      Version #
-              1              8          ospf.type         Type (0/1)
-              2              16         ospf.len          Packet Length (header includes)
-              4              32         ospf.router_id    Router ID
-              8              64         ospf.area_id      Area ID
-              12             96         ospf.chksum       Checksum
-              14             112        ospf.autype       AuType
-              16             128        ospf.auth         Authentication
+            Octets      Bits        Name                    Discription
+              0           0     ospf.version            Version #
+              1           8     ospf.type               Type (0/1)
+              2          16     ospf.len                Packet Length (header includes)
+              4          32     ospf.router_id          Router ID
+              8          64     ospf.area_id            Area ID
+              12         96     ospf.chksum             Checksum
+              14        112     ospf.autype             AuType
+              16        128     ospf.auth               Authentication
 
         """
         if length is None:
@@ -195,19 +194,19 @@ class OSPF(Link):
 
         Structure of Cryptographic Authentication [RFC 2328]:
 
-            0                   1                   2                   3
-            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |              0                |    Key ID     | Auth Data Len |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-           |                 Cryptographic sequence number                 |
-           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |              0                |    Key ID     | Auth Data Len |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                 Cryptographic sequence number                 |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits          Name                Discription
-              0              0          -                 Reserved (must be zero)
-              2              16         ospf.auth.key_id  Key ID
-              3              24         ospf.auth.len     Auth Data Length
-              4              32         ospf.auth.seq     Cryptographic Aequence Number
+            Octets      Bits        Name                    Discription
+              0           0     -                       Reserved (must be zero)
+              2          16     ospf.auth.key_id        Key ID
+              3          24     ospf.auth.len           Auth Data Length
+              4          32     ospf.auth.seq           Cryptographic Aequence Number
 
         """
         _resv = self._read_fileng(2)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """root link layer protocol
 
-``jspcap.protocols.link.link`` contains both ``LINKTYPE``
-and ``Link``. The former is a dictionary of link layer header
+`jspcap.protocols.link.link` contains both `LINKTYPE`
+and `Link`. The former is a dictionary of link layer header
 type values, registered in IANA. And the latter is a base
 class for link layer protocols, eg. ARP/InARP, Ethernet,
 L2TP, OSPF, RARP/DRARP and etc.
@@ -99,8 +99,11 @@ class Link(Protocol):
     def _read_protos(self, size):
         """Read next layer protocol type.
 
-        Keyword arguments:
-            size  -- int, buffer size
+        Positional arguments:
+            * size  -- int, buffer size
+
+        Returns:
+            * str -- next layer's protocol name
 
         """
         _byte = self._read_unpack(size)
@@ -111,9 +114,15 @@ class Link(Protocol):
     def _import_next_layer(self, proto, length):
         """Import next layer extractor.
 
-        Keyword arguments:
-            proto -- str, next layer protocol name
-            length -- int, valid (not padding) length
+        Positional arguments:
+            * proto -- str, next layer protocol name
+            * length -- int, valid (not padding) length
+
+        Returns:
+            * bool -- flag if extraction of next layer succeeded
+            * Info -- info of next layer
+            * ProtoChain -- protocol chain of next layer
+            * str -- alias of next layer
 
         Protocols:
             * ARP -- data link layer

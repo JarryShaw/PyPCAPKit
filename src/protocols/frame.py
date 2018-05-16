@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """frame header
 
-``jspcap.protocols.frame`` contains ``Frame`` only,
+`jspcap.protocols.frame` contains `Frame` only,
 which implements extractor for frame headers of PCAP,
 whose structure is described as below.
 
-    typedef struct pcaprec_hdr_s {
+typedef struct pcaprec_hdr_s {
     guint32 ts_sec;     /* timestamp seconds */
     guint32 ts_usec;    /* timestamp microseconds */
     guint32 incl_len;   /* number of octets of packet saved in file */
     guint32 orig_len;   /* actual length of packet */
-    } pcaprec_hdr_t;
+} pcaprec_hdr_t;
 
 """
 import datetime
@@ -85,10 +85,10 @@ class Frame(Protocol):
 
         Structure of record/package header (C):
             typedef struct pcaprec_hdr_s {
-            guint32 ts_sec;     /* timestamp seconds */
-            guint32 ts_usec;    /* timestamp microseconds */
-            guint32 incl_len;   /* number of octets of packet saved in file */
-            guint32 orig_len;   /* actual length of packet */
+                guint32 ts_sec;     /* timestamp seconds */
+                guint32 ts_usec;    /* timestamp microseconds */
+                guint32 incl_len;   /* number of octets of packet saved in file */
+                guint32 orig_len;   /* actual length of packet */
             } pcaprec_hdr_t;
 
         """
@@ -197,10 +197,13 @@ class Frame(Protocol):
     def _decode_next_layer(self, dict_, length=None):
         """Decode next layer protocol.
 
-        Keyword arguments:
+        Positional arguments:
             dict_ -- dict, info buffer
             proto -- str, next layer protocol name
             length -- int, valid (not padding) length
+
+        Returns:
+            * dict -- current protocol with packet extracted
 
         """
         # make BytesIO from frame package data
@@ -223,9 +226,15 @@ class Frame(Protocol):
     def _import_next_layer(self, file, length):
         """Import next layer extractor.
 
-        Keyword arguments:
-            file -- BytesIO, packet bytes I/O object
-            length -- int, valid (not padding) length
+        Positional arguments:
+            * file -- BytesIO, packet bytes I/O object
+            * length -- int, valid (not padding) length
+
+        Returns:
+            * bool -- flag if extraction of next layer succeeded
+            * Info -- info of next layer
+            * ProtoChain -- protocol chain of next layer
+            * str -- alias of next layer
 
         Protocols:
             * Ethernet (data link layer)

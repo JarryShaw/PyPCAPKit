@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """internet protocol
 
-``jspcap.protocols.internet.ipsec`` contains ``IP`` only,
+`jspcap.protocols.internet.ipsec` contains `IP` only,
 which is a base class for Internet Protocol (IP) protocol
-family, eg. IPv4, IPv6, and AH.
+family, eg. IPv4, IPv6, and IPsec.
 
 """
 # Internet Protocol

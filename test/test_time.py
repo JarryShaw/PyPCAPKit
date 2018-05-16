@@ -10,7 +10,7 @@ lid = list()
 for index in range(1, 101):
     now = time.time()
 
-    tree = jspcap.Extractor(fin='../sample/test.pcap', tcp=True, store=False, nofile=True, strict=True)
+    tree = jspcap.extract(fin='../sample/test.pcap', tcp=True, store=False, nofile=True, strict=True)
 
     delta = time.time() - now
     print(f'No. {index:>3d}: {tree.length} packets extracted and reassembled in {delta} seconds.')

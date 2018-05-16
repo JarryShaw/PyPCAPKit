@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 """(inverse) address resolution protocol
 
-``jspcap.protocols.link.arp`` contains ``ARP`` only,
+`jspcap.protocols.link.arp` contains `ARP` only,
 which implements extractor for (Inverse) Address Resolution
 Protocol (ARP/InARP), whose structure is described as below.
 
-    Octets          Bits          Name                Discription
-      0              0          arp.htype         Hardware Type
-      2              16         arp.ptype         Protocol Type
-      4              32         arp.hlen          Hardware Address Length
-      5              40         arp.plen          Protocol Address Length
-      6              48         arp.oper          Operation
-      8              64         arp.sha           Sender Hardware Address
-      14             112        arp.spa           Sender Protocol Address
-      18             144        arp.tha           Target Hardware Address
-      24             192        arp.tpa           Target Protocol Address
+Octets      Bits        Name                    Discription
+  0           0     arp.htype               Hardware Type
+  2          16     arp.ptype               Protocol Type
+  4          32     arp.hlen                Hardware Address Length
+  5          40     arp.plen                Protocol Address Length
+  6          48     arp.oper                Operation
+  8          64     arp.sha                 Sender Hardware Address
+  14        112     arp.spa                 Sender Protocol Address
+  18        144     arp.tha                 Target Hardware Address
+  24        192     arp.tpa                 Target Protocol Address
 
 """
 import collections
@@ -53,43 +53,43 @@ OPER = {
 class ARP(Link):
     """This class implements all protocols in ARP family.
 
-     - Address Resolution Protocol (ARP) [RFC 826]
-     - Reverse Address Resolution Protocol (RARP) [RFC 903]
-     - Dynamic Reverse Address Resolution Protocol (DRARP) [RFC 1931]
-     - Inverse Address Resolution Protocol (InARP) [RFC 2390]
+    - Address Resolution Protocol (ARP) [RFC 826]
+    - Reverse Address Resolution Protocol (RARP) [RFC 903]
+    - Dynamic Reverse Address Resolution Protocol (DRARP) [RFC 1931]
+    - Inverse Address Resolution Protocol (InARP) [RFC 2390]
 
-     Properties:
-         * name -- str, name of corresponding procotol
-         * info -- Info, info dict of current instance
-         * alias -- str, acronym of corresponding procotol
-         * layer -- str, `Link`
-         * length -- int, header length of corresponding protocol
-         * protocol -- str, name of next layer protocol
-         * protochain -- ProtoChain, protocol chain of current instance
-         * src -- tuple(str, str), sender hardware & protocol address
-         * dst -- tuple(str, str), target hardware & protocol address
-         * type -- tuple(str, str), hardware & protocol type
+    Properties:
+        * name -- str, name of corresponding procotol
+        * info -- Info, info dict of current instance
+        * alias -- str, acronym of corresponding procotol
+        * layer -- str, `Link`
+        * length -- int, header length of corresponding protocol
+        * protocol -- str, name of next layer protocol
+        * protochain -- ProtoChain, protocol chain of current instance
+        * src -- tuple(str, str), sender hardware & protocol address
+        * dst -- tuple(str, str), target hardware & protocol address
+        * type -- tuple(str, str), hardware & protocol type
 
     Methods:
         * read_arp -- read Address Resolution Protocol
 
-     Attributes:
-         * _file -- BytesIO, bytes to be extracted
-         * _info -- Info, info dict of current instance
-         * _protos -- ProtoChain, protocol chain of current instance
-         * _acnm -- str, acronym of corresponding procotol
-         * _name -- str, name of corresponding procotol
+    Attributes:
+        * _file -- BytesIO, bytes to be extracted
+        * _info -- Info, info dict of current instance
+        * _protos -- ProtoChain, protocol chain of current instance
+        * _acnm -- str, acronym of corresponding procotol
+        * _name -- str, name of corresponding procotol
 
-     Utilities:
-         * _read_protos -- read next layer protocol type
-         * _read_fileng -- read file buffer
-         * _read_unpack -- read bytes and unpack to integers
-         * _read_binary -- read bytes and convert into binaries
-         * _read_packet -- read raw packet data
-         * _decode_next_layer -- decode next layer protocol type
-         * _import_next_layer -- import next layer protocol extractor
-         * _read_addr_resolve -- resolve MAC address according to protocol
-         * _read_proto_resolve -- solve IP address according to protocol
+    Utilities:
+        * _read_protos -- read next layer protocol type
+        * _read_fileng -- read file buffer
+        * _read_unpack -- read bytes and unpack to integers
+        * _read_binary -- read bytes and convert into binaries
+        * _read_packet -- read raw packet data
+        * _decode_next_layer -- decode next layer protocol type
+        * _import_next_layer -- import next layer protocol extractor
+        * _read_addr_resolve -- resolve MAC address according to protocol
+        * _read_proto_resolve -- solve IP address according to protocol
 
     """
     ##########################################################################
@@ -134,16 +134,17 @@ class ARP(Link):
         """Read Address Resolution Protocol.
 
         Structure of ARP header [RFC 826]:
-            Octets          Bits          Name                Discription
-              0              0          arp.htype         Hardware Type
-              2              16         arp.ptype         Protocol Type
-              4              32         arp.hlen          Hardware Address Length
-              5              40         arp.plen          Protocol Address Length
-              6              48         arp.oper          Operation
-              8              64         arp.sha           Sender Hardware Address
-              14             112        arp.spa           Sender Protocol Address
-              18             144        arp.tha           Target Hardware Address
-              24             192        arp.tpa           Target Protocol Address
+            Octets      Bits        Name                    Discription
+              0           0     arp.htype               Hardware Type
+              2          16     arp.ptype               Protocol Type
+              4          32     arp.hlen                Hardware Address Length
+              5          40     arp.plen                Protocol Address Length
+              6          48     arp.oper                Operation
+              8          64     arp.sha                 Sender Hardware Address
+              14        112     arp.spa                 Sender Protocol Address
+              18        144     arp.tha                 Target Hardware Address
+              24        192     arp.tpa                 Target Protocol Address
+
         """
         if length is None:
             length = len(self)
@@ -211,9 +212,12 @@ class ARP(Link):
     def _read_addr_resolve(self, length, htype):
         """Resolve MAC address according to protocol.
 
-        Keyword arguments:
+        Positional arguments:
             * length -- int, hardware address length
             * htype -- int, hardware type
+
+        Returns:
+            * str -- MAC address
 
         """
         if htype == 1:  # Ethernet
@@ -226,9 +230,12 @@ class ARP(Link):
     def _read_proto_resolve(self, length, ptype):
         """Resolve IP address according to protocol.
 
-        Keyword arguments:
+        Positional arguments:
             * length -- int, protocol address length
             * hptype -- int, protocol type
+
+        Returns:
+            * str -- IP address
 
         """
         if ptype == '0800':     # IPv4
@@ -242,7 +249,7 @@ class ARP(Link):
             last = False    # if last hextet/group is zero value
             ommt = False    # ommitted flag, since IPv6 address can ommit to `::` only once
 
-            for _ in range(8):
+            for index in range(8):
                 hex_ = self._read_fileng(2).hex().lstrip('0')
 
                 if hex_:    # if hextet is not '', directly append
@@ -253,7 +260,7 @@ class ARP(Link):
                     if last:    # if last hextet is '', ascend counter
                         ctr_[ptr_] += 1
                     else:       # if last hextet is not '', record pointer
-                        ptr_ = _
+                        ptr_ = index
                         last = True
                         ctr_[ptr_] = 1
 
@@ -270,7 +277,7 @@ class ARP(Link):
                 else:                           # insert '' otherwise
                     adlt.insert(ptr_, '')
 
-            addr = ':'.join(adlt)
+            _addr = ':'.join(adlt)
         else:
             _addr = self._read_fileng(length)
         return _addr

@@ -11,7 +11,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.6.0'
+__version__ = '0.7.0'
 
 
 # set-up script for pip distribution
@@ -29,6 +29,11 @@ setuptools.setup(
     python_requires = '>=3.6',
     install_requires = ['jsformat', 'chardet'],
     py_modules = ['jspcap'],
+    entry_points = {
+        'console_scripts': [
+            'jspcapy = jspcap.__main__:main',
+        ]
+    },
     packages = [
         'jspcap',
         'jspcap.protocols',

@@ -20,10 +20,15 @@
 		"time_epoch" : "1511106545.471719 seconds",
 		"len" : 86,
 		"cap_len" : 86,
+		"packet" : "00 00 04 00 01 00 00 00 f1 a7 11 5a a7 32 07 00 56 00 00 00 56 00 00 00 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd 60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00",
 		"ethernet" : {
 			"dst" : "40-33-1a-d1-85-1c",
 			"src" : "a4-5e-60-d9-6b-97",
 			"type" : "IPv6",
+			"packet" : {
+				"header" : "40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd",
+				"payload" : "60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97"
+			},
 			"ipv6" : {
 				"version" : "6",
 				"tclass" : 96,
@@ -33,13 +38,20 @@
 				"limit" : 255,
 				"src" : "fe80::a6:87f9:2793:16ee",
 				"dst" : "fe80::1ccd:7c77:bac7:46b7",
+				"packet" : {
+					"header" : "60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7",
+					"payload" : "87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97"
+				},
 				"hdr_len" : 40,
 				"raw_len" : 32,
 				"proto" : "ICMPv6",
-				"icmpv6" : "87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97"
+				"raw" : {
+					"packet" : "87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97",
+					"error" : null
+				}
 			}
 		},
-		"protocols" : "Ethernet:IPv6:ICMPv6"
+		"protocols" : "Ethernet:IPv6"
 	},
 	"Frame 2" : {
 		"frame_info" : {
@@ -53,10 +65,15 @@
 		"time_epoch" : "1511106545.578078 seconds",
 		"len" : 78,
 		"cap_len" : 78,
+		"packet" : "00 00 04 00 01 00 00 00 f1 a7 11 5a a7 32 07 00 56 00 00 00 56 00 00 00 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd 60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7",
 		"ethernet" : {
 			"dst" : "a4-5e-60-d9-6b-97",
 			"src" : "40-33-1a-d1-85-1c",
 			"type" : "IPv6",
+			"packet" : {
+				"header" : "a4 5e 60 d9 6b 97 40 33 1a d1 85 1c 86 dd",
+				"payload" : "60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7"
+			},
 			"ipv6" : {
 				"version" : "6",
 				"tclass" : 96,
@@ -66,13 +83,20 @@
 				"limit" : 255,
 				"src" : "fe80::1ccd:7c77:bac7:46b7",
 				"dst" : "fe80::a6:87f9:2793:16ee",
+				"packet" : {
+					"header" : "60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee",
+					"payload" : "88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7"
+				},
 				"hdr_len" : 40,
 				"raw_len" : 24,
 				"proto" : "ICMPv6",
-				"icmpv6" : "88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7"
+				"raw" : {
+					"packet" : "88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7",
+					"error" : null
+				}
 			}
 		},
-		"protocols" : "Ethernet:IPv6:ICMPv6"
+		"protocols" : "Ethernet:IPv6"
 	},
 	"Frame 3" : {
 		"frame_info" : {
@@ -86,10 +110,15 @@
 		"time_epoch" : "1511106549.777804 seconds",
 		"len" : 54,
 		"cap_len" : 54,
+		"packet" : "00 00 04 00 01 00 00 00 f1 a7 11 5a a7 32 07 00 56 00 00 00 56 00 00 00 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd 60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00",
 		"ethernet" : {
 			"dst" : "a4-5e-60-d9-6b-97",
 			"src" : "b8-f8-83-a5-f9-47",
 			"type" : "IPv4",
+			"packet" : {
+				"header" : "a4 5e 60 d9 6b 97 b8 f8 83 a5 f9 47 08 00",
+				"payload" : "45 00 00 28 c5 34 40 00 2b 06 7a 86 7b 81 d2 87 c0 a8 01 64 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0 7c 8e 00 00"
+			},
 			"ipv4" : {
 				"version" : "4",
 				"hdr_len" : 20,
@@ -109,6 +138,10 @@
 				"checksum" : "7a 86",
 				"src" : "123.129.210.135",
 				"dst" : "192.168.1.100",
+				"packet" : {
+					"header" : "45 00 00 28 c5 34 40 00 2b 06 7a 86 7b 81 d2 87 c0 a8 01 64",
+					"payload" : "00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0 7c 8e 00 00"
+				},
 				"tcp" : {
 					"srcport" : 80,
 					"dstport" : 55232,
@@ -129,7 +162,14 @@
 					"window_size" : 31920,
 					"checksum" : "7c 8e",
 					"urgent_pointer" : 0,
-					"raw" : null
+					"packet" : {
+						"header" : "00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0 7c 8e 00 00",
+						"payload" : ""
+					},
+					"raw" : {
+						"packet" : "",
+						"error" : null
+					}
 				}
 			}
 		},
@@ -147,10 +187,15 @@
 		"time_epoch" : "1511106549.777868 seconds",
 		"len" : 54,
 		"cap_len" : 54,
+		"packet" : "00 00 04 00 01 00 00 00 f1 a7 11 5a a7 32 07 00 56 00 00 00 56 00 00 00 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd 60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00",
 		"ethernet" : {
 			"dst" : "b8-f8-83-a5-f9-47",
 			"src" : "a4-5e-60-d9-6b-97",
 			"type" : "IPv4",
+			"packet" : {
+				"header" : "b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00",
+				"payload" : "45 00 00 28 00 00 40 00 40 06 2a bb c0 a8 01 64 7b 81 d2 87 d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff f9 3e 00 00"
+			},
 			"ipv4" : {
 				"version" : "4",
 				"hdr_len" : 20,
@@ -170,6 +215,10 @@
 				"checksum" : "2a bb",
 				"src" : "192.168.1.100",
 				"dst" : "123.129.210.135",
+				"packet" : {
+					"header" : "45 00 00 28 00 00 40 00 40 06 2a bb c0 a8 01 64 7b 81 d2 87",
+					"payload" : "d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff f9 3e 00 00"
+				},
 				"tcp" : {
 					"srcport" : 55232,
 					"dstport" : 80,
@@ -190,7 +239,14 @@
 					"window_size" : 65535,
 					"checksum" : "f9 3e",
 					"urgent_pointer" : 0,
-					"raw" : null
+					"packet" : {
+						"header" : "d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff f9 3e 00 00",
+						"payload" : ""
+					},
+					"raw" : {
+						"packet" : "",
+						"error" : null
+					}
 				}
 			}
 		},
@@ -208,10 +264,15 @@
 		"time_epoch" : "1511106549.913720 seconds",
 		"len" : 54,
 		"cap_len" : 54,
+		"packet" : "00 00 04 00 01 00 00 00 f1 a7 11 5a a7 32 07 00 56 00 00 00 56 00 00 00 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd 60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00",
 		"ethernet" : {
 			"dst" : "b8-f8-83-a5-f9-47",
 			"src" : "a4-5e-60-d9-6b-97",
 			"type" : "IPv4",
+			"packet" : {
+				"header" : "b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00",
+				"payload" : "45 00 00 28 00 00 40 00 40 06 2a bb c0 a8 01 64 7b 81 d2 87 d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff 2a f4 00 00"
+			},
 			"ipv4" : {
 				"version" : "4",
 				"hdr_len" : 20,
@@ -231,6 +292,10 @@
 				"checksum" : "2a bb",
 				"src" : "192.168.1.100",
 				"dst" : "123.129.210.135",
+				"packet" : {
+					"header" : "45 00 00 28 00 00 40 00 40 06 2a bb c0 a8 01 64 7b 81 d2 87",
+					"payload" : "d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff 2a f4 00 00"
+				},
 				"tcp" : {
 					"srcport" : 55216,
 					"dstport" : 80,
@@ -251,7 +316,14 @@
 					"window_size" : 65535,
 					"checksum" : "2a f4",
 					"urgent_pointer" : 0,
-					"raw" : null
+					"packet" : {
+						"header" : "d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff 2a f4 00 00",
+						"payload" : ""
+					},
+					"raw" : {
+						"packet" : "",
+						"error" : null
+					}
 				}
 			}
 		},
@@ -269,10 +341,15 @@
 		"time_epoch" : "1511106551.66835 seconds",
 		"len" : 159,
 		"cap_len" : 159,
+		"packet" : "00 00 04 00 01 00 00 00 f1 a7 11 5a a7 32 07 00 56 00 00 00 56 00 00 00 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd 60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97 f1 a7 11 5a 1e d2 08 00 4e 00 00 00 4e 00 00 00 a4 5e 60 d9 6b 97 40 33 1a d1 85 1c 86 dd 60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00 1c cd 7c",
 		"ethernet" : {
 			"dst" : "ff-ff-ff-ff-ff-ff",
 			"src" : "b8-f8-83-a5-f9-47",
 			"type" : "IPv4",
+			"packet" : {
+				"header" : "ff ff ff ff ff ff b8 f8 83 a5 f9 47 08 00",
+				"payload" : "45 00 00 91 00 00 40 00 40 11 78 b3 c0 a8 01 01 ff ff ff ff 92 44 13 89 00 7d 63 b1 01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34"
+			},
 			"ipv4" : {
 				"version" : "4",
 				"hdr_len" : 20,
@@ -292,12 +369,23 @@
 				"checksum" : "78 b3",
 				"src" : "192.168.1.1",
 				"dst" : "255.255.255.255",
+				"packet" : {
+					"header" : "45 00 00 91 00 00 40 00 40 11 78 b3 c0 a8 01 01 ff ff ff ff",
+					"payload" : "92 44 13 89 00 7d 63 b1 01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34"
+				},
 				"udp" : {
 					"srcport" : 37444,
 					"dstport" : 5001,
 					"len" : 125,
 					"checksum" : "63 b1",
-					"raw" : "01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34"
+					"packet" : {
+						"header" : "92 44 13 89 00 7d 63 b1",
+						"payload" : "01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34"
+					},
+					"raw" : {
+						"packet" : "01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34",
+						"error" : null
+					}
 				}
 			}
 		},

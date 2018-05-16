@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """internet layer protocols
 
-``jspcap.protocols.internet`` is collection of all
-protocols in internet layer, with detailed implementation
-and methods.
+`jspcap.protocols.internet` is collection of all protocols
+in internet layer, with detailed implementation and
+methods.
 
 """
 # Base Class for Internet Layer

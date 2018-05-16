@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """user defined exceptions
 
-``jspcap.exceptions`` refined built-in exceptions. Make it
+`jspcap.exceptions` refined built-in exceptions. Make it
 possible to show only user error stack infomation, when
 exception raised on user's operation.
 
@@ -19,14 +19,16 @@ import traceback
 __all__ = [
     'BaseError',                                                # Exception
     'DigitError', 'IntError', 'RealError', 'ComplexError',      # TypeError
-    'BoolError', 'BytesError', 'StringError', 'IterableError',  # TypeError
-    'DictError', 'ListError', 'TupleError', 'ProtocolUnbound',  # TypeError
+    'BoolError', 'BytesError', 'StringError', 'BytearrayError', # TypeError
+    'DictError', 'ListError', 'TupleError', 'IterableError',    # TypeError
+    'IOObjError', 'ProtocolUnbound',                            # TypeError
     'FormatError', 'UnsupportedCall',                           # AttributeError
     'FileError',                                                # IOError
     'FileNotFound',                                             # FileNotFoundError
     'ProtocolNotFound',                                         # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',           # ValueError
     'StructError',                                              # struct.error
+    'FragmentError',                                            # KeyError
 ]
 
 
@@ -53,7 +55,7 @@ class BaseError(Exception):
         else:
             index = len(tb)
 
-        quiet = kwargs.pop('quiet', None)
+        quiet = kwargs.pop('quiet', False)
         if not quiet and index:
             print('Traceback (most recent call last):')
             traceback.print_stack(limit=-index)
@@ -91,6 +93,11 @@ class BytesError(BaseError, TypeError):
     pass
 
 
+class BytearrayError(BaseError, TypeError):
+    """The argument(s) must be bytearray type."""
+    pass
+
+
 class BoolError(BaseError, TypeError):
     """The argument(s) must be bool type."""
     pass
@@ -123,6 +130,11 @@ class IterableError(BaseError, TypeError):
 
 class ProtocolUnbound(BaseError, TypeError):
     """Protocol slice unbound."""
+    pass
+
+
+class IOObjError(BaseError, TypeError):
+    """The argument(s) must be file-like type."""
     pass
 
 
@@ -191,4 +203,13 @@ class ProtocolError(BaseError, ValueError):
 
 class StructError(BaseError, struct.error):
     """Unpack failed."""
+    pass
+
+
+##############################################################################
+# KeyError session.
+##############################################################################
+
+class FragmentError(BaseError, KeyError):
+    """Invalid fragment dict."""
     pass

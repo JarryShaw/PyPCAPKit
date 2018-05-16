@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """ethernet protocol
 
-``jspcap.protocols.link.ethernet`` contains ``Ethernet``
+`jspcap.protocols.link.ethernet` contains `Ethernet`
 only, which implements extractor for Ethernet Protocol,
 whose structure is described as below.
 
-    Octets          Bits          Name                Discription
-      0              0          eth.dst           Destination MAC Address
-      1              8          eth.src           Source MAC Address
-      2              16         eth.type          Protocol (Internet Layer)
+Octets      Bits        Name                    Discription
+  0           0     eth.dst                 Destination MAC Address
+  1           8     eth.src                 Source MAC Address
+  2          16     eth.type                Protocol (Internet Layer)
 
 """
 import textwrap
@@ -94,10 +94,10 @@ class Ethernet(Link):
         """Read Ethernet Protocol.
 
         Structure of Ethernet Protocol header [RFC 7042]:
-            Octets          Bits          Name                Discription
-              0              0          eth.dst           Destination MAC Address
-              1              8          eth.src           Source MAC Address
-              2              16         eth.type          Protocol (Internet Layer)
+            Octets      Bits        Name                    Discription
+              0           0     eth.dst                 Destination MAC Address
+              1           8     eth.src                 Source MAC Address
+              2          16     eth.type                Protocol (Internet Layer)
 
         """
         if length is None:

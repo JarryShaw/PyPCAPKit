@@ -1,10 +1,16 @@
 # -*- coding: utf-8 -*-
 """reassembly IPv4 fragments
 
-``jspcap.reassembly.ipv4`` contains ``IPv4_Reassembly``
+`jspcap.reassembly.ipv4` contains `IPv4_Reassembly`
 only, which reconstructs fragmented IPv4 packets back to
-origin. The algorithm for IPv4 reassembly is decribed as
-below.
+origin. The following algorithm implementment is based on IP
+reassembly procedure introduced in RFC 791, using
+`RCVBT` (fragment receivedbit table). Though another
+algorithm is explained in RFC 815, replacing `RCVBT`,
+however, this implementment still used the elder one.
+And here is the pseudo-code:
+
+Notations:
 
     FO    - Fragment Offset
     IHL   - Internet Header Length
@@ -17,49 +23,51 @@ below.
     RCVBT - Fragment Received Bit Table
     TLB   - Timer Lower Bound
 
-DO {
-    BUFID <- source|destination|protocol|identification;
+Algorithm:
 
-    IF (FO = 0 AND MF = 0) {
-        IF (buffer with BUFID is allocated) {
-            flush all reassembly for this BUFID;
+    DO {
+        BUFID <- source|destination|protocol|identification;
+
+        IF (FO = 0 AND MF = 0) {
+            IF (buffer with BUFID is allocated) {
+                flush all reassembly for this BUFID;
+                Submit datagram to next step;
+                DONE.
+            }
+        }
+
+        IF (no buffer with BUFID is allocated) {
+            allocate reassembly resources with BUFID;
+            TIMER <- TLB;
+            TDL <- 0;
+            put data from fragment into data buffer with BUFID
+                [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
+            set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
+        }
+
+        IF (MF = 0) {
+            TDL <- TL-(IHL*4)+(FO*8)
+        }
+
+        IF (FO = 0) {
+            put header in header buffer
+        }
+
+        IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
+            TL <- TDL+(IHL*4)
             Submit datagram to next step;
+            free all reassembly resources for this BUFID;
             DONE.
         }
-    }
 
-    IF (no buffer with BUFID is allocated) {
-        allocate reassembly resources with BUFID;
-        TIMER <- TLB;
-        TDL <- 0;
-        put data from fragment into data buffer with BUFID
-            [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
-        set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
-    }
+        TIMER <- MAX(TIMER,TTL);
 
-    IF (MF = 0) {
-        TDL <- TL-(IHL*4)+(FO*8)
-    }
+    } give up until (next fragment or timer expires);
 
-    IF (FO = 0) {
-        put header in header buffer
-    }
-
-    IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
-        TL <- TDL+(IHL*4)
-        Submit datagram to next step;
-        free all reassembly resources for this BUFID;
+    timer expires: {
+        flush all reassembly with this BUFID;
         DONE.
     }
-
-    TIMER <- MAX(TIMER,TTL);
-
-} give up until (next fragment or timer expires);
-
-timer expires: {
-    flush all reassembly with this BUFID;
-    DONE.
-}
 
 """
 # Reassembly IPv4 Fragments
@@ -76,7 +84,7 @@ class IPv4_Reassembly(IP_Reassembly):
     """Reassembly for IPv4 payload.
 
     Usage:
-        >>> from reassembly import IPv4_Reassembly
+        >>> from jspcap.reassembly import IPv4_Reassembly
         # Initialise instance:
         >>> ipv4_reassembly = IPv4_Reassembly()
         # Call reassembly:
@@ -84,16 +92,12 @@ class IPv4_Reassembly(IP_Reassembly):
         # Fetch result:
         >>> result = ipv4_reassembly.datagram
 
-    Keyword arguments:
-        * strict -- bool, if strict set to True, all datagram will return
-                    else only implemented ones will submit (False in default)
-                    < True / False >
-
     Properties:
         * name -- str, protocol of current packet
         * count -- int, total number of reassembled packets
         * datagram -- tuple, reassembled datagram, which structure may vary
                         according to its protocol
+        * protocol -- str, protocol of current reassembly object
 
     Methods:
         * reassembly -- perform the reassembly procedure
@@ -163,3 +167,9 @@ class IPv4_Reassembly(IP_Reassembly):
     def name(self):
         """Protocol of current packet."""
         return 'Internet Protocol version 4'
+
+    @property
+    def protocol(self):
+        """Protocol of current reassembly object."""
+        return 'IPv4'
+    

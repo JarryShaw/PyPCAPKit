@@ -1,6 +1,6 @@
 """hypertext transfer protocol (HTTP/1.*)
 
-``jspcap.protocols.application.httpv1`` contains ``HTTPv1``
+`jspcap.protocols.application.httpv1` contains `HTTPv1`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/1.*), whose structure is described as
 below.

@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """analyser for application layer
 
-``jspcap.analyser`` works as a header quater to analyse and
+`jspcap.analyser` works as a header quater to analyse and
 match application layer protocol. Then, call corresponding
 modules and functions to extract the attributes.
 
 """
-
-
 # Analyser for Application Layer
 # Match Protocols and Extract Attributes
 
@@ -51,13 +49,15 @@ class Analysis:
 
 
 @beholder_ng
-def analyse(file, length):
+def analyse(file, length=None):
     """Analyse application layer packets."""
     flag, http = _analyse_httpv1(file, length)
     if flag:
         return Analysis(http.info, http.protochain, http.alias)
 
     # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
+    # NB: the NOTE abrove is deprecated, since validations are performed
+    
     flag, http = _analyse_httpv2(file, length)
     if flag:
         return Analysis(http.info, http.protochain, http.alias)

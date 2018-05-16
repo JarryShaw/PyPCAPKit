@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """reassembly fragmented packets
 
-``jspcap.reassembly.reassembly`` contains ``Reassembly``
+`jspcap.reassembly.reassembly` contains `Reassembly`
 only, which is an abstract base class for all reassembly
 classes, bases on algorithms described in
-```RFC 815`` <https://tools.ietf.org/html/rfc815>`__,
+[`RFC 815`](https://tools.ietf.org/html/rfc815),
 implements datagram reassembly of IP and TCP packets.
 
 """
@@ -17,7 +17,7 @@ import copy
 
 
 from jspcap.utilities import Info
-from jspcap.validations import bool_check, dict_check, int_check
+from jspcap.validations import frag_check, int_check
 
 
 __all__ = ['Reassembly']
@@ -31,16 +31,12 @@ abstractproperty = abc.abstractproperty
 class Reassembly(object):
     """Base class for reassembly procedure.
 
-    Keyword arguments:
-        * strict -- bool, if strict set to True, all datagram will return
-                    else only implemented ones will submit (False in default)
-                    < True / False >
-
     Properties:
-        * name -- str, protocol of current packet
+        * name -- str, name of current protocol
         * count -- int, total number of reassembled packets
         * datagram -- tuple, reassembled datagram, which structure may vary
                         according to its protocol
+        * protocol -- str, protocol of current reassembly object
 
     Methods:
         * reassembly -- perform the reassembly procedure
@@ -80,6 +76,11 @@ class Reassembly(object):
         """Reassembled datagram."""
         return self.fetch()
 
+    @abstractproperty
+    def protocol(self):
+        """Protocol of current reassembly object."""
+        pass
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -89,8 +90,11 @@ class Reassembly(object):
     def reassembly(self, info):
         """Reassembly procedure.
 
-        Keyword arguments:
+        Positional arguments:
             * info - Info, info dict of packets to be reassembled
+
+        Returns:
+            * NotImplemented
 
         """
         pass
@@ -100,8 +104,14 @@ class Reassembly(object):
     def submit(self, buf, **kwargs):
         """Submit reassembled payload.
 
-        Keyword arguments:
+        Positional arguments:
             * buf -- dict, buffer dict of reassembled packets
+
+        Keyword arguments:
+            * NotImplemented
+
+        Returns:
+            * NotImplemented
 
         """
         pass
@@ -130,12 +140,12 @@ class Reassembly(object):
     def run(self, packets):
         """Run automatically.
 
-        Keyword arguments:
+        Positional arguments:
             * packets -- list[dict], list of packet dicts to be reassembled
 
         """
         for packet in packets:
-            dict_check(packet)
+            frag_check(packet, protocol=self.protocol)
             info = Info(packet)
             self.reassembly(info)
         self._newflg = True
@@ -151,24 +161,25 @@ class Reassembly(object):
         """Initialise packet reassembly.
 
         Keyword arguments:
-            * strict -- bool, if return all datagrams (including those not implemented) when submit (default is False)
+            * strict -- bool, if return all datagrams (including those not
+                        implemented) when submit (default is False)
                             <keyword> True / False
 
         """
-        bool_check(strict)
         self._newflg = False    # new packets reassembled
         self._strflg = strict   # stirct mode flag
         self._buffer = dict()   # buffer field
         self._dtgram = list()   # reassembled datagram
 
-    def __call__(self, packet_dict):
+    def __call__(self, packet):
         """Call packet reassembly.
 
-        Keyword arguments:
-            * packet_dict -- dict, packet dict to be reassembled
+        Positional arguments:
+            * packet -- dict, packet dict to be reassembled
+                        (detailed format described in corresponding protocol)
 
         """
-        dict_check(packet_dict)
-        info = Info(packet_dict)
+        frag_check(packet, protocol=self.protocol)
+        info = Info(packet)
         self.reassembly(info)
         self._newflg = True

@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """reassembly TCP datagram
 
-``jspcap.reassembly.tcp`` contains ``TCP_Reassembly`` only,
+`jspcap.reassembly.tcp` contains `TCP_Reassembly` only,
 which reconstructs fragmented TCP packets back to origin.
 The algorithm for TCP reassembly is decribed as below.
+
+Notations:
 
     FO    - Fragment Offset
     IHL   - Internet Header Length
@@ -16,52 +18,56 @@ The algorithm for TCP reassembly is decribed as below.
     RCVBT - Fragment Received Bit Table
     TLB   - Timer Lower Bound
 
-DO {
-    BUFID <- source|destination|protocol|identification;
+Algorithm:
 
-    IF (FO = 0 AND MF = 0) {
-        IF (buffer with BUFID is allocated) {
-            flush all reassembly for this BUFID;
+    DO {
+        BUFID <- source|destination|protocol|identification;
+
+        IF (FO = 0 AND MF = 0) {
+            IF (buffer with BUFID is allocated) {
+                flush all reassembly for this BUFID;
+                Submit datagram to next step;
+                DONE.
+            }
+        }
+
+        IF (no buffer with BUFID is allocated) {
+            allocate reassembly resources with BUFID;
+            TIMER <- TLB;
+            TDL <- 0;
+            put data from fragment into data buffer with BUFID
+                [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
+            set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
+        }
+
+        IF (MF = 0) {
+            TDL <- TL-(IHL*4)+(FO*8)
+        }
+
+        IF (FO = 0) {
+            put header in header buffer
+        }
+
+        IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
+            TL <- TDL+(IHL*4)
             Submit datagram to next step;
+            free all reassembly resources for this BUFID;
             DONE.
         }
-    }
 
-    IF (no buffer with BUFID is allocated) {
-        allocate reassembly resources with BUFID;
-        TIMER <- TLB;
-        TDL <- 0;
-        put data from fragment into data buffer with BUFID
-            [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
-        set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
-    }
+        TIMER <- MAX(TIMER,TTL);
 
-    IF (MF = 0) {
-        TDL <- TL-(IHL*4)+(FO*8)
-    }
+    } give up until (next fragment or timer expires);
 
-    IF (FO = 0) {
-        put header in header buffer
-    }
-
-    IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
-        TL <- TDL+(IHL*4)
-        Submit datagram to next step;
-        free all reassembly resources for this BUFID;
+    timer expires: {
+        flush all reassembly with this BUFID;
         DONE.
     }
 
-    TIMER <- MAX(TIMER,TTL);
-
-} give up until (next fragment or timer expires);
-
-timer expires: {
-    flush all reassembly with this BUFID;
-    DONE.
-}
-
-And as for ``RCVBT``, there is an alternative algorithm
-described below.
+The following algorithm implementment is based on `IP Datagram
+Reassembly Algorithm` introduced in RFC 815. It descripted an
+algorithm dealing with `RCVBT` (fragment received bit table)
+appeared in RFC 791. And here is the process:
 
 1. Select the next hole descriptor from the hole descriptor
   list. If there are no more entries, go to step eight.
@@ -103,7 +109,7 @@ class TCP_Reassembly(Reassembly):
     """Reassembly for TCP payload.
 
     Usage:
-        >>> from reassembly import TCP_Reassembly
+        >>> from jspcap.reassembly import TCP_Reassembly
         # Initialise instance:
         >>> tcp_reassembly = TCP_Reassembly()
         # Call reassembly:
@@ -111,16 +117,12 @@ class TCP_Reassembly(Reassembly):
         # Fetch result:
         >>> result = tcp_reassembly.datagram
 
-    Keyword arguments:
-        * strict -- bool, if strict set to True, all datagram will return
-                    else only implemented ones will submit (False in default)
-                    < True / False >
-
     Properties:
         * name -- str, protocol of current packet
         * count -- int, total number of reassembled packets
         * datagram -- tuple, reassembled datagram, which structure may vary
                         according to its protocol
+        * protocol -- str, protocol of current reassembly object
 
     Methods:
         * reassembly -- perform the reassembly procedure
@@ -133,29 +135,6 @@ class TCP_Reassembly(Reassembly):
         * _strflg -- bool, stirct mode flag
         * _buffer -- dict, buffer field
         * _dtgram -- tuple, reassembled datagram
-
-    The following algorithm implementment is based on `IP Datagram
-    Reassembly Algorithm` introduced in RFC 815. It descripted an
-    algorithm dealing with `RCVBT` (fragment received bit table)
-    appeared in RFC 791. And here is the process:
-
-    1. Select the next hole descriptor from the hole descriptor
-      list. If there are no more entries, go to step eight.
-    2. If fragment.first is greater than hole.last, go to step one.
-    3. If fragment.last is less than hole.first, go to step one.
-    4. Delete the current entry from the hole descriptor list.
-    5. If fragment.first is greater than hole.first, then create a
-      new hole descriptor "new_hole" with new_hole.first equal to
-      hole.first, and new_hole.last equal to fragment.first  minus
-      one.
-    6. If fragment.last is less than hole.last and fragment.more
-      fragments is true, then create a new hole descriptor
-      "new_hole", with new_hole.first equal to fragment.last plus
-      one and new_hole.last equal to hole.last.
-    7. Go to step one.
-    8. If the hole descriptor list is now empty, the datagram is now
-      complete. Pass it on to the higher level protocol processor
-      for further handling. Otherwise, return.
 
     Terminology:
         - packet_dict = Info(
@@ -236,6 +215,11 @@ class TCP_Reassembly(Reassembly):
         """Protocol of current packet."""
         return 'Transmission Control Protocol'
 
+    @property
+    def protocol(self):
+        """Protocol of current reassembly object."""
+        return 'TCP'
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -243,8 +227,8 @@ class TCP_Reassembly(Reassembly):
     def reassembly(self, info):
         """Reassembly procedure.
 
-        Keyword arguments:
-            * info - Info, info dict of packets to be reassembled
+        Positional arguments:
+            * info -- Info, info dict of packets to be reassembled
 
         """
         BUFID = info.bufid  # Buffer Identifier
@@ -330,9 +314,14 @@ class TCP_Reassembly(Reassembly):
     def submit(self, buf, *, bufid):
         """Submit reassembled payload.
 
-        Keyword arguments:
+        Positional arguments:
             * buf -- dict, buffer dict of reassembled packets
+
+        Keyword arguments:
             * bufid -- tuple, buffer identifier
+
+        Returns:
+            * list -- reassembled packets
 
         """
         datagram = []           # reassembled datagram

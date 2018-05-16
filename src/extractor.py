@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """extractor for PCAP files
 
-``jspcap.extractor`` contains ``Extractor`` only, which
+`jspcap.extractor` contains `Extractor` only, which
 synthesises file I/O and protocol analysis, coordinates
 information exchange in all network layers, extracst
 parametres from a PCAP file.
@@ -20,7 +20,6 @@ import textwrap
 from jspcap.exceptions import FormatError, FileNotFound, UnsupportedCall, IterableError
 from jspcap.protocols import Frame, Header
 from jspcap.utilities import Info
-from jspcap.validations import bool_check, str_check
 
 
 __all__ = ['Extractor']
@@ -47,9 +46,9 @@ class Extractor:
         * frames -- tuple<Info>, extracted frames
         * protocol -- ProtoChain, protocol chain of current/last frame
         * reassembly -- Info, frame record for reassembly
-            |--> tcp -- tuple<Info>, TCP payload fragments
-            |--> ipv4 -- tuple<Info>, IPv4 frame fragments
-            |--> ipv6 -- tuple<Info>, IPv6 frame fragments
+            |--> tcp -- tuple<TCP_Reassembly>, TCP payload fragment reassembly
+            |--> ipv4 -- tuple<IPv4_Reassembly>, IPv4 frame fragment reassembly
+            |--> ipv6 -- tuple<IPv6_Reassembly>, IPv6 frame fragment reassembly
 
     Methods:
         * make_name -- formatting input & output file name
@@ -159,7 +158,6 @@ class Extractor:
         if fin is None:
             ifnm = 'in.pcap'
         else:
-            str_check(fin)
             if extension:
                 ifnm = fin if '.pcap' in fin else f'{fin}.pcap'
             else:
@@ -173,8 +171,6 @@ class Extractor:
             ext = None
         else:
             fmt_none = (fmt is None)
-            if not fmt_none:
-                str_check(fmt)
 
             if fmt == 'html':   ext = 'js'
             elif fmt == 'tree': ext = 'txt'
@@ -189,7 +185,6 @@ class Extractor:
                 else:
                     ofnm = f'out.{ext}'
             else:
-                str_check(fout)
                 name, fext = os.path.splitext(fout)
                 if fext:
                     files = False
@@ -251,40 +246,39 @@ class Extractor:
         """Initialise PCAP Reader.
 
         Keyword arguments:
-            fin  -- str, file name to be read; if file not exist, raise error
-            fout -- str, file name to be written
-            format  -- str, file format of output
-                    <keyword> 'plist' / 'json' / 'tree' / 'html'
+            * fin  -- str, file name to be read; if file not exist, raise an error
+            * fout -- str, file name to be written
+            * format  -- str, file format of output
+                            <keyword> 'plist' / 'json' / 'tree' / 'html'
 
-            store -- bool, if store extracted packet info (default is True)
-                        <keyword> True / False
-            verbose -- bool, if print verbose output information (default is False)
-                        <keyword> True / False
+            * store -- bool, if store extracted packet info (default is True)
+                            <keyword> True / False
+            * verbose -- bool, if print verbose output information (default is False)
+                            <keyword> True / False
 
-            auto -- bool, if automatically run till EOF (default is True)
-                    <keyword> True / False
-            extension -- bool, if check and append axtensions to output file (default is True)
-                         <keyword> True / False
+            * auto -- bool, if automatically run till EOF (default is True)
+                            <keyword> True / False
+            * extension -- bool, if check and append axtensions to output file (default is True)
+                            <keyword> True / False
 
-            files -- bool, if split each frame into different files (default is False)
-                        <keyword> True / False
-            nofile -- bool, if no output file is to be dumped (default is False)
-                        <keyword> True / False
+            * files -- bool, if split each frame into different files (default is False)
+                            <keyword> True / False
+            * nofile -- bool, if no output file is to be dumped (default is False)
+                            <keyword> True / False
 
-            ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
-                    <keyword> True / False
-            ipv4 -- bool, if record data for IPv4 reassembly (default is False)
-                    <keyword> True / False
-            ipv6 -- bool, if record data for IPv6 reassembly (default is False)
-                    <keyword> True / False
-            tcp -- bool, if record data for TCP reassembly (default is False)
-                    <keyword> True / False
+            * ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
+                            <keyword> True / False
+            * ipv4 -- bool, if record data for IPv4 reassembly (default is False)
+                            <keyword> True / False
+            * ipv6 -- bool, if record data for IPv6 reassembly (default is False)
+                            <keyword> True / False
+            * tcp -- bool, if record data for TCP reassembly (default is False)
+                            <keyword> True / False
 
-            strict -- bool, if set strict flag for reassembly (default is False)
-                        <keyword> True / False
+            * strict -- bool, if set strict flag for reassembly (default is False)
+                            <keyword> True / False
 
         """
-        bool_check(ip, ipv4, ipv6, tcp, auto, extension, files, nofile, verbose, strict, store)
         ifnm, ofnm, fmt, ext, files = self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
 
         self._ifnm = ifnm               # input file name
@@ -420,7 +414,7 @@ class Extractor:
                     ipv4.dst,                           # destination IP address
                     ipv4.id,                            # identification
                     ipv4.proto,                         # payload protocol type
-                    ),
+                ),
                 num = frame.info.number,                # original packet range number
                 fo = ipv4.frag_offset,                  # fragment offset
                 ihl = ipv4.hdr_len,                     # internet header length
@@ -448,7 +442,7 @@ class Extractor:
                 num = frame.info.number,                # original packet range number
                 fo = ipv6.ipv6_frag.offset,             # fragment offset
                 ihl = ipv6.hdr_len,                     # header length, only headers before IPv6-Frag
-                    mf = ipv6.ipv6_frag.mf,             # more fragment flag
+                mf = ipv6.ipv6_frag.mf,                 # more fragment flag
                 tl = ipv6.hdr_len + ipv6.raw_len,       # total length, header includes
                 header = bytearray(ipv6.fragment.header),
                                                         # raw bytearray type header before IPv6-Frag

@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 """user datagram protocol
 
-``jspcap.protocols.transport.udp`` contains ``UDP`` only,
-which implements extractor for User Datagram Protocol (UDP),
-whose structure is described as below.
+`jspcap.protocols.transport.udp` contains `UDP` only,
+which implements extractor for User Datagram Protocol
+(UDP), whose structure is described as below.
 
-     0      7 8     15 16    23 24    31
-    +--------+--------+--------+--------+
-    |     Source      |   Destination   |
-    |      Port       |      Port       |
-    +--------+--------+--------+--------+
-    |                 |                 |
-    |     Length      |    Checksum     |
-    +--------+--------+--------+--------+
-    |
-    |          data octets ...
-    +---------------- ...
+ 0      7 8     15 16    23 24    31
++--------+--------+--------+--------+
+|     Source      |   Destination   |
+|      Port       |      Port       |
++--------+--------+--------+--------+
+|                 |                 |
+|     Length      |    Checksum     |
++--------+--------+--------+--------+
+|
+|          data octets ...
++---------------- ...
 
 """
 # User Datagram Protocol
@@ -93,25 +93,23 @@ class UDP(Transport):
         """Read User Datagram Protocol (UDP).
 
         Structure of UDP header [RFC 768]:
+             0      7 8     15 16    23 24    31
+            +--------+--------+--------+--------+
+            |     Source      |   Destination   |
+            |      Port       |      Port       |
+            +--------+--------+--------+--------+
+            |                 |                 |
+            |     Length      |    Checksum     |
+            +--------+--------+--------+--------+
+            |
+            |          data octets ...
+            +---------------- ...
 
-
-            0      7 8     15 16    23 24    31
-           +--------+--------+--------+--------+
-           |     Source      |   Destination   |
-           |      Port       |      Port       |
-           +--------+--------+--------+--------+
-           |                 |                 |
-           |     Length      |    Checksum     |
-           +--------+--------+--------+--------+
-           |
-           |          data octets ...
-           +---------------- ...
-
-            Octets          Bits          Name                      Discription
-              0              0          udp.srcport             Source Port
-              2              16         udp.dstport             Destination Port
-              4              32         udp.len                 Length (header includes)
-              6              48         udp.checksum            Checksum
+            Octets      Bits        Name                    Discription
+              0           0     udp.srcport             Source Port
+              2          16     udp.dstport             Destination Port
+              4          32     udp.len                 Length (header includes)
+              6          48     udp.checksum            Checksum
 
         """
         if length is None:

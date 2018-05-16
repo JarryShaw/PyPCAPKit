@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 """root protocol
 
-``jspcap.protocols.protocol`` contains ``Protocol`` only,
+`jspcap.protocols.protocol` contains `Protocol` only,
 which is an abstract base clss for all protocol family,
 with pre-defined utility arguments and methods of specified
 protocols.
 
 """
+# TODO: Implement specified classes for MAC and IP addresses.
+
+
 import abc
 import copy
 import io
@@ -167,8 +170,8 @@ class Protocol:
     def _read_protos(self, size):
         """Read next layer protocol type.
 
-        Keyword arguments:
-            size  -- int, buffer size
+        Positional arguments:
+            * size  -- int, buffer size
 
         """
         return None
@@ -180,22 +183,27 @@ class Protocol:
     def _read_unpack(self, size=1, *, signed=False, lilendian=False, quiet=False):
         """Read bytes and unpack for integers.
 
+        Positional arguments:
+            * size  -- int, buffer size (default is 1)
+
         Keyword arguments:
-            size       -- int, buffer size (default is 1)
-            signed     -- bool, signed flag (default is False)
+            * signed -- bool, signed flag (default is False)
                            <keyword> True / False
-            lilendian  -- bool, little-endian flag (default is False)
+            * lilendian -- bool, little-endian flag (default is False)
                            <keyword> True / False
-            quiet      -- bool, quiet (no exception) flag (default is False)
+            * quiet -- bool, quiet (no exception) flag (default is False)
                            <keyword> True / False
+
+        Returns:
+            * int -- unpacked data upon sucess
 
         """
         endian = '<' if lilendian else '>'
-        if size == 8:   kind = 'q' if signed else 'Q' # unpack to 8-byte integer (long long)
-        elif size == 4: kind = 'i' if signed else 'I' # unpack to 4-byte integer (int / long)
-        elif size == 2: kind = 'h' if signed else 'H' # unpack to 2-byte integer (short)
-        elif size == 1: kind = 'b' if signed else 'B' # unpack to 1-byte integer (char)
-        else:           kind = None                 # do not unpack
+        if size == 8:   kind = 'q' if signed else 'Q'   # unpack to 8-byte integer (long long)
+        elif size == 4: kind = 'i' if signed else 'I'   # unpack to 4-byte integer (int / long)
+        elif size == 2: kind = 'h' if signed else 'H'   # unpack to 2-byte integer (short)
+        elif size == 1: kind = 'b' if signed else 'B'   # unpack to 1-byte integer (char)
+        else:           kind = None                     # do not unpack
 
         if kind is None:
             mem = self._file.read(size)
@@ -216,8 +224,11 @@ class Protocol:
     def _read_binary(self, size=1):
         """Read bytes and convert into binaries.
 
-        Keyword arguments:
-            size  -- int, buffer size (default is 1)
+        Positional arguments:
+            * size  -- int, buffer size (default is 1)
+
+        Returns:
+            * str -- binary bits (0/1)
 
         """
         bin_ = ''
@@ -229,12 +240,21 @@ class Protocol:
     @seekset
     def _read_packet(self, length=None, *, header=None, payload=None, discard=False):
         """Read raw packet data.
+
+        Positional arguments:
+            * length -- int, length of the packet
         
         Keyword arguments:
-            length -- int, length of the packet
-            header -- int, length of the packet header
-            payload -- int, length of the packet payload
-            discard -- bool, flag if discard header data
+            * header -- int, length of the packet header
+            * payload -- int, length of the packet payload
+            * discard -- bool, flag if discard header data (False in default)
+
+        Returns:
+            * [if header omits] bytes -- whole packet data
+            * [if discard set True] bytes -- packet body only
+            * dict -- header and payload data
+                |-- 'header' -- bytes, packet header
+                |-- 'payload' -- bytes, packet payload
 
         """
         if header is not None:
@@ -248,10 +268,13 @@ class Protocol:
     def _decode_next_layer(self, dict_, proto=None, length=None):
         """Decode next layer protocol.
 
-        Keyword arguments:
-            dict_ -- dict, info buffer
-            proto -- str, next layer protocol name
-            length -- int, valid (not padding) length
+        Positional arguments:
+            * dict_ -- dict, info buffer
+            * proto -- str, next layer protocol name
+            * length -- int, valid (not padding) length
+
+        Returns:
+            * dict -- current protocol with next layer extracted
 
         """
         flag, info, chain, alias = self._import_next_layer(proto, length)
@@ -274,9 +297,15 @@ class Protocol:
     def _import_next_layer(self, proto, length=None):
         """Import next layer extractor.
 
-        Keyword arguments:
+        Positional arguments:
             proto -- str, next layer protocol name
             length -- int, valid (not padding) length
+
+        Returns:
+            * bool -- flag if extraction of next layer succeeded
+            * Info -- info of next layer
+            * ProtoChain -- protocol chain of next layer
+            * str -- alias of next layer
 
         """
         from jspcap.protocols.raw import Raw

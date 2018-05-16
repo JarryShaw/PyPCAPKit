@@ -1,9 +1,16 @@
 # -*- coding: utf-8 -*-
 """reassembly IP fragments
 
-``jspcap.reassembly.ip`` contains ``IP_Reassembly`` only,
-which is the base class for IPv4 and IPv6 reassembly. The
-algorithm for IP reassembly is decribed as below.
+`jspcap.reassembly.ip` contains `IP_Reassembly` only,
+which is the base class for IPv4 and IPv6 reassembly.
+The following algorithm implementment is based on IP
+reassembly procedure introduced in RFC 791, using
+`RCVBT` (fragment receivedbit table). Though another
+algorithm is explained in RFC 815, replacing `RCVBT`,
+however, this implementment still used the elder one.
+And here is the pseudo-code:
+
+Notations:
 
     FO    - Fragment Offset
     IHL   - Internet Header Length
@@ -16,49 +23,51 @@ algorithm for IP reassembly is decribed as below.
     RCVBT - Fragment Received Bit Table
     TLB   - Timer Lower Bound
 
-DO {
-    BUFID <- source|destination|protocol|identification;
+Algorithm:
 
-    IF (FO = 0 AND MF = 0) {
-        IF (buffer with BUFID is allocated) {
-            flush all reassembly for this BUFID;
+    DO {
+        BUFID <- source|destination|protocol|identification;
+
+        IF (FO = 0 AND MF = 0) {
+            IF (buffer with BUFID is allocated) {
+                flush all reassembly for this BUFID;
+                Submit datagram to next step;
+                DONE.
+            }
+        }
+
+        IF (no buffer with BUFID is allocated) {
+            allocate reassembly resources with BUFID;
+            TIMER <- TLB;
+            TDL <- 0;
+            put data from fragment into data buffer with BUFID
+                [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
+            set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
+        }
+
+        IF (MF = 0) {
+            TDL <- TL-(IHL*4)+(FO*8)
+        }
+
+        IF (FO = 0) {
+            put header in header buffer
+        }
+
+        IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
+            TL <- TDL+(IHL*4)
             Submit datagram to next step;
+            free all reassembly resources for this BUFID;
             DONE.
         }
-    }
 
-    IF (no buffer with BUFID is allocated) {
-        allocate reassembly resources with BUFID;
-        TIMER <- TLB;
-        TDL <- 0;
-        put data from fragment into data buffer with BUFID
-            [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
-        set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
-    }
+        TIMER <- MAX(TIMER,TTL);
 
-    IF (MF = 0) {
-        TDL <- TL-(IHL*4)+(FO*8)
-    }
+    } give up until (next fragment or timer expires);
 
-    IF (FO = 0) {
-        put header in header buffer
-    }
-
-    IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
-        TL <- TDL+(IHL*4)
-        Submit datagram to next step;
-        free all reassembly resources for this BUFID;
+    timer expires: {
+        flush all reassembly with this BUFID;
         DONE.
     }
-
-    TIMER <- MAX(TIMER,TTL);
-
-} give up until (next fragment or timer expires);
-
-timer expires: {
-    flush all reassembly with this BUFID;
-    DONE.
-}
 
 """
 import copy
@@ -78,16 +87,12 @@ __all__ = ['IP_Reassembly']
 class IP_Reassembly(Reassembly):
     """Reassembly for IP payload.
 
-    Keyword arguments:
-        * strict -- bool, if strict set to True, all datagram will return
-                    else only implemented ones will submit (False in default)
-                    < True / False >
-
     Properties:
         * name -- str, protocol of current packet
         * count -- int, total number of reassembled packets
         * datagram -- tuple, reassembled datagram, which structure may vary
                         according to its protocol
+        * protocol -- str, protocol of current reassembly object
 
     Methods:
         * reassembly -- perform the reassembly procedure
@@ -101,68 +106,6 @@ class IP_Reassembly(Reassembly):
         * _buffer -- dict, buffer field
         * _dtgram -- tuple, reassembled datagram
 
-    The following algorithm implementment is based on IP reassembly procedure
-    introduced in RFC 791, using `RCVBT` (fragment receivedbit table). Though
-    another algorithm is explained in RFC 815, replacing `RCVBT`, however,
-    this implementment still used the elder one. And here is the pseudo-code:
-
-    Notation:
-        FO    - Fragment Offset
-        IHL   - Internet Header Length
-        MF    - More Fragments flag
-        TTL   - Time To Live
-        NFB   - Number of Fragment Blocks
-        TL    - Total Length
-        TDL   - Total Data Length
-        BUFID - Buffer Identifier
-        RCVBT - Fragment Received Bit Table
-        TLB   - Timer Lower Bound
-
-    Procedure:
-        DO {
-            BUFID <- source|destination|protocol|identification;
-
-            IF (FO = 0 AND MF = 0) {
-                IF (buffer with BUFID is allocated) {
-                    flush all reassembly for this BUFID;
-                    Submit datagram to next step;
-                    DONE.
-                }
-            }
-
-            IF (no buffer with BUFID is allocated) {
-                allocate reassembly resources with BUFID;
-                TIMER <- TLB;
-                TDL <- 0;
-                put data from fragment into data buffer with BUFID
-                    [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
-                set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
-            }
-
-            IF (MF = 0) {
-                TDL <- TL-(IHL*4)+(FO*8)
-            }
-
-            IF (FO = 0) {
-                put header in header buffer
-            }
-
-            IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
-                TL <- TDL+(IHL*4)
-                Submit datagram to next step;
-                free all reassembly resources for this BUFID;
-                DONE.
-            }
-
-            TIMER <- MAX(TIMER,TTL);
-
-        } give up until (next fragment or timer expires);
-
-        timer expires: {
-            flush all reassembly with this BUFID;
-            DONE.
-        }
-
     """
     ##########################################################################
     # Methods.
@@ -171,8 +114,8 @@ class IP_Reassembly(Reassembly):
     def reassembly(self, info):
         """Reassembly procedure.
 
-        Keyword arguments:
-            * info - Info, info dict of packets to be reassembled
+        Positional arguments:
+            * info -- Info, info dict of packets to be reassembled
 
         """
         BUFID = info.bufid  # Buffer Identifier
@@ -229,9 +172,14 @@ class IP_Reassembly(Reassembly):
     def submit(self, buf, *, checked=False):
         """Submit reassembled payload.
 
-        Keyword arguments:
+        Positional arguments:
             * buf -- dict, buffer dict of reassembled packets
-            * checked -- bool, if RCVBT is now checked to be fulfilled
+
+        Keyword arguments:
+            * bufid -- tuple, buffer identifier
+
+        Returns:
+            * list -- reassembled packets
 
         """
         TDL = buf['TDL']

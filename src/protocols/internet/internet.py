@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """root internet layer protocol
 
-``jspcap.protocols.internet.internet`` contains both
-``ETHERTYPE`` and ``Internet``. The former is a dictionary
+`jspcap.protocols.internet.internet` contains both
+`ETHERTYPE` and `Internet`. The former is a dictionary
 of ethertype IEEE 802 numbers, registered in IANA. And the
 latter is a base class for internet layer protocols, eg.
 AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
@@ -102,8 +102,11 @@ class Internet(Protocol):
     def _read_protos(self, size):
         """Read next layer protocol type.
 
-        Keyword arguments:
-            size  -- int, buffer size
+        Positional arguments:
+            * size  -- int, buffer size
+
+        Returns:
+            * str -- next layer's protocol name
 
         """
         _byte = self._read_unpack(size)
@@ -113,12 +116,17 @@ class Internet(Protocol):
     def _decode_next_layer(self, dict_, proto=None, length=None, *, version=4):
         """Decode next layer extractor.
 
-        Keyword arguments:
-            dict_ -- dict, info buffer
-            proto -- str, next layer protocol name
-            length -- int, valid (not padding) length
-            version -- int, IP version
-                        <4 / 6>
+        Positional arguments:
+            * dict_ -- dict, info buffer
+            * proto -- str, next layer protocol name
+            * length -- int, valid (not padding) length
+
+        Keyword Arguments:
+            * version -- int, IP version (4 in default)
+                            <keyword> 4 / 6
+
+        Returns:
+            * dict -- current protocol with next layer extracted
 
         """
         flag, info, chain, alias = self._import_next_layer(proto, length, version=version)
@@ -142,11 +150,21 @@ class Internet(Protocol):
     def _import_next_layer(self, proto, length=None, *, version=4, extension=False):
         """Import next layer extractor.
 
-        Keyword arguments:
-            proto -- str, next layer protocol name
-            length -- int, valid (not padding) length
-            version -- int, IP version (4/6)
-            extension -- bool, if is extension header (default is False)
+        Positional arguments:
+            * proto -- str, next layer protocol name
+            * length -- int, valid (not padding) length
+
+        Keyword Arguments:
+            * version -- int, IP version (4 in default)
+                            <keyword> 4 / 6
+            * extension -- bool, if is extension header (False in default)
+                            <keyword> True / False
+
+        Returns:
+            * bool -- flag if extraction of next layer succeeded
+            * Info -- info of next layer
+            * ProtoChain -- protocol chain of next layer
+            * str -- alias of next layer
 
         Protocols:
             * IPv4 -- internet layer

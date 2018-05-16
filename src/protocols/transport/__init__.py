@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """transport layer protocols
 
-``jspcap.protocols.transport`` is collection of all
-protocols in transport layer, with detailed implementation
-and methods.
+`jspcap.protocols.transport` is collection of all protocols
+in transport layer, with detailed implementation and
+methods.
 
 """
 # Base Class for Transport Layer

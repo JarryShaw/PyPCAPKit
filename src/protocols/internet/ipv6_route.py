@@ -115,12 +115,12 @@ class IPv6_Route(Protocol):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets          Bits          Name                Discription
-              0              0          route.next        Next Header
-              1              8          route.length      Header Extensive Length
-              2              16         route.type        Routing Type
-              3              24         route.seg_left    Segments Left
-              4              32         route.data        Type-Specific Data
+            Octets      Bits        Name                    Discription
+              0           0     route.next              Next Header
+              1           8     route.length            Header Extensive Length
+              2          16     route.type              Routing Type
+              3          24     route.seg_left          Segments Left
+              4          32     route.data              Type-Specific Data
 
         """
         if length is None:

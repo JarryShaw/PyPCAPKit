@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """root application layer protocol
 
-``jspcap.protocols.application.application`` contains only
-``Application``, which is a base class for application
-layer protocols, eg. HTTPv1, HTTPv2 and etc.
+`jspcap.protocols.application.application` contains only
+`Application`, which is a base class for application
+layer protocols, eg. HTTP/1.*, HTTP/2 and etc.
 
 """
-# TODO: Implements BGP, DHCP, DNS, FTP, HTTP/2, IMAP, IDAP, MQTT, NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, SSL, TELNET, TLS, XMPP.
+# TODO: Implements BGP, DHCP, DNS, FTP, IMAP, IDAP, MQTT, NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, SSL, TELNET, TLS, XMPP.
 
 
 # Application Layer Protocols

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """root transport layer protocol
 
-``jspcap.protocols.transport.transport`` contains both
-``TP_PROTO`` and ``Transport``. The former is a dictionary
+`jspcap.protocols.transport.transport` contains both
+`TP_PROTO` and `Transport`. The former is a dictionary
 of transport layer protocol numbers, registered in IANA.
 And the latter is a base class for transport layer
 protocols, eg. TCP and UDP.
@@ -18,9 +18,9 @@ import io
 # Table of corresponding protocols
 
 
-from jspcap.analyser import analyse
 from jspcap.utilities import beholder
 from jspcap.protocols.protocol import Protocol
+# from jspcap.analyser import analyse
 
 
 __all__ = ['Transport', 'TP_PROTO']
@@ -117,10 +117,17 @@ class Transport(Protocol):
     def _import_next_layer(self, proto, length):
         """Import next layer extractor.
 
-        Keyword arguments:
-            proto -- str, next layer protocol name
-            length -- int, valid (not padding) length
+        Positional arguments:
+            * proto -- str, next layer protocol name
+            * length -- int, valid (not padding) length
+
+        Returns:
+            * bool -- flag if extraction of next layer succeeded
+            * Info -- info of next layer
+            * ProtoChain -- protocol chain of next layer
+            * str -- alias of next layer
 
         """
+        from jspcap.analyser import analyse
         next_ = analyse(io.BytesIO(self._read_fileng(length)), length)
         return True, next_.info, next_.protochain, next_.alias
