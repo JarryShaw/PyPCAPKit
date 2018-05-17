@@ -1,7 +1,5 @@
 # JSPCAP Manual
 
-<!-- Current Progress: Utilities -->
-
 &emsp; `jspcap` is an open sourse library for PCAP extarction and analysis, written in __Python 3.6__. The following is a manual for this library. Usage instructions and samples attached.
 
  - [Interface](#interface)
@@ -29,11 +27,13 @@
     * [`ProtoChain`](#protochain)
  - [Validations](#validations)
  - [Exceptions](#exceptions)
+    * [`BaseError`](#baseerror)
+    * [Refined Exceptions](#refined-exceptions)
  - [TODO](#todo)
 
 ---
 
-## Intterface
+## Interface
 
  > described in [`src/interface.py`](https://github.com/JarryShaw/jspcap/tree/master/src/interface.py)
 
@@ -59,37 +59,23 @@ extract(*, fin=None, fout=None, format=None,
 ```
 
  - Keyword arguments:
-    * `fin`  -- `str`, file name to be read; if file not exist, raise an error
-    * `fout` -- `str`, file name to be written
-    * `format`  -- `str`, file format of output
-                    **KEYWORD** `plist` / `json` / `tree` / `html`
 
-    * `store` -- `bool`, if store extracted packet info (default is `True`)
-                    **KEYWORD** `True` / `False`
-    * `verbose` -- `bool`, if print verbose output information (default is `False`)
-                    **KEYWORD** `True` / `False`
-
-    * `auto` -- `bool`, if automatically run till EOF (default is `True`)
-                    **KEYWORD** `True` / `False`
-    * `extension` -- `bool`, if check and append axtensions to output file (default is `True`)
-                    **KEYWORD** `True` / `False`
-
-    * `files` -- `bool`, if split each frame into different files (default is `False`)
-                    **KEYWORD** `True` / `False`
-    * `nofile` -- `bool`, if no output file is to be dumped (default is False)
-                    **KEYWORD** `True` / `False`
-
-    * `ip` -- `bool`, if record data for IPv4 & IPv6 reassembly (default is `False`)
-                    **KEYWORD** `True` / `False`
-    * `ipv4` -- `bool`, if record data for IPv4 reassembly (default is `False`)
-                    **KEYWORD** `True` / `False`
-    * `ipv6` -- `bool`, if record data for IPv6 reassembly (default is `False`)
-                    **KEYWORD** `True` / `False`
-    * `tcp` -- `bool`, if record data for TCP reassembly (default is `False`)
-                     **KEYWORD** `True` / `False`
-
-    * `strict` -- `bool`, if set strict flag for reassembly (default is `False`)
-                    **KEYWORD** `True` / `False`
+    |    NAME     |  TYPE  | DEFAULT |              KEYWORD               |                       DESCRIPTION                       |
+    | :---------: | :----: | :-----: | :--------------------------------: | :-----------------------------------------------------: |
+    |    `fin`    | `str`  | `None`  |                                    | file name to be read; if file not exist, raise an error |
+    |   `fout`    | `str`  | `None`  |                                    |                 file name to be written                 |
+    |  `format`   | `str`  | `None`  | `plist` / `json` / `tree` / `html` |                  file format of output                  |
+    |   `store`   | `bool` | `True`  |          `True` / `False`          |             if store extracted packet info              |
+    |  `verbose`  | `bool` | `False` |          `True` / `False`          |           if print verbose output information           |
+    |   `auto`    | `bool` | `True`  |          `True` / `False`          |              if automatically run till EOF              |
+    | `extension` | `bool` | `True`  |          `True` / `False`          |      if check and append axtensions to output file      |
+    |   `files`   | `bool` | `False` |          `True` / `False`          |        if split each frame into different files         |
+    |  `nofile`   | `bool` | `False` |          `True` / `False`          |            if no output file is to be dumped            |
+    |    `ip`     | `bool` | `False` |          `True` / `False`          |            if perform IPv4 & IPv6 reassembly            |
+    |   `ipv4`    | `bool` | `False` |          `True` / `False`          |               if perform IPv4 reassembly                |
+    |   `ipv6`    | `bool` | `False` |          `True` / `False`          |               if perform IPv6 reassembly                |
+    |    `tcp`    | `bool` | `False` |          `True` / `False`          |                if perform TCP reassembly                |
+    |  `strict`   | `bool` | `False` |          `True` / `False`          |            if set strict flag for reassembly            |
 
  - Returns:
     * `Extractor` -- an [`Extractor`](#extractor) object form [`jspcap.extractor`](#extraction)
@@ -120,9 +106,11 @@ reassemble(*, protocol, strict=False)
 ```
 
  - Keyword arguments:
-    * `protocol` -- `str`, protocol to be reassembled
-    * `strict` -- `bool`, if return all datagrams (including those not implemented) when submit (default is `False`)
-                    **KEYWORD** `True` / `False`
+
+    |    NAME    |  TYPE  | DEFAULT |         KEYWORD         |                         DESCRIPTION                                   |
+    | :--------: | :----: | :-----: | :---------------------: | :-------------------------------------------------------------------: |
+    | `protocol` | `str`  |         | `IPv4` / `IPv6` / `TCP` |                  protocol to be reassembled                           |
+    |  `strict`  | `bool` | `False` |    `True` / `False`     | if return all datagrams (including those not implemented) when submit |
 
  - Returns:
     * *if protocol is IPv4* `IPv4_Reassembly` -- a Reassembly object from [`jspcap.reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
@@ -142,7 +130,7 @@ reassemble(*, protocol, strict=False)
 ##### Extractor for PCAP files.
 
 ```python
-class Extractor(builtins.object)
+class Extractor(object)
 ```
 
  - Properties:
@@ -155,9 +143,9 @@ class Extractor(builtins.object)
     * `frames` -- `tuple<Info>`, extracted frames
     * `protocol` -- `ProtoChain`, protocol chain (of current/last frame)
     * `reassembly` -- `Info`, frame record for reassembly
-        |--> `tcp` -- `tuple<TCP_Reassembly>`, TCP payload fragment reassembly
-        |--> `ipv4` -- `tuple<IPv4_Reassembly>`, IPv4 frame fragment reassembly
-        |--> `ipv6` -- `tuple<IPv6_Reassembly>`, IPv6 frame fragment reassembly
+        - `tcp` -- `tuple<TCP_Reassembly>`, TCP payload fragment reassembly
+        - `ipv4` -- `tuple<IPv4_Reassembly>`, IPv4 frame fragment reassembly
+        - `ipv6` -- `tuple<IPv6_Reassembly>`, IPv6 frame fragment reassembly
 
  - Methods:
     * *`classmethod`* `make_name` -- formatting input & output file name
@@ -217,7 +205,7 @@ analyse(file, length=None)
 ##### Analyse report.
 
 ```python
-class Analysis(builtins.object)
+class Analysis(object)
 ```
 
  - Properties:
@@ -246,21 +234,32 @@ class Analysis(builtins.object)
 
 ##### Protocols
 
-|                                            NAME                                           |             DESCRIPTION             |
-| :---------------------------------------------------------------------------------------: | :---------------------------------: |
-| [`Header`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#header)          |            Global Header            |
-| [`Frame`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#frame)            |            Frame Header             |
-| [`ARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#arp)           |     Address Resolution Protocol     |
-| [`Ethernet`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ethernet) |          Ethernet Protocol          |
-| [`L2TP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#l2tp)         |    Layer Two Tunneling Protocol     |
-| [`OSPF`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ospf)         |      Open Shortest Path First       |
-| [`RARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#rarp)         | Reverse Address Resolution Protocol |
-| [`AH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ah)         |        Athentication Header         |
-| [`IP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ip)         |          Internet Protocol          |
-| [`IPX`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipx)       |    Internetwork Packet Exchange     |
-| [`TCP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#tcp)      |    Transmission Control Protocol    |
-| [`UDP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#udp)      |       User Datagram Protocol        |
-| [`HTTP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/application#http)  |     Hypertext Transfer Protocol     |
+|                                                NAME                                               |             DESCRIPTION             |
+| :-----------------------------------------------------------------------------------------------: | :---------------------------------: |
+| [`Header`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#header)                  |            Global Header            |
+| [`Frame`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#frame)                    |            Frame Header             |
+| [`Raw`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#raw)                        |           Raw Packet Data           |
+| [`ARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#arp)                   |     Address Resolution Protocol     |
+| [`Ethernet`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ethernet)         |          Ethernet Protocol          |
+| [`L2TP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#l2tp)                 |    Layer Two Tunneling Protocol     |
+| [`OSPF`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ospf)                 |      Open Shortest Path First       |
+| [`RARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#rarp)                 | Reverse Address Resolution Protocol |
+| [`VLAN`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#vlan)                 |    802.1Q Customer VLAN Tag Type    |
+| [`AH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ah)                 |        Athentication Header         |
+| [`HIP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#hip)               |       Host Identity Protocol        |
+| [`HOPOPT`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#hopopt)         |       IPv6 Hop-by-Hop Options       |
+| [`IP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ip)                 |          Internet Protocol          |
+| [`IPsec`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipsec)           |     Internet Protocol Security      |
+| [`IPv4`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv4)             |     Internet Protocol version 4     |
+| [`IPv6`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6)             |     Internet Protocol version 6     |
+| [`IPv6_Frag`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_frag)   |      Fragment Header for IPv6       |
+| [`IPv6_Opts`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_opts)   |    Destination Options for IPv6     |
+| [`IPv6_Route`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_route) |       Routing Header for IPv6       |
+| [`IPX`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipx)               |    Internetwork Packet Exchange     |
+| [`MH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#mh)                 |           Mobility Header           |
+| [`TCP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#tcp)              |    Transmission Control Protocol    |
+| [`UDP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#udp)              |       User Datagram Protocol        |
+| [`HTTP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/application#http)          |     Hypertext Transfer Protocol     |
 
 &emsp; `jspcap.protocols` is collection of all protocol families, with detailed implementation and methods. Currently, it includes altogehter 22 different protocols and three macro variables.
 
@@ -286,4 +285,234 @@ class Analysis(builtins.object)
 
 ## Utilities
 
+ > described in [`src/utilities.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities.py)
 
+### `seekset`
+
+##### Read file from start then set back to original.
+
+```python
+def seekset(func):
+    def seekcur(self, *args, **kw):
+        ...
+        return func(self, *args, **kw)
+    return seekcur
+```
+
+__NOTE__: this decorator works with class methods, which has a *file-like* attribute names `self._file`.
+
+### `seekset_ng`
+
+##### Read file from start then set back to original.
+
+```python
+def seekset_ng(func):
+    def seekcur(file, *args, **kw):
+        ...
+        return func(file, *args, **kw)
+    return seekcur
+```
+
+__NOTE__: positional argument `file` in `seekcur` must be a *file-like* object.
+
+### `beholder`
+
+##### Behold extraction procedure.
+
+```python
+def beholder(func):
+    def behold(self, proto, length, *args, **kwargs):
+        ...
+        return func(self, proto, length, *args, **kwargs)
+    return behold
+```
+
+__NOTE__: this decorator works with class method `self._import_next_layer`, which has a *file-like* attribute names `self._file`.
+
+### `beholder_ng`
+
+##### Behold extraction procedure.
+
+```python
+def beholder_ng(func):
+    def behold(file, length, *args, **kwargs):
+        ...
+        return func(file, length, *args, **kwargs)
+    return behold
+```
+
+__NOTE__: positional argument `file` in `behold` must be a *file-like* object.
+
+### `Info`
+
+##### Turn dictionaries into object-like instances.
+
+```python
+class Info(dict)
+```
+
+ - Properties:
+    * indicated as `Info` initialisation procedure
+
+ - Methods:
+    * `infotodict` -- reverse `Info` object into `dict` type
+    * all other methods inherited from `dict`
+
+ - Data modules:
+    * **immutable** -- cannot delete or set value of a key
+    * any other data modules inherited from `dict`
+
+ - Notes:
+    * `Info` objects inherit from `dict` type
+    * `Info` objects are iterable, and support all functions as `dict`
+    * `Info` objects are one-time-modeling, thus cannot set or delete attributes after initialisation
+
+### `VersionInfo`
+
+##### VersionInfo alikes `sys.version_info`.
+
+```python
+class VersionInfo(object)
+```
+
+ - Properties:
+    * `major` -- `int`, major version
+    * `minor` -- `int`, minor version
+
+ - Data modules:
+    * immutable
+    * subscriptable
+
+### `ProtoChain`
+
+##### Protocols chain.
+
+```python
+class ProtoChain(object)
+```
+
+ - Properties:
+    * `alias` -- `tuple`, aliases of protocols in chain
+    * `tuple` -- `tuple`, name of protocols in chain
+    * `proto` -- `tuple`, lowercase name of protocols in chain
+    * `chain` -- `str`, chain of protocols seperated by colons
+
+ - Methods:
+    * `index` -- same as `index` function of `tuple` type
+
+ - Data modules:
+    * iterable
+    * subscriptable
+
+&nbsp;
+
+## Validations
+
+ > described in [`src/validations.py`](https://github.com/JarryShaw/jspcap/tree/master/src/validations.py)
+
+&emsp; `jspcap.validations` contains functions to validate arguments for functions and classes. It first appears in
+[`jsntlib`](https://github.com/JarryShaw/jsntlib) as validators.
+
+##### Validators
+
+```python
+type_check(*agrs, func=None)
+```
+
+|       NAME        |                 DESCRIPTION                 |
+| :---------------: | :-----------------------------------------: |
+|    `int_check`    |      Check if arguments are integrals.      |
+|   `real_check`    |    Check if arguments are real numbers.     |
+|  `complex_check`  |   Check if arguments are complex numbers.   |
+|  `number_check`   |       Check if arguments are numbers.       |
+|   `bytes_check`   |     Check if arguments are bytes type.      |
+| `bytearray_check` |   Check if arguments are bytearray type.    |
+|    `str_check`    |      Check if arguments are str type.       |
+|   `bool_check`    |     Check if arguments are bytes type.      |
+|   `list_check`    |      Check if arguments are list type.      |
+|   `tuple_check`   |     Check if arguments are tuple type.      |
+|    `io_check`     |   Check if arguments are file-like type.    |
+|   `frag_check`    |   Check if arguments are valid fragments.   |
+| `_ip_frag_check`  | Check if arguments are valid IP fragments.  |
+| `_tcp_frag_check` | Check if arguments are valid TCP fragments. |
+
+&emsp; __EXCEPT__ `frag_check`, all validators take arbitrary positional arguments with one keyword argument named `func`, which takes a `str` type indicates the caller function of validation procedure.
+
+##### Nota Bene
+
+```python
+frag_check(*args, protocol, func=None)
+_ip_frag_check(*args, func=None)
+_tcp_frag_check(*args, func=None)
+```
+
+&emsp; As for `frag_check`, `str` type keyword argument `protocol` indicats what protocol the fragment is reassembled for, which must be either `IP` (`IPv4` & `IPv6`) or `TCP`. Then, `_ip_frag_check` or `_tcp_frag_check` shall be called to validate arguments caller passed into. For more infomation on fragment format, please refer to the documentation of [`IP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly) and [`TCP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ip_reassembly).
+
+&nbsp;
+
+## Exceptions
+
+ > described in [`src/exceptions.py`](https://github.com/JarryShaw/jspcap/tree/master/src/exceptions.py)
+
+&emsp; `jspcap.exceptions` refined built-in exceptions. Make it possible to show only user error stack infomation, when exception raised on user's operation.
+
+### `BaseError`
+
+##### Base error class of all kinds.
+
+```python
+class BaseError(Exception)
+```
+
+ - Notes:
+
+    * Turn off system-default traceback function by set `sys.tracebacklimit` to 0.
+
+    * But bugs appear in Python 3.6, so we have to set `sys.tracebacklimit` to None.
+
+        > this note is deprecated since Python fixed the problem above
+
+    * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
+
+### Refined Exceptions
+
+```python
+class error(BaseError, Exception)
+```
+
+|        NAME        |            INHERIT FROM            |                     DESCRIPTION                     |
+| :----------------: | :--------------------------------: | :-------------------------------------------------: |
+|    `DigitError`    |     `BaseError` / `TypeError`      |       The argument(s) must be (a) number(s).        |
+|     `IntError`     |     `BaseError` / `TypeError`      |          The argument(s) must be integral.          |
+|    `RealError`     |     `BaseError` / `TypeError`      |    The function is not defined for real number.     |
+|   `ComplexError`   |     `BaseError` / `TypeError`      | The function is not defined for `complex` instance. |
+|    `BytesError`    |     `BaseError` / `TypeError`      |        The argument(s) must be `bytes` type.        |
+|  `BytearrayError`  |     `BaseError` / `TypeError`      |      The argument(s) must be `bytearray` type.      |
+|    `BoolError`     |     `BaseError` / `TypeError`      |        The argument(s) must be `bool` type.         |
+|   `StringError`    |     `BaseError` / `TypeError`      |         The argument(s) must be `str` type.         |
+|    `DictError`     |     `BaseError` / `TypeError`      |        The argument(s) must be `dict` type.         |
+|    `ListError`     |     `BaseError` / `TypeError`      |        The argument(s) must be `list` type.         |
+|    `TupleError`    |     `BaseError` / `TypeError`      |        The argument(s) must be `tuple` type.        |
+|  `IterableError`   |     `BaseError` / `TypeError`      |          The argument(s) must be iterable.          |
+|  `CallableError`   |     `BaseError` / `TypeError`      |          The argument(s) must be callable.          |
+| `ProtocolUnbound`  |     `BaseError` / `TypeError`      |               Protocol slice unbound.               |
+|    `IOObjError`    |     `BaseError` / `TypeError`      |      The argument(s) must be *file-like* type.      |
+|   `FormatError`    |   `BaseError` / `AttributeError`   |                  Unknow format(s).                  |
+| `UnsupportedCall`  |   `BaseError` / `AttributeError`   |       Unsupported function or property call.        |
+|    `FileError`     |      `BaseError` / `IOError`       |                 Wrong file format.                  |
+|   `FileNotFound`   | `BaseError` /  `FileNotFoundError` |                   File not found.                   |
+| `ProtocolNotFound` |     `BaseError` / `IndexError`     |         Protocol not found in `ProtoChain`.         |
+|   `VersionError`   |     `BaseError` / `ValueError`     |                 Unknown IP version.                 |
+|  `IndexNotFound`   |     `BaseError` / `ValueError`     |            Protocol not in `ProtoChain`.            |
+|  `ProtocolError`   |     `BaseError` / `ValueError`     |              Invalid protocol format.               |
+|   `StructError`    |    `BaseError` / `struct.error`    |                   Unpack failed.                    |
+|  `FragmentError`   |      `BaseError` / `KeyError`      |               Invalid fragment dict.                |
+
+&nbsp;
+
+## TODO
+
+ - [x] interface verbs
+ - [x] review docstrings
+ - [ ] write documentation for `jspcap`
+ - [ ] implement IP and MAC address containers
