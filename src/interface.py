@@ -59,11 +59,11 @@ def extract(*, fin=None, fout=None, format=None,
 
         * ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
                         <keyword> True / False
-        * ipv4 -- bool, if record data for IPv4 reassembly (default is False)
+        * ipv4 -- bool, if perform IPv4 reassembly (default is False)
                         <keyword> True / False
-        * ipv6 -- bool, if record data for IPv6 reassembly (default is False)
+        * ipv6 -- bool, if perform IPv6 reassembly (default is False)
                         <keyword> True / False
-        * tcp -- bool, if record data for TCP reassembly (default is False)
+        * tcp -- bool, if perform TCP reassembly (default is False)
                         <keyword> True / False
 
         * strict -- bool, if set strict flag for reassembly (default is False)

@@ -71,10 +71,10 @@ def seekset_ng(func):
 def beholder(func):
     """Behold extraction procedure."""
     @functools.wraps(func)
-    def behold(self, proto, length, **kwargs):
+    def behold(self, proto, length, *args, **kwargs):
         seek_cur = self._file.tell()
         try:
-            return func(self, proto, length)
+            return func(self, proto, length, *args, **kwargs)
         except Exception as error:
             self._file.seek(seek_cur, os.SEEK_SET)
             from jspcap.protocols.raw import Raw
@@ -84,12 +84,12 @@ def beholder(func):
 
 
 def beholder_ng(func):
-    """Behold extraction procedure."""
+    """Behold analysis procedure."""
     @functools.wraps(func)
-    def behold(file, length):
+    def behold(file, length, *args, **kwargs):
         seek_cur = file.tell()
         try:
-            return func(file, length)
+            return func(file, length, *args, **kwargs)
         except Exception as error:
             from jspcap.analyser import Analysis
             from jspcap.protocols.raw import Raw
@@ -181,24 +181,24 @@ class Info(dict):
 
 class VersionInfo:
     """VersionInfo alikes `sys.version_info`."""
+    @property
+    def major(self):
+        return self.__vers__[0]
+
+    @property
+    def minor(self):
+        return self.__vers__[1]
+
     def __init__(self, vmaj, vmin):
-        self._vers = (vmaj, vmin)
+        self.__vers__ = (vmaj, vmin)
 
     def __str__(self):
-        str_ = f'pcap version {self._vers[0]}.{self._vers[1]}'
+        str_ = f'pcap version {self.__vers__[0]}.{self.__vers__[1]}'
         return str_
 
     def __repr__(self):
-        repr_ = f'jspcap.version_info(major={self._vers[0]}, minor={self._vers[1]})'
+        repr_ = f'jspcap.version_info(major={self.__vers__[0]}, minor={self.__vers__[1]})'
         return repr_
-
-    def __getattribute__(self, name):
-        if name == 'major':
-            return self._vers[0]
-        elif name == 'minor':
-            return self._vers[1]
-        else:
-            raise UnsupportedCall(f"'VersionInfo' object has no attribute '{name}'")
 
     def __getattr__(self, name):
         raise UnsupportedCall("can't get attribute")
@@ -211,7 +211,7 @@ class VersionInfo:
 
     def __getitem__(self, key):
         int_check(key)
-        return self._vers[key]
+        return self.__vers__[key]
 
 
 class ProtoChain:

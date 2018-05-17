@@ -17,4 +17,4 @@ from jspcap.protocols.application.httpv2 import HTTPv2
 from jspcap.protocols.application.http import HTTP
 
 
-__all__ = ['HTTP']
+__all__ = ['HTTPv1', 'HTTPv2']
