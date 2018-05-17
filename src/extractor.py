@@ -17,7 +17,7 @@ import textwrap
 # Extract parametres from a PCAP file
 
 
-from jspcap.exceptions import FormatError, FileNotFound, UnsupportedCall, IterableError
+from jspcap.exceptions import CallableError, FormatError, FileNotFound, UnsupportedCall, IterableError
 from jspcap.protocols import Frame, Header
 from jspcap.utilities import Info
 
@@ -332,10 +332,9 @@ class Extractor:
         self.record_frames()            # read frames
 
     def __iter__(self):
-        if self._auto:
-            raise IterableError("'Extractor(auto=True)' object is not iterable")
-        else:
+        if not self._auto:
             return self
+        raise IterableError("'Extractor(auto=True)' object is not iterable") 
 
     def __next__(self):
         try:
@@ -351,6 +350,7 @@ class Extractor:
             except EOFError as error:
                 self._ifile.close()
                 raise error from None
+        raise CallableError("'Extractor(auto=True)' object is not callable")
 
     def __enter__(self):
         return self

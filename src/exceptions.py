@@ -21,7 +21,7 @@ __all__ = [
     'DigitError', 'IntError', 'RealError', 'ComplexError',      # TypeError
     'BoolError', 'BytesError', 'StringError', 'BytearrayError', # TypeError
     'DictError', 'ListError', 'TupleError', 'IterableError',    # TypeError
-    'IOObjError', 'ProtocolUnbound',                            # TypeError
+    'IOObjError', 'ProtocolUnbound', 'CallableError',           # TypeError
     'FormatError', 'UnsupportedCall',                           # AttributeError
     'FileError',                                                # IOError
     'FileNotFound',                                             # FileNotFoundError
@@ -125,6 +125,11 @@ class TupleError(BaseError, TypeError):
 
 class IterableError(BaseError, TypeError):
     """The argument(s) must be iterable."""
+    pass
+
+
+class CallableError(BaseError, TypeError):
+    """The argument(s) must be callable."""
     pass
 
 

@@ -14,7 +14,7 @@ from jspcap.interface import extract
 
 
 # version number
-__version__ = '0.7.0'
+__version__ = '0.4.0'
 
 
 def get_parser():

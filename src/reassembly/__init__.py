@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """reassembly packets and datagrams
 
-``jspcap.reassembly`` bases on algorithms described in
-```RFC 815`` <https://tools.ietf.org/html/rfc815>`__,
+`jspcap.reassembly` bases on algorithms described in
+[`RFC 815`](https://tools.ietf.org/html/rfc815),
 implements datagram reassembly of IP and TCP packets.
 
 """

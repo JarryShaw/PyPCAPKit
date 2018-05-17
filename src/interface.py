@@ -108,12 +108,9 @@ def reassemble(*, protocol, strict=False):
                         <keyword> True / False
 
     Returns:
-        [if protocol is IPv4]
-        * IPv4_Reassembly, a Reassembly object from `jspcap.reassembly`
-        [if protocol is IPv6]
-        * IPv6_Reassembly, a Reassembly object from `jspcap.reassembly`
-        [if protocol is TCP]
-        * TCP_Reassembly, a Reassembly object from `jspcap.reassembly`
+        * [if protocol is IPv4] IPv4_Reassembly -- a Reassembly object from `jspcap.reassembly`
+        * [if protocol is IPv6] IPv6_Reassembly -- a Reassembly object from `jspcap.reassembly`
+        * [if protocol is TCP] TCP_Reassembly -- a Reassembly object from `jspcap.reassembly`
 
     """
     if isinstance(protocol, type) and issubclass(protocol, Protocol):
