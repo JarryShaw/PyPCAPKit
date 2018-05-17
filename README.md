@@ -5,20 +5,27 @@
  > Note that the whole project only supports __Python 3.6__ or later.
 
  - [About](#about)
-    * Interface
-    * Extraction
-    * Reassembly
-    * Protocols
-    * Utilities
-    * Exceptions
+    * [Interface](https://github.com/JarryShaw/jspcap/tree/master/src#interface)
+    * [Extraction](https://github.com/JarryShaw/jspcap/tree/master/src#extraction)
+    * [Reassembly](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
+    * [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
+    * [Utilities](https://github.com/JarryShaw/jspcap/tree/master/src#utilities)
+    * [Exceptions](https://github.com/JarryShaw/jspcap/tree/master/src#exceptions)
  - [Installation](#installation)
  - [Usage](#usage)
+    * [Documentation](#documentation)
+        - [Interface](#interface)
+        - [Macros](#macros)
+        - [Protocols](#protocols)
+    * [CLI Usage](#cli-usage)
  - [Samples](#samples)
+    * [Usage Samples](#usage-samples)
+    * [CLI Samples](#cli-samples)
  - [TODO](#todo)
 
 ---
 
-### About
+## About
 
 &emsp; `jspcap` is an independent open source library, using only [`jsformat`](https://github.com/JarryShaw/jsformat) as its formatted output dumper.
 
@@ -39,7 +46,7 @@
 
 &nbsp;
 
-### Installation
+## Installation
 
 > Note that `jspcap` only supports Python verions __since 3.6__
 
@@ -58,15 +65,58 @@ $ python setup.py install
 
 &nbsp;
 
-### Usage
+## Usage
 
-##### Module Documentation
+### Documentation
 
-&emsp; Documentation can be found in submodules of `jspcap`. Or, you may find usage sample in the [`test`](https://github.com/JarryShaw/jspcap/tree/master/test) folder. For further information, please refer to the source code -- the docstrings should help you :)
+##### Interface
+
+|                                      NAME                                      |            DESCRIPTION            |
+| :----------------------------------------------------------------------------: | :-------------------------------: |
+| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src#extract)       |        extract a PCAP file        |
+| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src#analyse)       | analyse application layer packets |
+| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src#reassemble) |  reassemble fragmented datagrams  |
+
+##### Macros
+
+|                                   NAME                                   |               DESCRIPTION                |
+| :----------------------------------------------------------------------: | :--------------------------------------: |
+| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src#variables)  | JavaScript Object Notation (JSON) format |
+| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src#variables) |    macOS Property List (PLIST) format    |
+| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src#variables)  |          Tree-View text format           |
+
+##### Protocols
+
+|                                                NAME                                               |             DESCRIPTION             |
+| :-----------------------------------------------------------------------------------------------: | :---------------------------------: |
+| [`Raw`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#raw)                        |           Raw Packet Data           |
+| [`ARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#arp)                   |     Address Resolution Protocol     |
+| [`Ethernet`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ethernet)         |          Ethernet Protocol          |
+| [`L2TP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#l2tp)                 |    Layer Two Tunneling Protocol     |
+| [`OSPF`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ospf)                 |      Open Shortest Path First       |
+| [`RARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#rarp)                 | Reverse Address Resolution Protocol |
+| [`VLAN`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#vlan)                 |    802.1Q Customer VLAN Tag Type    |
+| [`AH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ah)                 |        Athentication Header         |
+| [`HIP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#hip)               |       Host Identity Protocol        |
+| [`HOPOPT`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#hopopt)         |       IPv6 Hop-by-Hop Options       |
+| [`IP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ip)                 |          Internet Protocol          |
+| [`IPsec`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipsec)           |     Internet Protocol Security      |
+| [`IPv4`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv4)             |     Internet Protocol version 4     |
+| [`IPv6`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6)             |     Internet Protocol version 6     |
+| [`IPv6_Frag`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_frag)   |      Fragment Header for IPv6       |
+| [`IPv6_Opts`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_opts)   |    Destination Options for IPv6     |
+| [`IPv6_Route`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_route) |       Routing Header for IPv6       |
+| [`IPX`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipx)               |    Internetwork Packet Exchange     |
+| [`MH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#mh)                 |           Mobility Header           |
+| [`TCP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#tcp)              |    Transmission Control Protocol    |
+| [`UDP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#udp)              |       User Datagram Protocol        |
+| [`HTTP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/application#http)          |     Hypertext Transfer Protocol     |
+
+&emsp; Documentation can be found in submodules of `jspcap`. Or, you may find usage sample in the [`test`](https://github.com/JarryShaw/jspcap/tree/master/test#test-samples) folder. For further information, please refer to the source code -- the docstrings should help you :)
 
 __ps__: `help` function in Python should always help you out.
 
-##### CLI Usage
+### CLI Usage
 
  > The following part was originally described in [`jspcapy`](https://github.com/JarryShaw/jspcapy), which is now deprecated and merged into this repository.
 
@@ -115,9 +165,9 @@ optional arguments:
 
 &nbsp;
 
-### Samples
+## Samples
 
-##### Usage Samples
+### Usage Samples
 
 &emsp; As described in `test` folder, `jspcap` is quite easy to use, with simply three verbs as its main interface. Several scenarios are shown as below.
 
@@ -155,7 +205,7 @@ optional arguments:
             pprint.pprint(reassembly.info)
  ```
 
-##### CLI Samples
+### CLI Samples
 
 &emsp; The CLI (command line interface) of `jspcap` has two different access.
 
@@ -206,7 +256,9 @@ Here are some usage samples:
  🍺Report file stored in 'out'
  ```
 
-### TODO
+&nbsp;
+
+## TODO
 
  - [x] specify `Raw` packet
  - [x] interface verbs
