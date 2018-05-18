@@ -130,7 +130,7 @@ reassemble(*, protocol, strict=False)
 ##### Extractor for PCAP files.
 
 ```python
-class Extractor(object)
+class Extractor(builtins.object)
 ```
 
  - Properties:
@@ -149,6 +149,10 @@ class Extractor(object)
 
  - Methods:
     * *`classmethod`* `make_name` -- formatting input & output file name
+        ```python
+        @classmethod
+        make_name(cls, fin, fout, fmt, extension, *, files, nofile)
+        ```
         - Positional arguments:
             * `fin` -- `str`, input file
             * `fout` -- `str`, output file
@@ -171,6 +175,7 @@ class Extractor(object)
     * iterable -- if only `auto` set `False`
     * callable -- if only `auto` set `False`
     * support `with` statement
+    * initialisation takes numerous keyword arguments as decribed in [`jspcap.extract`](#extract)
 
 &nbsp;
 
@@ -205,7 +210,7 @@ analyse(file, length=None)
 ##### Analyse report.
 
 ```python
-class Analysis(object)
+class Analysis(builtins.object)
 ```
 
  - Properties:
@@ -277,7 +282,7 @@ class Analysis(object)
 | :-------------------------------------------------------------------------------------------------: | :-------------: |
 | [`IPv4_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ipv4_reassembly) | IPv4 Reassembly |
 | [`IPv6_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ipv6_reassembly) | IPv6 Reassembly |
-| [`TCP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#arp)          | TCP Reassembly  |
+| [`TCP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly)   | TCP Reassembly  |
 
 &emsp; `jspcap.reassembly` bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets. Currently, it supports reassembly of only 3 different protocols.
 
@@ -348,7 +353,7 @@ __NOTE__: positional argument `file` in `behold` must be a *file-like* object.
 ##### Turn dictionaries into object-like instances.
 
 ```python
-class Info(dict)
+class Info(builtins.dict)
 ```
 
  - Properties:
@@ -372,7 +377,7 @@ class Info(dict)
 ##### VersionInfo alikes `sys.version_info`.
 
 ```python
-class VersionInfo(object)
+class VersionInfo(builtins.object)
 ```
 
  - Properties:
@@ -388,7 +393,7 @@ class VersionInfo(object)
 ##### Protocols chain.
 
 ```python
-class ProtoChain(object)
+class ProtoChain(builtins.object)
 ```
 
  - Properties:
@@ -425,13 +430,13 @@ type_check(*agrs, func=None)
 |   `real_check`    |    Check if arguments are real numbers.     |
 |  `complex_check`  |   Check if arguments are complex numbers.   |
 |  `number_check`   |       Check if arguments are numbers.       |
-|   `bytes_check`   |     Check if arguments are bytes type.      |
-| `bytearray_check` |   Check if arguments are bytearray type.    |
-|    `str_check`    |      Check if arguments are str type.       |
-|   `bool_check`    |     Check if arguments are bytes type.      |
-|   `list_check`    |      Check if arguments are list type.      |
-|   `tuple_check`   |     Check if arguments are tuple type.      |
-|    `io_check`     |   Check if arguments are file-like type.    |
+|   `bytes_check`   |    Check if arguments are `bytes` type.     |
+| `bytearray_check` |  Check if arguments are `bytearray` type.   |
+|    `str_check`    |     Check if arguments are `str` type.      |
+|   `bool_check`    |    Check if arguments are `bytes` type.     |
+|   `list_check`    |     Check if arguments are `list` type.     |
+|   `tuple_check`   |    Check if arguments are `tuple` type.     |
+|    `io_check`     |  Check if arguments are *file-like* type.   |
 |   `frag_check`    |   Check if arguments are valid fragments.   |
 | `_ip_frag_check`  | Check if arguments are valid IP fragments.  |
 | `_tcp_frag_check` | Check if arguments are valid TCP fragments. |
@@ -461,8 +466,11 @@ _tcp_frag_check(*args, func=None)
 ##### Base error class of all kinds.
 
 ```python
-class BaseError(Exception)
+class BaseError(builtins.Exception)
 ```
+ - Data modules:
+    * initialisation takes a special keyword argument `quiet` of `bool` type, referring if print no traceback information when exception raised
+    * all other data modules inherited from `Exception`
 
  - Notes:
 
@@ -477,7 +485,7 @@ class BaseError(Exception)
 ### Refined Exceptions
 
 ```python
-class error(BaseError, Exception)
+class error(jspcap.exceptions.BaseError, builtins.Exception)
 ```
 
 |        NAME        |            INHERIT FROM            |                     DESCRIPTION                     |
