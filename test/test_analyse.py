@@ -11,10 +11,12 @@ extraction = jspcap.extract(
 )
 # pprint.pprint(extraction.reassembly.tcp)
 print()
-for packet in extraction.reassembly.tcp:
-    for reassembly in packet.packets:
-        if jspcap.HTTP in reassembly.protochain:
-            pprint.pprint(reassembly.info)
+for reassembly in extraction.reassembly.tcp:
+    for packet in reassembly.packets:
+        if jspcap.HTTP in packet.protochain:
+            with open('../sample/37fc254c-68c1-4677-9ed1-806c5eab8acb.dat', 'ab') as file:
+                file.write(packet.info.raw.header or b'')
+            pprint.pprint(packet.info)
         else:
-            print(reassembly)
+            print(packet)
     print()
