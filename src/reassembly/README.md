@@ -23,7 +23,7 @@
 
 ### Basic Algorithm
 
-&emsp; The following algorithm implementmentation is based on IP reassembly procedure introduced in [`RFC 791`](https://tools.ietf.org/html/rfc791), using `RCVBT` (fragment receivedbit table).
+&emsp; The following algorithm implementmentation is based on IP reassembly procedure introduced in [`RFC 791`](https://tools.ietf.org/html/rfc791), using `RCVBT` (fragment received bit table).
 
 ##### Notations:
 
@@ -223,10 +223,10 @@ class IP_Reassembly(jspcap.reassembly.reassembly.Reassembly)
             |                        |--> (bytes/None) IPv4 payload fragment
             |--> (dict) packet ...
         ```
-    * `fragement` structure:
+    * `fragment` structure:
         - [IPv4](#ipv4_reassembly)
             ```python
-            fragement = dict(
+            fragment = dict(
                 bufid = tuple(
                     ipv4.src,                   # source IP address
                     ipv4.dst,                   # destination IP address
@@ -244,7 +244,7 @@ class IP_Reassembly(jspcap.reassembly.reassembly.Reassembly)
             ```
         - [IPv6](#ipv6_reaseembly)
             ```python
-            fragement = dict(
+            fragment = dict(
                 bufid = tuple(
                     ipv6.src,                   # source IP address
                     ipv6.dst,                   # destination IP address
@@ -312,7 +312,7 @@ class IPv6_Reassembly(jspcap.reassembly.ip.IP_Reassembly)
 ##### Reassembly for TCP payload.
 
 ```python
-class TCP_Reassembly(jspcap.reassembly.tcp.Reassembly)
+class TCP_Reassembly(jspcap.reassembly.reassembly.Reassembly)
 ```
 
  - Usage:
@@ -392,7 +392,7 @@ class TCP_Reassembly(jspcap.reassembly.tcp.Reassembly)
            |       |--> 'packets' : (tuple<Analysis>) analysed payloads
            |--> (Info) data ...
         ```
-    * `fragement` structure:
+    * `fragment` structure:
         ```python
         packet = Info(
             bufid = tuple(

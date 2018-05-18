@@ -451,7 +451,7 @@ _ip_frag_check(*args, func=None)
 _tcp_frag_check(*args, func=None)
 ```
 
-&emsp; As for `frag_check`, `str` type keyword argument `protocol` indicats what protocol the fragment is reassembled for, which must be either `IP` (`IPv4` & `IPv6`) or `TCP`. Then, `_ip_frag_check` or `_tcp_frag_check` shall be called to validate arguments caller passed into. For more infomation on fragment format, please refer to the documentation of [`IP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly) and [`TCP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ip_reassembly).
+&emsp; As for `frag_check`, `str` type keyword argument `protocol` indicats what protocol the fragment is reassembled for, which must be either `IP` (`IPv4` & `IPv6`) or `TCP`. Then, `_ip_frag_check` or `_tcp_frag_check` shall be called to validate arguments caller passed into. For more infomation on fragment format, please refer to the documentation of [`IP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ip_reassembly) and [`TCP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly).
 
 &nbsp;
 
