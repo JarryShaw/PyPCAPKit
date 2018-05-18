@@ -76,10 +76,10 @@ appeared in RFC 791. And here is the process:
 4. Delete the current entry from the hole descriptor list.
 5. If fragment.first is greater than hole.first, then create a
   new hole descriptor "new_hole" with new_hole.first equal to
-  hole.first, and new_hole.last equal to fragment.first  minus
+  hole.first, and new_hole.last equal to fragment.first minus
   one.
-6. If fragment.last is less than hole.last and fragment.more
-  fragments is true, then create a new hole descriptor
+6. If fragment.last is less than hole.last and
+  fragment.more_fragments is true, then create a new hole descriptor
   "new_hole", with new_hole.first equal to fragment.last plus
   one and new_hole.last equal to hole.last.
 7. Go to step one.
@@ -153,7 +153,7 @@ class TCP_Reassembly(Reassembly):
             first = tcp.seq,                # this sequence number
             last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
             payload = tcp.raw,              # raw bytearray type payload
-        )
+         )
         - (tuple) datagram
            |--> (Info) data
            |       |--> 'NotImplemented' : (bool) True --> implemented
@@ -168,6 +168,7 @@ class TCP_Reassembly(Reassembly):
            |       |--> 'index' : (tuple) packet numbers
            |       |                |--> (int) original packet range number
            |       |--> 'payload' : (bytes/None) reassembled application layer data
+           |       |--> 'packets' : (tuple<Analysis>) analysed payload
            |--> (Info) data
            |       |--> 'NotImplemented' : (bool) False --> not implemented
            |       |--> 'id' : (Info) original packet identifier
@@ -182,7 +183,8 @@ class TCP_Reassembly(Reassembly):
            |       |--> 'index' : (tuple) packet numbers
            |       |                |--> (int) original packet range number
            |       |--> 'payload' : (tuple/None) partially reassembled payload
-           |                        |--> (bytes/None) payload fragment
+           |       |                |--> (bytes/None) payload fragment
+           |       |--> 'packets' : (tuple<Analysis>) analysed payloads
            |--> (Info) data ...
         - (dict) buffer --> memory buffer for reassembly
            |--> (tuple) BUFID : (dict)

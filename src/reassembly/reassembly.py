@@ -107,9 +107,6 @@ class Reassembly(object):
         Positional arguments:
             * buf -- dict, buffer dict of reassembled packets
 
-        Keyword arguments:
-            * NotImplemented
-
         Returns:
             * NotImplemented
 
@@ -141,7 +138,7 @@ class Reassembly(object):
         """Run automatically.
 
         Positional arguments:
-            * packets -- list[dict], list of packet dicts to be reassembled
+            * packets -- list<dict>, list of packet dicts to be reassembled
 
         """
         for packet in packets:

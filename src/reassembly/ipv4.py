@@ -126,7 +126,7 @@ class IPv4_Reassembly(IP_Reassembly):
             tl = ipv4.len,                  # total length, header includes
             header = ipv4.header,           # raw bytearray type header
             payload = ipv4.payload,         # raw bytearray type payload
-        )
+          )
         * (tuple) datagram
             |--> (dict) data
             |       |--> 'NotImplemented' : (bool) True --> implemented
