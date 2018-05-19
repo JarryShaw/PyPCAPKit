@@ -124,10 +124,10 @@ class Frame(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, *, num, proto):
+    def __init__(self, file, *, num, proto):
         self._fnum = num
         self._prot = proto
-        self._file = _file
+        self._file = file
         self._info = Info(self.read_frame())
 
     def __length_hint__(self):

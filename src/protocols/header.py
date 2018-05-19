@@ -133,8 +133,8 @@ class Header(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file):
-        self._file = _file
+    def __init__(self, file):
+        self._file = file
         self._info = Info(self.read_header())
 
     def __len__(self):

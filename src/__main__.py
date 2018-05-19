@@ -82,7 +82,7 @@ def main():
     elif args.tree:     fmt = 'tree'
     else:               fmt = None
 
-    extractor = jspcap.extract(
+    extractor = extract(
                     fin=args.fin, fout=args.fout, format=fmt,
                     auto=args.verbose, files=args.files,
                     store=False, extension=args.auto_extension,
