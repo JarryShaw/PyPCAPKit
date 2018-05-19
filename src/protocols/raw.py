@@ -54,7 +54,7 @@ class Raw(Protocol):
     @property
     def name(self):
         """Name of current protocol."""
-        return "Unknown"
+        return 'Unknown'
 
     # header length of current protocol
     @property
@@ -88,8 +88,8 @@ class Raw(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length, *, error=None, **kwargs):
-        self._file = _file
+    def __init__(self, file, length=None, *, error=None, **kwargs):
+        self._file = file
         self._info = Info(self.read_raw(length, error=error))
         self._make_protochain()
 

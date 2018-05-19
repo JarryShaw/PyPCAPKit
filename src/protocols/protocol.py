@@ -144,9 +144,9 @@ class Protocol:
         pass
 
     def __iter__(self):
-        file_ = copy.deepcopy(self._file)
-        file_.seek(os.SEEK_SET)
-        return iter(file_)
+        file = copy.deepcopy(self._file)
+        file.seek(os.SEEK_SET)
+        return iter(file)
 
     # def __next__(self):
     #     next_ = self._file.read(1)
@@ -173,6 +173,10 @@ class Protocol:
         Positional arguments:
             * size  -- int, buffer size
 
+        Returns:
+            * [upon success] str -- name of next layer protocol
+            * [upon failure] None
+
         """
         return None
 
@@ -195,7 +199,7 @@ class Protocol:
                            <keyword> True / False
 
         Returns:
-            * int -- unpacked data upon sucess
+            * int -- unpacked data upon success
 
         """
         endian = '<' if lilendian else '>'
@@ -298,8 +302,8 @@ class Protocol:
         """Import next layer extractor.
 
         Positional arguments:
-            proto -- str, next layer protocol name
-            length -- int, valid (not padding) length
+            * proto -- str, next layer protocol name
+            * length -- int, valid (not padding) length
 
         Returns:
             * bool -- flag if extraction of next layer succeeded
