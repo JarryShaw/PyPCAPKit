@@ -49,14 +49,14 @@
 
 ### `extract`
 
-##### Extract a PCAP file.
-
 ```python
 extract(*, fin=None, fout=None, format=None, 
             store=True, files=False, nofile=False,
             auto=True, verbose=False, extension=True,
             ip=False, ipv4=False, ipv6=False, tcp=False, strict=False)
 ```
+
+##### Extract a PCAP file.
 
  - Keyword arguments:
 
@@ -84,11 +84,11 @@ extract(*, fin=None, fout=None, format=None,
 
 ### `analyse`
 
-##### Analyse application layer packets.
-
 ```python
 analyse(*, file, length=None)
 ```
+
+##### Analyse application layer packets.
 
  - Keyword arguments:
     * `file` -- file-like object, packet to be analysed
@@ -99,11 +99,11 @@ analyse(*, file, length=None)
 
 ### `reassemble`
 
-##### Reassemble fragmented datagrams.
-
 ```python
 reassemble(*, protocol, strict=False)
 ```
+
+##### Reassemble fragmented datagrams.
 
  - Keyword arguments:
 
@@ -127,11 +127,11 @@ reassemble(*, protocol, strict=False)
 
 ### `Extactor`
 
-##### Extractor for PCAP files.
-
 ```python
 class Extractor(builtins.object)
 ```
+
+##### Extractor for PCAP files.
 
  - Properties:
     * `info` -- `VerionInfo`, version of input PCAP file
@@ -191,12 +191,12 @@ class Extractor(builtins.object)
 
 ### `analyse`
 
-##### Analyse application layer packets.
-
 ```python
 @beholder_ng
 analyse(file, length=None)
 ```
+
+##### Analyse application layer packets.
 
  - Positional arguments:
     * `file` -- file-like object, packet to be analysed
@@ -207,11 +207,11 @@ analyse(file, length=None)
 
 ### `Analysis`
 
-##### Analyse report.
-
 ```python
 class Analysis(builtins.object)
 ```
+
+##### Analyse report.
 
  - Properties:
     * `info` -- `Info`, extracted packet
@@ -226,6 +226,8 @@ class Analysis(builtins.object)
 ## Protocols
 
  > described in [`src/protocols`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
+
+&emsp; `jspcap.protocols` is collection of all protocol families, with detailed implementation and methods. Currently, it includes altogehter 22 different protocols and three macro variables.
 
 ##### Macros
 
@@ -266,13 +268,13 @@ class Analysis(builtins.object)
 | [`UDP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#udp)              |       User Datagram Protocol        |
 | [`HTTP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/application#http)          |     Hypertext Transfer Protocol     |
 
-&emsp; `jspcap.protocols` is collection of all protocol families, with detailed implementation and methods. Currently, it includes altogehter 22 different protocols and three macro variables.
-
 &nbsp;
 
 ## Reassembly
 
  > described in [`src/reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
+
+&emsp; `jspcap.reassembly` bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets. Currently, it supports reassembly of only 3 different protocols.
 
 <a name="index-reassembly"> </a>
 
@@ -284,8 +286,6 @@ class Analysis(builtins.object)
 | [`IPv6_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ipv6_reassembly) | IPv6 Reassembly |
 | [`TCP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly)   | TCP Reassembly  |
 
-&emsp; `jspcap.reassembly` bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets. Currently, it supports reassembly of only 3 different protocols.
-
 &nbsp;
 
 ## Utilities
@@ -293,8 +293,6 @@ class Analysis(builtins.object)
  > described in [`src/utilities.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities.py)
 
 ### `seekset`
-
-##### Read file from start then set back to original.
 
 ```python
 def seekset(func):
@@ -304,11 +302,11 @@ def seekset(func):
     return seekcur
 ```
 
+##### Read file from start then set back to original.
+
 __NOTE__: this decorator works with class methods, which has a *file-like* attribute names `self._file`.
 
 ### `seekset_ng`
-
-##### Read file from start then set back to original.
 
 ```python
 def seekset_ng(func):
@@ -318,11 +316,11 @@ def seekset_ng(func):
     return seekcur
 ```
 
+##### Read file from start then set back to original.
+
 __NOTE__: positional argument `file` in `seekcur` must be a *file-like* object.
 
 ### `beholder`
-
-##### Behold extraction procedure.
 
 ```python
 def beholder(func):
@@ -332,11 +330,11 @@ def beholder(func):
     return behold
 ```
 
+##### Behold extraction procedure.
+
 __NOTE__: this decorator works with class method `self._import_next_layer`, which has a *file-like* attribute names `self._file`.
 
 ### `beholder_ng`
-
-##### Behold extraction procedure.
 
 ```python
 def beholder_ng(func):
@@ -346,15 +344,17 @@ def beholder_ng(func):
     return behold
 ```
 
+##### Behold extraction procedure.
+
 __NOTE__: positional argument `file` in `behold` must be a *file-like* object.
 
 ### `Info`
 
-##### Turn dictionaries into object-like instances.
-
 ```python
 class Info(builtins.dict)
 ```
+
+##### Turn dictionaries into object-like instances.
 
  - Properties:
     * indicated as `Info` initialisation procedure
@@ -374,11 +374,11 @@ class Info(builtins.dict)
 
 ### `VersionInfo`
 
-##### VersionInfo alikes `sys.version_info`.
-
 ```python
 class VersionInfo(builtins.object)
 ```
+
+##### VersionInfo alikes `sys.version_info`.
 
  - Properties:
     * `major` -- `int`, major version
@@ -390,11 +390,11 @@ class VersionInfo(builtins.object)
 
 ### `ProtoChain`
 
-##### Protocols chain.
-
 ```python
 class ProtoChain(builtins.object)
 ```
+
+##### Protocols chain.
 
  - Properties:
     * `alias` -- `tuple`, aliases of protocols in chain
@@ -463,11 +463,12 @@ _tcp_frag_check(*args, func=None)
 
 ### `BaseError`
 
-##### Base error class of all kinds.
-
 ```python
 class BaseError(builtins.Exception)
 ```
+
+##### Base error class of all kinds.
+
  - Data modules:
     * initialisation takes a special keyword argument `quiet` of `bool` type, referring if print no traceback information when exception raised
     * all other data modules inherited from `Exception`
