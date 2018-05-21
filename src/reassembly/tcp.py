@@ -240,8 +240,12 @@ class TCP_Reassembly(Reassembly):
         SYN = info.syn      # Synchronise Flag (Establishment)
 
         # when SYN is set, reset buffer of this session
-        # initialise buffer with BUFID & ACK then recurse
-        if SYN or BUFID not in self._buffer:
+        if SYN and BUFID in self._buffer:
+            self._dtgram += self.submit(self._buffer[BUFID], bufid=BUFID)
+            del self._buffer[BUFID]
+
+        # initialise buffer with BUFID & ACK
+        if BUFID not in self._buffer:
             self._buffer[BUFID] = {
                 'hdl' : [Info(first=info.len, last=sys.maxsize),],
                 ACK : dict(

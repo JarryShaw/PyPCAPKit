@@ -66,9 +66,9 @@ class ARP(Link):
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
-        * src -- tuple(str, str), sender hardware & protocol address
-        * dst -- tuple(str, str), target hardware & protocol address
-        * type -- tuple(str, str), hardware & protocol type
+        * src -- tuple<str, str>, sender hardware & protocol address
+        * dst -- tuple<str, str>, target hardware & protocol address
+        * type -- tuple<str, str>, hardware & protocol type
 
     Methods:
         * read_arp -- read Address Resolution Protocol

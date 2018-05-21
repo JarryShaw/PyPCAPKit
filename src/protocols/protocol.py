@@ -24,7 +24,7 @@ import textwrap
 
 
 from jspcap.exceptions import BoolError, BytesError, StructError
-from jspcap.utilities import seekset, Info, ProtoChain
+from jspcap.utilities import beholder, seekset, Info, ProtoChain
 from jspcap.validations import bool_check, int_check
 # from jspcap.protocols.raw import Raw
 
@@ -298,6 +298,7 @@ class Protocol:
         self._protos = ProtoChain(proto, chain, alias)
         return dict_
 
+    @beholder
     def _import_next_layer(self, proto, length=None):
         """Import next layer extractor.
 
