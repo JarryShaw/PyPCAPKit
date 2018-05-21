@@ -107,8 +107,11 @@ class Protocol(builtins.object)
             * *if header omits* `bytes` -- whole packet data
             * *if discard set True* `bytes` -- packet body only
             * `dict` -- header and payload data
-                - `'header'` -- `bytes`, packet header
-                - `'payload'` -- `bytes`, packet payload
+                ```
+                Packet
+                 |-- header -- bytes, packet header
+                 |-- payload -- bytes, packet payload
+                ```
     * `_decode_next_layer` -- decode next layer protocol type
         ```python
         _decode_next_layer(self, dict_, proto=None, length=None)
@@ -121,6 +124,7 @@ class Protocol(builtins.object)
             * `dict` -- current protocol with next layer extracted
     * `_import_next_layer` -- import next layer protocol extractor
         ```python
+        @beholder
         _import_next_layer(self, proto, length=None)
         ```
         - Positional arguments:
