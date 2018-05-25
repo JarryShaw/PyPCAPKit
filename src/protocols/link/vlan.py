@@ -50,6 +50,9 @@ class VLAN(Link):
         * protocol -- str, next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
 
+    Methods:
+        * read_vlan -- read 802.1Q Customer VLAN Tag Type
+
     Attributes:
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
@@ -93,7 +96,7 @@ class VLAN(Link):
     # Methods.
     ##########################################################################
 
-    def read_ctag(self, length):
+    def read_vlan(self, length):
         """Read 802.1Q Customer VLAN Tag Type.
 
         Structure of 802.1Q Customer VLAN Tag Type [RFC 7042]:
@@ -131,7 +134,7 @@ class VLAN(Link):
 
     def __init__(self, _file, length=None, **kwargs):
         self._file = _file
-        self._info = Info(self.read_ctag(length))
+        self._info = Info(self.read_vlan(length))
 
     def __length_hint__(self):
         return 4

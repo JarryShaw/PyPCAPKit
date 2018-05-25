@@ -206,7 +206,7 @@ class OSPF(Link):
               0           0     -                       Reserved (must be zero)
               2          16     ospf.auth.key_id        Key ID
               3          24     ospf.auth.len           Auth Data Length
-              4          32     ospf.auth.seq           Cryptographic Aequence Number
+              4          32     ospf.auth.seq           Cryptographic Sequence Number
 
         """
         _resv = self._read_fileng(2)
