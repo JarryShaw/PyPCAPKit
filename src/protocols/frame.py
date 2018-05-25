@@ -33,9 +33,9 @@ class Frame(Protocol):
     """Per packet frame header extractor.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current frame
@@ -65,7 +65,7 @@ class Frame(Protocol):
 
     @property
     def name(self):
-        """Name of corresponding procotol."""
+        """Name of corresponding protocol."""
         return f'Frame {self._fnum}'
 
     @property

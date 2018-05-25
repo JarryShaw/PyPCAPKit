@@ -19,12 +19,12 @@ __all__ = ['Raw']
 
 
 class Raw(Protocol):
-    """This class implements universal unknown procotol.
+    """This class implements universal unknown protocol.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * protochain -- ProtoChain, protocol chain of current instance
 
     Methods:

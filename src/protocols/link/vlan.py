@@ -42,9 +42,9 @@ class VLAN(Link):
     """This class implements 802.1Q Customer VLAN Tag Type.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protocol -- str, next layer protocol
@@ -76,7 +76,7 @@ class VLAN(Link):
 
     @property
     def alias(self):
-        """Acronym of corresponding procotol."""
+        """Acronym of corresponding protocol."""
         return '802.1Q'
 
     @property

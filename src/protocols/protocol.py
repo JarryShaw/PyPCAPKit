@@ -41,9 +41,9 @@ class Protocol:
     """Abstract base class for all protocol family.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
@@ -247,7 +247,7 @@ class Protocol:
 
         Positional arguments:
             * length -- int, length of the packet
-        
+
         Keyword arguments:
             * header -- int, length of the packet header
             * payload -- int, length of the packet payload

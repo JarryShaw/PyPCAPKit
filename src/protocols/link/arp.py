@@ -59,9 +59,9 @@ class ARP(Link):
     - Inverse Address Resolution Protocol (InARP) [RFC 2390]
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -77,8 +77,8 @@ class ARP(Link):
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
         * _protos -- ProtoChain, protocol chain of current instance
-        * _acnm -- str, acronym of corresponding procotol
-        * _name -- str, name of corresponding procotol
+        * _acnm -- str, acronym of corresponding protocol
+        * _name -- str, name of corresponding protocol
 
     Utilities:
         * _read_protos -- read next layer protocol type
@@ -103,7 +103,7 @@ class ARP(Link):
 
     @property
     def alias(self):
-        """Acronym of corresponding procotol."""
+        """Acronym of corresponding protocol."""
         return self._acnm
 
     @property

@@ -32,9 +32,9 @@ class RARP(ARP):
     """This class implements Reverse Address Resolution Protocol.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protochain -- ProtoChain, protocol chain of current instance
@@ -49,8 +49,8 @@ class RARP(ARP):
         * _file -- BytesIO, bytes to be extracted
         * _info -- Info, info dict of current instance
         * _protos -- ProtoChain, protocol chain of current instance
-        * _acnm -- str, acronym of corresponding procotol
-        * _name -- str, name of corresponding procotol
+        * _acnm -- str, acronym of corresponding protocol
+        * _name -- str, name of corresponding protocol
 
     Utilities:
         * _read_protos -- read next layer protocol type

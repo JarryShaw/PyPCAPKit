@@ -55,9 +55,9 @@ class OSPF(Link):
     """This class implements Open Shortest Path First.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protochain -- ProtoChain, protocol chain of current instance

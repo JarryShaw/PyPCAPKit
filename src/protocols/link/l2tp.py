@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""layer two tunneling protocol
+"""layer two tunnelling protocol
 
 `jspcap.protocols.link.l2tp` contains `L2TP` only,
-which implements extractor for Layer Two Tunneling Protocol
+which implements extractor for Layer Two Tunnelling Protocol
 (L2TP), whose structure is described as below.
 
  0                   1                   2                   3
@@ -18,7 +18,7 @@ which implements extractor for Layer Two Tunneling Protocol
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-# Layer Two Tunneling Protocol
+# Layer Two Tunnelling Protocol
 # Analyser for L2TP header
 
 
@@ -30,12 +30,12 @@ __all__ = ['L2TP']
 
 
 class L2TP(Link):
-    """This class implements Layer Two Tunneling Protocol.
+    """This class implements Layer Two Tunnelling Protocol.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * type -- str, L2TP packet type
@@ -44,7 +44,7 @@ class L2TP(Link):
         * type -- str, L2TP type
 
     Methods:
-        * read_l2tp -- read Layer Two Tunneling Protocol
+        * read_l2tp -- read Layer Two Tunnelling Protocol
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
@@ -68,7 +68,7 @@ class L2TP(Link):
     @property
     def name(self):
         """Name of current protocol."""
-        return 'Layer 2 Tunneling Protocol'
+        return 'Layer 2 Tunnelling Protocol'
 
     @property
     def length(self):
@@ -85,7 +85,7 @@ class L2TP(Link):
     ##########################################################################
 
     def read_l2tp(self, length):
-        """Read Layer Two Tunneling Protocol.
+        """Read Layer Two Tunnelling Protocol.
 
         Structure of L2TP header [RFC 2661]:
              0                   1                   2                   3

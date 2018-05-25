@@ -34,9 +34,9 @@ class Header(Protocol):
     """PCAP file global header extractor.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * length -- int, header length of global header, i.e. 24
         * version -- VersionInfo, version infomation of input PCAP file
         * protocol -- str, data link type
@@ -63,7 +63,7 @@ class Header(Protocol):
 
     @property
     def name(self):
-        """Name of corresponding procotol."""
+        """Name of corresponding protocol."""
         return 'Global Header'
 
     @property

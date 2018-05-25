@@ -29,15 +29,18 @@ class Ethernet(Link):
     """This class implements Ethernet Protocol.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Link`
         * length -- int, header length of corresponding protocol
         * protocol -- str, next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
         * src -- str, source mac address
         * dst -- str, destination mac address
+
+    Methods:
+        * read_ethernet -- read Ethernet Protocol
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
