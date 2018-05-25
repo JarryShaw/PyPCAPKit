@@ -1,7 +1,5 @@
 # Link Layer Protocols Manual
 
-<!-- NotImplemented -->
-
 &emsp; `jspcap.protocols.link` is collection of all protocols in link layer, with detailed implementation and methods.
 
  - [`Link`](#link)
@@ -152,4 +150,146 @@ class Ethernet(jspcap.protocols.link.link.Link)
 
  > described in [`src/protocols/link/l2tp.py`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link/l2tp.py)
 
+```python
+class L2TP(jspcap.protocols.link.link.Link)
+```
+
 ##### This class implements Layer Two Tunnelling Protocol.
+
+ - Properties:
+    * `name` -- `str`, name of corresponding protocol
+    * `info` -- `Info`, info dict of current instance [[RFC 2661](https://tools.ietf.org/html/rfc2661)]
+        ```
+        L2TP
+        |-- flags --> dict, flags and version info
+        |    |-- type --> str, type string
+        |    |-- len --> bool, length flag
+        |    |-- seq --> bool, sequence flag
+        |    |-- offset --> bool, offset flag
+        |    |-- prio --> bool, priority flag
+        |-- ver --> int, version
+        |-- length --> int, header length
+        |-- tunnelid --> int, tunnel ID
+        |-- sessionid --> int, session ID
+        |-- ns --> int, sequence number
+        |-- nr --> int, next sequence number
+        |-- offset --> int, offset size
+        ```
+    * `alias` -- `str`, acronym of corresponding protocol
+    * `layer` -- `str`, `'Link'`
+    * `length` -- `int`, header length of corresponding protocol
+    * `protocol` -- `str`, name of next layer protocol
+    * `protochain` -- `ProtoChain`, protocol chain of current instance
+    * `type` -- `str`, L2TP type
+
+ - Methods:
+     * read_l2tp -- read Layer Two Tunnelling Protocol
+
+## `OSPF`
+
+ > described in [`src/protocols/link/ospf.py`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link/ospf.py)
+
+```python
+class OSPF(jspcap.protocols.link.link.Link)
+```
+
+##### This class implements Open Shortest Path First.
+
+ - Properties:
+    * `name` -- `str`, name of corresponding protocol
+    * `info` -- `Info`, info dict of current instance [[RFC 2661](https://tools.ietf.org/html/rfc2661)]
+        ```
+        OSPF
+         |-- version --> int, version number
+         |-- type --> str, type string
+         |-- len --> int, packet length
+         |-- router_id --> int, router ID
+         |-- area_id --> int, area_id
+         |-- chksum --> bytes, checksum
+         |-- autype --> str, authentication type
+         |-- auth --> bytes/dict, authentication
+              |-- key_id --> int, key ID
+              |-- len --> authentication data length
+              |-- seq --> cryptographic sequence number
+        ```
+    * `alias` -- `str`, acronym of corresponding protocol
+    * `layer` -- `str`, `'Link'`
+    * `length` -- `int`, header length of corresponding protocol
+    * `protocol` -- `str`, name of next layer protocol
+    * `protochain` -- `ProtoChain`, protocol chain of current instance
+    * `type` -- `str`, OSPF packet type
+
+ - Methods:
+    * `read_ospf` -- read Open Shortest Path First
+
+## `RARP`
+
+ > described in [`src/protocols/link/rarp.py`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link/rarp.py)
+
+```python
+class RARP(jspcap.protocols.link.arp.ARP)
+```
+
+##### This class implements Reverse Address Resolution Protocol.
+
+ - Relative protocols:
+    * Reverse Address Resolution Protocol (RARP) [[RFC 903](https://tools.ietf.org/html/rfc903)]
+    * Dynamic Reverse Address Resolution Protocol (DRARP) [[RFC 1931](https://tools.ietf.org/html/rfc1931)]
+
+ - Properties:
+    * `name` -- `str`, name of corresponding protocol
+    * `info` -- `Info`, info dict of current instance [[RFC 826](https://tools.ietf.org/html/rfc826)]
+        ```
+        RARP
+         |-- htype --> str, Hardware Type
+         |-- ptype --> str, Protocol Type
+         |-- hlen --> int, Hardware Address Length
+         |-- plen --> int, Protocol Address Length
+         |-- oper --> str, Operation
+         |-- sha --> str, Sender Hardware Address
+         |-- spa --> str, Sender Protocol Address
+         |-- tha --> str, Target Hardware Address
+         |-- tpa --> str, Target Hardware Address
+         |-- len --> int, protocol header length
+        ```
+    * `alias` -- `str`, acronym of corresponding protocol
+    * `layer` -- `str`, `'Link'`
+    * `length` -- `int`, header length of corresponding protocol
+    * `protocol` -- `str`, name of next layer protocol
+    * `protochain` -- `ProtoChain`, protocol chain of current instance
+    * `src` -- `tuple<str, str>`, sender hardware & protocol address
+    * `dst` -- `tuple<str, str>`, target hardware & protocol address
+    * `type` -- `tuple<str, str>`, hardware & protocol type
+
+ - Methods:
+    * `read_arp` -- read Address Resolution Protocol
+
+## `VLAN`
+
+ > described in [`src/protocols/link/vlan.py`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link/vlan.py)
+
+```python
+class VLAN(jspcap.protocols.link.link.Link)
+```
+
+##### This class implements 802.1Q Customer VLAN Tag Type.
+
+ - Properties:
+    * `name` -- `str`, name of corresponding protocol
+    * `info` -- `Info`, info dict of current instance [[RFC 7042](https://tools.ietf.org/html/rfc7042)]
+        ```
+        VLAN
+         |-- tci --> dict, tag control information
+         |    |-- pcp --> str, priority code point
+         |    |-- dei --> bool, drop eligible indicator
+         |    |-- vid --> int, VLAN identifier
+         |-- type --> str, protocol
+        ```
+    * `alias` -- `str`, acronym of corresponding protocol
+    * `layer` -- `str`, `Link`
+    * `length` -- `int`, header length of corresponding protocol
+    * `protocol` -- `str`, next layer protocol
+    * `protochain` -- `ProtoChain`, protocol chain of current instance
+
+ - Methods:
+    * `read_vlan` -- read 802.1Q Customer VLAN Tag Type
