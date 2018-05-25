@@ -40,9 +40,9 @@ class Protocol(builtins.object)
 ##### Abstract base class for all protocol family.
 
  - Properties:
-    * `name` -- `str`, name of corresponding procotol
+    * `name` -- `str`, name of corresponding protocol
     * `info` -- `Info`, info dict of current instance
-    * `alias` -- `str`, acronym of corresponding procotol
+    * `alias` -- `str`, acronym of corresponding protocol
     * `length` -- `int`, header length of corresponding protocol
     * `protocol` -- `str`, name of next layer protocol
     * `protochain` -- `ProtoChain`, protocol chain of current instance
@@ -152,17 +152,17 @@ class Protocol(builtins.object)
 class Raw(jspcap.protocols.protocol.Protocol)
 ```
 
-##### This class implements universal unknown procotol.
+##### This class implements universal unknown protocol.
 
  - Properties:
-    * `name` -- `str`, name of corresponding procotol (`'Unknown'`)
+    * `name` -- `str`, name of corresponding protocol (`'Unknown'`)
     * `info` -- `Info`, info dict of current instance (shows as below)
         ```
         Raw
          |-- packet --> bytes, raw packet data
          |-- error --> str, error infomation when exception raised
         ```
-    * `alias` -- `str`, acronym of corresponding procotol (`'Raw'`)
+    * `alias` -- `str`, acronym of corresponding protocol (`'Raw'`)
     * `protochain` -- `ProtoChain`, protocol chain of current instance
 
  - Methods:
@@ -193,7 +193,7 @@ class Header(jspcap.protocols.protocol.Protocol)
 ##### PCAP file global header extractor.
 
  - Properties:
-    * `name` -- `str`, name of corresponding procotol (`'Global Header'`)
+    * `name` -- `str`, name of corresponding protocol (`'Global Header'`)
     * `info` -- `Info`, info dict of current instance
         ```
         Header
@@ -205,7 +205,7 @@ class Header(jspcap.protocols.protocol.Protocol)
          |-- snaplen --> int, max length of captured packets, in octets
          |-- network --> str, data link type
         ```
-    * `alias` -- `str`, acronym of corresponding procotol (`'Header'`)
+    * `alias` -- `str`, acronym of corresponding protocol (`'Header'`)
     * `length` -- `int`, header length of global header, (`24`)
     * `version` -- `VersionInfo`, version infomation of input PCAP file
     * `protocol` -- `str`, data link type
@@ -236,7 +236,7 @@ class Frame(jspcap.protocols.protocol.Protocol)
 ##### Per packet frame header extractor.
 
  - Properties:
-    * `name` -- `str`, name of corresponding procotol
+    * `name` -- `str`, name of corresponding protocol
     * `info` -- `Info`, info dict of current instance
         ```
         Frame
@@ -251,7 +251,7 @@ class Frame(jspcap.protocols.protocol.Protocol)
          |-- len --> int, number of octets of packet saved in file
          |-- cap_len --> int, actual length of packet
         ```
-    * `alias` -- `str`, acronym of corresponding procotol (`'Frame'`)
+    * `alias` -- `str`, acronym of corresponding protocol (`'Frame'`)
     * `length` -- `int`, header length of global header, (`16`)
     * `protocol` -- `str`, data link type
     * `protochain` -- `ProtoChain`, protocol chain of current frame
@@ -259,7 +259,7 @@ class Frame(jspcap.protocols.protocol.Protocol)
  - Methods:
     * `index` -- call [`ProtoChain.index`](https://github.com/JarryShaw/jspcap/tree/master/src#protochain)
     * `read_header` -- read each block after global header
- 
+
  - Data modules:
     * initilisation procedure shows as below
         ```python
