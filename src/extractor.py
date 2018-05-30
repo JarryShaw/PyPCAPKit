@@ -7,10 +7,18 @@ information exchange in all network layers, extracst
 parametres from a PCAP file.
 
 """
+import collections
+import datetime
+import functools
 import io
+import multiprocessing
 import os
 import pathlib
+import queue
+import random
+import signal
 import textwrap
+import time
 
 
 # Extractor for PCAP files
@@ -33,6 +41,16 @@ __all__ = ['Extractor']
 # ''', re.VERBOSE | re.IGNORECASE)
 
 
+# CPU number
+if os.name == 'posix' and 'SC_NPROCESSORS_CONF' in os.sysconf_names:
+    CPU_CNT = os.sysconf('SC_NPROCESSORS_CONF')
+else:
+    try:
+        CPU_CNT = len(os.sched_getaffinity(0))
+    except AttributeError:
+        CPU_CNT = os.cpu_count() or 1
+
+
 class Extractor:
     """Extractor for PCAP files.
 
@@ -52,8 +70,6 @@ class Extractor:
 
     Methods:
         * make_name -- formatting input & output file name
-        * record_header -- extract global header
-        * record_frames -- extract frames
 
     Attributes:
         * _auto -- bool, if run automatically to the end
@@ -91,6 +107,8 @@ class Extractor:
         * _tcp -- bool, flag if perform TCP payload reassembly
 
     Utilities:
+        * _record_header -- extract global header
+        * _record_frames -- extract frames
         * _read_frame -- read frames
         * _tcp_reassembly -- store data for TCP reassembly
         * _ipv4_reassembly -- store data for IPv4 reassembly
@@ -132,6 +150,8 @@ class Extractor:
 
     @property
     def protocol(self):
+        if self._flag_a:
+            raise UnsupportedCall("'Extractor(auto=True)' object has no attribute 'protocol'")
         return self._proto
 
     @property
@@ -202,37 +222,6 @@ class Extractor:
 
         return ifnm, ofnm, fmt, ext, files
 
-    def record_header(self):
-        """Read global header.
-
-        - Extract global header.
-        - Make Info object out of header properties.
-        - Append Info.
-        - Write plist file.
-
-        """
-        self._gbhdr = Header(self._ifile)
-        self._dlink = self._gbhdr.protocol
-        self._vinfo = self._gbhdr.info
-        if not self._flag_q:
-            if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
-                ofile(self._gbhdr.info, name='Global Header')
-                self._type = ofile.kind
-            else:
-                self._ofile(self._gbhdr.info, name='Global Header')
-                self._type = self._ofile.kind
-
-    def record_frames(self):
-        if self._auto:
-            while True:
-                try:
-                    self._read_frame()
-                except EOFError:
-                    # quit when EOF
-                    break
-            self._ifile.close()
-
     ##########################################################################
     # Data modules.
     ##########################################################################
@@ -285,13 +274,17 @@ class Extractor:
         self._ofnm = ofnm               # output file name
         self._fext = ext                # output file extension
 
+        self._flag_e = False            # EOF flag
+        self._flag_a = auto             # auto extract flag
         self._flag_f = files            # split file flag
         self._flag_v = verbose          # verbose output flag
         self._flag_q = nofile           # no output flag
         self._flag_d = store            # store data flag
+        self._flag_m = (self._flag_a and CPU_CNT > 1)
+                                        # multiprocessing flag
 
-        self._auto = auto               # auto extract flag
         self._frnum = 1                 # frame number
+        self._cfnum = 1                 # current frame number
         self._frame = list()            # frame record
         self._reasm = [None] * 3        # frame record for reassembly (IPv4 / IPv6 / TCP)
         self._proto = None              # frame ProtoChain
@@ -328,25 +321,58 @@ class Extractor:
             self._ofile = output if self._flag_f else output(ofnm)
                                                             # output file
 
-        self.record_header()            # read PCAP global header
-        self.record_frames()            # read frames
+        if self._flag_m:
+            # register signals
+            signal.signal(signal.SIGUSR1, functools.partial(self._read_frame))
+            signal.signal(signal.SIGUSR2, functools.partial(self._update_eof))
+
+            self._mpsvc = None                          # service process
+            self._mplst = list()                        # process list
+            self._mpcnt = multiprocessing.Value('I', 0) # process count
+            self._mpbuf = multiprocessing.Queue()       # multiprocessing buffer
+            self._mpret = multiprocessing.Queue()       # multiprocessing return
+            self._mpfdp = collections.defaultdict(multiprocessing.Queue)
+                                                        # multiprocessing file pointer
+
+        self._record_header()           # read PCAP global header
+        self._record_frames()           # read frames
+
+        # if self._flag_m:
+        #     with multiprocessing.Manager() as manager:
+        #         # register signals
+        #         signal.signal(signal.SIGUSR1, functools.partial(self._read_frame))
+        #         signal.signal(signal.SIGUSR2, functools.partial(self._update_eof))
+
+        #         self._mpsvc = None                          # service process
+        #         self._mplst = list()                        # process list
+        #         self._mpcnt = multiprocessing.Value('I', 0) # process count
+        #         self._mpbuf = manager.Queue()               # multiprocessing buffer
+        #         self._mpret = multiprocessing.Queue()       # multiprocessing return
+        #         self._mpfdp = collections.defaultdict(multiprocessing.Queue)
+        #                                                     # multiprocessing file pointer
+
+        #         self._record_header()   # read PCAP global header
+        #         self._record_frames()   # read frames
+        # else:
+        #     self._record_header()       # read PCAP global header
+        #     self._record_frames()       # read frames
 
     def __iter__(self):
-        if not self._auto:
+        if not self._flag_a:
             return self
         raise IterableError("'Extractor(auto=True)' object is not iterable") 
 
     def __next__(self):
         try:
-            return self._read_frame()
+            return self._record_frames()
         except EOFError:
             self._ifile.close()
             raise StopIteration
 
     def __call__(self):
-        if not self._auto:
+        if not self._flag_a:
             try:
-                return self._read_frame()
+                return self._record_frames()
             except EOFError as error:
                 self._ifile.close()
                 raise error from None
@@ -362,17 +388,121 @@ class Extractor:
     # Utilities.
     ##########################################################################
 
-    def _read_frame(self):
-        """Read frames.
+    def _update_eof(self, *args):
+        """Update EOF flag."""
+        if not self._flag_e and self._flag_m:
+            print('receive SIGUSR2')
+            [ proc.join() for proc in self._mplst ]
+            self._mpbuf.put(EOFError)
+            self._mpsvc.join()
+            self._frame = self._mpret.get()
+            self._reasm = self._mpret.get()
+        self._flag_e = True
+        self._ifile.close()
 
-        - Extract frames and each layer of packets.
-        - Make Info object out of frame properties.
-        - Append Info.
-        - Write plist & append Info.
+    def _record_header(self):
+        """Read global header.
+
+         - Extract global header.
+         - Make Info object out of header properties.
+         - Append Info.
+         - Write plist file.
 
         """
-        # read frame header
-        frame = Frame(self._ifile, num=self._frnum, proto=self._dlink)
+        self._gbhdr = Header(self._ifile)
+        self._dlink = self._gbhdr.protocol
+        self._vinfo = self._gbhdr.info
+        if not self._flag_q:
+            if self._flag_f:
+                ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
+                ofile(self._gbhdr.info, name='Global Header')
+                self._type = ofile.kind
+            else:
+                self._ofile(self._gbhdr.info, name='Global Header')
+                self._type = self._ofile.kind
+
+    def _record_frames(self):
+        """Read frames."""
+        if self._flag_m:
+            self._mpfdp[0].put(self._gbhdr.length)
+            self._mpsvc = multiprocessing.Process(target=self._analyse_frame,
+                            kwargs={'mpbuf': self._mpbuf, 'mpret': self._mpret})
+            self._mpsvc.start()
+            self._read_frame()
+        else:
+            frame = self._extract_frame()
+            self._analyse_frame_ng(frame)
+            return frame
+
+    def _read_frame(self, *args):
+        """Read frames.
+
+         - Extract frames and each layer of packets.
+         - Make Info object out of frame properties.
+         - Append Info.
+         - Write plist & append Info.
+
+        """
+        if self._flag_e:    return
+        while self._mpcnt.value >= CPU_CNT - 1:
+            time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
+
+        print(self._frnum, 'start')
+        # create process
+        self._ifile.seek(self._mpfdp[self._frnum-1].get(), os.SEEK_SET)
+        proc = multiprocessing.Process(target=self._extract_frame,
+                kwargs={'mpbuf': self._mpbuf, 'mpfdp': self._mpfdp[self._frnum]})
+        proc.start()
+
+        # update status
+        self._frnum += 1
+        self._mpcnt.value += 1
+        self._mplst.append(proc)
+
+    def _extract_frame(self, *, mpbuf=None, mpfdp=None):
+        """Extract frame."""
+        if self._flag_e:    raise EOFError
+
+        # extract frame
+        try:
+            frame = Frame(self._ifile, num=self._frnum, proto=self._dlink, fd=mpfdp)
+        except EOFError as error:
+            if self._flag_m:
+                return self._ifile.close()
+            raise error from None
+
+        # multiprocessing communication
+        if self._flag_m:
+            self._ifile.close()
+            frame._file = NotImplemented
+            mpbuf.put(Info(number=self._frnum, object=frame))
+            print(self._frnum, 'put')
+            self._mpcnt.value -= 1
+        return frame
+
+    def _analyse_frame(self, frame=None, *, mpbuf=None, mpret=None):
+        """Head quaters for analysis."""
+        if self._flag_m:
+            mpdct = dict()
+            while True:
+                print(self._frnum, 'trying')
+                frame = mpbuf.get()
+                if frame is EOFError:
+                    break
+                print(frame.number, 'get')
+                mpdct[frame.number] = frame.object
+
+                while True:
+                    frame = mpdct.pop(self._frnum, None)
+                    if frame is None:
+                        break
+                    self._analyse_frame_ng(frame)
+            mpret.put(self._frame)
+            mpret.put(self._reasm)
+
+    def _analyse_frame_ng(self, frame):
+        """Analyses frame."""
+        # verbose output
         if self._flag_v:
             print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
 
@@ -398,9 +528,6 @@ class Extractor:
             self._ipv4_reassembly(frame)
         if self._ipv6:
             self._ipv6_reassembly(frame)
-
-        # return frame record
-        return frame
 
     def _ipv4_reassembly(self, frame):
         """Store data for IPv4 reassembly."""
