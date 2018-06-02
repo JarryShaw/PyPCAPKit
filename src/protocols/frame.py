@@ -15,6 +15,8 @@ typedef struct pcaprec_hdr_s {
 """
 import datetime
 import io
+import os
+import signal
 
 
 # Frame Header
@@ -93,7 +95,9 @@ class Frame(Protocol):
 
         """
         _temp = self._read_unpack(4, lilendian=True, quiet=True)
-        if _temp is None:   raise EOFError
+        if _temp is None:
+            os.kill(os.getppid(), signal.SIGUSR2)
+            raise EOFError
 
         _time = datetime.datetime.fromtimestamp(_temp)
         _tsss = _temp
@@ -124,7 +128,8 @@ class Frame(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, *, num, proto):
+    def __init__(self, file, *, num, proto, fd=None):
+        self._fptr = fd
         self._fnum = num
         self._prot = proto
         self._file = file
@@ -208,6 +213,9 @@ class Frame(Protocol):
         """
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
+        if self._fptr is not None:
+            self._fptr.put(self._file.tell())
+            os.kill(os.getppid(), signal.SIGUSR1)
         flag, info, chain, alias = self._import_next_layer(bytes_, length)
 
         # make next layer protocol name
