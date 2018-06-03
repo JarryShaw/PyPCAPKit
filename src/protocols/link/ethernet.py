@@ -13,13 +13,8 @@ Octets      Bits        Name                    Discription
 """
 import textwrap
 
-
-# Ethernet Protocol
-# Analyser for ethernet protocol header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.link.link import Link
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['Ethernet']

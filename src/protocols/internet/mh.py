@@ -19,14 +19,8 @@ whose structure is described as below.
 
 """
 # TODO: Implements extractor for message data of all MH types.
-
-
-# Mobility Header
-# Analyser for Mobility Header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.protocol import Protocol
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['MH']

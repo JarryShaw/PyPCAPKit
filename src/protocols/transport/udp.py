@@ -18,12 +18,8 @@ which implements extractor for User Datagram Protocol
 +---------------- ...
 
 """
-# User Datagram Protocol
-# Analyser for UDP header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.transport.transport import Transport
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['UDP']

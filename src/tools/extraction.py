@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """extractor for PCAP files
 
-`jspcap.extractor` contains `Extractor` only, which
+`jspcap.tools.extraction` contains `Extractor` only, which
 synthesises file I/O and protocol analysis, coordinates
 information exchange in all network layers, extracst
 parametres from a PCAP file.
@@ -12,25 +12,24 @@ import os
 import pathlib
 import textwrap
 
+###############################################################################
+# from jsformat import PLIST, JSON, Tree, JavaScript, XML
+###############################################################################
 
-# Extractor for PCAP files
-# Extract parametres from a PCAP file
+from jspcap.protocols.pcap.frame import Frame
+from jspcap.protocols.pcap.header import Header
+from jspcap.utilities.exceptions import CallableError, FormatError, \
+        FileNotFound, UnsupportedCall, IterableError
+from jspcap.utilities.infoclass import Info
 
-
-from jspcap.exceptions import CallableError, FormatError, FileNotFound, UnsupportedCall, IterableError
-from jspcap.protocols import Frame, Header
-from jspcap.utilities import Info
+###############################################################################
+# from jspcap.reassembly.ipv4 import IPv4_Reassembly
+# from jspcap.reassembly.ipv6 import IPv6_Reassembly
+# from jspcap.reassembly.tcp import TCP_Reassembly
+###############################################################################
 
 
 __all__ = ['Extractor']
-
-
-# import re
-#
-# # file name match regex
-# FILE = re.compile(r'''
-#     \A(.+?)[.](?P<ext>.*)\Z
-# ''', re.VERBOSE | re.IGNORECASE)
 
 
 class Extractor:

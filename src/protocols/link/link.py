@@ -8,38 +8,14 @@ class for link layer protocols, eg. ARP/InARP, Ethernet,
 L2TP, OSPF, RARP/DRARP and etc.
 
 """
-# TODO: Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.
-
-
 import io
 
-
-# Link Layer Protocols
-# Table of corresponding protocols
-
-
-from jspcap.utilities import beholder
-from jspcap.protocols.protocol import Protocol
 from jspcap.protocols.internet.internet import ETHERTYPE
+from jspcap.protocols.protocol import Protocol
+from jspcap.utilities.decorators import beholder
 
 
 __all__ = ['Link', 'LINKTYPE']
-
-
-# ##############################################################################
-# # for unknown reason and never-encountered situation, at current time
-# # we have to change the working directory to import from parent folders
-#
-# import os
-# import sys
-# sys.path.insert(1, os.path.join(sys.path[0], '..'))
-#
-# from protocol import Protocol
-#
-# del sys.path[1]
-#
-# # and afterwards, we recover the whole scene back to its original state
-# ##############################################################################
 
 
 # Link-Layer Header Type Values

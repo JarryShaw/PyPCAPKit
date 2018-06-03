@@ -6,13 +6,10 @@ implements extractor for unknown protocol, and constructs
 a `Protocol` like object.
 
 """
-# Raw Packet Data
-# Analyser for unknown protocol data
-
-
-from jspcap.exceptions import UnsupportedCall
-from jspcap.utilities import Info, ProtoChain
 from jspcap.protocols.protocol import Protocol
+from jspcap.utilities.exceptions import UnsupportedCall
+from jspcap.utilities.infoclass import Info
+from jspcap.utilities.protochain import ProtoChain
 
 
 __all__ = ['Raw']

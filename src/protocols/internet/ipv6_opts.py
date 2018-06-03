@@ -18,14 +18,8 @@ is described as below.
 
 """
 # TODO: Implements extractor of all destination options.
-
-
-# Destination Options for IPv6
-# Analyser for IPv6-Opts header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.protocol import Protocol
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['IPv6_Opts']

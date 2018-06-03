@@ -72,13 +72,8 @@ Algorithm:
 """
 import copy
 
-
-# Reassembly IP Fragments
-# Base class for IPv4 & IPv6 reassembly
-
-
-from jspcap.utilities import Info
 from jspcap.reassembly.reassembly import Reassembly
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['IP_Reassembly']

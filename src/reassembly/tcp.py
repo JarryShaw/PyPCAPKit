@@ -7,62 +7,68 @@ The algorithm for TCP reassembly is decribed as below.
 
 Notations:
 
-    FO    - Fragment Offset
-    IHL   - Internet Header Length
-    MF    - More Fragments flag
-    TTL   - Time To Live
-    NFB   - Number of Fragment Blocks
-    TL    - Total Length
-    TDL   - Total Data Length
-    BUFID - Buffer Identifier
-    RCVBT - Fragment Received Bit Table
-    TLB   - Timer Lower Bound
+    DSN     - Data Sequence Number 
+    ACK     - TCP Acknowledgement
+    FIN     - TCP Finish Flag
+    SYN     - TCP Synchronisation Flag
+    BUFID   - Buffer Identifier
+    HDL     - Hole Discriptor List
+    ISN     - Initial Sequence Number
+    src     - source IP
+    dst     - destionation IP
+    srcport - source TCP port
+    dstport - destionation TCP port
 
 Algorithm:
 
-    DO {
-        BUFID <- source|destination|protocol|identification;
+    DO { 
+        BUFID <- src|dst|srcport|dstport|ACK;  
+        IF (SYN is true) { 
+            IF (buffer with BUFID is allocated) { 
+                flush all reassembly for this BUFID; 
+                submit datagram to next step; 
+            } 
+        }  
 
-        IF (FO = 0 AND MF = 0) {
-            IF (buffer with BUFID is allocated) {
-                flush all reassembly for this BUFID;
-                Submit datagram to next step;
-                DONE.
-            }
-        }
-
-        IF (no buffer with BUFID is allocated) {
-            allocate reassembly resources with BUFID;
-            TIMER <- TLB;
-            TDL <- 0;
+        IF (no buffer with BUFID is allocated) { 
+            allocate reassembly resources with BUFID; 
+            ISN <- DSN; 
             put data from fragment into data buffer with BUFID
-                [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
-            set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
+                [from octet fragment.first to octet fragment.last]; 
+            update HDL; 
+        }  
+
+        IF (FIN is true) { 
+            submit datagram to next step; 
+            free all reassembly resources for this BUFID; 
+            BREAK. 
         }
+      } give up until (next fragment);
 
-        IF (MF = 0) {
-            TDL <- TL-(IHL*4)+(FO*8)
-        }
+    update HDL: { 
+        DO { 
+            select the next hole descriptor from HDL;  
 
-        IF (FO = 0) {
-            put header in header buffer
-        }
+            IF (fragment.first >= hole.first) CONTINUE. 
+            IF (fragment.last <= hole.first) CONTINUE.  
 
-        IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
-            TL <- TDL+(IHL*4)
-            Submit datagram to next step;
-            free all reassembly resources for this BUFID;
-            DONE.
-        }
+            delete the current entry from HDL;  
 
-        TIMER <- MAX(TIMER,TTL);
+            IF (fragment.first >= hole.first) { 
+                create new entry "new_hole" in HDL; 
+                new_hole.first <- hole.first; 
+                new_hole.last <- fragment.first - 1; 
+                BREAK. 
+            }  
 
-    } give up until (next fragment or timer expires);
-
-    timer expires: {
-        flush all reassembly with this BUFID;
-        DONE.
-    }
+            IF (fragment.last <= hole.last) { 
+                create new entry "new_hole" in HDL; 
+                new_hole.first <- fragment.last + 1 ;
+                new_hole.last <- hole.last; 
+                BREAK. 
+            }
+        } give up until (no entry from HDL)
+     }
 
 The following algorithm implementment is based on `IP Datagram
 Reassembly Algorithm` introduced in RFC 815. It descripted an
@@ -92,14 +98,9 @@ import copy
 import io
 import sys
 
-
-# Reassembly TCP Datagram
-# Reconstruct application layer packets
-
-
-from jspcap.analyser import analyse
-from jspcap.utilities import Info
 from jspcap.reassembly.reassembly import Reassembly
+from jspcap.tools.analysis import analyse
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['TCP_Reassembly']

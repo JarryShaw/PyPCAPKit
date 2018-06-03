@@ -20,14 +20,9 @@ Octets      Bits        Name                    Discription
 import collections
 import textwrap
 
-
-# Address Resolution Protocol
-# Analyser for ARP/InARP header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.internet.internet import ETHERTYPE
 from jspcap.protocols.link.link import Link, LINKTYPE
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['ARP']

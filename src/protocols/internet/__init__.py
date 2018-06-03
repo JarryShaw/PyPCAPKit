@@ -6,6 +6,8 @@ in internet layer, with detailed implementation and
 methods.
 
 """
+# TODO: Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.
+
 # Base Class for Internet Layer
 from jspcap.protocols.internet.internet import Internet
 
@@ -34,6 +36,6 @@ from jspcap.protocols.internet.ipsec import IPsec
 __all__ = [
     'ETHERTYPE',                                        # Protocol Numbers
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',         # Internet Layer
-    'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
-                                                        # IPv6 Extension Header
+    'HIP', 'HOPOPT', 'IPv6_Frag',
+    'IPv6_Opts', 'IPv6_Route', 'MH',                    # IPv6 Extension Header
 ]

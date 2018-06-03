@@ -18,10 +18,6 @@ Octets      Bits        Name                    Discription
   24        192     rarp.tpa                Target Protocol Address
 
 """
-# Reverse Address Resolution Protocol
-# Analyser for RARP/DRARP header
-
-
 from jspcap.protocols.link.arp import ARP
 
 

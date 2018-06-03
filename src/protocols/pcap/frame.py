@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """frame header
 
-`jspcap.protocols.frame` contains `Frame` only,
+`jspcap.protocols.pcap.frame` contains `Frame` only,
 which implements extractor for frame headers of PCAP,
 whose structure is described as below.
 
@@ -16,14 +16,18 @@ typedef struct pcaprec_hdr_s {
 import datetime
 import io
 
-
-# Frame Header
-# Analyser for record/package headers
-
-
-from jspcap.exceptions import ProtocolNotFound, ProtocolUnbound
-from jspcap.utilities import beholder, Info, ProtoChain
 from jspcap.protocols.protocol import Protocol
+from jspcap.utilities.decorators import beholder
+from jspcap.utilities.exceptions import ProtocolNotFound, ProtocolUnbound
+from jspcap.utilities.infoclass import Info
+from jspcap.utilities.protochain import ProtoChain
+
+###############################################################################
+# from jspcap.protocols.link import Ethernet
+# from jspcap.protocols.internet import IPv4
+# from jspcap.protocols.internet import IPv6
+# from jspcap.protocols.raw import Raw
+###############################################################################
 
 
 __all__ = ['Frame']

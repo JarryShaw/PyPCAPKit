@@ -7,9 +7,6 @@ with pre-defined utility arguments and methods of specified
 protocols.
 
 """
-# TODO: Implement specified classes for MAC and IP addresses.
-
-
 import abc
 import copy
 import io
@@ -18,15 +15,14 @@ import os
 import struct
 import textwrap
 
-
-# Abstract Base Class of Protocols
-# Pre-define useful arguments and methods of protocols
-
-
-from jspcap.exceptions import BoolError, BytesError, StructError
-from jspcap.utilities import beholder, seekset, Info, ProtoChain
-from jspcap.validations import bool_check, int_check
+from jspcap.utilities.decorators import beholder, seekset
+from jspcap.utilities.exceptions import BoolError, BytesError, StructError
+from jspcap.utilities.infoclass import Info
+from jspcap.utilities.protochain import ProtoChain
+from jspcap.utilities.validations import bool_check, int_check
+###############################################################################
 # from jspcap.protocols.raw import Raw
+###############################################################################
 
 
 __all__ = ['Protocol']

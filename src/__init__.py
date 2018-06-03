@@ -19,33 +19,37 @@ efficiency in some way.
 In `jspcap`, all files can be described as following six
 parts.
 
- - Interface (`jspcap.interface`)
+ - Functions (`jspcap.functions`)
+    standard library interface, which implements three
+    major verbs of the library
+
+ - Tools (`jspcap.tools`)
+    synthesise file I/O and protocol analysis, coordinate
+    information exchange in all network layers
+
+ - Interfaces (`jspcap.interfaces`)
     user interface for the `jspcap` library, which 
     standardises and simplifies the usage of this
     library
-
- - Extraction (`jspcap.extractor`)
-    synthesise file I/O and protocol analysis, coordinate
-    information exchange in all network layers
 
  - Reassembly (`jspcap.reassembly`)
     base on algorithms described in
    [`RFC 815`](https://tools.ietf.org/html/rfc815>),
    implement datagram reassembly of IP and TCP packets
 
- - Protocls (`jspcap.protocols`)
+ - Protocols (`jspcap.protocols`)
     collection of all protocol family, with detailed
     implementation and methods
 
  - Utilities (`jspcap.utilities`)
     collection of four utility functions and classes
 
- - Exceptions (`jspcap.exceptions`)
-    collection of refined custom exceptions
-
 """
-# Interface
-from jspcap.interface import *
+# Functions
+from jspcap.functions import *
+
+# Interfaces
+from jspcap.interfaces import *
 
 # Protocols
 from jspcap.protocols.raw import Raw
@@ -73,8 +77,8 @@ from jspcap.protocols.application.http import HTTP
 
 
 __all__ = [
-    'extract', 'analyse', 'reassemble',                 # Interface
-    'TREE', 'JSON', 'PLIST',                            # Variables
+    'extract', 'analyse', 'reassemble',                 # Functions
+    'TREE', 'JSON', 'PLIST',                            # Macros
     'Raw',                                              # Raw Packet
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',  # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',         # Internet Layer

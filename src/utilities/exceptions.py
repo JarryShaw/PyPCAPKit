@@ -12,10 +12,6 @@ import sys
 import traceback
 
 
-# user defined exceptions
-# show refined infomation when exceptions raised
-
-
 __all__ = [
     'BaseError',                                                # Exception
     'DigitError', 'IntError', 'RealError', 'ComplexError',      # TypeError

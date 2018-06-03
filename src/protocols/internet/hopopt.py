@@ -18,14 +18,8 @@ as below.
 
 """
 # TODO: Implements extractor of all hop-by-hop options.
-
-
-# IPv6 Hop-by-Hop Option
-# Analyser for HOPOPT header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.protocol import Protocol
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['HOPOPT']

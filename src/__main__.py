@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
+"""command line tool
 
+`jspcap.__main__` was originally the module file of
+[`jspcapy`](https://github.com/JarryShaw/jspcapy), which
+is now deprecated and merged with `jspcap`.
 
+"""
 import argparse
 import os
 import sys
 
-
-# original module of jspcapy
-# command line tool for jspcap
-
-
-from jspcap.interface import extract
+from jspcap.functions import extract
 
 
 # version number
@@ -82,11 +82,9 @@ def main():
     elif args.tree:     fmt = 'tree'
     else:               fmt = None
 
-    extractor = extract(
-                    fin=args.fin, fout=args.fout, format=fmt,
+    extractor = extract(fin=args.fin, fout=args.fout, format=fmt,
                     auto=args.verbose, files=args.files,
-                    store=False, extension=args.auto_extension,
-                )
+                    store=False, extension=args.auto_extension)
 
     if not args.verbose:
         print(f"🚨 Loading file '{extractor.input}'")

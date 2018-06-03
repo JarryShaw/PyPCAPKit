@@ -17,14 +17,9 @@ Protocol (HTTP/2), whose structure is described as below.
 """
 import collections
 
-
-# Hypertext Transfer Protocol (HTTP/2)
-# Analyser for HTTP/2 request & response
-
-
-from jspcap.exceptions import ProtocolError
-from jspcap.utilities import Info
 from jspcap.protocols.application.http import HTTP
+from jspcap.utilities.exceptions import ProtocolError
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['HTTPv2']
@@ -117,7 +112,6 @@ class HTTPv2(HTTP):
         * _read_binary -- read bytes and convert into binaries
         * _read_packet -- read raw packet data
         * _make_protochain -- make ProtoChain instance for corresponding protocol
-        * _http_decode -- test and decode HTTP parameters
         * _read_http_data -- read HTTP/2 DATA frames
         * _read_http_headers -- read HTTP/2 HEADERS frames
         * _read_http_priority -- read HTTP/2 PRIORITY frames

@@ -1,26 +1,24 @@
 # -*- coding: utf-8 -*-
 """interface functions
 
-`jspcap.interface` defines several user-oriented
-functions, variables, and etc. These interfaces are
+`jspcap.functions` defines several user-oriented
+functions, macros, and etc. These interfaces are
 designed to help and simplify the usage of `jspcap`.
 
 """
-# User Interface
-# interface functions and variables
-
-
-from jspcap.analyser import analyse as _analyse
-from jspcap.exceptions import FormatError
-from jspcap.extractor import Extractor
-from jspcap.reassembly import IPv4_Reassembly, IPv6_Reassembly, TCP_Reassembly
-from jspcap.validations import bool_check, int_check, io_check, str_check
 from jspcap.protocols.protocol import Protocol
+from jspcap.reassembly.ipv4 import IPv4_Reassembly
+from jspcap.reassembly.ipv6 import IPv6_Reassembly
+from jspcap.reassembly.tcp import TCP_Reassembly
+from jspcap.tools.analysis import analyse as raw_analyse
+from jspcap.tools.extraction import Extractor
+from jspcap.utilities.exceptions import FormatError
+from jspcap.utilities.validations import bool_check, int_check, io_check, str_check
 
 
 __all__ = [
     'extract', 'analyse', 'reassemble',     # functions
-    'TREE', 'JSON', 'PLIST',                # variables
+    'TREE', 'JSON', 'PLIST',                # macros
 ]
 
 
@@ -96,7 +94,7 @@ def analyse(*, file, length=None):
     io_check(file)
     int_check(length)
 
-    return _analyse(file, length)
+    return raw_analyse(file, length)
 
 
 def reassemble(*, protocol, strict=False):

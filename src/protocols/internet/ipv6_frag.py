@@ -12,12 +12,8 @@ IPv6 (IPv6-Frag), whose structure is described as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-# Fragment Header for IPv6
-# Analyser for IPv6-Frag header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.protocol import Protocol
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['IPv6_Frag']

@@ -8,38 +8,15 @@ latter is a base class for internet layer protocols, eg.
 AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 
 """
-# TODO: Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.
-
-
 import io
 
-
-# Internet Layer Protocols
-# Table of corresponding protocols
-
-
-from jspcap.utilities import beholder, ProtoChain
 from jspcap.protocols.protocol import Protocol
 from jspcap.protocols.transport.transport import TP_PROTO
+from jspcap.utilities.decorators import beholder
+from jspcap.utilities.protochain import ProtoChain
 
 
 __all__ = ['Internet', 'ETHERTYPE']
-
-
-# ##############################################################################
-# # for unknown reason and never-encountered situation, at current time
-# # we have to change the working directory to import from parent folders
-#
-# import os
-# import sys
-# sys.path.insert(1, os.path.join(sys.path[0], '..'))
-#
-# from protocol import Protocol
-#
-# del sys.path[1]
-#
-# # and afterwards, we recover the whole scene back to its original state
-# ##############################################################################
 
 
 # Ethertype IEEE 802 Numbers

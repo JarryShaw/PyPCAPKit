@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """validation utilities
 
-`jspcap.validations` contains functions to validate
+`jspcap.utilities.validations` contains functions to validate
 arguments for functions and classes. It was first used in
 [`jsntlib`](https://github.com/JarryShaw/jspcapy) as
 validators.
@@ -11,12 +11,9 @@ import inspect
 import io
 import numbers
 
-
-# Validation utilities
-# Validates arguments for functions
-
-
-from jspcap.exceptions import BoolError, BytesError, BytearrayError, DictError, DigitError, FragmentError, IntError, IOObjError, ListError, RealError, TupleError
+from jspcap.utilities.exceptions import BoolError, BytesError, BytearrayError, \
+        DictError, DigitError, FragmentError, IntError, IOObjError, ListError, \
+        RealError, TupleError
 
 
 __all__ = [

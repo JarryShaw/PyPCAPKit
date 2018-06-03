@@ -14,12 +14,8 @@ Octets      Bits        Name                    Discription
   18        144     ipx.src                 Source Address
 
 """
-# Internetwork Packet Exchange
-# Analyser for IPX header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.internet.internet import Internet
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['IPX']

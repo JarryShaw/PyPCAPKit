@@ -11,13 +11,8 @@ implements datagram reassembly of IP and TCP packets.
 import abc
 import copy
 
-
-# Reassembly of Packets
-# Abstract Base Class for Reassembly
-
-
-from jspcap.utilities import Info
-from jspcap.validations import frag_check, int_check
+from jspcap.utilities.infoclass import Info
+from jspcap.utilities.validations import frag_check, int_check
 
 
 __all__ = ['Reassembly']

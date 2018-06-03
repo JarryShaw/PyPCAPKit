@@ -20,12 +20,8 @@ whose structure is described as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-# Authentication Header
-# Analyser for AH header
-
-
-from jspcap.exceptions import VersionError, ProtocolError
 from jspcap.protocols.internet.ipsec import IPsec
+from jspcap.utilities.exceptions import VersionError, ProtocolError
 
 
 __all__ = ['AH']

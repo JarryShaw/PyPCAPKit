@@ -5,8 +5,8 @@
  > Note that the whole project only supports __Python 3.6__ or later.
 
  - [About](#about)
-    * [Interface](https://github.com/JarryShaw/jspcap/tree/master/src#interface)
-    * [Extraction](https://github.com/JarryShaw/jspcap/tree/master/src#extraction)
+    * [Interface](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
+    * [Extraction](https://github.com/JarryShaw/jspcap/tree/master/src/tools#extraction)
     * [Reassembly](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
     * [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
     * [Utilities](https://github.com/JarryShaw/jspcap/tree/master/src#utilities)
@@ -71,19 +71,19 @@ $ python setup.py install
 
 ##### Interface
 
-|                                      NAME                                      |            DESCRIPTION            |
-| :----------------------------------------------------------------------------: | :-------------------------------: |
-| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src#extract)       |        extract a PCAP file        |
-| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src#analyse)       | analyse application layer packets |
-| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src#reassemble) |  reassemble fragmented datagrams  |
+|                                           NAME                                           |            DESCRIPTION            |
+| :--------------------------------------------------------------------------------------: | :-------------------------------: |
+| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#extract)       |        extract a PCAP file        |
+| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#analyse)       | analyse application layer packets |
+| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#reassemble) |  reassemble fragmented datagrams  |
 
 ##### Macros
 
-|                                   NAME                                   |               DESCRIPTION                |
-| :----------------------------------------------------------------------: | :--------------------------------------: |
-| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src#variables)  | JavaScript Object Notation (JSON) format |
-| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src#variables) |    macOS Property List (PLIST) format    |
-| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src#variables)  |          Tree-View text format           |
+|                                        NAME                                        |               DESCRIPTION                |
+| :--------------------------------------------------------------------------------: | :--------------------------------------: |
+| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#variables)  | JavaScript Object Notation (JSON) format |
+| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#variables) |    macOS Property List (PLIST) format    |
+| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#variables)  |          Tree-View text format           |
 
 ##### Protocols
 

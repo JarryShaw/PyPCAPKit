@@ -6,12 +6,9 @@ which is a base class for Internet Protocol (IP) protocol
 family, eg. IPv4, IPv6, and IPsec.
 
 """
-# Internet Protocol
-# Analyser for IP header
-
-
-from jspcap.utilities import Info, seekset
 from jspcap.protocols.internet.internet import Internet
+from jspcap.utilities.decorators import seekset
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['IP']

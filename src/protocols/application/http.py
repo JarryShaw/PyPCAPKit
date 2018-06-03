@@ -8,14 +8,9 @@ Protocol (HTTP) protocol family, eg. HTTP/1.*, HTTP/2.
 """
 import chardet
 
-
-# Hypertext Transfer Protocol
-# Analyser for HTTP request & response
-
-
-from jspcap.exceptions import UnsupportedCall, ProtocolError
-from jspcap.utilities import Info
 from jspcap.protocols.application.application import Application
+from jspcap.utilities.exceptions import UnsupportedCall, ProtocolError
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['HTTP']
@@ -50,7 +45,6 @@ class HTTP(Application):
         * _read_binary -- read bytes and convert into binaries
         * _read_packet -- read raw packet data
         * _make_protochain -- make ProtoChain instance for corresponding protocol
-        * _http_decode -- test and decode HTTP parameters
 
     """
     ##########################################################################
@@ -79,17 +73,3 @@ class HTTP(Application):
     @classmethod
     def __index__(cls):
         return ('HTTPv1', 'HTTPv2')
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    @staticmethod
-    def _http_decode(byte):
-        charset = chardet.detect(byte)['encoding']
-        if charset:
-            try:
-                return byte.decode(charset)
-            except Exception:
-                pass
-        return byte

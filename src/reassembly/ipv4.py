@@ -70,10 +70,6 @@ Algorithm:
     }
 
 """
-# Reassembly IPv4 Fragments
-# Reconstruct IPv4 packets back to origin
-
-
 from jspcap.reassembly.ip import IP_Reassembly
 
 

@@ -25,14 +25,10 @@ which implements extractor for Internet Protocol version 4
 import collections
 import datetime
 
-
-# Internet Protocol version 4
-# Analyser for IPv4 header
-
-
-from jspcap.exceptions import ProtocolError
-from jspcap.utilities import Info, ProtoChain
 from jspcap.protocols.internet.ip import IP
+from jspcap.utilities.exceptions import ProtocolError
+from jspcap.utilities.infoclass import Info
+from jspcap.utilities.protochain import ProtoChain
 
 
 __all__ = ['IPv4']

@@ -31,17 +31,11 @@ which implements extractor for Internet Protocol version 6
 
 """
 # TODO: Implements IPv6 extension headers.
-
-
 import collections
 
-
-# Internet Protocol version 6
-# Analyser for IPv6 header
-
-
-from jspcap.utilities import Info, ProtoChain
 from jspcap.protocols.internet.ip import IP
+from jspcap.utilities.infoclass import Info
+from jspcap.utilities.protochain import ProtoChain
 
 
 __all__ = ['IPv6']

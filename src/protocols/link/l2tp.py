@@ -18,12 +18,8 @@ which implements extractor for Layer Two Tunnelling Protocol
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-# Layer Two Tunnelling Protocol
-# Analyser for L2TP header
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.link.link import Link
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['L2TP']

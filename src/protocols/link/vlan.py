@@ -13,14 +13,8 @@ Octets      Bits        Name                    Discription
   3          24     vlan.type               Protocol (Internet Layer)
 
 """
-
-
-# 802.1Q Customer VLAN Tag Type
-# Analyser for 802.1Q customer VLAN tag type
-
-
-from jspcap.utilities import Info
 from jspcap.protocols.link.link import Link
+from jspcap.utilities.infoclass import Info
 
 __all__ = ['VLAN']
 

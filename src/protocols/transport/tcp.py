@@ -28,13 +28,9 @@ Protocol (TCP), whose structure is described as below.
 """
 import struct
 
-
-# Transmission Control Protocol
-# Analyser for TCP header
-
-
-from jspcap.utilities import Info, seekset
 from jspcap.protocols.transport.transport import Transport
+from jspcap.utilities.decorators import seekset
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['TCP']

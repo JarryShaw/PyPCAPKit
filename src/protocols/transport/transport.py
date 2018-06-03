@@ -8,38 +8,16 @@ And the latter is a base class for transport layer
 protocols, eg. TCP and UDP.
 
 """
-# TODO: Implements DCCP, RSVP, STCP.
-
-
 import io
 
-
-# Transport Layer Protocols
-# Table of corresponding protocols
-
-
-from jspcap.utilities import beholder
 from jspcap.protocols.protocol import Protocol
-# from jspcap.analyser import analyse
+from jspcap.utilities.decorators import beholder
+###############################################################################
+# from jspcap.tools.analysis import analyse
+###############################################################################
 
 
 __all__ = ['Transport', 'TP_PROTO']
-
-
-# ##############################################################################
-# # for unknown reason and never-encountered situation, at current time
-# # we have to change the working directory to import from parent folders
-#
-# import os
-# import sys
-# sys.path.insert(1, os.path.join(sys.path[0], '..'))
-#
-# from protocol import Protocol
-#
-# del sys.path[1]
-#
-# # and afterwards, we recover the whole scene back to its original state
-# ##############################################################################
 
 
 # Transport Layer Protocol Numbers

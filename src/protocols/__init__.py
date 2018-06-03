@@ -5,12 +5,13 @@
 with detailed implementation and methods.
 
 """
+# TODO: Implement specified classes for MAC and IP addresses.
+
 # Base Class for Protocols
 from jspcap.protocols.protocol import Protocol
 
 # Utility Classes for Protocols
-from jspcap.protocols.header import Header
-from jspcap.protocols.frame import Frame
+from jspcap.protocols.pcap import *
 from jspcap.protocols.raw import Raw
 
 # Protocols & Macros

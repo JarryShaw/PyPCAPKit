@@ -20,14 +20,11 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 """
 import re
 
+import chardet
 
-# Hypertext Transfer Protocol (HTTP/1.*)
-# Analyser for HTTP/1.* request & response
-
-
-from jspcap.exceptions import ProtocolError
-from jspcap.utilities import Info
 from jspcap.protocols.application.http import HTTP
+from jspcap.utilities.exceptions import ProtocolError
+from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['HTTPv1']
@@ -131,6 +128,16 @@ class HTTPv1(HTTP):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    @staticmethod
+    def _http_decode(byte):
+        charset = chardet.detect(byte)['encoding']
+        if charset:
+            try:
+                return byte.decode(charset)
+            except Exception:
+                pass
+        return byte
 
     def _read_http_header(self, header):
         """Read HTTP/1.* header.
