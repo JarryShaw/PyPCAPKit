@@ -6,35 +6,12 @@
 layer protocols, eg. HTTP/1.*, HTTP/2 and etc.
 
 """
-# TODO: Implements BGP, DHCP, DNS, FTP, IMAP, IDAP, MQTT, NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, SSL, TELNET, TLS, XMPP.
-
-
-# Application Layer Protocols
-# Table of corresponding protocols
-
-
-from jspcap.exceptions import UnsupportedCall
-from jspcap.utilities import ProtoChain
 from jspcap.protocols.protocol import Protocol
+from jspcap.utilities.exceptions import UnsupportedCall
+from jspcap.utilities.protochain import ProtoChain
 
 
 __all__ = ['Application']
-
-
-# ##############################################################################
-# # for unknown reason and never-encountered situation, at current time
-# # we have to change the working directory to import from parent folders
-#
-# import os
-# import sys
-# sys.path.insert(1, os.path.join(sys.path[0], '..'))
-#
-# from protocol import Protocol
-#
-# del sys.path[1]
-#
-# # and afterwards, we recover the whole scene back to its original state
-# ##############################################################################
 
 
 class Application(Protocol):

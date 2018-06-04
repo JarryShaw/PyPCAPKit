@@ -19,13 +19,13 @@ efficiency in some way.
 In `jspcap`, all files can be described as following six
 parts.
 
- - Functions (`jspcap.functions`)
-    standard library interface, which implements three
-    major verbs of the library
-
- - Tools (`jspcap.tools`)
+ - Fundations (`jspcap.fundations`)
     synthesise file I/O and protocol analysis, coordinate
     information exchange in all network layers
+
+ - Tools (`jspcap.tools`)
+    standard library interface, which implements three
+    major verbs of the library
 
  - Interfaces (`jspcap.interfaces`)
     user interface for the `jspcap` library, which 
@@ -45,8 +45,8 @@ parts.
     collection of four utility functions and classes
 
 """
-# Functions
-from jspcap.functions import *
+# Tools
+from jspcap.tools import *
 
 # Interfaces
 from jspcap.interfaces import *

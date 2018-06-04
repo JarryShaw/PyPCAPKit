@@ -26,6 +26,6 @@ from jspcap.protocols.link.link import LINKTYPE
 
 __all__ = [
     'LINKTYPE',                             # Protocol Numbers
-    'ARP', 'InARP', 'RARP', 'DRARP',
-    'Ethernet', 'L2TP', 'OSPF', 'VLAN',     # Link Layer Protocols
+    'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP', 'VLAN',
+                                            # Link Layer Protocols
 ]

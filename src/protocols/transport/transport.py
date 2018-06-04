@@ -13,7 +13,7 @@ import io
 from jspcap.protocols.protocol import Protocol
 from jspcap.utilities.decorators import beholder
 ###############################################################################
-# from jspcap.tools.analysis import analyse
+# from jspcap.fundations.analysis import analyse
 ###############################################################################
 
 
@@ -106,6 +106,6 @@ class Transport(Protocol):
             * str -- alias of next layer
 
         """
-        from jspcap.analyser import analyse
+        from jspcap.fundations.analysis import analyse
         next_ = analyse(io.BytesIO(self._read_fileng(length)), length)
         return True, next_.info, next_.protochain, next_.alias

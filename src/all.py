@@ -3,11 +3,11 @@
 
 `jspcap` has defined various and numerous functions and
 classes, which have different features and purposes. To
-make a simple index for this library, `jspcap.__all__`
+make a simple index for this library, `jspcap.all`
 contains all things from `jspcap`.
 
 """
-from jspcap.functions import *
+from jspcap.fundations import *
 from jspcap.interfaces import *
 from jspcap.protocols import *
 from jspcap.reassembly import *
@@ -16,16 +16,18 @@ from jspcap.utilities import *
 
 
 __all__ = [
-    # jspcap.functions
-    'extract', 'analyse', 'reassemble',                 # functions
-    'TREE', 'JSON', 'PLIST',                            # macros
+    # jspcap.fundations
+    'Extrator',                                         # Extraction
+    'analyse',                                          # Analysis
 
     # jspcap.interfaces
 
     # jspcap.protocols
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                # Protocol Numbers
+    'Header', 'Frame',                                  # PCAP Headers
     'Raw',                                              # Raw Packet
-    'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',  # Link Layer
+    'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP', 'VLAN',
+                                                        # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',         # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                         # IPv6 Extension Header
@@ -37,11 +39,12 @@ __all__ = [
     'TCP_Reassembly',                                   # TCP Reassembly
 
     # jspcap.tools
-    'analyse', 'Extrator',
+    'extract', 'analyse', 'reassemble',                 # Functions
+    'TREE', 'JSON', 'PLIST',                            # Macros
 
     # jspcap.utilities
-    'seekset_ng', 'beholder_ng',                        # decorators
-    'Info',                                             # Info
+    'seekset_ng', 'beholder_ng',                        # Decorators
+    'Info',                                             # Info Class
     'ProtoChain',                                       # ProtoChain
-    'VersionInfo',                                      # VersionInfo
+    'VersionInfo',                                      # Version
 ]

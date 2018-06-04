@@ -10,7 +10,7 @@ import argparse
 import os
 import sys
 
-from jspcap.functions import extract
+from jspcap.fundations.extraction import Extractor
 
 
 # version number
@@ -82,9 +82,9 @@ def main():
     elif args.tree:     fmt = 'tree'
     else:               fmt = None
 
-    extractor = extract(fin=args.fin, fout=args.fout, format=fmt,
-                    auto=args.verbose, files=args.files,
-                    store=False, extension=args.auto_extension)
+    extractor = Extractor(fin=args.fin, fout=args.fout, format=fmt,
+                            auto=args.verbose, files=args.files,
+                            store=False, extension=args.auto_extension)
 
     if not args.verbose:
         print(f"🚨 Loading file '{extractor.input}'")

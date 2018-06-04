@@ -6,6 +6,8 @@ protocols in application layer, with detailed
 implementation and methods.
 
 """
+# TODO: Implements BGP, DHCP, DNS, FTP, IMAP, IDAP, MQTT, NNTP, NTP, ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, SSL, TELNET, TLS, XMPP.
+
 # Base Class for Internet Layer
 from jspcap.protocols.application.application import Application
 

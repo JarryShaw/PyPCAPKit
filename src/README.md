@@ -2,12 +2,12 @@
 
 &emsp; `jspcap` is an open sourse library for PCAP extarction and analysis, written in __Python 3.6__. The following is a manual for this library.
 
- - [Functions](https://github.com/JarryShaw/jspcap/tree/master/src/functions#functions-manual)
-    * [`functions`](#index-functions)
- - [Interfaces](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
- 	* [`interfaces`](#index-interfaces)
+ - [Fundations](https://github.com/JarryShaw/jspcap/tree/master/src/fundations#fundations-manual)
+    * [`fundations`](#index-fundations)
  - [Tools](https://github.com/JarryShaw/jspcap/tree/master/src/tools#tools-manual)
     * [`tools`](#index-tools)
+ - [Interfaces](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
+ 	* [`interfaces`](#index-interfaces)
  - [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
     * [Macros](#macros)
     * [`protocols`](#index-protocols)
@@ -19,23 +19,46 @@
 
 ---
 
-## Functions
+<a name="fundations"> </a> 
 
- > described in [`src/functions`](https://github.com/JarryShaw/jspcap/tree/master/src/functions)
+## Fundations
 
-&emsp; For vast scale of this library, `jspcap.functions` standardises library interfaces, which implements three major verbs of the library.
+ > described in [`src/fundations`](https://github.com/JarryShaw/jspcap/tree/master/src/fundations#fundations-manual)
 
-<a name="index-functions"> </a>
+&emsp; `jspcap.fundations` is a collection of fundations for `jspcap`, including PCAP file extraction tool `Extrator` and application layer protocol analyser `analyse`.
 
-##### `functions`
+<a name="index-fundations"> </a>
 
-|                                           NAME                                           |            DESCRIPTION            |
-| :--------------------------------------------------------------------------------------: | :-------------------------------: |
-| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#extract)       |        extract a PCAP file        |
-| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#analyse)       | analyse application layer packets |
-| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#reassemble) |  reassemble fragmented datagrams  |
+##### Fundations
+
+|                                        NAME                                        |             DESCRIPTION              |
+| :--------------------------------------------------------------------------------: | :----------------------------------: |
+| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/fundations#analyse)     | match protocols & extract attributes |
+| [`Extractor`](https://github.com/JarryShaw/jspcap/tree/master/src/fundations#extractor) | extract parameters from a PCAP file  |
 
 &nbsp;
+
+<a name="tools"> </a> 
+
+## Tools
+
+ > described in [`src/tools`](https://github.com/JarryShaw/jspcap/tree/master/src/tools)
+
+&emsp; For vast scale of this library, `jspcap.tools` standardises library interfaces, which implements three major verbs of the library.
+
+<a name="index-tools"> </a>
+
+##### Tools
+
+|                                         NAME                                         |            DESCRIPTION            |
+| :----------------------------------------------------------------------------------: | :-------------------------------: |
+| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#extract)       |        extract a PCAP file        |
+| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#analyse)       | analyse application layer packets |
+| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#reassemble) |  reassemble fragmented datagrams  |
+
+&nbsp;
+
+<a name="interfaces"> </a>
 
 ## Interfaces
 
@@ -49,23 +72,6 @@
 
 | NAME | DESCRIPTION |
 | :--: | :---------: |
-
-&nbsp;
-
-## Tools
-
- > described in [`src/tools`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#tools-manual)
-
-&emsp; `jspcap.tools` is a collection of fundations for `jspcap`, including PCAP file extraction tool `Extrator` and application layer protocol analyser `analyse`.
-
-<a name="index-tools"> </a>
-
-##### Tools
-
-|                                        NAME                                        |             DESCRIPTION              |
-| :--------------------------------------------------------------------------------: | :----------------------------------: |
-| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#analyse)     | match protocols & extract attributes |
-| [`Extractor`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#extractor) | extract parameters from a PCAP file  |
 
 &nbsp;
 
@@ -118,6 +124,8 @@
 
 &nbsp;
 
+<a name="reassembly"> </a> 
+
 ## Reassembly
 
  > described in [`src/reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
@@ -135,6 +143,8 @@
 | [`TCP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly)   | TCP Reassembly  |
 
 &nbsp;
+
+<a name="utilities"> </a> 
 
 ## Utilities
 

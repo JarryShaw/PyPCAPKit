@@ -6,7 +6,7 @@
 
  - [About](#about)
     * [Interface](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
-    * [Extraction](https://github.com/JarryShaw/jspcap/tree/master/src/tools#extraction)
+    * [Extraction](https://github.com/JarryShaw/jspcap/tree/master/src/fundations#extraction)
     * [Reassembly](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
     * [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
     * [Utilities](https://github.com/JarryShaw/jspcap/tree/master/src#utilities)
@@ -35,12 +35,12 @@
 
 &emsp; In `jspcap`, all files can be described as following six parts.
 
- - Interface (`jspcap.interface`) -- user interface for the `jspcap` library, which standardises and simplifies the usage of this library
- - Extraction (`jspcap.extractor`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
- - Reassembly (`jspcap.reassembly`) -- base on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implement datagram reassembly of IP and TCP packets
- - Protocls (`jspcap.protocols`) -- collection of all protocol family, with detailed implementation and methods
+ - Fundations (`jspcap.fundations`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
+ - Tools (`jspcap.tools`) -- standard library interface, which implements three major verbs of the library
+ - Interfaces (`jspcap.interfaces`) -- user interface for the `jspcap` library, which standardises and simplifies the usage of this library
+ - Reassembly (`jspcap.reassembly`) -- base on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815>), implement datagram reassembly of IP and TCP packets
+ - Protocols (`jspcap.protocols`) -- collection of all protocol family, with detailed implementation and methods
  - Utilities (`jspcap.utilities`) -- collection of four utility functions and classes
- - Exceptions (`jspcap.exceptions`) -- collection of refined custom exceptions
 
 ![](./doc/jspcap.png)
 

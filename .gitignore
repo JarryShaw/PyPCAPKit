@@ -15,6 +15,7 @@ out
 *.pcap
 !in.pcap
 *.cap
+*.dat
 
 sample/test
 test/jspcap

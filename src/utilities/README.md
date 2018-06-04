@@ -89,7 +89,7 @@ __NOTE__: positional argument `file` in `behold` must be a *file-like* object.
 
 ### `Info`
 
- > described in [`src/utilities/info.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities/info.py)
+ > described in [`src/utilities/infoclass.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities/infoclass.py)
 
 ```python
 class Info(builtins.dict)

@@ -98,8 +98,8 @@ import copy
 import io
 import sys
 
+from jspcap.fundations.analysis import analyse
 from jspcap.reassembly.reassembly import Reassembly
-from jspcap.tools.analysis import analyse
 from jspcap.utilities.infoclass import Info
 
 
