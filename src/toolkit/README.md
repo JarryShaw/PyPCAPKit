@@ -1,6 +1,6 @@
-# Tool Manual
+# ToolKit Manual
 
-&emsp; `jspcap` is an open sourse library for PCAP extarction and analysis, written in __Python 3.6__. The following is a manual for function tools usage. 
+&emsp; `jspcap` is an open sourse library for PCAP extarction and analysis, written in __Python 3.6__. The following is a manual for function ToolKit usage. 
 
  - [Macros](#macros)
  - [`extract`](#extract)

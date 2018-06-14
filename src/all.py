@@ -11,7 +11,7 @@ from jspcap.fundations import *
 from jspcap.interfaces import *
 from jspcap.protocols import *
 from jspcap.reassembly import *
-from jspcap.tools import *
+from jspcap.toolkit import *
 from jspcap.utilities import *
 
 
@@ -38,7 +38,7 @@ __all__ = [
     'IPv4_Reassembly', 'IPv6_Reassembly',               # IP Reassembly
     'TCP_Reassembly',                                   # TCP Reassembly
 
-    # jspcap.tools
+    # jspcap.toolkit
     'extract', 'analyse', 'reassemble',                 # Functions
     'TREE', 'JSON', 'PLIST',                            # Macros
 
