@@ -14,11 +14,9 @@ import io
 import multiprocessing
 import os
 import pathlib
-import pickle
 import queue
 import random
 import signal
-import tempfile
 import textwrap
 import time
 
@@ -282,7 +280,7 @@ class Extractor:
         self._flag_v = verbose          # verbose output flag
         self._flag_q = nofile           # no output flag
         self._flag_d = store            # store data flag
-        self._flag_m = (self._flag_a and CPU_CNT > 1)
+        self._flag_m = (self._flag_a and CPU_CNT)
                                         # multiprocessing flag
 
         self._frnum = 1                 # frame number
@@ -328,13 +326,12 @@ class Extractor:
             signal.signal(signal.SIGUSR1, functools.partial(self._read_frame))
             signal.signal(signal.SIGUSR2, functools.partial(self._update_eof))
 
-            self._mpsvc = None                          # service process
-            self._mplst = list()                        # process list
-            self._mpcnt = multiprocessing.Value('I', 0) # process count
-            self._mpbuf = multiprocessing.Queue()       # multiprocessing buffer
-            self._mpret = multiprocessing.Queue()       # multiprocessing return
+            self._mplst = list()                            # process list
+            self._mpcnt = multiprocessing.Value('L', 0)     # process count
+            self._mpptr = multiprocessing.Value('L', 1)     # current frame pointer
+            self._mprsm = multiprocessing.Queue()           # multiprocessing reassembly
             self._mpfdp = collections.defaultdict(multiprocessing.Queue)
-                                                        # multiprocessing file pointer
+                                                            # multiprocessing file pointer
 
         self._record_header()           # read PCAP global header
         self._record_frames()           # read frames
@@ -395,10 +392,7 @@ class Extractor:
         if not self._flag_e and self._flag_m:
             print('receive SIGUSR2')
             [ proc.join() for proc in self._mplst ]
-            self._mpbuf.put(EOFError)
-            self._mpsvc.join()
-            self._frame = self._mpret.get()
-            self._reasm = self._mpret.get()
+            self._reasm = self._mprsm.get()
         self._flag_e = True
         self._ifile.close()
 
@@ -427,9 +421,7 @@ class Extractor:
         """Read frames."""
         if self._flag_m:
             self._mpfdp[0].put(self._gbhdr.length)
-            self._mpsvc = multiprocessing.Process(target=self._analyse_frame,
-                            kwargs={'mpbuf': self._mpbuf, 'mpret': self._mpret})
-            self._mpsvc.start()
+            self._mprsm.put(self._reasm)
             self._read_frame()
         else:
             frame = self._extract_frame()
@@ -446,14 +438,15 @@ class Extractor:
 
         """
         if self._flag_e:    return
-        while self._mpcnt.value >= CPU_CNT - 1:
+        while self._mpcnt.value >= CPU_CNT:
             time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
 
         print(self._frnum, 'start')
         # create process
         self._ifile.seek(self._mpfdp[self._frnum-1].get(), os.SEEK_SET)
         proc = multiprocessing.Process(target=self._extract_frame,
-                kwargs={'mpbuf': self._mpbuf, 'mpfdp': self._mpfdp[self._frnum]})
+                kwargs={'mprsm': self._mprsm, 'mpptr': self._mpptr,
+                        'mpfdp': self._mpfdp[self._frnum]})
         proc.start()
 
         # update status
@@ -461,46 +454,37 @@ class Extractor:
         self._mpcnt.value += 1
         self._mplst.append(proc)
 
-    def _extract_frame(self, *, mpbuf=None, mpfdp=None):
+    def _extract_frame(self, *, mprsm=None, mpfdp=None, mpptr=None):
         """Extract frame."""
         if self._flag_e:    raise EOFError
 
         # extract frame
-        try:
-            frame = Frame(self._ifile, num=self._frnum, proto=self._dlink, fd=mpfdp)
-        except EOFError as error:
-            if self._flag_m:
-                return self._ifile.close()
-            raise error from None
-
-        # multiprocessing communication
         if self._flag_m:
-            self._ifile.close()
-            frame._file = NotImplemented
-            mpbuf.put(Info(number=self._frnum, object=frame))
-            print(self._frnum, 'put')
-            self._mpcnt.value -= 1
-        return frame
+            try:
+                frame = Frame(self._ifile, num=self._frnum, proto=self._dlink, fd=mpfdp)
+                self._analyse_frame(frame, mprsm=mprsm, mpptr=mpptr)
+                self._mpcnt.value -= 1
+                print(self._frnum, 'done')
+            except EOFError:
+                if self._flag_m:
+                    self._mpcnt.value -= 1
+                return self._ifile.close()
+        else:
+            frame = Frame(self._ifile, num=self._frnum, proto=self._dlink)
+            return frame
 
-    def _analyse_frame(self, frame=None, *, mpbuf=None, mpret=None):
+    def _analyse_frame(self, frame=None, *, mprsm=None, mpptr=None):
         """Head quaters for analysis."""
         if self._flag_m:
-            mpdct = dict()
-            while True:
-                print(self._frnum, 'trying')
-                frame = mpbuf.get()
-                if frame is EOFError:
-                    break
-                print(frame.number, 'get')
-                mpdct[frame.number] = frame.object
-
-                while True:
-                    frame = mpdct.pop(self._frnum, None)
-                    if frame is None:
-                        break
-                    self._analyse_frame_ng(frame)
-            mpret.put(self._frame)
-            mpret.put(self._reasm)
+            while mpptr.value != self._frnum:
+                time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
+            self._reasm = mprsm.get()
+            print(self._frnum, 'get')
+            print(self._reasm[2].datagram)
+            self._analyse_frame_ng(frame)
+            mprsm.put(self._reasm)
+            print(self._reasm[2].count)
+            print(self._frnum, 'put')
 
     def _analyse_frame_ng(self, frame):
         """Analyses frame."""
@@ -517,12 +501,6 @@ class Extractor:
             else:
                 self._ofile(frame.info, name=frnum)
 
-        # record frames
-        self._frnum += 1
-        self._proto = frame.protochain.chain
-        if self._flag_d:
-            self._frame.append(frame)
-
         # record fragments
         if self._tcp:
             self._tcp_reassembly(frame)
@@ -530,6 +508,15 @@ class Extractor:
             self._ipv4_reassembly(frame)
         if self._ipv6:
             self._ipv6_reassembly(frame)
+
+        # record frames
+        if self._flag_d:
+            self._frame.append(frame)
+        if self._flag_m:
+            self._mpptr.value += 1
+        else:
+            self._frnum += 1
+        self._proto = frame.protochain.chain
 
     def _ipv4_reassembly(self, frame):
         """Store data for IPv4 reassembly."""
