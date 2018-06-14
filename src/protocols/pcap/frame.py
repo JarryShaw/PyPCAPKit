@@ -15,6 +15,7 @@ typedef struct pcaprec_hdr_s {
 """
 import datetime
 import io
+import re
 
 from jspcap.protocols.protocol import Protocol
 from jspcap.utilities.decorators import beholder
@@ -97,7 +98,10 @@ class Frame(Protocol):
 
         """
         _temp = self._read_unpack(4, lilendian=True, quiet=True)
-        if _temp is None:   raise EOFError
+        if _temp is None:
+            if self._mpkt is not None:
+                self._mpkt.eof = True
+            raise EOFError
 
         _time = datetime.datetime.fromtimestamp(_temp)
         _tsss = _temp
@@ -128,11 +132,16 @@ class Frame(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, *, num, proto):
+    def __init__(self, file, *, num, proto, mpfdp=None, mpkit=None):
         self._fnum = num
-        self._prot = proto
         self._file = file
+        self._prot = proto
+        self._mpfp = mpfdp
+        self._mpkt = mpkit
         self._info = Info(self.read_frame())
+        for attr in dir(self):
+            if re.match('^_mp.*', attr):
+                delattr(self, attr)
 
     def __length_hint__(self):
         return 16
@@ -212,6 +221,9 @@ class Frame(Protocol):
         """
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
+        if self._mpkt is not None:
+            self._mpfp.put(self._file.tell())
+            self._mpkt.pool += 1
         flag, info, chain, alias = self._import_next_layer(bytes_, length)
 
         # make next layer protocol name
