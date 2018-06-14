@@ -60,7 +60,7 @@ class BaseError(Exception):
             print('Traceback (most recent call last):')
             traceback.print_stack(limit=-index)
 
-        sys.tracebacklimit = 0
+        # sys.tracebacklimit = 0
         super().__init__(message, *args, **kwargs)
 
 

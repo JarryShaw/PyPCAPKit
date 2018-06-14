@@ -14,9 +14,11 @@ import io
 import multiprocessing
 import os
 import pathlib
+import pickle
 import queue
 import random
 import signal
+import tempfile
 import textwrap
 import time
 
@@ -323,15 +325,20 @@ class Extractor:
 
         if self._flag_m:
             # register signals
-            signal.signal(signal.SIGUSR1, functools.partial(self._read_frame))
-            signal.signal(signal.SIGUSR2, functools.partial(self._update_eof))
+            # signal.signal(signal.SIGUSR1, functools.partial(self._read_frame))
+            # signal.signal(signal.SIGUSR2, functools.partial(self._update_eof))
 
             self._mplst = list()                            # process list
+            self._mpeof = multiprocessing.Value('L', 0)     # EOF flag
+            self._mpwps = multiprocessing.Value('L', 1)     # work pool
             self._mpcnt = multiprocessing.Value('L', 0)     # process count
             self._mpptr = multiprocessing.Value('L', 1)     # current frame pointer
-            self._mprsm = multiprocessing.Queue()           # multiprocessing reassembly
             self._mpfdp = collections.defaultdict(multiprocessing.Queue)
                                                             # multiprocessing file pointer
+            self._mprsl = multiprocessing.Lock()            # multiprocessing lock for reassembly tempfile
+            self._mpfsl = multiprocessing.Lock()            # multiprocessing lock for frame storage tempfile
+            self._mprsm = tempfile.TemporaryFile()          # multiprocessing temporary file for reassembly
+            self._mpstr = tempfile.TemporaryFile()          # multiprocessing temporary file for frame storage
 
         self._record_header()           # read PCAP global header
         self._record_frames()           # read frames
@@ -387,12 +394,32 @@ class Extractor:
     # Utilities.
     ##########################################################################
 
-    def _update_eof(self, *args):
+    def _pickle_load_tempfile(self, fp, *, lock):
+        lock.acquire()
+        fp.seek(os.SEEK_SET)
+        temp = pickle.load(fp)
+        lock.release()
+        return temp
+
+    def _pickle_dump_tempfile(self, obj, fp, *, lock):
+        lock.acquire()
+        fp.seek(os.SEEK_SET)
+        pickle.dump(obj, fp)
+        lock.release()
+
+    def _mpaftermath(self):
+        [ proc.join() for proc in self._mplst ]
+        self._frame = self._pickle_load_tempfile(self._mpstr).sort(key=lambda x: x[0])
+        self._reasm = self._pickle_load_tempfile(self._mprsm)
+        self._mprsm.close()
+        self._mpstr.close()
+
+    def _update_eof(self):
         """Update EOF flag."""
         if not self._flag_e and self._flag_m:
             print('receive SIGUSR2')
-            [ proc.join() for proc in self._mplst ]
-            self._reasm = self._mprsm.get()
+            self._mpaftermath()
+            self._mprsm.close()
         self._flag_e = True
         self._ifile.close()
 
@@ -421,14 +448,15 @@ class Extractor:
         """Read frames."""
         if self._flag_m:
             self._mpfdp[0].put(self._gbhdr.length)
-            self._mprsm.put(self._reasm)
+            self._pickle_dump_tempfile(self._frame, self._mpstr, lock=self._mpfsl)
+            self._pickle_dump_tempfile(self._reasm, self._mprsm, lock=self._mprsl)
             self._read_frame()
         else:
             frame = self._extract_frame()
             self._analyse_frame_ng(frame)
             return frame
 
-    def _read_frame(self, *args):
+    def _read_frame(self):
         """Read frames.
 
          - Extract frames and each layer of packets.
@@ -437,56 +465,63 @@ class Extractor:
          - Write plist & append Info.
 
         """
-        if self._flag_e:    return
-        while self._mpcnt.value >= CPU_CNT:
-            time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
+        while True:
+            if self._mpeof.value:   self._update_eof();     break
+            if self._mpwps.value and self._mpcnt.value < CPU_CNT:
+                # create worker
+                print(self._frnum, 'start')
+                # create process
+                self._ifile.seek(self._mpfdp[self._frnum-1].get(), os.SEEK_SET)
+                proc = multiprocessing.Process(target=self._extract_frame,
+                        kwargs={'mpptr': self._mpptr, 'mpwps': self._mpwps,
+                                'mprsl': self._mprsl, 'mpfsl': self._mpfsl,
+                                'mpeof': self._mpeof, 'mpfdp': self._mpfdp[self._frnum]})
+                proc.start()
 
-        print(self._frnum, 'start')
-        # create process
-        self._ifile.seek(self._mpfdp[self._frnum-1].get(), os.SEEK_SET)
-        proc = multiprocessing.Process(target=self._extract_frame,
-                kwargs={'mprsm': self._mprsm, 'mpptr': self._mpptr,
-                        'mpfdp': self._mpfdp[self._frnum]})
-        proc.start()
+                # update status
+                self._frnum += 1
+                self._mpcnt.value += 1
+                self._mpwps.value -= 1
+                self._mplst.append(proc)
+            else:
+                time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
 
-        # update status
-        self._frnum += 1
-        self._mpcnt.value += 1
-        self._mplst.append(proc)
-
-    def _extract_frame(self, *, mprsm=None, mpfdp=None, mpptr=None):
+    def _extract_frame(self, *, mpfdp=None, mpptr=None, mpwps=None,
+                                mprsl=None, mpfsl=None, mpeof=None):
         """Extract frame."""
         if self._flag_e:    raise EOFError
 
         # extract frame
         if self._flag_m:
             try:
-                frame = Frame(self._ifile, num=self._frnum, proto=self._dlink, fd=mpfdp)
-                self._analyse_frame(frame, mprsm=mprsm, mpptr=mpptr)
+                frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
+                                fd=mpfdp, wps=mpwps, eof=mpeof)
+                self._analyse_frame(frame, mpptr=mpptr, mprsl=mprsl, mpfsl=mpfsl)
                 self._mpcnt.value -= 1
                 print(self._frnum, 'done')
             except EOFError:
-                if self._flag_m:
-                    self._mpcnt.value -= 1
+                self._mpcnt.value -= 1
                 return self._ifile.close()
         else:
             frame = Frame(self._ifile, num=self._frnum, proto=self._dlink)
             return frame
 
-    def _analyse_frame(self, frame=None, *, mprsm=None, mpptr=None):
+    def _analyse_frame(self, frame=None, *, mpptr=None, mprsl=None, mpfsl=None):
         """Head quaters for analysis."""
         if self._flag_m:
             while mpptr.value != self._frnum:
                 time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
-            self._reasm = mprsm.get()
+            self._reasm = self._pickle_load_tempfile(self._mprsm, lock=mprsl)
             print(self._frnum, 'get')
-            print(self._reasm[2].datagram)
-            self._analyse_frame_ng(frame)
-            mprsm.put(self._reasm)
-            print(self._reasm[2].count)
+            self._analyse_frame_ng(frame, mpfsl=mpfsl)
+            print(self._frnum, 'analysed')
+            self._pickle_dump_tempfile(self._reasm, self._mprsm, lock=mprsl)
             print(self._frnum, 'put')
+            self._ifile.close()
+            self._mprsm.close()
+            self._mpstr.close()
 
-    def _analyse_frame_ng(self, frame):
+    def _analyse_frame_ng(self, frame, *, mpfsl=None):
         """Analyses frame."""
         # verbose output
         if self._flag_v:
@@ -510,13 +545,20 @@ class Extractor:
             self._ipv6_reassembly(frame)
 
         # record frames
-        if self._flag_d:
-            self._frame.append(frame)
         if self._flag_m:
+            if self._flag_d:
+                print('store')
+                temp = self._pickle_load_tempfile(self._mpstr, lock=mpfsl)
+                print(temp)
+                temp.append((self._frnum, frame))
+                self._pickle_dump_tempfile(temp, self._mpstr, lock=mpfsl)
+                print('stored')
             self._mpptr.value += 1
         else:
+            if self._flag_d:
+                self._frame.append(frame)
             self._frnum += 1
-        self._proto = frame.protochain.chain
+            self._proto = frame.protochain.chain
 
     def _ipv4_reassembly(self, frame):
         """Store data for IPv4 reassembly."""
