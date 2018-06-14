@@ -23,7 +23,7 @@ parts.
     synthesise file I/O and protocol analysis, coordinate
     information exchange in all network layers
 
- - Tools (`jspcap.tools`)
+ - ToolKit (`jspcap.toolkit`)
     standard library interface, which implements three
     major verbs of the library
 
@@ -45,8 +45,8 @@ parts.
     collection of four utility functions and classes
 
 """
-# Tools
-from jspcap.tools import *
+# ToolKit
+from jspcap.toolkit import *
 
 # Interfaces
 from jspcap.interfaces import *

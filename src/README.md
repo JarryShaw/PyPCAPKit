@@ -4,8 +4,8 @@
 
  - [Fundations](https://github.com/JarryShaw/jspcap/tree/master/src/fundations#fundations-manual)
     * [`fundations`](#index-fundations)
- - [Tools](https://github.com/JarryShaw/jspcap/tree/master/src/tools#tools-manual)
-    * [`tools`](#index-tools)
+ - [ToolKit](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#toolkit-manual)
+    * [`toolkit`](#index-toolkit)
  - [Interfaces](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
  	* [`interfaces`](#index-interfaces)
  - [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
@@ -38,23 +38,23 @@
 
 &nbsp;
 
-<a name="tools"> </a> 
+<a name="toolkit"> </a> 
 
-## Tools
+## ToolKit
 
- > described in [`src/tools`](https://github.com/JarryShaw/jspcap/tree/master/src/tools)
+ > described in [`src/toolkit`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit)
 
-&emsp; For vast scale of this library, `jspcap.tools` standardises library interfaces, which implements three major verbs of the library.
+&emsp; For vast scale of this library, `jspcap.toolkit` standardises library interfaces, which implements three major verbs of the library.
 
-<a name="index-tools"> </a>
+<a name="index-toolkit"> </a>
 
-##### Tools
+##### ToolKit
 
 |                                         NAME                                         |            DESCRIPTION            |
 | :----------------------------------------------------------------------------------: | :-------------------------------: |
-| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#extract)       |        extract a PCAP file        |
-| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#analyse)       | analyse application layer packets |
-| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/tools#reassemble) |  reassemble fragmented datagrams  |
+| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#extract)       |        extract a PCAP file        |
+| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#analyse)       | analyse application layer packets |
+| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#reassemble) |  reassemble fragmented datagrams  |
 
 &nbsp;
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """tool functions
 
-`jspcap.tools` defines several user-oriented
+`jspcap.toolkit` defines several user-oriented
 functions, macros, and etc. These interfaces are
 designed to help and simplify the usage of `jspcap`.
 
