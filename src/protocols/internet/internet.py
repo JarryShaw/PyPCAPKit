@@ -12,7 +12,6 @@ import io
 
 from jspcap.protocols.protocol import Protocol
 from jspcap.protocols.transport.transport import TP_PROTO
-from jspcap.utilities.decorators import beholder
 from jspcap.utilities.protochain import ProtoChain
 
 
@@ -106,7 +105,10 @@ class Internet(Protocol):
             * dict -- current protocol with next layer extracted
 
         """
-        flag, info, chain, alias = self._import_next_layer(proto, length, version=version)
+        if self._onerror:
+            flag, info, chain, alias = beholder(self._import_next_layer)(proto, length, version=version)
+        else:
+            flag, info, chain, alias = self._import_next_layer(proto, length, version=version)
 
         # make next layer protocol name
         if flag:
@@ -123,7 +125,6 @@ class Internet(Protocol):
         self._protos = ProtoChain(proto, chain, alias)
         return dict_
 
-    @beholder
     def _import_next_layer(self, proto, length=None, *, version=4, extension=False):
         """Import next layer extractor.
 
@@ -175,5 +176,6 @@ class Internet(Protocol):
             from jspcap.protocols.transport.udp import UDP as Protocol
         else:
             from jspcap.protocols.raw import Raw as Protocol
-        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length, version=version, extension=extension)
+        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length,
+                            version=version, extension=extension, error=self._onerror)
         return True, next_.info, next_.protochain, next_.alias

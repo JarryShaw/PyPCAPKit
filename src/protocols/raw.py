@@ -76,7 +76,7 @@ class Raw(Protocol):
 
         raw = dict(
             packet = self._read_packet(length),
-            error = error,
+            error = error or None,
         )
 
         return raw

@@ -28,6 +28,7 @@ from jspcap.utilities.validations import bool_check, int_check
 __all__ = ['Protocol']
 
 
+# abstract base class utilities
 ABCMeta = abc.ABCMeta
 abstractmethod = abc.abstractmethod
 abstractproperty = abc.abstractproperty
@@ -113,6 +114,7 @@ class Protocol:
 
     def __new__(cls, *args, **kwargs):
         self = super().__new__(cls)
+        self._onerror = kwargs.pop('error', False)
         return self
 
     def __repr__(self):
@@ -277,7 +279,10 @@ class Protocol:
             * dict -- current protocol with next layer extracted
 
         """
-        flag, info, chain, alias = self._import_next_layer(proto, length)
+        if self._onerror:
+            flag, info, chain, alias = beholder(self._import_next_layer)(proto, length)
+        else:
+            flag, info, chain, alias = self._import_next_layer(proto, length)
 
         # make next layer protocol name
         if flag:
@@ -294,7 +299,6 @@ class Protocol:
         self._protos = ProtoChain(proto, chain, alias)
         return dict_
 
-    @beholder
     def _import_next_layer(self, proto, length=None):
         """Import next layer extractor.
 

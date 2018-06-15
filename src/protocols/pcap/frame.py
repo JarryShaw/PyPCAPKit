@@ -224,7 +224,11 @@ class Frame(Protocol):
         if self._mpkt is not None:
             self._mpfp.put(self._file.tell())
             self._mpkt.pool += 1
-        flag, info, chain, alias = self._import_next_layer(bytes_, length)
+        try:
+            flag, info, chain, alias = self._import_next_layer(bytes_, length)
+        except Exception as error:
+            dict_['error'] = str(error)
+            flag, info, chain, alias = beholder(self._import_next_layer)(bytes_, length, error=True)
 
         # make next layer protocol name
         if flag:
@@ -238,13 +242,15 @@ class Frame(Protocol):
         dict_['protocols'] = self._protos.chain
         return dict_
 
-    @beholder
-    def _import_next_layer(self, file, length):
+    def _import_next_layer(self, file, length, *, error=False):
         """Import next layer extractor.
 
         Positional arguments:
             * file -- BytesIO, packet bytes I/O object
             * length -- int, valid (not padding) length
+
+        Keyword arguments:
+            * error -- bool, if function call on error
 
         Returns:
             * bool -- flag if extraction of next layer succeeded
@@ -266,5 +272,5 @@ class Frame(Protocol):
             from jspcap.protocols.internet import IPv6 as Protocol
         else:
             from jspcap.protocols.raw import Raw as Protocol
-        next_ = Protocol(file, length)
+        next_ = Protocol(file, length, error=error)
         return True, next_.info, next_.protochain, next_.alias

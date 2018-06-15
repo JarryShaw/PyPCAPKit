@@ -11,7 +11,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.8.0.dev3'
+__version__ = '0.8.0a2'
 
 
 # set-up script for pip distribution
@@ -36,18 +36,22 @@ setuptools.setup(
     },
     packages = [
         'jspcap',
+        'jspcap.fundations',
+        'jspcap.interfaces',
         'jspcap.protocols',
+        'jspcap.protocols.pcap',
         'jspcap.protocols.application',
         'jspcap.protocols.internet',
         'jspcap.protocols.link',
         'jspcap.protocols.transport',
         'jspcap.reassembly',
+        'jspcap.toolkit',
+        'jspcap.Utilities',
     ],
     package_data = {
         '': [
-            'LICENSE.txt',
+            'LICENSE',
             'README.md',
-            'README.rst',
         ],
     },
     classifiers = [

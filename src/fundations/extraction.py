@@ -406,6 +406,7 @@ class Extractor:
             for attr in dir(self):
                 if re.match('^_mp.*', attr):
                     delattr(self, attr)
+            self._frnum -= 1
             # map(lambda attr: delattr(self, attr), filter(lambda attr: re.match('^_mp.*', attr), dir(self)))
 
     def _update_eof(self):
@@ -460,31 +461,30 @@ class Extractor:
 
             # check counter
             if self._mpkit.pool and self._mpkit.counter < CPU_CNT:
-                print(self._frnum, 'start')
                 # update file offset
-                self._ifile.seek(self._mpfdp[self._frnum-1].get(), os.SEEK_SET)
+                self._ifile.seek(self._mpfdp.pop(self._frnum-1).get(), os.SEEK_SET)
 
                 # create worker
+                # print(self._frnum, 'start')
                 proc = multiprocessing.Process(target=self._extract_frame,
-                        kwargs={'mpkit': self._mpkit, 'mpfrn': self._frnum,
+                        kwargs={'mpkit': self._mpkit,
                                 'mpfdp': self._mpfdp[self._frnum]})
 
                 # update status
-                self._frnum += 1
                 self._mpkit.pool  -= 1
                 self._mpkit.counter += 1
 
                 # start and record
                 proc.start()
+                self._frnum += 1
                 self._mpprc.append(proc)
-            elif len(self._mpprc) >= CPU_CNT:
+
+            # check buffer
+            if len(self._mpprc) >= CPU_CNT:
                 [ proc.join() for proc in self._mpprc[:-4] ]
                 del self._mpprc[:-4]
-            else:
-                time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
 
-
-    def _extract_frame(self, *, mpfdp=None, mpkit=None, mpfrn=None):
+    def _extract_frame(self, *, mpfdp=None, mpkit=None):
         """Extract frame."""
         # check EOF
         if self._flag_e:    raise EOFError
@@ -493,43 +493,38 @@ class Extractor:
         if self._flag_m:
             try:
                 # extraction
-                frame = Frame(self._ifile, num=mpfrn, proto=self._dlink,
+                frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
                                 mpkit=mpkit, mpfdp=mpfdp)
-                # print(frame.info)
                 # analysis
-                self._analyse_frame(frame, mpkit=mpkit, mpfrn=mpfrn)
+                self._analyse_frame(frame, mpkit=mpkit)
             except EOFError:
                 mpkit.eof = True
             finally:
                 mpkit.counter -= 1
                 self._ifile.close()
-                print(self._frnum, 'done')
+                # print(self._frnum, 'done')
         else:
             return Frame(self._ifile, num=self._frnum, proto=self._dlink)
 
-    def _analyse_frame(self, frame, *, mpkit=None, mpfrn=None):
+    def _analyse_frame(self, frame, *, mpkit=None):
         """Head quaters for analysis."""
         if self._flag_m:
             # wait until ready
-            while mpkit.curent != mpfrn:
+            while mpkit.curent != self._frnum:
                 time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
 
-            print(self._frnum, 'get')
             # analysis and storage
+            # print(self._frnum, 'get')
             self._reasm = mpkit.reassembly
-            self._analyse_frame_ng(frame, mpkit=mpkit, mpfrn=mpfrn)
-            print(self._frnum, 'analysed')
+            self._analyse_frame_ng(frame, mpkit=mpkit)
+            # print(self._frnum, 'analysed')
             mpkit.reassembly = copy.deepcopy(self._reasm)
-            print(self._frnum, 'put')
+            # print(self._frnum, 'put')
         else:
             self._analyse_frame_ng(frame)
 
-    def _analyse_frame_ng(self, frame, *, mpkit=None, mpfrn=None):
+    def _analyse_frame_ng(self, frame, *, mpkit=None):
         """Analyses frame."""
-        # restore frame number
-        if self._flag_m:
-            self._frnum = mpfrn
-
         # verbose output
         if self._flag_v:
             print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
@@ -556,7 +551,7 @@ class Extractor:
             if self._flag_d:
                 frame._file = NotImplemented
                 mpkit.frames[self._frnum] = copy.deepcopy(frame)
-                print(self._frnum, 'stored')
+                # print(self._frnum, 'stored')
             mpkit.curent += 1
         else:
             if self._flag_d:

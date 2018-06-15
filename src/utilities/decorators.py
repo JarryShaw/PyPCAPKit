@@ -46,14 +46,14 @@ def beholder(func):
     """[ClassMethod] Behold extraction procedure."""
     @functools.wraps(func)
     def behold(self, proto, length, *args, **kwargs):
-        seek_cur = self._file.tell()
-        try:
-            return func(self, proto, length, *args, **kwargs)
-        except Exception as error:
-            self._file.seek(seek_cur, os.SEEK_SET)
-            from jspcap.protocols.raw import Raw
-            next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=str(error))
-            return False, next_.info, next_.protochain, next_.alias
+            seek_cur = self._file.tell()
+            try:
+                return func(self, proto, length, *args, **kwargs)
+            except Exception as error:
+                self._file.seek(seek_cur, os.SEEK_SET)
+                from jspcap.protocols.raw import Raw
+                next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=str(error))
+                return False, next_.info, next_.protochain, next_.alias
     return behold
 
 
