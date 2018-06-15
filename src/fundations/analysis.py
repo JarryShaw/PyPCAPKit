@@ -8,7 +8,7 @@ modules and functions to extract the attributes.
 """
 from jspcap.protocols.raw import Raw
 from jspcap.utilities.exceptions import ProtocolError
-from jspcap.utilities.decorators import beholder_ng, seekset_ng
+from jspcap.utilities.decorators import seekset_ng
 
 ###############################################################################
 # from jspcap.protocols.application.httpv1 import HTTPv1
@@ -49,9 +49,9 @@ class Analysis:
         return f'Analysis({self._ptch.alias[0]})'
 
 
-@beholder_ng
 def analyse(file, length=None):
     """Analyse application layer packets."""
+    # HTTP/1.* analysis
     flag, http = _analyse_httpv1(file, length)
     if flag:
         return Analysis(http.info, http.protochain, http.alias)
@@ -59,10 +59,12 @@ def analyse(file, length=None):
     # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
     # NB: the NOTE abrove is deprecated, since validations are performed
     
+    # HTTP/2 analysis
     flag, http = _analyse_httpv2(file, length)
     if flag:
         return Analysis(http.info, http.protochain, http.alias)
 
+    # raw packet analysis
     raw = Raw(file, length)
     return Analysis(raw.info, raw.protochain, raw.alias)
 

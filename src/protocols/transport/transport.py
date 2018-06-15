@@ -11,7 +11,8 @@ protocols, eg. TCP and UDP.
 import io
 
 from jspcap.protocols.protocol import Protocol
-from jspcap.utilities.decorators import beholder
+from jspcap.utilities.decorators import beholder_ng
+
 ###############################################################################
 # from jspcap.fundations.analysis import analyse
 ###############################################################################
@@ -91,7 +92,6 @@ class Transport(Protocol):
     # Utilities.
     ##########################################################################
 
-    @beholder
     def _import_next_layer(self, proto, length):
         """Import next layer extractor.
 
@@ -107,5 +107,8 @@ class Transport(Protocol):
 
         """
         from jspcap.fundations.analysis import analyse
-        next_ = analyse(io.BytesIO(self._read_fileng(length)), length)
+        if self._onerror:
+            next_ = beholder_ng(analyse)(io.BytesIO(self._read_fileng(length)), length)
+        else:
+            next_ = analyse(io.BytesIO(self._read_fileng(length)), length)
         return True, next_.info, next_.protochain, next_.alias

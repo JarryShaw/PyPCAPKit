@@ -97,7 +97,8 @@ class Frame(Protocol):
 
         """
         _temp = self._read_unpack(4, lilendian=True, quiet=True)
-        if _temp is None:   raise EOFError
+        if _temp is None:
+            raise EOFError
 
         _time = datetime.datetime.fromtimestamp(_temp)
         _tsss = _temp
@@ -130,8 +131,8 @@ class Frame(Protocol):
 
     def __init__(self, file, *, num, proto):
         self._fnum = num
-        self._prot = proto
         self._file = file
+        self._prot = proto
         self._info = Info(self.read_frame())
 
     def __length_hint__(self):
@@ -212,7 +213,11 @@ class Frame(Protocol):
         """
         # make BytesIO from frame package data
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
-        flag, info, chain, alias = self._import_next_layer(bytes_, length)
+        try:
+            flag, info, chain, alias = self._import_next_layer(bytes_, length)
+        except Exception as error:
+            dict_['error'] = str(error)
+            flag, info, chain, alias = beholder(self._import_next_layer)(bytes_, length, error=True)
 
         # make next layer protocol name
         if flag:
@@ -226,13 +231,15 @@ class Frame(Protocol):
         dict_['protocols'] = self._protos.chain
         return dict_
 
-    @beholder
-    def _import_next_layer(self, file, length):
+    def _import_next_layer(self, file, length, *, error=False):
         """Import next layer extractor.
 
         Positional arguments:
             * file -- BytesIO, packet bytes I/O object
             * length -- int, valid (not padding) length
+
+        Keyword arguments:
+            * error -- bool, if function call on error
 
         Returns:
             * bool -- flag if extraction of next layer succeeded
@@ -254,5 +261,5 @@ class Frame(Protocol):
             from jspcap.protocols.internet import IPv6 as Protocol
         else:
             from jspcap.protocols.raw import Raw as Protocol
-        next_ = Protocol(file, length)
+        next_ = Protocol(file, length, error=error)
         return True, next_.info, next_.protochain, next_.alias
