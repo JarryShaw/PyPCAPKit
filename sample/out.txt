@@ -15,9 +15,9 @@ Frame 1
   |     |-- ts_usec -> 471719
   |     |-- incl_len -> 86
   |     |-- orig_len -> 86
-  |-- time -> 2017-11-19 23:49:05
+  |-- time -> 2017-11-19 23:49:05.471719
   |-- number -> 1
-  |-- time_epoch -> 1511106545.471719 seconds
+  |-- time_epoch -> 1511106545.471719
   |-- len -> 86
   |-- cap_len -> 86
   |-- packet
@@ -63,7 +63,7 @@ Frame 1
   |                 |-- packet
   |                 |     |--> 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
   |                 |          1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
-  |                 |-- error -> N/A
+  |                 |-- error -> NIL
   |-- protocols -> Ethernet:IPv6
 
 Frame 2
@@ -72,9 +72,9 @@ Frame 2
   |     |-- ts_usec -> 578078
   |     |-- incl_len -> 78
   |     |-- orig_len -> 78
-  |-- time -> 2017-11-19 23:49:05
+  |-- time -> 2017-11-19 23:49:05.578078
   |-- number -> 2
-  |-- time_epoch -> 1511106545.578078 seconds
+  |-- time_epoch -> 1511106545.578078
   |-- len -> 78
   |-- cap_len -> 78
   |-- packet
@@ -118,7 +118,7 @@ Frame 2
   |                 |-- packet
   |                 |     |--> 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
   |                 |          1c cd 7c 77 ba c7 46 b7
-  |                 |-- error -> N/A
+  |                 |-- error -> NIL
   |-- protocols -> Ethernet:IPv6
 
 Frame 3
@@ -127,9 +127,9 @@ Frame 3
   |     |-- ts_usec -> 777804
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19 23:49:09
+  |-- time -> 2017-11-19 23:49:09.777804
   |-- number -> 3
-  |-- time_epoch -> 1511106549.777804 seconds
+  |-- time_epoch -> 1511106549.777804
   |-- len -> 54
   |-- cap_len -> 54
   |-- packet
@@ -198,10 +198,10 @@ Frame 3
   |                 |     |-- header
   |                 |     |     |--> 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0
   |                 |     |          7c 8e 00 00
-  |                 |     |-- payload -> N/A 
+  |                 |     |-- payload -> NIL 
   |                 |-- raw
-  |                       |-- packet -> N/A 
-  |                       |-- error -> N/A
+  |                       |-- packet -> NIL 
+  |                       |-- error -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 4
@@ -210,9 +210,9 @@ Frame 4
   |     |-- ts_usec -> 777868
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19 23:49:09
+  |-- time -> 2017-11-19 23:49:09.777868
   |-- number -> 4
-  |-- time_epoch -> 1511106549.777868 seconds
+  |-- time_epoch -> 1511106549.777868
   |-- len -> 54
   |-- cap_len -> 54
   |-- packet
@@ -281,10 +281,10 @@ Frame 4
   |                 |     |-- header
   |                 |     |     |--> d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff
   |                 |     |          f9 3e 00 00
-  |                 |     |-- payload -> N/A 
+  |                 |     |-- payload -> NIL 
   |                 |-- raw
-  |                       |-- packet -> N/A 
-  |                       |-- error -> N/A
+  |                       |-- packet -> NIL 
+  |                       |-- error -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 5
@@ -293,9 +293,9 @@ Frame 5
   |     |-- ts_usec -> 913720
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19 23:49:09
+  |-- time -> 2017-11-19 23:49:09.913720
   |-- number -> 5
-  |-- time_epoch -> 1511106549.913720 seconds
+  |-- time_epoch -> 1511106549.91372
   |-- len -> 54
   |-- cap_len -> 54
   |-- packet
@@ -364,10 +364,10 @@ Frame 5
   |                 |     |-- header
   |                 |     |     |--> d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff
   |                 |     |          2a f4 00 00
-  |                 |     |-- payload -> N/A 
+  |                 |     |-- payload -> NIL 
   |                 |-- raw
-  |                       |-- packet -> N/A 
-  |                       |-- error -> N/A
+  |                       |-- packet -> NIL 
+  |                       |-- error -> NIL
   |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 6
@@ -376,9 +376,9 @@ Frame 6
   |     |-- ts_usec -> 66835
   |     |-- incl_len -> 159
   |     |-- orig_len -> 159
-  |-- time -> 2017-11-19 23:49:11
+  |-- time -> 2017-11-19 23:49:11.668350
   |-- number -> 6
-  |-- time_epoch -> 1511106551.66835 seconds
+  |-- time_epoch -> 1511106551.66835
   |-- len -> 159
   |-- cap_len -> 159
   |-- packet
@@ -469,5 +469,5 @@ Frame 6
   |                       |          74 70 6c 6f 67 69 6e 2e 63 6e 00 0a 00 0e 54 4c
   |                       |          2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05
   |                       |          31 2e 37 2e 34
-  |                       |-- error -> N/A
+  |                       |-- error -> NIL
   |-- protocols -> Ethernet:IPv4:UDP

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 
-import chardet
-import jspcap
 import os
 import pprint
 import textwrap
 import time
+
+import chardet
+import jspcap
 
 
 os.system('> ../sample/out')

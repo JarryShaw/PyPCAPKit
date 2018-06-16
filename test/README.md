@@ -8,3 +8,4 @@
  - [`test_reassembly.py`](https://github.com/JarryShaw/jspcap/tree/master/test/test_reassembly.py) -- samples on reassembly of TCP payloads, whilst writing the reassembled payloads into an output file
  - [`test_analyse.py`](https://github.com/JarryShaw/jspcap/tree/master/test/test_analyse.py) -- samples on analysis of application layer after reassembly, which writes the extracted HTTP frame to `stdout`
  - [`test_time.py`](https://github.com/JarryShaw/jspcap/tree/master/test/test_time.py) -- samples on a minimum usage of `jspcap.extract`, whilst timing the whole procedure
+ - [`test_trace.py`](https://github.com/JarryShaw/jspcap/tree/master/test/test_trace.py) -- samples on tracing TCP flows

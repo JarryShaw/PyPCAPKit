@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
 
-import jspcap
 import pprint
+
+import jspcap
 
 
 extraction = jspcap.extract(

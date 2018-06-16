@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 
-import jspcap
 import statistics
 import time
+
+import jspcap
 
 
 lid = list()
