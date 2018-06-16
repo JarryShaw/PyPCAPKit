@@ -46,11 +46,10 @@ __all__ = ['Extractor']
 # CPU number
 if os.name == 'posix' and 'SC_NPROCESSORS_CONF' in os.sysconf_names:
     CPU_CNT = os.sysconf('SC_NPROCESSORS_CONF')
+elif 'sched_getaffinity' in os.__all__:
+    CPU_CNT = len(os.sched_getaffinity(0))
 else:
-    try:
-        CPU_CNT = len(os.sched_getaffinity(0))
-    except AttributeError:
-        CPU_CNT = os.cpu_count() or 1
+    CPU_CNT = os.cpu_count() or 1
 
 
 class Extractor:
@@ -276,14 +275,14 @@ class Extractor:
         self._ofnm = ofnm               # output file name
         self._fext = ext                # output file extension
 
-        self._flag_e = False            # EOF flag
         self._flag_a = auto             # auto extract flag
-        self._flag_f = files            # split file flag
-        self._flag_v = verbose          # verbose output flag
-        self._flag_q = nofile           # no output flag
         self._flag_d = store            # store data flag
+        self._flag_e = False            # EOF flag
+        self._flag_f = files            # split file flag
         self._flag_m = (self._flag_a and CPU_CNT)
                                         # multiprocessing flag
+        self._flag_q = nofile           # no output flag
+        self._flag_v = verbose          # verbose output flag
 
         self._frnum = 1                 # frame number
         self._cfnum = 1                 # current frame number
@@ -509,7 +508,7 @@ class Extractor:
     def _analyse_frame(self, frame=None, *, mpptr=None, mprsl=None, mpfsl=None):
         """Head quaters for analysis."""
         if self._flag_m:
-            while mpptr.value != self._frnum:
+            while f.value != self._frnum:
                 time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
             self._reasm = self._pickle_load_tempfile(self._mprsm, lock=mprsl)
             print(self._frnum, 'get')

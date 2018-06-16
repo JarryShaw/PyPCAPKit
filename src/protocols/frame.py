@@ -216,7 +216,7 @@ class Frame(Protocol):
         bytes_ = io.BytesIO(self._file.read(dict_['len']))
         if self._fptr is not None:
             self._fptr.put(self._file.tell())
-            self._pool.value += 1
+            self.s.value += 1
         flag, info, chain, alias = self._import_next_layer(bytes_, length)
 
         # make next layer protocol name
