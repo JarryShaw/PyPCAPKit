@@ -6,7 +6,7 @@
 
 ## Multiprocessing Testbench
 
- > [__NB__] [`master`](https://github.com/JarryShaw/jspcap/tree/master#jspcap) : 0.01901674787203471 seconds per packet
+ > [__NOTA BENE__] [`master`](https://github.com/JarryShaw/jspcap/tree/master#jspcap) : 0.01901674787203471 seconds per packet
 
 ### [Prototype](https://github.com/JarryShaw/jspcap/tree/test/mp/prototype#jspcap)
 
