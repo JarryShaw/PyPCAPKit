@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""tool functions
+"""user interface
 
-`jspcap.toolkit` defines several user-oriented
-functions, macros, and etc. These interfaces are
+`jspcap.interface` defines several user-oriented
+interfaces, variables, and etc. These interfaces are
 designed to help and simplify the usage of `jspcap`.
 
 """
@@ -18,7 +18,7 @@ from jspcap.utilities.validations import bool_check, int_check, io_check, str_ch
 
 
 __all__ = [
-    'tkextract', 'tkanalyse', 'tkreassemble', 'tktrace',    # functions
+    'extract', 'analyse', 'reassemble', 'trace',            # functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # macros
 ]
 
@@ -30,8 +30,8 @@ PLIST = 'plist'
 PCAP  = 'pcap'
 
 
-def tkextract(*, fin=None, fout=None, format=None,                            # basic settings
-                auto=True, extension=True, store=True,                      # internal settings        
+def extract(*, fin=None, fout=None, format=None,                            # basic settings
+                auto=True, extension=True, store=True,                      # internal settings
                 files=False, nofile=False, verbose=False,                   # output settings
                 ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
                 trace=False, trace_fout=None, trace_format=None):           # trace settings
@@ -84,7 +84,7 @@ def tkextract(*, fin=None, fout=None, format=None,                            # 
                         trace=trace, trace_fout=trace_fout, trace_format=trace_format)
 
 
-def tkanalyse(*, file, length=None):
+def analyse(*, file, length=None):
     """Analyse application layer packets.
 
     Keyword arguments:
@@ -101,7 +101,7 @@ def tkanalyse(*, file, length=None):
     return Analysis.analyse(file, length)
 
 
-def tkreassemble(*, protocol, strict=False):
+def reassemble(*, protocol, strict=False):
     """Reassemble fragmented datagrams.
 
     Keyword arguments:
@@ -131,7 +131,7 @@ def tkreassemble(*, protocol, strict=False):
         raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
-def tktrace(*, fout=None, format=None):
+def trace(*, fout=None, format=None):
     """Trace TCP flows.
 
     """

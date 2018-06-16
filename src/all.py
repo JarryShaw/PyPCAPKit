@@ -10,11 +10,10 @@ contains all things from `jspcap`.
 from jspcap.corekit import *
 from jspcap.dumpkit import *
 from jspcap.foundation import *
-from jspcap.interfaces import *
+from jspcap.interface import *
 from jspcap.ipsuite import *
 from jspcap.protocols import *
 from jspcap.reassembly import *
-from jspcap.toolkit import *
 from jspcap.utilities import *
 
 
@@ -32,7 +31,9 @@ __all__ = [
     'Analysis',                                             # Analysis
     'TraceFlow',                                            # Trace Flow
 
-    # jspcap.interfaces
+    # jspcap.interface
+    'extract', 'analyse', 'reassemble', 'trace',            # Functions
+    'TREE', 'JSON', 'PLIST', 'PCAP',                        # Macros
 
     # jspcap.ipsuite
     'IPSHeader', 'IPSFrame',                                # PCAP Headers
@@ -52,10 +53,6 @@ __all__ = [
     # jspcap.reassembly
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
     'TCP_Reassembly',                                       # TCP Reassembly
-
-    # jspcap.toolkit
-    'tkextract', 'tkanalyse', 'tkreassemble', 'tktrace',    # Functions
-    'TREE', 'JSON', 'PLIST', 'PCAP',                        # Macros
 
     # jspcap.utilities
     'beholder_ng', 'seekset_ng',                            # Decorators

@@ -16,12 +16,17 @@ strategy to read input files. That is to read frame by
 frame, decrease occupation on memory, as well as enhance
 efficiency in some way.
 
-In `jspcap`, all files can be described as following nine
+In `jspcap`, all files can be described as following eight
 different sections.
 
  - Foundation (`jspcap.foundation`)
     synthesise file I/O and protocol analysis, coordinate
     information exchange in all network layers
+
+ - Interface (`jspcap.interface`)
+    user interface for the `jspcap` library, which
+    standardise and simplify the usage of this
+    library
 
  - Reassembly (`jspcap.reassembly`)
     base on algorithms described in
@@ -35,30 +40,18 @@ different sections.
     collection of all protocol family, with detailed
     implementation and methods
 
- - Interfaces (`jspcap.interfaces`)
-    user interface for the `jspcap` library, which
-    standardises and simplifies the usage of this
-    library
-
  - Utilities (`jspcap.utilities`)
     collection of utility functions and classes
 
  - CoreKit (`jspcap.corekit`)
     core utilities for `jspcap` implementation
 
- - ToolKit (`jspcap.toolkit`)
-    standard library interface, which implements three
-    major verbs of the library
-
  - DumpKit (`jspcap.dumpkit`)
     dump utilities for `jspcap` implementation
 
 """
-# ToolKit
-from jspcap.toolkit import *
-
-# Interfaces
-from jspcap.interfaces import *
+# Interface
+from jspcap.interface import *
 
 # Protocols
 from jspcap.protocols.raw import Raw
@@ -86,9 +79,8 @@ from jspcap.protocols.application.http import HTTP
 
 
 __all__ = [
-    'TREE', 'JSON', 'PLIST', 'PCAP',                        # ToolKit Macros
-    'tkextract', 'tkanalyse', 'tkreassemble', 'tktrace',    # ToolKit Functions
-
+    'TREE', 'JSON', 'PLIST', 'PCAP',                        # Macros
+    'extract', 'analyse', 'reassemble', 'trace',            # Functions
     'Raw',                                                  # Raw Packet
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer
