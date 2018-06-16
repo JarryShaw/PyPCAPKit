@@ -1,20 +1,23 @@
 # jspcap
 
-&emsp; The `jspcap` project is an open source Python program focus on [PCAP](https://en.wikipedia.org/wiki/Pcap) parsing and analysis, which works as a stream pcap file extractor. With support of [`jsformat`](https://github.com/JarryShaw/jsformat), it shall support multiple output report formats.
+&emsp; The `jspcap` project is an open source Python program focus on [PCAP](https://en.wikipedia.org/wiki/Pcap) parsing and analysis, which works as a stream PCAP file extractor. With support of [`jsformat`](https://github.com/JarryShaw/jsformat), it shall support multiple output report formats.
 
  > Note that the whole project only supports __Python 3.6__ or later.
 
  - [About](#about)
-    * [Fundations](https://github.com/JarryShaw/jspcap/tree/master/src/fundations#fundations-manual)
-    * [ToolKit](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#toolkit-manual)
-    * [Interface](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
-    * [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
+    * [Foundation](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#foundation-manual)
     * [Reassembly](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
+    * [IPSuite](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite#ipsuite-manual)
+    * [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
+    * [Interfaces](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
     * [Utilities](https://github.com/JarryShaw/jspcap/tree/master/src/utilities#utilities-maunal)
+    * [CoreKit](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#corekit-manual)
+    * [ToolKit](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#toolkit-manual)
+    * [DumpKit](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#dumpkit-manual)
  - [Installation](#installation)
  - [Usage](#usage)
     * [Documentation](#documentation)
-        - [Interface](#interface)
+        - [Interfaces](#interfaces)
         - [Macros](#macros)
         - [Protocols](#protocols)
     * [CLI Usage](#cli-usage)
@@ -35,12 +38,15 @@
 
 &emsp; In `jspcap`, all files can be described as following six parts.
 
- - Fundations (`jspcap.fundations`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
- - ToolKit (`jspcap.toolkit`) -- standard library interface, which implements three major verbs of the library
- - Interfaces (`jspcap.interfaces`) -- user interface for the `jspcap` library, which standardises and simplifies the usage of this library
- - Protocols (`jspcap.protocols`) -- collection of all protocol family, with detailed implementation and methods
+ - Foundation (`jspcap.foundation`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
  - Reassembly (`jspcap.reassembly`) -- base on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implement datagram reassembly of IP and TCP packets
+ - IPSuite (`jspcap.ipsuite`) -- collection of constructors for [Internet Protocol Suite](https://en.wikipedia.org/wiki/Internet_protocol_suite)
+ - Protocols (`jspcap.protocols`) -- collection of all protocol family, with detail implementation and methods
+ - Interfaces (`jspcap.interfaces`) -- user interface for the `jspcap` library, which standardise and simplify the usage of this library
  - Utilities (`jspcap.utilities`) -- collection of four utility functions and classes
+ - CoreKit (`jspcap.corekit`) -- core utilities for `jspcap` implementation
+ - ToolKit (`jspcap.toolkit`) -- standard library interface, which implements three major verbs of the library
+ - DumpKit (`jspcap.dumpkit`) -- dump utilities for `jspcap` implementation
 
 ![](./doc/jspcap.png)
 
@@ -48,7 +54,7 @@
 
 ## Installation
 
-> Note that `jspcap` only supports Python verions __since 3.6__
+> Note that `jspcap` only supports Python versions __since 3.6__
 
 &emsp; Simply run the following to install the latest from PyPI:
 
@@ -69,21 +75,19 @@ $ python setup.py install
 
 ### Documentation
 
-##### Interface
+##### Interfaces
 
-|                                           NAME                                           |            DESCRIPTION            |
-| :--------------------------------------------------------------------------------------: | :-------------------------------: |
-| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#extract)       |        extract a PCAP file        |
-| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#analyse)       | analyse application layer packets |
-| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#reassemble) |  reassemble fragmented datagrams  |
+| NAME | DESCRIPTION |
+| :--: | :---------: |
 
 ##### Macros
 
-|                                        NAME                                        |               DESCRIPTION                |
-| :--------------------------------------------------------------------------------: | :--------------------------------------: |
-| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#variables)  | JavaScript Object Notation (JSON) format |
-| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#variables) |    macOS Property List (PLIST) format    |
-| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src/functions#variables)  |          Tree-View text format           |
+|                                     NAME                                      |               DESCRIPTION                |
+| :---------------------------------------------------------------------------: | :--------------------------------------: |
+| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#macros)  | JavaScript Object Notation (JSON) format |
+| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#macros) |    macOS Property List (PLIST) format    |
+| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#macros)  |          Tree-View text format           |
+| [`PCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#macros)  |               PCAP format                |
 
 ##### Protocols
 
@@ -92,11 +96,11 @@ $ python setup.py install
 | [`Raw`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#raw)                        |           Raw Packet Data           |
 | [`ARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#arp)                   |     Address Resolution Protocol     |
 | [`Ethernet`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ethernet)         |          Ethernet Protocol          |
-| [`L2TP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#l2tp)                 |    Layer Two Tunneling Protocol     |
+| [`L2TP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#l2tp)                 |   Layer Two Tunnelling Protocol     |
 | [`OSPF`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ospf)                 |      Open Shortest Path First       |
 | [`RARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#rarp)                 | Reverse Address Resolution Protocol |
 | [`VLAN`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#vlan)                 |    802.1Q Customer VLAN Tag Type    |
-| [`AH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ah)                 |        Athentication Header         |
+| [`AH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ah)                 |       Authentication Header         |
 | [`HIP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#hip)               |       Host Identity Protocol        |
 | [`HOPOPT`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#hopopt)         |       IPv6 Hop-by-Hop Options       |
 | [`IP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ip)                 |          Internet Protocol          |
@@ -131,20 +135,20 @@ usage: jspcapy [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a] [-F]
 PCAP file extractor and formatted exporter
 
 positional arguments:
-  input-file-name       The name of input pcap file. If ".pcap" omits, it will
-                        be automatically appended.
+  input-file-name       The name of input PCAP file. If extension omits, it
+                        will be automatically appended.
 
 optional arguments:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   -o file-name, --output file-name
-                        The name of input pcap file. If format extension
+                        The name of input PCAP file. If format extension
                         omits, it will be automatically appended.
   -f format, --format format
                         Print a extraction report in the specified output
                         format. Available are all formats supported by
                         jsformat, e.g.: json, plist, and tree.
-  -j, --json            Display extraction report as json. This will yield
+  -j, --json            Display extraction report as JSON. This will yield
                         "raw" output that may be used by external tools. This
                         option overrides all other options.
   -p, --plist           Display extraction report as macOS Property List
@@ -159,7 +163,7 @@ optional arguments:
   -v, --verbose         Show more information.
 ```
 
-&emsp; Under most circumstances, you should indicate the name of input pcap file (extension may omit) and at least, output format (`json`, `plist`, or `tree`). Once format unspecified, the name of output file must have proper extension (`*.json`, `*.plist`, or `*.txt`), otherwise `FormatError` will raise.
+&emsp; Under most circumstances, you should indicate the name of input PCAP file (extension may omit) and at least, output format (`json`, `plist`, or `tree`). Once format unspecified, the name of output file must have proper extension (`*.json`, `*.plist`, or `*.txt`), otherwise `FormatError` will raise.
 
 &emsp; As for `verbose` mode, detailed information will print while extraction (as following examples). And `auto-extension` flag works for the output file, to indicate whether extensions should be appended.
 
@@ -195,14 +199,14 @@ optional arguments:
 
  - extract a PCAP file and reassemble TCP payload (with no output file nor frame storage)
  ```python
- import jspcap, pprint
+ import jspcap
  # set strict to make sure full reassembly
  extraction = jspcap.extract(fin='in.pcap', store=False, nofile=True, tcp=True, strict=True)
  # print extracted packet if HTTP in reassembled payloads
  for packet in extraction.reassembly.tcp:
     for reassembly in packet.packets:
         if jspcap.HTTP in reassembly.protochain:
-            pprint.pprint(reassembly.info)
+            print(reassembly.info)
  ```
 
 ### CLI Samples

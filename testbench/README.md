@@ -1,30 +1,30 @@
-# Testbench
+# Test Bench
 
 &emsp; Here you can find several testing version of `jspcap` under development, which are actually branches of this repository.
 
 ---
 
-## Multiprocessing Testbench
+## Multiprocessing Test Bench
 
  > [__NOTA BENE__] [`master`](https://github.com/JarryShaw/jspcap/tree/master#jspcap) : 0.01901674787203471 seconds per packet
 
 ### [Prototype](https://github.com/JarryShaw/jspcap/tree/test/mp/prototype#jspcap)
 
- > [__DEPRECATED__] fetal error remains
+ > [__DEPRECATED__] fatal error remains
 
-&emsp; This implementation with multiprocessing is a prototype with fetal bugs.
+&emsp; This implementation with multiprocessing is a prototype with fatal bugs.
 
 ### [Queue](https://github.com/JarryShaw/jspcap/tree/test/mp/queue#jspcap)
 
- > [__DEPRECATED__] fetal error remains
+ > [__DEPRECATED__] fatal error remains
 
-&emsp; This implementation using multiprocessing with `queue` is with fetal bugs.
+&emsp; This implementation using multiprocessing with `queue` is with fatal bugs.
 
 ### [Tempfile](https://github.com/JarryShaw/jspcap/tree/test/mp/tempfile#jspcap)
 
- > [__DEPRECATED__] fetal error remains
+ > [__DEPRECATED__] fatal error remains
 
-&emsp; This implementation using multiprocessing with `tempfile` is with fetal bugs.
+&emsp; This implementation using multiprocessing with `tempfile` is with fatal bugs.
 
 ### [Manager](https://github.com/JarryShaw/jspcap/tree/test/mp/manager#jspcap)
 

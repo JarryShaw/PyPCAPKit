@@ -1,6 +1,6 @@
 # Test Samples
 
-&emsp; Here we provide several test samples. Though the original PCAP files are not uploaded due to restrictions on file size of GitHub, you may still easiliy get a simple but thorough view of `jspcap`, either on how to use it or on what it can do.
+&emsp; Here we provide several test samples. Though the original PCAP files are not uploaded due to restrictions on file size of GitHub, you may still easily get a simple but thorough view of `jspcap`, either on how to use it or on what it can do.
 
  - [`test_extraction.py`](https://github.com/JarryShaw/jspcap/tree/master/test/test_extraction.py) -- samples on usage of `jspcap.extract`, which extracts a PCAP file and dumps to a specificly formatted output file
  - [`test_ipv6.py`](https://github.com/JarryShaw/jspcap/tree/master/test/test_ipv6.py) -- samples on extraction of IPv6 packets, whilst dumping a tree-view text file
