@@ -17,9 +17,9 @@ Protocol (HTTP/2), whose structure is described as below.
 """
 import collections
 
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.application.http import HTTP
 from jspcap.utilities.exceptions import ProtocolError
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['HTTPv2']

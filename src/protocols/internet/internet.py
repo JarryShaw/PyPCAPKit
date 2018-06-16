@@ -10,9 +10,10 @@ AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 """
 import io
 
+from jspcap.corekit.protochain import ProtoChain
 from jspcap.protocols.protocol import Protocol
 from jspcap.protocols.transport.transport import TP_PROTO
-from jspcap.utilities.protochain import ProtoChain
+from jspcap.utilities.decorators import beholder
 
 
 __all__ = ['Internet', 'ETHERTYPE']
@@ -106,7 +107,7 @@ class Internet(Protocol):
 
         """
         if self._onerror:
-            flag, info, chain, alias = beholder(self._import_next_layer)(proto, length, version=version)
+            flag, info, chain, alias = beholder(self._import_next_layer)(self, proto, length, version=version)
         else:
             flag, info, chain, alias = self._import_next_layer(proto, length, version=version)
 

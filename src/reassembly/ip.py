@@ -72,8 +72,8 @@ Algorithm:
 """
 import copy
 
+from jspcap.corekit.infoclass import Info
 from jspcap.reassembly.reassembly import Reassembly
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['IP_Reassembly']

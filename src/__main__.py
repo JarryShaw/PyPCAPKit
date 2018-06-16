@@ -10,7 +10,7 @@ import argparse
 import os
 import sys
 
-from jspcap.fundations.extraction import Extractor
+from jspcap.fundation.extraction import Extractor
 
 
 # version number

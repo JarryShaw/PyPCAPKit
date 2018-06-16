@@ -7,8 +7,8 @@ modules and functions to extract the attributes.
 
 """
 from jspcap.protocols.raw import Raw
-from jspcap.utilities.exceptions import ProtocolError
 from jspcap.utilities.decorators import seekset_ng
+from jspcap.utilities.exceptions import ProtocolError
 
 ###############################################################################
 # from jspcap.protocols.application.httpv1 import HTTPv1

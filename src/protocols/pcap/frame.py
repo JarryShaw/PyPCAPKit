@@ -15,12 +15,13 @@ typedef struct pcaprec_hdr_s {
 """
 import datetime
 import io
+import os
 
+from jspcap.corekit.infoclass import Info
+from jspcap.corekit.protochain import ProtoChain
 from jspcap.protocols.protocol import Protocol
 from jspcap.utilities.decorators import beholder
 from jspcap.utilities.exceptions import ProtocolNotFound, ProtocolUnbound
-from jspcap.utilities.infoclass import Info
-from jspcap.utilities.protochain import ProtoChain
 
 ###############################################################################
 # from jspcap.protocols.link import Ethernet
@@ -96,15 +97,18 @@ class Frame(Protocol):
             } pcaprec_hdr_t;
 
         """
+        # _scur = self._file.tell()
         _temp = self._read_unpack(4, lilendian=True, quiet=True)
         if _temp is None:
             raise EOFError
 
-        _time = datetime.datetime.fromtimestamp(_temp)
         _tsss = _temp
         _tsus = self._read_unpack(4, lilendian=True)
         _ilen = self._read_unpack(4, lilendian=True)
         _olen = self._read_unpack(4, lilendian=True)
+
+        _epch = float(f'{_tsss}.{_tsus}')
+        _time = datetime.datetime.fromtimestamp(_epch)
 
         frame = dict(
             frame_info = dict(
@@ -115,13 +119,15 @@ class Frame(Protocol):
             ),
             time = _time,
             number = self._fnum,
-            time_epoch = f'{_tsss}.{_tsus} seconds',
+            time_epoch = _epch,
             len = _ilen,
             cap_len = _olen,
         )
 
-        length = frame['cap_len']
-        frame['packet'] = self._read_packet(header=16, payload=length, discard=True)
+        # make BytesIO from frame package data
+        length = frame['len']
+        self._file = io.BytesIO(self._file.read(length))
+        frame['packet'] = self._read_packet(header=0, payload=length, discard=True)
 
         return self._decode_next_layer(frame, length)
 
@@ -211,13 +217,13 @@ class Frame(Protocol):
             * dict -- current protocol with packet extracted
 
         """
-        # make BytesIO from frame package data
-        bytes_ = io.BytesIO(self._file.read(dict_['len']))
+        seek_cur = self._file.tell()
         try:
-            flag, info, chain, alias = self._import_next_layer(bytes_, length)
+            flag, info, chain, alias = self._import_next_layer(self._prot, length)
         except Exception as error:
             dict_['error'] = str(error)
-            flag, info, chain, alias = beholder(self._import_next_layer)(bytes_, length, error=True)
+            self._file.seek(seek_cur, os.SEEK_SET)
+            flag, info, chain, alias = beholder(self._import_next_layer)(self, self._prot, length, error=True)
 
         # make next layer protocol name
         if flag:
@@ -231,11 +237,11 @@ class Frame(Protocol):
         dict_['protocols'] = self._protos.chain
         return dict_
 
-    def _import_next_layer(self, file, length, *, error=False):
+    def _import_next_layer(self, proto, length, error=False):
         """Import next layer extractor.
 
         Positional arguments:
-            * file -- BytesIO, packet bytes I/O object
+            * proto -- str, next layer protocol name
             * length -- int, valid (not padding) length
 
         Keyword arguments:
@@ -253,13 +259,13 @@ class Frame(Protocol):
             * IPv6 (internet layer)
 
         """
-        if self._prot == 'Ethernet':
+        if proto == 'Ethernet':
             from jspcap.protocols.link import Ethernet as Protocol
-        elif self._prot == 'IPv4':
+        elif proto == 'IPv4':
             from jspcap.protocols.internet import IPv4 as Protocol
-        elif self._prot == 'IPv6':
+        elif proto == 'IPv6':
             from jspcap.protocols.internet import IPv6 as Protocol
         else:
             from jspcap.protocols.raw import Raw as Protocol
-        next_ = Protocol(file, length, error=error)
+        next_ = Protocol(self._file, length, error=error)
         return True, next_.info, next_.protochain, next_.alias

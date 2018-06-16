@@ -18,19 +18,23 @@ __all__ = [
     'BoolError', 'BytesError', 'StringError', 'BytearrayError', # TypeError
     'DictError', 'ListError', 'TupleError', 'IterableError',    # TypeError
     'IOObjError', 'ProtocolUnbound', 'CallableError',           # TypeError
+    'InfoError',                                                # TypeError
     'FormatError', 'UnsupportedCall',                           # AttributeError
     'FileError',                                                # IOError
+    'FileExists',                                               # FileExistsError
     'FileNotFound',                                             # FileNotFoundError
     'ProtocolNotFound',                                         # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',           # ValueError
+    'ProtocolNotImplemented',                                   # NotImplementedError
     'StructError',                                              # struct.error
-    'FragmentError',                                            # KeyError
+    'FragmentError', 'PacketError'                              # KeyError
 ]
 
 
 ##############################################################################
 # BaseError (abc of exceptions) session.
 ##############################################################################
+
 
 class BaseError(Exception):
     """Base error class of all kinds.
@@ -63,6 +67,7 @@ class BaseError(Exception):
 ##############################################################################
 # TypeError session.
 ##############################################################################
+
 
 class DigitError(BaseError, TypeError):
     """The argument(s) must be (a) number(s)."""
@@ -135,13 +140,19 @@ class ProtocolUnbound(BaseError, TypeError):
 
 
 class IOObjError(BaseError, TypeError):
-    """The argument(s) must be file-like type."""
+    """The argument(s) must be file-like object."""
+    pass
+
+
+class InfoError(BaseError, TypeError):
+    """The argument(s) must be Info instance."""
     pass
 
 
 ##############################################################################
 # AttributeError session.
 ##############################################################################
+
 
 class FormatError(BaseError, AttributeError):
     """Unknow format(s)."""
@@ -157,14 +168,26 @@ class UnsupportedCall(BaseError, AttributeError):
 # IOError session.
 ##############################################################################
 
+
 class FileError(BaseError, IOError):
     """Wrong file format."""
     pass
 
 
 ##############################################################################
+# FileExistsError session.
+##############################################################################
+
+
+class FileExists(BaseError, FileExistsError):
+    """File already exists."""
+    pass
+
+
+##############################################################################
 # FileNotFoundError session.
 ##############################################################################
+
 
 class FileNotFound(BaseError, FileNotFoundError):
     """File not found."""
@@ -175,6 +198,7 @@ class FileNotFound(BaseError, FileNotFoundError):
 # IndexError session.
 ##############################################################################
 
+
 class ProtocolNotFound(BaseError, IndexError):
     """Protocol not found in ProtoChain."""
     pass
@@ -183,6 +207,7 @@ class ProtocolNotFound(BaseError, IndexError):
 ##############################################################################
 # ValueError session.
 ##############################################################################
+
 
 class VersionError(BaseError, ValueError):
     """Unknown IP version."""
@@ -193,14 +218,25 @@ class IndexNotFound(BaseError, ValueError):
     """Protocol not in ProtoChain."""
     pass
 
+
 class ProtocolError(BaseError, ValueError):
     """Invalid protocol format."""
+    pass
+
+##############################################################################
+# NotImplementedError session.
+##############################################################################
+
+
+class ProtocolNotImplemented(BaseError, NotImplementedError):
+    """Protocol not implemented."""
     pass
 
 
 ##############################################################################
 # struct.error session.
 ##############################################################################
+
 
 class StructError(BaseError, struct.error):
     """Unpack failed."""
@@ -211,6 +247,12 @@ class StructError(BaseError, struct.error):
 # KeyError session.
 ##############################################################################
 
+
 class FragmentError(BaseError, KeyError):
     """Invalid fragment dict."""
+    pass
+
+
+class PacketError(BaseError, KeyError):
+    """Invalid packet dict."""
     pass

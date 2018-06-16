@@ -18,8 +18,8 @@ which implements extractor for User Datagram Protocol
 +---------------- ...
 
 """
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.transport.transport import Transport
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['UDP']

@@ -28,9 +28,9 @@ Protocol (TCP), whose structure is described as below.
 """
 import struct
 
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.transport.transport import Transport
 from jspcap.utilities.decorators import seekset
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['TCP']

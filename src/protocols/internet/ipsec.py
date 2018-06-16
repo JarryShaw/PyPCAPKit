@@ -6,9 +6,9 @@ only, which is a base class for Internet Protocol Security
 (IPsec) protocol family, eg. AH and ESP (NotImplemented).
 
 """
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.internet.ip import IP
 from jspcap.utilities.exceptions import UnsupportedCall
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = 'IPsec'

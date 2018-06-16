@@ -16,12 +16,30 @@ strategy to read input files. That is to read frame by
 frame, decrease occupation on memory, as well as enhance
 efficiency in some way.
 
-In `jspcap`, all files can be described as following six
+In `jspcap`, all files can be described as following eight
 parts.
 
- - Fundations (`jspcap.fundations`)
+ - Fundation (`jspcap.fundation`)
     synthesise file I/O and protocol analysis, coordinate
     information exchange in all network layers
+
+ - Reassembly (`jspcap.reassembly`)
+    base on algorithms described in
+    [`RFC 815`](https://tools.ietf.org/html/rfc815>),
+    implement datagram reassembly of IP and TCP packets
+ 
+ - Protocols (`jspcap.protocols`)
+    collection of all protocol family, with detailed
+    implementation and methods
+
+ - IPSuite (`jspcap.ipsuite`)
+    collection of constructors for Internet Protocol Suite
+
+ - CoreKit (`jspcap.corekit`)
+    core utilities for `jspcap` implementation
+
+ - DumpKit (`jspcap.dumpkit`)
+    dump utilities for `jspcap` implementation
 
  - ToolKit (`jspcap.toolkit`)
     standard library interface, which implements three
@@ -31,15 +49,6 @@ parts.
     user interface for the `jspcap` library, which 
     standardises and simplifies the usage of this
     library
-
- - Reassembly (`jspcap.reassembly`)
-    base on algorithms described in
-   [`RFC 815`](https://tools.ietf.org/html/rfc815>),
-   implement datagram reassembly of IP and TCP packets
-
- - Protocols (`jspcap.protocols`)
-    collection of all protocol family, with detailed
-    implementation and methods
 
  - Utilities (`jspcap.utilities`)
     collection of four utility functions and classes

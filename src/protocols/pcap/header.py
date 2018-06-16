@@ -16,12 +16,12 @@ typedef struct pcap_hdr_s {
 } pcap_hdr_t;
 
 """
+from jspcap.corekit.infoclass import Info
+from jspcap.corekit.version import VersionInfo
 from jspcap.protocols.protocol import Protocol
 from jspcap.protocols.link.link import LINKTYPE
 from jspcap.utilities.exceptions import FileError, UnsupportedCall
-from jspcap.utilities.infoclass import Info
 from jspcap.utilities.validations import int_check
-from jspcap.utilities.version import VersionInfo
 
 
 __all__ = ['Header']

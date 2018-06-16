@@ -8,9 +8,9 @@ Protocol (HTTP) protocol family, eg. HTTP/1.*, HTTP/2.
 """
 import chardet
 
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.application.application import Application
 from jspcap.utilities.exceptions import UnsupportedCall, ProtocolError
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['HTTP']

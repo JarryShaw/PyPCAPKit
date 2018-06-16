@@ -98,9 +98,9 @@ import copy
 import io
 import sys
 
-from jspcap.fundations.analysis import analyse
+from jspcap.corekit.infoclass import Info
+from jspcap.fundation.analysis import analyse
 from jspcap.reassembly.reassembly import Reassembly
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['TCP_Reassembly']

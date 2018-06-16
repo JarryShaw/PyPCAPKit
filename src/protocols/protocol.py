@@ -15,11 +15,12 @@ import os
 import struct
 import textwrap
 
+from jspcap.corekit.infoclass import Info
+from jspcap.corekit.protochain import ProtoChain
 from jspcap.utilities.decorators import beholder, seekset
 from jspcap.utilities.exceptions import BoolError, BytesError, StructError
-from jspcap.utilities.infoclass import Info
-from jspcap.utilities.protochain import ProtoChain
 from jspcap.utilities.validations import bool_check, int_check
+
 ###############################################################################
 # from jspcap.protocols.raw import Raw
 ###############################################################################
@@ -280,7 +281,7 @@ class Protocol:
 
         """
         if self._onerror:
-            flag, info, chain, alias = beholder(self._import_next_layer)(proto, length)
+            flag, info, chain, alias = beholder(self._import_next_layer)(self, proto, length)
         else:
             flag, info, chain, alias = self._import_next_layer(proto, length)
 

@@ -6,8 +6,8 @@ including PCAP file extraction tool `Extrator` and
 application layer protocol analyser `analyse`.
 
 """
-from jspcap.fundations.analysis import *
-from jspcap.fundations.extraction import *
+from jspcap.fundation.analysis import *
+from jspcap.fundation.extraction import *
 
 
 __all__ = ['analyse', 'Extractor']

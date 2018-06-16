@@ -22,8 +22,8 @@ which implements extractor for Open Shortest Path First
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.link.link import Link
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['OSPF']

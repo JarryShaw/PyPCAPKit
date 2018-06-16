@@ -30,9 +30,9 @@ Protocol (HIP), whose structure is described as below.
 
 """
 # TODO: Implements extractor of all HIP parameters.
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.protocol import Protocol
 from jspcap.utilities.exceptions import ProtocolError
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['HIP']

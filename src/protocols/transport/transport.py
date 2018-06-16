@@ -14,7 +14,7 @@ from jspcap.protocols.protocol import Protocol
 from jspcap.utilities.decorators import beholder_ng
 
 ###############################################################################
-# from jspcap.fundations.analysis import analyse
+# from jspcap.fundation.analysis import analyse
 ###############################################################################
 
 
@@ -106,7 +106,7 @@ class Transport(Protocol):
             * str -- alias of next layer
 
         """
-        from jspcap.fundations.analysis import analyse
+        from jspcap.fundation.analysis import analyse
         if self._onerror:
             next_ = beholder_ng(analyse)(io.BytesIO(self._read_fileng(length)), length)
         else:

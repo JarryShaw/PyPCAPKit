@@ -6,10 +6,10 @@ implements extractor for unknown protocol, and constructs
 a `Protocol` like object.
 
 """
+from jspcap.corekit.infoclass import Info
+from jspcap.corekit.protochain import ProtoChain
 from jspcap.protocols.protocol import Protocol
 from jspcap.utilities.exceptions import UnsupportedCall
-from jspcap.utilities.infoclass import Info
-from jspcap.utilities.protochain import ProtoChain
 
 
 __all__ = ['Raw']

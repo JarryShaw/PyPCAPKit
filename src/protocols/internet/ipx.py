@@ -14,8 +14,8 @@ Octets      Bits        Name                    Discription
   18        144     ipx.src                 Source Address
 
 """
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.internet.internet import Internet
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['IPX']

@@ -18,8 +18,8 @@ as below.
 
 """
 # TODO: Implements extractor of all hop-by-hop options.
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.protocol import Protocol
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['HOPOPT']

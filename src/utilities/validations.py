@@ -13,14 +13,14 @@ import numbers
 
 from jspcap.utilities.exceptions import BoolError, BytesError, BytearrayError, \
         DictError, DigitError, FragmentError, IntError, IOObjError, ListError, \
-        RealError, TupleError
+        RealError, TupleError, InfoError, PacketError
 
 
 __all__ = [
     'int_check', 'real_check', 'complex_check', 'number_check',
     'bool_check', 'bytes_check', 'bytearray_check', 'str_check',
-    'list_check', 'dict_check', 'tuple_check',
-    'io_check', 'frag_check',
+    'list_check', 'dict_check', 'tuple_check', 'io_check',
+    'frag_check', 'pkt_check', 'info_check',
 ]
 
 
@@ -28,7 +28,7 @@ def int_check(*args, func=None):
     """Check if arguments are integrals."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, numbers.Complex):
+        if not isinstance(var, numbers.Integral):
             name = type(var).__name__
             raise ComplexError(f'Function {func} expected integral number, {name} got instead.')
 
@@ -37,7 +37,7 @@ def real_check(*args, func=None):
     """Check if arguments are real numbers."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, numbers.Complex):
+        if not isinstance(var, numbers.Real):
             name = type(var).__name__
             raise ComplexError(f'Function {func} expected real number, {name} got instead.')
 
@@ -56,7 +56,7 @@ def number_check(*args, func=None):
     func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, numbers.Number):
-
+            name = type(var).__name__
             raise DigitError(f'Function {func} expected number, {name} got instead.')
 
 
@@ -124,12 +124,22 @@ def tuple_check(*args, func=None):
 
 
 def io_check(*args, func=None):
-    """Check if arguments are file-like type."""
+    """Check if arguments are file-like object."""
     func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, io.IOBase):
             name = type(var).__name__
             raise IOObjError(f'Function {func} expected file-like object, {name} got instead.')
+
+def info_check(*args, func=None):
+    """Check if arguments are Info instance."""
+    from jspcap.corekit.infoclass import Info
+
+    func = func or inspect.stack()[2][3]
+    for var in args:
+        if not isinstance(var, Info):
+            name = type(var).__name__
+            raise IOObjError(f'Function {func} expected Info instance, {name} got instead.')
 
 
 def frag_check(*args, protocol, func=None):
@@ -166,6 +176,18 @@ def _tcp_frag_check(*args, func=None):
         bool_check(var.get('syn'), var.get('fin'), func=func)
         int_check(bufid[2], bufid[3], var.get('num'), var.get('ack'), var.get('dsn'),
                     var.get('first'), var.get('last'), var.get('len'), func=func)
+
+
+def pkt_check(*args, func=None):
+    """Check if arguments are valid packets."""
+    func = func or inspect.stack()[2][3]
+    for var in args:
+        dict_check(var, func=func)
+        info_check(var.get('frame'), func=func)
+        real_check(vat.get('timestamp'), func=func)
+        bool_check(var.get('syn'), var.get('fin'), func=func)
+        str_check(var.get('protocol'), var.get('src'), var.get('dst'), func=func)
+        int_check(var.get('srcport'), var.get('dstport'), var.get('index'), func=func)
 
 
 ###############################################################################

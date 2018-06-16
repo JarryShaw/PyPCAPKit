@@ -13,8 +13,8 @@ Octets      Bits        Name                    Discription
   3          24     vlan.type               Protocol (Internet Layer)
 
 """
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.link.link import Link
-from jspcap.utilities.infoclass import Info
 
 __all__ = ['VLAN']
 

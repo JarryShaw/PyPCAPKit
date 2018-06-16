@@ -16,13 +16,14 @@ import textwrap
 # from jsformat import PLIST, JSON, Tree, JavaScript, XML
 ###############################################################################
 
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.pcap.frame import Frame
 from jspcap.protocols.pcap.header import Header
 from jspcap.utilities.exceptions import CallableError, FormatError, \
         FileNotFound, UnsupportedCall, IterableError
-from jspcap.utilities.infoclass import Info
 
 ###############################################################################
+# from jspcap.fundation.traceflow import TraceFlow
 # from jspcap.reassembly.ipv4 import IPv4_Reassembly
 # from jspcap.reassembly.ipv6 import IPv6_Reassembly
 # from jspcap.reassembly.tcp import TCP_Reassembly
@@ -55,7 +56,8 @@ class Extractor:
         * record_frames -- extract frames
 
     Attributes:
-        * _auto -- bool, if run automatically to the end
+        * _flag_a -- bool, if run automatically to the end
+
         * _ifnm -- str, input file name (aka _ifile.name)
         * _ofnm -- str, output file name (aka _ofile.name)
         * _type -- str, output file kind (aka _ofile.kind)
@@ -148,6 +150,12 @@ class Extractor:
         )
         return data
 
+    @property
+    def trace(self):
+        if self._flag_t:
+            return self._trace.index
+        raise UnsupportedCall("'Extractor(trace=False)' object has no attribute 'trace'")
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -223,7 +231,7 @@ class Extractor:
                 self._type = self._ofile.kind
 
     def record_frames(self):
-        if self._auto:
+        if self._flag_a:
             while True:
                 try:
                     self._read_frame()
@@ -239,9 +247,12 @@ class Extractor:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fin=None, fout=None, format=None, store=True, verbose=False,
-                            auto=True, extension=True, files=False, nofile=False,
-                            ip=False, ipv4=False, ipv6=False, tcp=False, strict=False):
+    def __init__(self, *,
+                    fin=None, fout=None, format=None,                           # basic settings
+                    auto=True, extension=True, store=True,                      # internal settings        
+                    files=False, nofile=False, verbose=False,                   # output settings
+                    ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
+                    trace=False, trace_fout=None, trace_format=None):           # trace settings
         """Initialise PCAP Reader.
 
         Keyword arguments:
@@ -284,16 +295,19 @@ class Extractor:
         self._ofnm = ofnm               # output file name
         self._fext = ext                # output file extension
 
-        self._flag_f = files            # split file flag
-        self._flag_v = verbose          # verbose output flag
-        self._flag_q = nofile           # no output flag
+        self._flag_a = auto             # auto extract flag
         self._flag_d = store            # store data flag
+        self._flag_f = files            # split file flag
+        self._flag_q = nofile           # no output flag
+        self._flag_t = trace            # trace flag
+        self._flag_v = verbose          # verbose output flag
 
-        self._auto = auto               # auto extract flag
         self._frnum = 1                 # frame number
         self._frame = list()            # frame record
-        self._reasm = [None] * 3        # frame record for reassembly (IPv4 / IPv6 / TCP)
         self._proto = None              # frame ProtoChain
+
+        self._reasm = [None] * 3        # frame record for reassembly (IPv4 / IPv6 / TCP)
+        self._trace = NotImplemented    # flow tracer
 
         self._ipv4 = ipv4 or ip         # IPv4 Reassembly
         self._ipv6 = ipv6 or ip         # IPv6 Reassembly
@@ -309,6 +323,10 @@ class Extractor:
             from jspcap.reassembly.tcp import TCP_Reassembly
             self._reasm[2] = TCP_Reassembly(strict=strict)
 
+        if trace:
+            from jspcap.fundation.traceflow import TraceFlow
+            self._trace = TraceFlow(fout=trace_fout, format=trace_format)
+
         self._ifile = open(ifnm, 'rb')                      # input file
         if not self._flag_q:
             if fmt == 'plist':
@@ -319,7 +337,6 @@ class Extractor:
                 from jsformat import Tree as output         # output treeview text file
             elif fmt == 'html':
                 from jsformat import JavaScript as output   # output JavaScript file
-                fmt = 'js'
             elif fmt == 'xml':
                 from jsformat import XML as output          # output XML file
             else:
@@ -331,7 +348,7 @@ class Extractor:
         self.record_frames()            # read frames
 
     def __iter__(self):
-        if not self._auto:
+        if not self._flag_a:
             return self
         raise IterableError("'Extractor(auto=True)' object is not iterable") 
 
@@ -343,7 +360,7 @@ class Extractor:
             raise StopIteration
 
     def __call__(self):
-        if not self._auto:
+        if not self._flag_a:
             try:
                 return self._read_frame()
             except EOFError as error:
@@ -397,6 +414,10 @@ class Extractor:
             self._ipv4_reassembly(frame)
         if self._ipv6:
             self._ipv6_reassembly(frame)
+
+        # trace flows
+        if self._flag_t:
+            self._tcp_traceflow(frame)
 
         # return frame record
         return frame
@@ -475,3 +496,22 @@ class Extractor:
             data['last'] = tcp.seq + raw_len            # next (wanted) sequence number
             data['len'] = raw_len                       # payload length, header excludes
             self._reasm[2](data)
+
+    def _tcp_traceflow(self, frame):
+        """Trace packet flow for TCP."""
+        if 'TCP' in frame:
+            ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
+            tcp = frame['TCP']
+            packet = dict(
+                protocol = self._dlink,                 # data link type from global header
+                index = frame.info.number,              # frame number
+                frame = frame.info,                     # extracted frame info
+                syn = tcp.flags.syn,                    # TCP synchronise (SYN) flag
+                fin = tcp.flags.fin,                    # TCP finish (FIN) flag
+                src = ip.src,                           # source IP
+                dst = ip.dst,                           # destination IP
+                srcport = tcp.srcport,                  # TCP source port
+                dstport = tcp.dstport,                  # TCP destination port
+                timestamp = frame.info.time_epoch,      # frame timestamp
+            )
+            self._trace.dump(packet)

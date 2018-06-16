@@ -6,9 +6,9 @@
 layer protocols, eg. HTTP/1.*, HTTP/2 and etc.
 
 """
+from jspcap.corekit.protochain import ProtoChain
 from jspcap.protocols.protocol import Protocol
 from jspcap.utilities.exceptions import UnsupportedCall
-from jspcap.utilities.protochain import ProtoChain
 
 
 __all__ = ['Application']

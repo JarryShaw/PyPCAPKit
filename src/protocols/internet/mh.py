@@ -19,8 +19,8 @@ whose structure is described as below.
 
 """
 # TODO: Implements extractor for message data of all MH types.
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.protocol import Protocol
-from jspcap.utilities.infoclass import Info
 
 
 __all__ = ['MH']

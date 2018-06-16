@@ -20,6 +20,7 @@ whose structure is described as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
+from jspcap.corekit.infoclass import Info
 from jspcap.protocols.internet.ipsec import IPsec
 from jspcap.utilities.exceptions import VersionError, ProtocolError
 

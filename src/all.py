@@ -7,16 +7,21 @@ make a simple index for this library, `jspcap.all`
 contains all things from `jspcap`.
 
 """
-from jspcap.fundations import *
+from jspcap.corekit import *
+from jspcap.fundation import *
 from jspcap.interfaces import *
 from jspcap.protocols import *
 from jspcap.reassembly import *
 from jspcap.toolkit import *
-from jspcap.utilities import *
 
 
 __all__ = [
-    # jspcap.fundations
+    # jspcap.corekit
+    'Info',                                             # Info Class
+    'ProtoChain',                                       # ProtoChain
+    'VersionInfo',                                      # Version
+
+    # jspcap.fundation
     'Extractor',                                        # Extraction
     'analyse',                                          # Analysis
 
@@ -41,10 +46,4 @@ __all__ = [
     # jspcap.toolkit
     'extract', 'analyse', 'reassemble',                 # Functions
     'TREE', 'JSON', 'PLIST',                            # Macros
-
-    # jspcap.utilities
-    'seekset_ng', 'beholder_ng',                        # Decorators
-    'Info',                                             # Info Class
-    'ProtoChain',                                       # ProtoChain
-    'VersionInfo',                                      # Version
 ]
