@@ -11,7 +11,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.7.7.post1'
+__version__ = '0.7.7.post2'
 
 
 # set-up script for pip distribution
@@ -36,8 +36,16 @@ setuptools.setup(
     },
     packages = [
         'jspcap',
-        'jspcap.fundations',
+        'jspcap.corekit',
+        'jspcap.dumpkit',
+        'jspcap.fundation',
         'jspcap.interfaces',
+        'jspcap.ipsuite',
+        'jspcap.ipsuite.pcap',
+        'jspcap.ipsuite.application',
+        'jspcap.ipsuite.internet',
+        'jspcap.ipsuite.link',
+        'jspcap.ipsuite.transport',
         'jspcap.protocols',
         'jspcap.protocols.pcap',
         'jspcap.protocols.application',
@@ -46,7 +54,7 @@ setuptools.setup(
         'jspcap.protocols.transport',
         'jspcap.reassembly',
         'jspcap.toolkit',
-        'jspcap.Utilities',
+        'jspcap.utilities',
     ],
     package_data = {
         '': [
