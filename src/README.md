@@ -5,6 +5,9 @@
  - [Foundation](#foundation)
     * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#foundation-manual)
     * [Module Index](#index-foundation)
+ - [Interface](#interface)
+    * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/interface#interface-manual)
+    * [Module Index](#index-interface)
  - [Reassembly](#reassembly)
     * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
     * [Module Index](#index-reassembly)
@@ -14,18 +17,12 @@
  - [Protocols](protocols)
     * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
     * [Module Index](#index-protocols)
- - [Interfaces](#interfaces)
-    * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
-    * [Module Index](#index-interfaces)
  - [Utilities](#utilities)
     * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/utilities#utilities-maunal)
     * [Module Index](#index-utilities)
  - [CoreKit](#corekit)
     * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#corekit-manual)
     * [Module Index](#index-corekit)
- - [ToolKit](#toolkit)
-    * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#toolkit-manual)
-    * [Module Index](#index-toolkit)
  - [DumpKit](#dumpkit)
     * [Module Manual](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#dumpkit-manual)
     * [Module Index](#index-dumpkit)
@@ -46,6 +43,23 @@
 | [`Analysis`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#analysis)   | match protocols & extract attributes |
 | [`Extractor`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#extractor) | extract parameters from a PCAP file  |
 | [`TraceFlow`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#traceflow) |        trace TCP packet flows        |
+
+&nbsp;
+
+## Interface
+
+ > described in [`src/interface`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#interfaces-manual)
+
+&emsp; Since `jspcap` has massive classes and numerous functions, `jspcap.interface` defines several user-oriented interfaces, variables, and etc. These interfaces are designed to help and simplify the usage of `jspcap`.
+
+<a name="index-interface"> </a>
+
+|                                           NAME                                           |            DESCRIPTION            |
+| :--------------------------------------------------------------------------------------: | :-------------------------------: |
+| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#extract)       |        extract a PCAP file        |
+| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#analyse)       | analyse application layer packets |
+| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
+| [`trace`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#trace)           |      trace TCP packet flows       |
 
 &nbsp;
 
@@ -127,19 +141,6 @@
 
 &nbsp;
 
-## Interfaces
-
- > described in [`src/interfaces`](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
-
-&emsp; Since `jspcap` has massive classes and numerous functions, `jspcap.interfaces` defines several user-oriented interfaces, variables, and etc. These interfaces are designed to help and simplify the usage of `jspcap`.
-
-<a name="index-interfaces"> </a>
-
-| NAME | DESCRIPTION |
-| :--: | :---------: |
-
-&nbsp;
-
 ## Utilities
 
  > described in [`src/utilities`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities#utilities-manual)
@@ -169,23 +170,6 @@
 | [`Info`](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#info)               |         `dict`-like class         |
 | [`VersionInfo`](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#versioninfo) |        `tuple`-like class         |
 | [`ProtoChain`](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#protochain)   |     protocol collection class     |
-
-&nbsp;
-
-## ToolKit
-
- > described in [`src/toolkit`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#toolkit-manual)
-
-&emsp; For vast scale of this library, `jspcap.toolkit` standardises library interfaces, which implements four major verbs of the library.
-
-<a name="index-toolkit"> </a>
-
-|                                           NAME                                           |            DESCRIPTION            |
-| :--------------------------------------------------------------------------------------: | :-------------------------------: |
-| [`tkextract`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#extract)       |        extract a PCAP file        |
-| [`tkanalyse`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#analyse)       | analyse application layer packets |
-| [`tkreassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#reassemble) |  reassemble fragmented datagrams  |
-| [`tktrace`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#trace)           |      trace TCP packet flows       |
 
 &nbsp;
 

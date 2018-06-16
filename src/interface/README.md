@@ -1,11 +1,12 @@
-# ToolKit Manual
+# Interface Manual
 
-&emsp; `jspcap` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for function ToolKit usage.
+&emsp; `jspcap` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for interface usage.
 
  - [Macros](#macros)
- - [`tkextract`](#tkextract)
- - [`tkanalyse`](#tkanalyse)
- - [`tkreassemble`](#tkreassemble)
+ - [`extract`](#extract)
+ - [`analyse`](#analyse)
+ - [`reassemble`](#reassemble)
+ - [`trace`](#trace)
 
 ---
 
@@ -16,18 +17,18 @@
  - `PLIST` -- macOS Property List (PLIST) format
  - `PCAP` -- PCAP format
 
-&emsp; There are four macro variables defined in this part, as shown above. They indicate the output format of extraction operation, which should simplify the usage of [`tkextract`](#tkextract).
+&emsp; There are four macro variables defined in this part, as shown above. They indicate the output format of extraction operation, which should simplify the usage of [`extract`](#extract).
 
 &nbsp;
 
-## `tkextract`
+## `extract`
 
 ```python
-tkextract(*, fin=None, fout=None, format=None,                              # basic settings
-                auto=True, extension=True, store=True,                      # internal settings
-                files=False, nofile=False, verbose=False,                   # output settings
-                ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
-                trace=False, trace_fout=None, trace_format=None)            # trace settings
+extract(*, fin=None, fout=None, format=None,                            # basic settings
+            auto=True, extension=True, store=True,                      # internal settings
+            files=False, nofile=False, verbose=False,                   # output settings
+            ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
+            trace=False, trace_fout=None, trace_format=None)            # trace settings
 ```
 
 ##### Extract a PCAP file.
@@ -55,14 +56,14 @@ tkextract(*, fin=None, fout=None, format=None,                              # ba
     | `trace_format` | `str`  | `None`  | `plist` / `json` / `tree` / `html` / `pcap` / `None` |              output format of flow tracer               |
 
  - Returns:
-    * `Extractor` -- an Extractor object form [`jspcap.foundation.extraction`](https://github.com/JarryShaw/jspcap/tree/master/src/foundations#extraction)
+    * `Extractor` -- an Extractor object form [`jspcap.foundation.extraction`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#extraction)
 
 &nbsp;
 
-## `tkanalyse`
+## `analyse`
 
 ```python
-tkanalyse(*, file, length=None)
+analyse(*, file, length=None)
 ```
 
 ##### Analyse application layer packets.
@@ -76,10 +77,10 @@ tkanalyse(*, file, length=None)
 
 &nbsp;
 
-## `tkreassemble`
+## `reassemble`
 
 ```python
-tkreassemble(*, protocol, strict=False)
+reassemble(*, protocol, strict=False)
 ```
 
 ##### Reassemble fragmented datagrams.
@@ -95,3 +96,13 @@ tkreassemble(*, protocol, strict=False)
     * *if protocol is IPv4* `IPv4_Reassembly` -- a `IPv4_Reassembly` object from [`jspcap.reassembly.ipv4`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ipv4_reassembly)
     * *if protocol is IPv6* `IPv6_Reassembly` -- a` IPv6_Reassembly` object from [`jspcap.reassembly.ipv6`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ipv6_reassembly)
     * *if protocol is TCP* `TCP_Reassembly` -- a `TCP_Reassembly` object from [`jspcap.reassembly.tcp`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly)
+
+&nbsp;
+
+## `trace`
+
+```python
+trace(*, fout=None, format=None)
+```
+
+##### Trace TCP flows.

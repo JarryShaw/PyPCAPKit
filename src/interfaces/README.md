@@ -1,3 +1,0 @@
-# Interfaces Manual
-
-<!-- NotImplemented -->

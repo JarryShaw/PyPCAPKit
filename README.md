@@ -6,13 +6,12 @@
 
  - [About](#about)
     * [Foundation](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#foundation-manual)
+    * [Interface](https://github.com/JarryShaw/jspcap/tree/master/src/interface#interface-manual)
     * [Reassembly](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
     * [IPSuite](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite#ipsuite-manual)
     * [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
-    * [Interfaces](https://github.com/JarryShaw/jspcap/tree/master/src/interfaces#interfaces-manual)
     * [Utilities](https://github.com/JarryShaw/jspcap/tree/master/src/utilities#utilities-maunal)
     * [CoreKit](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#corekit-manual)
-    * [ToolKit](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#toolkit-manual)
     * [DumpKit](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#dumpkit-manual)
  - [Installation](#installation)
  - [Usage](#usage)
@@ -39,13 +38,12 @@
 &emsp; In `jspcap`, all files can be described as following six parts.
 
  - Foundation (`jspcap.foundation`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
+ - Interface (`jspcap.interface`) -- user interface for the `jspcap` library, which standardise and simplify the usage of this library
  - Reassembly (`jspcap.reassembly`) -- base on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implement datagram reassembly of IP and TCP packets
  - IPSuite (`jspcap.ipsuite`) -- collection of constructors for [Internet Protocol Suite](https://en.wikipedia.org/wiki/Internet_protocol_suite)
  - Protocols (`jspcap.protocols`) -- collection of all protocol family, with detail implementation and methods
- - Interfaces (`jspcap.interfaces`) -- user interface for the `jspcap` library, which standardise and simplify the usage of this library
  - Utilities (`jspcap.utilities`) -- collection of four utility functions and classes
  - CoreKit (`jspcap.corekit`) -- core utilities for `jspcap` implementation
- - ToolKit (`jspcap.toolkit`) -- standard library interface, which implements three major verbs of the library
  - DumpKit (`jspcap.dumpkit`) -- dump utilities for `jspcap` implementation
 
 ![](./doc/jspcap.png)
