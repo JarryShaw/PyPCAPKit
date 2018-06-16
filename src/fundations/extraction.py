@@ -8,16 +8,12 @@ parametres from a PCAP file.
 
 """
 import collections
-import copy
-import datetime
 import io
 import multiprocessing
 import os
 import pathlib
-import random
 import re
 import textwrap
-import time
 
 ###############################################################################
 # from jsformat import PLIST, JSON, Tree, JavaScript, XML
@@ -304,7 +300,7 @@ class Extractor:
         self._flag_d = store            # store data flag
         self._flag_e = False            # EOF flag
         self._flag_f = files            # split file flag
-        self._flag_m = (self._flag_a and CPU_CNT)
+        self._flag_m = (self._flag_a and CPU_CNT > 1)
                                         # multiprocessing flag
         self._flag_q = nofile           # no output flag
         self._flag_v = verbose          # verbose output flag
@@ -347,20 +343,20 @@ class Extractor:
                                                             # output file
 
         if self._flag_m:
+            self._mpsvc = NotImplemented                    # multiprocessing server process
             self._mpprc = list()                            # multiprocessing process list
             self._mpfdp = collections.defaultdict(multiprocessing.Queue)
                                                             # multiprocessing file pointer
 
             self._mpmng = multiprocessing.Manager()         # multiprocessing manager
-            self._mpkit = self._mpmng.Namespace()           # multiprocessing utilities
+            self._mpbuf = self._mpmng.dict()                # multiprocessing frame dict
+            self._mpfrm = self._mpmng.list()                # multiprocessing frame storage
+            self._mprsm = self._mpmng.list()                # multiprocessing reassembly buffer
 
-            self._mpkit.counter    = 0                      # work count (on duty)
-            self._mpkit.pool       = 1                      # work pool (ready)
-            self._mpkit.curent     = 1                      # current frame number
-            self._mpkit.eof        = False                  # EOF flag
-            self._mpkit.frames     = dict()                 # frame storage
-            self._mpkit.reassembly = copy.deepcopy(self._reasm)
-                                                            # reassembly buffers
+            self._mpkit = self._mpmng.Namespace()           # multiprocessing utilities
+            self._mpkit.counter = 0                         # work count (on duty)
+            self._mpkit.pool    = 1                         # work pool (ready)
+            self._mpkit.eof     = False                     # EOF flag
 
         self._record_header()            # read PCAP global header
         self._record_frames()            # read frames
@@ -399,9 +395,15 @@ class Extractor:
     def _aftermathmp(self):
         """Aftermath for multiprocessing."""
         if not self._flag_e and self._flag_m:
+            # join processes
             [ proc.join() for proc in self._mpprc ]
-            self._frame = [ self._mpkit.frames[x] for x in sorted(self._mpkit.frames) ]
-            self._reasm = copy.deepcopy(self._mpkit.reassembly)
+            self._mpsvc.join()
+
+            # restore attributes
+            self._frame = list(self._mpfrm)
+            self._reasm = list(self._mprsm)
+
+            # shutdown & cleanup
             self._mpmng.shutdown()
             for attr in dir(self):
                 if re.match('^_mp.*', attr):
@@ -440,6 +442,10 @@ class Extractor:
         """Read frames."""
         if self._flag_m:
             self._mpfdp[0].put(self._gbhdr.length)
+            self._mpsvc = multiprocessing.Process(target=self._analyse_frame,
+                            kwargs={'mpfrm': self._mpfrm, 'mprsm': self._mprsm,
+                                    'mpbuf': self._mpbuf, 'mpkit': self._mpkit})
+            self._mpsvc.start()
             self._read_frame()
         else:
             frame = self._extract_frame()
@@ -460,14 +466,14 @@ class Extractor:
             if self._mpkit.eof:     self._update_eof();     break
 
             # check counter
-            if self._mpkit.pool and self._mpkit.counter < CPU_CNT:
+            if self._mpkit.pool and self._mpkit.counter < CPU_CNT - 1:
                 # update file offset
                 self._ifile.seek(self._mpfdp.pop(self._frnum-1).get(), os.SEEK_SET)
 
                 # create worker
                 # print(self._frnum, 'start')
                 proc = multiprocessing.Process(target=self._extract_frame,
-                        kwargs={'mpkit': self._mpkit,
+                        kwargs={'mpkit': self._mpkit, 'mpbuf': self._mpbuf,
                                 'mpfdp': self._mpfdp[self._frnum]})
 
                 # update status
@@ -480,11 +486,11 @@ class Extractor:
                 self._mpprc.append(proc)
 
             # check buffer
-            if len(self._mpprc) >= CPU_CNT:
+            if len(self._mpprc) >= CPU_CNT - 1:
                 [ proc.join() for proc in self._mpprc[:-4] ]
                 del self._mpprc[:-4]
 
-    def _extract_frame(self, *, mpfdp=None, mpkit=None):
+    def _extract_frame(self, *, mpfdp=None, mpkit=None, mpbuf=None):
         """Extract frame."""
         # check EOF
         if self._flag_e:    raise EOFError
@@ -495,9 +501,10 @@ class Extractor:
                 # extraction
                 frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
                                 mpkit=mpkit, mpfdp=mpfdp)
-                # analysis
-                self._analyse_frame(frame, mpkit=mpkit)
+                frame._file = NotImplemented
+                mpbuf[self._frnum] = frame
             except EOFError:
+                mpbuf[self._frnum] = EOFError
                 mpkit.eof = True
             finally:
                 mpkit.counter -= 1
@@ -506,24 +513,24 @@ class Extractor:
         else:
             return Frame(self._ifile, num=self._frnum, proto=self._dlink)
 
-    def _analyse_frame(self, frame, *, mpkit=None):
+    def _analyse_frame(self, frame=None, *, mpkit=None, mpfrm=None, mprsm=None, mpbuf=None):
         """Head quaters for analysis."""
         if self._flag_m:
-            # wait until ready
-            while mpkit.curent != self._frnum:
-                time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
+            while True:
+                # fetch frame
+                # print(self._frnum, 'trying')
+                frame = mpbuf.pop(self._frnum, None)
+                if frame is EOFError:   break
+                if frame is None:       continue
+                # print(self._frnum, 'get')
 
-            # analysis and storage
-            # print(self._frnum, 'get')
-            self._reasm = mpkit.reassembly
-            self._analyse_frame_ng(frame, mpkit=mpkit)
-            # print(self._frnum, 'analysed')
-            mpkit.reassembly = copy.deepcopy(self._reasm)
-            # print(self._frnum, 'put')
+                self._analyse_frame_ng(frame)
+            mpfrm += self._frame
+            mprsm += self._reasm
         else:
             self._analyse_frame_ng(frame)
 
-    def _analyse_frame_ng(self, frame, *, mpkit=None):
+    def _analyse_frame_ng(self, frame):
         """Analyses frame."""
         # verbose output
         if self._flag_v:
@@ -547,17 +554,13 @@ class Extractor:
             self._ipv6_reassembly(frame)
 
         # record frames
-        if self._flag_m:
-            if self._flag_d:
+        if self._flag_d:
+            if self._flag_m:
                 frame._file = NotImplemented
-                mpkit.frames[self._frnum] = copy.deepcopy(frame)
-                # print(self._frnum, 'stored')
-            mpkit.curent += 1
-        else:
-            if self._flag_d:
-                self._frame.append(frame)
-            self._frnum += 1
-            self._proto = frame.protochain.chain
+            self._frame.append(frame)
+            # print(self._frnum, 'stored')
+        self._proto = frame.protochain.chain
+        self._frnum += 1
 
     # def _read_frame(self):
     #     """Read frames.

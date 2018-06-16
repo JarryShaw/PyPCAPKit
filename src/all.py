@@ -17,7 +17,7 @@ from jspcap.utilities import *
 
 __all__ = [
     # jspcap.fundations
-    'Extrator',                                         # Extraction
+    'Extractor',                                        # Extraction
     'analyse',                                          # Analysis
 
     # jspcap.interfaces

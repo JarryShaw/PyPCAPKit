@@ -1,5 +1,9 @@
 # jspcap
 
+__NB: This implementation uses multiprocessing with a server process to perform reassembly.__
+
+ > [__DEPRECATED__] 0.04677961190541585 seconds per packet.
+
 &emsp; The `jspcap` project is an open source Python program focus on [PCAP](https://en.wikipedia.org/wiki/Pcap) parsing and analysis, which works as a stream pcap file extractor. With support of [`jsformat`](https://github.com/JarryShaw/jsformat), it shall support multiple output report formats.
 
  > Note that the whole project only supports __Python 3.6__ or later.
