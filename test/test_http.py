@@ -4,7 +4,7 @@
 import jspcap
 
 
-for frame in jspcap.extract(fin='../sample/http.pcap', nofile=True, auto=False):
+for frame in jspcap.tkextract(fin='../sample/http.pcap', nofile=True, auto=False):
     # check if this frame contains HTTP
     if jspcap.HTTP in frame:
         # print frame number & its protocols chain
