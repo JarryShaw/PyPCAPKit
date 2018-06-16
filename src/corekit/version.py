@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-"""utility functions and classes
+"""version info
 
-`jspcap.utilities` contains tuple-like class `VersionInfo`,
-which is originally designed alike `sys.version_info`.
+`jspcap.corekit.version` contains tuple-like class
+`VersionInfo`, which is originally designed alike
+`sys.version_info`.
 
 """
 import copy
@@ -20,7 +21,7 @@ __all__ = ['VersionInfo']
 
 
 class VersionInfo:
-    """VersionInfo alikes `sys.version_info`."""
+    """VersionInfo is alike `sys.version_info`."""
     @property
     def major(self):
         return self.__vers__[0]

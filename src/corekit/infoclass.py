@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""utility functions and classes
+"""info class
 
-`jspcap.utilities.infoclass` contains dict-like class
+`jspcap.corekit.infoclass` contains dict-like class
 `Info` only, which is originally designed to work alike
 `dataclasses.dataclass` in Python 3.7 and later versions.
 

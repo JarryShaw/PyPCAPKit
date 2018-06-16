@@ -16,10 +16,10 @@ strategy to read input files. That is to read frame by
 frame, decrease occupation on memory, as well as enhance
 efficiency in some way.
 
-In `jspcap`, all files can be described as following eight
-parts.
+In `jspcap`, all files can be described as following nine
+different sections.
 
- - Fundation (`jspcap.fundation`)
+ - Foundation (`jspcap.foundation`)
     synthesise file I/O and protocol analysis, coordinate
     information exchange in all network layers
 
@@ -27,31 +27,31 @@ parts.
     base on algorithms described in
     [`RFC 815`](https://tools.ietf.org/html/rfc815>),
     implement datagram reassembly of IP and TCP packets
- 
- - Protocols (`jspcap.protocols`)
-    collection of all protocol family, with detailed
-    implementation and methods
 
  - IPSuite (`jspcap.ipsuite`)
     collection of constructors for Internet Protocol Suite
 
+ - Protocols (`jspcap.protocols`)
+    collection of all protocol family, with detailed
+    implementation and methods
+
+ - Interfaces (`jspcap.interfaces`)
+    user interface for the `jspcap` library, which
+    standardises and simplifies the usage of this
+    library
+
+ - Utilities (`jspcap.utilities`)
+    collection of utility functions and classes
+
  - CoreKit (`jspcap.corekit`)
     core utilities for `jspcap` implementation
-
- - DumpKit (`jspcap.dumpkit`)
-    dump utilities for `jspcap` implementation
 
  - ToolKit (`jspcap.toolkit`)
     standard library interface, which implements three
     major verbs of the library
 
- - Interfaces (`jspcap.interfaces`)
-    user interface for the `jspcap` library, which 
-    standardises and simplifies the usage of this
-    library
-
- - Utilities (`jspcap.utilities`)
-    collection of four utility functions and classes
+ - DumpKit (`jspcap.dumpkit`)
+    dump utilities for `jspcap` implementation
 
 """
 # ToolKit
@@ -86,13 +86,14 @@ from jspcap.protocols.application.http import HTTP
 
 
 __all__ = [
-    'extract', 'analyse', 'reassemble',                 # Functions
-    'TREE', 'JSON', 'PLIST',                            # Macros
-    'Raw',                                              # Raw Packet
-    'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',  # Link Layer
-    'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',         # Internet Layer
+    'TREE', 'JSON', 'PLIST', 'PCAP',                        # ToolKit Macros
+    'tkextract', 'tkanalyse', 'tkreassemble', 'tktrace',    # ToolKit Functions
+
+    'Raw',                                                  # Raw Packet
+    'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
+    'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
-                                                        # IPv6 Extension Header
-    'TCP', 'UDP',                                       # Transport Layer
-    'HTTP',                                             # Application Layer
+                                                            # IPv6 Extension Header
+    'TCP', 'UDP',                                           # Transport Layer
+    'HTTP',                                                 # Application Layer
 ]

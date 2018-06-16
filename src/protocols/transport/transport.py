@@ -106,9 +106,9 @@ class Transport(Protocol):
             * str -- alias of next layer
 
         """
-        from jspcap.fundation.analysis import analyse
+        from jspcap.foundation.analysis import Analysis
         if self._onerror:
-            next_ = beholder_ng(analyse)(io.BytesIO(self._read_fileng(length)), length)
+            next_ = beholder_ng(Analysis.analyse)(io.BytesIO(self._read_fileng(length)), length)
         else:
-            next_ = analyse(io.BytesIO(self._read_fileng(length)), length)
+            next_ = Analysis.analyse(io.BytesIO(self._read_fileng(length)), length)
         return True, next_.info, next_.protochain, next_.alias

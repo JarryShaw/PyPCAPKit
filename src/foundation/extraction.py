@@ -23,7 +23,7 @@ from jspcap.utilities.exceptions import CallableError, FormatError, \
         FileNotFound, UnsupportedCall, IterableError
 
 ###############################################################################
-# from jspcap.fundation.traceflow import TraceFlow
+# from jspcap.foundation.traceflow import TraceFlow
 # from jspcap.reassembly.ipv4 import IPv4_Reassembly
 # from jspcap.reassembly.ipv6 import IPv6_Reassembly
 # from jspcap.reassembly.tcp import TCP_Reassembly
@@ -98,7 +98,6 @@ class Extractor:
         * _ipv6_reassembly -- store data for IPv6 reassembly
 
     """
-
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -324,7 +323,7 @@ class Extractor:
             self._reasm[2] = TCP_Reassembly(strict=strict)
 
         if trace:
-            from jspcap.fundation.traceflow import TraceFlow
+            from jspcap.foundation.traceflow import TraceFlow
             self._trace = TraceFlow(fout=trace_fout, format=trace_format)
 
         self._ifile = open(ifnm, 'rb')                      # input file

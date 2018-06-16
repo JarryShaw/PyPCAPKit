@@ -11,7 +11,7 @@ import os
 
 ###############################################################################
 # from jspcap.protocols.raw import Raw
-# from jspcap.tools.analysis import Analysis
+# from jspcap.foundation.analysis import Analysis
 ###############################################################################
 
 
@@ -66,7 +66,7 @@ def beholder_ng(func):
         try:
             return func(file, length, *args, **kwargs)
         except Exception as error:
-            from jspcap.tools.analysis import Analysis
+            from jspcap.foundation.analysis import Analysis
             from jspcap.protocols.raw import Raw
 
             file.seek(seek_cur, os.SEEK_SET)

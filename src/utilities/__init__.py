@@ -3,9 +3,8 @@
 
 `jspcap.utilities` contains several useful functions and
 classes which are fundations of `jspcap`, including
-decorater function `seekset` and `beholder`, 
-dict-like class `Info`, tuple-like class `VersionInfo`,
-and special class `ProtoChain`.
+decorater function `seekset` and `beholder`, and several
+user-refined exceptions and validations.
 
 """
 from jspcap.utilities.decorators import *

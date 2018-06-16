@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
+"""internet protocol suite
+
+`jspcap.ipsuite` is a collection for protocol constructor
+described in Internet Protocol Suite.
 
 """
 # Internet Protocol Suite
@@ -12,7 +15,9 @@ from jspcap.ipsuite.application import *
 from jspcap.ipsuite.pcap import *
 
 # Abstract Base Class
-from jspcap.ipsuite.protocol import Protocol
+from jspcap.ipsuite.protocol import Protocol as IPSProtocol
 
 
-__all__ = ['Header', 'Frame']
+__all__ = [
+    'IPSHeader', 'IPSFrame'                     # PCAP Headers
+]

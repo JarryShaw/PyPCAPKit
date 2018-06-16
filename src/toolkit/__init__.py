@@ -6,9 +6,9 @@ functions, macros, and etc. These interfaces are
 designed to help and simplify the usage of `jspcap`.
 
 """
-from jspcap.fundation.analysis import analyse as raw_analyse
-from jspcap.fundation.extraction import Extractor
-from jspcap.fundation.traceflow import TraceFlow
+from jspcap.foundation.analysis import Analysis
+from jspcap.foundation.extraction import Extractor
+from jspcap.foundation.traceflow import TraceFlow
 from jspcap.protocols.protocol import Protocol
 from jspcap.reassembly.ipv4 import IPv4_Reassembly
 from jspcap.reassembly.ipv6 import IPv6_Reassembly
@@ -18,8 +18,8 @@ from jspcap.utilities.validations import bool_check, int_check, io_check, str_ch
 
 
 __all__ = [
-    'extract', 'analyse', 'reassemble', 'trace',    # functions
-    'TREE', 'JSON', 'PLIST', 'PCAP',                # macros
+    'tkextract', 'tkanalyse', 'tkreassemble', 'tktrace',    # functions
+    'TREE', 'JSON', 'PLIST', 'PCAP',                        # macros
 ]
 
 
@@ -30,7 +30,7 @@ PLIST = 'plist'
 PCAP  = 'pcap'
 
 
-def extract(*, fin=None, fout=None, format=None,                            # basic settings
+def tkextract(*, fin=None, fout=None, format=None,                            # basic settings
                 auto=True, extension=True, store=True,                      # internal settings        
                 files=False, nofile=False, verbose=False,                   # output settings
                 ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
@@ -84,7 +84,7 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
                         trace=trace, trace_fout=trace_fout, trace_format=trace_format)
 
 
-def analyse(*, file, length=None):
+def tkanalyse(*, file, length=None):
     """Analyse application layer packets.
 
     Keyword arguments:
@@ -98,10 +98,10 @@ def analyse(*, file, length=None):
     io_check(file)
     int_check(length)
 
-    return raw_analyse(file, length)
+    return Analysis.analyse(file, length)
 
 
-def reassemble(*, protocol, strict=False):
+def tkreassemble(*, protocol, strict=False):
     """Reassemble fragmented datagrams.
 
     Keyword arguments:
@@ -131,7 +131,7 @@ def reassemble(*, protocol, strict=False):
         raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
-def trace(*, fout=None, format=None):
+def tktrace(*, fout=None, format=None):
     """Trace TCP flows.
 
     """

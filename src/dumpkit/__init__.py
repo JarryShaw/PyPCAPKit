@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
+"""dump utilities
+
+`jspcap.dumpkit` is the collection of dumpers for
+`jspcap` implementation, which is alike those described
+in [`jsformat`](https://github.com/JarryShaw/jsformat).
 
 """
 from jspcap.ipsuite.pcap.frame import Frame

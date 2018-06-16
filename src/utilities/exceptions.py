@@ -155,7 +155,7 @@ class InfoError(BaseError, TypeError):
 
 
 class FormatError(BaseError, AttributeError):
-    """Unknow format(s)."""
+    """Unknown format(s)."""
     pass
 
 

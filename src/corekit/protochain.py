@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""utility functions and classes
+"""protocol chain collection
 
-`jspcap.utilities.protochain` contains special protocol
+`jspcap.corekit.protochain` contains special protocol
 collection class `ProtoChain`.
 
 """
