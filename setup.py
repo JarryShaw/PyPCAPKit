@@ -11,7 +11,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.7.5.post2'
+__version__ = '0.7.7.post1'
 
 
 # set-up script for pip distribution
@@ -27,7 +27,7 @@ setuptools.setup(
     long_description = long_desc,
     long_description_content_type='text/markdown',
     python_requires = '>=3.6',
-    install_requires = ['jsformat', 'chardet'],
+    install_requires = ['jsformat', 'chardet', 'setuptools'],
     py_modules = ['jspcap'],
     entry_points = {
         'console_scripts': [

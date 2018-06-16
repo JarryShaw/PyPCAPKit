@@ -1,6 +1,7 @@
 global-include *.py
 include doc/*.png
 prune deprecated
+prune testbench
 prune test
 prune sample
 prune src
