@@ -6,7 +6,7 @@ import pprint
 import jspcap
 
 
-extraction = jspcap.tkextract(
+extraction = jspcap.extract(
     fin='../sample/http6.cap', # fout='../sample/http.txt', format='tree',
     store=False, tcp=True, verbose=True, nofile=True, strict=True, extension=False
 )

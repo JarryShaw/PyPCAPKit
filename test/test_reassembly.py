@@ -12,7 +12,7 @@ import jspcap
 
 os.system('> ../sample/out')
 
-extraction = jspcap.tkextract(
+extraction = jspcap.extract(
     fin='../sample/test.pcap',
     store=False, tcp=True, verbose=True, strict=True, nofile=True,
 )
