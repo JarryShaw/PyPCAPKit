@@ -248,7 +248,7 @@ class Extractor:
 
     def __init__(self, *,
                     fin=None, fout=None, format=None,                           # basic settings
-                    auto=True, extension=True, store=True,                      # internal settings        
+                    auto=True, extension=True, store=True,                      # internal settings
                     files=False, nofile=False, verbose=False,                   # output settings
                     ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
                     trace=False, trace_fout=None, trace_format=None):           # trace settings
@@ -349,7 +349,7 @@ class Extractor:
     def __iter__(self):
         if not self._flag_a:
             return self
-        raise IterableError("'Extractor(auto=True)' object is not iterable") 
+        raise IterableError("'Extractor(auto=True)' object is not iterable")
 
     def __next__(self):
         try:
@@ -489,7 +489,7 @@ class Extractor:
                 fin = tcp.flags.fin,                    # finish flag
                 payload = bytearray(tcp.packet.payload or b''),
                                                         # raw bytearray type payload
-           )
+            )
             raw_len = len(data['payload'])              # payload length, header excludes
             data['first'] = tcp.seq                     # this sequence number
             data['last'] = tcp.seq + raw_len            # next (wanted) sequence number

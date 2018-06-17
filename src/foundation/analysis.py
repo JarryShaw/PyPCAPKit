@@ -45,38 +45,34 @@ class Analysis:
     # Methods.
     ##########################################################################
 
-    @classmethod
-    def analyse(cls, file, length=None):
+    @staticmethod
+    def analyse(file, length=None):
         """Analyse application layer packets."""
         # HTTP/1.* analysis
-        flag, http = cls._analyse_httpv1(file, length)
+        flag, http = Analysis._analyse_httpv1(file, length)
         if flag:
-            return cls.__new__(cls, http.info, http.protochain, http.alias)
+            return Analysis(http.info, http.protochain, http.alias)
 
         # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
         # NB: the NOTE abrove is deprecated, since validations are performed
 
         # HTTP/2 analysis
-        flag, http = cls._analyse_httpv2(file, length)
+        flag, http = Analysis._analyse_httpv2(file, length)
         if flag:
-            return cls.__new__(cls, http.info, http.protochain, http.alias)
+            return Analysis(http.info, http.protochain, http.alias)
 
         # raw packet analysis
         raw = Raw(file, length)
-        return cls.__new__(cls, raw.info, raw.protochain, raw.alias)
+        return Analysis(raw.info, raw.protochain, raw.alias)
 
     ##########################################################################
     # Data modules.
     ##########################################################################
 
-    def __new__(cls, info, ptch, acnm):
-        self = super().__new__(cls)
-
+    def __init__(self, info, ptch, acnm):
         self._info = info
         self._ptch = ptch
         self._acnm = acnm
-
-        return self
 
     def __str__(self):
         return f'Analysis({self._ptch.alias[0]}, info={self._info})'
