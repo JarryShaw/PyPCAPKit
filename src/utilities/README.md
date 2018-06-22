@@ -13,6 +13,9 @@
  - [Exceptions](#exceptions)
     * [`BaseError`](#baseerror)
     * [Refined Exceptions](#refined-exceptions)
+ - [Warnings](#warnings)
+    * [`BaseWarning`](#basewarning)
+    * [Refined Warnings](#refined-warnings)
 
 ---
 
@@ -136,7 +139,7 @@ _tcp_frag_check(*args, func=None)
 
  > described in [`src/utilities/exceptions.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities/exceptions.py)
 
-&emsp; `jspcap.exceptions` refined built-in exceptions. Make it possible to show only user error stack information, when exception raised on user's operation.
+&emsp; `jspcap.utilities.exceptions` refined built-in exceptions. Make it possible to show only user error stack information, when exception raised on user's operation.
 
 ### `BaseError`
 
@@ -196,3 +199,25 @@ class error(jspcap.utilities.exceptions.BaseError, builtins.Exception)
 |     `FragmentError`      |      `BaseError` / `KeyError`       |               Invalid fragment dict.                |
 |      `PacketError`       |      `BaseError` / `KeyError`       |                Invalid packet dict.                 |
 |      `StructError`       |    `BaseError` / `struct.error`     |                   Unpack failed.                    |
+
+&nbsp;
+
+## Warnings
+
+> described in [`src/utilities/warnings.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities/warnings.py)
+
+&emsp; `jspcap.utilities.warnings` refined built-in warnings.
+
+### `BaseWarning`
+
+```python
+class BaseWarning(builtins.Warning)
+```
+
+##### Base warning class of all kinds.
+
+### Refined Warnings
+
+```python
+class warning(jspcap.utilities.warnings.BaseWarning, builtins.Warning)
+```

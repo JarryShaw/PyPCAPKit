@@ -48,6 +48,8 @@
 
 ![](./doc/jspcap.png)
 
+&emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.02* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net) and is to implement [`DKPT`](https://github.com/kbandla/dpkt) and [`PyShark`](https://kiminewt.github.io/pyshark/) support.
+
 &nbsp;
 
 ## Installation
@@ -75,8 +77,12 @@ $ python setup.py install
 
 ##### Interfaces
 
-| NAME | DESCRIPTION |
-| :--: | :---------: |
+|                                           NAME                                           |            DESCRIPTION            |
+| :--------------------------------------------------------------------------------------: | :-------------------------------: |
+| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#extract)       |        extract a PCAP file        |
+| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#analyse)       | analyse application layer packets |
+| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
+| [`trace`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#trace)           |      trace TCP packet flows       |
 
 ##### Macros
 
@@ -126,27 +132,27 @@ __ps__: `help` function in Python should always help you out.
 
 ```
 $ jspcapy --help
-usage: jspcapy [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a] [-F]
-               [-v]
+usage: jspcapy [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a] [-v]
+               [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]
                input-file-name
 
 PCAP file extractor and formatted exporter
 
 positional arguments:
-  input-file-name       The name of input PCAP file. If extension omits, it
-                        will be automatically appended.
+  input-file-name       The name of input pcap file. If ".pcap" omits, it will
+                        be automatically appended.
 
 optional arguments:
   -h, --help            show this help message and exit
   -V, --version         show program's version number and exit
   -o file-name, --output file-name
-                        The name of input PCAP file. If format extension
+                        The name of input pcap file. If format extension
                         omits, it will be automatically appended.
   -f format, --format format
                         Print a extraction report in the specified output
                         format. Available are all formats supported by
                         jsformat, e.g.: json, plist, and tree.
-  -j, --json            Display extraction report as JSON. This will yield
+  -j, --json            Display extraction report as json. This will yield
                         "raw" output that may be used by external tools. This
                         option overrides all other options.
   -p, --plist           Display extraction report as macOS Property List
@@ -157,8 +163,15 @@ optional arguments:
                         yield "raw" output that may be used by external tools.
                         This option overrides all other options.
   -a, --auto-extension  If output file extension omits, append automatically.
-  -F, --files           Split each frame into different files.
   -v, --verbose         Show more information.
+  -F, --files           Split each frame into different files.
+  -E PKG, --engine PKG  Indicate extraction engine. Note that except default
+                        or jspcap engine, all other engines need support of
+                        corresponding packages.
+  -P PROTOCOL, --protocol PROTOCOL
+                        Indicate extraction stops after which protocol.
+  -L LAYER, --layer LAYER
+                        Indicate extract frames until which layer.
 ```
 
 &emsp; Under most circumstances, you should indicate the name of input PCAP file (extension may omit) and at least, output format (`json`, `plist`, or `tree`). Once format unspecified, the name of output file must have proper extension (`*.json`, `*.plist`, or `*.txt`), otherwise `FormatError` will raise.
@@ -175,37 +188,39 @@ optional arguments:
 
  - extract a PCAP file and dump the result to a specific file (with no reassembly)
 
- ```python
- import jspcap
- # dump to a PLIST file with no frame storage (property frame disabled)
- plist = jspcap.extract(fin='in.pcap', fout='out.plist', format='plist', store=False)
- # dump to a JSON file with no extension auto-complete
- json = jspcap.extract(fin='in.cap', fout='out.json', format='json', extension=False)
- # dump to a folder with each tree-view text file per frame
- tree = jspcap.extract(fin='in.pcap', fout='out', format='tree', files=True)
- ```
+    ```python
+    import jspcap
+    # dump to a PLIST file with no frame storage (property frame disabled)
+    plist = jspcap.extract(fin='in.pcap', fout='out.plist', format='plist', store=False)
+    # dump to a JSON file with no extension auto-complete
+    json = jspcap.extract(fin='in.cap', fout='out.json', format='json', extension=False)
+    # dump to a folder with each tree-view text file per frame
+    tree = jspcap.extract(fin='in.pcap', fout='out', format='tree', files=True)
+    ```
 
  - extract a PCAP file and fetch IP packet (both IPv4 and IPv6) from a frame (with no output file)
- ```python
- >>> import jspcap
- >>> extraction = jspcap.extract(fin='in.pcap', nofile=True)
- >>> frame0 = extraction.frame[0]
- # check if IP in this frame, otherwise ProtocolNotFound will be raised
- >>> flag = jspcap.IP in frame0
- >>> tcp = frame0[jspcap.IP] if flag else None
- ```
+
+    ```python
+    >>> import jspcap
+    >>> extraction = jspcap.extract(fin='in.pcap', nofile=True)
+    >>> frame0 = extraction.frame[0]
+    # check if IP in this frame, otherwise ProtocolNotFound will be raised
+    >>> flag = jspcap.IP in frame0
+    >>> tcp = frame0[jspcap.IP] if flag else None
+    ```
 
  - extract a PCAP file and reassemble TCP payload (with no output file nor frame storage)
- ```python
- import jspcap
- # set strict to make sure full reassembly
- extraction = jspcap.extract(fin='in.pcap', store=False, nofile=True, tcp=True, strict=True)
- # print extracted packet if HTTP in reassembled payloads
- for packet in extraction.reassembly.tcp:
+
+    ```python
+    import jspcap
+    # set strict to make sure full reassembly
+    extraction = jspcap.extract(fin='in.pcap', store=False, nofile=True, tcp=True, strict=True)
+    # print extracted packet if HTTP in reassembled payloads
+    for packet in extraction.reassembly.tcp:
     for reassembly in packet.packets:
         if jspcap.HTTP in reassembly.protochain:
             print(reassembly.info)
- ```
+    ```
 
 ### CLI Samples
 

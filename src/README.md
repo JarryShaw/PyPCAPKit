@@ -87,10 +87,10 @@
 
 <a name="index-ipsuite"> </a>
 
-|                                          NAME                                          |             DESCRIPTION             |
-| :------------------------------------------------------------------------------------: | :---------------------------------: |
-| [`IPSHeader`](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite/pcap#header) |            Global Header            |
-| [`IPSFrame`](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite/pcap#frame)   |            Frame Header             |
+|                                          NAME                                          |  DESCRIPTION  |
+| :------------------------------------------------------------------------------------: | :-----------: |
+| [`IPSHeader`](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite/pcap#header) | Global Header |
+| [`IPSFrame`](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite/pcap#frame)   | Frame Header  |
 
 &nbsp;
 
@@ -181,9 +181,10 @@
 
 <a name="index-dumpkit"> </a>
 
-|                                    NAME                                    |    DESCRIPTION    |
-| :------------------------------------------------------------------------: | :---------------: |
-| [`PCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#pcap) | dump as PCAP file |
+|                                                NAME                                                |         DESCRIPTION          |
+| :------------------------------------------------------------------------------------------------: | :--------------------------: |
+| [`NotImplementedIO`](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#notimplementedio) | NotImplemented I/O simulator |
+| [`PCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#pcap)                         |      dump as PCAP file       |
 
 &nbsp;
 

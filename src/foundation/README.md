@@ -40,6 +40,7 @@ class Extractor(builtins.object)
         - `ipv4` -- `tuple<IPv4_Reassembly>`, IPv4 frame fragment reassembly
         - `ipv6` -- `tuple<IPv6_Reassembly>`, IPv6 frame fragment reassembly
     * `trace` -- `tuple`, traced TCP packet flow index
+    * `engine` -- `str`, extraction engine
 
  - Methods:
     * *`classmethod`* `make_name` -- formatting input & output file name
@@ -71,11 +72,13 @@ class Extractor(builtins.object)
     * support `with` statement
     * initialisation takes numerous keyword arguments
         ```python
-        __init__(self, *, fin=None, fout=None, format=None,                             # basic settings
-                            auto=True, extension=True, store=True,                      # internal settings
-                            files=False, nofile=False, verbose=False,                   # output settings
-                            ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
-                            trace=False, trace_fout=None, trace_format=None)            # trace settings
+        __init__(self, *,
+                    fin=None, fout=None, format=None,                           # basic settings
+                    auto=True, extension=True, store=True,                      # internal settings
+                    files=False, nofile=False, verbose=False,                   # output settings
+                    engine=None, layer=None, protocol=None,                     # extraction settings
+                    ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
+                    trace=False, trace_fout=None, trace_format=None):           # trace settings
         ```
         |      NAME      |  TYPE  | DEFAULT |                       KEYWORD                        |                       DESCRIPTION                       |
         | :------------: | :----: | :-----: | :--------------------------------------------------: | :-----------------------------------------------------: |
@@ -88,6 +91,9 @@ class Extractor(builtins.object)
         |  `extension`   | `bool` | `True`  |                   `True` / `False`                   |      if check and append extensions to output file      |
         |    `files`     | `bool` | `False` |                   `True` / `False`                   |        if split each frame into different files         |
         |    `nofile`    | `bool` | `False` |                   `True` / `False`                   |            if no output file is to be dumped            |
+        |    `engine`    | `str`  | `None`  | `default` / `jspcap` / `scapy` / `dpkt` / `pyshark`  |                    extraction engine                    |
+        |     `layer`    | `str`  | `None`  |  `Link` / `Internet` / `Transport` / `Application`   |                   extract until layer                   |
+        |   `protocol`   | `str`  | `None`  |                                                      |                  extract until protocol                 |
         |      `ip`      | `bool` | `False` |                   `True` / `False`                   |            if perform IPv4 & IPv6 reassembly            |
         |     `ipv4`     | `bool` | `False` |                   `True` / `False`                   |               if perform IPv4 reassembly                |
         |     `ipv6`     | `bool` | `False` |                   `True` / `False`                   |               if perform IPv6 reassembly                |
