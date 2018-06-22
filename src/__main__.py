@@ -71,20 +71,18 @@ def get_parser():
                         help=(
                             'Split each frame into different files.'
                         ))
-    parser.add_argument('-E', '--engine', action='store', dest='engine', choises=[
-                        'default', 'jspcap', 'dpkt', 'scapy', 'pyshark',
-                        ], default='default', metavar='PKG', help=(
+    parser.add_argument('-E', '--engine', action='store', dest='engine',
+                        default='default', metavar='PKG', help=(
                             'Indicate extraction engine. Note that except '
                             'default or jspcap engine, all other engines '
-                            'need support of correspoding packages.'
+                            'need support of corresponding packages.'
                         ))
     parser.add_argument('-P', '--protocol', action='store', dest='protocol',
                         default='null', metavar='PROTOCOL', help=(
                             'Indicate extraction stops after which protocol.'
                         ))
-    parser.add_argument('-L', '--layer', action='store', dest='layer', choises=[
-                        'None', 'Link', 'Internet', 'Transport', 'Application',
-                        ], default='None', metavar='LAYER', help=(
+    parser.add_argument('-L', '--layer', action='store', dest='layer',
+                        default='None', metavar='LAYER', help=(
                             'Indicate extract frames until which layer.'
                         ))
     return parser
