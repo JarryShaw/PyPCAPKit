@@ -12,6 +12,7 @@ import sys
 import warnings
 
 from jspcap.foundation.extraction import Extractor
+from jspcap.interface import TREE, JSON, PLIST
 
 
 # version number
@@ -71,18 +72,19 @@ def get_parser():
                             'Split each frame into different files.'
                         ))
     parser.add_argument('-E', '--engine', action='store', dest='engine', choises=[
-                        'default', 'jspcap', 'scapy', 'pyshark', 'dpkt',
+                        'default', 'jspcap', 'dpkt', 'scapy', 'pyshark',
                         ], default='default', metavar='PKG', help=(
                             'Indicate extraction engine. Note that except '
                             'default or jspcap engine, all other engines '
-                            'need support of correspoding package.'
+                            'need support of correspoding packages.'
                         ))
-    parser.add_argument('-P', '--protocol', action='store', metavar='PROTOCOL',
-                        dest='protocol', help=(
+    parser.add_argument('-P', '--protocol', action='store', dest='protocol',
+                        default='null', metavar='PROTOCOL', help=(
                             'Indicate extraction stops after which protocol.'
                         ))
-    parser.add_argument('-L', '--layer', action='store', metavar='LAYER',
-                        dest='layer', help=(
+    parser.add_argument('-L', '--layer', action='store', dest='layer', choises=[
+                        'None', 'Link', 'Internet', 'Transport', 'Application',
+                        ], default='None', metavar='LAYER', help=(
                             'Indicate extract frames until which layer.'
                         ))
     return parser
@@ -94,9 +96,9 @@ def main():
     warnings.simplefilter('ignore')
 
     if args.format:     fmt = args.format
-    elif args.json:     fmt = 'json'
-    elif args.plist:    fmt = 'plist'
-    elif args.tree:     fmt = 'tree'
+    elif args.json:     fmt = JSON
+    elif args.plist:    fmt = PLIST
+    elif args.tree:     fmt = TREE
     else:               fmt = None
 
     extractor = Extractor(store=False, format=fmt,

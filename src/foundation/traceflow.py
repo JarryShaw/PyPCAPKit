@@ -189,3 +189,7 @@ class TraceFlow:
         self._foutio, self._fdpext \
                     = self.make_fout(fout, format)
                                 # dump I/O object
+
+    def __call__(self, packet):
+        """Dump frame to output files."""
+        return self.dump(packet)

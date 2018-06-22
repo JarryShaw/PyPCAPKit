@@ -11,8 +11,9 @@ import importlib
 import io
 import os
 import pathlib
-import traceback
 import textwrap
+import time
+import traceback
 import warnings
 
 ###############################################################################
@@ -25,7 +26,7 @@ from jspcap.protocols.pcap.header import Header
 from jspcap.utilities.exceptions import stacklevel, CallableError, \
         FileNotFound, UnsupportedCall, IterableError
 from jspcap.utilities.warnings import FormatWarning, EngineWarning, \
-        LayerWarning, ProtocolWarning
+        LayerWarning, ProtocolWarning, AttributeWarning
 
 ###############################################################################
 # from jspcap.foundation.traceflow import TraceFlow
@@ -123,11 +124,13 @@ class Extractor:
 
     @property
     def info(self):
+        if self._exeng in ('scapy',):
+            raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'info'")
         return self._vinfo
 
     @property
     def length(self):
-        return self._frnum - 1
+        return self._frnum
 
     @property
     def format(self):
@@ -147,10 +150,14 @@ class Extractor:
 
     @property
     def header(self):
+        if self._exeng in ('scapy',):
+            raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'header'")
         return self._gbhdr
 
     @property
     def protocol(self):
+        if self._flag_a:
+            raise UnsupportedCall(f"'Extractor(auto=True)' object has no attribute 'protocol'")
         return self._proto
 
     @property
@@ -174,18 +181,22 @@ class Extractor:
             return self._trace.index
         raise UnsupportedCall("'Extractor(trace=False)' object has no attribute 'trace'")
 
+    @property
+    def engine(self):
+        return self._exeng
+
     ##########################################################################
     # Methods.
     ##########################################################################
 
     def run(self):
         """Start extraction."""
-        if self._exeng == 'scapy':
-            flag, engine = self.import_test(self._exeng, name='Scapy')
+        if self._exeng == 'dpkt':
+            flag, engine = self.import_test(self._exeng, name='DPKT')
             if flag:    pass
-        elif self._exeng == 'dpkt':
-            flag, engine = self.import_test(self._exeng)
-            if flag:    pass
+        elif self._exeng == 'scapy':
+            flag, engine = self.import_test('scapy.all', name='Scapy')
+            if flag:    return self._run_scapy(engine)
         elif self._exeng == 'pyshark':
             flag, engine = self.import_test(self._exeng, name='PyShark')
             if flag:    pass
@@ -193,6 +204,8 @@ class Extractor:
             warnings.warn(f'unsupported extraction engine: {self._exeng}; '
                             'using default engine instead',
                             EngineWarning, stacklevel=stacklevel())
+
+        # using default/jspcap engine
         self.record_header()            # read PCAP global header
         self.record_frames()            # read frames
 
@@ -207,8 +220,13 @@ class Extractor:
                             EngineWarning, stacklevel=stacklevel())
         return False, None
 
-    @staticmethod
-    def check(*, layer=None, protocol=None):
+    def check_list(self):
+        layer = self._exlyr
+        protocol = self._exptl
+        if self._exeng in ('scapy',) and (layer or protocol):
+            warnings.warn(f"'Extractor(engine={self._exeng})' does not support protocol and layer threshold; "
+                            f"'layer={layer}' and 'protocol={protocol}' ignored", AttributeWarning, stacklevel=stacklevel())
+
         if layer is not None:
             if layer.capitalize() not in LAYER_LIST:
                 warnings.warn(f'unrecognised layer: {layer}',
@@ -217,7 +235,7 @@ class Extractor:
             def check_protocol(*args):
                 for arg in args:
                     if arg.lower() not in PROTO_LIST:
-                        warnings.warn(f'unrecognised protocol: {protocol}', 
+                        warnings.warn(f'unrecognised protocol: {protocol}',
                                         ProtocolWarning, stacklevel=stacklevel())
             if isinstance(protocol, tuple): check_protocol(*protocol)
             else:                           check_protocol(protocol)
@@ -255,6 +273,7 @@ class Extractor:
                     ofnm = f'out.{ext}'
             else:
                 name, fext = os.path.splitext(fout)
+                pathlib.Path(fout).parent.mkdir(parents=True, exist_ok=True)
                 if fext:
                     files = False
                     ofnm = fout
@@ -282,7 +301,7 @@ class Extractor:
         """
         self._gbhdr = Header(self._ifile)
         self._dlink = self._gbhdr.protocol
-        self._vinfo = self._gbhdr.info
+        self._vinfo = self._gbhdr.version
         if not self._flag_q:
             if self._flag_f:
                 ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
@@ -377,7 +396,7 @@ class Extractor:
         self._flag_t = trace            # trace flag
         self._flag_v = verbose          # verbose output flag
 
-        self._frnum = 1                 # frame number
+        self._frnum = 0                 # frame number
         self._frame = list()            # frame record
         self._proto = None              # frame ProtoChain
 
@@ -391,7 +410,7 @@ class Extractor:
         self._exlyr = layer or 'none'                       # extract til layer
         self._exptl = protocol or 'null'                    # extract til protocol
         self._exeng = (engine or 'default').lower()         # extract using engine
-        self.check(layer=self._exlyr, protocol=self._exptl) # check layer & protocol
+        self.check_list()                                   # check layer & protocol
 
         if self._ipv4:
             from jspcap.reassembly.ipv4 import IPv4_Reassembly
@@ -423,12 +442,12 @@ class Extractor:
                 from jspcap.dumpkit import NotImplementedIO as output
                                                             # no output file
                 warnings.warn(f'unsupported output format: {fmt}; '
-                                'disabled file output feature', 
+                                'disabled file output feature',
                                 FormatWarning, stacklevel=stacklevel())
             self._ofile = output if self._flag_f else output(ofnm)
                                                             # output file
         self.run()                      # start extraction
-            
+
     def __iter__(self):
         if not self._flag_a:
             return self
@@ -470,13 +489,13 @@ class Extractor:
 
         """
         # read frame header
-        frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
+        frame = Frame(self._ifile, num=self._frnum+1, proto=self._dlink,
                         layer=self._exlyr, protocol=self._exptl)
         if self._flag_v:
             print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
 
         # write plist
-        frnum = f'Frame {self._frnum}'
+        frnum = f'Frame {self._frnum+1}'
         if not self._flag_q:
             if self._flag_f:
                 ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
@@ -509,8 +528,7 @@ class Extractor:
         """Store data for IPv4 reassembly."""
         if 'IPv4' in frame:
             ipv4 = frame['IPv4']
-            if ipv4.flags.df:
-                return
+            if ipv4.flags.df:   return                  # dismiss not fragmented frame
             data = dict(
                 bufid = (
                     ipv4.src,                           # source IP address
@@ -533,8 +551,7 @@ class Extractor:
         """Store data for IPv6 reassembly."""
         if 'IPv6' in frame:
             ipv6 = frame['IPv6']
-            if 'frag' not in ipv6:
-                return
+            if 'frag' not in ipv6:  return              # dismiss not fragmented frame
             data = dict(
                 bufid = (
                     ipv6.src,                           # source IP address
@@ -585,7 +602,7 @@ class Extractor:
         if 'TCP' in frame:
             ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
             tcp = frame['TCP']
-            packet = dict(
+            data = dict(
                 protocol = self._dlink,                 # data link type from global header
                 index = frame.info.number,              # frame number
                 frame = frame.info,                     # extracted frame info
@@ -597,4 +614,149 @@ class Extractor:
                 dstport = tcp.dstport,                  # TCP destination port
                 timestamp = frame.info.time_epoch,      # frame timestamp
             )
-            self._trace.dump(packet)
+            self._trace(data)
+
+    def _run_scapy(self, scapy_all):
+        """Call scapy.all.sniff to extract PCAP files."""
+        if not self._flag_a:
+            self._flag_a = True
+            warnings.warn(f"'Extractor(engine=scapy)' object is not iterable; "
+                            "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
+
+        def _scapy_packet2dict(packet):
+            """Convert Scapy packet into dict."""
+            dict_ = packet.fields
+            payload = packet.payload
+            if not isinstance(payload, scapy_all.packet.NoPayload):
+                dict_[payload.name] = _scapy_packet2dict(payload)
+            return dict_
+
+        def _scapy_tcp_reassembly(packet, *, count=NotImplemented):
+            """Store data for IPv4 reassembly."""
+            if 'IP' in packet:
+                ipv4 = packet['IP']
+                if ipv4.flags.DF:   return                  # dismiss not fragmented packet
+                data = dict(
+                    bufid = (
+                        ipv4.src,                           # source IP address
+                        ipv4.dst,                           # destination IP address
+                        ipv4.id,                            # identification
+                        ipv4.proto,                         # payload protocol type
+                    ),
+                    num = count,                            # original packet range number
+                    fo = ipv4.frag,                         # fragment offset
+                    ihl = ipv4.ihl,                         # internet header length
+                    mf = ipv4.flags.MF,                     # more fragment flag
+                    tl = ipv4.len,                          # total length, header includes
+                    header = bytearray(ipv4.raw_packet_cache),
+                                                            # raw bytearray type header
+                    payload = bytearray(bytes(ipv4.payload)),
+                                                            # raw bytearray type payload
+                )
+                self._reasm[0](data)
+
+        def _scapy_ipv6_reassembly(packet, *, count=NotImplemented):
+            """Store data for IPv6 reassembly."""
+            if 'IPv6' in packet:
+                ipv6 = packet['IPv6']
+                if scapy_all.IPv6ExtHdrFragment not in ipv6:
+                    return                                  # dismiss not fragmented packet
+                data = dict(
+                    bufid = (
+                        ipv6.src,                           # source IP address
+                        ipv6.dst,                           # destination IP address
+                        ipv6.fl,                            # label
+                        ipv6['IPv6ExtHdrFragment'].nh,      # next header field in IPv6 Fragment Header
+                    ),
+                    num = count,                            # original packet range number
+                    fo = ipv6['IPv6ExtHdrFragment'].offset, # fragment offset
+                    ihl = len(ipv6) - len(ipv6['IPv6ExtHdrFragment']),
+                                                            # header length, only headers before IPv6-Frag
+                    mf = ipv6['IPv6ExtHdrFragment'].m,      # more fragment flag
+                    tl = len(ipv6),                         # total length, header includes
+                    header = bytearray(bytes(ipv6)[:-len(ipv6['IPv6ExtHdrFragment'])]),
+                                                            # raw bytearray type header before IPv6-Frag
+                    payload = bytearray(bytes(ipv6['IPv6ExtHdrFragment'].payload)),
+                                                            # raw bytearray type payload after IPv6-Frag
+                )
+                self._reasm[1](data)
+
+        def _scapy_tcp_reassembly(packet, *, count=NotImplemented):
+            """Store data for TCP reassembly."""
+            if 'TCP' in packet:
+                ip = packet['IP'] if 'IP' in packet else packet['IPv6']
+                tcp = packet['TCP']
+                data = dict(
+                    bufid = (
+                        ip.src,                             # source IP address
+                        ip.dst,                             # destination IP address
+                        tcp.sport,                          # source port
+                        tcp.dport,                          # destination port
+                    ),
+                    num = count,                            # original packet range number
+                    ack = tcp.ack,                          # acknowledgement
+                    dsn = tcp.seq,                          # data sequence number
+                    syn = tcp.flags.S,                      # synchronise flag
+                    fin = tcp.flags.F,                      # finish flag
+                    payload = bytearray(bytes(tcp.payload)),# raw bytearray type payload
+                )
+                raw_len = len(tcp.payload)                  # payload length, header excludes
+                data['first'] = tcp.seq                     # this sequence number
+                data['last'] = tcp.seq + raw_len            # next (wanted) sequence number
+                data['len'] = raw_len                       # payload length, header excludes
+                self._reasm[2](data)
+
+        def _scapy_tcp_traceflow(packet, *, count=NotImplemented):
+            """Trace packet flow for TCP."""
+            if 'TCP' in packet:
+                ip = packet['IP'] if 'IP' in packet else packet['IPv6']
+                tcp = packet['TCP']
+                data = dict(
+                    protocol = packet.name,                 # data link type from global header
+                    index = count,                          # frame number
+                    frame = _scapy_packet2dict(packet),     # extracted packet
+                    syn = tcp.flags.S,                      # TCP synchronise (SYN) flag
+                    fin = tcp.flags.F,                      # TCP finish (FIN) flag
+                    src = ip.src,                           # source IP
+                    dst = ip.dst,                           # destination IP
+                    srcport = tcp.sport,                    # TCP source port
+                    dstport = tcp.dport,                    # TCP destination port
+                    timestamp = time.time(),                # timestamp
+                )
+                self._trace(data)
+
+        # extract & analyse file
+        sniffed = scapy_all.sniff(offline=self._ifnm)
+        for packet in sniffed:
+            self._frnum += 1
+            if self._flag_v:
+                print(f' - Frame {self._frnum:>3d}: {packet.summary()}')
+
+            # write plist
+            frnum = f'Frame {self._frnum}'
+            if not self._flag_q:
+                info = {packet.name: _scapy_packet2dict(packet)}
+                if self._flag_f:
+                    ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                    ofile(info, name=frnum)
+                else:
+                    self._ofile(info, name=frnum)
+
+            # record frames
+            if self._flag_d:
+                self._frame.append(packet)
+
+            # record fragments
+            if self._tcp:
+                _scapy_tcp_reassembly(packet, count=self._frnum)
+            if self._ipv4:
+                _scapy_ipv4_reassembly(packet, count=self._frnum)
+            if self._ipv6:
+                _scapy_ipv6_reassembly(packet, count=self._frnum)
+
+            # trace flows
+            if self._flag_t:
+                _scapy_tcp_traceflow(packet)
+
+        # aftermath
+        self._ifile.close()

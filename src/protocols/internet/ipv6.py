@@ -32,6 +32,7 @@ which implements extractor for Internet Protocol version 6
 """
 # TODO: Implements IPv6 extension headers.
 import collections
+import ipaddress
 
 from jspcap.corekit.infoclass import Info
 from jspcap.corekit.protochain import ProtoChain
@@ -210,43 +211,44 @@ class IPv6(IP):
 
     def _read_ip_addr(self):
         """Read IP address."""
-        adlt = []       # list of IPv6 hexadecimal address
-        ctr_ = collections.defaultdict(int)
-                        # counter for consecutive groups of zero value
-        ptr_ = 0        # start pointer of consecutive groups of zero value
-        last = False    # if last hextet/group is zero value
-        ommt = False    # ommitted flag, since IPv6 address can ommit to `::` only once
+        # adlt = []       # list of IPv6 hexadecimal address
+        # ctr_ = collections.defaultdict(int)
+        #                 # counter for consecutive groups of zero value
+        # ptr_ = 0        # start pointer of consecutive groups of zero value
+        # last = False    # if last hextet/group is zero value
+        # ommt = False    # ommitted flag, since IPv6 address can ommit to `::` only once
 
-        for _ in range(8):
-            hex_ = self._read_fileng(2).hex().lstrip('0')
+        # for _ in range(8):
+        #     hex_ = self._read_fileng(2).hex().lstrip('0')
 
-            if hex_:    # if hextet is not '', directly append
-                adlt.append(hex_)
-                last = False
-            else:       # if hextet is '', append '0'
-                adlt.append('0')
-                if last:    # if last hextet is '', ascend counter
-                    ctr_[ptr_] += 1
-                else:       # if last hextet is not '', record pointer
-                    ptr_ = _
-                    last = True
-                    ctr_[ptr_] = 1
+        #     if hex_:    # if hextet is not '', directly append
+        #         adlt.append(hex_)
+        #         last = False
+        #     else:       # if hextet is '', append '0'
+        #         adlt.append('0')
+        #         if last:    # if last hextet is '', ascend counter
+        #             ctr_[ptr_] += 1
+        #         else:       # if last hextet is not '', record pointer
+        #             ptr_ = _
+        #             last = True
+        #             ctr_[ptr_] = 1
 
-        ptr_ = max(ctr_, key=ctr_.get) if ctr_ else 0   # fetch start pointer with longest zero values
-        end_ = ptr_ + ctr_[ptr_]                        # calculate end pointer
+        # ptr_ = max(ctr_, key=ctr_.get) if ctr_ else 0   # fetch start pointer with longest zero values
+        # end_ = ptr_ + ctr_[ptr_]                        # calculate end pointer
 
-        if ctr_[ptr_] > 1:      # only ommit if zero values are in a consecutive group
-            del adlt[ptr_:end_] # remove zero values
+        # if ctr_[ptr_] > 1:      # only ommit if zero values are in a consecutive group
+        #     del adlt[ptr_:end_] # remove zero values
 
-            if ptr_ == 0 and end_ == 8:     # insert `::` if IPv6 unspecified address (::)
-                adlt.insert(ptr_, '::')
-            elif ptr_ == 0 or end_ == 8:    # insert `:` if zero values are from start or at end
-                adlt.insert(ptr_, ':')
-            else:                           # insert '' otherwise
-                adlt.insert(ptr_, '')
+        #     if ptr_ == 0 and end_ == 8:     # insert `::` if IPv6 unspecified address (::)
+        #         adlt.insert(ptr_, '::')
+        #     elif ptr_ == 0 or end_ == 8:    # insert `:` if zero values are from start or at end
+        #         adlt.insert(ptr_, ':')
+        #     else:                           # insert '' otherwise
+        #         adlt.insert(ptr_, '')
 
-        addr = ':'.join(adlt)
-        return addr
+        # addr = ':'.join(adlt)
+        # return addr
+        return ipaddress.ip_address(self._read_fileng(16))
 
     def _decode_next_layer(self, ipv6, proto=None, length=None):
         """Decode next layer extractor.

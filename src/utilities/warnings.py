@@ -3,13 +3,13 @@
 
 """
 import warnings
-import sys
 
 
 __all__ = [
     'BaseWarning',                                                  # Warning
     'FormatWarning', 'EngineWarning',                               # ImportWarning
-    'FileWarning', 'LayerWarning', 'ProtocolWarning',               # RuntimeWarning
+    'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
+                                                                    # RuntimeWarning
 ]
 
 
@@ -21,7 +21,6 @@ __all__ = [
 class BaseWarning(Warning):
     """Base warning class of all kinds."""
     def __init__(self, *args, **kwargs):
-        sys.tracebacklimit = 0
         warnings.simplefilter('default')
         super().__init__(*args, **kwargs)
 
@@ -58,4 +57,9 @@ class LayerWarning(BaseWarning, RuntimeWarning):
 
 class ProtocolWarning(BaseWarning, RuntimeWarning):
     """Unrecognised protocol."""
+    pass
+
+
+class AttributeWarning(BaseWarning, RuntimeWarning):
+    """Unsupported attribute."""
     pass

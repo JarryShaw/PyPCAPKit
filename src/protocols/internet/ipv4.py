@@ -24,6 +24,7 @@ which implements extractor for Internet Protocol version 4
 """
 import collections
 import datetime
+import ipaddress
 
 from jspcap.corekit.infoclass import Info
 from jspcap.corekit.protochain import ProtoChain
@@ -346,9 +347,10 @@ class IPv4(IP):
 
     def _read_ipv4_addr(self):
         """Read IP address."""
-        _byte = self._read_fileng(4)
-        _addr = '.'.join([str(_) for _ in _byte])
-        return _addr
+        # _byte = self._read_fileng(4)
+        # _addr = '.'.join([str(_) for _ in _byte])
+        # return _addr
+        return ipaddress.ip_address(self._read_fileng(4))
 
     def _read_opt_type(self, kind):
         """Read option type field.

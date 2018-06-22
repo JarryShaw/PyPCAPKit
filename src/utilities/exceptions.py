@@ -60,10 +60,11 @@ class BaseError(Exception):
 
     """
     def __init__(self, message=None, *args, **kwargs):
+        index = stacklevel()
         quiet = kwargs.pop('quiet', False)
         if not quiet and index:
             print('Traceback (most recent call last):')
-            traceback.print_stack(limit=-stacklevel())
+            traceback.print_stack(limit=-index)
 
         sys.tracebacklimit = 0
         super().__init__(message, *args, **kwargs)

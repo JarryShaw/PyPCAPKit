@@ -5,12 +5,7 @@
 collection class `ProtoChain`.
 
 """
-import copy
-import functools
-import io
 import numbers
-import os
-import re
 
 from jspcap.utilities.exceptions import IndexNotFound
 from jspcap.utilities.validations import int_check

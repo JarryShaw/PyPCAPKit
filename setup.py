@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.8.3'
+__version__ = '0.9.0.post1'
 
 
 # set-up script for pip distribution
@@ -27,6 +27,11 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     python_requires = '>=3.6',
     install_requires = ['jsformat', 'chardet', 'setuptools'],
+    extras_require = {
+        'DPKT': ['dpkt'],
+        'Scapy': ['scapy'],
+        'PyShark': ['pyshark'],
+    },
     py_modules = ['jspcap'],
     entry_points = {
         'console_scripts': [

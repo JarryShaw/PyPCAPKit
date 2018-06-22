@@ -7,11 +7,6 @@
 
 """
 import copy
-import functools
-import io
-import numbers
-import os
-import re
 
 from jspcap.utilities.exceptions import UnsupportedCall
 from jspcap.utilities.validations import dict_check

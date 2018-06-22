@@ -18,6 +18,7 @@ Octets      Bits        Name                    Discription
 
 """
 import collections
+import ipaddress
 import textwrap
 
 from jspcap.corekit.infoclass import Info
@@ -233,46 +234,52 @@ class ARP(Link):
             * str -- IP address
 
         """
+        # if ptype == '0800':     # IPv4
+        #     _byte = self._read_fileng(4)
+        #     _addr = '.'.join([str(_) for _ in _byte])
+        # elif ptype == '86dd':   # IPv6
+        #     adlt = []       # list of IPv6 hexadecimal address
+        #     ctr_ = collections.defaultdict(int)
+        #                     # counter for consecutive groups of zero value
+        #     ptr_ = 0        # start pointer of consecutive groups of zero value
+        #     last = False    # if last hextet/group is zero value
+        #     ommt = False    # ommitted flag, since IPv6 address can ommit to `::` only once
+
+        #     for index in range(8):
+        #         hex_ = self._read_fileng(2).hex().lstrip('0')
+
+        #         if hex_:    # if hextet is not '', directly append
+        #             adlt.append(hex_)
+        #             last = False
+        #         else:       # if hextet is '', append '0'
+        #             adlt.append('0')
+        #             if last:    # if last hextet is '', ascend counter
+        #                 ctr_[ptr_] += 1
+        #             else:       # if last hextet is not '', record pointer
+        #                 ptr_ = index
+        #                 last = True
+        #                 ctr_[ptr_] = 1
+
+        #     ptr_ = max(ctr_, key=ctr_.get) if ctr_ else 0   # fetch start pointer with longest zero values
+        #     end_ = ptr_ + ctr_[ptr_]                        # calculate end pointer
+
+        #     if ctr_[ptr_] > 1:      # only ommit if zero values are in a consecutive group
+        #         del adlt[ptr_:end_] # remove zero values
+
+        #         if ptr_ == 0 and end_ == 8:     # insert `::` if IPv6 unspecified address (::)
+        #             adlt.insert(ptr_, '::')
+        #         elif ptr_ == 0 or end_ == 8:    # insert `:` if zero values are from start or at end
+        #             adlt.insert(ptr_, ':')
+        #         else:                           # insert '' otherwise
+        #             adlt.insert(ptr_, '')
+
+        #     _addr = ':'.join(adlt)
+        # else:
+        #     _addr = self._read_fileng(length)
+        # return _addr
         if ptype == '0800':     # IPv4
-            _byte = self._read_fileng(4)
-            _addr = '.'.join([str(_) for _ in _byte])
+            return ipaddress.ip_address(self._read_fileng(4))
         elif ptype == '86dd':   # IPv6
-            adlt = []       # list of IPv6 hexadecimal address
-            ctr_ = collections.defaultdict(int)
-                            # counter for consecutive groups of zero value
-            ptr_ = 0        # start pointer of consecutive groups of zero value
-            last = False    # if last hextet/group is zero value
-            ommt = False    # ommitted flag, since IPv6 address can ommit to `::` only once
-
-            for index in range(8):
-                hex_ = self._read_fileng(2).hex().lstrip('0')
-
-                if hex_:    # if hextet is not '', directly append
-                    adlt.append(hex_)
-                    last = False
-                else:       # if hextet is '', append '0'
-                    adlt.append('0')
-                    if last:    # if last hextet is '', ascend counter
-                        ctr_[ptr_] += 1
-                    else:       # if last hextet is not '', record pointer
-                        ptr_ = index
-                        last = True
-                        ctr_[ptr_] = 1
-
-            ptr_ = max(ctr_, key=ctr_.get) if ctr_ else 0   # fetch start pointer with longest zero values
-            end_ = ptr_ + ctr_[ptr_]                        # calculate end pointer
-
-            if ctr_[ptr_] > 1:      # only ommit if zero values are in a consecutive group
-                del adlt[ptr_:end_] # remove zero values
-
-                if ptr_ == 0 and end_ == 8:     # insert `::` if IPv6 unspecified address (::)
-                    adlt.insert(ptr_, '::')
-                elif ptr_ == 0 or end_ == 8:    # insert `:` if zero values are from start or at end
-                    adlt.insert(ptr_, ':')
-                else:                           # insert '' otherwise
-                    adlt.insert(ptr_, '')
-
-            _addr = ':'.join(adlt)
+            return ipaddress.ip_address(self._read_fileng(16))
         else:
-            _addr = self._read_fileng(length)
-        return _addr
+            return self._read_fileng(length)
