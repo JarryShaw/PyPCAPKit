@@ -153,7 +153,9 @@ class Internet(Protocol):
             * UDP -- transport layer
 
         """
-        if proto == 'AH':
+        if self._sigterm:
+            from jspcap.protocols.raw import Raw as Protocol
+        elif proto == 'AH':
             from jspcap.protocols.internet.ah import AH as Protocol
         elif proto == 'HIP':
             from jspcap.protocols.internet.hip import HIP as Protocol
@@ -178,5 +180,6 @@ class Internet(Protocol):
         else:
             from jspcap.protocols.raw import Raw as Protocol
         next_ = Protocol(io.BytesIO(self._read_fileng(length)), length,
-                            version=version, extension=extension, error=self._onerror)
+                            version=version, extension=extension,
+                            error=self._onerror, layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias

@@ -12,6 +12,7 @@ import copy
 import io
 import numbers
 import os
+import re
 import struct
 import textwrap
 
@@ -61,6 +62,7 @@ class Protocol:
         * _import_next_layer -- import next layer protocol extractor
 
     """
+    __layer__ = None
     __metaclass__ = ABCMeta
 
     ##########################################################################
@@ -116,6 +118,9 @@ class Protocol:
     def __new__(cls, *args, **kwargs):
         self = super().__new__(cls)
         self._onerror = kwargs.pop('error', False)
+        self._exlayer = kwargs.pop('layer', str())
+        self._exproto = kwargs.pop('protocol', str())
+        self._sigterm = self._check_termination()
         return self
 
     def __repr__(self):
@@ -315,5 +320,13 @@ class Protocol:
 
         """
         from jspcap.protocols.raw import Raw
-        next_ = Raw(io.BytesIO(self._read_fileng(length)), length)
+        next_ = Raw(io.BytesIO(self._read_fileng(length)), length,
+                    layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias
+
+    def _check_termination(self):
+        index = self.__index__()
+        pattern = '|'.join(index) if isinstance(index, tuple) else index
+        iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)
+        match = filter(lambda string: re.fullmatch(pattern, string, re.IGNORECASE), iterable)
+        return (len(list(match)) or re.fullmatch(self.__layer__ or '', self._exlayer, re.IGNORECASE))

@@ -135,7 +135,7 @@ class Frame(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, *, num, proto):
+    def __init__(self, file, *, num, proto, **kwrags):
         self._fnum = num
         self._file = file
         self._prot = proto
@@ -188,7 +188,10 @@ class Frame(Protocol):
                 return Info(dict_)
         return Info(dict_)
 
-    def __index__(self):
+    def __index__(self=None):
+        if self is None:    return 'Frame'
+        if getattr(self, '_fnum', NotImplemented) is NotImplemented:
+            return self.__class__.__name__
         return self._fnum
 
     def __contains__(self, name):
@@ -267,5 +270,6 @@ class Frame(Protocol):
             from jspcap.protocols.internet import IPv6 as Protocol
         else:
             from jspcap.protocols.raw import Raw as Protocol
-        next_ = Protocol(self._file, length, error=error)
+        next_ = Protocol(self._file, length, error=error,
+                            layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias

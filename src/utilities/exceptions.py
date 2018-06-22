@@ -31,6 +31,19 @@ __all__ = [
 ]
 
 
+
+def stacklevel():
+    """Fetch curent stack level."""
+    tb = traceback.extract_stack()
+    for tbitem in tb:
+        if pathlib.Path(tbitem[0]).match('*/jspcap/*'):
+            index = tb.index(tbitem)
+            break
+    else:
+        index = len(tb)
+    return (index-1)
+
+
 ##############################################################################
 # BaseError (abc of exceptions) session.
 ##############################################################################
@@ -47,18 +60,10 @@ class BaseError(Exception):
 
     """
     def __init__(self, message=None, *args, **kwargs):
-        tb = traceback.extract_stack()
-        for tbitem in tb:
-            if pathlib.Path(tbitem[0]).match('*/jspcap/*'):
-                index = tb.index(tbitem)
-                break
-        else:
-            index = len(tb)
-
         quiet = kwargs.pop('quiet', False)
         if not quiet and index:
             print('Traceback (most recent call last):')
-            traceback.print_stack(limit=-index)
+            traceback.print_stack(limit=-stacklevel())
 
         sys.tracebacklimit = 0
         super().__init__(message, *args, **kwargs)

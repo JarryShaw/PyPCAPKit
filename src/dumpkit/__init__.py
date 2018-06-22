@@ -13,8 +13,26 @@ from jspcap.ipsuite.pcap.header import Header
 __all__ = ['PCAP']
 
 
+
+class NotImplementedIO:
+    """Unspecified output format."""
+    @property
+    def kind(self):
+        return NotImplemented
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __call__(self, *args, **kwargs):
+        pass
+
+
 class PCAP:
     """PCAP file dumper."""
+    @property
+    def kind(self):
+        return 'pcap'
+
     def __init__(self, filename, *, protocol):
         self._file = filename
         packet = Header(protocol=protocol).data

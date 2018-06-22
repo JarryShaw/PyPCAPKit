@@ -10,6 +10,7 @@ user-refined exceptions and validations.
 from jspcap.utilities.decorators import *
 from jspcap.utilities.exceptions import *
 from jspcap.utilities.validations import *
+from jspcap.utilities.warnings import *
 
 
 __all__ = ['seekset_ng', 'beholder_ng']

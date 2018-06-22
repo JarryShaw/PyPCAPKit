@@ -69,4 +69,4 @@ class RARP(ARP):
 
     @classmethod
     def __index__(cls):
-        return ('RARP', 'DRARPD')
+        return ('RARP', 'DRARP')

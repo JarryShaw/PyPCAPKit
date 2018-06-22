@@ -130,7 +130,7 @@ class Header(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file):
+    def __init__(self, file, **kwrags):
         self._file = file
         self._info = Info(self.read_header())
 

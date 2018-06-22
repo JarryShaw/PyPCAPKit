@@ -7,10 +7,13 @@ information exchange in all network layers, extracst
 parametres from a PCAP file.
 
 """
+import importlib
 import io
 import os
 import pathlib
+import traceback
 import textwrap
+import warnings
 
 ###############################################################################
 # from jsformat import PLIST, JSON, Tree, JavaScript, XML
@@ -19,8 +22,10 @@ import textwrap
 from jspcap.corekit.infoclass import Info
 from jspcap.protocols.pcap.frame import Frame
 from jspcap.protocols.pcap.header import Header
-from jspcap.utilities.exceptions import CallableError, FormatError, \
+from jspcap.utilities.exceptions import stacklevel, CallableError, \
         FileNotFound, UnsupportedCall, IterableError
+from jspcap.utilities.warnings import FormatWarning, EngineWarning, \
+        LayerWarning, ProtocolWarning
 
 ###############################################################################
 # from jspcap.foundation.traceflow import TraceFlow
@@ -31,6 +36,20 @@ from jspcap.utilities.exceptions import CallableError, FormatError, \
 
 
 __all__ = ['Extractor']
+
+
+# check list
+LAYER_LIST = {'None', 'Link', 'Internet', 'Transport', 'Application'}
+PROTO_LIST = {
+    'null', 'protocol', 'raw',                              # base protocols
+    'header', 'frame',                                      # PCAP headers
+    'link', 'arp', 'inarp', 'ethernet', 'l2tp', 'ospf', 'rarp', 'drarp', 'vlan',
+                                                            # Link layer
+    'internet', 'ah', 'hip', 'hopopt', 'ip', 'ipsec', 'ipv4', 'ipv6', 'ipv6_frag',
+    'ipv6_opts', 'ipv6_route', 'ipx', 'mh',                 # Internet layer
+    'transport', 'tcp', 'udp',                              # Transport layer
+    'application', 'http', 'httpv1', 'httpv2',              # Application layer
+}
 
 
 class Extractor:
@@ -159,6 +178,50 @@ class Extractor:
     # Methods.
     ##########################################################################
 
+    def run(self):
+        """Start extraction."""
+        if self._exeng == 'scapy':
+            flag, engine = self.import_test(self._exeng, name='Scapy')
+            if flag:    pass
+        elif self._exeng == 'dpkt':
+            flag, engine = self.import_test(self._exeng)
+            if flag:    pass
+        elif self._exeng == 'pyshark':
+            flag, engine = self.import_test(self._exeng, name='PyShark')
+            if flag:    pass
+        elif self._exeng not in ('default', 'jspcap'):
+            warnings.warn(f'unsupported extraction engine: {self._exeng}; '
+                            'using default engine instead',
+                            EngineWarning, stacklevel=stacklevel())
+        self.record_header()            # read PCAP global header
+        self.record_frames()            # read frames
+
+    @staticmethod
+    def import_test(engine, *, name=None):
+        try:
+            engine = importlib.import_module(engine)
+            return True, engine
+        except ImportError:
+            warnings.warn(f'extraction engine {name or engine} not installed; '
+                            'using default engine instead',
+                            EngineWarning, stacklevel=stacklevel())
+        return False, None
+
+    @staticmethod
+    def check(*, layer=None, protocol=None):
+        if layer is not None:
+            if layer.capitalize() not in LAYER_LIST:
+                warnings.warn(f'unrecognised layer: {layer}',
+                                LayerWarning, stacklevel=stacklevel())
+        if protocol is not None:
+            def check_protocol(*args):
+                for arg in args:
+                    if arg.lower() not in PROTO_LIST:
+                        warnings.warn(f'unrecognised protocol: {protocol}', 
+                                        ProtocolWarning, stacklevel=stacklevel())
+            if isinstance(protocol, tuple): check_protocol(*protocol)
+            else:                           check_protocol(protocol)
+
     @classmethod
     def make_name(cls, fin, fout, fmt, extension, *, files=False, nofile=False):
         if fin is None:
@@ -250,6 +313,7 @@ class Extractor:
                     fin=None, fout=None, format=None,                           # basic settings
                     auto=True, extension=True, store=True,                      # internal settings
                     files=False, nofile=False, verbose=False,                   # output settings
+                    engine=None, layer=None, protocol=None,                     # extraction settings
                     ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
                     trace=False, trace_fout=None, trace_format=None):           # trace settings
         """Initialise PCAP Reader.
@@ -260,20 +324,26 @@ class Extractor:
             * format  -- str, file format of output
                             <keyword> 'plist' / 'json' / 'tree' / 'html'
 
-            * store -- bool, if store extracted packet info (default is True)
-                            <keyword> True / False
-            * verbose -- bool, if print verbose output information (default is False)
-                            <keyword> True / False
-
             * auto -- bool, if automatically run till EOF (default is True)
                             <keyword> True / False
             * extension -- bool, if check and append axtensions to output file (default is True)
+                            <keyword> True / False
+            * store -- bool, if store extracted packet info (default is True)
                             <keyword> True / False
 
             * files -- bool, if split each frame into different files (default is False)
                             <keyword> True / False
             * nofile -- bool, if no output file is to be dumped (default is False)
                             <keyword> True / False
+            * verbose -- bool, if print verbose output information (default is False)
+                            <keyword> True / False
+
+            * engine -- str, extraction engine to be used
+                            <keyword> 'default | jspcap'
+            * layer -- str, extract til which layer
+                            <keyword> 'Link' / 'Internet' / 'Transport' / 'Application'
+            * protocol -- str, extract til which protocol
+                            <keyword> available protocol name
 
             * ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
                             <keyword> True / False
@@ -283,12 +353,18 @@ class Extractor:
                             <keyword> True / False
             * tcp -- bool, if perform TCP reassembly (default is False)
                             <keyword> True / False
-
             * strict -- bool, if set strict flag for reassembly (default is False)
                             <keyword> True / False
 
+            * trace -- bool, if trace TCP traffic flows (default is False)
+                            <keyword> True / False
+            * trace_fout -- str, path name for flow tracer if necessary
+            * trace_format -- str, output file format of flow tracer
+                            <keyword> 'plist' / 'json' / 'tree' / 'html' / 'pcap'
+
         """
-        ifnm, ofnm, fmt, ext, files = self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
+        ifnm, ofnm, fmt, ext, files = \
+            self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
 
         self._ifnm = ifnm               # input file name
         self._ofnm = ofnm               # output file name
@@ -311,6 +387,11 @@ class Extractor:
         self._ipv4 = ipv4 or ip         # IPv4 Reassembly
         self._ipv6 = ipv6 or ip         # IPv6 Reassembly
         self._tcp = tcp                 # TCP Reassembly
+
+        self._exlyr = layer or 'none'                       # extract til layer
+        self._exptl = protocol or 'null'                    # extract til protocol
+        self._exeng = (engine or 'default').lower()         # extract using engine
+        self.check(layer=self._exlyr, protocol=self._exptl) # check layer & protocol
 
         if self._ipv4:
             from jspcap.reassembly.ipv4 import IPv4_Reassembly
@@ -339,13 +420,15 @@ class Extractor:
             elif fmt == 'xml':
                 from jsformat import XML as output          # output XML file
             else:
-                raise FormatError(f'Unsupported output format: {fmt}')
+                from jspcap.dumpkit import NotImplementedIO as output
+                                                            # no output file
+                warnings.warn(f'unsupported output format: {fmt}; '
+                                'disabled file output feature', 
+                                FormatWarning, stacklevel=stacklevel())
             self._ofile = output if self._flag_f else output(ofnm)
                                                             # output file
-
-        self.record_header()            # read PCAP global header
-        self.record_frames()            # read frames
-
+        self.run()                      # start extraction
+            
     def __iter__(self):
         if not self._flag_a:
             return self
@@ -387,7 +470,8 @@ class Extractor:
 
         """
         # read frame header
-        frame = Frame(self._ifile, num=self._frnum, proto=self._dlink)
+        frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
+                        layer=self._exlyr, protocol=self._exptl)
         if self._flag_v:
             print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
 

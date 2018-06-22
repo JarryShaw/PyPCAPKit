@@ -46,20 +46,21 @@ class Analysis:
     ##########################################################################
 
     @staticmethod
-    def analyse(file, length=None):
+    def analyse(file, length=None, *, _termination=False):
         """Analyse application layer packets."""
-        # HTTP/1.* analysis
-        flag, http = Analysis._analyse_httpv1(file, length)
-        if flag:
-            return Analysis(http.info, http.protochain, http.alias)
+        if not _termination:
+            # HTTP/1.* analysis
+            flag, http = Analysis._analyse_httpv1(file, length)
+            if flag:
+                return Analysis(http.info, http.protochain, http.alias)
 
-        # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
-        # NB: the NOTE abrove is deprecated, since validations are performed
+            # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
+            # NB: the NOTE abrove is deprecated, since validations are performed
 
-        # HTTP/2 analysis
-        flag, http = Analysis._analyse_httpv2(file, length)
-        if flag:
-            return Analysis(http.info, http.protochain, http.alias)
+            # HTTP/2 analysis
+            flag, http = Analysis._analyse_httpv2(file, length)
+            if flag:
+                return Analysis(http.info, http.protochain, http.alias)
 
         # raw packet analysis
         raw = Raw(file, length)

@@ -108,7 +108,7 @@ class Transport(Protocol):
         """
         from jspcap.foundation.analysis import Analysis
         if self._onerror:
-            next_ = beholder_ng(Analysis.analyse)(io.BytesIO(self._read_fileng(length)), length)
+            next_ = beholder_ng(Analysis.analyse)(io.BytesIO(self._read_fileng(length)), length, _termination=self._sigterm)
         else:
-            next_ = Analysis.analyse(io.BytesIO(self._read_fileng(length)), length)
+            next_ = Analysis.analyse(io.BytesIO(self._read_fileng(length)), length, _termination=self._sigterm)
         return True, next_.info, next_.protochain, next_.alias

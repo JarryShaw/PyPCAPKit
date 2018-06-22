@@ -33,6 +33,7 @@ PCAP  = 'pcap'
 def extract(*, fin=None, fout=None, format=None,                            # basic settings
                 auto=True, extension=True, store=True,                      # internal settings
                 files=False, nofile=False, verbose=False,                   # output settings
+                engine=None, layer=None, protocol=None,                     # extraction settings
                 ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
                 trace=False, trace_fout=None, trace_format=None):           # trace settings
     """Extract a PCAP file.
@@ -43,20 +44,26 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
         * format  -- str, file format of output
                         <keyword> 'plist' / 'json' / 'tree' / 'html'
 
-        * store -- bool, if store extracted packet info (default is True)
-                        <keyword> True / False
-        * verbose -- bool, if print verbose output information (default is False)
-                        <keyword> True / False
-
         * auto -- bool, if automatically run till EOF (default is True)
                         <keyword> True / False
         * extension -- bool, if check and append axtensions to output file (default is True)
+                        <keyword> True / False
+        * store -- bool, if store extracted packet info (default is True)
                         <keyword> True / False
 
         * files -- bool, if split each frame into different files (default is False)
                         <keyword> True / False
         * nofile -- bool, if no output file is to be dumped (default is False)
                         <keyword> True / False
+        * verbose -- bool, if print verbose output information (default is False)
+                        <keyword> True / False
+
+        * engine -- str, extraction engine to be used
+                        <keyword> 'default | jspcap'
+        * layer -- str, extract til which layer
+                        <keyword> 'Link' / 'Internet' / 'Transport' / 'Application'
+        * protocol -- str, extract til which protocol
+                        <keyword> available protocol name
 
         * ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
                         <keyword> True / False
@@ -66,20 +73,34 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
                         <keyword> True / False
         * tcp -- bool, if perform TCP reassembly (default is False)
                         <keyword> True / False
-
         * strict -- bool, if set strict flag for reassembly (default is False)
                         <keyword> True / False
+
+        * trace -- bool, if trace TCP traffic flows (default is False)
+                        <keyword> True / False
+        * trace_fout -- str, path name for flow tracer if necessary
+        * trace_format -- str, output file format of flow tracer
+                        <keyword> 'plist' / 'json' / 'tree' / 'html' / 'pcap'
 
     Returns:
         * Extractor -- an Extractor object form `jspcap.extractor`
 
     """
-    str_check(fin or '', fout or '', format or '', trace_fout or '', trace_format or '')
-    bool_check(ip, ipv4, ipv6, tcp, auto, extension, files, nofile, verbose, strict, store, trace)
+    if isinstance(layer, type) and issubclass(layer, Protocol):
+        layer = layer.__layer__
+    if isinstance(protocol, type) and issubclass(protocol, Protocol):
+        protocol = protocol.__index__()
+
+    str_check(fin or '', fout or '', format or '',
+                trace_fout or '', trace_format or '',
+                engine or '', layer or '', *(protocol or ''))
+    bool_check(files, nofile, verbose, auto, extension, store, 
+                ip, ipv4, ipv6, tcp, strict, trace)
 
     return Extractor(fin=fin, fout=fout, format=format,
                         store=store, files=files, nofile=nofile,
                         auto=auto, verbose=verbose, extension=extension,
+                        engine=engine, layer=layer, protocol=protocol,
                         ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, strict=strict,
                         trace=trace, trace_fout=trace_fout, trace_format=trace_format)
 
@@ -116,7 +137,7 @@ def reassemble(*, protocol, strict=False):
 
     """
     if isinstance(protocol, type) and issubclass(protocol, Protocol):
-        protocol = protocol.__class__.__name__
+        protocol = protocol.__index__()
 
     str_check(protocol)
     bool_check(strict)

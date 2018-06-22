@@ -4,28 +4,20 @@
 """
 import copy
 import pathlib
+import warnings
 
 ###############################################################################
 # from jsformat import PLIST, JSON, Tree, JavaScript, XML
 ###############################################################################
 
 from jspcap.corekit.infoclass import Info
-from jspcap.utilities.exceptions import FileExists, FormatError
+from jspcap.utilities.exceptions import stacklevel, FileExists
+from jspcap.utilities.warnings import FormatWarning, FileWarning
 from jspcap.utilities.validations import pkt_check
 
 ###############################################################################
-# from jspcap.dumpkit.pcap import PCAP
+# from jspcap.dumpkit import PCAP, NotImplementedIO
 ###############################################################################
-
-
-class NotImplementedIO:
-    """Unspecified output format."""
-    @property
-    def kind(self):
-        return None
-
-    def __call__(self):
-        pass
 
 
 class TraceFlow:
@@ -54,8 +46,8 @@ class TraceFlow:
     # Methods.
     ##########################################################################
 
-    @classmethod
-    def make_fout(cls, fout='./tmp', fmt='pcap'):
+    @staticmethod
+    def make_fout(fout='./tmp', fmt='pcap'):
         """Make root path for output.
 
         Positional arguments:
@@ -66,10 +58,8 @@ class TraceFlow:
             * output -- dumper of specified format
 
         """
-        if fmt is None:
-            return NotImplementedIO                         # no output files
-        elif fmt == 'pcap':
-            from jspcap.dumpkit import PCAP as output  # output PCAP file 
+        if fmt == 'pcap':
+            from jspcap.dumpkit import PCAP as output       # output PCAP file 
         elif fmt == 'plist':
             from jsformat import PLIST as output            # output PLIST file
         elif fmt == 'json':
@@ -83,12 +73,20 @@ class TraceFlow:
         elif fmt == 'xml':
             from jsformat import XML as output              # output XML file
         else:
-            raise FormatError(f'Unsupported output format: {fmt}')
+            from jspcap.dumpkit import NotImplementedIO as output
+                                                            # no output file
+            if fmt is not None:
+                warnings.warn(f'Unsupported output format: {fmt}; '
+                                'disabled file output feature',
+                                FormatWarning, stacklevel=stacklevel())
 
         try:
             pathlib.Path(fout).mkdir(parents=True, exist_ok=True)
         except FileExistsError as error:
-            raise FileExists(str(error)) from None
+            if fmt is None:
+                warnings.warn(str(error), FileWarning, stacklevel=stacklevel())
+            else:
+                raise FileExists(str(error)) from None
 
         return output, fmt
 
@@ -138,7 +136,7 @@ class TraceFlow:
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            label = f'{info.src}-{info.srcport}-{info.dst}-{info.dstport}-{info.timestamp}'.replace('.', '_')
+            label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'.replace('.', '_')
             self._buffer[BUFID] = dict(
                 fpout = self._foutio(f'{self._fproot}/{label}.{self._fdpext}', protocol=info.protocol),
                 index = list(),

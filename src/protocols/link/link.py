@@ -107,7 +107,9 @@ class Link(Protocol):
             * IPX -- internet layer
 
         """
-        if proto == 'ARP':
+        if self._sigterm:
+            from jspcap.protocols.raw import Raw as Protocol
+        elif proto == 'ARP':
             from jspcap.protocols.link.arp import ARP as Protocol
         elif proto == 'RARP':
             from jspcap.protocols.link.rarp import RARP as Protocol
@@ -121,5 +123,6 @@ class Link(Protocol):
             from jspcap.protocols.internet.ipx import IPX as Protocol
         else:
             from jspcap.protocols.raw import Raw as Protocol
-        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length, error=self._onerror)
+        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length,
+                            error=self._onerror, layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias

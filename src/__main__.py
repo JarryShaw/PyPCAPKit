@@ -9,12 +9,13 @@ is now deprecated and merged with `jspcap`.
 import argparse
 import os
 import sys
+import warnings
 
 from jspcap.foundation.extraction import Extractor
 
 
 # version number
-__version__ = '0.4.0'
+__version__ = '0.5.0'
 
 
 def get_parser():
@@ -61,13 +62,28 @@ def get_parser():
                         help=(
                             'If output file extension omits, append automatically.'
                         ))
+    parser.add_argument('-v', '--verbose', action='store_false', default=True,
+                        help=(
+                            'Show more information.'
+                        ))
     parser.add_argument('-F', '--files', action='store_true', default=False,
                         help=(
                             'Split each frame into different files.'
                         ))
-    parser.add_argument('-v', '--verbose', action='store_false', default=True,
-                        help=(
-                            'Show more information.'
+    parser.add_argument('-E', '--engine', action='store', dest='engine', choises=[
+                        'default', 'jspcap', 'scapy', 'pyshark', 'dpkt',
+                        ], default='default', metavar='PKG', help=(
+                            'Indicate extraction engine. Note that except '
+                            'default or jspcap engine, all other engines '
+                            'need support of correspoding package.'
+                        ))
+    parser.add_argument('-P', '--protocol', action='store', metavar='PROTOCOL',
+                        dest='protocol', help=(
+                            'Indicate extraction stops after which protocol.'
+                        ))
+    parser.add_argument('-L', '--layer', action='store', metavar='LAYER',
+                        dest='layer', help=(
+                            'Indicate extract frames until which layer.'
                         ))
     return parser
 
@@ -75,6 +91,7 @@ def get_parser():
 def main():
     parser = get_parser()
     args = parser.parse_args()
+    warnings.simplefilter('ignore')
 
     if args.format:     fmt = args.format
     elif args.json:     fmt = 'json'
@@ -82,9 +99,11 @@ def main():
     elif args.tree:     fmt = 'tree'
     else:               fmt = None
 
-    extractor = Extractor(fin=args.fin, fout=args.fout, format=fmt,
+    extractor = Extractor(store=False, format=fmt,
+                            fin=args.fin, fout=args.fout,
                             auto=args.verbose, files=args.files,
-                            store=False, extension=args.auto_extension)
+                            layer=args.layer, protocol=args.protocol,
+                            engine=args.engine, extension=args.auto_extension)
 
     if not args.verbose:
         print(f"🚨 Loading file '{extractor.input}'")
