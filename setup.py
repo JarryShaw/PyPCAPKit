@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.9.3'
+__version__ = '0.9.3.post1'
 
 
 # set-up script for pip distribution
@@ -64,6 +64,25 @@ setuptools.setup(
             'LICENSE',
             'README.md',
         ],
+        'jspcap': ['README.md',],
+        'jspcap.corekit': ['README.md',],
+        'jspcap.dumpkit': ['README.md',],
+        'jspcap.foundation': ['README.md',],
+        'jspcap.interface': ['README.md',],
+        'jspcap.ipsuite': ['README.md',],
+        'jspcap.ipsuite.pcap': ['README.md',],
+        'jspcap.ipsuite.application': ['README.md',],
+        'jspcap.ipsuite.internet': ['README.md',],
+        'jspcap.ipsuite.link': ['README.md',],
+        'jspcap.ipsuite.transport': ['README.md',],
+        'jspcap.protocols': ['README.md',],
+        'jspcap.protocols.pcap': ['README.md',],
+        'jspcap.protocols.application': ['README.md',],
+        'jspcap.protocols.internet': ['README.md',],
+        'jspcap.protocols.link': ['README.md',],
+        'jspcap.protocols.transport': ['README.md',],
+        'jspcap.reassembly': ['README.md',],
+        'jspcap.utilities': ['README.md',],
     },
     classifiers = [
         'Development Status :: 5 - Production/Stable',

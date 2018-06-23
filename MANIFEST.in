@@ -1,8 +1,10 @@
 global-include *.py
-include doc/*.png
+include doc/*
 prune NotImplemented
 prune deprecated
 prune testbench
-prune test
 prune sample
+prune build
+prune dist
+prune test
 prune src
