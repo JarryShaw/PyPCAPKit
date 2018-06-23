@@ -7,7 +7,7 @@ import time
 import jspcap
 
 
-for engine in {'default', 'pyshark', 'scapy', 'dpkt'}:
+for engine in {'default', 'pyshark', 'scapy', 'dpkt', 'pipline', 'server'}:
     lid = list()
     for index in range(1, 101):
         now = time.time()
