@@ -33,7 +33,7 @@
 
 > There is a project called [`jspcapy`](https://github.com/JarryShaw/jspcapy) works on `jspcap`, which is a command line tool for PCAP extraction.
 
-&emsp; Unlike popular PCAP file extractors, such as `Scapy`, `dkpt`, `pyshark`, and etc, `jspcap` uses __streaming__ strategy to read input files. That is to read frame by frame, decrease occupation on memory, as well as enhance efficiency in some way.
+&emsp; Unlike popular PCAP file extractors, such as `Scapy`, `dpkt`, `pyshark`, and etc, `jspcap` uses __streaming__ strategy to read input files. That is to read frame by frame, decrease occupation on memory, as well as enhance efficiency in some way.
 
 &emsp; In `jspcap`, all files can be described as following six parts.
 
@@ -48,7 +48,7 @@
 
 ![](./doc/jspcap.png)
 
-&emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.02* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net) and is to implement [`DKPT`](https://github.com/kbandla/dpkt) and [`PyShark`](https://kiminewt.github.io/pyshark/) support.
+&emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.02* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net) and [`DPKT`](https://github.com/kbandla/dpkt), and is to implement [`PyShark`](https://kiminewt.github.io/pyshark/) support.
 
 &nbsp;
 
