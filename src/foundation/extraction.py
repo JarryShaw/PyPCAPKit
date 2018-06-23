@@ -19,6 +19,9 @@ import traceback
 import warnings
 
 ###############################################################################
+# import dpkt
+# import scapy.all
+# 
 # from jsformat import PLIST, JSON, Tree, JavaScript, XML
 ###############################################################################
 
@@ -195,18 +198,19 @@ class Extractor:
     def run(self):
         """Start extraction."""
         if self._exeng == 'dpkt':
-            flag, engine = self.import_test(self._exeng, name='DPKT')
+            flag, engine = self.import_test('dpkt', name='DPKT')
             if flag:    return self._run_dpkt(engine)
         elif self._exeng == 'scapy':
             flag, engine = self.import_test('scapy.all', name='Scapy')
             if flag:    return self._run_scapy(engine)
         elif self._exeng == 'pyshark':
-            flag, engine = self.import_test(self._exeng, name='PyShark')
-            if flag:    pass
+            flag, engine = self.import_test('pyshark', name='PyShark')
+            if flag:    return self._run_pyshark(engine)
         elif self._exeng not in ('default', 'jspcap'):
             warnings.warn(f'unsupported extraction engine: {self._exeng}; '
                             'using default engine instead',
                             EngineWarning, stacklevel=stacklevel())
+            self._exeng = 'default'
 
         # using default/jspcap engine
         self.record_header()            # read PCAP global header
@@ -318,11 +322,11 @@ class Extractor:
         if self._flag_a:
             while True:
                 try:
-                    self._read_frame()
-                except EOFError:
+                    self._read_frame_hq()
+                except (EOFError, StopIteration):
                     # quit when EOF
                     break
-            self._ifile.close()
+            self._cleanup()
 
     ##########################################################################
     # Data modules.
@@ -426,9 +430,9 @@ class Extractor:
 
         if trace:
             from jspcap.foundation.traceflow import TraceFlow
-            if self._exeng in ('scapy', 'dpkt') and re.fullmatch('pcap', str(trace_format), re.IGNORECASE):
+            if self._exeng in ('scapy', 'dpkt', 'pyshark') and re.fullmatch('pcap', str(trace_format), re.IGNORECASE):
                 warnings.warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
-                                "using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
+                                f"using 'trace_format={trace_format}' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = None
             self._trace = TraceFlow(fout=trace_fout, format=trace_format)
 
@@ -463,16 +467,16 @@ class Extractor:
 
     def __next__(self):
         try:
-            return self._read_frame()
-        except EOFError:
+            return self._read_frame_hq()
+        except (EOFError, StopIteration):
             self._ifile.close()
             raise StopIteration
 
     def __call__(self):
         if not self._flag_a:
             try:
-                return self._read_frame()
-            except EOFError as error:
+                return self._read_frame_hq()
+            except (EOFError, StopIteration) as error:
                 self._ifile.close()
                 raise error from None
         raise CallableError("'Extractor(auto=True)' object is not callable")
@@ -486,6 +490,23 @@ class Extractor:
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _cleanup(self):
+        """Cleanup after extraction & analysis."""
+        self._expkg = None
+        self._extmp = None
+        self._ifile.close()
+
+    def _read_frame_hq(self):
+        """Headquarters for frame reader."""
+        if self._exeng == 'scapy':
+            return self._scapy_read_frame()
+        elif self._exeng == 'dpkt':
+            return self._dpkt_read_frame()
+        elif self._exeng == 'pyshark':
+            return self._pyshark_read_frame()
+        else:
+            return self._read_frame()
 
     def _read_frame(self):
         """Read frames.
@@ -626,16 +647,27 @@ class Extractor:
 
     def _run_scapy(self, scapy_all):
         """Call scapy.all.sniff to extract PCAP files."""
-        if not self._flag_a:
-            self._flag_a = True
-            warnings.warn(f"'Extractor(engine=scapy)' object is not iterable; "
-                            "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
+        # if not self._flag_a:
+        #     self._flag_a = True
+        #     warnings.warn(f"'Extractor(engine=scapy)' object is not iterable; "
+        #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
+
+        # extract & analyse file
+        self._expkg = scapy_all
+        self._extmp = iter(scapy_all.sniff(offline=self._ifnm))
+
+        # start iteration
+        self.record_frames()
+
+    def _scapy_read_frame(self):
+        """Read frames."""
+        packet = self._extmp.__next__()
 
         def _scapy_packet2chain(packet):
             """Fetch Scapy packet protocol chain."""
             chain = [packet.name,]
             payload = packet.payload
-            while not isinstance(payload, scapy_all.packet.NoPayload):
+            while not isinstance(payload, self._expkg.packet.NoPayload):
                 chain.append(payload.name)
                 payload = payload.payload
             return ':'.join(chain)
@@ -644,7 +676,7 @@ class Extractor:
             """Convert Scapy packet into dict."""
             dict_ = packet.fields
             payload = packet.payload
-            if not isinstance(payload, scapy_all.packet.NoPayload):
+            if not isinstance(payload, self._expkg.packet.NoPayload):
                 dict_[payload.name] = _scapy_packet2dict(payload)
             return dict_
 
@@ -676,7 +708,7 @@ class Extractor:
             """Store data for IPv6 reassembly."""
             if 'IPv6' in packet:
                 ipv6 = packet['IPv6']
-                if scapy_all.IPv6ExtHdrFragment not in ipv6:
+                if self._expkg.IPv6ExtHdrFragment not in ipv6:
                     return                                  # dismiss not fragmented packet
                 ipv6_frag = ipv6['IPv6ExtHdrFragment']
                 data = dict(
@@ -742,48 +774,61 @@ class Extractor:
                 )
                 self._trace(data)
 
-        # extract & analyse file
-        sniffed = scapy_all.sniff(offline=self._ifnm)
-        for packet in sniffed:
-            self._frnum += 1
-            if self._flag_v:
-                print(f' - Frame {self._frnum:>3d}: {_scapy_packet2chain(packet)}')
+        # verbose output
+        self._frnum += 1
+        self._proto = _scapy_packet2chain(packet)
+        if self._flag_v:
+            print(f' - Frame {self._frnum:>3d}: {self._proto}')
 
-            # write plist
-            frnum = f'Frame {self._frnum}'
-            if not self._flag_q:
-                info = {packet.name: _scapy_packet2dict(packet)}
-                if self._flag_f:
-                    ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-                    ofile(info, name=frnum)
-                else:
-                    self._ofile(info, name=frnum)
+        # write plist
+        frnum = f'Frame {self._frnum}'
+        if not self._flag_q:
+            info = {packet.name: _scapy_packet2dict(packet)}
+            if self._flag_f:
+                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                ofile(info, name=frnum)
+            else:
+                self._ofile(info, name=frnum)
 
-            # record frames
-            if self._flag_d:
-                self._frame.append(packet)
+        # record frames
+        if self._flag_d:
+            self._frame.append(packet)
 
-            # record fragments
-            if self._tcp:
-                _scapy_tcp_reassembly(packet, count=self._frnum)
-            if self._ipv4:
-                _scapy_ipv4_reassembly(packet, count=self._frnum)
-            if self._ipv6:
-                _scapy_ipv6_reassembly(packet, count=self._frnum)
+        # record fragments
+        if self._tcp:
+            _scapy_tcp_reassembly(packet, count=self._frnum)
+        if self._ipv4:
+            _scapy_ipv4_reassembly(packet, count=self._frnum)
+        if self._ipv6:
+            _scapy_ipv6_reassembly(packet, count=self._frnum)
 
-            # trace flows
-            if self._flag_t:
-                _scapy_tcp_traceflow(packet, count=self._frnum)
+        # trace flows
+        if self._flag_t:
+            _scapy_tcp_traceflow(packet, count=self._frnum)
 
-        # aftermath
-        self._ifile.close()
+        return packet
 
     def _run_dpkt(self, dpkt):
         """Call dpkt.pcap.Reader to extract PCAP files."""
-        if not self._flag_a:
-            self._flag_a = True
-            warnings.warn(f"'Extractor(engine=dpkt)' object is not iterable; "
-                            "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
+        # if not self._flag_a:
+        #     self._flag_a = True
+        #     warnings.warn(f"'Extractor(engine=dpkt)' object is not iterable; "
+        #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
+
+        # extract global header
+        self.record_header()
+        self._ifile.seek(0, os.SEEK_SET)
+
+        # extract & analyse file
+        self._expkg = dpkt
+        self._extmp = iter(dpkt.pcap.Reader(self._ifile))
+
+        # start iteration
+        self.record_frames()
+
+    def _dpkt_read_frame(self):
+        """Read frames."""
+        timestamp, packet = self._extmp.__next__()
 
         def _dpkt_packet2chain(packet):
             """Fetch DPKT packet protocol chain."""
@@ -913,54 +958,144 @@ class Extractor:
                     timestamp = timestamp,                  # timestamp
                 )
                 self._trace(data)
-
-        self.record_header()
-        self._ifile.seek(0, os.SEEK_SET)
-
-        pcap = dpkt.pcap.Reader(self._ifile)
-        for timestamp, packet in pcap:
-            if self._dlink == 'Ethernet':
-                packet = dpkt.ethernet.Ethernet(packet)
-            elif self._dlink == 'IPv4':
-                packet = dpkt.ip.IP(packet)
-            elif self._dlink == 'IPv6':
-                packet = dpkt.ip6.IP6(packet)
-            else:
-                warnings.warn('unrecognised link layer protocol; '
-                                'all analysis functions ignored', DPKTWarning, stacklevel=stacklevel())
-                if self._flag_d:
-                    self._frame.append(packet)
-                continue
-
+        
+        # extract packet
+        if self._dlink == 'Ethernet':
+            packet = self._expkg.ethernet.Ethernet(packet)
+        elif self._dlink == 'IPv4':
+            packet = self._expkg.ip.IP(packet)
+        elif self._dlink == 'IPv6':
+            packet = self._expkg.ip6.IP6(packet)
+        else:
+            warnings.warn('unrecognised link layer protocol; '
+                            'all analysis functions ignored', DPKTWarning, stacklevel=stacklevel())
             self._frnum += 1
-            if self._flag_v:
-                print(f' - Frame {self._frnum:>3d}: {_dpkt_packet2chain(packet)}')
-
-            # write plist
-            frnum = f'Frame {self._frnum}'
-            if not self._flag_q:
-                info = {self._dlink: _dpkt_packet2dict(packet)}
-                if self._flag_f:
-                    ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
-                    ofile(info, name=frnum)
-                else:
-                    self._ofile(info, name=frnum)
-
-            # record frames
             if self._flag_d:
                 self._frame.append(packet)
+            return packet
 
-            # record fragments
-            if self._tcp:
-                _dpkt_tcp_reassembly(packet, count=self._frnum)
-            if self._ipv4:
-                _dpkt_ipv4_reassembly(packet, count=self._frnum)
-            if self._ipv6:
-                _dpkt_ipv6_reassembly(packet, count=self._frnum)
+        # verbose output
+        self._frnum += 1
+        self._proto = _dpkt_packet2chain(packet)
+        if self._flag_v:
+            print(f' - Frame {self._frnum:>3d}: {self._proto}')
 
-            # trace flows
-            if self._flag_t:
-                _dpkt_tcp_traceflow(packet, timestamp, count=self._frnum)
+        # write plist
+        frnum = f'Frame {self._frnum}'
+        if not self._flag_q:
+            info = {self._dlink: _dpkt_packet2dict(packet)}
+            if self._flag_f:
+                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                ofile(info, name=frnum)
+            else:
+                self._ofile(info, name=frnum)
 
-        # aftermath
-        self._ifile.close()
+        # record frames
+        if self._flag_d:
+            self._frame.append(packet)
+
+        # record fragments
+        if self._tcp:
+            _dpkt_tcp_reassembly(packet, count=self._frnum)
+        if self._ipv4:
+            _dpkt_ipv4_reassembly(packet, count=self._frnum)
+        if self._ipv6:
+            _dpkt_ipv6_reassembly(packet, count=self._frnum)
+
+        # trace flows
+        if self._flag_t:
+            _dpkt_tcp_traceflow(packet, timestamp, count=self._frnum)
+
+        return packet
+
+    def _run_pyshark(self, pyshark):
+        """Call pyshark.FileCapture to extract PCAP files."""
+        # if not self._flag_a:
+        #     self._flag_a = True
+        #     warnings.warn(f"'Extractor(engine=pyshark)' object is not iterable; "
+        #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
+
+        if (self._ipv4 or self._ipv6 or self._tcp):
+            self._ipv4 = self._ipv6 = self._tcp = False
+            self._reasm = [None] * 3
+            warnings.warn(f"'Extractor(engine=pyshark)' object dose not support reassembly; "
+                            f"so 'ipv4={self._ipv4}', 'ipv6={self._ipv6}' and 'tcp={self._tcp}' will be ignored",
+                            AttributeWarning, stacklevel=stacklevel())
+
+        # extract & analyse file
+        self._expkg = pyshark
+        self._extmp = iter(pyshark.FileCapture(self._ifnm, keep_packets=False))
+
+        # start iteration
+        self.record_frames()
+
+    def _pyshark_read_frame(self):
+        """Read frames."""
+        packet = self._extmp.__next__()
+
+        def _pyshark_packet2chain(packet):
+            """Fetch PyShark packet protocol chain."""
+            return ':'.join(map(lambda layer: layer.layer_name.upper(), packet.layers))
+
+        def _pyshark_packet2dict(packet):
+            """Convert PyShark packet into dict."""
+            dict_ = dict()
+            frame = packet.frame_info
+            for field in frame.field_names:
+                dict_[field] = getattr(frame, field)
+
+            tempdict = dict_
+            for layer in packet.layers:
+                tempdict[layer.layer_name.upper()] = dict()
+                tempdict = tempdict[layer.layer_name.upper()]
+                for field in layer.field_names:
+                    tempdict[field] = getattr(layer, field)
+
+            return dict_
+
+        def _pyshark_tcp_traceflow(packet):
+            """Trace packet flow for TCP."""
+            if 'TCP' in packet:
+                ip = packet.ip if 'IP' in packet else packet.ipv6
+                tcp = packet.tcp
+                data = dict(
+                    protocol = packet.layers[0].layer_name.upper(),
+                                                            # data link type from global header
+                    index = int(packet.number),             # frame number
+                    frame = _pyshark_packet2dict(packet),   # extracted packet
+                    syn = bool(int(tcp.flags_syn)),         # TCP synchronise (SYN) flag
+                    fin = bool(int(tcp.flags_fin)),         # TCP finish (FIN) flag
+                    src = ipaddress.ip_address(ip.src),     # source IP
+                    dst = ipaddress.ip_address(ip.dst),     # destination IP
+                    srcport = int(tcp.srcport),             # TCP source port
+                    dstport = int(tcp.dstport),             # TCP destination port
+                    timestamp = packet.frame_info.time_epoch,
+                                                            # timestamp
+                )
+                self._trace(data)
+
+        # verbose output
+        self._frnum = int(packet.number)
+        self._proto = _pyshark_packet2chain(packet)
+        if self._flag_v:
+            print(f' - Frame {self._frnum:>3d}: {self._proto}')
+
+        # write plist
+        frnum = f'Frame {self._frnum}'
+        if not self._flag_q:
+            info = _pyshark_packet2dict(packet)
+            if self._flag_f:
+                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                ofile(info, name=frnum)
+            else:
+                self._ofile(info, name=frnum)
+
+        # record frames
+        if self._flag_d:
+            self._frame.append(packet)
+
+        # trace flows
+        if self._flag_t:
+            _pyshark_tcp_traceflow(packet)
+
+        return packet
