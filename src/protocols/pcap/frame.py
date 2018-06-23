@@ -16,6 +16,7 @@ typedef struct pcaprec_hdr_s {
 import datetime
 import io
 import os
+import re
 
 from jspcap.corekit.infoclass import Info
 from jspcap.corekit.protochain import ProtoChain
@@ -124,9 +125,19 @@ class Frame(Protocol):
             cap_len = _olen,
         )
 
-        # make BytesIO from frame package data
+        
+        # load packet data
         length = frame['len']
-        self._file = io.BytesIO(self._file.read(length))
+        bytes_ = self._file.read(length)
+
+        # record file pointer
+        if self._mpkt and self._mpfp:
+            # print(self._fnum, 'ready')
+            self._mpfp.put(self._file.tell())
+            self._mpkt.pool += 1
+
+        # make BytesIO from frame packet data
+        self._file = io.BytesIO(bytes_)
         frame['packet'] = self._read_packet(header=0, payload=length, discard=True)
 
         return self._decode_next_layer(frame, length)
@@ -139,7 +150,12 @@ class Frame(Protocol):
         self._fnum = num
         self._file = file
         self._prot = proto
+        self._mpfp = kwrags.pop('mpfdp', None)
+        self._mpkt = kwrags.pop('mpkit', None)
         self._info = Info(self.read_frame())
+        for attr in dir(self):
+            if re.match('^_mp.*', attr):
+                delattr(self, attr)
 
     def __length_hint__(self):
         return 16

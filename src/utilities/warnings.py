@@ -2,7 +2,9 @@
 """user defined warnings
 
 """
-import warnings
+##############################################################################
+# import warnings
+##############################################################################
 
 
 __all__ = [
@@ -22,7 +24,7 @@ __all__ = [
 class BaseWarning(Warning):
     """Base warning class of all kinds."""
     def __init__(self, *args, **kwargs):
-        warnings.simplefilter('default')
+        # warnings.simplefilter('default')
         super().__init__(*args, **kwargs)
 
 

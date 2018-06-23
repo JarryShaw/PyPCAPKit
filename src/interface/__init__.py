@@ -50,7 +50,7 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
                 auto=True, extension=True, store=True,                      # internal settings
                 files=False, nofile=False, verbose=False,                   # output settings
                 engine=None, layer=None, protocol=None,                     # extraction settings
-                ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
+                ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
                 trace=False, trace_fout=None, trace_format=None):           # trace settings
     """Extract a PCAP file.
 
@@ -89,7 +89,7 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
                         <keyword> True / False
         * tcp -- bool, if perform TCP reassembly (default is False)
                         <keyword> True / False
-        * strict -- bool, if set strict flag for reassembly (default is False)
+        * strict -- bool, if set strict flag for reassembly (default is True)
                         <keyword> True / False
 
         * trace -- bool, if trace TCP traffic flows (default is False)

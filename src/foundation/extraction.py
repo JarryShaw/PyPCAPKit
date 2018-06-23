@@ -7,11 +7,15 @@ information exchange in all network layers, extracst
 parametres from a PCAP file.
 
 """
+import collections
+import copy
+import datetime
 import importlib
 import io
 import ipaddress
 import os
 import pathlib
+import random
 import re
 import textwrap
 import time
@@ -19,6 +23,8 @@ import traceback
 import warnings
 
 ###############################################################################
+# import multiprocessing
+# 
 # import dpkt
 # import scapy.all
 # 
@@ -57,6 +63,15 @@ PROTO_LIST = {
     'transport', 'tcp', 'udp',                              # Transport layer
     'application', 'http', 'httpv1', 'httpv2',              # Application layer
 }
+
+
+# CPU number
+if os.name == 'posix' and 'SC_NPROCESSORS_CONF' in os.sysconf_names:
+    CPU_CNT = os.sysconf('SC_NPROCESSORS_CONF')
+elif 'sched_getaffinity' in os.__all__:
+    CPU_CNT = len(os.sched_getaffinity(0))
+else:
+    CPU_CNT = os.cpu_count() or 1
 
 
 class Extractor:
@@ -130,7 +145,7 @@ class Extractor:
 
     @property
     def info(self):
-        if self._exeng in ('scapy',):
+        if self._exeng in ('scapy', 'pyshark'):
             raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'info'")
         return self._vinfo
 
@@ -156,7 +171,7 @@ class Extractor:
 
     @property
     def header(self):
-        if self._exeng in ('scapy',):
+        if self._exeng in ('scapy', 'pyshark'):
             raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'header'")
         return self._gbhdr
 
@@ -197,6 +212,7 @@ class Extractor:
 
     def run(self):
         """Start extraction."""
+        tempflag = True
         if self._exeng == 'dpkt':
             flag, engine = self.import_test('dpkt', name='DPKT')
             if flag:    return self._run_dpkt(engine)
@@ -206,27 +222,39 @@ class Extractor:
         elif self._exeng == 'pyshark':
             flag, engine = self.import_test('pyshark', name='PyShark')
             if flag:    return self._run_pyshark(engine)
+        elif self._exeng == 'pipeline':
+            flag, engine = self.import_test('multiprocessing', name='Pipeline Multiprocessing')
+            self._flag_m = tempflag = bool(flag and (self._flag_a and CPU_CNT > 1))
+            if self._flag_m:
+                return self._run_pipeline(engine)
+            warnings.warn(f'extraction engine Pipeline Multiprocessing is not available; '
+                            'using default engine instead', EngineWarning, stacklevel=stacklevel())
+        elif self._exeng == 'server':
+            flag, engine = self.import_test('multiprocessing', name='Server Multiprocessing')
+            self._flag_m = tempflag = bool(flag and (self._flag_a and CPU_CNT > 2))
+            if self._flag_m:
+                return self._run_server(engine)
+            warnings.warn(f'extraction engine Server Multiprocessing is not available; '
+                            'using default engine instead', EngineWarning, stacklevel=stacklevel())
         elif self._exeng not in ('default', 'jspcap'):
+            tempflag = False
             warnings.warn(f'unsupported extraction engine: {self._exeng}; '
                             'using default engine instead',
                             EngineWarning, stacklevel=stacklevel())
-            self._exeng = 'default'
 
         # using default/jspcap engine
+        self._exeng = self._exeng if tempflag else 'default'
         self.record_header()            # read PCAP global header
         self.record_frames()            # read frames
 
     def check(self):
         layer = self._exlyr
-        protocol = self._exptl
-        if self._exeng in ('scapy', 'dpkt') and (layer != 'None' or protocol != 'null'):
-            warnings.warn(f"'Extractor(engine={self._exeng})' does not support protocol and layer threshold; "
-                            f"'layer={layer}' and 'protocol={protocol}' ignored", AttributeWarning, stacklevel=stacklevel())
-
         if layer is not None:
             if layer not in LAYER_LIST:
                 warnings.warn(f'unrecognised layer: {layer}',
                                 LayerWarning, stacklevel=stacklevel())
+
+        protocol = self._exptl
         if protocol is not None:
             def check_protocol(*args):
                 for arg in args:
@@ -242,9 +270,8 @@ class Extractor:
             engine = importlib.import_module(engine)
             return True, engine
         except ImportError:
-            warnings.warn(f'extraction engine {name or engine} not installed; '
-                            'using default engine instead',
-                            EngineWarning, stacklevel=stacklevel())
+            warnings.warn(f"extraction engine '{name or engine}' not available; "
+                            'using default engine instead', EngineWarning, stacklevel=stacklevel())
         return False, None
 
     @classmethod
@@ -340,7 +367,7 @@ class Extractor:
                     auto=True, extension=True, store=True,                      # internal settings
                     files=False, nofile=False, verbose=False,                   # output settings
                     engine=None, layer=None, protocol=None,                     # extraction settings
-                    ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
+                    ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
                     trace=False, trace_fout=None, trace_format=None):           # trace settings
         """Initialise PCAP Reader.
 
@@ -379,7 +406,7 @@ class Extractor:
                             <keyword> True / False
             * tcp -- bool, if perform TCP reassembly (default is False)
                             <keyword> True / False
-            * strict -- bool, if set strict flag for reassembly (default is False)
+            * strict -- bool, if set strict flag for reassembly (default is True)
                             <keyword> True / False
 
             * trace -- bool, if trace TCP traffic flows (default is False)
@@ -398,7 +425,9 @@ class Extractor:
 
         self._flag_a = auto             # auto extract flag
         self._flag_d = store            # store data flag
+        self._flag_e = False            # EOF flag
         self._flag_f = files            # split file flag
+        self._flag_m = False            # multiprocessing flag
         self._flag_q = nofile           # no output flag
         self._flag_t = trace            # trace flag
         self._flag_v = verbose          # verbose output flag
@@ -469,7 +498,7 @@ class Extractor:
         try:
             return self._read_frame_hq()
         except (EOFError, StopIteration):
-            self._ifile.close()
+            self._cleanup()
             raise StopIteration
 
     def __call__(self):
@@ -477,7 +506,7 @@ class Extractor:
             try:
                 return self._read_frame_hq()
             except (EOFError, StopIteration) as error:
-                self._ifile.close()
+                self._cleanup()
                 raise error from None
         raise CallableError("'Extractor(auto=True)' object is not callable")
 
@@ -495,7 +524,38 @@ class Extractor:
         """Cleanup after extraction & analysis."""
         self._expkg = None
         self._extmp = None
+        self._flag_e = True
         self._ifile.close()
+
+    def _aftermathmp(self):
+        """Aftermath for multiprocessing."""
+        if not self._flag_e and self._flag_m:
+            # join processes
+            [ proc.join() for proc in self._mpprc ]
+            if self._exeng == 'server':
+                self._mpsvc.join()
+
+            # restore attributes
+            if self._exeng == 'server':
+                self._frame = list(self._mpfrm)
+                self._reasm = list(self._mprsm)
+            if self._exeng == 'pipeline':
+                self._frame = [ self._mpkit.frames[x] for x in sorted(self._mpkit.frames) ]
+                self._reasm = copy.deepcopy(self._mpkit.reassembly)
+
+            # shutdown & cleanup
+            self._mpmng.shutdown()
+            for attr in dir(self):
+                if re.match('^_mp.*', attr):
+                    delattr(self, attr)
+            self._frnum -= 2
+            # map(lambda attr: delattr(self, attr), filter(lambda attr: re.match('^_mp.*', attr), dir(self)))
+
+    def _update_eof(self):
+        """Update EOF flag."""
+        self._aftermathmp()
+        self._ifile.close()
+        self._flag_e = True
 
     def _read_frame_hq(self):
         """Headquarters for frame reader."""
@@ -508,7 +568,7 @@ class Extractor:
         else:
             return self._read_frame()
 
-    def _read_frame(self):
+    def _read_frame(self, *, frame=None, mpkit=None):
         """Read frames.
 
         - Extract frames and each layer of packets.
@@ -518,8 +578,11 @@ class Extractor:
 
         """
         # read frame header
-        frame = Frame(self._ifile, num=self._frnum+1, proto=self._dlink,
-                        layer=self._exlyr, protocol=self._exptl)
+        if not self._flag_m:
+            frame = Frame(self._ifile, num=self._frnum+1, proto=self._dlink,
+                            layer=self._exlyr, protocol=self._exptl)
+        
+        # verbose output
         if self._flag_v:
             print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
 
@@ -532,12 +595,6 @@ class Extractor:
             else:
                 self._ofile(frame.info, name=frnum)
 
-        # record frames
-        self._frnum += 1
-        self._proto = frame.protochain.chain
-        if self._flag_d:
-            self._frame.append(frame)
-
         # record fragments
         if self._tcp:
             self._tcp_reassembly(frame)
@@ -549,6 +606,26 @@ class Extractor:
         # trace flows
         if self._flag_t:
             self._tcp_traceflow(frame)
+
+        # record frames
+        if self._exeng == 'pipeline':
+            if self._flag_d:
+                # frame._file = NotImplemented
+                mpkit.frames[self._frnum] = frame
+                # print(self._frnum, 'stored')
+            mpkit.curent += 1
+        elif self._exeng == 'server':
+            # record frames
+            if self._flag_d:
+                # frame._file = NotImplemented
+                self._frame.append(frame)
+                # print(self._frnum, 'stored')
+            self._frnum += 1
+        else:
+            if self._flag_d:
+                self._frame.append(frame)
+            self._frnum += 1
+            self._proto = frame.protochain.chain
 
         # return frame record
         return frame
@@ -651,6 +728,10 @@ class Extractor:
         #     self._flag_a = True
         #     warnings.warn(f"'Extractor(engine=scapy)' object is not iterable; "
         #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
+
+        if self._exlyr != 'None' or self._exptl != 'null':
+            warnings.warn("'Extractor(engine=scapy)' does not support protocol and layer threshold; "
+                            f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored", AttributeWarning, stacklevel=stacklevel())
 
         # extract & analyse file
         self._expkg = scapy_all
@@ -814,6 +895,10 @@ class Extractor:
         #     self._flag_a = True
         #     warnings.warn(f"'Extractor(engine=dpkt)' object is not iterable; "
         #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
+
+        if self._exlyr != 'None' or self._exptl != 'null':
+            warnings.warn("'Extractor(engine=dpkt)' does not support protocol and layer threshold; "
+                            f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored", AttributeWarning, stacklevel=stacklevel())
 
         # extract global header
         self.record_header()
@@ -1015,6 +1100,10 @@ class Extractor:
         #     warnings.warn(f"'Extractor(engine=pyshark)' object is not iterable; "
         #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
+        if self._exlyr != 'None' or self._exptl != 'null':
+            warnings.warn("'Extractor(engine=pyshark)' does not support protocol and layer threshold; "
+                            f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored", AttributeWarning, stacklevel=stacklevel())
+
         if (self._ipv4 or self._ipv6 or self._tcp):
             self._ipv4 = self._ipv6 = self._tcp = False
             self._reasm = [None] * 3
@@ -1099,3 +1188,197 @@ class Extractor:
             _pyshark_tcp_traceflow(packet)
 
         return packet
+
+    def _run_pipeline(self, multiprocessing):
+        """Use pipeline multiprocessing to extract PCAP files."""
+        if not self._flag_m:
+            raise UnsupportedCall(f"Extractor(engine={self._exeng})' has no attribute '_run_pipline'")
+
+        if not self._flag_q:
+            self._flag_q = True
+            warnings.warn("'Extractor(engine=pipeline)' does not support output; "
+                            f"'fout={self._ofnm}' ignored", AttributeWarning, stacklevel=stacklevel())
+
+        self._frnum = 1                                 # frame number (revised)
+        self._expkg = multiprocessing                   # multiprocessing module
+        self._mpprc = list()                            # multiprocessing process list
+        self._mpfdp = collections.defaultdict(multiprocessing.Queue)
+                                                        # multiprocessing file pointer
+
+        self._mpmng = multiprocessing.Manager()         # multiprocessing manager
+        self._mpkit = self._mpmng.Namespace()           # multiprocessing work kit
+
+        self._mpkit.counter    = 0                      # work count (on duty)
+        self._mpkit.pool       = 1                      # work pool (ready)
+        self._mpkit.curent     = 1                      # current frame number
+        self._mpkit.eof        = False                  # EOF flag
+        self._mpkit.frames     = dict()                 # frame storage
+        self._mpkit.reassembly = copy.deepcopy(self._reasm)
+                                                        # reassembly buffers
+
+        # preparation
+        self.record_header()
+        self._mpfdp[0].put(self._gbhdr.length)
+
+        # extraction
+        while True:
+            # check EOF
+            if self._mpkit.eof:     self._update_eof();     break
+
+            # check counter
+            if self._mpkit.pool and self._mpkit.counter < CPU_CNT:
+                # update file offset
+                self._ifile.seek(self._mpfdp.pop(self._frnum-1).get(), os.SEEK_SET)
+
+                # create worker
+                # print(self._frnum, 'start')
+                proc = multiprocessing.Process(target=self._pipeline_read_frame,
+                        kwargs={'mpkit': self._mpkit,
+                                'mpfdp': self._mpfdp[self._frnum]})
+
+                # update status
+                self._mpkit.pool  -= 1
+                self._mpkit.counter += 1
+
+                # start and record
+                proc.start()
+                self._frnum += 1
+                self._mpprc.append(proc)
+
+            # check buffer
+            if len(self._mpprc) >= CPU_CNT:
+                [ proc.join() for proc in self._mpprc[:-4] ]
+                del self._mpprc[:-4]
+
+    def _pipeline_read_frame(self, *, mpfdp, mpkit):
+        """Extract frame."""
+        # check EOF
+        if self._flag_e:    raise EOFError
+
+        def _analyse_frame(*, frame, mpkit):
+            """Analyse frame."""
+            # wait until ready
+            while mpkit.curent != self._frnum:
+                time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
+
+            # analysis and storage
+            # print(self._frnum, 'get')
+            self._reasm = mpkit.reassembly
+            self._read_frame(frame=frame, mpkit=mpkit)
+            # print(self._frnum, 'analysed')
+            mpkit.reassembly = copy.deepcopy(self._reasm)
+            # print(self._frnum, 'put')
+
+        # extract frame
+        try:
+            # extraction
+            frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
+                            layer=self._exlyr, protocol=self._exptl,
+                            mpkit=mpkit, mpfdp=mpfdp)
+            # analysis
+            _analyse_frame(frame=frame, mpkit=mpkit)
+        except EOFError:
+            mpkit.eof = True
+        finally:
+            mpkit.counter -= 1
+            self._ifile.close()
+            # print(self._frnum, 'done')
+
+    def _run_server(self, multiprocessing):
+        """Use server multiprocessing to extract PCAP files."""
+        if not self._flag_m:
+            raise UnsupportedCall(f"Extractor(engine={self._exeng})' has no attribute '_run_server'")
+
+        if not self._flag_q:
+            self._flag_q = True
+            warnings.warn("'Extractor(engine=pipeline)' does not support output; "
+                            f"'fout={self._ofnm}' ignored", AttributeWarning, stacklevel=stacklevel())
+
+        self._frnum = 1                                 # frame number (revised)
+        self._expkg = multiprocessing                   # multiprocessing module
+        self._mpsvc = NotImplemented                    # multiprocessing server process
+        self._mpprc = list()                            # multiprocessing process list
+        self._mpfdp = collections.defaultdict(multiprocessing.Queue)
+                                                        # multiprocessing file pointer
+
+        self._mpmng = multiprocessing.Manager()         # multiprocessing manager
+        self._mpbuf = self._mpmng.dict()                # multiprocessing frame dict
+        self._mpfrm = self._mpmng.list()                # multiprocessing frame storage
+        self._mprsm = self._mpmng.list()                # multiprocessing reassembly buffer
+
+        self._mpkit = self._mpmng.Namespace()           # multiprocessing work kit
+        self._mpkit.counter = 0                         # work count (on duty)
+        self._mpkit.pool    = 1                         # work pool (ready)
+        self._mpkit.eof     = False                     # EOF flag
+
+        # preparation
+        self.record_header()
+        self._mpfdp[0].put(self._gbhdr.length)
+        self._mpsvc = multiprocessing.Process(target=self._server_analyse_frame,
+                        kwargs={'mpfrm': self._mpfrm, 'mprsm': self._mprsm,
+                                'mpbuf': self._mpbuf, 'mpkit': self._mpkit})
+        self._mpsvc.start()
+        
+        # extraction
+        while True:
+            # check EOF
+            if self._mpkit.eof:     self._update_eof();     break
+
+            # check counter
+            if self._mpkit.pool and self._mpkit.counter < CPU_CNT - 1:
+                # update file offset
+                self._ifile.seek(self._mpfdp.pop(self._frnum-1).get(), os.SEEK_SET)
+
+                # create worker
+                # print(self._frnum, 'start')
+                proc = multiprocessing.Process(target=self._server_extract_frame,
+                        kwargs={'mpkit': self._mpkit, 'mpbuf': self._mpbuf,
+                                'mpfdp': self._mpfdp[self._frnum]})
+
+                # update status
+                self._mpkit.pool  -= 1
+                self._mpkit.counter += 1
+
+                # start and record
+                proc.start()
+                self._frnum += 1
+                self._mpprc.append(proc)
+
+            # check buffer
+            if len(self._mpprc) >= CPU_CNT - 1:
+                [ proc.join() for proc in self._mpprc[:-4] ]
+                del self._mpprc[:-4]
+
+    def _server_extract_frame(self, *, mpfdp, mpkit, mpbuf):
+        """Extract frame."""
+        # check EOF
+        if self._flag_e:    raise EOFError
+
+        # extract frame
+        try:
+            frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
+                            layer=self._exlyr, protocol=self._exptl,
+                            mpkit=mpkit, mpfdp=mpfdp)
+            # frame._file = NotImplemented
+            mpbuf[self._frnum] = frame
+        except EOFError:
+            mpbuf[self._frnum] = EOFError
+            mpkit.eof = True
+        finally:
+            mpkit.counter -= 1
+            self._ifile.close()
+            # print(self._frnum, 'done')
+
+    def _server_analyse_frame(self, *, mpkit, mpfrm, mprsm, mpbuf):
+        """Analyse frame."""
+        while True:
+            # fetch frame
+            # print(self._frnum, 'trying')
+            frame = mpbuf.pop(self._frnum, None)
+            if frame is EOFError:   break
+            if frame is None:       continue
+            # print(self._frnum, 'get')
+
+            self._read_frame(frame=frame)
+        mpfrm += self._frame
+        mprsm += self._reasm

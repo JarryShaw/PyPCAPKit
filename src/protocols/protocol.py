@@ -329,4 +329,4 @@ class Protocol:
         pattern = '|'.join(index) if isinstance(index, tuple) else index
         iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)
         match = filter(lambda string: re.fullmatch(pattern, string, re.IGNORECASE), iterable)
-        return (len(list(match)) or re.fullmatch(self.__layer__ or '', self._exlayer, re.IGNORECASE))
+        return bool(len(list(match)) or re.fullmatch(self.__layer__ or '', self._exlayer, re.IGNORECASE))

@@ -149,12 +149,12 @@ class Reassembly(object):
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, strict=False):
+    def __init__(self, *, strict=True):
         """Initialise packet reassembly.
 
         Keyword arguments:
             * strict -- bool, if return all datagrams (including those not
-                        implemented) when submit (default is False)
+                        implemented) when submit (default is True)
                             <keyword> True / False
 
         """
