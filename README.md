@@ -35,6 +35,8 @@
 
 &emsp; Unlike popular PCAP file extractors, such as `Scapy`, `dpkt`, `pyshark`, and etc, `jspcap` uses __streaming__ strategy to read input files. That is to read frame by frame, decrease occupation on memory, as well as enhance efficiency in some way.
 
+### Module Structure
+
 &emsp; In `jspcap`, all files can be described as following six parts.
 
  - Foundation (`jspcap.foundation`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
@@ -48,7 +50,16 @@
 
 ![](./doc/jspcap.png)
 
-&emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.02* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net) and [`DPKT`](https://github.com/kbandla/dpkt), and is to implement [`PyShark`](https://kiminewt.github.io/pyshark/) support.
+### Engine Comparison
+
+&emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.01* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/).
+
+|  Engine   | Performance (seconds per packet) |
+| :-------: | :------------------------------- |
+| `jspcap`  | 0.014810208876927694             |
+|  `scapy`  | 0.002173967758814494             |
+|  `dpkt`   | 0.0003478717803955078            |
+| `pyshark` | 0.07347922126452128              |
 
 &nbsp;
 
