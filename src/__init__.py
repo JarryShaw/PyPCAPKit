@@ -11,7 +11,7 @@ its formatted output dumper.
     PCAP extraction.
 
 Unlike popular PCAP file extractors, such as `Scapy`,
-`dkpt`, `pyshark`, and etc, `jspcap` uses streaming
+`dpkt`, `pyshark`, and etc, `jspcap` uses streaming
 strategy to read input files. That is to read frame by
 frame, decrease occupation on memory, as well as enhance
 efficiency in some way.
@@ -80,6 +80,8 @@ from jspcap.protocols.application.http import HTTP
 
 __all__ = [
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Macros
+    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Macros
+    'DPKT', 'Scapy', 'PyShark',                             # Macros
     'extract', 'analyse', 'reassemble', 'trace',            # Functions
     'Raw',                                                  # Raw Packet
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer

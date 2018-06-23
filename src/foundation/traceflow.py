@@ -79,6 +79,7 @@ class TraceFlow:
                 warnings.warn(f'Unsupported output format: {fmt}; '
                                 'disabled file output feature',
                                 FormatWarning, stacklevel=stacklevel())
+            return output, ''
 
         try:
             pathlib.Path(fout).mkdir(parents=True, exist_ok=True)
@@ -122,7 +123,7 @@ class TraceFlow:
             pkt_check(packet)
         info = Info(packet)
 
-        BUFID = tuple(sorted([info.src, str(info.srcport), info.dst, str(info.dstport)]))
+        BUFID = tuple(sorted([str(info.src), str(info.srcport), str(info.dst), str(info.dstport)]))
                             # Buffer Identifier
         SYN = info.syn      # Synchronise Flag (Establishment)
         FIN = info.fin      # Finish Flag (Termination)
@@ -152,7 +153,8 @@ class TraceFlow:
         if FIN:
             buf = self._buffer.pop(BUFID)
             fpout, label = buf['fpout'], buf['label']
-            buf['fpout'] = f'{self._fproot}/{label}.{self._fdpext}'
+            if self._fdpext:    buf['fpout'] = f'{self._fproot}/{label}.{self._fdpext}'
+            else:               del buf['fpout']
             buf['index'] = tuple(buf['index'])
             self._stream.append(Info(buf))
 
@@ -165,7 +167,8 @@ class TraceFlow:
         ret = list()
         for buf in self._buffer.values():
             buf = copy.deepcopy(buf)
-            buf['fpout'] = f"{self._fproot}/{buf['label']}.{self._fdpext}"
+            if self._fdpext:    buf['fpout'] = f"{self._fproot}/{buf['label']}.{self._fdpext}"
+            else:               del buf['fpout']
             buf['index'] = tuple(buf['index'])
             ret.append(Info(buf))
         ret += self._stream

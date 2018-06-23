@@ -10,6 +10,7 @@ __all__ = [
     'FormatWarning', 'EngineWarning',                               # ImportWarning
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
                                                                     # RuntimeWarning
+    'DPKTWarning', 'ScapyWarning',                                  # ResourceWarning
 ]
 
 
@@ -62,4 +63,19 @@ class ProtocolWarning(BaseWarning, RuntimeWarning):
 
 class AttributeWarning(BaseWarning, RuntimeWarning):
     """Unsupported attribute."""
+    pass
+
+
+##############################################################################
+# ResourceWarning session.
+##############################################################################
+
+
+class DPKTWarning(BaseWarning, ResourceWarning):
+    """Warnings on DPKT usage."""
+    pass
+
+
+class ScapyWarning(BaseWarning, ResourceWarning):
+    """Warnings on Scapy usage."""
     pass

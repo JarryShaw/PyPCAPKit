@@ -10,7 +10,7 @@ from jspcap.ipsuite.pcap.frame import Frame
 from jspcap.ipsuite.pcap.header import Header
 
 
-__all__ = ['PCAP']
+__all__ = ['PCAP', 'NotImplementedIO']
 
 
 

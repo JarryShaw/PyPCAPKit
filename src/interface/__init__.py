@@ -20,6 +20,8 @@ from jspcap.utilities.validations import bool_check, int_check, io_check, str_ch
 __all__ = [
     'extract', 'analyse', 'reassemble', 'trace',            # functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # macros
+    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # macros
+    'DPKT', 'Scapy', 'PyShark',                             # macros
 ]
 
 
@@ -28,6 +30,20 @@ TREE  = 'tree'
 JSON  = 'json'
 PLIST = 'plist'
 PCAP  = 'pcap'
+
+
+# layer thresholds
+LINK = 'Link'
+INET = 'Internet'
+TRANS = 'Transport'
+APP = 'Application'
+RAW = 'Raw'
+
+
+# extraction engines
+DPKT = 'dpkt'
+Scapy = 'scapy'
+PyShark = 'pyshark'
 
 
 def extract(*, fin=None, fout=None, format=None,                            # basic settings

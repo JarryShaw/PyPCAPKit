@@ -24,7 +24,8 @@ __all__ = [
     'VersionInfo',                                          # Version
 
     # jspcap.dumpkit
-    'PCAP_Dumper',                                          # PCAP Dumper
+    'PCAP',                                                 # PCAP Dumper
+    'NotImplementedIO',                                     # Simulated I/O
 
     # jspcap.foundation
     'Extractor',                                            # Extraction
@@ -34,6 +35,8 @@ __all__ = [
     # jspcap.interface
     'extract', 'analyse', 'reassemble', 'trace',            # Functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Macros
+    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Macros
+    'DPKT', 'Scapy', 'PyShark',                             # Macros
 
     # jspcap.ipsuite
     'IPSHeader', 'IPSFrame',                                # PCAP Headers

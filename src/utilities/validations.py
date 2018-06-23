@@ -9,18 +9,19 @@ validators.
 """
 import inspect
 import io
+import ipaddress
 import numbers
 
 from jspcap.utilities.exceptions import BoolError, BytesError, BytearrayError, \
         DictError, DigitError, FragmentError, IntError, IOObjError, ListError, \
-        RealError, TupleError, InfoError, PacketError
+        RealError, TupleError, InfoError, PacketError, IPError
 
 
 __all__ = [
     'int_check', 'real_check', 'complex_check', 'number_check',
     'bool_check', 'bytes_check', 'bytearray_check', 'str_check',
     'list_check', 'dict_check', 'tuple_check', 'io_check',
-    'frag_check', 'pkt_check', 'info_check',
+    'frag_check', 'pkt_check', 'info_check', 'ip_check'
 ]
 
 
@@ -131,6 +132,7 @@ def io_check(*args, func=None):
             name = type(var).__name__
             raise IOObjError(f'Function {func} expected file-like object, {name} got instead.')
 
+
 def info_check(*args, func=None):
     """Check if arguments are Info instance."""
     from jspcap.corekit.infoclass import Info
@@ -140,6 +142,15 @@ def info_check(*args, func=None):
         if not isinstance(var, Info):
             name = type(var).__name__
             raise IOObjError(f'Function {func} expected Info instance, {name} got instead.')
+
+
+def ip_check(*args, func=None):
+    """Check if arguments are IP addresses."""
+    func = func or inspect.stack()[2][3]
+    for var in args:
+        if not isinstance(var, ipaddress._IPAddressBase):
+            name = type(var).__name__
+            raise IPError(f'Function {func} expected IP address, {name} got instead.')
 
 
 def frag_check(*args, protocol, func=None):
@@ -159,8 +170,9 @@ def _ip_frag_check(*args, func=None):
     for var in args:
         dict_check(var, func=func)
         bufid = var.get('bufid')
+        str_check(bufid[3], func=func)
         bool_check(var.get('mf'), func=func)
-        str_check(bufid[0], bufid[1], bufid[3], func=func)
+        ip_check(bufid[0], bufid[1], func=func)
         bytearray_check(var.get('header'), var.get('payload'), func=func)
         int_check(bufid[2], var.get('num'), var.get('fo'), var.get('ihl'), var.get('tl'), func=func)
 
@@ -171,7 +183,7 @@ def _tcp_frag_check(*args, func=None):
     for var in args:
         dict_check(var, func=func)
         bufid = var.get('bufid')
-        str_check(bufid[0], bufid[1], func=func)
+        ip_check(bufid[0], bufid[1], func=func)
         bytearray_check(var.get('payload'), func=func)
         bool_check(var.get('syn'), var.get('fin'), func=func)
         int_check(bufid[2], bufid[3], var.get('num'), var.get('ack'), var.get('dsn'),
@@ -183,10 +195,11 @@ def pkt_check(*args, func=None):
     func = func or inspect.stack()[2][3]
     for var in args:
         dict_check(var, func=func)
-        info_check(var.get('frame'), func=func)
+        dict_check(var.get('frame'), func=func)
+        str_check(var.get('protocol'), func=func)
         real_check(vat.get('timestamp'), func=func)
+        ip_check(var.get('src'), var.get('dst'), func=func)
         bool_check(var.get('syn'), var.get('fin'), func=func)
-        str_check(var.get('protocol'), var.get('src'), var.get('dst'), func=func)
         int_check(var.get('srcport'), var.get('dstport'), var.get('index'), func=func)
 
 

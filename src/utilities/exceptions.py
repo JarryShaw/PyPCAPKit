@@ -18,7 +18,7 @@ __all__ = [
     'BoolError', 'BytesError', 'StringError', 'BytearrayError', # TypeError
     'DictError', 'ListError', 'TupleError', 'IterableError',    # TypeError
     'IOObjError', 'ProtocolUnbound', 'CallableError',           # TypeError
-    'InfoError',                                                # TypeError
+    'InfoError', 'IPError',                                     # TypeError
     'FormatError', 'UnsupportedCall',                           # AttributeError
     'FileError',                                                # IOError
     'FileExists',                                               # FileExistsError
@@ -152,6 +152,11 @@ class IOObjError(BaseError, TypeError):
 
 class InfoError(BaseError, TypeError):
     """The argument(s) must be Info instance."""
+    pass
+
+
+class IPError(BaseError, TypeError):
+    """The argument(s) must be IP address."""
     pass
 
 
