@@ -52,14 +52,16 @@
 
 ### Engine Comparison
 
-&emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.01* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/).
+&emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.01* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/). Plus, `jspcap` supports two strategies of multiprocessing (`server` & `pipeline`). For more information, please refer to the document.
 
-|  Engine   | Performance (seconds per packet) |
-| :-------: | :------------------------------- |
-| `jspcap`  | 0.014810208876927694             |
-|  `scapy`  | 0.002173967758814494             |
-|  `dpkt`   | 0.0003478717803955078            |
-| `pyshark` | 0.07347922126452128              |
+|   Engine   | Performance (seconds per packet) |
+| :--------: | :------------------------------- |
+| `default`  | 0.014525251388549805             |
+|  `server`  | 0.12124489148457845              |
+| `pipeline` | 0.014450424114863079             |
+|  `scapy`   | 0.002443440357844035             |
+|   `dpkt`   | 0.0003609057267506917            |
+| `pyshark`  | 0.0792640733718872               |
 
 &nbsp;
 
