@@ -459,7 +459,7 @@ class Extractor:
 
         if trace:
             from jspcap.foundation.traceflow import TraceFlow
-            if self._exeng in ('scapy', 'dpkt', 'pyshark') and re.fullmatch('pcap', str(trace_format), re.IGNORECASE):
+            if self._exeng in ('pyshark',) and re.fullmatch('pcap', str(trace_format), re.IGNORECASE):
                 warnings.warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
                                 f"using 'trace_format={trace_format}' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = None
@@ -539,9 +539,11 @@ class Extractor:
             if self._exeng == 'server':
                 self._frame = list(self._mpfrm)
                 self._reasm = list(self._mprsm)
+                self._trace = copy.deepcopy(self._mpkit.trace)
             if self._exeng == 'pipeline':
                 self._frame = [ self._mpkit.frames[x] for x in sorted(self._mpkit.frames) ]
                 self._reasm = copy.deepcopy(self._mpkit.reassembly)
+                self._trace = copy.deepcopy(self._mpkit.trace)
 
             # shutdown & cleanup
             self._mpmng.shutdown()
@@ -581,13 +583,14 @@ class Extractor:
         if not self._flag_m:
             frame = Frame(self._ifile, num=self._frnum+1, proto=self._dlink,
                             layer=self._exlyr, protocol=self._exptl)
+            self._frnum += 1
         
         # verbose output
         if self._flag_v:
             print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
 
         # write plist
-        frnum = f'Frame {self._frnum+1}'
+        frnum = f'Frame {self._frnum}'
         if not self._flag_q:
             if self._flag_f:
                 ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
@@ -624,7 +627,6 @@ class Extractor:
         else:
             if self._flag_d:
                 self._frame.append(frame)
-            self._frnum += 1
             self._proto = frame.protochain.chain
 
         # return frame record
@@ -753,13 +755,18 @@ class Extractor:
                 payload = payload.payload
             return ':'.join(chain)
 
-        def _scapy_packet2dict(packet):
+        def _scapy_packet2dict(packet, *, count=NotImplemented):
             """Convert Scapy packet into dict."""
-            dict_ = packet.fields
-            payload = packet.payload
-            if not isinstance(payload, self._expkg.packet.NoPayload):
-                dict_[payload.name] = _scapy_packet2dict(payload)
-            return dict_
+            def _scapy_packet2dict_wrapper(packet):
+                dict_ = packet.fields
+                payload = packet.payload
+                if not isinstance(payload, self._expkg.packet.NoPayload):
+                    dict_[payload.name] = _scapy_packet2dict_wrapper(payload)
+                return dict_
+            return {
+                'packet' : bytes(packet),
+                packet.name : _scapy_packet2dict_wrapper(packet),
+            }
 
         def _scapy_ipv4_reassembly(packet, *, count=NotImplemented):
             """Store data for IPv4 reassembly."""
@@ -864,7 +871,7 @@ class Extractor:
         # write plist
         frnum = f'Frame {self._frnum}'
         if not self._flag_q:
-            info = {packet.name: _scapy_packet2dict(packet)}
+            info = _scapy_packet2dict(packet)
             if self._flag_f:
                 ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
                 ofile(info, name=frnum)
@@ -924,15 +931,21 @@ class Extractor:
                 payload = payload.data
             return ':'.join(chain)
 
-        def _dpkt_packet2dict(packet):
+        def _dpkt_packet2dict(packet, timestamp):
             """Convert DPKT packet into dict."""
-            dict_ = dict()
-            for field in packet.__hdr_fields__:
-                dict_[field] = getattr(packet, field, None)
-            payload = packet.data
-            if not isinstance(payload, bytes):
-                dict_[type(payload).__name__] = _dpkt_packet2dict(payload)
-            return dict_
+            def _dpkt_packet2dict_wrapper(packet):
+                dict_ = dict()
+                for field in packet.__hdr_fields__:
+                    dict_[field] = getattr(packet, field, None)
+                payload = packet.data
+                if not isinstance(payload, bytes):
+                    dict_[type(payload).__name__] = _dpkt_packet2dict_wrapper(payload)
+                return dict_
+            return {
+                'timestamp' : timestamp,
+                'packet' : packet.pack(),
+                self._dlink : _dpkt_packet2dict_wrapper(packet),
+            }
 
         def _dpkt_ipv4_reassembly(packet, *, count=NotImplemented):
             """Store data for IPv4 reassembly."""
@@ -1033,7 +1046,8 @@ class Extractor:
                 data = dict(
                     protocol = self._dlink,                 # data link type from global header
                     index = count,                          # frame number
-                    frame = _dpkt_packet2dict(packet),      # extracted packet
+                    frame = _dpkt_packet2dict(packet, timestamp),
+                                                            # extracted packet
                     syn = bool(int(flags[6])),              # TCP synchronise (SYN) flag
                     fin = bool(int(flags[7])),              # TCP finish (FIN) flag
                     src = ipaddress.ip_address(ip.src),     # source IP
@@ -1068,7 +1082,7 @@ class Extractor:
         # write plist
         frnum = f'Frame {self._frnum}'
         if not self._flag_q:
-            info = {self._dlink: _dpkt_packet2dict(packet)}
+            info = _dpkt_packet2dict(packet, timestamp)
             if self._flag_f:
                 ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
                 ofile(info, name=frnum)
@@ -1122,9 +1136,9 @@ class Extractor:
         """Read frames."""
         packet = self._extmp.__next__()
 
-        def _pyshark_packet2chain(packet):
-            """Fetch PyShark packet protocol chain."""
-            return ':'.join(map(lambda layer: layer.layer_name.upper(), packet.layers))
+        # def _pyshark_packet2chain(packet):
+        #     """Fetch PyShark packet protocol chain."""
+        #     return ':'.join(map(lambda layer: layer.layer_name.upper(), packet.layers))
 
         def _pyshark_packet2dict(packet):
             """Convert PyShark packet into dict."""
@@ -1165,7 +1179,7 @@ class Extractor:
 
         # verbose output
         self._frnum = int(packet.number)
-        self._proto = _pyshark_packet2chain(packet)
+        self._proto = packet.frame_info.protocols
         if self._flag_v:
             print(f' - Frame {self._frnum:>3d}: {self._proto}')
 
@@ -1213,6 +1227,7 @@ class Extractor:
         self._mpkit.curent     = 1                      # current frame number
         self._mpkit.eof        = False                  # EOF flag
         self._mpkit.frames     = dict()                 # frame storage
+        self._mpkit.trace      = self._trace            # flow tracer
         self._mpkit.reassembly = copy.deepcopy(self._reasm)
                                                         # reassembly buffers
 
@@ -1263,9 +1278,11 @@ class Extractor:
 
             # analysis and storage
             # print(self._frnum, 'get')
+            self._trace = mpkit.trace
             self._reasm = mpkit.reassembly
             self._read_frame(frame=frame, mpkit=mpkit)
             # print(self._frnum, 'analysed')
+            mpkit.trace = copy.deepcopy(self._trace)
             mpkit.reassembly = copy.deepcopy(self._reasm)
             # print(self._frnum, 'put')
 
@@ -1310,6 +1327,7 @@ class Extractor:
         self._mpkit.counter = 0                         # work count (on duty)
         self._mpkit.pool    = 1                         # work pool (ready)
         self._mpkit.eof     = False                     # EOF flag
+        self._mpkit.trace   = None                      # flow tracer
 
         # preparation
         self.record_header()
@@ -1382,3 +1400,4 @@ class Extractor:
             self._read_frame(frame=frame)
         mpfrm += self._frame
         mprsm += self._reasm
+        mpkit.trace = copy.deepcopy(self._trace)

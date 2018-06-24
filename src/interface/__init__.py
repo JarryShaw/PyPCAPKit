@@ -18,10 +18,11 @@ from jspcap.utilities.validations import bool_check, int_check, io_check, str_ch
 
 
 __all__ = [
-    'extract', 'analyse', 'reassemble', 'trace',            # functions
-    'TREE', 'JSON', 'PLIST', 'PCAP',                        # macros
-    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # macros
-    'DPKT', 'Scapy', 'PyShark',                             # macros
+    'extract', 'analyse', 'reassemble', 'trace',            # interface functions
+    'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
+    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
+    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'jsPCAP',
+                                                            # engine macros
 ]
 
 
@@ -33,17 +34,20 @@ PCAP  = 'pcap'
 
 
 # layer thresholds
+RAW = 'None'
 LINK = 'Link'
 INET = 'Internet'
 TRANS = 'Transport'
 APP = 'Application'
-RAW = 'Raw'
 
 
 # extraction engines
 DPKT = 'dpkt'
 Scapy = 'scapy'
+jsPCAP = 'default'
 PyShark = 'pyshark'
+MPSearver = 'server'
+MPPipeline = 'pipeline'
 
 
 def extract(*, fin=None, fout=None, format=None,                            # basic settings

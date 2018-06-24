@@ -33,10 +33,11 @@ __all__ = [
     'TraceFlow',                                            # Trace Flow
 
     # jspcap.interface
-    'extract', 'analyse', 'reassemble', 'trace',            # Functions
-    'TREE', 'JSON', 'PLIST', 'PCAP',                        # Macros
-    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Macros
-    'DPKT', 'Scapy', 'PyShark',                             # Macros
+    'extract', 'analyse', 'reassemble', 'trace',            # Interface Functions
+    'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
+    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
+    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'jsPCAP',
+                                                            # Engine Macros
 
     # jspcap.ipsuite
     'IPSHeader', 'IPSFrame',                                # PCAP Headers

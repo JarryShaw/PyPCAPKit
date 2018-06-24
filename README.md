@@ -5,19 +5,24 @@
  > Note that the whole project only supports __Python 3.6__ or later.
 
  - [About](#about)
-    * [Foundation](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#foundation-manual)
-    * [Interface](https://github.com/JarryShaw/jspcap/tree/master/src/interface#interface-manual)
-    * [Reassembly](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
-    * [IPSuite](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite#ipsuite-manual)
-    * [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
-    * [Utilities](https://github.com/JarryShaw/jspcap/tree/master/src/utilities#utilities-maunal)
-    * [CoreKit](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#corekit-manual)
-    * [DumpKit](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#dumpkit-manual)
+    * [Module Structure](#module-structure)
+        - [Foundation](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#foundation-manual)
+        - [Interface](https://github.com/JarryShaw/jspcap/tree/master/src/interface#interface-manual)
+        - [Reassembly](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
+        - [IPSuite](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite#ipsuite-manual)
+        - [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
+        - [Utilities](https://github.com/JarryShaw/jspcap/tree/master/src/utilities#utilities-maunal)
+        - [CoreKit](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#corekit-manual)
+        - [DumpKit](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#dumpkit-manual)
+    * [Engine Comparison](#engine-comparison)
  - [Installation](#installation)
  - [Usage](#usage)
     * [Documentation](#documentation)
         - [Interfaces](#interfaces)
         - [Macros](#macros)
+            * [Formats](#formats)
+            * [Layers](#layers)
+            * [Engines](#engines)
         - [Protocols](#protocols)
     * [CLI Usage](#cli-usage)
  - [Samples](#samples)
@@ -55,13 +60,13 @@
 &emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.01* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/). Plus, `jspcap` supports two strategies of multiprocessing (`server` & `pipeline`). For more information, please refer to the document.
 
 |   Engine   | Performance (seconds per packet) |
-| :--------: | :------------------------------- |
-| `default`  | 0.014525251388549805             |
-|  `server`  | 0.12124489148457845              |
-| `pipeline` | 0.014450424114863079             |
-|  `scapy`   | 0.002443440357844035             |
-|   `dpkt`   | 0.0003609057267506917            |
-| `pyshark`  | 0.0792640733718872               |
+| :--------: | :------------------------------: |
+| `default`  |      `0.014525251388549805`      |
+|  `server`  |      `0.12124489148457845`       |
+| `pipeline` |      `0.014450424114863079`      |
+|  `scapy`   |      `0.002443440357844035`      |
+|   `dpkt`   |     `0.0003609057267506917`      |
+| `pyshark`  |       `0.0792640733718872`       |
 
 &nbsp;
 
@@ -88,7 +93,7 @@ $ python setup.py install
 
 ### Documentation
 
-##### Interfaces
+#### Interfaces
 
 |                                           NAME                                           |            DESCRIPTION            |
 | :--------------------------------------------------------------------------------------: | :-------------------------------: |
@@ -97,16 +102,39 @@ $ python setup.py install
 | [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
 | [`trace`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#trace)           |      trace TCP packet flows       |
 
-##### Macros
+#### Macros
 
-|                                     NAME                                      |               DESCRIPTION                |
-| :---------------------------------------------------------------------------: | :--------------------------------------: |
-| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#macros)  | JavaScript Object Notation (JSON) format |
-| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#macros) |    macOS Property List (PLIST) format    |
-| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#macros)  |          Tree-View text format           |
-| [`PCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/toolkit#macros)  |               PCAP format                |
+##### Formats
 
-##### Protocols
+|                                      NAME                                      |               DESCRIPTION                |
+| :----------------------------------------------------------------------------: | :--------------------------------------: |
+| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  | JavaScript Object Notation (JSON) format |
+| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats) |    macOS Property List (PLIST) format    |
+| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  |          Tree-View text format           |
+| [`PCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  |               PCAP format                |
+
+##### Layers
+
+|                             NAME                             |    DESCRIPTION    |
+| :----------------------------------------------------------: | :---------------: |
+| [`RAW`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) | no specific layer |
+| [`LINK`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  data-link layer  |
+| [`INET`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  internet layer   |
+| [`TRANS`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  transport layer  |
+| [`APP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) | application layer |
+
+##### Engines
+
+|                             NAME                             |                         DESCRIPTION                         |
+| :----------------------------------------------------------: | :---------------------------------------------------------: |
+| [`jsPCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |                     the default engine                      |
+| [`MPServer`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |   the multiprocessing engine with server process strategy   |
+| [`MPPipeline`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |      the multiprocessing engine with pipeline strategy      |
+| [`DPKT`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |    the [`DPKT`](https://github.com/kbandla/dpkt) engine     |
+| [`Scapy`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |           the [`Scapy`](https://scapy.net) engine           |
+| [`PyShark`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) | the [`PyShark`](https://kiminewt.github.io/pyshark/) engine |
+
+#### Protocols
 
 |                                                NAME                                               |             DESCRIPTION             |
 | :-----------------------------------------------------------------------------------------------: | :---------------------------------: |

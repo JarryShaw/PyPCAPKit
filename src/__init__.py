@@ -79,10 +79,11 @@ from jspcap.protocols.application.http import HTTP
 
 
 __all__ = [
-    'TREE', 'JSON', 'PLIST', 'PCAP',                        # Macros
-    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Macros
-    'DPKT', 'Scapy', 'PyShark',                             # Macros
-    'extract', 'analyse', 'reassemble', 'trace',            # Functions
+    'extract', 'analyse', 'reassemble', 'trace',            # Interface Functions
+    'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
+    'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
+    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'jsPCAP',
+                                                            # Engine Macros
     'Raw',                                                  # Raw Packet
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer

@@ -60,6 +60,21 @@
 | [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#analyse)       | analyse application layer packets |
 | [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
 | [`trace`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#trace)           |      trace TCP packet flows       |
+| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  | JavaScript Object Notation (JSON) format |
+| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats) |    macOS Property List (PLIST) format    |
+| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  |          Tree-View text format           |
+| [`PCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  |               PCAP format                |
+| [`RAW`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) | no specific layer |
+| [`LINK`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  data-link layer  |
+| [`INET`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  internet layer   |
+| [`TRANS`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  transport layer  |
+| [`APP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) | application layer |
+| [`jsPCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |                     the default engine                      |
+| [`MPServer`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |   the multiprocessing engine with server process strategy   |
+| [`MPPipeline`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |      the multiprocessing engine with pipeline strategy      |
+| [`DPKT`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |    the [`DPKT`](https://github.com/kbandla/dpkt) engine     |
+| [`Scapy`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |           the [`Scapy`](https://scapy.net) engine           |
+| [`PyShark`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) | the [`PyShark`](https://kiminewt.github.io/pyshark/) engine |
 
 &nbsp;
 

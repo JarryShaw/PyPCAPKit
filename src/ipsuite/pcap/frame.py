@@ -44,7 +44,8 @@ class Frame(Protocol):
             incl_len = frame_info.pop('incl_len', len(packet))      # number of octets of packet saved in file
             orig_len = frame_info.pop('orig_len', len(packet))      # actual length of packet
         else:
-            now = [ int(x or 0) for x in str(time.time()).split('.') ]
+            timestamp = self.__dict__.pop('timestamp', time.time()) # timestamp
+            now = [ int(x or 0) for x in str(timestamp).split('.') ]
             ts_sec = self.__dict__.pop('ts_sec', now[0])            # timestamp seconds
             ts_usec = self.__dict__.pop('ts_usec', now[1])          # timestamp microseconds
             incl_len = self.__dict__.pop('incl_len', len(packet))   # number of octets of packet saved in file

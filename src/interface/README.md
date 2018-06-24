@@ -3,6 +3,9 @@
 &emsp; `jspcap` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for interface usage.
 
  - [Macros](#macros)
+    * [Formats](#formats)
+    * [Layers](#layers)
+    * [Engines](#engines)
  - [`extract`](#extract)
  - [`analyse`](#analyse)
  - [`reassemble`](#reassemble)
@@ -12,12 +15,35 @@
 
 ## Macros
 
+### Formats
+
  - `TREE` -- tree-view text output format
  - `JSON` -- JavaScript Object Notation (JSON) format
  - `PLIST` -- macOS Property List (PLIST) format
  - `PCAP` -- PCAP format
 
-&emsp; There are four macro variables defined in this part, as shown above. They indicate the output format of extraction operation, which should simplify the usage of [`extract`](#extract).
+&emsp; There are four format macro variables defined in this part, as shown above. They indicate the output format of extraction operation, which should simplify the usage of [`extract`](#extract).
+
+### Layers
+
+ - `RAW` -- no specific layer
+ - `LINK` -- data-link layer
+ - `INET` -- internet layer
+ - `TRANS` -- transport layer
+ - `APP` -- application layer
+
+&emsp; There are five layer macro variables defined in this part, as shown above. They indicate the maximum layer-depth of extraction operation, which should simplify the usage of [`extract`](#extract).
+
+### Engines
+
+ - `jsPCAP` -- the default engine
+ - `MPServer` -- the multiprocessing engine with server process strategy
+ - `MPPipeline` -- the multiprocessing engine with pipeline strategy
+ - `DPKT` -- the [`DPKT`](https://github.com/kbandla/dpkt) engine
+ - `Scapy` -- the [`Scapy`](https://scapy.net) engine
+ - `PyShark` -- the [`PyShark`](https://kiminewt.github.io/pyshark/) engine
+
+&emsp; There are six format macro variables defined in this part, as shown above. They indicate the engine of extraction operation, which should simplify the usage of [`extract`](#extract).
 
 &nbsp;
 
@@ -37,28 +63,28 @@ extract(*,
 
  - Keyword arguments:
 
-    |      NAME      |  TYPE  | DEFAULT |                       KEYWORD                        |                       DESCRIPTION                       |
-    | :------------: | :----: | :-----: | :--------------------------------------------------: | :-----------------------------------------------------: |
-    |     `fin`      | `str`  | `None`  |                                                      | file name to be read; if file not exist, raise an error |
-    |     `fout`     | `str`  | `None`  |                                                      |                 file name to be written                 |
-    |    `format`    | `str`  | `None`  |          `plist` / `json` / `tree` / `html`          |                  file format of output                  |
-    |    `store`     | `bool` | `True`  |                   `True` / `False`                   |             if store extracted packet info              |
-    |   `verbose`    | `bool` | `False` |                   `True` / `False`                   |           if print verbose output information           |
-    |     `auto`     | `bool` | `True`  |                   `True` / `False`                   |              if automatically run till EOF              |
-    |  `extension`   | `bool` | `True`  |                   `True` / `False`                   |      if check and append extensions to output file      |
-    |    `files`     | `bool` | `False` |                   `True` / `False`                   |        if split each frame into different files         |
-    |    `nofile`    | `bool` | `False` |                   `True` / `False`                   |            if no output file is to be dumped            |
-    |    `engine`    | `str`  | `None`  | `default` / `jspcap` / `scapy` / `dpkt` / `pyshark`  |                    extraction engine                    |
-    |     `layer`    | `str`  | `None`  |  `Link` / `Internet` / `Transport` / `Application`   |                   extract until layer                   |
-    |   `protocol`   | `str`  | `None`  |                                                      |                  extract until protocol                 |
-    |      `ip`      | `bool` | `False` |                   `True` / `False`                   |            if perform IPv4 & IPv6 reassembly            |
-    |     `ipv4`     | `bool` | `False` |                   `True` / `False`                   |               if perform IPv4 reassembly                |
-    |     `ipv6`     | `bool` | `False` |                   `True` / `False`                   |               if perform IPv6 reassembly                |
-    |     `tcp`      | `bool` | `False` |                   `True` / `False`                   |                if perform TCP reassembly                |
-    |    `strict`    | `bool` | `False` |                   `True` / `False`                   |            if set strict flag for reassembly            |
-    |    `trace`     | `bool` | `False` |                   `True` / `False`                   |                if trace TCP packet flows                |
-    |  `trace_fout`  | `str`  | `None`  |                                                      |                root path for flow tracer                |
-    | `trace_format` | `str`  | `None`  | `plist` / `json` / `tree` / `html` / `pcap` / `None` |              output format of flow tracer               |
+    |      NAME      |  TYPE  | DEFAULT |                           KEYWORD                            |                       DESCRIPTION                       |
+    | :------------: | :----: | :-----: | :----------------------------------------------------------: | :-----------------------------------------------------: |
+    |     `fin`      | `str`  | `None`  |                                                              | file name to be read; if file not exist, raise an error |
+    |     `fout`     | `str`  | `None`  |                                                              |                 file name to be written                 |
+    |    `format`    | `str`  | `None`  |              `plist` / `json` / `tree` / `html`              |                  file format of output                  |
+    |    `store`     | `bool` | `True`  |                       `True` / `False`                       |             if store extracted packet info              |
+    |   `verbose`    | `bool` | `False` |                       `True` / `False`                       |           if print verbose output information           |
+    |     `auto`     | `bool` | `True`  |                       `True` / `False`                       |              if automatically run till EOF              |
+    |  `extension`   | `bool` | `True`  |                       `True` / `False`                       |      if check and append extensions to output file      |
+    |    `files`     | `bool` | `False` |                       `True` / `False`                       |        if split each frame into different files         |
+    |    `nofile`    | `bool` | `False` |                       `True` / `False`                       |            if no output file is to be dumped            |
+    |    `engine`    | `str`  | `None`  | `default` / `jspcap` / `scapy` / `dpkt` / `pyshark` / `server` / `pipline` |                    extraction engine                    |
+    |    `layer`     | `str`  | `None`  |      `Link` / `Internet` / `Transport` / `Application`       |                   extract until layer                   |
+    |   `protocol`   | `str`  | `None`  |                                                              |                 extract until protocol                  |
+    |      `ip`      | `bool` | `False` |                       `True` / `False`                       |            if perform IPv4 & IPv6 reassembly            |
+    |     `ipv4`     | `bool` | `False` |                       `True` / `False`                       |               if perform IPv4 reassembly                |
+    |     `ipv6`     | `bool` | `False` |                       `True` / `False`                       |               if perform IPv6 reassembly                |
+    |     `tcp`      | `bool` | `False` |                       `True` / `False`                       |                if perform TCP reassembly                |
+    |    `strict`    | `bool` | `False` |                       `True` / `False`                       |            if set strict flag for reassembly            |
+    |    `trace`     | `bool` | `False` |                       `True` / `False`                       |                if trace TCP packet flows                |
+    |  `trace_fout`  | `str`  | `None`  |                                                              |                root path for flow tracer                |
+    | `trace_format` | `str`  | `None`  |     `plist` / `json` / `tree` / `html` / `pcap` / `None`     |              output format of flow tracer               |
 
  - Returns:
     * `Extractor` -- an Extractor object form [`jspcap.foundation.extraction`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#extraction)
