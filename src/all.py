@@ -1,48 +1,48 @@
 # -*- coding: utf-8 -*-
 """index for the library
 
-`jspcap` has defined various and numerous functions and
+`pcapkit` has defined various and numerous functions and
 classes, which have different features and purposes. To
-make a simple index for this library, `jspcap.all`
-contains all things from `jspcap`.
+make a simple index for this library, `pcapkit.all`
+contains all things from `pcapkit`.
 
 """
-from jspcap.corekit import *
-from jspcap.dumpkit import *
-from jspcap.foundation import *
-from jspcap.interface import *
-from jspcap.ipsuite import *
-from jspcap.protocols import *
-from jspcap.reassembly import *
-from jspcap.utilities import *
+from pcapkit.corekit import *
+from pcapkit.dumpkit import *
+from pcapkit.foundation import *
+from pcapkit.interface import *
+from pcapkit.ipsuite import *
+from pcapkit.protocols import *
+from pcapkit.reassembly import *
+from pcapkit.utilities import *
 
 
 __all__ = [
-    # jspcap.corekit
+    # pcapkit.corekit
     'Info',                                                 # Info Class
     'ProtoChain',                                           # ProtoChain
     'VersionInfo',                                          # Version
 
-    # jspcap.dumpkit
+    # pcapkit.dumpkit
     'PCAP',                                                 # PCAP Dumper
     'NotImplementedIO',                                     # Simulated I/O
 
-    # jspcap.foundation
+    # pcapkit.foundation
     'Extractor',                                            # Extraction
     'Analysis',                                             # Analysis
     'TraceFlow',                                            # Trace Flow
 
-    # jspcap.interface
+    # pcapkit.interface
     'extract', 'analyse', 'reassemble', 'trace',            # Interface Functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
-    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'jsPCAP',
+    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'PCAPKit',
                                                             # Engine Macros
 
-    # jspcap.ipsuite
+    # pcapkit.ipsuite
     'IPSHeader', 'IPSFrame',                                # PCAP Headers
 
-    # jspcap.protocols
+    # pcapkit.protocols
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                    # Protocol Numbers
     'Header', 'Frame',                                      # PCAP Headers
     'Raw',                                                  # Raw Packet
@@ -54,10 +54,10 @@ __all__ = [
     'TCP', 'UDP',                                           # Transport Layer
     'HTTP',                                                 # Application Layer
 
-    # jspcap.reassembly
+    # pcapkit.reassembly
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
     'TCP_Reassembly',                                       # TCP Reassembly
 
-    # jspcap.utilities
+    # pcapkit.utilities
     'beholder_ng', 'seekset_ng',                            # Decorators
 ]

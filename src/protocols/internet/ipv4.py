@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """internet protocol version 4
 
-`jspcap.protocols.internet.ipv4` contains `IPv4` only,
+`pcapkit.protocols.internet.ipv4` contains `IPv4` only,
 which implements extractor for Internet Protocol version 4
 (IPv4), whose structure is described as below.
 
@@ -26,10 +26,10 @@ import collections
 import datetime
 import ipaddress
 
-from jspcap.corekit.infoclass import Info
-from jspcap.corekit.protochain import ProtoChain
-from jspcap.protocols.internet.ip import IP
-from jspcap.utilities.exceptions import ProtocolError
+from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.internet.ip import IP
+from pcapkit.utilities.exceptions import ProtocolError
 
 
 __all__ = ['IPv4']

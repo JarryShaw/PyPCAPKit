@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """internetwork packet exchange
 
-`jspcap.protocols.internet.ipx` contains `IPX` only,
+`pcapkit.protocols.internet.ipx` contains `IPX` only,
 which implements extractor for Internetwork Packet
 Exchange (IPX), whose structure is described as below.
 
@@ -14,8 +14,8 @@ Octets      Bits        Name                    Discription
   18        144     ipx.src                 Source Address
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.internet.internet import Internet
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.internet.internet import Internet
 
 
 __all__ = ['IPX']

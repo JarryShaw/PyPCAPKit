@@ -1,6 +1,6 @@
 # Utilities Manual
 
-&emsp; `jspcap` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for utility functions and classes.
+&emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for utility functions and classes.
 
  - [Decorators](#decorators)
  	* [`seekset`](#seekset)
@@ -21,9 +21,9 @@
 
 ## Decorators
 
- > described in [`src/utilities/decorators.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities/decorators.py)
+ > described in [`src/utilities/decorators.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/utilities/decorators.py)
 
-&emsp; `jspcap.utilities.decorators` contains several useful decorators, including `seekset` and `beholder`.
+&emsp; `pcapkit.utilities.decorators` contains several useful decorators, including `seekset` and `beholder`.
 
 ### `seekset`
 
@@ -83,10 +83,10 @@ __NOTE__: positional argument `file` in `behold` must be a *file-like* object.
 
 ## Validations
 
- > described in [`src/utilities/validations.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities/validations.py)
+ > described in [`src/utilities/validations.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/utilities/validations.py)
 
-&emsp; `jspcap.utilities.validations` contains functions to validate arguments for functions and classes. It first appears in
-[`jsntlib`](https://github.com/JarryShaw/jsntlib) as validators.
+&emsp; `pcapkit.utilities.validations` contains functions to validate arguments for functions and classes. It first appears in
+[`ntlib`](https://github.com/JarryShaw/pyntlib) as validators.
 
 <a name="index-validations"> </a>
 
@@ -123,7 +123,7 @@ type_check(*agrs, func=None)
 pkt_check(*args, func=None)
 ```
 
-&emsp; `pkt_check` is the validator for `TraceFlow`. For more information on packet format, please refer to the documentation of [`TraceFlow`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#traceflow).
+&emsp; `pkt_check` is the validator for `TraceFlow`. For more information on packet format, please refer to the documentation of [`TraceFlow`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation#traceflow).
 
 ```python
 frag_check(*args, protocol, func=None)
@@ -131,15 +131,15 @@ _ip_frag_check(*args, func=None)
 _tcp_frag_check(*args, func=None)
 ```
 
-&emsp; As for `frag_check`, `str` type keyword argument `protocol` indicates what protocol the fragment is reassembled for, which must be either `IP` (`IPv4` & `IPv6`) or `TCP`. Then, `_ip_frag_check` or `_tcp_frag_check` shall be called to validate arguments caller passed into. For more information on fragment format, please refer to the documentation of [`IP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ip_reassembly) and [`TCP_Reassembly`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly).
+&emsp; As for `frag_check`, `str` type keyword argument `protocol` indicates what protocol the fragment is reassembled for, which must be either `IP` (`IPv4` & `IPv6`) or `TCP`. Then, `_ip_frag_check` or `_tcp_frag_check` shall be called to validate arguments caller passed into. For more information on fragment format, please refer to the documentation of [`IP_Reassembly`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#ip_reassembly) and [`TCP_Reassembly`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#tcp_reassembly).
 
 &nbsp;
 
 ## Exceptions
 
- > described in [`src/utilities/exceptions.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities/exceptions.py)
+ > described in [`src/utilities/exceptions.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/utilities/exceptions.py)
 
-&emsp; `jspcap.utilities.exceptions` refined built-in exceptions. Make it possible to show only user error stack information, when exception raised on user's operation.
+&emsp; `pcapkit.utilities.exceptions` refined built-in exceptions. Make it possible to show only user error stack information, when exception raised on user's operation.
 
 ### `BaseError`
 
@@ -166,7 +166,7 @@ class BaseError(builtins.Exception)
 ### Refined Exceptions
 
 ```python
-class error(jspcap.utilities.exceptions.BaseError, builtins.Exception)
+class error(pcapkit.utilities.exceptions.BaseError, builtins.Exception)
 ```
 
 |           NAME           |            INHERIT FROM             |                     DESCRIPTION                     |
@@ -204,9 +204,9 @@ class error(jspcap.utilities.exceptions.BaseError, builtins.Exception)
 
 ## Warnings
 
-> described in [`src/utilities/warnings.py`](https://github.com/JarryShaw/jspcap/tree/master/src/utilities/warnings.py)
+> described in [`src/utilities/warnings.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/utilities/warnings.py)
 
-&emsp; `jspcap.utilities.warnings` refined built-in warnings.
+&emsp; `pcapkit.utilities.warnings` refined built-in warnings.
 
 ### `BaseWarning`
 
@@ -219,5 +219,5 @@ class BaseWarning(builtins.Warning)
 ### Refined Warnings
 
 ```python
-class warning(jspcap.utilities.warnings.BaseWarning, builtins.Warning)
+class warning(pcapkit.utilities.warnings.BaseWarning, builtins.Warning)
 ```

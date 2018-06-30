@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """reassembly IP fragments
 
-`jspcap.reassembly.ip` contains `IP_Reassembly` only,
+`pcapkit.reassembly.ip` contains `IP_Reassembly` only,
 which is the base class for IPv4 and IPv6 reassembly.
 The following algorithm implementment is based on IP
 reassembly procedure introduced in RFC 791, using
@@ -72,8 +72,8 @@ Algorithm:
 """
 import copy
 
-from jspcap.corekit.infoclass import Info
-from jspcap.reassembly.reassembly import Reassembly
+from pcapkit.corekit.infoclass import Info
+from pcapkit.reassembly.reassembly import Reassembly
 
 
 __all__ = ['IP_Reassembly']

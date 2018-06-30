@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """internet protocol security
 
-`jspcap.protocols.internet.ipsec` contains `IPsec`
+`pcapkit.protocols.internet.ipsec` contains `IPsec`
 only, which is a base class for Internet Protocol Security
 (IPsec) protocol family, eg. AH and ESP (NotImplemented).
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.internet.ip import IP
-from jspcap.utilities.exceptions import UnsupportedCall
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.internet.ip import IP
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 
 __all__ = 'IPsec'

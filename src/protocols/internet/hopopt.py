@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """IPv6 hop-by-hop options
 
-`jspcap.protocols.internet.hopopt` contains `HOPOPT`
+`pcapkit.protocols.internet.hopopt` contains `HOPOPT`
 only, which implements extractor for IPv6 Hop-by-Hop
 Options header (HOPOPT), whose structure is described
 as below.
@@ -18,8 +18,8 @@ as below.
 
 """
 # TODO: Implements extractor of all hop-by-hop options.
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.protocol import Protocol
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.protocol import Protocol
 
 
 __all__ = ['HOPOPT']

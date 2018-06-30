@@ -4,7 +4,7 @@
 """
 import time
 
-from jspcap.ipsuite.protocol import Protocol
+from pcapkit.ipsuite.protocol import Protocol
 
 
 __all__ = ['Frame']

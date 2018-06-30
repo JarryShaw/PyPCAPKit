@@ -7,16 +7,16 @@ import pathlib
 import warnings
 
 ###############################################################################
-# from jsformat import PLIST, JSON, Tree, JavaScript, XML
+# from dictdumper import PLIST, JSON, Tree, JavaScript, XML
 ###############################################################################
 
-from jspcap.corekit.infoclass import Info
-from jspcap.utilities.exceptions import stacklevel, FileExists
-from jspcap.utilities.warnings import FormatWarning, FileWarning
-from jspcap.utilities.validations import pkt_check
+from pcapkit.corekit.infoclass import Info
+from pcapkit.utilities.exceptions import stacklevel, FileExists
+from pcapkit.utilities.warnings import FormatWarning, FileWarning
+from pcapkit.utilities.validations import pkt_check
 
 ###############################################################################
-# from jspcap.dumpkit import PCAP, NotImplementedIO
+# from pcapkit.dumpkit import PCAP, NotImplementedIO
 ###############################################################################
 
 
@@ -59,21 +59,21 @@ class TraceFlow:
 
         """
         if fmt == 'pcap':
-            from jspcap.dumpkit import PCAP as output       # output PCAP file 
+            from pcapkit.dumpkit import PCAP as output      # output PCAP file 
         elif fmt == 'plist':
-            from jsformat import PLIST as output            # output PLIST file
+            from dictdumper import PLIST as output          # output PLIST file
         elif fmt == 'json':
-            from jsformat import JSON as output             # output JSON file
+            from dictdumper import JSON as output           # output JSON file
         elif fmt == 'tree':
-            from jsformat import Tree as output             # output treeview text file
+            from dictdumper import Tree as output           # output treeview text file
             fmt = 'txt'
         elif fmt == 'html':
-            from jsformat import JavaScript as output       # output JavaScript file
+            from dictdumper import JavaScript as output     # output JavaScript file
             fmt = 'js'
         elif fmt == 'xml':
-            from jsformat import XML as output              # output XML file
+            from dictdumper import XML as output            # output XML file
         else:
-            from jspcap.dumpkit import NotImplementedIO as output
+            from pcapkit.dumpkit import NotImplementedIO as output
                                                             # no output file
             if fmt is not None:
                 warnings.warn(f'Unsupported output format: {fmt}; '

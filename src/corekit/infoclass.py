@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """info class
 
-`jspcap.corekit.infoclass` contains dict-like class
+`pcapkit.corekit.infoclass` contains dict-like class
 `Info` only, which is originally designed to work alike
 `dataclasses.dataclass` in Python 3.7 and later versions.
 
 """
 import copy
 
-from jspcap.utilities.exceptions import UnsupportedCall
-from jspcap.utilities.validations import dict_check
+from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.validations import dict_check
 
 
 __all__ = ['Info']

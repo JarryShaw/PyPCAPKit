@@ -7,12 +7,12 @@ import textwrap
 import time
 
 import chardet
-import jspcap
+import pcapkit
 
 
 os.system('> ../sample/out')
 
-extraction = jspcap.extract(
+extraction = pcapkit.extract(
     fin='../sample/test.pcap',
     store=False, tcp=True, verbose=True, strict=True, nofile=True,
 )

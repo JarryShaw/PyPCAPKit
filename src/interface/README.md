@@ -1,6 +1,6 @@
 # Interface Manual
 
-&emsp; `jspcap` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for interface usage.
+&emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for interface usage.
 
  - [Macros](#macros)
     * [Formats](#formats)
@@ -36,7 +36,7 @@
 
 ### Engines
 
- - `jsPCAP` -- the default engine
+ - `PCAPKit` -- the default engine
  - `MPServer` -- the multiprocessing engine with server process strategy
  - `MPPipeline` -- the multiprocessing engine with pipeline strategy
  - `DPKT` -- the [`DPKT`](https://github.com/kbandla/dpkt) engine
@@ -74,7 +74,7 @@ extract(*,
     |  `extension`   | `bool` | `True`  |                       `True` / `False`                       |      if check and append extensions to output file      |
     |    `files`     | `bool` | `False` |                       `True` / `False`                       |        if split each frame into different files         |
     |    `nofile`    | `bool` | `False` |                       `True` / `False`                       |            if no output file is to be dumped            |
-    |    `engine`    | `str`  | `None`  | `default` / `jspcap` / `scapy` / `dpkt` / `pyshark` / `server` / `pipline` |                    extraction engine                    |
+    |    `engine`    | `str`  | `None`  | `default` / `scapy` / `dpkt` / `pyshark` / `server` / `pipline` |                    extraction engine                    |
     |    `layer`     | `str`  | `None`  |      `Link` / `Internet` / `Transport` / `Application`       |                   extract until layer                   |
     |   `protocol`   | `str`  | `None`  |                                                              |                 extract until protocol                  |
     |      `ip`      | `bool` | `False` |                       `True` / `False`                       |            if perform IPv4 & IPv6 reassembly            |
@@ -87,7 +87,7 @@ extract(*,
     | `trace_format` | `str`  | `None`  |     `plist` / `json` / `tree` / `html` / `pcap` / `None`     |              output format of flow tracer               |
 
  - Returns:
-    * `Extractor` -- an Extractor object form [`jspcap.foundation.extraction`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#extraction)
+    * `Extractor` -- an Extractor object form [`pcapkit.foundation.extraction`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation#extraction)
 
 &nbsp;
 
@@ -104,7 +104,7 @@ analyse(*, file, length=None)
     * `length` -- `int`, length of the analysing packet
 
  - Returns:
-    * `Analysis` -- an `Analysis` object from [`jspcap.foundation.analysis`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#analysis)
+    * `Analysis` -- an `Analysis` object from [`pcapkit.foundation.analysis`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation#analysis)
 
 &nbsp;
 
@@ -124,9 +124,9 @@ reassemble(*, protocol, strict=False)
     |  `strict`  | `bool` | `False` |    `True` / `False`     | if return all datagrams (including those not implemented) when submit |
 
  - Returns:
-    * *if protocol is IPv4* `IPv4_Reassembly` -- a `IPv4_Reassembly` object from [`jspcap.reassembly.ipv4`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ipv4_reassembly)
-    * *if protocol is IPv6* `IPv6_Reassembly` -- a` IPv6_Reassembly` object from [`jspcap.reassembly.ipv6`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#ipv6_reassembly)
-    * *if protocol is TCP* `TCP_Reassembly` -- a `TCP_Reassembly` object from [`jspcap.reassembly.tcp`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#tcp_reassembly)
+    * *if protocol is IPv4* `IPv4_Reassembly` -- a `IPv4_Reassembly` object from [`pcapkit.reassembly.ipv4`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#ipv4_reassembly)
+    * *if protocol is IPv6* `IPv6_Reassembly` -- a` IPv6_Reassembly` object from [`pcapkit.reassembly.ipv6`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#ipv6_reassembly)
+    * *if protocol is TCP* `TCP_Reassembly` -- a `TCP_Reassembly` object from [`pcapkit.reassembly.tcp`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#tcp_reassembly)
 
 &nbsp;
 

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """hypertext transfer protocol
 
-`jspcap.protocols.application.http` contains `HTTP`
+`pcapkit.protocols.application.http` contains `HTTP`
 only, which is a base class for Hypertext Transfer
 Protocol (HTTP) protocol family, eg. HTTP/1.*, HTTP/2.
 
 """
 import chardet
 
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.application.application import Application
-from jspcap.utilities.exceptions import UnsupportedCall, ProtocolError
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.application.application import Application
+from pcapkit.utilities.exceptions import UnsupportedCall, ProtocolError
 
 
 __all__ = ['HTTP']

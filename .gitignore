@@ -18,8 +18,8 @@ out
 *.dat
 
 sample/test
-test/jspcap
-test/jsformat
+test/pcapkit
+test/dictdumper
 deprecated/
 
 # Created by https://www.gitignore.io/api/macos,python

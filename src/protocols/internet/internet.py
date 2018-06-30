@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """root internet layer protocol
 
-`jspcap.protocols.internet.internet` contains both
+`pcapkit.protocols.internet.internet` contains both
 `ETHERTYPE` and `Internet`. The former is a dictionary
 of ethertype IEEE 802 numbers, registered in IANA. And the
 latter is a base class for internet layer protocols, eg.
@@ -10,10 +10,10 @@ AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 """
 import io
 
-from jspcap.corekit.protochain import ProtoChain
-from jspcap.protocols.protocol import Protocol
-from jspcap.protocols.transport.transport import TP_PROTO
-from jspcap.utilities.decorators import beholder
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.transport.transport import TP_PROTO
+from pcapkit.utilities.decorators import beholder
 
 
 __all__ = ['Internet', 'ETHERTYPE']
@@ -154,31 +154,31 @@ class Internet(Protocol):
 
         """
         if self._sigterm:
-            from jspcap.protocols.raw import Raw as Protocol
+            from pcapkit.protocols.raw import Raw as Protocol
         elif proto == 'AH':
-            from jspcap.protocols.internet.ah import AH as Protocol
+            from pcapkit.protocols.internet.ah import AH as Protocol
         elif proto == 'HIP':
-            from jspcap.protocols.internet.hip import HIP as Protocol
+            from pcapkit.protocols.internet.hip import HIP as Protocol
         elif proto == 'HOPOPT':
-            from jspcap.protocols.internet.hopopt import HOPOPT as Protocol
+            from pcapkit.protocols.internet.hopopt import HOPOPT as Protocol
         elif proto == 'IPv6-Frag':
-            from jspcap.protocols.internet.ipv6_frag import IPv6_Frag as Protocol
+            from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag as Protocol
         elif proto == 'IPv6-Opts':
-            from jspcap.protocols.internet.ipv6_opts import IPv6_Opts as Protocol
+            from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts as Protocol
         elif proto == 'IPv6-Route':
-            from jspcap.protocols.internet.ipv6_route import IPv6_Route as Protocol
+            from pcapkit.protocols.internet.ipv6_route import IPv6_Route as Protocol
         elif proto == 'MH':
-            from jspcap.protocols.internet.mh import MH as Protocol
+            from pcapkit.protocols.internet.mh import MH as Protocol
         elif proto == 'IPv4':
-            from jspcap.protocols.internet.ipv4 import IPv4 as Protocol
+            from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
-            from jspcap.protocols.internet.ipv6 import IPv6 as Protocol
+            from pcapkit.protocols.internet.ipv6 import IPv6 as Protocol
         elif proto == 'TCP':
-            from jspcap.protocols.transport.tcp import TCP as Protocol
+            from pcapkit.protocols.transport.tcp import TCP as Protocol
         elif proto == 'UDP':
-            from jspcap.protocols.transport.udp import UDP as Protocol
+            from pcapkit.protocols.transport.udp import UDP as Protocol
         else:
-            from jspcap.protocols.raw import Raw as Protocol
+            from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(io.BytesIO(self._read_fileng(length)), length,
                             version=version, extension=extension,
                             error=self._onerror, layer=self._exlayer, protocol=self._exproto)

@@ -1,27 +1,27 @@
 # -*- coding: utf-8 -*-
 """user interface
 
-`jspcap.interface` defines several user-oriented
+`pcapkit.interface` defines several user-oriented
 interfaces, variables, and etc. These interfaces are
-designed to help and simplify the usage of `jspcap`.
+designed to help and simplify the usage of `pcapkit`.
 
 """
-from jspcap.foundation.analysis import Analysis
-from jspcap.foundation.extraction import Extractor
-from jspcap.foundation.traceflow import TraceFlow
-from jspcap.protocols.protocol import Protocol
-from jspcap.reassembly.ipv4 import IPv4_Reassembly
-from jspcap.reassembly.ipv6 import IPv6_Reassembly
-from jspcap.reassembly.tcp import TCP_Reassembly
-from jspcap.utilities.exceptions import FormatError
-from jspcap.utilities.validations import bool_check, int_check, io_check, str_check
+from pcapkit.foundation.analysis import Analysis
+from pcapkit.foundation.extraction import Extractor
+from pcapkit.foundation.traceflow import TraceFlow
+from pcapkit.protocols.protocol import Protocol
+from pcapkit.reassembly.ipv4 import IPv4_Reassembly
+from pcapkit.reassembly.ipv6 import IPv6_Reassembly
+from pcapkit.reassembly.tcp import TCP_Reassembly
+from pcapkit.utilities.exceptions import FormatError
+from pcapkit.utilities.validations import bool_check, int_check, io_check, str_check
 
 
 __all__ = [
     'extract', 'analyse', 'reassemble', 'trace',            # interface functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
-    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'jsPCAP',
+    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'PCAPKit',
                                                             # engine macros
 ]
 
@@ -44,7 +44,7 @@ APP = 'Application'
 # extraction engines
 DPKT = 'dpkt'
 Scapy = 'scapy'
-jsPCAP = 'default'
+PCAPKit = 'default'
 PyShark = 'pyshark'
 MPSearver = 'server'
 MPPipeline = 'pipeline'
@@ -79,7 +79,7 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
                         <keyword> True / False
 
         * engine -- str, extraction engine to be used
-                        <keyword> 'default | jspcap'
+                        <keyword> 'default | pcapkit'
         * layer -- str, extract til which layer
                         <keyword> 'Link' / 'Internet' / 'Transport' / 'Application'
         * protocol -- str, extract til which protocol
@@ -103,7 +103,7 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
                         <keyword> 'plist' / 'json' / 'tree' / 'html' / 'pcap'
 
     Returns:
-        * Extractor -- an Extractor object form `jspcap.extractor`
+        * Extractor -- an Extractor object form `pcapkit.extractor`
 
     """
     if isinstance(layer, type) and issubclass(layer, Protocol):
@@ -133,7 +133,7 @@ def analyse(*, file, length=None):
         * length -- int, length of the analysing packet
 
     Returns:
-        * Analysis -- an Analysis object from `jspcap.analyser`
+        * Analysis -- an Analysis object from `pcapkit.analyser`
 
     """
     io_check(file)
@@ -151,9 +151,9 @@ def reassemble(*, protocol, strict=False):
                         <keyword> True / False
 
     Returns:
-        * [if protocol is IPv4] IPv4_Reassembly -- a Reassembly object from `jspcap.reassembly`
-        * [if protocol is IPv6] IPv6_Reassembly -- a Reassembly object from `jspcap.reassembly`
-        * [if protocol is TCP] TCP_Reassembly -- a Reassembly object from `jspcap.reassembly`
+        * [if protocol is IPv4] IPv4_Reassembly -- a Reassembly object from `pcapkit.reassembly`
+        * [if protocol is IPv6] IPv6_Reassembly -- a Reassembly object from `pcapkit.reassembly`
+        * [if protocol is TCP] TCP_Reassembly -- a Reassembly object from `pcapkit.reassembly`
 
     """
     if isinstance(protocol, type) and issubclass(protocol, Protocol):

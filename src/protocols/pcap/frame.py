@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """frame header
 
-`jspcap.protocols.pcap.frame` contains `Frame` only,
+`pcapkit.protocols.pcap.frame` contains `Frame` only,
 which implements extractor for frame headers of PCAP,
 whose structure is described as below.
 
@@ -18,17 +18,17 @@ import io
 import os
 import re
 
-from jspcap.corekit.infoclass import Info
-from jspcap.corekit.protochain import ProtoChain
-from jspcap.protocols.protocol import Protocol
-from jspcap.utilities.decorators import beholder
-from jspcap.utilities.exceptions import ProtocolNotFound, ProtocolUnbound
+from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.protocol import Protocol
+from pcapkit.utilities.decorators import beholder
+from pcapkit.utilities.exceptions import ProtocolNotFound, ProtocolUnbound
 
 ###############################################################################
-# from jspcap.protocols.link import Ethernet
-# from jspcap.protocols.internet import IPv4
-# from jspcap.protocols.internet import IPv6
-# from jspcap.protocols.raw import Raw
+# from pcapkit.protocols.link import Ethernet
+# from pcapkit.protocols.internet import IPv4
+# from pcapkit.protocols.internet import IPv6
+# from pcapkit.protocols.raw import Raw
 ###############################################################################
 
 
@@ -279,13 +279,13 @@ class Frame(Protocol):
 
         """
         if proto == 'Ethernet':
-            from jspcap.protocols.link import Ethernet as Protocol
+            from pcapkit.protocols.link import Ethernet as Protocol
         elif proto == 'IPv4':
-            from jspcap.protocols.internet import IPv4 as Protocol
+            from pcapkit.protocols.internet import IPv4 as Protocol
         elif proto == 'IPv6':
-            from jspcap.protocols.internet import IPv6 as Protocol
+            from pcapkit.protocols.internet import IPv6 as Protocol
         else:
-            from jspcap.protocols.raw import Raw as Protocol
+            from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(self._file, length, error=error,
                             layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias

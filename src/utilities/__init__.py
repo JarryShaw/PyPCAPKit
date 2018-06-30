@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 """utility functions and classes
 
-`jspcap.utilities` contains several useful functions and
-classes which are fundations of `jspcap`, including
+`pcapkit.utilities` contains several useful functions and
+classes which are fundations of `pcapkit`, including
 decorater function `seekset` and `beholder`, and several
 user-refined exceptions and validations.
 
 """
-from jspcap.utilities.decorators import *
-from jspcap.utilities.exceptions import *
-from jspcap.utilities.validations import *
-from jspcap.utilities.warnings import *
+from pcapkit.utilities.decorators import *
+from pcapkit.utilities.exceptions import *
+from pcapkit.utilities.validations import *
+from pcapkit.utilities.warnings import *
 
 
 __all__ = ['seekset_ng', 'beholder_ng']

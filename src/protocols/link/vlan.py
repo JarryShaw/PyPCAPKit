@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """802.1Q customer VLAN tag type
 
-`jspcap.protocols.link.vlan` contains `VLAN`
+`pcapkit.protocols.link.vlan` contains `VLAN`
 only, which implements extractor for 802.1QCustomer
 VLAN Tag Type, whose structure is described as below.
 
@@ -13,8 +13,8 @@ Octets      Bits        Name                    Discription
   3          24     vlan.type               Protocol (Internet Layer)
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.link.link import Link
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.link.link import Link
 
 __all__ = ['VLAN']
 

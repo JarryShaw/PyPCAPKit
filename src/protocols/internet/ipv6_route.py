@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """routing header for IPv6
 
-``jspcap.protocols.internet.ipv6_route`` contains
+``pcapkit.protocols.internet.ipv6_route`` contains
 ``IPv6_Route`` only, which implements extractor for Routing
 Header for IPv6 (IPv6-Route), whose structure is described
 as below.
@@ -18,8 +18,8 @@ as below.
 
 """
 # TODO: Implements extractor of all routing types.
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.protocol import Protocol
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.protocol import Protocol
 
 
 __all__ = ['IPv6_Route']

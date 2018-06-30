@@ -1,12 +1,12 @@
 # Foundation Manual
 
-&emsp; `jspcap` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for fundamental tools in the library.
+&emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for fundamental tools in the library.
 
  - [Extraction](#extraction)
-    * [Reference](https://github.com/JarryShaw/jspcap/tree/master/src/foundation/extraction.py)
+    * [Reference](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation/extraction.py)
     * [`Extractor`](#extractor)
  - [Analysis](#analysis)
-    * [Reference](https://github.com/JarryShaw/jspcap/tree/master/src/foundation/analysis.py)
+    * [Reference](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation/analysis.py)
     * [`analyse`](#analyse)
     * [`Analysis`](#class-analysis)
 
@@ -14,9 +14,9 @@
 
 ## Extraction
 
- > described in [`src/foundation/extraction.py`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation/extraction.py)
+ > described in [`src/foundation/extraction.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation/extraction.py)
 
-&emsp; `jspcap.foundation.extraction` contains `Extractor` only, which synthesises file I/O and protocol analysis, coordinates information exchange in all network layers, extract parameters from a PCAP file.
+&emsp; `pcapkit.foundation.extraction` contains `Extractor` only, which synthesises file I/O and protocol analysis, coordinates information exchange in all network layers, extract parameters from a PCAP file.
 
 ### `Extractor`
 
@@ -91,7 +91,7 @@ class Extractor(builtins.object)
         |  `extension`   | `bool` | `True`  |                   `True` / `False`                   |      if check and append extensions to output file      |
         |    `files`     | `bool` | `False` |                   `True` / `False`                   |        if split each frame into different files         |
         |    `nofile`    | `bool` | `False` |                   `True` / `False`                   |            if no output file is to be dumped            |
-        |    `engine`    | `str`  | `None`  | `default` / `jspcap` / `scapy` / `dpkt` / `pyshark`  |                    extraction engine                    |
+        |    `engine`    | `str`  | `None`  | `default` / `pcapkit` / `scapy` / `dpkt` / `pyshark`  |                    extraction engine                    |
         |     `layer`    | `str`  | `None`  |  `Link` / `Internet` / `Transport` / `Application`   |                   extract until layer                   |
         |   `protocol`   | `str`  | `None`  |                                                      |                  extract until protocol                 |
         |      `ip`      | `bool` | `False` |                   `True` / `False`                   |            if perform IPv4 & IPv6 reassembly            |
@@ -107,9 +107,9 @@ class Extractor(builtins.object)
 
 ## Analysis
 
- > described in [`src/foundation/analysis.py`](https://github.com/JarryShaw/jspcap/tree/master/src/foundation/analysis.py)
+ > described in [`src/foundation/analysis.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation/analysis.py)
 
-&emsp; `jspcap.foundation.analysis` works as a header quarter to analyse and match application layer protocol. Then, call corresponding modules and functions to extract the attributes.
+&emsp; `pcapkit.foundation.analysis` works as a header quarter to analyse and match application layer protocol. Then, call corresponding modules and functions to extract the attributes.
 
 <a name="class-analysis"> </a>
 
@@ -137,4 +137,4 @@ class Analysis(builtins.object)
            * `file` -- file-like object, packet to be analysed
            * `length` -- `int`, length of the analysing packet
         - Returns:
-           * `Analysis` -- an [`Analysis`](#class-analysis) object from [`jspcap.foundation.analysis`](#analysis)
+           * `Analysis` -- an [`Analysis`](#class-analysis) object from [`pcapkit.foundation.analysis`](#analysis)

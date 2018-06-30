@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """(dynamic) reverse address resolution protocol
 
-`jspcap.protocols.link.rarp` contains `RARP` only,
+`pcapkit.protocols.link.rarp` contains `RARP` only,
 which implements extractor for (Dynamic) Reverse Address
 Resolution Protocol (RARP/DRARP), whose structure is
 described as below.
@@ -18,7 +18,7 @@ Octets      Bits        Name                    Discription
   24        192     rarp.tpa                Target Protocol Address
 
 """
-from jspcap.protocols.link.arp import ARP
+from pcapkit.protocols.link.arp import ARP
 
 
 __all__ = ['RARP']

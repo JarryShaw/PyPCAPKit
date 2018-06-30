@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """decorator functions
 
-`jspcap.utilities.decorators` contains several useful
+`pcapkit.utilities.decorators` contains several useful
 decorators, including `seekset` and `beholder`.
 
 """
@@ -10,8 +10,8 @@ import io
 import os
 
 ###############################################################################
-# from jspcap.protocols.raw import Raw
-# from jspcap.foundation.analysis import Analysis
+# from pcapkit.protocols.raw import Raw
+# from pcapkit.foundation.analysis import Analysis
 ###############################################################################
 
 
@@ -50,7 +50,7 @@ def beholder(func):
         try:
             return func(proto, length, *args, **kwargs)
         except Exception as error:
-            from jspcap.protocols.raw import Raw
+            from pcapkit.protocols.raw import Raw
 
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=str(error))
@@ -66,8 +66,8 @@ def beholder_ng(func):
         try:
             return func(file, length, *args, **kwargs)
         except Exception as error:
-            from jspcap.foundation.analysis import Analysis
-            from jspcap.protocols.raw import Raw
+            from pcapkit.foundation.analysis import Analysis
+            from pcapkit.protocols.raw import Raw
 
             file.seek(seek_cur, os.SEEK_SET)
 

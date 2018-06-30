@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """global header
 
-`jspcap.protocols.pcap.header` contains `Header` only,
+`pcapkit.protocols.pcap.header` contains `Header` only,
 which implements extractor for global headers of PCAP,
 whose structure is described as below.
 
@@ -16,12 +16,12 @@ typedef struct pcap_hdr_s {
 } pcap_hdr_t;
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.corekit.version import VersionInfo
-from jspcap.protocols.protocol import Protocol
-from jspcap.protocols.link.link import LINKTYPE
-from jspcap.utilities.exceptions import FileError, UnsupportedCall
-from jspcap.utilities.validations import int_check
+from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.version import VersionInfo
+from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.link.link import LINKTYPE
+from pcapkit.utilities.exceptions import FileError, UnsupportedCall
+from pcapkit.utilities.validations import int_check
 
 
 __all__ = ['Header']

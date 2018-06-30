@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """layer two tunnelling protocol
 
-`jspcap.protocols.link.l2tp` contains `L2TP` only,
+`pcapkit.protocols.link.l2tp` contains `L2TP` only,
 which implements extractor for Layer Two Tunnelling Protocol
 (L2TP), whose structure is described as below.
 
@@ -18,8 +18,8 @@ which implements extractor for Layer Two Tunnelling Protocol
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.link.link import Link
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.link.link import Link
 
 
 __all__ = ['L2TP']

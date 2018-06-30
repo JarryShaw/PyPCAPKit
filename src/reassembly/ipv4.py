@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """reassembly IPv4 fragments
 
-`jspcap.reassembly.ipv4` contains `IPv4_Reassembly`
+`pcapkit.reassembly.ipv4` contains `IPv4_Reassembly`
 only, which reconstructs fragmented IPv4 packets back to
 origin. The following algorithm implementment is based on IP
 reassembly procedure introduced in RFC 791, using
@@ -70,7 +70,7 @@ Algorithm:
     }
 
 """
-from jspcap.reassembly.ip import IP_Reassembly
+from pcapkit.reassembly.ip import IP_Reassembly
 
 
 __all__ = ['IPv4_Reassembly']
@@ -80,7 +80,7 @@ class IPv4_Reassembly(IP_Reassembly):
     """Reassembly for IPv4 payload.
 
     Usage:
-        >>> from jspcap.reassembly import IPv4_Reassembly
+        >>> from pcapkit.reassembly import IPv4_Reassembly
         # Initialise instance:
         >>> ipv4_reassembly = IPv4_Reassembly()
         # Call reassembly:

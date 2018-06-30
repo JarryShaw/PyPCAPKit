@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """extractor for PCAP files
 
-`jspcap.tools.extraction` contains `Extractor` only, which
+`pcapkit.tools.extraction` contains `Extractor` only, which
 synthesises file I/O and protocol analysis, coordinates
 information exchange in all network layers, extracst
 parametres from a PCAP file.
 
 """
+# TODO: implement engine support for pypcap & pycapfile
 import collections
 import copy
 import datetime
@@ -28,23 +29,23 @@ import warnings
 # import dpkt
 # import scapy.all
 # 
-# from jsformat import PLIST, JSON, Tree, JavaScript, XML
+# from dictdumper import PLIST, JSON, Tree, JavaScript, XML
 ###############################################################################
 
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.pcap.frame import Frame
-from jspcap.protocols.pcap.header import Header
-from jspcap.protocols.transport.transport import TP_PROTO
-from jspcap.utilities.exceptions import stacklevel, CallableError, \
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.pcap.frame import Frame
+from pcapkit.protocols.pcap.header import Header
+from pcapkit.protocols.transport.transport import TP_PROTO
+from pcapkit.utilities.exceptions import stacklevel, CallableError, \
         FileNotFound, UnsupportedCall, IterableError
-from jspcap.utilities.warnings import FormatWarning, EngineWarning, \
+from pcapkit.utilities.warnings import FormatWarning, EngineWarning, \
         LayerWarning, ProtocolWarning, AttributeWarning, DPKTWarning
 
 ###############################################################################
-# from jspcap.foundation.traceflow import TraceFlow
-# from jspcap.reassembly.ipv4 import IPv4_Reassembly
-# from jspcap.reassembly.ipv6 import IPv6_Reassembly
-# from jspcap.reassembly.tcp import TCP_Reassembly
+# from pcapkit.foundation.traceflow import TraceFlow
+# from pcapkit.reassembly.ipv4 import IPv4_Reassembly
+# from pcapkit.reassembly.ipv6 import IPv6_Reassembly
+# from pcapkit.reassembly.tcp import TCP_Reassembly
 ###############################################################################
 
 
@@ -236,13 +237,13 @@ class Extractor:
                 return self._run_server(engine)
             warnings.warn(f'extraction engine Server Multiprocessing is not available; '
                             'using default engine instead', EngineWarning, stacklevel=stacklevel())
-        elif self._exeng not in ('default', 'jspcap'):
+        elif self._exeng not in ('default', 'pcapkit'):
             tempflag = False
             warnings.warn(f'unsupported extraction engine: {self._exeng}; '
                             'using default engine instead',
                             EngineWarning, stacklevel=stacklevel())
 
-        # using default/jspcap engine
+        # using default/pcapkit engine
         self._exeng = self._exeng if tempflag else 'default'
         self.record_header()            # read PCAP global header
         self.record_frames()            # read frames
@@ -392,7 +393,7 @@ class Extractor:
                             <keyword> True / False
 
             * engine -- str, extraction engine to be used
-                            <keyword> 'default | jspcap'
+                            <keyword> 'default | pcapkit'
             * layer -- str, extract til which layer
                             <keyword> 'Link' / 'Internet' / 'Transport' / 'Application'
             * protocol -- str, extract til which protocol
@@ -448,17 +449,17 @@ class Extractor:
         self._exeng = (engine or 'default').lower()         # extract using engine
 
         if self._ipv4:
-            from jspcap.reassembly.ipv4 import IPv4_Reassembly
+            from pcapkit.reassembly.ipv4 import IPv4_Reassembly
             self._reasm[0] = IPv4_Reassembly(strict=strict)
         if self._ipv6:
-            from jspcap.reassembly.ipv6 import IPv6_Reassembly
+            from pcapkit.reassembly.ipv6 import IPv6_Reassembly
             self._reasm[1] = IPv6_Reassembly(strict=strict)
         if self._tcp:
-            from jspcap.reassembly.tcp import TCP_Reassembly
+            from pcapkit.reassembly.tcp import TCP_Reassembly
             self._reasm[2] = TCP_Reassembly(strict=strict)
 
         if trace:
-            from jspcap.foundation.traceflow import TraceFlow
+            from pcapkit.foundation.traceflow import TraceFlow
             if self._exeng in ('pyshark',) and re.fullmatch('pcap', str(trace_format), re.IGNORECASE):
                 warnings.warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
                                 f"using 'trace_format={trace_format}' instead", FormatWarning, stacklevel=stacklevel())
@@ -468,17 +469,17 @@ class Extractor:
         self._ifile = open(ifnm, 'rb')                      # input file
         if not self._flag_q:
             if fmt == 'plist':
-                from jsformat import PLIST as output        # output PLIST file
+                from dictdumper import PLIST as output      # output PLIST file
             elif fmt == 'json':
-                from jsformat import JSON as output         # output JSON file
+                from dictdumper import JSON as output       # output JSON file
             elif fmt == 'tree':
-                from jsformat import Tree as output         # output treeview text file
+                from dictdumper import Tree as output       # output treeview text file
             elif fmt == 'html':
-                from jsformat import JavaScript as output   # output JavaScript file
+                from dictdumper import JavaScript as output # output JavaScript file
             elif fmt == 'xml':
-                from jsformat import XML as output          # output XML file
+                from dictdumper import XML as output        # output XML file
             else:
-                from jspcap.dumpkit import NotImplementedIO as output
+                from pcapkit.dumpkit import NotImplementedIO as output
                                                             # no output file
                 warnings.warn(f'unsupported output format: {fmt}; '
                                 'disabled file output feature',

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """authentication header
 
-`jspcap.protocols.internet.ah` contains `AH` only,
+`pcapkit.protocols.internet.ah` contains `AH` only,
 which implements extractor for Authentication Header (AH),
 whose structure is described as below.
 
@@ -20,9 +20,9 @@ whose structure is described as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.internet.ipsec import IPsec
-from jspcap.utilities.exceptions import VersionError, ProtocolError
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.internet.ipsec import IPsec
+from pcapkit.utilities.exceptions import VersionError, ProtocolError
 
 
 __all__ = ['AH']

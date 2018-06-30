@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """root protocol
 
-`jspcap.ipsuite.protocol` contains `Protocol` only,
+`pcapkit.ipsuite.protocol` contains `Protocol` only,
 which is an abstract base clss for all protocol family,
 with pre-defined utility arguments and methods of specified
 protocols.
@@ -10,9 +10,9 @@ protocols.
 import abc
 import struct
 
-from jspcap.corekit.infoclass import Info
-from jspcap.utilities.exceptions import ProtocolNotImplemented, StructError
-from jspcap.utilities.validations import dict_check
+from pcapkit.corekit.infoclass import Info
+from pcapkit.utilities.exceptions import ProtocolNotImplemented, StructError
+from pcapkit.utilities.validations import dict_check
 
 
 __all__ = ['Protocol']

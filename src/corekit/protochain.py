@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """protocol chain collection
 
-`jspcap.corekit.protochain` contains special protocol
+`pcapkit.corekit.protochain` contains special protocol
 collection class `ProtoChain`.
 
 """
 import numbers
 
-from jspcap.utilities.exceptions import IndexNotFound
-from jspcap.utilities.validations import int_check
+from pcapkit.utilities.exceptions import IndexNotFound
+from pcapkit.utilities.validations import int_check
 
 ###############################################################################
-# from jspcap.protocols.protocol import Protocol
+# from pcapkit.protocols.protocol import Protocol
 ###############################################################################
 
 
@@ -123,7 +123,7 @@ class ProtoChain:
         return iter(self.__damn__)
 
     def __contains__(self, name):
-        from jspcap.protocols.protocol import Protocol
+        from pcapkit.protocols.protocol import Protocol
         if isinstance(name, type) and issubclass(name, Protocol):
             name = name.__index__()
         if isinstance(name, tuple):

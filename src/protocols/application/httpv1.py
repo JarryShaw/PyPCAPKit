@@ -1,6 +1,6 @@
 """hypertext transfer protocol (HTTP/1.*)
 
-`jspcap.protocols.application.httpv1` contains `HTTPv1`
+`pcapkit.protocols.application.httpv1` contains `HTTPv1`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/1.*), whose structure is described as
 below.
@@ -22,9 +22,9 @@ import re
 
 import chardet
 
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.application.http import HTTP
-from jspcap.utilities.exceptions import ProtocolError
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.application.http import HTTP
+from pcapkit.utilities.exceptions import ProtocolError
 
 
 __all__ = ['HTTPv1']

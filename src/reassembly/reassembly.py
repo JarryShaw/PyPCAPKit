@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """reassembly fragmented packets
 
-`jspcap.reassembly.reassembly` contains `Reassembly`
+`pcapkit.reassembly.reassembly` contains `Reassembly`
 only, which is an abstract base class for all reassembly
 classes, bases on algorithms described in
 [`RFC 815`](https://tools.ietf.org/html/rfc815),
@@ -11,8 +11,8 @@ implements datagram reassembly of IP and TCP packets.
 import abc
 import copy
 
-from jspcap.corekit.infoclass import Info
-from jspcap.utilities.validations import frag_check, int_check
+from pcapkit.corekit.infoclass import Info
+from pcapkit.utilities.validations import frag_check, int_check
 
 
 __all__ = ['Reassembly']

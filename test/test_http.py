@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 
-import jspcap
+import pcapkit
 
 
-for frame in jspcap.extract(fin='../sample/http.pcap', nofile=True, auto=False):
+for frame in pcapkit.extract(fin='../sample/http.pcap', nofile=True, auto=False):
     # check if this frame contains HTTP
-    if jspcap.HTTP in frame:
+    if pcapkit.HTTP in frame:
         # print frame number & its protocols chain
         print(f' - {frame.name}: {frame.protochain}')
         #
@@ -28,7 +28,7 @@ for frame in jspcap.extract(fin='../sample/http.pcap', nofile=True, auto=False):
         # #     # other fields
         # #     ...
         # # )
-        # http = frame[jspcap.HTTP]
+        # http = frame[pcapkit.HTTP]
         #
         # # fetch HTTP type (request/response)
         # http_type = http.receipt    # or http['receipt']

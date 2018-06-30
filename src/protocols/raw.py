@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """raw packet data
 
-`jspcap.protocols.raw` contains `Raw` only, which
+`pcapkit.protocols.raw` contains `Raw` only, which
 implements extractor for unknown protocol, and constructs
 a `Protocol` like object.
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.corekit.protochain import ProtoChain
-from jspcap.protocols.protocol import Protocol
-from jspcap.utilities.exceptions import UnsupportedCall
+from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.protocol import Protocol
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 
 __all__ = ['Raw']

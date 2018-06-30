@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """validation utilities
 
-`jspcap.utilities.validations` contains functions to validate
+`pcapkit.utilities.validations` contains functions to validate
 arguments for functions and classes. It was first used in
-[`jsntlib`](https://github.com/JarryShaw/jspcapy) as
+[`ntlib`](https://github.com/JarryShaw/pyntlib) as
 validators.
 
 """
@@ -12,7 +12,7 @@ import io
 import ipaddress
 import numbers
 
-from jspcap.utilities.exceptions import BoolError, BytesError, BytearrayError, \
+from pcapkit.utilities.exceptions import BoolError, BytesError, BytearrayError, \
         DictError, DigitError, FragmentError, IntError, IOObjError, ListError, \
         RealError, TupleError, InfoError, PacketError, IPError
 
@@ -135,7 +135,7 @@ def io_check(*args, func=None):
 
 def info_check(*args, func=None):
     """Check if arguments are Info instance."""
-    from jspcap.corekit.infoclass import Info
+    from pcapkit.corekit.infoclass import Info
 
     func = func or inspect.stack()[2][3]
     for var in args:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """fragment header for IPv6
 
-`jspcap.protocols.internet.ipv6_frag` contains `IPv6_Frag`
+`pcapkit.protocols.internet.ipv6_frag` contains `IPv6_Frag`
 only, which implements extractor for Fragment Header for
 IPv6 (IPv6-Frag), whose structure is described as below.
 
@@ -12,8 +12,8 @@ IPv6 (IPv6-Frag), whose structure is described as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.protocol import Protocol
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.protocol import Protocol
 
 
 __all__ = ['IPv6_Frag']

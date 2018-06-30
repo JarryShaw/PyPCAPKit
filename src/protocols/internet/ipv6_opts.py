@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """destination options for IPv6
 
-`jspcap.protocols.internet.ipv6_opts` contains
+`pcapkit.protocols.internet.ipv6_opts` contains
 `IPv6_Opts` only, which implements extractor for
 Destination Options for IPv6 (IPv6-Opts), whose structure
 is described as below.
@@ -18,8 +18,8 @@ is described as below.
 
 """
 # TODO: Implements extractor of all destination options.
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.protocol import Protocol
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.protocol import Protocol
 
 
 __all__ = ['IPv6_Opts']

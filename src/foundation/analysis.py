@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """analyser for application layer
 
-`jspcap.tools.analysis` works as a header quarter to analyse
+`pcapkit.tools.analysis` works as a header quarter to analyse
 and match application layer protocol. Then, call
 corresponding modules and functions to extract the attributes.
 
 """
-from jspcap.protocols.raw import Raw
-from jspcap.utilities.decorators import seekset_ng
-from jspcap.utilities.exceptions import ProtocolError
+from pcapkit.protocols.raw import Raw
+from pcapkit.utilities.decorators import seekset_ng
+from pcapkit.utilities.exceptions import ProtocolError
 
 ###############################################################################
-# from jspcap.protocols.application.httpv1 import HTTPv1
-# from jspcap.protocols.application.httpv2 import HTTPv2
+# from pcapkit.protocols.application.httpv1 import HTTPv1
+# from pcapkit.protocols.application.httpv2 import HTTPv2
 ###############################################################################
 
 
@@ -89,7 +89,7 @@ class Analysis:
     @seekset_ng
     def _analyse_httpv1(file, length):
         try:
-            from jspcap.protocols.application.httpv1 import HTTPv1
+            from pcapkit.protocols.application.httpv1 import HTTPv1
             http = HTTPv1(file, length)
         except ProtocolError:
             return False, None
@@ -99,7 +99,7 @@ class Analysis:
     @seekset_ng
     def _analyse_httpv2(file, length):
         try:
-            from jspcap.protocols.application.httpv2 import HTTPv2
+            from pcapkit.protocols.application.httpv2 import HTTPv2
             http = HTTPv2(file, length)
         except ProtocolError:
             return False, None

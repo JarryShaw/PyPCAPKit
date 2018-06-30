@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """dump utilities
 
-`jspcap.dumpkit` is the collection of dumpers for
-`jspcap` implementation, which is alike those described
-in [`jsformat`](https://github.com/JarryShaw/jsformat).
+`pcapkit.dumpkit` is the collection of dumpers for
+`pcapkit` implementation, which is alike those described
+in [`dictdumper`](https://github.com/JarryShaw/dictdumper).
 
 """
-from jspcap.ipsuite.pcap.frame import Frame
-from jspcap.ipsuite.pcap.header import Header
+from pcapkit.ipsuite.pcap.frame import Frame
+from pcapkit.ipsuite.pcap.header import Header
 
 
 __all__ = ['PCAP', 'NotImplementedIO']

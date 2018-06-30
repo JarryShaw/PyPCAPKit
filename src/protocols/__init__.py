@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
 """protocol family
 
-`jspcap.protocols` is collection of all protocol families,
+`pcapkit.protocols` is collection of all protocol families,
 with detailed implementation and methods.
 
 """
 # TODO: Implement specified classes for MAC and IP addresses.
 
 # Base Class for Protocols
-from jspcap.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import Protocol
 
 # Utility Classes for Protocols
-from jspcap.protocols.pcap import *
-from jspcap.protocols.raw import Raw
+from pcapkit.protocols.pcap import *
+from pcapkit.protocols.raw import Raw
 
 # Protocols & Macros
-from jspcap.protocols.link import *
-from jspcap.protocols.internet import *
-from jspcap.protocols.transport import *
-from jspcap.protocols.application import *
+from pcapkit.protocols.link import *
+from pcapkit.protocols.internet import *
+from pcapkit.protocols.transport import *
+from pcapkit.protocols.application import *
 
 # Deprecated / Base Protocols
-from jspcap.protocols.internet.ip import IP
-from jspcap.protocols.internet.ipsec import IPsec
-from jspcap.protocols.application.http import HTTP
+from pcapkit.protocols.internet.ip import IP
+from pcapkit.protocols.internet.ipsec import IPsec
+from pcapkit.protocols.application.http import HTTP
 
 
 __all__ = [

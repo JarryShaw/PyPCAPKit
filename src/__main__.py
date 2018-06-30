@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """command line tool
 
-`jspcap.__main__` was originally the module file of
+`pcapkit.__main__` was originally the module file of
 [`jspcapy`](https://github.com/JarryShaw/jspcapy), which
-is now deprecated and merged with `jspcap`.
+is now deprecated and merged with `pcapkit`.
 
 """
 import argparse
@@ -11,8 +11,8 @@ import os
 import sys
 import warnings
 
-from jspcap.foundation.extraction import Extractor
-from jspcap.interface import TREE, JSON, PLIST
+from pcapkit.foundation.extraction import Extractor
+from pcapkit.interface import TREE, JSON, PLIST
 
 
 # version number
@@ -20,8 +20,8 @@ __version__ = '0.5.0'
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(prog='jspcapy', description=(
-        'PCAP file extractor and formatted exporter'
+    parser = argparse.ArgumentParser(prog='pcapkit', description=(
+        'PCAP file extractor and formatted dumper'
     ))
     parser.add_argument('-V', '--version', action='version', version=f'{__version__}')
     parser.add_argument('fin', metavar='input-file-name',
@@ -38,7 +38,7 @@ def get_parser():
                         dest='format', help=(
                             'Print a extraction report in the specified output '
                             'format. Available are all formats supported by '
-                            'jsformat, e.g.: json, plist, and tree.'
+                            'dictdumper, e.g.: json, plist, and tree.'
                         ))
     parser.add_argument('-j', '--json', action='store_true', default=False,
                         help=(
@@ -74,7 +74,7 @@ def get_parser():
     parser.add_argument('-E', '--engine', action='store', dest='engine',
                         default='default', metavar='PKG', help=(
                             'Indicate extraction engine. Note that except '
-                            'default or jspcap engine, all other engines '
+                            'default or pcapkit engine, all other engines '
                             'need support of corresponding packages.'
                         ))
     parser.add_argument('-P', '--protocol', action='store', dest='protocol',

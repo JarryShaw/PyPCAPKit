@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """root application layer protocol
 
-`jspcap.protocols.application.application` contains only
+`pcapkit.protocols.application.application` contains only
 `Application`, which is a base class for application
 layer protocols, eg. HTTP/1.*, HTTP/2 and etc.
 
 """
-from jspcap.corekit.protochain import ProtoChain
-from jspcap.protocols.protocol import Protocol
-from jspcap.utilities.exceptions import UnsupportedCall
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.protocol import Protocol
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 
 __all__ = ['Application']

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """(inverse) address resolution protocol
 
-`jspcap.protocols.link.arp` contains `ARP` only,
+`pcapkit.protocols.link.arp` contains `ARP` only,
 which implements extractor for (Inverse) Address Resolution
 Protocol (ARP/InARP), whose structure is described as below.
 
@@ -21,9 +21,9 @@ import collections
 import ipaddress
 import textwrap
 
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.internet.internet import ETHERTYPE
-from jspcap.protocols.link.link import Link, LINKTYPE
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.internet.internet import ETHERTYPE
+from pcapkit.protocols.link.link import Link, LINKTYPE
 
 
 __all__ = ['ARP']

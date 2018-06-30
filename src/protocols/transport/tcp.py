@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """transmission control protocol
 
-`jspcap.protocols.transport.tcp` contains `TCP` only,
+`pcapkit.protocols.transport.tcp` contains `TCP` only,
 which implements extractor for Transmission Control
 Protocol (TCP), whose structure is described as below.
 
@@ -28,9 +28,9 @@ Protocol (TCP), whose structure is described as below.
 """
 import struct
 
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.transport.transport import Transport
-from jspcap.utilities.decorators import seekset
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.transport.transport import Transport
+from pcapkit.utilities.decorators import seekset
 
 
 __all__ = ['TCP']

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """reassembly TCP datagram
 
-`jspcap.reassembly.tcp` contains `TCP_Reassembly` only,
+`pcapkit.reassembly.tcp` contains `TCP_Reassembly` only,
 which reconstructs fragmented TCP packets back to origin.
 The algorithm for TCP reassembly is decribed as below.
 
@@ -98,9 +98,9 @@ import copy
 import io
 import sys
 
-from jspcap.corekit.infoclass import Info
-from jspcap.foundation.analysis import Analysis
-from jspcap.reassembly.reassembly import Reassembly
+from pcapkit.corekit.infoclass import Info
+from pcapkit.foundation.analysis import Analysis
+from pcapkit.reassembly.reassembly import Reassembly
 
 
 __all__ = ['TCP_Reassembly']
@@ -110,7 +110,7 @@ class TCP_Reassembly(Reassembly):
     """Reassembly for TCP payload.
 
     Usage:
-        >>> from jspcap.reassembly import TCP_Reassembly
+        >>> from pcapkit.reassembly import TCP_Reassembly
         # Initialise instance:
         >>> tcp_reassembly = TCP_Reassembly()
         # Call reassembly:

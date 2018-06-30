@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """user datagram protocol
 
-`jspcap.protocols.transport.udp` contains `UDP` only,
+`pcapkit.protocols.transport.udp` contains `UDP` only,
 which implements extractor for User Datagram Protocol
 (UDP), whose structure is described as below.
 
@@ -18,8 +18,8 @@ which implements extractor for User Datagram Protocol
 +---------------- ...
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.transport.transport import Transport
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.transport.transport import Transport
 
 
 __all__ = ['UDP']

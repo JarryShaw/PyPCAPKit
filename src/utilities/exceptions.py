@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """user defined exceptions
 
-`jspcap.exceptions` refined built-in exceptions. Make it
+`pcapkit.exceptions` refined built-in exceptions. Make it
 possible to show only user error stack infomation, when
 exception raised on user's operation.
 
@@ -36,7 +36,7 @@ def stacklevel():
     """Fetch curent stack level."""
     tb = traceback.extract_stack()
     for tbitem in tb:
-        if pathlib.Path(tbitem[0]).match('*/jspcap/*'):
+        if pathlib.Path(tbitem[0]).match('*/pcapkit/*'):
             index = tb.index(tbitem)
             break
     else:

@@ -2,9 +2,9 @@
 """
 
 """
-from jspcap.ipsuite.protocol import Protocol
-from jspcap.protocols.link.link import LINKTYPE
-from jspcap.utilities.exceptions import ProtocolNotImplemented
+from pcapkit.ipsuite.protocol import Protocol
+from pcapkit.protocols.link.link import LINKTYPE
+from pcapkit.utilities.exceptions import ProtocolNotImplemented
 
 
 __all__ = ['Header']

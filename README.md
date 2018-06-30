@@ -1,19 +1,21 @@
-# jspcap
+# PyPCAPKit
 
-&emsp; The `jspcap` project is an open source Python program focus on [PCAP](https://en.wikipedia.org/wiki/Pcap) parsing and analysis, which works as a stream PCAP file extractor. With support of [`jsformat`](https://github.com/JarryShaw/jsformat), it shall support multiple output report formats.
+<!-- reconstruct Frame, each protocol instance should be stored within the Frame instance; IPv6 pending more consideration -->
+
+&emsp; The `pcapkit` project is an open source Python program focus on [PCAP](https://en.wikipedia.org/wiki/Pcap) parsing and analysis, which works as a stream PCAP file extractor. With support of [`dictdumper`](https://github.com/JarryShaw/dictdumper), it shall support multiple output report formats.
 
  > Note that the whole project only supports __Python 3.6__ or later.
 
  - [About](#about)
     * [Module Structure](#module-structure)
-        - [Foundation](https://github.com/JarryShaw/jspcap/tree/master/src/foundation#foundation-manual)
-        - [Interface](https://github.com/JarryShaw/jspcap/tree/master/src/interface#interface-manual)
-        - [Reassembly](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly#reassembly-manual)
-        - [IPSuite](https://github.com/JarryShaw/jspcap/tree/master/src/ipsuite#ipsuite-manual)
-        - [Protocols](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#protocols-manual)
-        - [Utilities](https://github.com/JarryShaw/jspcap/tree/master/src/utilities#utilities-maunal)
-        - [CoreKit](https://github.com/JarryShaw/jspcap/tree/master/src/corekit#corekit-manual)
-        - [DumpKit](https://github.com/JarryShaw/jspcap/tree/master/src/dumpkit#dumpkit-manual)
+        - [Foundation](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation#foundation-manual)
+        - [Interface](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#interface-manual)
+        - [Reassembly](https://github.com/JarryShaw/pypcapkit/tree/master/src/reassembly#reassembly-manual)
+        - [IPSuite](https://github.com/JarryShaw/pypcapkit/tree/master/src/ipsuite#ipsuite-manual)
+        - [Protocols](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocols-manual)
+        - [Utilities](https://github.com/JarryShaw/pypcapkit/tree/master/src/utilities#utilities-maunal)
+        - [CoreKit](https://github.com/JarryShaw/pypcapkit/tree/master/src/corekit#corekit-manual)
+        - [DumpKit](https://github.com/JarryShaw/pypcapkit/tree/master/src/dumpkit#dumpkit-manual)
     * [Engine Comparison](#engine-comparison)
  - [Installation](#installation)
  - [Usage](#usage)
@@ -34,30 +36,30 @@
 
 ## About
 
-&emsp; `jspcap` is an independent open source library, using only [`jsformat`](https://github.com/JarryShaw/jsformat) as its formatted output dumper.
+&emsp; `pcapkit` is an independent open source library, using only [`dictdumper`](https://github.com/JarryShaw/dictdumper) as its formatted output dumper.
 
-> There is a project called [`jspcapy`](https://github.com/JarryShaw/jspcapy) works on `jspcap`, which is a command line tool for PCAP extraction.
+> There is a project called [`jspcapy`](https://github.com/JarryShaw/jspcapy) works on `pcapkit`, which is a command line tool for PCAP extraction.
 
-&emsp; Unlike popular PCAP file extractors, such as `Scapy`, `dpkt`, `pyshark`, and etc, `jspcap` uses __streaming__ strategy to read input files. That is to read frame by frame, decrease occupation on memory, as well as enhance efficiency in some way.
+&emsp; Unlike popular PCAP file extractors, such as `Scapy`, `dpkt`, `pyshark`, and etc, `pcapkit` uses __streaming__ strategy to read input files. That is to read frame by frame, decrease occupation on memory, as well as enhance efficiency in some way.
 
 ### Module Structure
 
-&emsp; In `jspcap`, all files can be described as following six parts.
+&emsp; In `pcapkit`, all files can be described as following six parts.
 
- - Foundation (`jspcap.foundation`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
- - Interface (`jspcap.interface`) -- user interface for the `jspcap` library, which standardise and simplify the usage of this library
- - Reassembly (`jspcap.reassembly`) -- base on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implement datagram reassembly of IP and TCP packets
- - IPSuite (`jspcap.ipsuite`) -- collection of constructors for [Internet Protocol Suite](https://en.wikipedia.org/wiki/Internet_protocol_suite)
- - Protocols (`jspcap.protocols`) -- collection of all protocol family, with detail implementation and methods
- - Utilities (`jspcap.utilities`) -- collection of four utility functions and classes
- - CoreKit (`jspcap.corekit`) -- core utilities for `jspcap` implementation
- - DumpKit (`jspcap.dumpkit`) -- dump utilities for `jspcap` implementation
+ - Foundation (`pcapkit.foundation`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
+ - Interface (`pcapkit.interface`) -- user interface for the `pcapkit` library, which standardise and simplify the usage of this library
+ - Reassembly (`pcapkit.reassembly`) -- base on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implement datagram reassembly of IP and TCP packets
+ - IPSuite (`pcapkit.ipsuite`) -- collection of constructors for [Internet Protocol Suite](https://en.wikipedia.org/wiki/Internet_protocol_suite)
+ - Protocols (`pcapkit.protocols`) -- collection of all protocol family, with detail implementation and methods
+ - Utilities (`pcapkit.utilities`) -- collection of four utility functions and classes
+ - CoreKit (`pcapkit.corekit`) -- core utilities for `pcapkit` implementation
+ - DumpKit (`pcapkit.dumpkit`) -- dump utilities for `pcapkit` implementation
 
-![](./doc/jspcap.png)
+![](./doc/pypcapkit.png)
 
 ### Engine Comparison
 
-&emsp; Besides, due to complexity of `jspcap`, its extraction procedure takes around *0.01* seconds per packet, which is not ideal enough. Thus, `jspcap` introduced alternative extraction engines to accelerate this procedure. By now, `jspcap` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/). Plus, `jspcap` supports two strategies of multiprocessing (`server` & `pipeline`). For more information, please refer to the document.
+&emsp; Besides, due to complexity of `pcapkit`, its extraction procedure takes around *0.01* seconds per packet, which is not ideal enough. Thus, `pcapkit` introduced alternative extraction engines to accelerate this procedure. By now, `pcapkit` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/). Plus, `pcapkit` supports two strategies of multiprocessing (`server` & `pipeline`). For more information, please refer to the document.
 
 |   Engine   | Performance (seconds per packet) |
 | :--------: | :------------------------------: |
@@ -72,18 +74,18 @@
 
 ## Installation
 
-> Note that `jspcap` only supports Python versions __since 3.6__
+> Note that `pcapkit` only supports Python versions __since 3.6__
 
 &emsp; Simply run the following to install the latest from PyPI:
 
 ```
-pip install jspcap
+pip install pypcapkit
 ```
 
 &emsp; Or install from the git repository:
 
 ```
-$ git clone https://github.com/JarryShaw/jspcap.git
+$ git clone https://github.com/JarryShaw/pypcapkit.git
 $ python setup.py install
 ```
 
@@ -97,10 +99,10 @@ $ python setup.py install
 
 |                                           NAME                                           |            DESCRIPTION            |
 | :--------------------------------------------------------------------------------------: | :-------------------------------: |
-| [`extract`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#extract)       |        extract a PCAP file        |
-| [`analyse`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#analyse)       | analyse application layer packets |
-| [`reassemble`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
-| [`trace`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#trace)           |      trace TCP packet flows       |
+| [`extract`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#extract)       |        extract a PCAP file        |
+| [`analyse`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#analyse)       | analyse application layer packets |
+| [`reassemble`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
+| [`trace`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#trace)           |      trace TCP packet flows       |
 
 #### Macros
 
@@ -108,60 +110,60 @@ $ python setup.py install
 
 |                                      NAME                                      |               DESCRIPTION                |
 | :----------------------------------------------------------------------------: | :--------------------------------------: |
-| [`JSON`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  | JavaScript Object Notation (JSON) format |
-| [`PLIST`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats) |    macOS Property List (PLIST) format    |
-| [`TREE`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  |          Tree-View text format           |
-| [`PCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#formats)  |               PCAP format                |
+| [`JSON`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#formats)  | JavaScript Object Notation (JSON) format |
+| [`PLIST`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#formats) |    macOS Property List (PLIST) format    |
+| [`TREE`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#formats)  |          Tree-View text format           |
+| [`PCAP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#formats)  |               PCAP format                |
 
 ##### Layers
 
 |                             NAME                             |    DESCRIPTION    |
 | :----------------------------------------------------------: | :---------------: |
-| [`RAW`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) | no specific layer |
-| [`LINK`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  data-link layer  |
-| [`INET`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  internet layer   |
-| [`TRANS`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) |  transport layer  |
-| [`APP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#layers) | application layer |
+| [`RAW`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#layers) | no specific layer |
+| [`LINK`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#layers) |  data-link layer  |
+| [`INET`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#layers) |  internet layer   |
+| [`TRANS`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#layers) |  transport layer  |
+| [`APP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#layers) | application layer |
 
 ##### Engines
 
 |                             NAME                             |                         DESCRIPTION                         |
 | :----------------------------------------------------------: | :---------------------------------------------------------: |
-| [`jsPCAP`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |                     the default engine                      |
-| [`MPServer`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |   the multiprocessing engine with server process strategy   |
-| [`MPPipeline`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |      the multiprocessing engine with pipeline strategy      |
-| [`DPKT`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |    the [`DPKT`](https://github.com/kbandla/dpkt) engine     |
-| [`Scapy`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) |           the [`Scapy`](https://scapy.net) engine           |
-| [`PyShark`](https://github.com/JarryShaw/jspcap/tree/master/src/interface#engines) | the [`PyShark`](https://kiminewt.github.io/pyshark/) engine |
+| [`PCAPKit`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#engines) |                     the default engine                      |
+| [`MPServer`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#engines) |   the multiprocessing engine with server process strategy   |
+| [`MPPipeline`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#engines) |      the multiprocessing engine with pipeline strategy      |
+| [`DPKT`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#engines) |    the [`DPKT`](https://github.com/kbandla/dpkt) engine     |
+| [`Scapy`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#engines) |           the [`Scapy`](https://scapy.net) engine           |
+| [`PyShark`](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#engines) | the [`PyShark`](https://kiminewt.github.io/pyshark/) engine |
 
 #### Protocols
 
 |                                                NAME                                               |             DESCRIPTION             |
 | :-----------------------------------------------------------------------------------------------: | :---------------------------------: |
-| [`Raw`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols#raw)                        |           Raw Packet Data           |
-| [`ARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#arp)                   |     Address Resolution Protocol     |
-| [`Ethernet`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ethernet)         |          Ethernet Protocol          |
-| [`L2TP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#l2tp)                 |   Layer Two Tunnelling Protocol     |
-| [`OSPF`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#ospf)                 |      Open Shortest Path First       |
-| [`RARP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#rarp)                 | Reverse Address Resolution Protocol |
-| [`VLAN`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/link#vlan)                 |    802.1Q Customer VLAN Tag Type    |
-| [`AH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ah)                 |       Authentication Header         |
-| [`HIP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#hip)               |       Host Identity Protocol        |
-| [`HOPOPT`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#hopopt)         |       IPv6 Hop-by-Hop Options       |
-| [`IP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ip)                 |          Internet Protocol          |
-| [`IPsec`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipsec)           |     Internet Protocol Security      |
-| [`IPv4`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv4)             |     Internet Protocol version 4     |
-| [`IPv6`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6)             |     Internet Protocol version 6     |
-| [`IPv6_Frag`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_frag)   |      Fragment Header for IPv6       |
-| [`IPv6_Opts`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_opts)   |    Destination Options for IPv6     |
-| [`IPv6_Route`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipv6_route) |       Routing Header for IPv6       |
-| [`IPX`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#ipx)               |    Internetwork Packet Exchange     |
-| [`MH`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/internet#mh)                 |           Mobility Header           |
-| [`TCP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#tcp)              |    Transmission Control Protocol    |
-| [`UDP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/transport#udp)              |       User Datagram Protocol        |
-| [`HTTP`](https://github.com/JarryShaw/jspcap/tree/master/src/protocols/application#http)          |     Hypertext Transfer Protocol     |
+| [`Raw`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#raw)                        |           Raw Packet Data           |
+| [`ARP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link#arp)                   |     Address Resolution Protocol     |
+| [`Ethernet`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link#ethernet)         |          Ethernet Protocol          |
+| [`L2TP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link#l2tp)                 |   Layer Two Tunnelling Protocol     |
+| [`OSPF`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link#ospf)                 |      Open Shortest Path First       |
+| [`RARP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link#rarp)                 | Reverse Address Resolution Protocol |
+| [`VLAN`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link#vlan)                 |    802.1Q Customer VLAN Tag Type    |
+| [`AH`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ah)                 |       Authentication Header         |
+| [`HIP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#hip)               |       Host Identity Protocol        |
+| [`HOPOPT`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#hopopt)         |       IPv6 Hop-by-Hop Options       |
+| [`IP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ip)                 |          Internet Protocol          |
+| [`IPsec`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipsec)           |     Internet Protocol Security      |
+| [`IPv4`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv4)             |     Internet Protocol version 4     |
+| [`IPv6`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv6)             |     Internet Protocol version 6     |
+| [`IPv6_Frag`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv6_frag)   |      Fragment Header for IPv6       |
+| [`IPv6_Opts`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv6_opts)   |    Destination Options for IPv6     |
+| [`IPv6_Route`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv6_route) |       Routing Header for IPv6       |
+| [`IPX`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipx)               |    Internetwork Packet Exchange     |
+| [`MH`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#mh)                 |           Mobility Header           |
+| [`TCP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/transport#tcp)              |    Transmission Control Protocol    |
+| [`UDP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/transport#udp)              |       User Datagram Protocol        |
+| [`HTTP`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/application#http)          |     Hypertext Transfer Protocol     |
 
-&emsp; Documentation can be found in submodules of `jspcap`. Or, you may find usage sample in the [`test`](https://github.com/JarryShaw/jspcap/tree/master/test#test-samples) folder. For further information, please refer to the source code -- the docstrings should help you :)
+&emsp; Documentation can be found in submodules of `pcapkit`. Or, you may find usage sample in the [`test`](https://github.com/JarryShaw/pypcapkit/tree/master/test#test-samples) folder. For further information, please refer to the source code -- the docstrings should help you :)
 
 __ps__: `help` function in Python should always help you out.
 
@@ -172,8 +174,8 @@ __ps__: `help` function in Python should always help you out.
 &emsp; As it shows in the help manual, it is quite easy to use:
 
 ```
-$ jspcapy --help
-usage: jspcapy [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a] [-v]
+$ pcapkit --help
+usage: pcapkit [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a] [-v]
                [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]
                input-file-name
 
@@ -192,7 +194,7 @@ optional arguments:
   -f format, --format format
                         Print a extraction report in the specified output
                         format. Available are all formats supported by
-                        jsformat, e.g.: json, plist, and tree.
+                        dictdumper, e.g.: json, plist, and tree.
   -j, --json            Display extraction report as json. This will yield
                         "raw" output that may be used by external tools. This
                         option overrides all other options.
@@ -207,8 +209,8 @@ optional arguments:
   -v, --verbose         Show more information.
   -F, --files           Split each frame into different files.
   -E PKG, --engine PKG  Indicate extraction engine. Note that except default
-                        or jspcap engine, all other engines need support of
-                        corresponding packages.
+                        engine, all other engines need support of corresponding
+                        packages.
   -P PROTOCOL, --protocol PROTOCOL
                         Indicate extraction stops after which protocol.
   -L LAYER, --layer LAYER
@@ -225,57 +227,57 @@ optional arguments:
 
 ### Usage Samples
 
-&emsp; As described in `test` folder, `jspcap` is quite easy to use, with simply three verbs as its main interface. Several scenarios are shown as below.
+&emsp; As described in `test` folder, `pcapkit` is quite easy to use, with simply three verbs as its main interface. Several scenarios are shown as below.
 
  - extract a PCAP file and dump the result to a specific file (with no reassembly)
 
     ```python
-    import jspcap
+    import pcapkit
     # dump to a PLIST file with no frame storage (property frame disabled)
-    plist = jspcap.extract(fin='in.pcap', fout='out.plist', format='plist', store=False)
+    plist = pcapkit.extract(fin='in.pcap', fout='out.plist', format='plist', store=False)
     # dump to a JSON file with no extension auto-complete
-    json = jspcap.extract(fin='in.cap', fout='out.json', format='json', extension=False)
+    json = pcapkit.extract(fin='in.cap', fout='out.json', format='json', extension=False)
     # dump to a folder with each tree-view text file per frame
-    tree = jspcap.extract(fin='in.pcap', fout='out', format='tree', files=True)
+    tree = pcapkit.extract(fin='in.pcap', fout='out', format='tree', files=True)
     ```
 
  - extract a PCAP file and fetch IP packet (both IPv4 and IPv6) from a frame (with no output file)
 
     ```python
-    >>> import jspcap
-    >>> extraction = jspcap.extract(fin='in.pcap', nofile=True)
+    >>> import pcapkit
+    >>> extraction = pcapkit.extract(fin='in.pcap', nofile=True)
     >>> frame0 = extraction.frame[0]
     # check if IP in this frame, otherwise ProtocolNotFound will be raised
-    >>> flag = jspcap.IP in frame0
-    >>> tcp = frame0[jspcap.IP] if flag else None
+    >>> flag = pcapkit.IP in frame0
+    >>> tcp = frame0[pcapkit.IP] if flag else None
     ```
 
  - extract a PCAP file and reassemble TCP payload (with no output file nor frame storage)
 
     ```python
-    import jspcap
+    import pcapkit
     # set strict to make sure full reassembly
-    extraction = jspcap.extract(fin='in.pcap', store=False, nofile=True, tcp=True, strict=True)
+    extraction = pcapkit.extract(fin='in.pcap', store=False, nofile=True, tcp=True, strict=True)
     # print extracted packet if HTTP in reassembled payloads
     for packet in extraction.reassembly.tcp:
     for reassembly in packet.packets:
-        if jspcap.HTTP in reassembly.protochain:
+        if pcapkit.HTTP in reassembly.protochain:
             print(reassembly.info)
     ```
 
 ### CLI Samples
 
-&emsp; The CLI (command line interface) of `jspcap` has two different access.
+&emsp; The CLI (command line interface) of `pcapkit` has two different access.
 
- - through console scripts -- use command name `jspcapy` directly (as shown in samples)
- - through Python module -- `python -m jspcap [...]` works exactly the same as above
+ - through console scripts -- use command name `pcapkit` directly (as shown in samples)
+ - through Python module -- `python -m pypcapkit [...]` works exactly the same as above
 
 Here are some usage samples:
 
  - export to a macOS Property List ([`Xcode`](https://developer.apple.com/xcode) has special support for this format)
 
  ```
- $ jspcapy in --format plist --verbose
+ $ pcapkit in --format plist --verbose
  🚨Loading file 'in.pcap'
   - Frame   1: Ethernet:IPv6:ICMPv6
   - Frame   2: Ethernet:IPv6:ICMPv6
@@ -289,7 +291,7 @@ Here are some usage samples:
  - export to a JSON file (with no format specified)
 
  ```
- $ jspcapy in --output out.json --verbose
+ $ pcapkit in --output out.json --verbose
  🚨Loading file 'in.pcap'
   - Frame   1: Ethernet:IPv6:ICMPv6
   - Frame   2: Ethernet:IPv6:ICMPv6
@@ -303,7 +305,7 @@ Here are some usage samples:
  - export to a text tree view file (without extension autocorrect)
 
  ```
- $ jspcapy in --output out --format tree --verbose
+ $ pcapkit in --output out --format tree --verbose
  🚨Loading file 'in.pcap'
   - Frame   1: Ethernet:IPv6:ICMPv6
   - Frame   2: Ethernet:IPv6:ICMPv6

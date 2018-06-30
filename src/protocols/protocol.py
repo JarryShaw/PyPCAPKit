@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """root protocol
 
-`jspcap.protocols.protocol` contains `Protocol` only,
+`pcapkit.protocols.protocol` contains `Protocol` only,
 which is an abstract base clss for all protocol family,
 with pre-defined utility arguments and methods of specified
 protocols.
@@ -16,14 +16,14 @@ import re
 import struct
 import textwrap
 
-from jspcap.corekit.infoclass import Info
-from jspcap.corekit.protochain import ProtoChain
-from jspcap.utilities.decorators import beholder, seekset
-from jspcap.utilities.exceptions import BoolError, BytesError, StructError
-from jspcap.utilities.validations import bool_check, int_check
+from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.utilities.decorators import beholder, seekset
+from pcapkit.utilities.exceptions import BoolError, BytesError, StructError
+from pcapkit.utilities.validations import bool_check, int_check
 
 ###############################################################################
-# from jspcap.protocols.raw import Raw
+# from pcapkit.protocols.raw import Raw
 ###############################################################################
 
 
@@ -319,7 +319,7 @@ class Protocol:
             * str -- alias of next layer
 
         """
-        from jspcap.protocols.raw import Raw
+        from pcapkit.protocols.raw import Raw
         next_ = Raw(io.BytesIO(self._read_fileng(length)), length,
                     layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias

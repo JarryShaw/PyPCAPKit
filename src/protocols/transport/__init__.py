@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """transport layer protocols
 
-`jspcap.protocols.transport` is collection of all protocols
+`pcapkit.protocols.transport` is collection of all protocols
 in transport layer, with detailed implementation and
 methods.
 
@@ -9,14 +9,14 @@ methods.
 # TODO: Implements DCCP, RSVP, STCP.
 
 # Base Class for Transport Layer
-from jspcap.protocols.transport.transport import Transport
+from pcapkit.protocols.transport.transport import Transport
 
 # Utility Classes for Protocols
-from jspcap.protocols.transport.tcp import TCP
-from jspcap.protocols.transport.udp import UDP
+from pcapkit.protocols.transport.tcp import TCP
+from pcapkit.protocols.transport.udp import UDP
 
 # Transport Layer Protocol Numbers
-from jspcap.protocols.transport.transport import TP_PROTO
+from pcapkit.protocols.transport.transport import TP_PROTO
 
 
 __all__ = [

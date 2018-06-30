@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """root link layer protocol
 
-`jspcap.protocols.link.link` contains both `LINKTYPE`
+`pcapkit.protocols.link.link` contains both `LINKTYPE`
 and `Link`. The former is a dictionary of link layer header
 type values, registered in IANA. And the latter is a base
 class for link layer protocols, eg. ARP/InARP, Ethernet,
@@ -10,8 +10,8 @@ L2TP, OSPF, RARP/DRARP and etc.
 """
 import io
 
-from jspcap.protocols.internet.internet import ETHERTYPE
-from jspcap.protocols.protocol import Protocol
+from pcapkit.protocols.internet.internet import ETHERTYPE
+from pcapkit.protocols.protocol import Protocol
 
 
 __all__ = ['Link', 'LINKTYPE']
@@ -108,21 +108,21 @@ class Link(Protocol):
 
         """
         if self._sigterm:
-            from jspcap.protocols.raw import Raw as Protocol
+            from pcapkit.protocols.raw import Raw as Protocol
         elif proto == 'ARP':
-            from jspcap.protocols.link.arp import ARP as Protocol
+            from pcapkit.protocols.link.arp import ARP as Protocol
         elif proto == 'RARP':
-            from jspcap.protocols.link.rarp import RARP as Protocol
+            from pcapkit.protocols.link.rarp import RARP as Protocol
         elif proto == 'VLAN':
-            from jspcap.protocols.link.vlan import VLAN as Protocol
+            from pcapkit.protocols.link.vlan import VLAN as Protocol
         elif proto == 'IPv4':
-            from jspcap.protocols.internet.ipv4 import IPv4 as Protocol
+            from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol
         elif proto == 'IPv6':
-            from jspcap.protocols.internet.ipv6 import IPv6 as Protocol
+            from pcapkit.protocols.internet.ipv6 import IPv6 as Protocol
         elif proto == 'IPX':
-            from jspcap.protocols.internet.ipx import IPX as Protocol
+            from pcapkit.protocols.internet.ipx import IPX as Protocol
         else:
-            from jspcap.protocols.raw import Raw as Protocol
+            from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(io.BytesIO(self._read_fileng(length)), length,
                             error=self._onerror, layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias

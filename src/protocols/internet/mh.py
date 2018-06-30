@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """mobility header
 
-`jspcap.protocols.internet.mh` contains `MH` only,
+`pcapkit.protocols.internet.mh` contains `MH` only,
 which implements extractor for Mobility Header (MH),
 whose structure is described as below.
 
@@ -19,8 +19,8 @@ whose structure is described as below.
 
 """
 # TODO: Implements extractor for message data of all MH types.
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.protocol import Protocol
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.protocol import Protocol
 
 
 __all__ = ['MH']

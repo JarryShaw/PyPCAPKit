@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """internet protocol
 
-`jspcap.protocols.internet.ipsec` contains `IP` only,
+`pcapkit.protocols.internet.ipsec` contains `IP` only,
 which is a base class for Internet Protocol (IP) protocol
 family, eg. IPv4, IPv6, and IPsec.
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.internet.internet import Internet
-from jspcap.utilities.decorators import seekset
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.internet.internet import Internet
+from pcapkit.utilities.decorators import seekset
 
 
 __all__ = ['IP']

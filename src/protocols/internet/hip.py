@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """host identity protocol
 
-`jspcap.protocols.internet.hip` contains `HIP`
+`pcapkit.protocols.internet.hip` contains `HIP`
 only, which implements extractor for Host Identity
 Protocol (HIP), whose structure is described as below.
 
@@ -30,9 +30,9 @@ Protocol (HIP), whose structure is described as below.
 
 """
 # TODO: Implements extractor of all HIP parameters.
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.protocol import Protocol
-from jspcap.utilities.exceptions import ProtocolError
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.protocol import Protocol
+from pcapkit.utilities.exceptions import ProtocolError
 
 
 __all__ = ['HIP']

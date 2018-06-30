@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """version info
 
-`jspcap.corekit.version` contains tuple-like class
+`pcapkit.corekit.version` contains tuple-like class
 `VersionInfo`, which is originally designed alike
 `sys.version_info`.
 

@@ -1,6 +1,6 @@
 # Reassembly Manual
 
-&emsp; `jspcap` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for reassembly support. Usage instructions and samples attached.
+&emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for reassembly support. Usage instructions and samples attached.
 
  - [Algorithms](#algorithms)
     * [Basic Algorithm](#basic-algorithm)
@@ -19,7 +19,7 @@
 
 ## Algorithms
 
-&emsp; `jspcap` provides reassembly support with algorithms described in [`RFC 791`](https://tools.ietf.org/html/rfc791#section-3.1) and [`RFC 815`](https://tools.ietf.org/html/rfc815).
+&emsp; `pcapkit` provides reassembly support with algorithms described in [`RFC 791`](https://tools.ietf.org/html/rfc791#section-3.1) and [`RFC 815`](https://tools.ietf.org/html/rfc815).
 
 ### Basic Algorithm
 
@@ -104,15 +104,15 @@ timer expires: {
 
 ## Reassembly
 
-&emsp; `jspcap.reassembly` bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets.
+&emsp; `pcapkit.reassembly` bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets.
 
 <a name="class-reassembly"> </a>
 
 ### `Reassembly`
 
- > described in [`src/reassembly/reassembly.py`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly/reassembly.py)
+ > described in [`src/reassembly/reassembly.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly/reassembly.py)
 
-&emsp; `jspcap.reassembly.reassembly` contains `Reassembly` only, which is an abstract base class for all reassembly classes, bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets.
+&emsp; `pcapkit.reassembly.reassembly` contains `Reassembly` only, which is an abstract base class for all reassembly classes, bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets.
 
 ```python
 class Reassembly(builtins.object)
@@ -175,12 +175,12 @@ class Reassembly(builtins.object)
 
 ### `IP_Reassembly`
 
- > described in [`src/reassembly/ip.py`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly/ip.py)
+ > described in [`src/reassembly/ip.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly/ip.py)
 
-&emsp; `jspcap.reassembly.ip` contains `IP_Reassembly` only, which is the base class for IPv4 and IPv6 reassembly. The algorithm implementation is based on IP reassembly procedure introduced in [`RFC 791`](https://tools.ietf.org/html/rfc791), using `RCVBT` (fragment received-bit table). Though another algorithm is explained in [`RFC 815`](https://tools.ietf.org/html/rfc815), replacing `RCVBT`, however, this implementation still used the elder one.
+&emsp; `pcapkit.reassembly.ip` contains `IP_Reassembly` only, which is the base class for IPv4 and IPv6 reassembly. The algorithm implementation is based on IP reassembly procedure introduced in [`RFC 791`](https://tools.ietf.org/html/rfc791), using `RCVBT` (fragment received-bit table). Though another algorithm is explained in [`RFC 815`](https://tools.ietf.org/html/rfc815), replacing `RCVBT`, however, this implementation still used the elder one.
 
 ```python
-class IP_Reassembly(jspcap.reassembly.reassembly.Reassembly)
+class IP_Reassembly(pcapkit.reassembly.reassembly.Reassembly)
 ```
 
 ##### Reassembly for IP payload.
@@ -273,17 +273,17 @@ class IP_Reassembly(jspcap.reassembly.reassembly.Reassembly)
 
 #### `IPv4_Reassembly`
 
- > described in [`src/reassembly/ipv4.py`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly/ipv4.py)
+ > described in [`src/reassembly/ipv4.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly/ipv4.py)
 
 ```python
-class IPv4_Reassembly(jspcap.reassembly.ip.IP_Reassembly)
+class IPv4_Reassembly(pcapkit.reassembly.ip.IP_Reassembly)
 ```
 
 ##### Reassembly for IPv4 payload.
 
  - Usage:
     ```python
-    >>> from jspcap.reassembly import IPv4_Reassembly
+    >>> from pcapkit.reassembly import IPv4_Reassembly
     # Initialise instance:
     >>> ipv4_reassembly = IPv4_Reassembly()
     # Call reassembly:
@@ -294,17 +294,17 @@ class IPv4_Reassembly(jspcap.reassembly.ip.IP_Reassembly)
 
 #### `IPv6_Reassembly`
 
- > described in [`src/reassembly/ipv6.py`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly/ipv6.py)
+ > described in [`src/reassembly/ipv6.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly/ipv6.py)
 
 ```python
-class IPv6_Reassembly(jspcap.reassembly.ip.IP_Reassembly)
+class IPv6_Reassembly(pcapkit.reassembly.ip.IP_Reassembly)
 ```
 
 ##### Reassembly for IPv4 payload.
 
  - Usage:
     ```python
-    >>> from jspcap.reassembly import IPv6_Reassembly
+    >>> from pcapkit.reassembly import IPv6_Reassembly
     # Initialise instance:
     >>> ipv6_reassembly = IPv6_Reassembly()
     # Call reassembly:
@@ -315,19 +315,19 @@ class IPv6_Reassembly(jspcap.reassembly.ip.IP_Reassembly)
 
 ### `TCP_Reassembly`
 
- > described in [`src/reassembly/tcp.py`](https://github.com/JarryShaw/jspcap/tree/master/src/reassembly/tcp.py)
+ > described in [`src/reassembly/tcp.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly/tcp.py)
 
-&emsp; `jspcap.reassembly.tcp` contains `TCP_Reassembly` only, which reconstructs fragmented TCP packets back to origin. The algorithm implementation is based on `IP Datagram Reassembly Algorithm` introduced in [`RFC 815`](https://tools.ietf.org/html/rfc815). It described an algorithm dealing with `RCVBT` (fragment received bit table) appeared in [`RFC 791`](https://tools.ietf.org/html/rfc791).
+&emsp; `pcapkit.reassembly.tcp` contains `TCP_Reassembly` only, which reconstructs fragmented TCP packets back to origin. The algorithm implementation is based on `IP Datagram Reassembly Algorithm` introduced in [`RFC 815`](https://tools.ietf.org/html/rfc815). It described an algorithm dealing with `RCVBT` (fragment received bit table) appeared in [`RFC 791`](https://tools.ietf.org/html/rfc791).
 
 ```python
-class TCP_Reassembly(jspcap.reassembly.reassembly.Reassembly)
+class TCP_Reassembly(pcapkit.reassembly.reassembly.Reassembly)
 ```
 
 ##### Reassembly for TCP payload.
 
  - Usage:
     ```python
-    >>> from jspcap.reassembly import TCP_Reassembly
+    >>> from pcapkit.reassembly import TCP_Reassembly
     # Initialise instance:
     >>> tcp_reassembly = TCP_Reassembly()
     # Call reassembly:
@@ -428,6 +428,6 @@ class TCP_Reassembly(jspcap.reassembly.reassembly.Reassembly)
 ## TODO
 
  - [x] review docstrings
- - [x] write documentation for `jspcap.reassembly`
+ - [x] write documentation for `pcapkit.reassembly`
  - [ ] implement HTTP reassembly
  - [ ] implement IP reassembly extraction

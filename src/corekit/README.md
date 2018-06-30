@@ -1,6 +1,6 @@
 # CoreKit Manual
 
-&emsp; `jspcap` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for core utility classes.
+&emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for core utility classes.
 
  - [`Info`](#info)
  - [`VersionInfo`](#versioninfo)
@@ -10,7 +10,7 @@
 
 ## `Info`
 
- > described in [`src/corekit/infoclass.py`](https://github.com/JarryShaw/jspcap/tree/master/src/corekit/infoclass.py)
+ > described in [`src/corekit/infoclass.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit/infoclass.py)
 
 ```python
 class Info(builtins.dict)
@@ -38,7 +38,7 @@ class Info(builtins.dict)
 
 ## `VersionInfo`
 
- > described in [`src/corekit/version.py`](https://github.com/JarryShaw/jspcap/tree/master/src/corekit/version.py)
+ > described in [`src/corekit/version.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit/version.py)
 
 ```python
 class VersionInfo(builtins.object)
@@ -58,7 +58,7 @@ class VersionInfo(builtins.object)
 
 ## `ProtoChain`
 
- > described in [`src/corekit/protochain.py`](https://github.com/JarryShaw/jspcap/tree/master/src/corekit/protochain.py)
+ > described in [`src/corekit/protochain.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit/protochain.py)
 
 ```python
 class ProtoChain(builtins.object)

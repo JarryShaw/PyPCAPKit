@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """ethernet protocol
 
-`jspcap.protocols.link.ethernet` contains `Ethernet`
+`pcapkit.protocols.link.ethernet` contains `Ethernet`
 only, which implements extractor for Ethernet Protocol,
 whose structure is described as below.
 
@@ -13,8 +13,8 @@ Octets      Bits        Name                    Discription
 """
 import textwrap
 
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.link.link import Link
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.link.link import Link
 
 
 __all__ = ['Ethernet']

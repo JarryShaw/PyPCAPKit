@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """internet protocol version 6
 
-`jspcap.protocols.internet.ipv6` contains `IPv6` only,
+`pcapkit.protocols.internet.ipv6` contains `IPv6` only,
 which implements extractor for Internet Protocol version 6
 (IPv6), whose structure is described as below.
 
@@ -34,9 +34,9 @@ which implements extractor for Internet Protocol version 6
 import collections
 import ipaddress
 
-from jspcap.corekit.infoclass import Info
-from jspcap.corekit.protochain import ProtoChain
-from jspcap.protocols.internet.ip import IP
+from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.internet.ip import IP
 
 
 __all__ = ['IPv6']

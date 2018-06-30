@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """PCAP file headers
 
-`jspcap.protocols.pcap` contains header descriptions for
+`pcapkit.protocols.pcap` contains header descriptions for
 PCAP files, including global header and frame header.
 
 """
-from jspcap.protocols.pcap.frame import Frame
-from jspcap.protocols.pcap.header import Header
+from pcapkit.protocols.pcap.frame import Frame
+from pcapkit.protocols.pcap.header import Header
 
 
 __all__ = ['Frame', 'Header']

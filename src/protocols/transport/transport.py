@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """root transport layer protocol
 
-`jspcap.protocols.transport.transport` contains both
+`pcapkit.protocols.transport.transport` contains both
 `TP_PROTO` and `Transport`. The former is a dictionary
 of transport layer protocol numbers, registered in IANA.
 And the latter is a base class for transport layer
@@ -10,11 +10,11 @@ protocols, eg. TCP and UDP.
 """
 import io
 
-from jspcap.protocols.protocol import Protocol
-from jspcap.utilities.decorators import beholder_ng
+from pcapkit.protocols.protocol import Protocol
+from pcapkit.utilities.decorators import beholder_ng
 
 ###############################################################################
-# from jspcap.fundation.analysis import analyse
+# from pcapkit.fundation.analysis import analyse
 ###############################################################################
 
 
@@ -106,7 +106,7 @@ class Transport(Protocol):
             * str -- alias of next layer
 
         """
-        from jspcap.foundation.analysis import Analysis
+        from pcapkit.foundation.analysis import Analysis
         if self._onerror:
             next_ = beholder_ng(Analysis.analyse)(io.BytesIO(self._read_fileng(length)), length, _termination=self._sigterm)
         else:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """open shortest path first
 
-`jspcap.protocols.link.ospf` contains `OSPF` only,
+`pcapkit.protocols.link.ospf` contains `OSPF` only,
 which implements extractor for Open Shortest Path First
 (OSPF), whose structure is described as below.
 
@@ -22,8 +22,8 @@ which implements extractor for Open Shortest Path First
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.link.link import Link
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.link.link import Link
 
 
 __all__ = ['OSPF']

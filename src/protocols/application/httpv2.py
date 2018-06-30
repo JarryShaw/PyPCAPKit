@@ -1,6 +1,6 @@
 """hypertext transfer protocol (HTTP/2)
 
-`jspcap.protocols.application.httpv2` contains `HTTPv2`
+`pcapkit.protocols.application.httpv2` contains `HTTPv2`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/2), whose structure is described as below.
 
@@ -17,9 +17,9 @@ Protocol (HTTP/2), whose structure is described as below.
 """
 import collections
 
-from jspcap.corekit.infoclass import Info
-from jspcap.protocols.application.http import HTTP
-from jspcap.utilities.exceptions import ProtocolError
+from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.application.http import HTTP
+from pcapkit.utilities.exceptions import ProtocolError
 
 
 __all__ = ['HTTPv2']
