@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.9.5.post1'
+__version__ = '0.9.5.post2'
 
 
 # set-up script for pip distribution
@@ -26,7 +26,7 @@ setuptools.setup(
     long_description = long_desc,
     long_description_content_type='text/markdown',
     python_requires = '>=3.6',
-    install_requires = ['jsformat', 'chardet', 'setuptools'],
+    install_requires = ['dictdumper', 'chardet', 'setuptools'],
     extras_require = {
         'DPKT': ['dpkt'],
         'Scapy': ['scapy'],
