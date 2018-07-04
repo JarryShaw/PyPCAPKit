@@ -6,8 +6,9 @@ and match application layer protocol. Then, call
 corresponding modules and functions to extract the attributes.
 
 """
+import os
+
 from pcapkit.protocols.raw import Raw
-from pcapkit.utilities.decorators import seekset_ng
 from pcapkit.utilities.exceptions import ProtocolError
 
 ###############################################################################
@@ -49,10 +50,13 @@ class Analysis:
     def analyse(file, length=None, *, _termination=False):
         """Analyse application layer packets."""
         if not _termination:
+            temp = file.tell()
+
             # HTTP/1.* analysis
             flag, http = Analysis._analyse_httpv1(file, length)
             if flag:
                 return Analysis(http.info, http.protochain, http.alias)
+            file.seek(temp, os.SEEK_SET)
 
             # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
             # NB: the NOTE abrove is deprecated, since validations are performed
@@ -61,6 +65,7 @@ class Analysis:
             flag, http = Analysis._analyse_httpv2(file, length)
             if flag:
                 return Analysis(http.info, http.protochain, http.alias)
+            file.seek(temp, os.SEEK_SET)
 
         # raw packet analysis
         raw = Raw(file, length)
@@ -86,7 +91,6 @@ class Analysis:
     ##########################################################################
 
     @staticmethod
-    @seekset_ng
     def _analyse_httpv1(file, length):
         try:
             from pcapkit.protocols.application.httpv1 import HTTPv1
@@ -96,7 +100,6 @@ class Analysis:
         return True, http
 
     @staticmethod
-    @seekset_ng
     def _analyse_httpv2(file, length):
         try:
             from pcapkit.protocols.application.httpv2 import HTTPv2

@@ -8,8 +8,6 @@ And the latter is a base class for transport layer
 protocols, eg. TCP and UDP.
 
 """
-import io
-
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder_ng
 
@@ -108,7 +106,7 @@ class Transport(Protocol):
         """
         from pcapkit.foundation.analysis import Analysis
         if self._onerror:
-            next_ = beholder_ng(Analysis.analyse)(io.BytesIO(self._read_fileng(length)), length, _termination=self._sigterm)
+            next_ = beholder_ng(Analysis.analyse)(self._file, length, _termination=self._sigterm)
         else:
-            next_ = Analysis.analyse(io.BytesIO(self._read_fileng(length)), length, _termination=self._sigterm)
+            next_ = Analysis.analyse(self._file, length, _termination=self._sigterm)
         return True, next_.info, next_.protochain, next_.alias

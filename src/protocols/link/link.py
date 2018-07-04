@@ -8,7 +8,7 @@ class for link layer protocols, eg. ARP/InARP, Ethernet,
 L2TP, OSPF, RARP/DRARP and etc.
 
 """
-import io
+# import io
 
 from pcapkit.protocols.internet.internet import ETHERTYPE
 from pcapkit.protocols.protocol import Protocol
@@ -123,6 +123,6 @@ class Link(Protocol):
             from pcapkit.protocols.internet.ipx import IPX as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol
-        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length,
-                            error=self._onerror, layer=self._exlayer, protocol=self._exproto)
+        next_ = Protocol(self._file, length, error=self._onerror,
+                            layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias

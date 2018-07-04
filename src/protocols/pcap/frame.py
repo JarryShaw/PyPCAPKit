@@ -14,7 +14,6 @@ typedef struct pcaprec_hdr_s {
 
 """
 import datetime
-import io
 import os
 import re
 
@@ -125,20 +124,15 @@ class Frame(Protocol):
             cap_len = _olen,
         )
 
-        
         # load packet data
         length = frame['len']
-        bytes_ = self._file.read(length)
+        frame['packet'] = self._read_packet(header=16, payload=length, discard=True)
 
         # record file pointer
         if self._mpkt and self._mpfp:
-            # print(self._fnum, 'ready')
-            self._mpfp.put(self._file.tell())
+            print(self._fnum, 'ready')
+            self._mpfp.put(self._file.tell() + length)
             self._mpkt.pool += 1
-
-        # make BytesIO from frame packet data
-        self._file = io.BytesIO(bytes_)
-        frame['packet'] = self._read_packet(header=0, payload=length, discard=True)
 
         return self._decode_next_layer(frame, length)
 

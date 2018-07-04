@@ -9,7 +9,6 @@ protocols.
 """
 import abc
 import copy
-import io
 import numbers
 import os
 import re
@@ -115,8 +114,9 @@ class Protocol:
     # Not hashable
     __hash__ = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, file, *args, **kwargs):
         self = super().__new__(cls)
+        self._foffset = file.tell()
         self._onerror = kwargs.pop('error', False)
         self._exlayer = kwargs.pop('layer', str())
         self._exproto = kwargs.pop('protocol', str())
@@ -320,11 +320,12 @@ class Protocol:
 
         """
         from pcapkit.protocols.raw import Raw
-        next_ = Raw(io.BytesIO(self._read_fileng(length)), length,
+        next_ = Raw(self._file, length,
                     layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias
 
     def _check_termination(self):
+        """Check if matches termination boundary."""
         index = self.__index__()
         pattern = '|'.join(index) if isinstance(index, tuple) else index
         iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)

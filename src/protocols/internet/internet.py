@@ -8,8 +8,6 @@ latter is a base class for internet layer protocols, eg.
 AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 
 """
-import io
-
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.transport.transport import TP_PROTO
@@ -179,7 +177,6 @@ class Internet(Protocol):
             from pcapkit.protocols.transport.udp import UDP as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol
-        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length,
-                            version=version, extension=extension,
+        next_ = Protocol(self._file, length, version=version, extension=extension,
                             error=self._onerror, layer=self._exlayer, protocol=self._exproto)
         return True, next_.info, next_.protochain, next_.alias

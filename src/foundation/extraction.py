@@ -12,7 +12,6 @@ import collections
 import copy
 import datetime
 import importlib
-import io
 import ipaddress
 import os
 import pathlib
@@ -27,6 +26,7 @@ import warnings
 # import multiprocessing
 # 
 # import dpkt
+# import pyshark
 # import scapy.all
 # 
 # from dictdumper import PLIST, JSON, Tree, JavaScript, XML
@@ -213,7 +213,7 @@ class Extractor:
 
     def run(self):
         """Start extraction."""
-        tempflag = True
+        flag = True
         if self._exeng == 'dpkt':
             flag, engine = self.import_test('dpkt', name='DPKT')
             if flag:    return self._run_dpkt(engine)
@@ -225,26 +225,26 @@ class Extractor:
             if flag:    return self._run_pyshark(engine)
         elif self._exeng == 'pipeline':
             flag, engine = self.import_test('multiprocessing', name='Pipeline Multiprocessing')
-            self._flag_m = tempflag = bool(flag and (self._flag_a and CPU_CNT > 1))
+            self._flag_m = flag = bool(flag and (self._flag_a and CPU_CNT > 1))
             if self._flag_m:
                 return self._run_pipeline(engine)
             warnings.warn(f'extraction engine Pipeline Multiprocessing is not available; '
                             'using default engine instead', EngineWarning, stacklevel=stacklevel())
         elif self._exeng == 'server':
             flag, engine = self.import_test('multiprocessing', name='Server Multiprocessing')
-            self._flag_m = tempflag = bool(flag and (self._flag_a and CPU_CNT > 2))
+            self._flag_m = flag = bool(flag and (self._flag_a and CPU_CNT > 2))
             if self._flag_m:
                 return self._run_server(engine)
             warnings.warn(f'extraction engine Server Multiprocessing is not available; '
                             'using default engine instead', EngineWarning, stacklevel=stacklevel())
         elif self._exeng not in ('default', 'pcapkit'):
-            tempflag = False
+            flag = False
             warnings.warn(f'unsupported extraction engine: {self._exeng}; '
                             'using default engine instead',
                             EngineWarning, stacklevel=stacklevel())
 
         # using default/pcapkit engine
-        self._exeng = self._exeng if tempflag else 'default'
+        self._exeng = self._exeng if flag else 'default'
         self.record_header()            # read PCAP global header
         self.record_frames()            # read frames
 
@@ -614,7 +614,7 @@ class Extractor:
         # record frames
         if self._exeng == 'pipeline':
             if self._flag_d:
-                # frame._file = NotImplemented
+                frame._file = NotImplemented
                 mpkit.frames[self._frnum] = frame
                 # print(self._frnum, 'stored')
             mpkit.curent += 1
@@ -1349,7 +1349,7 @@ class Extractor:
                 self._ifile.seek(self._mpfdp.pop(self._frnum-1).get(), os.SEEK_SET)
 
                 # create worker
-                # print(self._frnum, 'start')
+                print(self._frnum, 'start')
                 proc = multiprocessing.Process(target=self._server_extract_frame,
                         kwargs={'mpkit': self._mpkit, 'mpbuf': self._mpbuf,
                                 'mpfdp': self._mpfdp[self._frnum]})
@@ -1378,7 +1378,7 @@ class Extractor:
             frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
                             layer=self._exlyr, protocol=self._exptl,
                             mpkit=mpkit, mpfdp=mpfdp)
-            # frame._file = NotImplemented
+            frame._file = NotImplemented
             mpbuf[self._frnum] = frame
         except EOFError:
             mpbuf[self._frnum] = EOFError
@@ -1386,7 +1386,7 @@ class Extractor:
         finally:
             mpkit.counter -= 1
             self._ifile.close()
-            # print(self._frnum, 'done')
+            print(self._frnum, 'done')
 
     def _server_analyse_frame(self, *, mpkit, mpfrm, mprsm, mpbuf):
         """Analyse frame."""
@@ -1396,7 +1396,7 @@ class Extractor:
             frame = mpbuf.pop(self._frnum, None)
             if frame is EOFError:   break
             if frame is None:       continue
-            # print(self._frnum, 'get')
+            print(self._frnum, 'get')
 
             self._read_frame(frame=frame)
         mpfrm += self._frame

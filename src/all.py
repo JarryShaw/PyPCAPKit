@@ -59,5 +59,5 @@ __all__ = [
     'TCP_Reassembly',                                       # TCP Reassembly
 
     # pcapkit.utilities
-    'beholder_ng', 'seekset_ng',                            # Decorators
+    'beholder', 'seekset',                                  # Decorators
 ]

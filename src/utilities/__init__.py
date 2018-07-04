@@ -13,4 +13,4 @@ from pcapkit.utilities.validations import *
 from pcapkit.utilities.warnings import *
 
 
-__all__ = ['seekset_ng', 'beholder_ng']
+__all__ = ['seekset', 'beholder']

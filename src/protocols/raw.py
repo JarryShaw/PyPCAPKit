@@ -75,7 +75,7 @@ class Raw(Protocol):
             length = len(self)
 
         raw = dict(
-            packet = self._read_packet(length),
+            packet = self._read_fileng(length),
             error = error or None,
         )
 

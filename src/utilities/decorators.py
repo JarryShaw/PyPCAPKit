@@ -15,7 +15,7 @@ import os
 ###############################################################################
 
 
-__all__ = ['seekset', 'seekset_ng', 'beholder', 'beholder_ng']
+__all__ = ['seekset', 'beholder', 'beholder_ng']
 
 
 def seekset(func):
@@ -23,21 +23,9 @@ def seekset(func):
     @functools.wraps(func)
     def seekcur(self, *args, **kw):
         seek_cur = self._file.tell()
-        self._file.seek(os.SEEK_SET)
+        self._file.seek(self._foffset, os.SEEK_SET)
         return_ = func(self, *args, **kw)
         self._file.seek(seek_cur, os.SEEK_SET)
-        return return_
-    return seekcur
-
-
-def seekset_ng(func):
-    """Read file from start then set back to original."""
-    @functools.wraps(func)
-    def seekcur(file, *args, **kw):
-        seek_cur = file.tell()
-        file.seek(os.SEEK_SET)
-        return_ = func(file, *args, **kw)
-        file.seek(seek_cur, os.SEEK_SET)
         return return_
     return seekcur
 
