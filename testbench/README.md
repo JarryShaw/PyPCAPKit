@@ -37,3 +37,9 @@
  > [__DEPRECATED__] 0.04677961190541585 seconds per packet
 
 &emsp; This implementation uses multiprocessing with a server process to perform reassembly.
+
+## Reconstructioin Test Bench
+
+### [FileIO]
+
+&emsp; Under development of the reconstruction for replacing `BytesIO`s with the original `TextIOWrapper` *file-like* object during extraction.
