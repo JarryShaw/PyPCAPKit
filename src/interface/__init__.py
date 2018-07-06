@@ -6,6 +6,9 @@ interfaces, variables, and etc. These interfaces are
 designed to help and simplify the usage of `pcapkit`.
 
 """
+import io
+import sys
+
 from pcapkit.foundation.analysis import Analysis
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.traceflow import TraceFlow
@@ -129,15 +132,18 @@ def analyse(*, file, length=None):
     """Analyse application layer packets.
 
     Keyword arguments:
-        * file -- file-like object, packet to be analysed
+        * file -- bytes or file-like object, packet to be analysed
         * length -- int, length of the analysing packet
 
     Returns:
         * Analysis -- an Analysis object from `pcapkit.analyser`
 
     """
+    if isinstance(file, bytes):
+        file = io.BytesIO(file)
+
     io_check(file)
-    int_check(length)
+    int_check(length or sys.maxsize)
 
     return Analysis.analyse(file, length)
 
@@ -177,4 +183,4 @@ def trace(*, fout=None, format=None):
 
     """
     str_check(fout or '', format or '')
-    return TraceFlow(fout, format)
+    return TraceFlow(fout=fout, format=format)

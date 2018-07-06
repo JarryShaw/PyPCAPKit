@@ -152,7 +152,7 @@ class TraceFlow:
         # when FIN is set, submit buffer of this session
         if FIN:
             buf = self._buffer.pop(BUFID)
-            fpout, label = buf['fpout'], buf['label']
+            # fpout, label = buf['fpout'], buf['label']
             if self._fdpext:    buf['fpout'] = f'{self._fproot}/{label}.{self._fdpext}'
             else:               del buf['fpout']
             buf['index'] = tuple(buf['index'])
@@ -195,4 +195,5 @@ class TraceFlow:
 
     def __call__(self, packet):
         """Dump frame to output files."""
-        return self.dump(packet)
+        self._newflg = True
+        self.dump(packet)

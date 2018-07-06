@@ -14,6 +14,7 @@ from pcapkit.interface import *
 from pcapkit.ipsuite import *
 from pcapkit.protocols import *
 from pcapkit.reassembly import *
+from pcapkit.toolkit import *
 from pcapkit.utilities import *
 
 
@@ -57,6 +58,17 @@ __all__ = [
     # pcapkit.reassembly
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
     'TCP_Reassembly',                                       # TCP Reassembly
+
+    # pcapkit.toolkit
+    'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
+                                                            # default engine
+    'dpkt_ipv6_hdr_len', 'dpkt_packet2chain', 'dpkt_packet2dict',
+    'dpkt_ipv4_reassembly', 'dpkt_ipv6_reassembly', 'dpkt_tcp_reassembly', 'dpkt_tcp_traceflow',
+                                                            # DPKT engine
+    'pyshark_packet2dict', 'pyshark_tcp_traceflow',         # PyShark engine
+    'scapy_packet2chain', 'scapy_packet2dict',
+    'scapy_ipv4_reassembly', 'scapy_ipv6_reassembly', 'scapy_tcp_reassembly', 'scapy_tcp_traceflow',
+                                                            # Scapy engine
 
     # pcapkit.utilities
     'beholder_ng', 'seekset_ng',                            # Decorators

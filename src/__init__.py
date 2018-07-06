@@ -6,7 +6,7 @@
 its formatted output dumper.
 
     There is a project called
-    [`jspcapy](https://github.com/JarryShaw/jspcapy)
+    [`jspcapy`](https://github.com/JarryShaw/jspcapy)
     works on `pcapkit`, which is a command line tool for
     PCAP extraction.
 
@@ -46,12 +46,18 @@ different sections.
  - CoreKit (`pcapkit.corekit`)
     core utilities for `pcapkit` implementation
 
+ - ToolKit (`pcapkit.toolkit`)
+    utility tools for `pcapkit` implementation
+
  - DumpKit (`pcapkit.dumpkit`)
     dump utilities for `pcapkit` implementation
 
 """
 # Interface
 from pcapkit.interface import *
+
+# ToolKit
+from pcapkit.toolkit import *
 
 # Protocols
 from pcapkit.protocols.raw import Raw
