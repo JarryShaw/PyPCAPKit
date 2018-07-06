@@ -23,6 +23,9 @@
  - [CoreKit](#corekit)
     * [Module Manual](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit#corekit-manual)
     * [Module Index](#index-corekit)
+ - [ToolKit](#toolkit)
+    * [Module Manual](https://github.com/JarryShaw/pcapkit/tree/master/src/toolkit#toolkit-manual)
+    * [Module Index](#index-toolkit)
  - [DumpKit](#dumpkit)
     * [Module Manual](https://github.com/JarryShaw/pcapkit/tree/master/src/dumpkit#dumpkit-manual)
     * [Module Index](#index-dumpkit)
@@ -187,6 +190,17 @@
 | [`ProtoChain`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit#protochain)   |     protocol collection class     |
 
 &nbsp;
+
+## ToolKit
+
+ > described in [`src/toolkit`](https://github.com/JarryShaw/pcapkit/tree/master/src/toolkit#toolkit-manual)
+
+&emsp; `pcapkit.toolkit` is the collections of tools for capability with PCAP extraction engine, such as the default engine, [`Scapy`](https://scapy.net) engine, [`DPKT`](https://github.com/kbandla/dpkt) engine, and [`PyShark`](https://kiminewt.github.io/pyshark/) engine.
+
+<a name="index-toolkit"> </a>
+
+| NAME | DESCRIPTION |
+| :--: | :--: |
 
 ## DumpKit
 

@@ -15,6 +15,7 @@
         - [Protocols](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocols-manual)
         - [Utilities](https://github.com/JarryShaw/pypcapkit/tree/master/src/utilities#utilities-maunal)
         - [CoreKit](https://github.com/JarryShaw/pypcapkit/tree/master/src/corekit#corekit-manual)
+        - [ToolKit](https://github.com/JarryShaw/pypcapkit/tree/master/src/toolkit#toolkit-manual)
         - [DumpKit](https://github.com/JarryShaw/pypcapkit/tree/master/src/dumpkit#dumpkit-manual)
     * [Engine Comparison](#engine-comparison)
  - [Installation](#installation)
@@ -53,6 +54,7 @@
  - Protocols (`pcapkit.protocols`) -- collection of all protocol family, with detail implementation and methods
  - Utilities (`pcapkit.utilities`) -- collection of four utility functions and classes
  - CoreKit (`pcapkit.corekit`) -- core utilities for `pcapkit` implementation
+ - ToolKit (`pcapkit.toolkit`) -- capability tools for `pcapkit` implementation
  - DumpKit (`pcapkit.dumpkit`) -- dump utilities for `pcapkit` implementation
 
 ![](./doc/pypcapkit.png)
