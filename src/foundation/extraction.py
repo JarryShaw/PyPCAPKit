@@ -701,7 +701,7 @@ class Extractor:
             flag, data = ipv6_reassembly(packet, count=self._frnum)
             if flag:    self._reasm[1](data)
         if self._tcp:
-            flag, data = ipv4_reassembly(packet, count=self._frnum)
+            flag, data = tcp_reassembly(packet, count=self._frnum)
             if flag:    self._reasm[2](data)
 
         # trace flows
@@ -784,7 +784,7 @@ class Extractor:
             flag, data = ipv6_reassembly(packet, count=self._frnum)
             if flag:    self._reasm[1](data)
         if self._tcp:
-            flag, data = ipv4_reassembly(packet, count=self._frnum)
+            flag, data = tcp_reassembly(packet, count=self._frnum)
             if flag:    self._reasm[2](data)
 
         # trace flows

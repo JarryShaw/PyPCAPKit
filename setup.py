@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.9.6'
+__version__ = '0.9.6.post2'
 
 
 # set-up script for pip distribution
@@ -57,6 +57,7 @@ setuptools.setup(
         'pcapkit.protocols.link',
         'pcapkit.protocols.transport',
         'pcapkit.reassembly',
+        'pcapkit.toolkit',
         'pcapkit.utilities',
     ],
     package_data = {
@@ -82,6 +83,7 @@ setuptools.setup(
         'pcapkit.protocols.link': ['README.md',],
         'pcapkit.protocols.transport': ['README.md',],
         'pcapkit.reassembly': ['README.md',],
+        'pcapkit.toolkit': ['README.md',],
         'pcapkit.utilities': ['README.md',],
     },
     classifiers = [

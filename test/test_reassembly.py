@@ -13,7 +13,7 @@ import pcapkit
 os.system('> ../sample/out')
 
 extraction = pcapkit.extract(
-    fin='../sample/test.pcap',
+    fin='../sample/test.pcap', engine=pcapkit.Scapy,
     store=False, tcp=True, verbose=True, strict=True, nofile=True,
 )
 # pprint.pprint(extraction.frame)
