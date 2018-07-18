@@ -137,7 +137,7 @@ class TraceFlow:
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'.replace('.', '_')
+            label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'
             self._buffer[BUFID] = dict(
                 fpout = self._foutio(f'{self._fproot}/{label}.{self._fdpext}', protocol=info.protocol),
                 index = list(),

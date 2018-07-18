@@ -35,12 +35,12 @@ class Header(Protocol):
         self.__dict__.update(kwargs)
 
         # fetch values
-        version_major = self.__dict__.pop('version_major', 2)   # major version number
-        version_minor = self.__dict__.pop('version_minor', 4)   # minor version number
-        thiszone = self.__dict__.pop('thiszone', 0)             # GMT to local correction
-        sigfigs = self.__dict__.pop('sigfigs', 0)               # accuracy of timestamps
-        snaplen = self.__dict__.pop('snaplen', 262144)          # max length of captured packets, in octets
-        network = self.__dict__.pop('network', 'Ethernet')      # data link type
+        version_major = self.__dict__.get('version_major', 2)   # major version number
+        version_minor = self.__dict__.get('version_minor', 4)   # minor version number
+        thiszone = self.__dict__.get('thiszone', 0)             # GMT to local correction
+        sigfigs = self.__dict__.get('sigfigs', 0)               # accuracy of timestamps
+        snaplen = self.__dict__.get('snaplen', 262144)          # max length of captured packets, in octets
+        network = self.__dict__.get('network', 'Ethernet')      # data link type
 
         # update packet
         data = b'\xd4\xc3\xb2\xa1'

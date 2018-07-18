@@ -13,7 +13,6 @@ from pcapkit.ipsuite.pcap.header import Header
 __all__ = ['PCAP', 'NotImplementedIO']
 
 
-
 class NotImplementedIO:
     """Unspecified output format."""
     @property

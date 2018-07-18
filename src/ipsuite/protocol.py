@@ -139,8 +139,6 @@ class Protocol:
     def __init__(self, *args, **kwargs):
         self.__dict__ = kwargs
         for arg in args:
-            if isinstance(arg, Info):
-                arg = arg.infotodict()
             dict_check(arg)
             self.__dict__.update(arg)
         self.update()

@@ -35,21 +35,21 @@ class Frame(Protocol):
         self.__dict__.update(kwargs)
 
         # fetch values
-        packet = self.__dict__.pop('packet', bytes())               # raw packet data
-        frame_info = self.__dict__.pop('frame_info')                # extracted frame info
+        packet = self.__dict__.get('packet', bytes())               # raw packet data
+        frame_info = self.__dict__.get('frame_info')                # extracted frame info
         if frame_info and isinstance(frame_info, dict):
             now = [ int(x or 0) for x in str(time.time()).split('.') ]
-            ts_sec = frame_info.pop('ts_sec', now[0])               # timestamp seconds
-            ts_usec = frame_info.pop('ts_usec', now[1])             # timestamp microseconds
-            incl_len = frame_info.pop('incl_len', len(packet))      # number of octets of packet saved in file
-            orig_len = frame_info.pop('orig_len', len(packet))      # actual length of packet
+            ts_sec = frame_info.get('ts_sec', now[0])               # timestamp seconds
+            ts_usec = frame_info.get('ts_usec', now[1])             # timestamp microseconds
+            incl_len = frame_info.get('incl_len', len(packet))      # number of octets of packet saved in file
+            orig_len = frame_info.get('orig_len', len(packet))      # actual length of packet
         else:
-            timestamp = self.__dict__.pop('timestamp', time.time()) # timestamp
+            timestamp = self.__dict__.get('timestamp', time.time()) # timestamp
             now = [ int(x or 0) for x in str(timestamp).split('.') ]
-            ts_sec = self.__dict__.pop('ts_sec', now[0])            # timestamp seconds
-            ts_usec = self.__dict__.pop('ts_usec', now[1])          # timestamp microseconds
-            incl_len = self.__dict__.pop('incl_len', len(packet))   # number of octets of packet saved in file
-            orig_len = self.__dict__.pop('orig_len', len(packet))   # actual length of packet
+            ts_sec = self.__dict__.get('ts_sec', now[0])            # timestamp seconds
+            ts_usec = self.__dict__.get('ts_usec', now[1])          # timestamp microseconds
+            incl_len = self.__dict__.get('incl_len', len(packet))   # number of octets of packet saved in file
+            orig_len = self.__dict__.get('orig_len', len(packet))   # actual length of packet
 
         # update packet
         data = self.pack(ts_sec, size=4, lilendian=True)

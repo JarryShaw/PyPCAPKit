@@ -27,7 +27,8 @@ __all__ = [
     'VersionError', 'IndexNotFound', 'ProtocolError',           # ValueError
     'ProtocolNotImplemented',                                   # NotImplementedError
     'StructError',                                              # struct.error
-    'FragmentError', 'PacketError'                              # KeyError
+    'FragmentError', 'PacketError',                             # KeyError
+    'ModuleNotFound',                                           # ModuleNotFoundError
 ]
 
 
@@ -266,4 +267,14 @@ class FragmentError(BaseError, KeyError):
 
 class PacketError(BaseError, KeyError):
     """Invalid packet dict."""
+    pass
+
+
+##############################################################################
+# ModuleNotFoundError session.
+##############################################################################
+
+
+class ModuleNotFound(BaseError, ModuleNotFoundError):
+    """Module not found."""
     pass

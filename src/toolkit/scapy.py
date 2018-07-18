@@ -4,10 +4,15 @@
 """
 import ipaddress
 import time
+import warnings
 
-import scapy.all
+###############################################################################
+# import scapy.all
+###############################################################################
 
 from pcapkit.protocols.transport.transport import TP_PROTO
+from pcapkit.utilities.exceptions import stacklevel, ModuleNotFound
+from pcapkit.utilities.warnings import ScapyWarning
 
 
 __all__ = [
@@ -16,8 +21,18 @@ __all__ = [
 ]
 
 
+try:
+    import scapy.all
+except ImportError:
+    scapy = None
+    warnings.warn("dependency package 'Scapy' not found",
+                    ScapyWarning, stacklevel=stacklevel())
+
+
 def packet2chain(packet):
     """Fetch Scapy packet protocol chain."""
+    if scapy is None:
+        raise ModuleNotFound("No module named 'scapy'")
     chain = [packet.name,]
     payload = packet.payload
     while not isinstance(payload, scapy.all.packet.NoPayload):
@@ -28,6 +43,8 @@ def packet2chain(packet):
 
 def packet2dict(packet, *, count=NotImplemented):
     """Convert Scapy packet into dict."""
+    if scapy is None:
+        raise ModuleNotFound("No module named 'scapy'")
     def wrapper(packet):
         dict_ = packet.fields
         payload = packet.payload
@@ -68,6 +85,8 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
 
 def ipv6_reassembly(packet, *, count=NotImplemented):
     """Make data for IPv6 reassembly."""
+    if scapy is None:
+        raise ModuleNotFound("No module named 'scapy'")
     if 'IPv6' in packet:
         ipv6 = packet['IPv6']
         if scapy.all.IPv6ExtHdrFragment not in ipv6:
