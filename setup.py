@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.9.8rc1'
+__version__ = '0.9.8'
 
 
 # set-up script for pip distribution
@@ -28,6 +28,7 @@ setuptools.setup(
     python_requires = '>=3.6',
     install_requires = ['dictdumper', 'chardet', 'setuptools'],
     extras_require = {
+        'all': ['dpkt', 'scapy', 'pyshark'],
         'DPKT': ['dpkt'],
         'Scapy': ['scapy'],
         'PyShark': ['pyshark'],

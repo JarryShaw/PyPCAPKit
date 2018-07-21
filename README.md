@@ -78,17 +78,35 @@
 
 > Note that `pcapkit` only supports Python versions __since 3.6__
 
-&emsp; Simply run the following to install the latest from PyPI:
+&emsp; Simply run the following to install the current version from PyPI:
 
-```
+```sh
 pip install pypcapkit
 ```
 
-&emsp; Or install from the git repository:
+&emsp; Or install the latest version from the git repository:
 
+```sh
+git clone https://github.com/JarryShaw/pypcapkit.git
+cd pypcapkit
+pip install -e .
+# and to update at any time
+git pull
 ```
-$ git clone https://github.com/JarryShaw/pypcapkit.git
-$ python setup.py install
+
+&emsp; And since `pcapkit` supports various extraction engines, and extensive plug-in functions, you may want to install the optional ones:
+
+```sh
+# for DPKT only
+pip install pypcapkit[DPKT]
+# for Scapy only
+pip install pypcapkit[Scapy]
+# for PyShark only
+pip install pypcapkit[PyShark]
+# and to install all the optional packages
+pip install pypcapkit[all]
+# or to do this explicitly
+pip install pypcapkit dpkt scapy pyshark
 ```
 
 &nbsp;
