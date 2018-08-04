@@ -137,3 +137,10 @@ trace(*, fout=None, format=None)
 ```
 
 ##### Trace TCP flows.
+
+ - Keyword arguments:
+    * `fout` -- `str`, output path
+    * `format` -- `str`, output format
+
+ - Returns:
+    * `TraceFlow` -- a [`TraceFlow`](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation#class-traceflow) object

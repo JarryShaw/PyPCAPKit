@@ -37,21 +37,21 @@ def seekset(func):
 
 ##### Read file from start then set back to original.
 
-__NOTE__: this decorator works with class methods, which has a *file-like* attribute names `self._file`.
+__NOTE__: this decorator works with class methods, which has a *file-like* attribute names `self._file` and file offset pointer `self._seekset`.
 
 ### `seekset_ng`
 
 ```python
 def seekset_ng(func):
-    def seekcur(file, *args, **kwargs):
+    def seekcur(file, *args, seekset=os.SEEK_SET, **kwargs):
         ...
-        return func(file, *args, **kwargs)
+        return func(file, *args, seekset=seekset, **kwargs)
     return seekcur
 ```
 
 ##### Read file from start then set back to original.
 
-__NOTE__: positional argument `file` in `seekcur` must be a *file-like* object.
+__NOTE__: positional argument `file` in `seekcur` must be a *file-like* object and keyword argument `seekset` should be `int` type.
 
 ### `beholder`
 
@@ -221,3 +221,15 @@ class BaseWarning(builtins.Warning)
 ```python
 class warning(pcapkit.utilities.warnings.BaseWarning, builtins.Warning)
 ```
+
+|        NAME        |           INHERIT FROM            |          DESCRIPTION           |
+| :----------------: | :-------------------------------: | :----------------------------: |
+|  `FormatWarning`   |  `BaseWarning` / `ImportWarning`  | Warning on unknown format(s).  |
+|  `EngineWarning`   |  `BaseWarning` / `ImportWarning`  | Unsupported extraction engine. |
+|   `FileWarning`    | `BaseWarning` / `RuntimeWarning`  |      Warning on file(s).       |
+|   `LayerWarning`   | `BaseWarning` / `RuntimeWarning`  |      Unrecognised layer.       |
+| `ProtocolWarning`  | `BaseWarning` / `RuntimeWarning`  |     Unrecognised protocol.     |
+| `AttributeWarning` | `BaseWarning` / `RuntimeWarning`  |     Unsupported attribute.     |
+|   `DPKTWarning`    | `BaseWarning` / `ResourceWarning` |    Warnings on DPKT usage.     |
+|   `ScapyWarning`   | `BaseWarning` / `ResourceWarning` |    Warnings on Scapy usage.    |
+|  `PySharkWarning`  | `BaseWarning` / `ResourceWarning` |   Warnings on PyShark usage.   |

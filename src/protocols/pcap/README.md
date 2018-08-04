@@ -9,7 +9,7 @@
 
 ## `Header`
 
- > described in [`src/protocols/pcap/header.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/pcap/header.py)
+ > described in [`src/protocols/pcap/header.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/pcap/header.py)
 
 &emsp; `pcapkit.protocols.pcap.header` contains `Header` only, which implements extractor for global headers of PCAP.
 
@@ -38,7 +38,9 @@ class Header(pcapkit.protocols.protocol.Protocol)
     * `protocol` -- `str`, data link type
 
  - Methods:
-    * `index` -- call [`ProtoChain.index`](https://github.com/JarryShaw/pcapkit/tree/master/src#protochain)
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `index` -- call [`ProtoChain.index`](https://github.com/JarryShaw/pypcapkit/tree/master/src#protochain)
     * `read_header` -- read global header of PCAP file
 
  - Data modules:
@@ -54,7 +56,7 @@ class Header(pcapkit.protocols.protocol.Protocol)
 
 ## `Frame`
 
- > described in [`src/protocols/pcap/frame.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/pcap/frame.py)
+ > described in [`src/protocols/pcap/frame.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/pcap/frame.py)
 
 &emsp; `pcapkit.protocols.pcap.frame` contains `Frame` only, which implements extractor for frame headers of PCAP.
 
@@ -86,7 +88,9 @@ class Frame(pcapkit.protocols.protocol.Protocol)
     * `protochain` -- `ProtoChain`, protocol chain of current frame
 
  - Methods:
-    * `index` -- call [`ProtoChain.index`](https://github.com/JarryShaw/pcapkit/tree/master/src#protochain)
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `index` -- call [`ProtoChain.index`](https://github.com/JarryShaw/pypcapkit/tree/master/src#protochain)
     * `read_header` -- read each block after global header
 
  - Data modules:

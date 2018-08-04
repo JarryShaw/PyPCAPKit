@@ -8,8 +8,8 @@
 
  - [About](#about)
     * [Module Structure](#module-structure)
-        - [Foundation](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation#foundation-manual)
         - [Interface](https://github.com/JarryShaw/pypcapkit/tree/master/src/interface#interface-manual)
+        - [Foundation](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation#foundation-manual)
         - [Reassembly](https://github.com/JarryShaw/pypcapkit/tree/master/src/reassembly#reassembly-manual)
         - [IPSuite](https://github.com/JarryShaw/pypcapkit/tree/master/src/ipsuite#ipsuite-manual)
         - [Protocols](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocols-manual)
@@ -47,8 +47,8 @@
 
 &emsp; In `pcapkit`, all files can be described as following six parts.
 
- - Foundation (`pcapkit.foundation`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
  - Interface (`pcapkit.interface`) -- user interface for the `pcapkit` library, which standardise and simplify the usage of this library
+ - Foundation (`pcapkit.foundation`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
  - Reassembly (`pcapkit.reassembly`) -- base on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implement datagram reassembly of IP and TCP packets
  - IPSuite (`pcapkit.ipsuite`) -- collection of constructors for [Internet Protocol Suite](https://en.wikipedia.org/wiki/Internet_protocol_suite)
  - Protocols (`pcapkit.protocols`) -- collection of all protocol family, with detail implementation and methods
@@ -65,11 +65,11 @@
 
 |   Engine   | Performance (seconds per packet) |
 | :--------: | :------------------------------: |
-| `default`  |      `0.014525251388549805`      |
-|  `server`  |      `0.12124489148457845`       |
-| `pipeline` |      `0.014450424114863079`      |
-|  `scapy`   |      `0.002443440357844035`      |
 |   `dpkt`   |     `0.0003609057267506917`      |
+|  `scapy`   |      `0.002443440357844035`      |
+| `default`  |      `0.014425251388549805`      |
+| `pipeline` |      `0.014550424114863079`      |
+|  `server`  |      `0.04667099356651306`       |
 | `pyshark`  |       `0.0792640733718872`       |
 
 &nbsp;
@@ -289,7 +289,7 @@ optional arguments:
 
 &emsp; The CLI (command line interface) of `pcapkit` has two different access.
 
- - through console scripts -- use command name `pcapkit` directly (as shown in samples)
+ - through console scripts -- use command name `pcapkit [...]` directly (as shown in samples)
  - through Python module -- `python -m pypcapkit [...]` works exactly the same as above
 
 Here are some usage samples:

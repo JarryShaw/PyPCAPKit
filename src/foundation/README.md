@@ -3,18 +3,21 @@
 &emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for fundamental tools in the library.
 
  - [Extraction](#extraction)
-    * [Reference](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation/extraction.py)
+    * [Reference](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/extraction.py)
     * [`Extractor`](#extractor)
  - [Analysis](#analysis)
-    * [Reference](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation/analysis.py)
+    * [Reference](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/analysis.py)
     * [`analyse`](#analyse)
     * [`Analysis`](#class-analysis)
+ - [Trace TCP Flows](#traceflow)
+    * [Reference](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/traceflow.py)
+    * [`TraceFlow`](#class-traceflow)
 
 ---
 
 ## Extraction
 
- > described in [`src/foundation/extraction.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation/extraction.py)
+ > described in [`src/foundation/extraction.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/extraction.py)
 
 &emsp; `pcapkit.foundation.extraction` contains `Extractor` only, which synthesises file I/O and protocol analysis, coordinates information exchange in all network layers, extract parameters from a PCAP file.
 
@@ -107,7 +110,7 @@ class Extractor(builtins.object)
 
 ## Analysis
 
- > described in [`src/foundation/analysis.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation/analysis.py)
+ > described in [`src/foundation/analysis.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/analysis.py)
 
 &emsp; `pcapkit.foundation.analysis` works as a header quarter to analyse and match application layer protocol. Then, call corresponding modules and functions to extract the attributes.
 
@@ -138,3 +141,78 @@ class Analysis(builtins.object)
            * `length` -- `int`, length of the analysing packet
         - Returns:
            * `Analysis` -- an [`Analysis`](#class-analysis) object from [`pcapkit.foundation.analysis`](#analysis)
+
+&nbsp;
+
+<a name="traceflow"> </a>
+
+## Trace TCP Flows
+
+ > described in [`src/foundation/traceflow.py`](https://github.com/JarryShaw/pypcaokit/tree/master/src/foundation/traceflow.py)
+
+&emsp; `pcapkit.foundation.traceflow` is the interface to trace TCP flows from a series of packets and connections. This was implemented as the demand of my mate @gousaiyang.
+
+<a name="class-traceflow"> </a>
+
+### `TraceFlow`
+
+```python
+class TraceFlow(builtins.object)
+```
+
+##### Trace TCP flows.
+
+ - Properties:
+    * `index` -- `tuple<Info>`, index table for traced flows
+
+ - Methods:
+    * *`staticmethod`* `make_fout` -- make root path for output
+        ```python
+        @staticmethod
+        make_fout(fout='./tmp', fmt='pcap')
+        ```
+        - Positional arguments:
+            * `fout` -- `str`, root path for output
+            * `fmt` -- `str`, output format
+        - Returns:
+            * `output` -- dumper of specified format
+    * `dump` -- dump frame to output files
+        ```python
+        dump(self, packet)
+        ```
+        - Positional arguments:
+            * `packet` -- `dict`, a flow packet
+                |-- `protocol` -- `str`, data link type from global header
+                |-- `index` -- `int`, frame number
+                |-- `syn` -- `bool`, TCP synchronise (SYN) flag
+                |-- `fin` -- `bool`, TCP finish (FIN) flag
+                |-- `src` -- `str`, source IP
+                |-- `srcport` -- `int`, TCP source port
+                |-- `dst` -- `str`, destination IP
+                |-- `dstport` -- `int`, TCP destination port
+                |-- timestamp -- `numbers.Real`, frame timestamp
+    * `trace` -- trace packets
+        ```python
+        trace(self, packet, *, _check=True, _output=False)
+        ```
+        - Positional arguments:
+            * `packet` -- `dict`, a flow packet
+        - Keyword arguments:
+            * `_check` -- `bool`, flag if run validations
+            * `_output` -- `bool`, flag if has formatted dumper
+    * `submit` -- submit traced TCP flows
+
+ - Data modules:
+    * initialisation
+        ```python
+        __init__(self, *, fout=None, format=None)
+        ```
+        - Keyword arguments:
+            * `fout` -- `str`, output path
+            * `format` -- `str`, output format
+    * callable
+        ```python
+        __call__(self, packet)
+        ```
+        - Positional arguments:
+            * `packet` -- `dict`, a flow packet as described above

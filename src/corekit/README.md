@@ -10,7 +10,7 @@
 
 ## `Info`
 
- > described in [`src/corekit/infoclass.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit/infoclass.py)
+ > described in [`src/corekit/infoclass.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/corekit/infoclass.py)
 
 ```python
 class Info(builtins.dict)
@@ -22,7 +22,7 @@ class Info(builtins.dict)
     * indicated as `Info` initialisation procedure
 
  - Methods:
-    * `infotodict` -- reverse `Info` object into `dict` type
+    * `infotodict` -- recursively convert `Info` object into `dict` type
     * all other methods inherited from `dict`
 
  - Data modules:
@@ -38,10 +38,10 @@ class Info(builtins.dict)
 
 ## `VersionInfo`
 
- > described in [`src/corekit/version.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit/version.py)
+ > described in [`src/corekit/version.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/corekit/version.py)
 
 ```python
-class VersionInfo(builtins.object)
+class VersionInfo(builtins.tuple)
 ```
 
 ##### VersionInfo is alike `sys.version_info`.
@@ -58,7 +58,7 @@ class VersionInfo(builtins.object)
 
 ## `ProtoChain`
 
- > described in [`src/corekit/protochain.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit/protochain.py)
+ > described in [`src/corekit/protochain.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/corekit/protochain.py)
 
 ```python
 class ProtoChain(builtins.object)

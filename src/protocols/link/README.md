@@ -15,7 +15,7 @@
 
 ## `Link`
 
- > described in [`src/protocols/link/link.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/link/link.py)
+ > described in [`src/protocols/link/link.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link/link.py)
 
 ```python
 class Link(pcapkit.protocols.protocol.Protocol)
@@ -51,11 +51,11 @@ class Link(pcapkit.protocols.protocol.Protocol)
                 - [`ARP`](#arp) -- Address Resolution Protocol
                 - [`RARP`](#rarp) -- Reversed Address Resolution Protocol
                 - [`VLAN`](#vlan) -- 802.1Q Customer VLAN Tag Type
-            * [Internet Layer](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/internet#internet-layer-protocols-manual):
-                - [`IPv4`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/internet#ipv4) -- Internet Protocol version 4
-                - [`IPv6`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/internet#ipv6) -- Internet Protocol version 6
-                - [`IPX`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/internet#ipx) -- Internetwork Protocol Exchange
-    * all other utility functions inherited from [`Protocol`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols#protocol)
+            * [Internet Layer](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#internet-layer-protocols-manual):
+                - [`IPv4`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv4) -- Internet Protocol version 4
+                - [`IPv6`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv6) -- Internet Protocol version 6
+                - [`IPX`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipx) -- Internetwork Protocol Exchange
+    * all other utility functions inherited from [`Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol)
 
 ### `LINKTYPE`
 
@@ -68,13 +68,13 @@ class Link(pcapkit.protocols.protocol.Protocol)
 |  `0`  | `Null`                                                                                | BSD loopback encapsulation |
 |  `1`  | [`Ethernet`](#ethernet)                                                               |    IEEE 802.3 Ethernet     |
 | `101` | `Raw`                                                                                 |           Raw IP           |
-| `228` | [`IPv4`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/internet#ipv4) |          Raw IPv4          |
-| `229` | [`IPv6`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/internet#ipv6) |          Raw IPv6          |
+| `228` | [`IPv4`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv4) |          Raw IPv4          |
+| `229` | [`IPv6`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/internet#ipv6) |          Raw IPv6          |
 | `248` | `SCTP`                                                                                |        SCTP packets        |
 
 ## `ARP`
 
- > described in [`src/protocols/link/arp.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/link/arp.py)
+ > described in [`src/protocols/link/arp.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link/arp.py)
 
 ```python
 class ARP(pcapkit.protocols.link.link.Link)
@@ -114,11 +114,13 @@ class ARP(pcapkit.protocols.link.link.Link)
     * `type` -- `tuple<str, str>`, hardware & protocol type
 
  - Methods:
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
     * `read_arp` -- read Address Resolution Protocol
 
 ## `Ethernet`
 
- > described in [`src/protocols/link/ethernet.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/link/ethernet.py)
+ > described in [`src/protocols/link/ethernet.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link/ethernet.py)
 
 ```python
 class Ethernet(pcapkit.protocols.link.link.Link)
@@ -144,11 +146,13 @@ class Ethernet(pcapkit.protocols.link.link.Link)
     * `dst` -- `str`, source MAC address
 
  - Methods:
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
     * `read_ethernet` -- read Ethernet Protocol
 
 ## `L2TP`
 
- > described in [`src/protocols/link/l2tp.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/link/l2tp.py)
+ > described in [`src/protocols/link/l2tp.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link/l2tp.py)
 
 ```python
 class L2TP(pcapkit.protocols.link.link.Link)
@@ -183,11 +187,13 @@ class L2TP(pcapkit.protocols.link.link.Link)
     * `type` -- `str`, L2TP type
 
  - Methods:
-     * read_l2tp -- read Layer Two Tunnelling Protocol
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * read_l2tp -- read Layer Two Tunnelling Protocol
 
 ## `OSPF`
 
- > described in [`src/protocols/link/ospf.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/link/ospf.py)
+ > described in [`src/protocols/link/ospf.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link/ospf.py)
 
 ```python
 class OSPF(pcapkit.protocols.link.link.Link)
@@ -220,11 +226,13 @@ class OSPF(pcapkit.protocols.link.link.Link)
     * `type` -- `str`, OSPF packet type
 
  - Methods:
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
     * `read_ospf` -- read Open Shortest Path First
 
 ## `RARP`
 
- > described in [`src/protocols/link/rarp.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/link/rarp.py)
+ > described in [`src/protocols/link/rarp.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link/rarp.py)
 
 ```python
 class RARP(pcapkit.protocols.link.arp.ARP)
@@ -262,11 +270,13 @@ class RARP(pcapkit.protocols.link.arp.ARP)
     * `type` -- `tuple<str, str>`, hardware & protocol type
 
  - Methods:
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
     * `read_arp` -- read Address Resolution Protocol
 
 ## `VLAN`
 
- > described in [`src/protocols/link/vlan.py`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/link/vlan.py)
+ > described in [`src/protocols/link/vlan.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols/link/vlan.py)
 
 ```python
 class VLAN(pcapkit.protocols.link.link.Link)
@@ -292,4 +302,6 @@ class VLAN(pcapkit.protocols.link.link.Link)
     * `protochain` -- `ProtoChain`, protocol chain of current instance
 
  - Methods:
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/pypcapkit/tree/master/src/protocols#protocol))
     * `read_vlan` -- read 802.1Q Customer VLAN Tag Type

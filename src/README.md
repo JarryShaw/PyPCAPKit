@@ -2,12 +2,12 @@
 
 &emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for this library.
 
- - [Foundation](#foundation)
-    * [Module Manual](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation#foundation-manual)
-    * [Module Index](#index-foundation)
  - [Interface](#interface)
     * [Module Manual](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#interface-manual)
     * [Module Index](#index-interface)
+ - [Foundation](#foundation)
+    * [Module Manual](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation#foundation-manual)
+    * [Module Index](#index-foundation)
  - [Reassembly](#reassembly)
     * [Module Manual](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#reassembly-manual)
     * [Module Index](#index-reassembly)
@@ -33,6 +33,55 @@
 
 ---
 
+## Interface
+
+ > described in [`src/interface`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#interfaces-manual)
+
+&emsp; Since `pcapkit` has massive classes and numerous functions, `pcapkit.interface` defines several user-oriented interfaces, variables, and etc. These interfaces are designed to help and simplify the usage of `pcapkit`.
+
+<a name="index-interface"> </a>
+
+#### Library Interfaces
+
+|                                            NAME                                           |            DESCRIPTION            |
+| :---------------------------------------------------------------------------------------: | :-------------------------------: |
+| [`extract`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#extract)       |        extract a PCAP file        |
+| [`analyse`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#analyse)       | analyse application layer packets |
+| [`reassemble`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
+| [`trace`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#trace)           |      trace TCP packet flows       |
+
+#### Output Formats
+
+|                                        NAME                                       |               DESCRIPTION                |
+| :-------------------------------------------------------------------------------: | :--------------------------------------: |
+| [`JSON`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#formats)  | JavaScript Object Notation (JSON) format |
+| [`PLIST`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#formats) |    macOS Property LIST (PLIST) format    |
+| [`TREE`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#formats)  |       Tree-View TeXT (TXT) format        |
+| [`PCAP`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#formats)  |       Packet CAPture (PCAP) format       |
+
+#### Layer Thresholds
+
+|                                       NAME                                       |    DESCRIPTION    |
+| :------------------------------------------------------------------------------: | :---------------: |
+| [`RAW`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers)   | no specific layer |
+| [`LINK`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers)  |  data-link layer  |
+| [`INET`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers)  |  internet layer   |
+| [`TRANS`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers) |  transport layer  |
+| [`APP`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers)   | application layer |
+
+#### Extraction Engines
+
+|                                          NAME                                          |                         DESCRIPTION                         |
+| :------------------------------------------------------------------------------------: | :---------------------------------------------------------: |
+| [`PCAPKit`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines)    |                     the default engine                      |
+| [`MPServer`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines)   |   the multiprocessing engine with server process strategy   |
+| [`MPPipeline`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines) |      the multiprocessing engine with pipeline strategy      |
+| [`DPKT`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines)       |    the [`DPKT`](https://github.com/kbandla/dpkt) engine     |
+| [`Scapy`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines)      |           the [`Scapy`](https://scapy.net) engine           |
+| [`PyShark`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines)    | the [`PyShark`](https://kiminewt.github.io/pyshark/) engine |
+
+&nbsp;
+
 ## Foundation
 
  > described in [`src/foundation`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation#foundation-manual)
@@ -49,38 +98,6 @@
 
 &nbsp;
 
-## Interface
-
- > described in [`src/interface`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#interfaces-manual)
-
-&emsp; Since `pcapkit` has massive classes and numerous functions, `pcapkit.interface` defines several user-oriented interfaces, variables, and etc. These interfaces are designed to help and simplify the usage of `pcapkit`.
-
-<a name="index-interface"> </a>
-
-|                                           NAME                                           |            DESCRIPTION            |
-| :--------------------------------------------------------------------------------------: | :-------------------------------: |
-| [`extract`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#extract)       |        extract a PCAP file        |
-| [`analyse`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#analyse)       | analyse application layer packets |
-| [`reassemble`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
-| [`trace`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#trace)           |      trace TCP packet flows       |
-| [`JSON`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#formats)  | JavaScript Object Notation (JSON) format |
-| [`PLIST`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#formats) |    macOS Property List (PLIST) format    |
-| [`TREE`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#formats)  |          Tree-View text format           |
-| [`PCAP`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#formats)  |               PCAP format                |
-| [`RAW`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers) | no specific layer |
-| [`LINK`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers) |  data-link layer  |
-| [`INET`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers) |  internet layer   |
-| [`TRANS`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers) |  transport layer  |
-| [`APP`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#layers) | application layer |
-| [`PCAPKit`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines) |                     the default engine                      |
-| [`MPServer`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines) |   the multiprocessing engine with server process strategy   |
-| [`MPPipeline`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines) |      the multiprocessing engine with pipeline strategy      |
-| [`DPKT`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines) |    the [`DPKT`](https://github.com/kbandla/dpkt) engine     |
-| [`Scapy`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines) |           the [`Scapy`](https://scapy.net) engine           |
-| [`PyShark`](https://github.com/JarryShaw/pcapkit/tree/master/src/interface#engines) | the [`PyShark`](https://kiminewt.github.io/pyshark/) engine |
-
-&nbsp;
-
 ## Reassembly
 
  > described in [`src/reassembly`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#reassembly-manual)
@@ -89,8 +106,8 @@
 
 <a name="index-reassembly"> </a>
 
-|                                                 NAME                                                |   DESCRIPTION   |
-| :-------------------------------------------------------------------------------------------------: | :-------------: |
+|                                                  NAME                                                |   DESCRIPTION   |
+| :--------------------------------------------------------------------------------------------------: | :-------------: |
 | [`IPv4_Reassembly`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#ipv4_reassembly) | IPv4 Reassembly |
 | [`IPv6_Reassembly`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#ipv6_reassembly) | IPv6 Reassembly |
 | [`TCP_Reassembly`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#tcp_reassembly)   | TCP Reassembly  |
@@ -105,8 +122,8 @@
 
 <a name="index-ipsuite"> </a>
 
-|                                          NAME                                          |  DESCRIPTION  |
-| :------------------------------------------------------------------------------------: | :-----------: |
+|                                           NAME                                          |  DESCRIPTION  |
+| :-------------------------------------------------------------------------------------: | :-----------: |
 | [`IPSHeader`](https://github.com/JarryShaw/pcapkit/tree/master/src/ipsuite/pcap#header) | Global Header |
 | [`IPSFrame`](https://github.com/JarryShaw/pcapkit/tree/master/src/ipsuite/pcap#frame)   | Frame Header  |
 
@@ -122,16 +139,16 @@
 
 ##### Macros
 
-|                                               NAME                                              |           DESCRIPTION            |
-| :---------------------------------------------------------------------------------------------: | :------------------------------: |
+|                                                NAME                                              |           DESCRIPTION            |
+| :----------------------------------------------------------------------------------------------: | :------------------------------: |
 | [`LINKTYPE`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/link#linktype)       |  Link-Layer Header Type Values   |
 | [`ETHERTYPE`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/internet#ethertype) |    EtherType IEEE 802 Numbers    |
 | [`TP_PROTO`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/transport#tp_proto)  | Transport Layer Protocol Numbers |
 
 ##### Protocols
 
-|                                                NAME                                               |             DESCRIPTION             |
-| :-----------------------------------------------------------------------------------------------: | :---------------------------------: |
+|                                                 NAME                                               |             DESCRIPTION             |
+| :------------------------------------------------------------------------------------------------: | :---------------------------------: |
 | [`Header`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/pcap#header)             |            Global Header            |
 | [`Frame`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols/pcap#frame)               |            Frame Header             |
 | [`Raw`](https://github.com/JarryShaw/pcapkit/tree/master/src/protocols#raw)                        |           Raw Packet Data           |
@@ -167,8 +184,8 @@
 
 <a name="index-utilities"> </a>
 
-|                                            NAME                                            |            DESCRIPTION            |
-| :----------------------------------------------------------------------------------------: | :-------------------------------: |
+|                                             NAME                                            |            DESCRIPTION            |
+| :-----------------------------------------------------------------------------------------: | :-------------------------------: |
 | [`decorators`](https://github.com/JarryShaw/pcapkit/tree/master/src/utilities#decorators)   |    Python decorator functions     |
 | [`validations`](https://github.com/JarryShaw/pcapkit/tree/master/src/utilities#validations) | user-defined validation functions |
 | [`exceptions`](https://github.com/JarryShaw/pcapkit/tree/master/src/utilities#exceptions)   |  user-refined exception classes   |
@@ -183,8 +200,8 @@
 
 <a name="index-corekit"> </a>
 
-|                                           NAME                                           |            DESCRIPTION            |
-| :--------------------------------------------------------------------------------------: | :-------------------------------: |
+|                                            NAME                                           |            DESCRIPTION            |
+| :---------------------------------------------------------------------------------------: | :-------------------------------: |
 | [`Info`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit#info)               |         `dict`-like class         |
 | [`VersionInfo`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit#versioninfo) |        `tuple`-like class         |
 | [`ProtoChain`](https://github.com/JarryShaw/pcapkit/tree/master/src/corekit#protochain)   |     protocol collection class     |
@@ -210,8 +227,8 @@
 
 <a name="index-dumpkit"> </a>
 
-|                                                NAME                                                |         DESCRIPTION          |
-| :------------------------------------------------------------------------------------------------: | :--------------------------: |
+|                                                 NAME                                                |         DESCRIPTION          |
+| :-------------------------------------------------------------------------------------------------: | :--------------------------: |
 | [`NotImplementedIO`](https://github.com/JarryShaw/pcapkit/tree/master/src/dumpkit#notimplementedio) | NotImplemented I/O simulator |
 | [`PCAP`](https://github.com/JarryShaw/pcapkit/tree/master/src/dumpkit#pcap)                         |      dump as PCAP file       |
 
