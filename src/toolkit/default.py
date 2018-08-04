@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
-"""
+"""default tools
+
+`pcapkit.toolkit.default` contains all you need for
+`PyPCAPKit` handy usage. All functions returns with a flag
+to indicate if usable for its caller.
 
 """
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow']
 
 
-def ipv4_reassembly(self, frame):
+def ipv4_reassembly(frame):
     """Make data for IPv4 reassembly."""
     if 'IPv4' in frame:
         ipv4 = frame['IPv4']
@@ -30,7 +34,7 @@ def ipv4_reassembly(self, frame):
     return False, None
 
 
-def ipv6_reassembly(self, frame):
+def ipv6_reassembly(frame):
     """Make data for IPv6 reassembly."""
     if 'IPv6' in frame:
         ipv6 = frame['IPv6']
@@ -56,7 +60,7 @@ def ipv6_reassembly(self, frame):
     return False, None
 
 
-def tcp_reassembly(self, frame):
+def tcp_reassembly(frame):
     """Make data for TCP reassembly."""
     if 'TCP' in frame:
         ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
@@ -84,7 +88,7 @@ def tcp_reassembly(self, frame):
     return False, None
 
 
-def tcp_traceflow(self, frame, *, data_link):
+def tcp_traceflow(frame, *, data_link):
     """Trace packet flow for TCP."""
     if 'TCP' in frame:
         ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']

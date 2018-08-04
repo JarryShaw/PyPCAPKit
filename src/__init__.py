@@ -19,14 +19,14 @@ efficiency in some way.
 In `pcapkit`, all files can be described as following eight
 different sections.
 
- - Foundation (`pcapkit.foundation`)
-    synthesise file I/O and protocol analysis, coordinate
-    information exchange in all network layers
-
  - Interface (`pcapkit.interface`)
     user interface for the `pcapkit` library, which
     standardise and simplify the usage of this
     library
+
+ - Foundation (`pcapkit.foundation`)
+    synthesise file I/O and protocol analysis, coordinate
+    information exchange in all network layers
 
  - Reassembly (`pcapkit.reassembly`)
     base on algorithms described in
@@ -53,6 +53,9 @@ different sections.
     dump utilities for `pcapkit` implementation
 
 """
+# All Reference
+import pcapkit.__all__ as all
+
 # Interface
 from pcapkit.interface import *
 

@@ -12,7 +12,7 @@ __all__ = [
     'FormatWarning', 'EngineWarning',                               # ImportWarning
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
                                                                     # RuntimeWarning
-    'DPKTWarning', 'ScapyWarning',                                  # ResourceWarning
+    'DPKTWarning', 'ScapyWarning', 'PySharkWarning'                 # ResourceWarning
 ]
 
 
@@ -80,4 +80,9 @@ class DPKTWarning(BaseWarning, ResourceWarning):
 
 class ScapyWarning(BaseWarning, ResourceWarning):
     """Warnings on Scapy usage."""
+    pass
+
+
+class PySharkWarning(BaseWarning, ResourceWarning):
+    """Warnings on PyShark usage."""
     pass

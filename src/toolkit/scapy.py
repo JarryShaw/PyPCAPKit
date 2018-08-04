@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
+"""Scapy tools
+
+`pcapkit.toolkit.scapy` contains all you need for
+`PyPCAPKit` handy usage with `Scapy` engine. All reforming
+functions returns with a flag to indicate if usable for
+its caller.
 
 """
 import ipaddress

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
+"""capability tools
+
+`pcapkit.toolkit` provides several utility functions for
+capability of multiple engine support.
 
 """
 # tools for default engine

@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
+"""PyShark tools
+
+`pcapkit.toolkit.pyshark` contains all you need for
+`PyPCAPKit` handy usage with `PyShark` engine. All
+reforming functions returns with a flag to indicate if
+usable for its caller.
 
 """
 import ipaddress

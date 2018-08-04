@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
+"""trace TCP flows
+
+`pcapkit.foundation.traceflow` is the interface to trace
+TCP flows from a series of packets and connections. This
+was implemented as the demand of my mate @gousaiyang.
 
 """
 import copy
@@ -117,6 +121,13 @@ class TraceFlow:
     def trace(self, packet, *, _check=True, _output=False):
         """Trace packets.
 
+        Positional arguments:
+            * packet -- dict, a flow packet
+
+        Keyword arguments:
+            * _check -- bool, flag if run validations
+            * _output -- bool, flag if has formatted dumper
+
         """
         self._newflg = True
         if _check:
@@ -184,6 +195,10 @@ class TraceFlow:
     def __init__(self, *, fout=None, format=None):
         """Initialise instance.
 
+        Keyword arguments:
+            * fout -- str, output path
+            * format -- str, output format
+
         """
         self._newflg = False    # new packet flag
         self._fproot = fout     # output root path
@@ -194,6 +209,11 @@ class TraceFlow:
                                 # dump I/O object
 
     def __call__(self, packet):
-        """Dump frame to output files."""
+        """Dump frame to output files.
+        
+        Positional arguments:
+            * packet -- dict, a flow packet
+
+        """
         self._newflg = True
         self.dump(packet)

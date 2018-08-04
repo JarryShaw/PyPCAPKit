@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
+"""DPKT tools
+
+`pcapkit.toolkit.dpkt` contains all you need for
+`PyPCAPKit` handy usage with `DPKT` engine. All reforming
+functions returns with a flag to indicate if usable for
+its caller.
 
 """
 import ipaddress
@@ -14,7 +19,7 @@ __all__ = [
 
 
 def ipv6_hdr_len(ipv6):
-    """Calculate length of headers before IPv6_Frag"""
+    """Calculate length of headers before IPv6-Frag"""
     hdr_len = ipv6.__hdr_len__
     for code in (0, 60, 43):
         ext_hdr = ipv6.extension_hdrs.get(code)

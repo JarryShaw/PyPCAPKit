@@ -13,4 +13,4 @@ __all__ = ['VersionInfo']
 
 
 VersionInfo = collections.namedtuple('VersionInfo', ['major', 'minor'])
-VersionInfo.__doc__ = 'VersionInfo is alike `sys.version_info`.'
+VersionInfo.__doc__ = """VersionInfo is alike `sys.version_info`."""

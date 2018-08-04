@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """extractor for PCAP files
 
-`pcapkit.tools.extraction` contains `Extractor` only, which
-synthesises file I/O and protocol analysis, coordinates
-information exchange in all network layers, extracst
-parametres from a PCAP file.
+`pcapkit.foundation.extraction` contains `Extractor` only,
+which synthesises file I/O and protocol analysis,
+coordinates information exchange in all network layers,
+extracst parametres from a PCAP file.
 
 """
 # TODO: implement engine support for pypcap & pycapfile
@@ -220,7 +220,7 @@ class Extractor:
 
     def run(self):
         """Start extraction."""
-        tempflag = True
+        flag = True
         if self._exeng == 'dpkt':
             flag, engine = self.import_test('dpkt', name='DPKT')
             if flag:    return self._run_dpkt(engine)
@@ -245,13 +245,13 @@ class Extractor:
             warnings.warn(f'extraction engine Server Multiprocessing is not available; '
                             'using default engine instead', EngineWarning, stacklevel=stacklevel())
         elif self._exeng not in ('default', 'pcapkit'):
-            tempflag = False
+            flag = False
             warnings.warn(f'unsupported extraction engine: {self._exeng}; '
                             'using default engine instead',
                             EngineWarning, stacklevel=stacklevel())
 
         # using default/pcapkit engine
-        self._exeng = self._exeng if tempflag else 'default'
+        self._exeng = self._exeng if flag else 'default'
         self.record_header()            # read PCAP global header
         self.record_frames()            # read frames
 
@@ -691,6 +691,8 @@ class Extractor:
 
         # record frames
         if self._flag_d:
+            # setattr(packet, 'packet2dict', packet2dict)
+            # setattr(packet, 'packet2chain', packet2chain)
             self._frame.append(packet)
 
         # record fragments
@@ -774,6 +776,8 @@ class Extractor:
 
         # record frames
         if self._flag_d:
+            setattr(packet, 'packet2dict', packet2dict)
+            setattr(packet, 'packet2chain', packet2chain)
             self._frame.append(packet)
 
         # record fragments
@@ -848,6 +852,7 @@ class Extractor:
 
         # record frames
         if self._flag_d:
+            setattr(packet, 'packet2dict', packet2dict)
             self._frame.append(packet)
 
         # trace flows
