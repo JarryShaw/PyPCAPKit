@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "73597c36ab8507ed48187bc1ddabf4528d4ab1ef504455ff7c9f8e04a2c59318"
+            "sha256": "b985141494280d8916cff4ed9159a1b902ffa74b8088896f64e1bab059a4d6db"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -23,6 +23,14 @@
             ],
             "index": "pypi",
             "version": "==3.0.4"
+        },
+        "dictdumper": {
+            "hashes": [
+                "sha256:05d270de873692a923361ceb133edd33d982d658bbe518edc518ff8620d88436",
+                "sha256:527bd1b144bd50d0f6a6ac193d5ea65a289a525979bc82b0c657bdc5d1c9929c"
+            ],
+            "markers": "python_version != '3.0.*' and python_version >= '2.7' and python_version != '3.3.*' and python_version != '3.1.*' and python_version != '3.2.*'",
+            "version": "==0.5.0.post1"
         },
         "dpkt": {
             "hashes": [
@@ -73,6 +81,32 @@
             ],
             "version": "==4.2.3"
         },
+        "mako": {
+            "hashes": [
+                "sha256:4e02fde57bd4abb5ec400181e4c314f56ac3e49ba4fb8b0d50bba18cb27d25ae"
+            ],
+            "version": "==1.0.7"
+        },
+        "markdown": {
+            "hashes": [
+                "sha256:812ec5249f45edc31330b7fb06e52aaf6ab2d83aa27047df7cb6837ef2d269b6",
+                "sha256:866f5474c2361de7ccf806b438c0462380b4b90aacb9fdf59dfc4b166fb66389"
+            ],
+            "version": "==2.4.1"
+        },
+        "markupsafe": {
+            "hashes": [
+                "sha256:a6be69091dac236ea9c6bc7d012beab42010fa914c459791d627dad4910eb665"
+            ],
+            "version": "==1.0"
+        },
+        "pdoc": {
+            "hashes": [
+                "sha256:7835909580d5a14a06bd3de4416cf17f86a146ecb12eeb5cd83d9a93d03e6d27"
+            ],
+            "index": "pypi",
+            "version": "==0.3.2"
+        },
         "py": {
             "hashes": [
                 "sha256:3fd59af7435864e1a243790d322d763925431213b6b8529c6ca71081ace3bbf7",
@@ -80,6 +114,14 @@
             ],
             "markers": "python_version != '3.0.*' and python_version != '3.1.*' and python_version != '3.3.*' and python_version != '3.2.*' and python_version >= '2.7'",
             "version": "==1.5.4"
+        },
+        "pypcapkit": {
+            "hashes": [
+                "sha256:7da7f9da400e9fd5a844cae5ff39368dced456955692cc9f7cb957c431e4063f",
+                "sha256:e3f3b70e870ab600b7aff129e5890e284542d5f7d43c45e2f58521979000ada4"
+            ],
+            "index": "pypi",
+            "version": "==0.9.9rc1"
         },
         "pyshark": {
             "hashes": [
