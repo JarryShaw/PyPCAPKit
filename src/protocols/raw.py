@@ -8,7 +8,7 @@ a `Protocol` like object.
 """
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import Protocol, NoPayload
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 
@@ -25,6 +25,8 @@ class Raw(Protocol):
         * protochain -- ProtoChain, protocol chain of current instance
 
     Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
         * read_raw -- read raw packet data
 
     Attributes:
@@ -88,6 +90,8 @@ class Raw(Protocol):
     def __init__(self, file, length=None, *, error=None, **kwargs):
         self._file = file
         self._info = Info(self.read_raw(length, error=error))
+
+        self._next = NoPayload()
         self._make_protochain()
 
     def __length_hint__(self):

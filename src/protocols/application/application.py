@@ -7,7 +7,7 @@ layer protocols, eg. HTTP/1.*, HTTP/2 and etc.
 
 """
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import Protocol, NoPayload
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 
@@ -51,6 +51,15 @@ class Application(Protocol):
     def layer(self):
         """Protocol layer."""
         return self.__layer__
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    def __new__(cls, *args, **kwargs):
+        self = super().__new__(cls)
+        self._next = NoPayload()
+        return self
 
     ##########################################################################
     # Utilities.

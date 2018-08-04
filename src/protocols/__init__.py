@@ -11,8 +11,9 @@ with detailed implementation and methods.
 from pcapkit.protocols.protocol import Protocol
 
 # Utility Classes for Protocols
+from pcapkit.protocols.raw import *
 from pcapkit.protocols.pcap import *
-from pcapkit.protocols.raw import Raw
+from pcapkit.protocols.protocol import NoPayload
 
 # Protocols & Macros
 from pcapkit.protocols.link import *
@@ -30,6 +31,7 @@ __all__ = [
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                # Protocol Numbers
     'Header', 'Frame',                                  # PCAP Headers
     'Raw',                                              # Raw Packet
+    'NoPayload',                                        # No Payload
     'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP', 'VLAN',
                                                         # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',         # Internet Layer

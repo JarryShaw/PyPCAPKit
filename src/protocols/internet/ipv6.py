@@ -276,7 +276,8 @@ class IPv6(IP):
                 break
 
             # make protocol name
-            flag, info, chain, alias = self._import_next_layer(proto, version=6, extension=True)
+            flag, next_ = self._import_next_layer(proto, version=6, extension=True)
+            info, chain, alias = next_.info, next_.protochain, next_.alias
             name = proto.replace('IPv6-', '').lower() if flag else 'raw'
             ipv6[name] = info
 

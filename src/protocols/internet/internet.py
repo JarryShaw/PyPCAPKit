@@ -8,8 +8,6 @@ latter is a base class for internet layer protocols, eg.
 AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 
 """
-import io
-
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.transport.transport import TP_PROTO
@@ -107,9 +105,10 @@ class Internet(Protocol):
 
         """
         if self._onerror:
-            flag, info, chain, alias = beholder(self._import_next_layer)(self, proto, length, version=version)
+            flag, next_ = beholder(self._import_next_layer)(self, proto, length, version=version)
         else:
-            flag, info, chain, alias = self._import_next_layer(proto, length, version=version)
+            flag, next_ = self._import_next_layer(proto, length, version=version)
+        info, chain, alias = next_.info, next_.protochain, next_.alias
 
         # make next layer protocol name
         if flag:
@@ -122,8 +121,9 @@ class Internet(Protocol):
             layer, proto = 'raw', 'Raw'
 
         # write info and protocol chain into dict
-        dict_[layer] = info
+        self._next = next_
         self._protos = ProtoChain(proto, chain, alias)
+        dict_[layer] = info
         return dict_
 
     def _import_next_layer(self, proto, length=None, *, version=4, extension=False):
@@ -179,7 +179,7 @@ class Internet(Protocol):
             from pcapkit.protocols.transport.udp import UDP as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol
-        next_ = Protocol(io.BytesIO(self._read_fileng(length)), length,
+        next_ = Protocol(self._file, length,
                             version=version, extension=extension,
                             error=self._onerror, layer=self._exlayer, protocol=self._exproto)
-        return True, next_.info, next_.protochain, next_.alias
+        return True, next_

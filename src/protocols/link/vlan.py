@@ -45,6 +45,8 @@ class VLAN(Link):
         * protochain -- ProtoChain, protocol chain of current instance
 
     Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
         * read_vlan -- read 802.1Q Customer VLAN Tag Type
 
     Attributes:

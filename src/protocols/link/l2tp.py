@@ -40,6 +40,8 @@ class L2TP(Link):
         * type -- str, L2TP type
 
     Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
         * read_l2tp -- read Layer Two Tunnelling Protocol
 
     Attributes:

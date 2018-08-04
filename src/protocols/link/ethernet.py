@@ -35,6 +35,8 @@ class Ethernet(Link):
         * dst -- str, destination mac address
 
     Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
         * read_ethernet -- read Ethernet Protocol
 
     Attributes:

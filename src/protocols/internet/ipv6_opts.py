@@ -75,6 +75,13 @@ class IPv6_Opts(Protocol):
         return self._info.length
 
     @property
+    def payload(self):
+        """Payload of current instance."""
+        if self.extension:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
+        return self._next
+
+    @property
     def protocol(self):
         """Name of next layer protocol."""
         return self._info.next

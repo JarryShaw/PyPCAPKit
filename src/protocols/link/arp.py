@@ -67,6 +67,8 @@ class ARP(Link):
         * type -- tuple<str, str>, hardware & protocol type
 
     Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
         * read_arp -- read Address Resolution Protocol
 
     Attributes:

@@ -20,8 +20,6 @@ HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 """
 import re
 
-import chardet
-
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.http import HTTP
 from pcapkit.utilities.exceptions import ProtocolError
@@ -61,7 +59,6 @@ class HTTPv1(HTTP):
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
         * _make_protochain -- make ProtoChain instance for corresponding protocol
-        * _http_decode -- test and decode HTTP parameters
         * _read_http_header -- read HTTP/1.* header
         * _read_http_body -- read HTTP/1.* body
 
@@ -129,16 +126,6 @@ class HTTPv1(HTTP):
     # Utilities.
     ##########################################################################
 
-    @staticmethod
-    def _http_decode(byte):
-        charset = chardet.detect(byte)['encoding']
-        if charset:
-            try:
-                return byte.decode(charset)
-            except Exception:
-                pass
-        return byte
-
     def _read_http_header(self, header):
         """Read HTTP/1.* header.
 
@@ -165,18 +152,18 @@ class HTTPv1(HTTP):
             receipt = 'request'
             header = dict(
                 request = dict(
-                    method = self._http_decode(para1),
-                    target = self._http_decode(para2),
-                    version = self._http_decode(match2.group('version')),
+                    method = self.decode(para1),
+                    target = self.decode(para2),
+                    version = self.decode(match2.group('version')),
                 ),
             )
         elif match3 and match4:
             receipt = 'response'
             header = dict(
                 response = dict(
-                    version = self._http_decode(match3.group('version')),
+                    version = self.decode(match3.group('version')),
                     status = int(para2),
-                    phrase = self._http_decode(para3),
+                    phrase = self.decode(para3),
                 ),
             )
         else:
@@ -184,8 +171,8 @@ class HTTPv1(HTTP):
 
         try:
             for item in lists:
-                key = self._http_decode(item[0].strip().replace(b'request', b'request_field').replace(b'response', b'response_field'))
-                value = self._http_decode(item[1].strip())
+                key = self.decode(item[0].strip()).replace(receipt, f'{receipt}_field')
+                value = self.decode(item[1].strip())
                 if key in header:
                     if isinstance(header[key], tuple):
                         header[key] += (value,)
@@ -200,4 +187,4 @@ class HTTPv1(HTTP):
 
     def _read_http_body(self, body):
         """Read HTTP/1.* body."""
-        return self._http_decode(body)
+        return self.decode(body)

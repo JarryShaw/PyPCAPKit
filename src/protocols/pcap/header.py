@@ -39,6 +39,8 @@ class Header(Protocol):
         * protocol -- str, data link type
 
     Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
         * index -- call `ProtoChain.index`
         * read_header -- read global header of PCAP file
 
@@ -72,6 +74,11 @@ class Header(Protocol):
     def version(self):
         """Version infomation of input PCAP file."""
         return VersionInfo(self._info.version_major, self._info.version_minor)
+
+    @property
+    def payload(self):
+        """NotImplemented"""
+        raise UnsupportedCall("'Header' object has no attribute 'payload'")
 
     @property
     def protocol(self):

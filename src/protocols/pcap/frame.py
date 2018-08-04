@@ -47,6 +47,8 @@ class Frame(Protocol):
         * protochain -- ProtoChain, protocol chain of current frame
 
     Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
         * index -- call `ProtoChain.index`
         * read_frame -- read each block after global header
 
@@ -206,7 +208,7 @@ class Frame(Protocol):
 
     def __index__(self=None):
         if self is None:    return 'Frame'
-        if getattr(self, '_fnum', NotImplemented) is NotImplemented:
+        if getattr(self, '_fnum', None) is None:
             return self.__class__.__name__
         return self._fnum
 
@@ -238,11 +240,12 @@ class Frame(Protocol):
         """
         seek_cur = self._file.tell()
         try:
-            flag, info, chain, alias = self._import_next_layer(self._prot, length)
+            flag, next_ = self._import_next_layer(self._prot, length)
         except Exception as error:
             dict_['error'] = str(error)
             self._file.seek(seek_cur, os.SEEK_SET)
-            flag, info, chain, alias = beholder(self._import_next_layer)(self, self._prot, length, error=True)
+            flag, next_ = beholder(self._import_next_layer)(self, self._prot, length, error=True)
+        info, chain, alias = next_.info, next_.protochain, next_.alias
 
         # make next layer protocol name
         if flag:
@@ -251,6 +254,7 @@ class Frame(Protocol):
             proto, name = 'raw', 'Raw'
 
         # write info and protocol chain into dict
+        self._next = next_
         self._protos = ProtoChain(name, chain, alias)
         dict_[proto] = info
         dict_['protocols'] = self._protos.chain
@@ -288,4 +292,4 @@ class Frame(Protocol):
             from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(self._file, length, error=error,
                             layer=self._exlayer, protocol=self._exproto)
-        return True, next_.info, next_.protochain, next_.alias
+        return True, next_

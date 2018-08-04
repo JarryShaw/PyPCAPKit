@@ -14,6 +14,7 @@ IPv6 (IPv6-Frag), whose structure is described as below.
 """
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.protocol import Protocol
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 
 __all__ = ['IPv6_Frag']
@@ -67,6 +68,13 @@ class IPv6_Frag(Protocol):
     def length(self):
         """Header length of current protocol."""
         return self._info.length
+
+    @property
+    def payload(self):
+        """Payload of current instance."""
+        if self.extension:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
+        return self._next
 
     @property
     def protocol(self):

@@ -60,6 +60,8 @@ class OSPF(Link):
         * type -- str, OSPF packet type
 
     Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
         * read_ospf -- read Open Shortest Path First
 
     Attributes:

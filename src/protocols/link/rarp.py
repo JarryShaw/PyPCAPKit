@@ -38,8 +38,10 @@ class RARP(ARP):
         * dst -- tuple(str, str), target hardware & protocol address
         * type -- tuple(str, str), hardware & protocol type
 
-   Methods:
-       * read_arp -- read Address Resolution Protocol
+    Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
+        * read_arp -- read Address Resolution Protocol
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
