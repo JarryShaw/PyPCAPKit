@@ -9,7 +9,7 @@ designed to help and simplify the usage of `pcapkit`.
 import io
 import sys
 
-from pcapkit.foundation.analysis import Analysis
+from pcapkit.foundation.analysis import analyse as analyse2
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.protocols.protocol import Protocol
@@ -145,7 +145,7 @@ def analyse(*, file, length=None):
     io_check(file)
     int_check(length or sys.maxsize)
 
-    return Analysis.analyse(file, length)
+    return analyse2(file, length)
 
 
 def reassemble(*, protocol, strict=False):
@@ -180,6 +180,10 @@ def reassemble(*, protocol, strict=False):
 
 def trace(*, fout=None, format=None):
     """Trace TCP flows.
+
+    Keyword arguments:
+        * fout -- str, output path
+        * format -- str, output format
 
     """
     str_check(fout or '', format or '')

@@ -11,7 +11,7 @@ import os
 
 ###############################################################################
 # from pcapkit.protocols.raw import Raw
-# from pcapkit.foundation.analysis import Analysis
+# from pcapkit.foundation.analysis import analyse
 ###############################################################################
 
 
@@ -23,7 +23,7 @@ def seekset(func):
     @functools.wraps(func)
     def seekcur(self, *args, **kw):
         seek_cur = self._file.tell()
-        self._file.seek(os.SEEK_SET)
+        self._file.seek(self._seekset, os.SEEK_SET)
         return_ = func(self, *args, **kw)
         self._file.seek(seek_cur, os.SEEK_SET)
         return return_
@@ -33,10 +33,10 @@ def seekset(func):
 def seekset_ng(func):
     """Read file from start then set back to original."""
     @functools.wraps(func)
-    def seekcur(file, *args, **kw):
+    def seekcur(file, *args, seekset=os.SEEK_SET, **kw):
         seek_cur = file.tell()
-        file.seek(os.SEEK_SET)
-        return_ = func(file, *args, **kw)
+        file.seek(seekset, os.SEEK_SET)
+        return_ = func(file, *args, seekset=seekset, **kw)
         file.seek(seek_cur, os.SEEK_SET)
         return return_
     return seekcur
@@ -54,7 +54,7 @@ def beholder(func):
 
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=str(error))
-            return False, next_.info, next_.protochain, next_.alias
+            return False, next_
     return behold
 
 
@@ -66,11 +66,11 @@ def beholder_ng(func):
         try:
             return func(file, length, *args, **kwargs)
         except Exception as error:
-            from pcapkit.foundation.analysis import Analysis
+            from pcapkit.foundation.analysis import analyse
             from pcapkit.protocols.raw import Raw
 
             file.seek(seek_cur, os.SEEK_SET)
 
             raw = Raw(file, length, error=str(error))
-            return Analysis(raw.info, raw.protochain, raw.alias)
+            return analyse(raw.info, raw.protochain, raw.alias)
     return behold

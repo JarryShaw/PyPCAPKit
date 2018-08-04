@@ -99,7 +99,7 @@ import io
 import sys
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.foundation.analysis import Analysis
+from pcapkit.foundation.analysis import analyse
 from pcapkit.reassembly.reassembly import Reassembly
 
 
@@ -360,7 +360,7 @@ class TCP_Reassembly(Reassembly):
                         ),
                         index = tuple(buffer['ind']),
                         payload = tuple(data) or None,
-                        packets = tuple([ Analysis.analyse(io.BytesIO(frag), len(frag)) for frag in data ]),
+                        packets = tuple([ analyse(io.BytesIO(frag), len(frag)) for frag in data ]),
                     )
                     datagram.append(packet)
             # if this buffer is implemented
@@ -377,7 +377,7 @@ class TCP_Reassembly(Reassembly):
                         ),
                         index = tuple(buffer['ind']),
                         payload = bytes(data) or None,
-                        packets = (Analysis.analyse(io.BytesIO(data), len(data)),),
+                        packets = (analyse(io.BytesIO(data), len(data)),),
                     )
                     datagram.append(packet)
         return datagram
