@@ -30,7 +30,7 @@ __all__ = [
 
     # pcapkit.foundation
     'Extractor',                                            # Extraction
-    'Analysis',                                             # Analysis
+    'analyse2',                                             # Analysis
     'TraceFlow',                                            # Trace Flow
 
     # pcapkit.interface
@@ -47,6 +47,7 @@ __all__ = [
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                    # Protocol Numbers
     'Header', 'Frame',                                      # PCAP Headers
     'Raw',                                                  # Raw Packet
+    'NoPayload',                                            # No Payload
     'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP', 'VLAN',
                                                             # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer
