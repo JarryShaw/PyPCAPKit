@@ -138,9 +138,9 @@ class HTTPv1(HTTP):
         """
         try:
             startline, headerfield = header.split(b'\r\n', 1)
-            para1, para2, para3 = re.split(b'\s+', startline, 2)
+            para1, para2, para3 = re.split(rb'\s+', startline, 2)
             fields = headerfield.split(b'\r\n')
-            lists = ( re.split(b'\s*:\s*', field, 1) for field in fields )
+            lists = ( re.split(rb'\s*:\s*', field, 1) for field in fields )
         except ValueError:
             raise ProtocolError('HTTP: invalid format', quiet=True)
 

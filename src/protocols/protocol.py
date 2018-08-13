@@ -37,8 +37,8 @@ from pcapkit.utilities.validations import bool_check, int_check
 __all__ = ['Protocol', 'NoPayload']
 
 
-# readable characters
-readable = ''.join(filter(lambda char: not char.isspace(), string.printable)).encode()
+# readable characters' order list
+readable = [ ord(char) for char in filter(lambda char: not char.isspace(), string.printable) ]
 
 
 # abstract base class utilities
@@ -180,19 +180,15 @@ class Protocol:
     @seekset
     def __str__(self):
         bytes_ = self._read_fileng()
-        hexbuf = ' '.join(textwrap.wrap(bytes_.hex(), 2))
 
-        strtmp = list()
-        for byte in bytes_:
-            char = byte.to_bytes(1, sys.byteorder)
-            strtmp.append(char.decode() if char in readable else '.')
-        strbuf = ''.join(strtmp)
+        hexbuf = ' '.join(textwrap.wrap(bytes_.hex(), 2))
+        strbuf = ''.join( chr(char) if char in readable else '.' for char in bytes_ )
 
         number = os.get_terminal_size().columns // 4 - 1
         length = number * 3
 
         hexlst = textwrap.wrap(hexbuf, length)
-        strlst = [ buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '')]
+        strlst = [ buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '') ]
 
         str_ = '\n'.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))
         return str_

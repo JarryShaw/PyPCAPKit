@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.9.9rc2'
+__version__ = '0.9.9.post1'
 
 
 # set-up script for pip distribution
@@ -66,26 +66,6 @@ setuptools.setup(
             'LICENSE',
             'README.md',
         ],
-        'pcapkit': ['README.md',],
-        'pcapkit.corekit': ['README.md',],
-        'pcapkit.dumpkit': ['README.md',],
-        'pcapkit.foundation': ['README.md',],
-        'pcapkit.interface': ['README.md',],
-        'pcapkit.ipsuite': ['README.md',],
-        'pcapkit.ipsuite.pcap': ['README.md',],
-        'pcapkit.ipsuite.application': ['README.md',],
-        'pcapkit.ipsuite.internet': ['README.md',],
-        'pcapkit.ipsuite.link': ['README.md',],
-        'pcapkit.ipsuite.transport': ['README.md',],
-        'pcapkit.protocols': ['README.md',],
-        'pcapkit.protocols.pcap': ['README.md',],
-        'pcapkit.protocols.application': ['README.md',],
-        'pcapkit.protocols.internet': ['README.md',],
-        'pcapkit.protocols.link': ['README.md',],
-        'pcapkit.protocols.transport': ['README.md',],
-        'pcapkit.reassembly': ['README.md',],
-        'pcapkit.toolkit': ['README.md',],
-        'pcapkit.utilities': ['README.md',],
     },
     classifiers = [
         'Development Status :: 5 - Production/Stable',
