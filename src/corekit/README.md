@@ -10,7 +10,7 @@
 
 ## `Info`
 
- > described in [`src/corekit/infoclass.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/corekit/infoclass.py)
+ > described in [`src/corekit/infoclass.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/corekit/infoclass.py)
 
 ```python
 class Info(builtins.dict)
@@ -38,7 +38,7 @@ class Info(builtins.dict)
 
 ## `VersionInfo`
 
- > described in [`src/corekit/version.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/corekit/version.py)
+ > described in [`src/corekit/version.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/corekit/version.py)
 
 ```python
 class VersionInfo(builtins.tuple)
@@ -58,7 +58,7 @@ class VersionInfo(builtins.tuple)
 
 ## `ProtoChain`
 
- > described in [`src/corekit/protochain.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/corekit/protochain.py)
+ > described in [`src/corekit/protochain.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/corekit/protochain.py)
 
 ```python
 class ProtoChain(builtins.object)

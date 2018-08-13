@@ -87,7 +87,7 @@ extract(*,
     | `trace_format` | `str`  | `None`  |     `plist` / `json` / `tree` / `html` / `pcap` / `None`     |              output format of flow tracer               |
 
  - Returns:
-    * `Extractor` -- an Extractor object form [`pcapkit.foundation.extraction`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation#extraction)
+    * `Extractor` -- an Extractor object form [`pcapkit.foundation.extraction`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/foundation#extraction)
 
 &nbsp;
 
@@ -104,7 +104,7 @@ analyse(*, file, length=None)
     * `length` -- `int`, length of the analysing packet
 
  - Returns:
-    * `Analysis` -- an `Analysis` object from [`pcapkit.foundation.analysis`](https://github.com/JarryShaw/pcapkit/tree/master/src/foundation#analysis)
+    * `Analysis` -- an `Analysis` object from [`pcapkit.foundation.analysis`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/foundation#analysis)
 
 &nbsp;
 
@@ -124,9 +124,9 @@ reassemble(*, protocol, strict=False)
     |  `strict`  | `bool` | `False` |    `True` / `False`     | if return all datagrams (including those not implemented) when submit |
 
  - Returns:
-    * *if protocol is IPv4* `IPv4_Reassembly` -- a `IPv4_Reassembly` object from [`pcapkit.reassembly.ipv4`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#ipv4_reassembly)
-    * *if protocol is IPv6* `IPv6_Reassembly` -- a` IPv6_Reassembly` object from [`pcapkit.reassembly.ipv6`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#ipv6_reassembly)
-    * *if protocol is TCP* `TCP_Reassembly` -- a `TCP_Reassembly` object from [`pcapkit.reassembly.tcp`](https://github.com/JarryShaw/pcapkit/tree/master/src/reassembly#tcp_reassembly)
+    * *if protocol is IPv4* `IPv4_Reassembly` -- a `IPv4_Reassembly` object from [`pcapkit.reassembly.ipv4`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/reassembly#ipv4_reassembly)
+    * *if protocol is IPv6* `IPv6_Reassembly` -- a` IPv6_Reassembly` object from [`pcapkit.reassembly.ipv6`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/reassembly#ipv6_reassembly)
+    * *if protocol is TCP* `TCP_Reassembly` -- a `TCP_Reassembly` object from [`pcapkit.reassembly.tcp`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/reassembly#tcp_reassembly)
 
 &nbsp;
 
@@ -143,4 +143,4 @@ trace(*, fout=None, format=None)
     * `format` -- `str`, output format
 
  - Returns:
-    * `TraceFlow` -- a [`TraceFlow`](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation#class-traceflow) object
+    * `TraceFlow` -- a [`TraceFlow`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/foundation#class-traceflow) object

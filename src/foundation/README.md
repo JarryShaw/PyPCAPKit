@@ -3,21 +3,21 @@
 &emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for fundamental tools in the library.
 
  - [Extraction](#extraction)
-    * [Reference](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/extraction.py)
+    * [Reference](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/foundation/extraction.py)
     * [`Extractor`](#extractor)
  - [Analysis](#analysis)
-    * [Reference](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/analysis.py)
+    * [Reference](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/foundation/analysis.py)
     * [`analyse`](#analyse)
     * [`Analysis`](#class-analysis)
  - [Trace TCP Flows](#traceflow)
-    * [Reference](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/traceflow.py)
+    * [Reference](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/foundation/traceflow.py)
     * [`TraceFlow`](#class-traceflow)
 
 ---
 
 ## Extraction
 
- > described in [`src/foundation/extraction.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/extraction.py)
+ > described in [`src/foundation/extraction.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/foundation/extraction.py)
 
 &emsp; `pcapkit.foundation.extraction` contains `Extractor` only, which synthesises file I/O and protocol analysis, coordinates information exchange in all network layers, extract parameters from a PCAP file.
 
@@ -110,7 +110,7 @@ class Extractor(builtins.object)
 
 ## Analysis
 
- > described in [`src/foundation/analysis.py`](https://github.com/JarryShaw/pypcapkit/tree/master/src/foundation/analysis.py)
+ > described in [`src/foundation/analysis.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/foundation/analysis.py)
 
 &emsp; `pcapkit.foundation.analysis` works as a header quarter to analyse and match application layer protocol. Then, call corresponding modules and functions to extract the attributes.
 
