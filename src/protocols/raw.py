@@ -8,7 +8,8 @@ a `Protocol` like object.
 """
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import Protocol, NoPayload
+from pcapkit.protocols.null import NoPayload
+from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 

@@ -12,8 +12,8 @@ from pcapkit.protocols.protocol import Protocol
 
 # Utility Classes for Protocols
 from pcapkit.protocols.raw import *
+from pcapkit.protocols.null import *
 from pcapkit.protocols.pcap import *
-from pcapkit.protocols.protocol import NoPayload
 
 # Protocols & Macros
 from pcapkit.protocols.link import *
@@ -30,8 +30,8 @@ from pcapkit.protocols.application.http import HTTP
 __all__ = [
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                # Protocol Numbers
     'Header', 'Frame',                                  # PCAP Headers
-    'Raw',                                              # Raw Packet
     'NoPayload',                                        # No Payload
+    'Raw',                                              # Raw Packet
     'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP', 'VLAN',
                                                         # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',         # Internet Layer

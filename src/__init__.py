@@ -63,6 +63,7 @@ from pcapkit.interface import *
 from pcapkit.toolkit import *
 
 # Protocols
+from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.raw import Raw
 from pcapkit.protocols.link.arp import ARP
 from pcapkit.protocols.link.ethernet import Ethernet
@@ -93,6 +94,7 @@ __all__ = [
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'PCAPKit',
                                                             # Engine Macros
+    'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer

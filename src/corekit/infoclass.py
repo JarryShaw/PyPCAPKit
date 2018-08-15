@@ -32,11 +32,13 @@ class Info(dict):
         def __read__(dict_):
             __dict__ = dict()
             for (key, value) in dict_.items():
+                if key in dir(dict):
+                    key = f'{key}2'
                 if isinstance(value, dict):
                     __dict__[key] = Info(value)
                 else:
                     # if isinstance(key, str):
-                    #     key = re.sub('\W', '_', key)
+                    #     key = re.sub(r'\W', '_', key)
                     __dict__[key] = value
             return __dict__
 
@@ -63,11 +65,15 @@ class Info(dict):
     def __iter__(self):
         return iter(self.__dict__)
 
-    def __getitem__(self, key):
-        return self.__dict__[key]
-
     def __contains__(self, name):
-        return (name in self.__dict__)
+        if name in dir(dict):
+            return super().__contains__(f'{name}2')
+        return super().__contains__(name)
+
+    def __getitem__(self, key):
+        if key in dir(dict):
+            return super().__getitem__(f'{key}2')
+        return super().__getitem__(key)
 
     def __setattr__(self, name, value):
         raise UnsupportedCall("can't set attribute")
@@ -80,7 +86,7 @@ class Info(dict):
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
                 dict_[key] = value.infotodict()
-            elif isinstance(value, (tuple, list)):
+            elif isinstance(value, (tuple, list, set)):
                 temp = list()
                 for item in value:
                     if isinstance(item, Info):

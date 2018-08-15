@@ -1,31 +1,33 @@
 # -*- coding: utf-8 -*-
-"""root application layer protocol
+"""no-payload packet
 
-`pcapkit.protocols.application.application` contains only
-`Application`, which is a base class for application
-layer protocols, eg. HTTP/1.*, HTTP/2 and etc.
+`pcapkit.protocols.null` contains `NoPayload` only, which
+implements a `Protocol` like object whose payload is
+recursively `NoPayload` itself.
 
 """
-from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.null import NoPayload
+import io
+
+from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 
-__all__ = ['Application']
+__all__ = ['NoPayload']
 
 
-class Application(Protocol):
-    """Abstract base class for transport layer protocol family.
+class NoPayload(Protocol):
+    """This class implements no-payload protocol.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
-        * layer -- str, `Application`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
+        * alias -- str, acronym of corresponding protocol
+
+    Methods:
+        * decode_bytes -- try to decode bytes into str
+        * decode_url -- decode URLs into Unicode
+        * read_raw -- read raw packet data
 
     Attributes:
         * _file -- BytesIO, bytes to be extracted
@@ -38,20 +40,29 @@ class Application(Protocol):
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
         * _read_packet -- read raw packet data
-        * _make_protochain -- make ProtoChain instance for corresponding protocol
 
     """
-    __layer__ = 'Application'
-
     ##########################################################################
     # Properties.
     ##########################################################################
 
-    # protocol layer
+    # name of current protocol
     @property
-    def layer(self):
-        """Protocol layer."""
-        return self.__layer__
+    def name(self):
+        """Name of current protocol."""
+        return 'Null'
+
+    # header length of current protocol
+    @property
+    def length(self):
+        """DEPRECATED"""
+        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'length'")
+
+    # name of next layer protocol
+    @property
+    def protocol(self):
+        """DEPRECATED"""
+        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
 
     ##########################################################################
     # Data models.
@@ -59,16 +70,20 @@ class Application(Protocol):
 
     def __new__(cls, *args, **kwargs):
         self = super().__new__(cls)
-        self._next = NoPayload()
         return self
+
+    def __init__(self, *args, **kwargs):
+        self._next = self
+        self._info = Info()
+        self._file = io.BytesIO()
+        self._protos = NotImplemented
+
+    def __length_hint__(self):
+        pass
 
     ##########################################################################
     # Utilities.
     ##########################################################################
-
-    def _make_protochain(self):
-        """Make ProtoChain instance for corresponding protocol."""
-        self._protos = ProtoChain(self.__class__.__name__, None, self.alias)
 
     def _decode_next_layer(self, dict_, proto=None, length=None):
         """Deprecated."""

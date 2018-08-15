@@ -347,11 +347,12 @@ class TCP(Transport):
             * size -- int, length of option list
 
         Returns:
+            * tuple -- TCP option list
             * dict -- extracted TCP option
 
         """
         counter = 0         # length of read option list
-        optkind = tuple()   # option kind list
+        optkind = list()    # option kind list
         options = dict()    # dict of option data
 
         while counter < size:
@@ -394,7 +395,7 @@ class TCP(Transport):
                 else:
                     options[dscp] = (Info(options[dscp]), Info(data))
             else:
-                optkind += (dscp,)
+                optkind.append(dscp)
                 options[dscp] = data
 
             # break when eol triggered
@@ -405,7 +406,7 @@ class TCP(Transport):
             len_ = size - counter
             options['padding'] = self._read_fileng(len_)
 
-        return optkind, options
+        return tuple(optkind), options
 
     def _read_mode_donone(self, size, kind):
         """Read options request no process.

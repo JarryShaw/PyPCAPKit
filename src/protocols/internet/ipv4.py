@@ -380,12 +380,16 @@ class IPv4(IP):
     def _read_ipv4_options(self, size=None):
         """Read IPv4 option list.
 
-        Keyword arguments:
+        Positional arguments:
             * size -- int, buffer size
+
+        Returns:
+            * tuple -- IPv4 option list
+            * dict -- extracted IPv4 option
 
         """
         counter = 0         # length of read option list
-        optkind = tuple()   # option kind list
+        optkind = list()    # option kind list
         options = dict()    # dict of option data
 
         while counter < size:
@@ -429,7 +433,7 @@ class IPv4(IP):
                 else:
                     options[dscp] = (Info(options[dscp]), Info(data))
             else:
-                optkind += (dscp,)
+                optkind.append(dscp)
                 options[dscp] = data
 
             # break when eol triggered
@@ -442,7 +446,7 @@ class IPv4(IP):
             if any((int(bit, base=2) for bit in padding)):
                 raise ProtocolError(f'{self.alias}: invalid format')
 
-        return optkind, options
+        return tuple(optkind), options
 
     def _read_mode_donone(self, size, kind):
         """Read options request no process.

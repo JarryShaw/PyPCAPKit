@@ -22,7 +22,6 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder
-from pcapkit.utilities.exceptions import ProtocolNotFound, ProtocolUnbound
 
 ###############################################################################
 # from pcapkit.protocols.link import Ethernet
@@ -127,7 +126,7 @@ class Frame(Protocol):
             cap_len = _olen,
         )
 
-        
+
         # load packet data
         length = frame['len']
         bytes_ = self._file.read(length)
@@ -163,48 +162,47 @@ class Frame(Protocol):
         return 16
 
     def __getitem__(self, key):
-        if isinstance(key, type) and issubclass(key, Protocol):
-            key = key.__index__()
-
-        # if requests attributes in info dict
+        # if requests attributes in info dict,
+        # else call the original function
         if key in self._info:
             return self._info[key]
+        return super().__getitem__(key)
 
-        def _getitem_from_ProtoChain(key):
-            proto = self._protos[key]
-            if not proto:
-                raise ProtocolNotFound('ProtoChain index out of range')
-            elif isinstance(proto, tuple):
-                if len(proto) > 1:  # if it's a slice with step & stop
-                    raise ProtocolUnbound('frame slice unbound')
-                else:
-                    start = proto[0]
-            else:
-                start = self._protos.index(proto)
-            return start
-
-        # fetch slice start point from ProtoChain
-        if not isinstance(key, tuple):
-            key = (key,)
-        start = None
-        for item in key:
-            try:
-                start = _getitem_from_ProtoChain(item)
-            except ProtocolNotFound:
-                continue
-            else:
-                break
-        if start is None:
-            raise IndexNotFound(f"'{key}' not in Frame")
-
-        # make return Info item
-        dict_ = self._info.infotodict()
-        for (level, proto) in enumerate(self._protos):
-            proto = proto or 'raw'
-            dict_ = dict_[proto.lower()]
-            if level >= start:
-                return Info(dict_)
-        return Info(dict_)
+        # def _getitem_from_ProtoChain(key):
+        #     proto = self._protos[key]
+        #     if not proto:
+        #         raise ProtocolNotFound('ProtoChain index out of range')
+        #     elif isinstance(proto, tuple):
+        #         if len(proto) > 1:  # if it's a slice with step & stop
+        #             raise ProtocolUnbound('frame slice unbound')
+        #         else:
+        #             start = proto[0]
+        #     else:
+        #         start = self._protos.index(proto)
+        #     return start
+        #
+        # # fetch slice start point from ProtoChain
+        # if not isinstance(key, tuple):
+        #     key = (key,)
+        # start = None
+        # for item in key:
+        #     try:
+        #         start = _getitem_from_ProtoChain(item)
+        #     except ProtocolNotFound:
+        #         continue
+        #     else:
+        #         break
+        # if start is None:
+        #     raise IndexNotFound(f"'{key}' not in Frame")
+        #
+        # # make return Info item
+        # dict_ = self._info.infotodict()
+        # for (level, proto) in enumerate(self._protos):
+        #     proto = proto or 'raw'
+        #     dict_ = dict_[proto.lower()]
+        #     if level >= start:
+        #         return Info(dict_)
+        # return Info(dict_)
 
     def __index__(self=None):
         if self is None:    return 'Frame'

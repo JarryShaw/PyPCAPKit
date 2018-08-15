@@ -6,6 +6,7 @@
     * [`Protocol`](#protocol)
  - [Utility Protocols](#utility-protocols)
     * [`Raw`](#raw)
+    * [`NoPayload`](#nopayload)
     * [PCAP](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/pcap#pcap-headers-manual)
  - [Link Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#link-layer-protocols-manual)
     * [Macros](#link-macros)
@@ -196,6 +197,31 @@ class Raw(pcapkit.protocols.protocol.Protocol)
         - Keyword arguments:
             * `error` -- `str`, exception information
     * all other data modules inherited from [`Protocol`](#protocol)
+
+### `NoPayload`
+
+> described in [`src/protocols/null.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/null.py)
+
+&emsp; `pcapkit.protocols.null` contains `NoPayload` only, which implements a [`Protocol`](#protocol) like object whose payload is recursively `NoPayload` itself.
+
+```python
+class NoPayload(pcapkit.protocols.protocol.Protocol)
+```
+
+##### This class implements no-payload protocol.
+
+ - Properties:
+    * `name` -- `str`, name of corresponding protocol (`'Null'`)
+    * `info` -- `Info`, an empty info dict
+    * `alias` -- `str`, acronym of corresponding protocol (`'NoPayload'`)
+    * `protochain` -- `NotImplemented`, protocol chain (not implemented)
+
+ - Methods:
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol))
+
+ - Data modules:
+    * all data modules inherited from [`Protocol`](#protocol)
 
 ### PCAP
 

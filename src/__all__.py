@@ -46,8 +46,8 @@ __all__ = [
     # pcapkit.protocols
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                    # Protocol Numbers
     'Header', 'Frame',                                      # PCAP Headers
-    'Raw',                                                  # Raw Packet
     'NoPayload',                                            # No Payload
+    'Raw',                                                  # Raw Packet
     'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP', 'VLAN',
                                                             # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer

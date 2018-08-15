@@ -15,6 +15,7 @@ import io
 import numbers
 import os
 import re
+import shutil
 import string
 import struct
 import sys
@@ -26,7 +27,7 @@ import chardet
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import BoolError, BytesError, StructError
+from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, ProtocolNotFound, ProtocolUnbound
 from pcapkit.utilities.validations import bool_check, int_check
 
 ###############################################################################
@@ -34,7 +35,7 @@ from pcapkit.utilities.validations import bool_check, int_check
 ###############################################################################
 
 
-__all__ = ['Protocol', 'NoPayload']
+__all__ = ['Protocol']
 
 
 # readable characters' order list
@@ -116,7 +117,7 @@ class Protocol:
     def payload(self):
         """Payload of current instance."""
         return self._next
-    
+
     # name of next layer protocol
     @property
     def protocol(self):
@@ -184,7 +185,7 @@ class Protocol:
         hexbuf = ' '.join(textwrap.wrap(bytes_.hex(), 2))
         strbuf = ''.join( chr(char) if char in readable else '.' for char in bytes_ )
 
-        number = os.get_terminal_size().columns // 4 - 1
+        number = shutil.get_terminal_size().columns // 4 - 1
         length = number * 3
 
         hexlst = textwrap.wrap(hexbuf, length)
@@ -221,7 +222,30 @@ class Protocol:
     #         raise StopIteration
 
     def __getitem__(self, key):
-        return self._info[key]
+        # if key is a slice, raise ProtocolUnbound
+        if isinstance(key, slice):
+            raise ProtocolUnbound('protocol slice unbound')
+
+        # if key is a protocol, then fetch protocol indexes
+        if isinstance(key, type) and issubclass(key, Protocol):
+            key = key.__index__()
+
+        # make regex for tuple indexes
+        if isinstance(key, tuple):
+            key = '|'.join(map(re.escape, key))
+
+        # if it's itself
+        if re.fullmatch(key, self.__class__.__name__, re.IGNORECASE):
+            return self
+
+        # then check recursively
+        from pcapkit.protocols.null import NoPayload
+        payload = self._next
+        while not isinstance(payload, NoPayload):
+            if re.fullmatch(key, payload.__class__.__name__, re.IGNORECASE):
+                return payload
+            payload = payload.payload
+        raise ProtocolNotFound(f"Layer '{key}' not in Frame")
 
     @classmethod
     def __index__(cls):
@@ -396,82 +420,3 @@ class Protocol:
         protocol_match = filter(lambda string: re.fullmatch(pattern, string, re.IGNORECASE), iterable)
 
         return bool(list(protocol_match) or layer_match)
-
-
-class NoPayload(Protocol):
-    """This class implements no-payload protocol.
-
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-
-    Methods:
-        * decode_bytes -- try to decode bytes into str
-        * decode_url -- decode URLs into Unicode
-        * read_raw -- read raw packet data
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-
-    """
-    ##########################################################################
-    # Properties.
-    ##########################################################################
-
-    # name of current protocol
-    @property
-    def name(self):
-        """Name of current protocol."""
-        return 'Null'
-
-    # header length of current protocol
-    @property
-    def length(self):
-        """DEPRECATED"""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'length'")
-
-    # name of next layer protocol
-    @property
-    def protocol(self):
-        """DEPRECATED"""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
-
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __new__(cls, *args, **kwargs):
-        self = super().__new__(cls)
-        return self
-
-    def __init__(self, *args, **kwargs):
-        self._next = self
-        self._info = Info()
-        self._file = io.BytesIO()
-        self._protos = NotImplemented
-
-    def __length_hint__(self):
-        pass
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    def _decode_next_layer(self, dict_, proto=None, length=None):
-        """Deprecated."""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
-
-    def _import_next_layer(self, proto, length):
-        """Deprecated."""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_import_next_layer'")
-
