@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.9.10'
+__version__ = '0.10.0rc2'
 
 
 # set-up script for pip distribution
@@ -33,7 +33,7 @@ setuptools.setup(
         'Scapy': ['scapy'],
         'PyShark': ['pyshark'],
     },
-    py_modules = ['pcapkit'],
+    # py_modules = ['pcapkit'],
     entry_points = {
         'console_scripts': [
             'pcapkit = pcapkit.__main__:main',
@@ -41,6 +41,7 @@ setuptools.setup(
     },
     packages = [
         'pcapkit',
+        # 'pcapkit._common',
         'pcapkit.corekit',
         'pcapkit.dumpkit',
         'pcapkit.foundation',

@@ -13,14 +13,14 @@ IPv6 (IPv6-Frag), whose structure is described as below.
 
 """
 from pcapkit.corekit.infoclass import Info
-from pcapkit.protocols.protocol import Protocol
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.protocols.internet.internet import Internet
+from pcapkit.utilities.exceptions import UnsupportedCall, ProtocolError
 
 
 __all__ = ['IPv6_Frag']
 
 
-class IPv6_Frag(Protocol):
+class IPv6_Frag(Internet):
     """This class implements Fragment Header for IPv6.
 
     Properties:
@@ -114,13 +114,13 @@ class IPv6_Frag(Protocol):
 
         ipv6_frag = dict(
             next = _next,
+            length = 8,
             offset = int(_offm[:13], base=2),
             mf = True if int(_offm[15], base=2) else False,
             id = _ipid,
         )
 
-        if length is not None:
-            length -= 8
+        length -= ipv6_frag['length']
         ipv6_frag['packet'] = self._read_packet(header=8, payload=length)
 
         if extension:

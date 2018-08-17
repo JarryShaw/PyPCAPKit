@@ -22,6 +22,8 @@ which implements extractor for Open Shortest Path First
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
+from pcapkit._common.ospf_type import TYPE
+from pcapkit._common.ospf_auth import AUTH
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 
@@ -29,22 +31,22 @@ from pcapkit.protocols.link.link import Link
 __all__ = ['OSPF']
 
 
-# OSPF Packet Types
-TYPE = {
-    1 : 'Hello',
-    2 : 'Database Description',
-    3 : 'Link State Request',
-    4 : 'Link State Update',
-    5 : 'Link State Acknowledgment',
-}
+# # OSPF Packet Types
+# TYPE = {
+#     1 : 'Hello',
+#     2 : 'Database Description',
+#     3 : 'Link State Request',
+#     4 : 'Link State Update',
+#     5 : 'Link State Acknowledgment',
+# }
 
 
-# Authentication Types
-AUTH = {
-    0 : 'Null Authentication',
-    1 : 'Simple Password',
-    2 : 'Cryptographic Authentication',
-}
+# # Authentication Types
+# AUTH = {
+#     0 : 'Null Authentication',
+#     1 : 'Simple Password',
+#     2 : 'Cryptographic Authentication',
+# }
 
 
 class OSPF(Link):
@@ -88,8 +90,13 @@ class OSPF(Link):
     @property
     def name(self):
         """Name of current protocol."""
-        return 'Open Shortest Path First'
+        return f'Open Shortest Path First version {self._info.version}'
 
+    @property
+    def alias(self):
+        """Acronym of current protocol."""
+        return f'OSPFv{self._info.version}'
+    
     @property
     def length(self):
         """Header length of current protocol."""

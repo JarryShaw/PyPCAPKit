@@ -280,11 +280,12 @@ class Frame(Protocol):
             * IPv6 (internet layer)
 
         """
-        if proto == 'Ethernet':
+        proto = proto.upper()
+        if proto == 'ETHERNET':
             from pcapkit.protocols.link import Ethernet as Protocol
-        elif proto == 'IPv4':
+        elif proto == 'IPV4':
             from pcapkit.protocols.internet import IPv4 as Protocol
-        elif proto == 'IPv6':
+        elif proto == 'IPV6':
             from pcapkit.protocols.internet import IPv6 as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol

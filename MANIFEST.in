@@ -1,5 +1,8 @@
 global-include *.py
+
 include doc/*
+include _common/*.py
+
 prune NotImplemented
 prune deprecated
 prune testbench

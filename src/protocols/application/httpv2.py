@@ -17,6 +17,9 @@ Protocol (HTTP/2), whose structure is described as below.
 """
 import collections
 
+from pcapkit._common.http_error_code import _ERROR_CODE
+from pcapkit._common.http_para_name import _PRAR_NAME
+from pcapkit._common.http_type import _HTTP_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.http import HTTP
 from pcapkit.utilities.exceptions import ProtocolError
@@ -25,19 +28,19 @@ from pcapkit.utilities.exceptions import ProtocolError
 __all__ = ['HTTPv2']
 
 
-# HTTP/2 Types
-_HTTP_TYPE = {
-    0x00 : 'DATA',
-    0x01 : 'HEADERS',
-    0x02 : 'PRIORITY',
-    0x03 : 'RST_STREAM',
-    0x04 : 'SETTINGS',
-    0x05 : 'PUSH_PROMISE',
-    0x06 : 'PING',
-    0x07 : 'GOAWAY',
-    0x08 : 'WINDOW_UPDATE',
-    0x09 : 'CONTINUATION',
-}
+# # HTTP/2 Types
+# _HTTP_TYPE = {
+#     0x00 : 'DATA',
+#     0x01 : 'HEADERS',
+#     0x02 : 'PRIORITY',
+#     0x03 : 'RST_STREAM',
+#     0x04 : 'SETTINGS',
+#     0x05 : 'PUSH_PROMISE',
+#     0x06 : 'PING',
+#     0x07 : 'GOAWAY',
+#     0x08 : 'WINDOW_UPDATE',
+#     0x09 : 'CONTINUATION',
+# }
 
 
 # HTTP/2 Functions
@@ -56,34 +59,34 @@ _HTTP_FUNC = collections.defaultdict(lambda : _read_http_none, {
 })
 
 
-# Error Codes
-_ERROR_CODE = {
-    0x00 : 'NO_ERROR',
-    0x01 : 'PROTOCOL_ERROR',
-    0x02 : 'INTERNAL_ERROR',
-    0x03 : 'FLOW_CONTROL_ERROR',
-    0x04 : 'SETTINGS_TIMEOUT',
-    0x05 : 'STREAM_CLOSED',
-    0x06 : 'FRAME_SIZE_ERROR',
-    0x07 : 'REFUSED_STREAM',
-    0x08 : 'CANCEL',
-    0x09 : 'COMPRESSION_ERROR',
-    0x0a : 'CONNECT_ERROR',
-    0x0b : 'ENHANCE_YOUR_CALM',
-    0x0c : 'INADEQUATE_SECURITY',
-    0x0d : 'HTTP_1_1_REQUIRED',
-}
+# # Error Codes
+# _ERROR_CODE = {
+#     0x00 : 'NO_ERROR',
+#     0x01 : 'PROTOCOL_ERROR',
+#     0x02 : 'INTERNAL_ERROR',
+#     0x03 : 'FLOW_CONTROL_ERROR',
+#     0x04 : 'SETTINGS_TIMEOUT',
+#     0x05 : 'STREAM_CLOSED',
+#     0x06 : 'FRAME_SIZE_ERROR',
+#     0x07 : 'REFUSED_STREAM',
+#     0x08 : 'CANCEL',
+#     0x09 : 'COMPRESSION_ERROR',
+#     0x0a : 'CONNECT_ERROR',
+#     0x0b : 'ENHANCE_YOUR_CALM',
+#     0x0c : 'INADEQUATE_SECURITY',
+#     0x0d : 'HTTP_1_1_REQUIRED',
+# }
 
 
-# SETTINGS Parameters
-_PRAR_NAME = {
-    0x01 : 'SETTINGS_HEADER_TABLE_SIZE',
-    0x02 : 'SETTINGS_ENABLE_PUSH',
-    0x03 : 'SETTINGS_MAX_CONCURRENT_STREAMS',
-    0x04 : 'SETTINGS_INITIAL_WINDOW_SIZE',
-    0x05 : 'SETTINGS_MAX_FRAME_SIZE',
-    0x06 : 'SETTINGS_MAX_HEADER_LIST_SIZE',
-}
+# # SETTINGS Parameters
+# _PRAR_NAME = {
+#     0x01 : 'SETTINGS_HEADER_TABLE_SIZE',
+#     0x02 : 'SETTINGS_ENABLE_PUSH',
+#     0x03 : 'SETTINGS_MAX_CONCURRENT_STREAMS',
+#     0x04 : 'SETTINGS_INITIAL_WINDOW_SIZE',
+#     0x05 : 'SETTINGS_MAX_FRAME_SIZE',
+#     0x06 : 'SETTINGS_MAX_HEADER_LIST_SIZE',
+# }
 
 
 class HTTPv2(HTTP):

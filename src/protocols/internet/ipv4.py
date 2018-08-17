@@ -26,6 +26,8 @@ import collections
 import datetime
 import ipaddress
 
+from pcapkit._common.ipv4_opt_type import OPT_TYPE
+from pcapkit._common.ipv4_router_alert import _ROUTER_ALERT
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.internet.ip import IP
@@ -103,10 +105,10 @@ _PROTECTION_AUTHORITY = {
     7 : 'Field Termination Indicator',
 }
 
-# Router Alert Code
-_ROUTER_ALERT = {
-    1 : 'Router shall examine packet',
-}
+# # Router Alert Code
+# _ROUTER_ALERT = {
+#     1 : 'Router shall examine packet',
+# }
 
 
 """IPv4 Option Utility Table
@@ -405,7 +407,7 @@ class IPv4(IP):
                 break
 
             # extract option
-            dscp = opts[1]
+            dscp = OPT_TYPE.get(kind)
             if opts[0]:
                 byte = self._read_unpack(1)
                 if byte:    # check option process mode
@@ -443,8 +445,6 @@ class IPv4(IP):
         if counter < size:
             len_ = size - counter
             padding = self._read_binary(len_)
-            if any((int(bit, base=2) for bit in padding)):
-                raise ProtocolError(f'{self.alias}: invalid format')
 
         return tuple(optkind), options
 
@@ -458,12 +458,12 @@ class IPv4(IP):
         Returns:
             * dict -- extracted option
 
-        Structure of TCP options:
+        Structure of IPv4 options:
             Octets      Bits        Name                    Discription
               0           0     ip.opt.kind             Kind
-              0           0     ip.ts.type.copy         Copied Flag
-              0           1     ip.ts.type.class        Option Class
-              0           3     ip.ts.type.number       Option Number
+              0           0     ip.opt.type.copy        Copied Flag
+              0           1     ip.opt.type.class       Option Class
+              0           3     ip.opt.type.number      Option Number
               1           8     ip.opt.length           Length
               2          16     ip.opt.data             Kind-specific Data
 
@@ -489,12 +489,12 @@ class IPv4(IP):
         Returns:
             * dict -- extracted option
 
-        Structure of TCP options:
+        Structure of IPv4 options:
             Octets      Bits        Name                    Discription
               0           0     ip.opt.kind             Kind
-              0           0     ip.ts.type.copy         Copied Flag
-              0           1     ip.ts.type.class        Option Class
-              0           3     ip.ts.type.number       Option Number
+              0           0     ip.opt.type.copy        Copied Flag
+              0           1     ip.opt.type.class       Option Class
+              0           3     ip.opt.type.number      Option Number
               1           8     ip.opt.length           Length
               2          16     ip.opt.data             Kind-specific Data
 

@@ -19,31 +19,34 @@ Octets      Bits        Name                    Discription
 """
 import collections
 import ipaddress
+import re
 import textwrap
 
+from pcapkit._common.arp_oper import OPER
+from pcapkit._common.arp_hrd import HRD_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import ETHERTYPE
-from pcapkit.protocols.link.link import Link, LINKTYPE
+from pcapkit.protocols.link.link import Link
 
 
 __all__ = ['ARP']
 
 
-# Operation Codes [RFC 826][RFC 5494]
-OPER = {
-    0 : 'Reserved',         # [RFC 5494]
-    1 : 'REQUEST',          # [RFC 826][RFC 5227]
-    2 : 'REPLY',            # [RFC 826][RFC 5227]
-    3 : 'Request Reverse',  # [RFC 826][RFC 5227]
-    4 : 'Reply Reverse',    # [RFC 903]
-    5 : 'DRARP-Request',    # [RFC 1931]
-    6 : 'DRARP-Reply',      # [RFC 1931]
-    7 : 'DRARP-Error',      # [RFC 1931]
-    8 : 'InARP-Request',    # [RFC 2390]
-    9 : 'InARP-Reply',      # [RFC 2390]
-   10 : 'ARP-NAK',          # [RFC 1577]
-65535 : 'Reserved',         # [RFC 5494]
-}
+# # Operation Codes [RFC 826][RFC 5494]
+# OPER = {
+#     0 : 'Reserved',         # [RFC 5494]
+#     1 : 'REQUEST',          # [RFC 826][RFC 5227]
+#     2 : 'REPLY',            # [RFC 826][RFC 5227]
+#     3 : 'Request Reverse',  # [RFC 826][RFC 5227]
+#     4 : 'Reply Reverse',    # [RFC 903]
+#     5 : 'DRARP-Request',    # [RFC 1931]
+#     6 : 'DRARP-Reply',      # [RFC 1931]
+#     7 : 'DRARP-Error',      # [RFC 1931]
+#     8 : 'InARP-Request',    # [RFC 2390]
+#     9 : 'InARP-Reply',      # [RFC 2390]
+#    10 : 'ARP-NAK',          # [RFC 1577]
+# 65535 : 'Reserved',         # [RFC 5494]
+# }
 
 
 class ARP(Link):
@@ -170,9 +173,15 @@ class ARP(Link):
             self._acnm = 'ARP'
             self._name = 'Address Resolution Protocol'
 
+        _htype = HRD_TYPE.get(_hwty)
+        if re.match(r'.*Ethernet.*', _htype, re.IGNORECASE):
+            _ptype = ETHERTYPE.get(_ptty)
+        else:
+            _ptype = f'Unknown [{_ptty}]'
+
         arp = dict(
-            htype = LINKTYPE.get(_hwty),
-            ptype = ETHERTYPE.get(_ptty),
+            htype = _htype,
+            ptype = _ptype,
             hlen = _hlen,
             plen = _plen,
             oper = OPER.get(_oper),

@@ -8,6 +8,7 @@ latter is a base class for internet layer protocols, eg.
 AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 
 """
+from pcapkit._common.ethertype import ETHERTYPE
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.transport.transport import TP_PROTO
@@ -17,18 +18,18 @@ from pcapkit.utilities.decorators import beholder
 __all__ = ['Internet', 'ETHERTYPE']
 
 
-# Ethertype IEEE 802 Numbers
-ETHERTYPE = {
-    # Link Layer
-    0x0806 : 'ARP',     # Address Resolution Protocol
-    0x8035 : 'RARP',    # Reverse Address Resolution Protocol
-    0x8100 : 'VLAN',    # 802.1Q Customer VLAN Tag Type
+# # Ethertype IEEE 802 Numbers
+# ETHERTYPE = {
+#     # Link Layer
+#     0x0806 : 'ARP',     # Address Resolution Protocol
+#     0x8035 : 'RARP',    # Reverse Address Resolution Protocol
+#     0x8100 : 'VLAN',    # 802.1Q Customer VLAN Tag Type
 
-    # Internet Layer
-    0x0800 : 'IPv4',    # Internet Protocol version 4
-    0x8137 : 'IPX',     # Internetwork Packet Exchange
-    0x86dd : 'IPv6',    # Internet Protocol version 6
-}
+#     # Internet Layer
+#     0x0800 : 'IPv4',    # Internet Protocol version 4
+#     0x8137 : 'IPX',     # Internetwork Packet Exchange
+#     0x86dd : 'IPv6',    # Internet Protocol version 6
+# }
 
 
 class Internet(Protocol):
@@ -99,6 +100,7 @@ class Internet(Protocol):
         Keyword Arguments:
             * version -- int, IP version (4 in default)
                             <keyword> 4 / 6
+            * ext_proto -- ProtoChain, ProtoChain of IPv6 extension headers
 
         Returns:
             * dict -- current protocol with next layer extracted
@@ -167,7 +169,7 @@ class Internet(Protocol):
             from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts as Protocol
         elif proto == 'IPv6-Route':
             from pcapkit.protocols.internet.ipv6_route import IPv6_Route as Protocol
-        elif proto == 'MH':
+        elif proto == 'Mobility Header':
             from pcapkit.protocols.internet.mh import MH as Protocol
         elif proto == 'IPv4':
             from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol

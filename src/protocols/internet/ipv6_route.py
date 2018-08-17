@@ -17,27 +17,38 @@ as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-# TODO: Implements extractor of all routing types.
+import ipaddress
+
+from pcapkit._common.ipv6_routing_type import _ROUTING_TYPE
 from pcapkit.corekit.infoclass import Info
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.internet.internet import Internet
+from pcapkit.utilities.exceptions import UnsupportedCall, ProtocolError
 
 
 __all__ = ['IPv6_Route']
 
 
-# IPv6 Routing Types
-_ROUTING_TYPE = {
-    0 : 'Source Route',                 # [RFC 5095] DEPRECATED
-    1 : 'Nimrod',                       # DEPRECATED 2009-05-06
-    2 : 'Type 2 Routing Header',        # [RFC 6275]
-    3 : 'RPL Source Route Header',      # [RFC 6554]
-  253 : 'RFC3692-style Experiment 1',   # [RFC 4727]
-  254 : 'RFC3692-style Experiment 2',   # [RFC 4727]
-  255 : 'Reserved',
+# # IPv6 Routing Types
+# _ROUTING_TYPE = {
+#     0 : 'Source Route',                 # [RFC 5095] DEPRECATED
+#     1 : 'Nimrod',                       # DEPRECATED 2009-05-06
+#     2 : 'Type 2 Routing Header',        # [RFC 6275]
+#     3 : 'RPL Source Route Header',      # [RFC 6554]
+#   253 : 'RFC3692-style Experiment 1',   # [RFC 4727]
+#   254 : 'RFC3692-style Experiment 2',   # [RFC 4727]
+#   255 : 'Reserved',
+# }
+
+
+# IPv6 Routing Processors
+_ROUTE_PROC = {
+    0 : 'src',                          # [RFC 5095] DEPRECATED
+    2 : '2',                            # [RFC 6275]
+    3 : 'rpl',                          # [RFC 6554]
 }
 
 
-class IPv6_Route(Protocol):
+class IPv6_Route(Internet):
     """This class implements Routing Header for IPv6.
 
     Properties:
@@ -131,18 +142,21 @@ class IPv6_Route(Protocol):
         _hlen = self._read_unpack(1)
         _type = self._read_unpack(1)
         _left = self._read_unpack(1)
-        _data = self._read_fileng(_hlen - 3)
 
         ipv6_route = dict(
             next = _next,
-            length = _hlen + 1,
+            length = (_hlen + 1) * 8,
             type = _ROUTING_TYPE.get(_type, 'Unassigned'),
-            sed_left = _left,
-            data = _data,
+            seg_left = _left,
         )
 
-        if length is not None:
-            length -= ipv6_route['length']
+        _dlen = _hlen * 8 - 4
+        if _dlen:
+            _func = _ROUTE_PROC.get(_type, 'none')
+            _data = eval(f'self._read_data_type_{func}')(_dlen)
+            ipv6_route.update(_data)
+
+        length -= ipv6_route['length']
         ipv6_route['packet'] = self._read_packet(header=ipv6_route['length'], payload=length)
 
         if extension:
@@ -160,3 +174,193 @@ class IPv6_Route(Protocol):
 
     def __length_hint__(self):
         return 4
+
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _read_data_type_none(self, length):
+        """Read IPv6-Route unknown type data.
+
+        Structure of IPv6-Route unknown type data [RFC 8200][RFC 5095]:
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |  Next Header  |  Hdr Ext Len  |  Routing Type | Segments Left |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            .                                                               .
+            .                       type-specific data                      .
+            .                                                               .
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+            Octets      Bits        Name                    Discription
+              0           0     route.next              Next Header
+              1           8     route.length            Header Extensive Length
+              2          16     route.type              Routing Type
+              3          24     route.seg_left          Segments Left
+              4          32     route.data              Type-Specific Data
+
+        """
+        _data = self._read_fileng(length)
+
+        data = dict(
+            data = _data,
+        )
+
+        return data
+
+    def _read_data_type_src(self, length):
+        """Read IPv6-Route Souce Route data.
+
+        Structure of IPv6-Route Souce Route data [RFC 5095]:
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |  Next Header  |  Hdr Ext Len  | Routing Type=0| Segments Left |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                            Reserved                           |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +                           Address[1]                          +
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +                           Address[2]                          +
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            .                               .                               .
+            .                               .                               .
+            .                               .                               .
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +                           Address[n]                          +
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+            Octets      Bits        Name                    Discription
+              0           0     route.next              Next Header
+              1           8     route.length            Header Extensive Length
+              2          16     route.type              Routing Type
+              3          24     route.seg_left          Segments Left
+              4          32     -                       Reserved
+              8          64     route.ip                Address
+                                ............
+
+        """
+        _resv = self._read_fileng(4)
+        _addr = list()
+        for _ in range((length - 4) // 16):
+            _addr.append(ipaddress.ip_address(self._read_fileng(16)))
+
+        data = dict(
+            ip = tuple(_addr),
+        )
+
+        return data
+
+    def _read_data_type_2(self, length):
+        """Read IPv6-Route Type 2 data.
+
+        Structure of IPv6-Route Type 2 data [RFC 6275]:
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |  Next Header  | Hdr Ext Len=2 | Routing Type=2|Segments Left=1|
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                            Reserved                           |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +                         Home Address                          +
+            |                                                               |
+            +                                                               +
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+            Octets      Bits        Name                    Discription
+              0           0     route.next              Next Header
+              1           8     route.length            Header Extensive Length
+              2          16     route.type              Routing Type
+              3          24     route.seg_left          Segments Left
+              4          32     -                       Reserved
+              8          64     route.ip                Home Address
+
+        """
+        if length != 20:
+            raise ProtocolError(f'{self.alias}: [Typeno 2] invalid format')
+
+        _resv = self._read_fileng(4)
+        _home = self._read_fileng(16)
+
+        data = dict(
+            ip = ipaddress.ip_address(_home),
+        )
+
+        return data
+
+    def _read_data_type_rpl(self, length):
+        """Read IPv6-Route RPL Source data.
+
+        Structure of IPv6-Route RPL Source data [RFC 6554]:
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |  Next Header  |  Hdr Ext Len  | Routing Type  | Segments Left |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            | CmprI | CmprE |  Pad  |               Reserved                |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |                                                               |
+            .                                                               .
+            .                        Addresses[1..n]                        .
+            .                                                               .
+            |                                                               |
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+            Octets      Bits        Name                    Discription
+              0           0     route.next              Next Header
+              1           8     route.length            Header Extensive Length
+              2          16     route.type              Routing Type
+              3          24     route.seg_left          Segments Left
+              4          32     route.cmpri             CmprI
+              4          36     route.cpmre             CmprE
+              5          40     route.pad               Pad Size
+              5          44     -                       Reserved
+              8          64     route.ip                Addresses
+
+        """
+        _cmpr = self._read_binary(1)
+        _padr = self._read_binary(1)
+        _resv = self._read_fileng(2)
+        
+        _inti = int(_cmpr[:4], base=2)
+        _inte = int(_cmpr[4:], base=2)
+        _plen = int(_padr[:4], base=2)
+
+        _ilen = 16 - _inti
+        _elen = 16 - _inte
+
+        _addr = list()
+        for _ in (((length - 4) - _elen - _plen) // _ilen):
+            _addr.append(ipaddress.ip_address(self._read_fileng(_ilen)))
+        _addr.append(ipaddress.ip_address(self._read_fileng(_elen)))
+
+        _pads = self._read_fileng(_plen)
+
+        data = dict(
+            cmpri = _inti,
+            cmpre = _inte,
+            pad = _plen,
+            ip = tuple(_addr),
+        )
+
+        return data

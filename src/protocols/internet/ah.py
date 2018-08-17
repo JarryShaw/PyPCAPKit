@@ -22,7 +22,7 @@ whose structure is described as below.
 """
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ipsec import IPsec
-from pcapkit.utilities.exceptions import VersionError, ProtocolError
+from pcapkit.utilities.exceptions import VersionError, ProtocolError, UnsupportedCall
 
 
 __all__ = ['AH']
@@ -125,7 +125,7 @@ class AH(IPsec):
         _dsnf = self._read_unpack(4)
 
         # ICV length & value
-        _tlen = 20 + _plen * 4
+        _tlen = _plen * 4 - 2
         _vlen = _tlen - 12
         _chkv = self._read_fileng(_vlen)
 
@@ -138,7 +138,7 @@ class AH(IPsec):
         )
 
         if version == 6:
-            _plen = 8 - (_vlen % 8)
+            _plen = 8 - (_tlen % 8)
         elif version == 4:
             _plen = 4 - (_tlen % 4)
         else:
