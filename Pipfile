@@ -13,6 +13,7 @@ pypcapkit = "*"
 "beautifulsoup4" = "*"
 requests = "*"
 "html5lib" = "*"
+aenum = "*"
 
 [dev-packages]
 

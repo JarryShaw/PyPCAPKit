@@ -70,7 +70,7 @@ class HTTPv1(HTTP):
     @property
     def alias(self):
         """Acronym of current protocol."""
-        return f'HTTP/{self._info.header[self._info.receipt].version}'
+        return f'HTTP/{self._info.header[self.__receipt__].version}'
 
     ##########################################################################
     # Methods.
@@ -108,6 +108,7 @@ class HTTPv1(HTTP):
                 packet = self._read_packet(length),
             ),
         )
+        self.__receipt__ = http_receipt
 
         return http
 

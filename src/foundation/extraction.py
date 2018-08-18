@@ -611,18 +611,18 @@ class Extractor:
 
         # record fragments
         if self._ipv4:
-            flag, data = ipv4_reassembly(packet)
+            flag, data = ipv4_reassembly(frame)
             if flag:    self._reasm[0](data)
         if self._ipv6:
-            flag, data = ipv6_reassembly(packet)
+            flag, data = ipv6_reassembly(frame)
             if flag:    self._reasm[1](data)
         if self._tcp:
-            flag, data = ipv4_reassembly(packet)
+            flag, data = ipv4_reassembly(frame)
             if flag:    self._reasm[2](data)
 
         # trace flows
         if self._flag_t:
-            flag, data = tcp_traceflow(packet, data_link=self._dlink)
+            flag, data = tcp_traceflow(frame, data_link=self._dlink)
             if flag:    self._trace(data)
 
         # record frames
@@ -744,11 +744,11 @@ class Extractor:
         timestamp, packet = next(self._extmp)
         
         # extract packet
-        if self._dlink == 'Ethernet':
+        if self._dlink == 'ETHERNET':
             packet = self._expkg.ethernet.Ethernet(packet)
-        elif self._dlink == 'IPv4':
+        elif self._dlink == 'IPV4':
             packet = self._expkg.ip.IP(packet)
-        elif self._dlink == 'IPv6':
+        elif self._dlink == 'IPV6':
             packet = self._expkg.ip6.IP6(packet)
         else:
             warnings.warn('unrecognised link layer protocol; '

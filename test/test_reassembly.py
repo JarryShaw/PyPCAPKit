@@ -13,13 +13,13 @@ import pcapkit
 os.system('> ../sample/out')
 
 extraction = pcapkit.extract(
-    fin='../sample/test.pcap', engine=pcapkit.Scapy,
+    fin='../sample/test.pcap', engine=pcapkit.DPKT,
     store=False, tcp=True, verbose=True, strict=True, nofile=True,
 )
 # pprint.pprint(extraction.frame)
 
 with open('../sample/out', 'a') as file:
-    # pprint.pprint(tcp.datagram)
+    # pprint.pprint(extraction.reassembly.tcp)
     for datagram in extraction.reassembly.tcp:
         print(f'NotImplemented = {datagram.NotImplemented}')
         file.write(f'NotImplemented = {datagram.NotImplemented}')

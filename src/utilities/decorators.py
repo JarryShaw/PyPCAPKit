@@ -71,6 +71,8 @@ def beholder_ng(func):
 
             file.seek(seek_cur, os.SEEK_SET)
 
-            raw = Raw(file, length, error=str(error))
-            return analyse(raw.info, raw.protochain, raw.alias)
+            # raw = Raw(file, length, error=str(error))
+            # return analyse(raw.info, raw.protochain, raw.alias)
+            next_ = Raw(file, length, error=str(error))
+            return False, next_
     return behold

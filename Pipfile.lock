@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "49d4ac80a9528650d315b2768003a6bf66441c076ef2cb84567e2d89eb82cc6d"
+            "sha256": "c4e3ba062ce72436a48cbfc6be8a41132ecaf17edb6c26dbd8052bcd94ec1029"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -16,6 +16,15 @@
         ]
     },
     "default": {
+        "aenum": {
+            "hashes": [
+                "sha256:3df9b84cce5dc9ed77c337079f97b66c44c0053eb87d6f4d46b888dc45801e38",
+                "sha256:7a77c205c4bc9d7fe9bd73b3193002d724aebf5909fa0d297534208953891ec8",
+                "sha256:a3208e4b28db3a7b232ff69b934aef2ea1bf27286d9978e1e597d46f490e4687"
+            ],
+            "index": "pypi",
+            "version": "==2.1.2"
+        },
         "beautifulsoup4": {
             "hashes": [
                 "sha256:194ec62a25438adcb3fdb06378b26559eda1ea8a747367d34c33cef9c7f48d57",
@@ -152,11 +161,11 @@
         },
         "pypcapkit": {
             "hashes": [
-                "sha256:4093609449d8cacaaba12b67a565ade7378c07f613a9e1638410e8dab90e54e2",
-                "sha256:a35aa796bbf0f66929c756029f3937e982efeefce9cdcb0d47ca81ed7c612b34"
+                "sha256:607441988c475709ba2e67976aa5863f5a63d654b6cc6f9eee06e6b4515c2993",
+                "sha256:df610120ce2a221aeeeda6b5c9bfcbd6c5ae311abfd53af628fcb8825ef8fb9a"
             ],
             "index": "pypi",
-            "version": "==0.10.0rc1"
+            "version": "==0.10.0rc2"
         },
         "pyshark": {
             "hashes": [

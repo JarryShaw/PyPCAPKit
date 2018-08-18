@@ -72,8 +72,8 @@ class Info(dict):
 
     def __getitem__(self, key):
         if key in dir(dict):
-            return super().__getitem__(f'{key}2')
-        return super().__getitem__(key)
+            return Info(super().__getitem__(f'{key}2'))
+        return Info(super().__getitem__(key))
 
     def __setattr__(self, name, value):
         raise UnsupportedCall("can't set attribute")
