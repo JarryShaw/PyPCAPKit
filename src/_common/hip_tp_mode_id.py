@@ -1,10 +1,25 @@
 # -*- coding: utf-8 -*-
 
 
-# HIP Transport Modes
-_TP_MODE_ID = {
-    0 : 'RESERVED [0]',                                                         # [RFC 6261]
-    1 : 'DEFAULT',                                                              # [RFC 6261]
-    2 : 'ESP',                                                                  # [RFC 6261]
-    3 : 'ESP-TCP',                                                              # [RFC 6261]
-}
+from aenum import IntEnum, extend_enum
+
+
+class TAT_ModeID(IntEnum):
+    """Enumeration class for TAT_ModeID."""
+    _ignore_ = 'TAT_ModeID _'
+    TAT_ModeID = vars()
+
+    # HIP Transport Modes
+    TAT_ModeID['RESERVED'] = 0                                                  # [RFC 6261]
+    TAT_ModeID['DEFAULT'] = 1                                                   # [RFC 6261]
+    TAT_ModeID['ESP'] = 2                                                       # [RFC 6261]
+    TAT_ModeID['ESP-TCP'] = 3                                                   # [RFC 6261]
+
+    @staticmethod
+    def get(key, default=-1):
+        """Backport support for original codes."""
+        if isinstance(key, int):
+            return TAT_ModeID(key)
+        if key not in TAT_ModeID._member_map_:
+            extend_enum(TAT_ModeID, key, default)
+        return TAT_ModeID[key]

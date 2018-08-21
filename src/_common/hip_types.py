@@ -1,134 +1,48 @@
 # -*- coding: utf-8 -*-
 
 
-# HIP Packet Types
-_HIP_TYPES = {
-    0 : 'Reserved [0]',                                                         # [RFC 7401]
-    1 : 'I1',                                                                   # [RFC 7401] the HIP Initiator Packet
-    2 : 'R1',                                                                   # [RFC 7401] the HIP Responder Packet
-    3 : 'I2',                                                                   # [RFC 7401] the Second HIP Initiator Packet
-    4 : 'R2',                                                                   # [RFC 7401] the Second HIP Responder Packet
-    5 : 'Unassigned [5]',
-    6 : 'Unassigned [6]',
-    7 : 'Unassigned [7]',
-    8 : 'Unassigned [8]',
-    9 : 'Unassigned [9]',
-   10 : 'Unassigned [10]',
-   11 : 'Unassigned [11]',
-   12 : 'Unassigned [12]',
-   13 : 'Unassigned [13]',
-   14 : 'Unassigned [14]',
-   15 : 'Unassigned [15]',
-   16 : 'UPDATE',                                                               # [RFC 7401] the HIP Update Packet
-   17 : 'NOTIFY',                                                               # [RFC 7401] the HIP Notify Packet
-   18 : 'CLOSE',                                                                # [RFC 7401] the HIP Association Closing Packet
-   19 : 'CLOSE_ACK',                                                            # [RFC 7401] the HIP Closing Acknowledgment Packet
-   20 : 'HIP Distributed Hash Table Resource Record (HDRR)',                    # [RFC 6537]
-   21 : 'Unassigned [21]',
-   22 : 'Unassigned [22]',
-   23 : 'Unassigned [23]',
-   24 : 'Unassigned [24]',
-   25 : 'Unassigned [25]',
-   26 : 'Unassigned [26]',
-   27 : 'Unassigned [27]',
-   28 : 'Unassigned [28]',
-   29 : 'Unassigned [29]',
-   30 : 'Unassigned [30]',
-   31 : 'Unassigned [31]',
-   32 : 'HIP_DATA',                                                             # [RFC 6078]
-   33 : 'Unassigned [33]',
-   34 : 'Unassigned [34]',
-   35 : 'Unassigned [35]',
-   36 : 'Unassigned [36]',
-   37 : 'Unassigned [37]',
-   38 : 'Unassigned [38]',
-   39 : 'Unassigned [39]',
-   40 : 'Unassigned [40]',
-   41 : 'Unassigned [41]',
-   42 : 'Unassigned [42]',
-   43 : 'Unassigned [43]',
-   44 : 'Unassigned [44]',
-   45 : 'Unassigned [45]',
-   46 : 'Unassigned [46]',
-   47 : 'Unassigned [47]',
-   48 : 'Unassigned [48]',
-   49 : 'Unassigned [49]',
-   50 : 'Unassigned [50]',
-   51 : 'Unassigned [51]',
-   52 : 'Unassigned [52]',
-   53 : 'Unassigned [53]',
-   54 : 'Unassigned [54]',
-   55 : 'Unassigned [55]',
-   56 : 'Unassigned [56]',
-   57 : 'Unassigned [57]',
-   58 : 'Unassigned [58]',
-   59 : 'Unassigned [59]',
-   60 : 'Unassigned [60]',
-   61 : 'Unassigned [61]',
-   62 : 'Unassigned [62]',
-   63 : 'Unassigned [63]',
-   64 : 'Unassigned [64]',
-   65 : 'Unassigned [65]',
-   66 : 'Unassigned [66]',
-   67 : 'Unassigned [67]',
-   68 : 'Unassigned [68]',
-   69 : 'Unassigned [69]',
-   70 : 'Unassigned [70]',
-   71 : 'Unassigned [71]',
-   72 : 'Unassigned [72]',
-   73 : 'Unassigned [73]',
-   74 : 'Unassigned [74]',
-   75 : 'Unassigned [75]',
-   76 : 'Unassigned [76]',
-   77 : 'Unassigned [77]',
-   78 : 'Unassigned [78]',
-   79 : 'Unassigned [79]',
-   80 : 'Unassigned [80]',
-   81 : 'Unassigned [81]',
-   82 : 'Unassigned [82]',
-   83 : 'Unassigned [83]',
-   84 : 'Unassigned [84]',
-   85 : 'Unassigned [85]',
-   86 : 'Unassigned [86]',
-   87 : 'Unassigned [87]',
-   88 : 'Unassigned [88]',
-   89 : 'Unassigned [89]',
-   90 : 'Unassigned [90]',
-   91 : 'Unassigned [91]',
-   92 : 'Unassigned [92]',
-   93 : 'Unassigned [93]',
-   94 : 'Unassigned [94]',
-   95 : 'Unassigned [95]',
-   96 : 'Unassigned [96]',
-   97 : 'Unassigned [97]',
-   98 : 'Unassigned [98]',
-   99 : 'Unassigned [99]',
-  100 : 'Unassigned [100]',
-  101 : 'Unassigned [101]',
-  102 : 'Unassigned [102]',
-  103 : 'Unassigned [103]',
-  104 : 'Unassigned [104]',
-  105 : 'Unassigned [105]',
-  106 : 'Unassigned [106]',
-  107 : 'Unassigned [107]',
-  108 : 'Unassigned [108]',
-  109 : 'Unassigned [109]',
-  110 : 'Unassigned [110]',
-  111 : 'Unassigned [111]',
-  112 : 'Unassigned [112]',
-  113 : 'Unassigned [113]',
-  114 : 'Unassigned [114]',
-  115 : 'Unassigned [115]',
-  116 : 'Unassigned [116]',
-  117 : 'Unassigned [117]',
-  118 : 'Unassigned [118]',
-  119 : 'Unassigned [119]',
-  120 : 'Unassigned [120]',
-  121 : 'Unassigned [121]',
-  122 : 'Unassigned [122]',
-  123 : 'Unassigned [123]',
-  124 : 'Unassigned [124]',
-  125 : 'Unassigned [125]',
-  126 : 'Unassigned [126]',
-  127 : 'Unassigned [127]',
-}
+from aenum import IntEnum, extend_enum
+
+
+class PktType(IntEnum):
+    """Enumeration class for PktType."""
+    _ignore_ = 'PktType _'
+    PktType = vars()
+
+    # HIP Packet Types
+    PktType['Reserved'] = 0                                                     # [RFC 7401]
+    PktType['I1'] = 1                                                           # [RFC 7401] the HIP Initiator Packet
+    PktType['R1'] = 2                                                           # [RFC 7401] the HIP Responder Packet
+    PktType['I2'] = 3                                                           # [RFC 7401] the Second HIP Initiator Packet
+    PktType['R2'] = 4                                                           # [RFC 7401] the Second HIP Responder Packet
+    PktType['UPDATE'] = 16                                                      # [RFC 7401] the HIP Update Packet
+    PktType['NOTIFY'] = 17                                                      # [RFC 7401] the HIP Notify Packet
+    PktType['CLOSE'] = 18                                                       # [RFC 7401] the HIP Association Closing Packet
+    PktType['CLOSE_ACK'] = 19                                                   # [RFC 7401] the HIP Closing Acknowledgment Packet
+    PktType['HDRR'] = 20                                                        # [RFC 6537] HIP Distributed Hash Table Resource Record
+    PktType['HIP_DATA'] = 32                                                    # [RFC 6078]
+
+    @staticmethod
+    def get(key, default=-1):
+        """Backport support for original codes."""
+        if isinstance(key, int):
+            return PktType(key)
+        if key not in PktType._member_map_:
+            extend_enum(PktType, key, default)
+        return PktType[key]
+
+    @classmethod
+    def _missing_(cls, value):
+        """Lookup function used when value is not found."""
+        if not (isinstance(value, int) and 0 <= value <= 127):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        if 5 <= value <= 15:
+            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            return cls(value)
+        if 21 <= value <= 31:
+            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            return cls(value)
+        if 33 <= value <= 127:
+            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            return cls(value)
+        super()._missing_(value)

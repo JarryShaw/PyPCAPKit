@@ -8,23 +8,12 @@ class for link layer protocols, eg. ARP/InARP, Ethernet,
 L2TP, OSPF, RARP/DRARP and etc.
 
 """
-from pcapkit._common.linktype import LINKTYPE
+from pcapkit._common.linktype import LinkType as LINKTYPE
 from pcapkit.protocols.internet.internet import ETHERTYPE
 from pcapkit.protocols.protocol import Protocol
 
 
 __all__ = ['Link', 'LINKTYPE']
-
-
-# # Link-Layer Header Type Values
-# LINKTYPE = {
-#     0 : 'Null',     # BSD loopback encapsulation
-#     1 : 'Ethernet', # IEEE 802.3 Ethernet
-#   101 : 'Raw',      # Raw IP
-#   228 : 'IPv4',     # Raw IPv4
-#   229 : 'IPv6',     # Raw IPv6
-#   248 : 'SCTP',     # SCTP packets
-# }
 
 
 class Link(Protocol):
@@ -112,17 +101,17 @@ class Link(Protocol):
         """
         if self._sigterm:
             from pcapkit.protocols.raw import Raw as Protocol
-        elif proto == 'Address Resolution Protocol (ARP)':
+        elif proto == 0x0806:
             from pcapkit.protocols.link.arp import ARP as Protocol
-        elif proto == 'Reverse Address Resolution Protocol (RARP)':
+        elif proto == 0x8035:
             from pcapkit.protocols.link.rarp import RARP as Protocol
-        elif proto == 'Customer VLAN Tag Type (C-Tag, formerly called the Q-Tag) (initially Wellfleet)':
+        elif proto == 0x8100:
             from pcapkit.protocols.link.vlan import VLAN as Protocol
-        elif proto == 'Internet Protocol version 4 (IPv4)':
+        elif proto == 0x0800:
             from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol
-        elif proto == 'Internet Protocol version 6 (IPv6)':
+        elif proto == 0x86DD:
             from pcapkit.protocols.internet.ipv6 import IPv6 as Protocol
-        elif proto == 'Novell, Inc. [0x8137]':
+        elif proto == 0x8137:
             from pcapkit.protocols.internet.ipx import IPX as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol

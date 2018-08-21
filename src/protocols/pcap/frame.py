@@ -247,7 +247,7 @@ class Frame(Protocol):
 
         # make next layer protocol name
         if flag:
-            proto, name = str(self._prot or 'Raw').lower(), self._prot
+            proto, name = str(self._prot.name or 'Raw').lower(), self._prot
         else:
             proto, name = 'raw', 'Raw'
 
@@ -280,12 +280,11 @@ class Frame(Protocol):
             * IPv6 (internet layer)
 
         """
-        proto = proto.upper()
-        if proto == 'ETHERNET':
+        if proto == 1:
             from pcapkit.protocols.link import Ethernet as Protocol
-        elif proto == 'IPV4':
+        elif proto == 228:
             from pcapkit.protocols.internet import IPv4 as Protocol
-        elif proto == 'IPV6':
+        elif proto == 229:
             from pcapkit.protocols.internet import IPv6 as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol

@@ -13,24 +13,11 @@ Octets      Bits        Name                    Discription
   3          24     vlan.type               Protocol (Internet Layer)
 
 """
-from pcapkit._common.vlan_pcp import _PCP
+from pcapkit._common.vlan_pcp import PrioLvl as _PCP
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 
 __all__ = ['VLAN']
-
-
-# # priority levels defined in IEEE 802.1p
-# _PCP = {
-#     '000' : 'BE',   # 1 - Best effort (default)
-#     '001' : 'BK',   # 0 - Background (lowest)
-#     '010' : 'EE',   # 2 - Excellent effort
-#     '011' : 'CA',   # 3 - Critical applications
-#     '100' : 'VI',   # 4 - Video, < 100 ms latency and jitter
-#     '101' : 'VO',   # 5 - Voice, < 10 ms latency and jitter
-#     '110' : 'IC',   # 6 - Internetwork control
-#     '111' : 'NC',   # 7 - Network control (highest)
-# }
 
 
 class VLAN(Link):
@@ -113,7 +100,7 @@ class VLAN(Link):
 
         vlan = dict(
             tci = dict(
-                pcp = _PCP.get(_tcif[:3]),
+                pcp = _PCP.get(int(_tcif[:3], base=2)),
                 dei = True if _tcif[3] else False,
                 vid = int(_tcif[4:], base=2),
             ),

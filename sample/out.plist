@@ -17,7 +17,7 @@
 		<key>snaplen</key>
 		<integer>262144</integer>
 		<key>network</key>
-		<string>ETHERNET</string>
+		<string><LinkType.ETHERNET: 1></string>
 	</dict>
 	<key>Frame 1</key>
 	<dict>
@@ -51,7 +51,7 @@
 			<key>src</key>
 			<string>a4-5e-60-d9-6b-97</string>
 			<key>type</key>
-			<string>Internet Protocol version 6 (IPv6)</string>
+			<string><EtherType.Internet Protocol version 6 (IPv6): 34525></string>
 			<key>packet</key>
 			<dict>
 				<key>header</key>
@@ -70,7 +70,7 @@
 				<key>payload</key>
 				<integer>32</integer>
 				<key>next</key>
-				<string>IPv6-ICMP</string>
+				<string><TransType.IPv6-ICMP: 58></string>
 				<key>limit</key>
 				<integer>255</integer>
 				<key>src</key>
@@ -88,8 +88,8 @@
 				<integer>40</integer>
 				<key>raw_len</key>
 				<integer>32</integer>
-				<key>proto</key>
-				<string>IPv6-ICMP</string>
+				<key>protocol</key>
+				<string><TransType.IPv6-ICMP: 58></string>
 				<key>raw</key>
 				<dict>
 					<key>packet</key>
@@ -132,7 +132,7 @@
 			<key>src</key>
 			<string>40-33-1a-d1-85-1c</string>
 			<key>type</key>
-			<string>Internet Protocol version 6 (IPv6)</string>
+			<string><EtherType.Internet Protocol version 6 (IPv6): 34525></string>
 			<key>packet</key>
 			<dict>
 				<key>header</key>
@@ -151,7 +151,7 @@
 				<key>payload</key>
 				<integer>24</integer>
 				<key>next</key>
-				<string>IPv6-ICMP</string>
+				<string><TransType.IPv6-ICMP: 58></string>
 				<key>limit</key>
 				<integer>255</integer>
 				<key>src</key>
@@ -169,8 +169,8 @@
 				<integer>40</integer>
 				<key>raw_len</key>
 				<integer>24</integer>
-				<key>proto</key>
-				<string>IPv6-ICMP</string>
+				<key>protocol</key>
+				<string><TransType.IPv6-ICMP: 58></string>
 				<key>raw</key>
 				<dict>
 					<key>packet</key>
@@ -213,7 +213,7 @@
 			<key>src</key>
 			<string>b8-f8-83-a5-f9-47</string>
 			<key>type</key>
-			<string>Internet Protocol version 4 (IPv4)</string>
+			<string><EtherType.Internet Protocol version 4 (IPv4): 2048></string>
 			<key>packet</key>
 			<dict>
 				<key>header</key>
@@ -231,13 +231,13 @@
 				<dict>
 					<key>dscp</key>
 					<array>
-						<string>Routine</string>
-						<string>Normal Delay</string>
-						<string>Normal Throughput</string>
-						<string>Normal Relibility</string>
+						<string><Precedence.Routine: 0></string>
+						<string><Delay.NORMAL: 0></string>
+						<string><Throughput.NORMAL: 0></string>
+						<string><Relibility.NORMAL: 0></string>
 					</array>
 					<key>ecn</key>
-					<string>Not-ECT</string>
+					<string><ECN.Not-ECT: 0></string>
 				</dict>
 				<key>len</key>
 				<integer>40</integer>
@@ -255,7 +255,7 @@
 				<key>ttl</key>
 				<integer>43</integer>
 				<key>proto</key>
-				<string>TCP</string>
+				<string><TransType.TCP: 6></string>
 				<key>checksum</key>
 				<data>7a86</data>
 				<key>src</key>
@@ -358,7 +358,7 @@
 			<key>src</key>
 			<string>a4-5e-60-d9-6b-97</string>
 			<key>type</key>
-			<string>Internet Protocol version 4 (IPv4)</string>
+			<string><EtherType.Internet Protocol version 4 (IPv4): 2048></string>
 			<key>packet</key>
 			<dict>
 				<key>header</key>
@@ -376,13 +376,13 @@
 				<dict>
 					<key>dscp</key>
 					<array>
-						<string>Routine</string>
-						<string>Normal Delay</string>
-						<string>Normal Throughput</string>
-						<string>Normal Relibility</string>
+						<string><Precedence.Routine: 0></string>
+						<string><Delay.NORMAL: 0></string>
+						<string><Throughput.NORMAL: 0></string>
+						<string><Relibility.NORMAL: 0></string>
 					</array>
 					<key>ecn</key>
-					<string>Not-ECT</string>
+					<string><ECN.Not-ECT: 0></string>
 				</dict>
 				<key>len</key>
 				<integer>40</integer>
@@ -400,7 +400,7 @@
 				<key>ttl</key>
 				<integer>64</integer>
 				<key>proto</key>
-				<string>TCP</string>
+				<string><TransType.TCP: 6></string>
 				<key>checksum</key>
 				<data>2abb</data>
 				<key>src</key>
@@ -503,7 +503,7 @@
 			<key>src</key>
 			<string>a4-5e-60-d9-6b-97</string>
 			<key>type</key>
-			<string>Internet Protocol version 4 (IPv4)</string>
+			<string><EtherType.Internet Protocol version 4 (IPv4): 2048></string>
 			<key>packet</key>
 			<dict>
 				<key>header</key>
@@ -521,13 +521,13 @@
 				<dict>
 					<key>dscp</key>
 					<array>
-						<string>Routine</string>
-						<string>Normal Delay</string>
-						<string>Normal Throughput</string>
-						<string>Normal Relibility</string>
+						<string><Precedence.Routine: 0></string>
+						<string><Delay.NORMAL: 0></string>
+						<string><Throughput.NORMAL: 0></string>
+						<string><Relibility.NORMAL: 0></string>
 					</array>
 					<key>ecn</key>
-					<string>Not-ECT</string>
+					<string><ECN.Not-ECT: 0></string>
 				</dict>
 				<key>len</key>
 				<integer>40</integer>
@@ -545,7 +545,7 @@
 				<key>ttl</key>
 				<integer>64</integer>
 				<key>proto</key>
-				<string>TCP</string>
+				<string><TransType.TCP: 6></string>
 				<key>checksum</key>
 				<data>2abb</data>
 				<key>src</key>
@@ -648,7 +648,7 @@
 			<key>src</key>
 			<string>b8-f8-83-a5-f9-47</string>
 			<key>type</key>
-			<string>Internet Protocol version 4 (IPv4)</string>
+			<string><EtherType.Internet Protocol version 4 (IPv4): 2048></string>
 			<key>packet</key>
 			<dict>
 				<key>header</key>
@@ -666,13 +666,13 @@
 				<dict>
 					<key>dscp</key>
 					<array>
-						<string>Routine</string>
-						<string>Normal Delay</string>
-						<string>Normal Throughput</string>
-						<string>Normal Relibility</string>
+						<string><Precedence.Routine: 0></string>
+						<string><Delay.NORMAL: 0></string>
+						<string><Throughput.NORMAL: 0></string>
+						<string><Relibility.NORMAL: 0></string>
 					</array>
 					<key>ecn</key>
-					<string>Not-ECT</string>
+					<string><ECN.Not-ECT: 0></string>
 				</dict>
 				<key>len</key>
 				<integer>145</integer>
@@ -690,7 +690,7 @@
 				<key>ttl</key>
 				<integer>64</integer>
 				<key>proto</key>
-				<string>UDP</string>
+				<string><TransType.UDP: 17></string>
 				<key>checksum</key>
 				<data>78b3</data>
 				<key>src</key>

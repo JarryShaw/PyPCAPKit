@@ -28,6 +28,7 @@ Protocol (TCP), whose structure is described as below.
 """
 import struct
 
+from pcapkit._common.tcp_chksum_opt import ChksumOpt as chksum_opt
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.transport.transport import Transport
 from pcapkit.utilities.decorators import seekset
@@ -90,13 +91,6 @@ F = False
 
 nm_len = lambda n: n - 2
 op_len = lambda n: n * 8
-
-chksum_opt = {  # [RFC 1146]
-    0:  'TCP checksum',
-    1:  "8-bit Fletcher's algorithm",
-    2:  "16-bit Fletcher's algorithm",
-    3:  'Redundant Checksum Avoidance',
-}
 
 mptcp_opt = {   # [RFC 6824]
     0:  lambda self, bits, size: self._read_mptcp_capable(bits, size),      # MP_CAPABLE

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import collections
 import csv
 import os
 import re
@@ -8,20 +9,81 @@ import re
 import requests
 
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+###############
+# Defaults
+###############
 
-page = requests.get('https://www.iana.org/assignments/hip-parameters/hit-suite-id.csv')
+
+ROOT, FILE = os.path.split(os.path.abspath(__file__))
+
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+# -*- coding: utf-8 -*-
+
+
+from aenum import IntEnum, extend_enum
+
+
+class {NAME}(IntEnum):
+    """Enumeration class for {NAME}."""
+    _ignore_ = '{NAME} _'
+    {NAME} = vars()
+
+    # {DOCS}
+    {ENUM}
+
+    @staticmethod
+    def get(key, default=-1):
+        """Backport support for original codes."""
+        if isinstance(key, int):
+            return {NAME}(key)
+        if key not in {NAME}._member_map_:
+            extend_enum({NAME}, key, default)
+        return {NAME}[key]
+
+    @classmethod
+    def _missing_(cls, value):
+        """Lookup function used when value is not found."""
+        if not ({FLAG}):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        {MISS}
+        super()._missing_(value)
+'''
+
+
+###############
+# Macros
+###############
+
+
+NAME = 'HIT_SuiteID'
+DOCS = 'HIT Suite ID'
+FLAG = 'isinstance(value, int) and 0 <= value <= 15'
+LINK = 'https://www.iana.org/assignments/hip-parameters/hit-suite-id.csv'
+
+
+###############
+# Processors
+###############
+
+
+page = requests.get(LINK)
 data = page.text.strip().split('\r\n')
 
 reader = csv.reader(data)
 header = next(reader)
+record = collections.Counter(map(lambda item: item[1],
+    filter(lambda item: len(item[0].split('-')) != 2, reader)))
 
 def rename(name, code):
-    if re.match(r'Reserved|Unassigned|Deprecated|Experimental', name, re.IGNORECASE):
-        name = f'{name} [{code}]'
+    if record[name] > 1:
+        return f'{name} [{code}]'
     return name
 
-lidb = list()
+reader = csv.reader(data)
+header = next(reader)
+
+enum = list()
+miss = list()
 for item in reader:
     name = item[1]
     rfcs = item[2]
@@ -35,20 +97,30 @@ for item in reader:
     desc = f"# {''.join(temp)}" if rfcs else ''
 
     try:
-        code = int(item[0])
+        code, _ = item[0], int(item[0])
         renm = rename(name, code)
-        lidb.append(f"{code:>5} : '{renm}',".ljust(80) + desc)
-        # print(code, name, ''.join(temp))
-    except ValueError:
-        start, stop = map(int, item[0].split('-'))
-        for code in range(start, stop+1):
-            renm = rename(name, code)
-            lidb.append(f"{code:>5} : '{renm}',".ljust(80) + desc)
-            # print(code, name, ''.join(temp))
 
-with open(os.path.join(ROOT, '../_common/hip_hit_suite_id.py'), 'w') as file:
-    file.write('# -*- coding: utf-8 -*-\n\n\n')
-    file.write('# HIT Suite ID\n')
-    file.write('_HIT_SUITE_ID = {\n')
-    file.write('\n'.join(map(lambda s: s.rstrip(), lidb)))
-    file.write('\n}\n')
+        pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
+        sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
+
+        enum.append(f'{pres}{sufs}')
+    except ValueError:
+        start, stop = item[0].split('-')
+        more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
+
+        miss.append(f'if {start} <= value <= {stop}:')
+        if more:
+            miss.append(f'    {more}')
+        miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+        miss.append('    return cls(value)')
+
+
+###############
+# Defaults
+###############
+
+
+ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
+MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
+with open(os.path.join(ROOT, f'../_common/{FILE}'), 'w') as file:
+    file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

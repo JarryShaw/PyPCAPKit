@@ -24,11 +24,13 @@ import traceback
 import warnings
 
 ###############################################################################
+# import enum
 # import multiprocessing
-# 
+#
+# import aenum
 # import dpkt
 # import scapy.all
-# 
+#
 # from dictdumper import PLIST, JSON, Tree, JavaScript, XML
 ###############################################################################
 
@@ -469,7 +471,7 @@ class Extractor:
             from pcapkit.foundation.traceflow import TraceFlow
             if self._exeng in ('pyshark',) and re.fullmatch('pcap', str(trace_format), re.IGNORECASE):
                 warnings.warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
-                                f"using 'trace_format={trace_format}' instead", FormatWarning, stacklevel=stacklevel())
+                                f"using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = None
             self._trace = TraceFlow(fout=trace_fout, format=trace_format)
 
@@ -491,7 +493,18 @@ class Extractor:
                 warnings.warn(f'unsupported output format: {fmt}; '
                                 'disabled file output feature',
                                 FormatWarning, stacklevel=stacklevel())
-            self._ofile = output if self._flag_f else output(ofnm)
+            class DictDumper(output):
+                @classmethod
+                def object_hook(cls, obj):
+                    import enum, aenum
+                    if isinstance(obj, (enum.IntEnum, aenum.IntEnum)):
+                        return repr(obj)
+                    if isinstance(obj, ipaddress._BaseAddress):
+                        return str(obj)
+                    if isinstance(obj, Info):
+                        return dict(obj)
+                    return super().object_hook(obj)
+            self._ofile = DictDumper if self._flag_f else DictDumper(ofnm)
                                                             # output file
 
         self.check()                    # check layer & protocol
@@ -595,7 +608,7 @@ class Extractor:
             frame = Frame(self._ifile, num=self._frnum+1, proto=self._dlink,
                             layer=self._exlyr, protocol=self._exptl)
             self._frnum += 1
-        
+
         # verbose output
         if self._flag_v:
             print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
@@ -742,13 +755,13 @@ class Extractor:
 
         # fetch DPKT packet
         timestamp, packet = next(self._extmp)
-        
+
         # extract packet
-        if self._dlink == 'ETHERNET':
+        if self._dlink.value == 1:
             packet = self._expkg.ethernet.Ethernet(packet)
-        elif self._dlink == 'IPV4':
+        elif self._dlink.value == 228:
             packet = self._expkg.ip.IP(packet)
-        elif self._dlink == 'IPV6':
+        elif self._dlink.value == 229:
             packet = self._expkg.ip6.IP6(packet)
         else:
             warnings.warn('unrecognised link layer protocol; '
@@ -995,7 +1008,7 @@ class Extractor:
                         kwargs={'mpfrm': self._mpfrm, 'mprsm': self._mprsm,
                                 'mpbuf': self._mpbuf, 'mpkit': self._mpkit})
         self._mpsvc.start()
-        
+
         # extraction
         while True:
             # check EOF

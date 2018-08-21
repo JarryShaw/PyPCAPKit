@@ -8,7 +8,10 @@ protocols.
 
 """
 import abc
+import enum
 import struct
+
+import aenum
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import ProtocolNotImplemented, StructError
@@ -74,15 +77,21 @@ class Protocol:
     ##########################################################################
 
     @classmethod
-    def index(cls, dict_, value, *, pack=False, size=4, lilendian=False):
-        """Return first index of value from a dict."""
-        try:
-            index = list(dict_.keys())[list(dict_.values()).index(value)]
-            if pack:
-                return cls.pack(index, size=size, lilendian=lilendian)
-            return index
-        except ValueError:
-            raise ProtocolNotImplemented(f'protocol {value} not implemented') from None
+    def index(cls, enum, value, *, pack=False, size=4, lilendian=False):
+        """Return first index of value from a dict or enumeration."""
+        if isinstance(value, (enum.IntEnum, aenum.IntEnum)):
+            index = value.value
+        else:
+            try:
+                if isinstance(enum, (enum.EnumMeta, aenum.EnumMeta)):
+                    index = enum[value]
+                else:
+                    index = list(dict_.keys())[list(dict_.values()).index(value)]
+            except (ValueError, KeyError):
+                raise ProtocolNotImplemented(f'protocol {value} not implemented') from None
+        if pack:
+            return cls.pack(index, size=size, lilendian=lilendian)
+        return index
 
     @abstractmethod
     def update(self, **kwargs):

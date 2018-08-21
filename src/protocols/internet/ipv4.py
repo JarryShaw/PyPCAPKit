@@ -26,8 +26,17 @@ import collections
 import datetime
 import ipaddress
 
-from pcapkit._common.ipv4_opt_type import OPT_TYPE
-from pcapkit._common.ipv4_router_alert import _ROUTER_ALERT
+from pcapkit._common.ipv4_classification_level import ClasLvl as _CLASSIFICATION_LEVEL
+from pcapkit._common.ipv4_opt_class import OptCls as opt_class
+from pcapkit._common.ipv4_opt_type import Options as OPT_TYPE
+from pcapkit._common.ipv4_protection_authority import ProtAuth as _PROTECTION_AUTHORITY
+from pcapkit._common.ipv4_router_alert import RT_ALT as _ROUTER_ALERT
+from pcapkit._common.ipv4_qs_func import QS as QS_FUNC
+from pcapkit._common.ipv4_tos_del import Delay as TOS_DEL
+from pcapkit._common.ipv4_tos_ecn import ECN as TOS_ECN
+from pcapkit._common.ipv4_tos_pre import Precedence as TOS_PRE
+from pcapkit._common.ipv4_tos_rel import Relibility as TOS_REL
+from pcapkit._common.ipv4_tos_thr import Throughput as TOS_THR
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.internet.ip import IP
@@ -35,80 +44,6 @@ from pcapkit.utilities.exceptions import ProtocolError
 
 
 __all__ = ['IPv4']
-
-
-# TOS (DS Field) Precedence
-TOS_PRE = {
-    '111':  'Network Control',
-    '110':  'Internetwork Control',
-    '101':  'CRITIC/ECP',
-    '100':  'Flash Override',
-    '011':  'Flash',
-    '010':  'Immediate',
-    '001':  'Priority',
-    '000':  'Routine',
-}
-
-# TOS (DS Field) Delay
-TOS_DEL = {
-    '0':    'Normal Delay',
-    '1':    'Low Delay',
-}
-
-# TOS (DS Field) Throughput
-TOS_THR = {
-    '0':    'Normal Throughput',
-    '1':    'High Throughput',
-}
-
-# TOS (DS Field) Relibility
-TOS_REL = {
-    '0':    'Normal Relibility',
-    '1':    'High Relibility',
-}
-
-# TOS ECN FIELD
-TOS_ECN = {
-    '00':   'Not-ECT',
-    '01':   'ECT(1)',
-    '10':   'ECT(0)',
-    '11':   'CE',
-}
-
-# QS Functions
-QS_FUNC = {
-    1:  'Quick-Start Request',
-    2:  'Report of Approved Rate',
-}
-
-# Classification Level Encodings
-_CLASSIFICATION_LEVEL = {
-    '00000001' : 'Reserved (4)',
-    '00111101' : 'Top Secret',
-    '01011010' : 'Secret',
-    '10010110' : 'Confidential',
-    '01100110' : 'Reserved (3)',
-    '11001100' : 'Reserved (2)',
-    '10101011' : 'Unclassified',
-    '11110001' : 'Reserved (1)',
-}
-
-# Protection Authority Bit Assignments
-_PROTECTION_AUTHORITY = {
-    0 : 'GENSER',
-    1 : 'SIOP-ESI',
-    2 : 'SCI',
-    3 : 'NSA',
-    4 : 'DOE',
-    5 : 'Unassigned',
-    6 : 'Unassigned',
-    7 : 'Field Termination Indicator',
-}
-
-# # Router Alert Code
-# _ROUTER_ALERT = {
-#     1 : 'Router shall examine packet',
-# }
 
 
 """IPv4 Option Utility Table
@@ -140,13 +75,6 @@ IPv4_OPT
 
 T = True
 F = False
-
-opt_class = {
-    0:  'control',
-    1:  'reserved for future use',
-    2:  'debugging and measurement',
-    3:  'reserved for future use',
-}
 
 process_opt = {
     0:  lambda self, size, kind: self._read_mode_donone(size, kind),    # do nothing
@@ -294,12 +222,12 @@ class IPv4(IP):
             hdr_len = int(_vihl[1], base=16) * 4,
             dsfield = dict(
                 dscp = (
-                    TOS_PRE.get(_dscp[:3]),
-                    TOS_DEL.get(_dscp[3]),
-                    TOS_THR.get(_dscp[4]),
-                    TOS_REL.get(_dscp[5]),
+                    TOS_PRE.get(int(_dscp[:3], base=2)),
+                    TOS_DEL.get(int(_dscp[3], base=2)),
+                    TOS_THR.get(int(_dscp[4], base=2)),
+                    TOS_REL.get(int(_dscp[5], base=2)),
                 ),
-                ecn = TOS_ECN.get(_dscp[-2:]),
+                ecn = TOS_ECN.get(int(_dscp[-2:], base=2)),
             ),
             len = _tlen,
             id = _iden,
@@ -408,6 +336,7 @@ class IPv4(IP):
 
             # extract option
             dscp = OPT_TYPE.get(kind)
+            desc = dscp.name
             if opts[0]:
                 byte = self._read_unpack(1)
                 if byte:    # check option process mode
@@ -430,13 +359,13 @@ class IPv4(IP):
             # record option data
             counter += byte
             if dscp in optkind:
-                if isinstance(options[dscp], tuple):
-                    options[dscp] += (Info(data),)
+                if isinstance(options[desc], tuple):
+                    options[desc] += (Info(data),)
                 else:
-                    options[dscp] = (Info(options[dscp]), Info(data))
+                    options[desc] = (Info(options[desc]), Info(data))
             else:
                 optkind.append(dscp)
-                options[dscp] = data
+                options[desc] = data
 
             # break when eol triggered
             if not kind:    break
@@ -814,7 +743,7 @@ class IPv4(IP):
         if size < 3:
             raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
 
-        _clvl = self._read_binary(1)
+        _clvl = self._read_unpack(1)
 
         data = dict(
             kind = kind,

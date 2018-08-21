@@ -1,27 +1,46 @@
 # -*- coding: utf-8 -*-
 
 
-class defaultdict(dict):
-    def __missing__(self, code):
-        if isinstance(code, int):
-            return f'Reserved for Experimental Use [0x{hex(code)[2:].upper().zfill(8)}]'
-        raise KeyError(code)
+from aenum import IntEnum, extend_enum
 
 
-# HTTP/2 Error Code
-_ERROR_CODE = defaultdict({
-	0x00000000 : 'NO_ERROR',                                                       # [RFC 7540, Section 7] Graceful shutdown
-	0x00000001 : 'PROTOCOL_ERROR',                                                 # [RFC 7540, Section 7] Protocol error detected
-	0x00000002 : 'INTERNAL_ERROR',                                                 # [RFC 7540, Section 7] Implementation fault
-	0x00000003 : 'FLOW_CONTROL_ERROR',                                             # [RFC 7540, Section 7] Flow-control limits exceeded
-	0x00000004 : 'SETTINGS_TIMEOUT',                                               # [RFC 7540, Section 7] Settings not acknowledged
-	0x00000005 : 'STREAM_CLOSED',                                                  # [RFC 7540, Section 7] Frame received for closed stream
-	0x00000006 : 'FRAME_SIZE_ERROR',                                               # [RFC 7540, Section 7] Frame size incorrect
-	0x00000007 : 'REFUSED_STREAM',                                                 # [RFC 7540, Section 7] Stream not processed
-	0x00000008 : 'CANCEL',                                                         # [RFC 7540, Section 7] Stream cancelled
-	0x00000009 : 'COMPRESSION_ERROR',                                              # [RFC 7540, Section 7] Compression state not updated
-	0x0000000A : 'CONNECT_ERROR',                                                  # [RFC 7540, Section 7] TCP connection error for CONNECT method
-	0x0000000B : 'ENHANCE_YOUR_CALM',                                              # [RFC 7540, Section 7] Processing capacity exceeded
-	0x0000000C : 'INADEQUATE_SECURITY',                                            # [RFC 7540, Section 7] Negotiated TLS parameters not acceptable
-	0x0000000D : 'HTTP_1_1_REQUIRED',                                              # [RFC 7540, Section 7] Use HTTP/1.1 for the request
-})
+class ErrCode(IntEnum):
+    """Enumeration class for ErrCode."""
+    _ignore_ = 'ErrCode _'
+    ErrCode = vars()
+
+    # HTTP/2 Error Code
+    ErrCode['NO_ERROR'] = 0x0000_0000                                           # [RFC 7540, Section 7] Graceful shutdown
+    ErrCode['PROTOCOL_ERROR'] = 0x0000_0001                                     # [RFC 7540, Section 7] Protocol error detected
+    ErrCode['INTERNAL_ERROR'] = 0x0000_0002                                     # [RFC 7540, Section 7] Implementation fault
+    ErrCode['FLOW_CONTROL_ERROR'] = 0x0000_0003                                 # [RFC 7540, Section 7] Flow-control limits exceeded
+    ErrCode['SETTINGS_TIMEOUT'] = 0x0000_0004                                   # [RFC 7540, Section 7] Settings not acknowledged
+    ErrCode['STREAM_CLOSED'] = 0x0000_0005                                      # [RFC 7540, Section 7] Frame received for closed stream
+    ErrCode['FRAME_SIZE_ERROR'] = 0x0000_0006                                   # [RFC 7540, Section 7] Frame size incorrect
+    ErrCode['REFUSED_STREAM'] = 0x0000_0007                                     # [RFC 7540, Section 7] Stream not processed
+    ErrCode['CANCEL'] = 0x0000_0008                                             # [RFC 7540, Section 7] Stream cancelled
+    ErrCode['COMPRESSION_ERROR'] = 0x0000_0009                                  # [RFC 7540, Section 7] Compression state not updated
+    ErrCode['CONNECT_ERROR'] = 0x0000_000A                                      # [RFC 7540, Section 7] TCP connection error for CONNECT method
+    ErrCode['ENHANCE_YOUR_CALM'] = 0x0000_000B                                  # [RFC 7540, Section 7] Processing capacity exceeded
+    ErrCode['INADEQUATE_SECURITY'] = 0x0000_000C                                # [RFC 7540, Section 7] Negotiated TLS parameters not acceptable
+    ErrCode['HTTP_1_1_REQUIRED'] = 0x0000_000D                                  # [RFC 7540, Section 7] Use HTTP/1.1 for the request
+
+    @staticmethod
+    def get(key, default=-1):
+        """Backport support for original codes."""
+        if isinstance(key, int):
+            return ErrCode(key)
+        if key not in ErrCode._member_map_:
+            extend_enum(ErrCode, key, default)
+        return ErrCode[key]
+
+    @classmethod
+    def _missing_(cls, value):
+        """Lookup function used when value is not found."""
+        if not (isinstance(value, int) and 0x0000_0000 <= value <= 0xFFFF_FFFF):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        if 0x0000_000E <= value <= 0xFFFF_FFFF:
+            temp = hex(value)[2:].upper().zfill(8)
+            extend_enum(cls, 'Unassigned [0x%s]' % (temp[:4]+'_'+temp[4:]), value)
+            return cls(value)
+        super()._missing_(value)

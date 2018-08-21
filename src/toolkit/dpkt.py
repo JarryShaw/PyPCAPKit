@@ -51,7 +51,7 @@ def packet2dict(packet, timestamp, *, data_link):
     return {
         'timestamp' : timestamp,
         'packet' : packet.pack(),
-        data_link : wrapper(packet),
+        data_link.name : wrapper(packet),
     }
 
 
@@ -65,7 +65,7 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
                 ipaddress.ip_address(ipv4.src),     # source IP address
                 ipaddress.ip_address(ipv4.dst),     # destination IP address
                 ipv4.id,                            # identification
-                TP_PROTO.get(ipv4.p),               # payload protocol type
+                TP_PROTO.get(ipv4.p).name,          # payload protocol type
             ),
             num = count,                            # original packet range number
             fo = ipv4.off,                          # fragment offset
@@ -93,7 +93,7 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
                 ipaddress.ip_address(ipv6.src),     # source IP address
                 ipaddress.ip_address(ipv6.dst),     # destination IP address
                 ipv6.flow,                          # label
-                TP_PROTO.get(ipv6_frag.nh),         # next header field in IPv6 Fragment Header
+                TP_PROTO.get(ipv6_frag.nh).name,    # next header field in IPv6 Fragment Header
             ),
             num = count,                            # original packet range number
             fo = ipv6_frag.nxt,                     # fragment offset

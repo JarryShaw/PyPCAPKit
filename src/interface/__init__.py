@@ -117,7 +117,7 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
     str_check(fin or '', fout or '', format or '',
                 trace_fout or '', trace_format or '',
                 engine or '', layer or '', *(protocol or ''))
-    bool_check(files, nofile, verbose, auto, extension, store, 
+    bool_check(files, nofile, verbose, auto, extension, store,
                 ip, ipv4, ipv6, tcp, strict, trace)
 
     return Extractor(fin=fin, fout=fout, format=format,

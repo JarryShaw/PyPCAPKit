@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import collections
 import csv
 import os
 import re
@@ -8,67 +9,125 @@ import re
 import requests
 
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
-
-defaultdict = '''\
-class defaultdict(dict):
-    def __missing__(self, code):
-        if isinstance(code, int):
-            return f'Reserved for Experimental Use [0x{hex(code)[2:].upper().zfill(8)}]'
-        raise KeyError(code)
+###############
+# Defaults
+###############
 
 
+ROOT, FILE = os.path.split(os.path.abspath(__file__))
+
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+# -*- coding: utf-8 -*-
+
+
+from aenum import IntEnum, extend_enum
+
+
+class {NAME}(IntEnum):
+    """Enumeration class for {NAME}."""
+    _ignore_ = '{NAME} _'
+    {NAME} = vars()
+
+    # {DOCS}
+    {ENUM}
+
+    @staticmethod
+    def get(key, default=-1):
+        """Backport support for original codes."""
+        if isinstance(key, int):
+            return {NAME}(key)
+        if key not in {NAME}._member_map_:
+            extend_enum({NAME}, key, default)
+        return {NAME}[key]
+
+    @classmethod
+    def _missing_(cls, value):
+        """Lookup function used when value is not found."""
+        if not ({FLAG}):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        {MISS}
+        super()._missing_(value)
 '''
 
-page = requests.get('https://www.iana.org/assignments/http2-parameters/error-code.csv')
+
+###############
+# Macros
+###############
+
+
+NAME = 'ErrCode'
+DOCS = 'HTTP/2 Error Code'
+FLAG = 'isinstance(value, int) and 0x0000_0000 <= value <= 0xFFFF_FFFF'
+LINK = 'https://www.iana.org/assignments/http2-parameters/error-code.csv'
+
+
+###############
+# Processors
+###############
+
+
+page = requests.get(LINK)
 data = page.text.strip().split('\r\n')
 
 reader = csv.reader(data)
 header = next(reader)
+record = collections.Counter(map(lambda item: item[1],
+    filter(lambda item: len(item[0].split('-')) != 2, reader)))
+
+def hexlify(code):
+    temp = hex(code)[2:].upper().zfill(8)
+    return f'0x{temp[:4]}_{temp[4:]}'
 
 def rename(name, code):
-    if re.match(r'Reserved|Unassigned|Deprecated|Experimental', name, re.IGNORECASE):
-        name = f'{name} [0x{hex(code)[2:].upper().zfill(8)}]'
+    if record[name] > 1:
+        return f'{name} [{code}]'
     return name
 
-with open(os.path.join(ROOT, '../_common/http_error_code.py'), 'w') as file:
-    file.write('# -*- coding: utf-8 -*-\n\n\n')
-    file.write(defaultdict)
-    file.write('# HTTP/2 Error Code\n')
-    file.write('_ERROR_CODE = defaultdict({\n')
+reader = csv.reader(data)
+header = next(reader)
 
-    for item in reader:
-        name = item[1]
-        dscp = item[2]
-        rfcs = item[3]
+enum = list()
+miss = list()
+for item in reader:
+    name = item[1]
+    dscp = item[2]
+    rfcs = item[3]
 
-        temp = list()
-        for rfc in filter(None, re.split(r'\[|\]', rfcs)):
-            if 'RFC' in rfc:
-                temp.append(f'[{rfc[:3]} {rfc[3:]}]')
-            else:
-                temp.append(f'[{rfc}]')
-        desc = f" {''.join(temp)}" if rfcs else ''
-        dscp = f' {dscp}' if dscp else ''
+    temp = list()
+    for rfc in filter(None, re.split(r'\[|\]', rfcs)):
+        if 'RFC' in rfc:
+            temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+        else:
+            temp.append(f'[{rfc}]')
+    desc = f" {''.join(temp)}" if rfcs else ''
+    dscp = f' {dscp}' if dscp else ''
 
-        try:
-            code = int(item[0], base=16)
-            renm = rename(name, code)
-            file.write((f"\t0x{hex(code)[2:].upper().zfill(8)} : '{renm}',".ljust(80) + (f'#{desc}{dscp}' if desc or dscp else '')).rstrip() + '\n')
-            # print(code, name, ''.join(temp))
-        except ValueError:
-            continue
-            # start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
-            # for code in range(start, stop+1):
-            #     print(f'0x{hex(code)[2:].upper().zfill(8)}')
-            #     renm = rename(name, code)
-            #     file.write((f"\t0x{hex(code)[2:].upper().zfill(8)} : '{renm}',".ljust(80) + (f'#{desc}{dscp}' if desc or dscp else '')).rstrip() + '\n')
-                # print(code, name, ''.join(temp))
-    file.write('})\n')
+    try:
+        temp = int(item[0], base=16)
+        code = hexlify(temp)
+        renm = rename(name, code)
 
-# with open(os.path.join(ROOT, '../_common/http_error_code.py'), 'w') as file:
-#     file.write('# -*- coding: utf-8 -*-\n\n\n')
-#     file.write('# HTTP/2 Error Code\n')
-#     file.write('_ERROR_CODE = {\n')
-#     file.write('\n'.join(map(lambda s: s.rstrip(), lidb)))
-#     file.write('\n}\n')
+        pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
+        sufs = f'#{desc}{dscp}' if desc or dscp else ''
+
+        enum.append(f'{pres}{sufs}')
+    except ValueError:
+        start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
+
+        miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
+        if desc or dscp:
+            miss.append(f'#{desc}{dscp}')
+        miss.append('    temp = hex(value)[2:].upper().zfill(8)')
+        miss.append(f"    extend_enum(cls, '{name} [0x%s]' % (temp[:4]+'_'+temp[4:]), value)")
+        miss.append('    return cls(value)')
+
+
+###############
+# Defaults
+###############
+
+
+ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
+MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
+with open(os.path.join(ROOT, f'../_common/{FILE}'), 'w') as file:
+    file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

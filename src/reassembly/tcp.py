@@ -7,7 +7,7 @@ The algorithm for TCP reassembly is decribed as below.
 
 Notations:
 
-    DSN     - Data Sequence Number 
+    DSN     - Data Sequence Number
     ACK     - TCP Acknowledgement
     FIN     - TCP Finish Flag
     SYN     - TCP Synchronisation Flag
@@ -43,7 +43,7 @@ Algorithm:
             free all reassembly resources for this BUFID; 
             BREAK. 
         }
-      } give up until (next fragment);
+      } give up until (next fragment);
 
     update HDL: { 
         DO { 
@@ -68,7 +68,7 @@ Algorithm:
                 BREAK. 
             }
         } give up until (no entry from HDL)
-     }
+     }
 
 The following algorithm implementment is based on `IP Datagram
 Reassembly Algorithm` introduced in RFC 815. It descripted an

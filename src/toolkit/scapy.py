@@ -15,6 +15,7 @@ import warnings
 # import scapy.all
 ###############################################################################
 
+from pcapkit.protocols.link.link import LINKTYPE
 from pcapkit.protocols.transport.transport import TP_PROTO
 from pcapkit.utilities.exceptions import stacklevel, ModuleNotFound
 from pcapkit.utilities.warnings import ScapyWarning
@@ -72,7 +73,7 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
                 ipaddress.ip_address(ipv4.src),     # source IP address
                 ipaddress.ip_address(ipv4.dst),     # destination IP address
                 ipv4.id,                            # identification
-                TP_PROTO.get(ipv4.proto),           # payload protocol type
+                TP_PROTO.get(ipv4.proto).name,      # payload protocol type
             ),
             num = count,                            # original packet range number
             fo = ipv4.frag,                         # fragment offset
@@ -102,7 +103,7 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
                 ipaddress.ip_address(ipv6.src),     # source IP address
                 ipaddress.ip_address(ipv6.dst),     # destination IP address
                 ipv6.fl,                            # label
-                TP_PROTO.get(ipv6_frag.nh),         # next header field in IPv6 Fragment Header
+                TP_PROTO.get(ipv6_frag.nh).name,    # next header field in IPv6 Fragment Header
             ),
             num = count,                            # original packet range number
             fo = ipv6_frag.offset,                  # fragment offset
@@ -151,7 +152,8 @@ def tcp_traceflow(packet, *, count=NotImplemented):
         ip = packet['IP'] if 'IP' in packet else packet['IPv6']
         tcp = packet['TCP']
         data = dict(
-            protocol = packet.name,                 # data link type from global header
+            protocol = LINKTYPE.get(packet.name.upper()),
+                                                    # data link type from global header
             index = count,                          # frame number
             frame = packet2dict(packet),            # extracted packet
             syn = bool(tcp.flags.S),                # TCP synchronise (SYN) flag

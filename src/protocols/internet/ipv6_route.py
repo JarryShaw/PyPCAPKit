@@ -19,25 +19,13 @@ as below.
 """
 import ipaddress
 
-from pcapkit._common.ipv6_routing_type import _ROUTING_TYPE
+from pcapkit._common.ipv6_routing_type import RT_TYPE as _ROUTING_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import UnsupportedCall, ProtocolError
 
 
 __all__ = ['IPv6_Route']
-
-
-# # IPv6 Routing Types
-# _ROUTING_TYPE = {
-#     0 : 'Source Route',                 # [RFC 5095] DEPRECATED
-#     1 : 'Nimrod',                       # DEPRECATED 2009-05-06
-#     2 : 'Type 2 Routing Header',        # [RFC 6275]
-#     3 : 'RPL Source Route Header',      # [RFC 6554]
-#   253 : 'RFC3692-style Experiment 1',   # [RFC 4727]
-#   254 : 'RFC3692-style Experiment 2',   # [RFC 4727]
-#   255 : 'Reserved',
-# }
 
 
 # IPv6 Routing Processors
@@ -341,7 +329,7 @@ class IPv6_Route(Internet):
         _cmpr = self._read_binary(1)
         _padr = self._read_binary(1)
         _resv = self._read_fileng(2)
-        
+
         _inti = int(_cmpr[:4], base=2)
         _inte = int(_cmpr[4:], base=2)
         _plen = int(_padr[:4], base=2)

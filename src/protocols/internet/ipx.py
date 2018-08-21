@@ -14,44 +14,13 @@ Octets      Bits        Name                    Discription
   18        144     ipx.src                 Source Address
 
 """
-from pcapkit._common.ipx_sock import SOCK
-from pcapkit._common.ipx_type import TYPE
+from pcapkit._common.ipx_sock import Sockets as SOCK
+from pcapkit._common.ipx_type import PktType as TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 
 
 __all__ = ['IPX']
-
-
-# # IPX Packet Types
-# TYPE = {
-#     0 : 'Unknown',
-#     1 : 'RIP',          # Routing Information Protocol [RFC 1582][RFC 2091]
-#     2 : 'Echo Packet',
-#     3 : 'Error Packet',
-#     4 : 'PEP',          # Packet Exchange Protocol, used for SAP (Service Advertising Protocol)
-#     5 : 'SPX',          # Sequenced Packet Exchange
-#    17 : 'NCP',          # NetWare Core Protocol
-# }
-
-
-# # Socket Types
-# SOCK = {
-#     '0001' : 'Routing Information Packet',
-#     '0002' : 'Echo Protocol Packet',
-#     '0003' : 'Error Handling Packet',
-#     '0451' : 'NCP',                         # Netware Core Protocol - used by Novell Netware servers
-#     '0452' : 'SAP',                         # Service Advertising Protocol
-#     '0453' : 'RIP',                         # Routing Information Protocol
-#     '0455' : 'NetBIOS',
-#     '0456' : 'Diagnostic Packet',
-#     '0457' : 'Serialization Packet',        # used for NCP as well
-#     '4003' : 'Novell Netware Client',       # Used by Novell Netware Client
-#     '8060' : 'IPX',
-#     '9091' : 'TCP',                         # TCP over IPXF
-#     '9092' : 'UDP',                         # UDP over IPXF
-#     '9093' : 'IPXF',                        # IPX Fragmentation Protocol
-# }
 
 
 class IPX(Internet):
@@ -202,7 +171,7 @@ class IPX(Internet):
         addr = dict(
             network = _ntwk,
             node = _maca,
-            socket = SOCK.get(_sock.hex()) or _sock,
+            socket = SOCK.get(int(_sock.hex(), base=16)) or _sock,
             addr = _addr,
         )
 

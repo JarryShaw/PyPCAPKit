@@ -63,7 +63,7 @@ class TraceFlow:
 
         """
         if fmt == 'pcap':
-            from pcapkit.dumpkit import PCAP as output      # output PCAP file 
+            from pcapkit.dumpkit import PCAP as output      # output PCAP file
         elif fmt == 'plist':
             from dictdumper import PLIST as output          # output PLIST file
         elif fmt == 'json':
@@ -210,7 +210,7 @@ class TraceFlow:
 
     def __call__(self, packet):
         """Dump frame to output files.
-        
+
         Positional arguments:
             * packet -- dict, a flow packet
 

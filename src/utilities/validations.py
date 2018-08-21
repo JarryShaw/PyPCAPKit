@@ -7,14 +7,17 @@ arguments for functions and classes. It was first used in
 validators.
 
 """
+import enum
 import inspect
 import io
 import ipaddress
 import numbers
 
+import aenum
+
 from pcapkit.utilities.exceptions import BoolError, BytesError, BytearrayError, \
         DictError, DigitError, FragmentError, IntError, IOObjError, ListError, \
-        RealError, TupleError, InfoError, PacketError, IPError
+        RealError, TupleError, InfoError, PacketError, IPError, EnumError
 
 
 __all__ = [
@@ -153,6 +156,15 @@ def ip_check(*args, func=None):
             raise IPError(f'Function {func} expected IP address, {name} got instead.')
 
 
+def proto_check(*args, func=None):
+    """Check if arguments are of protocol type."""
+    func = func or inspect.stack()[2][3]
+    for var in args:
+        if not isinstance(var, (enum.EnumMeta, anum.EnumMeta)):
+            name = type(var).__name__
+            raise EnumError(f'Function {func} expected enumeration, {name} got instead.')
+
+
 def frag_check(*args, protocol, func=None):
     """Check if arguments are valid fragments."""
     func = func or inspect.stack()[2][3]
@@ -196,7 +208,7 @@ def pkt_check(*args, func=None):
     for var in args:
         dict_check(var, func=func)
         dict_check(var.get('frame'), func=func)
-        str_check(var.get('protocol'), func=func)
+        enum_check(var.get('protocol'), func=func)
         real_check(vat.get('timestamp'), func=func)
         ip_check(var.get('src'), var.get('dst'), func=func)
         bool_check(var.get('syn'), var.get('fin'), func=func)
@@ -205,7 +217,7 @@ def pkt_check(*args, func=None):
 
 ###############################################################################
 # Test Codes
-# 
+#
 # func = sys._getframe().f_back.f_code.co_name
 # spec = inspect.getfullargspec(test)
 # argv = spec.args + spec.kwonlyargs
@@ -213,5 +225,5 @@ def pkt_check(*args, func=None):
 #     if not isinstance(var, numbers.Integral):
 #         raise IntError( f'Function {func.__name__} expected argument {argv[index]} '
 #                         f'to be integral number, {type(var).__name__} got instead.' )
-# 
+#
 ###############################################################################

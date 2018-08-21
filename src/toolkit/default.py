@@ -19,7 +19,7 @@ def ipv4_reassembly(frame):
                 ipv4.src,                           # source IP address
                 ipv4.dst,                           # destination IP address
                 ipv4.id,                            # identification
-                ipv4.proto,                         # payload protocol type
+                ipv4.proto.name,                    # payload protocol type
             ),
             num = frame.info.number,                # original packet range number
             fo = ipv4.frag_offset,                  # fragment offset
@@ -44,7 +44,7 @@ def ipv6_reassembly(frame):
                 ipv6.src,                           # source IP address
                 ipv6.dst,                           # destination IP address
                 ipv6.label,                         # label
-                ipv6.ipv6_frag.next,                # next header field in IPv6 Fragment Header
+                ipv6.ipv6_frag.next.name,           # next header field in IPv6 Fragment Header
             ),
             num = frame.info.number,                # original packet range number
             fo = ipv6.ipv6_frag.offset,             # fragment offset

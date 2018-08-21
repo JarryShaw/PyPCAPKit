@@ -32,23 +32,23 @@ Protocol (HIP), whose structure is described as below.
 import collections
 import ipaddress
 
-from pcapkit._common.hip_cert_type import _CERT_TYPE
-from pcapkit._common.hip_cipher_id import _CIPHER_ID
-from pcapkit._common.hip_di_type import _DI_TYPE
-from pcapkit._common.hip_ecdsa_curve import _ECDSA_CURVE
-from pcapkit._common.hip_ecdsa_low_curve import _ECDSA_LOW_CURVE
-from pcapkit._common.hip_esp_suite_id import _ESP_SUITE_ID
-from pcapkit._common.hip_group_id import _GROUP_ID
-from pcapkit._common.hip_hi_algorithm import _HI_ALGORITHM
-from pcapkit._common.hip_hit_suite_id import _HIT_SUITE_ID
-from pcapkit._common.hip_mode_id import _MODE_ID
-from pcapkit._common.hip_notification_type import _NOTIFICATION_TYPE
-from pcapkit._common.hip_para import _HIP_PARA
-from pcapkit._common.hip_reg_failure_type import _REG_FAILURE_TYPE
-from pcapkit._common.hip_reg_type import _REG_TYPE
-from pcapkit._common.hip_suite_id import _SUITE_ID
-from pcapkit._common.hip_tp_mode_id import _TP_MODE_ID
-from pcapkit._common.hip_types import _HIP_TYPES
+from pcapkit._common.hip_cert_type import CertType as _CERT_TYPE
+from pcapkit._common.hip_cipher_id import CipherID as _CIPHER_ID
+from pcapkit._common.hip_di_type import DI_TYPE as _DI_TYPE
+from pcapkit._common.hip_ecdsa_curve import ECDSA as _ECDSA_CURVE
+from pcapkit._common.hip_ecdsa_low_curve import ECDSA_LOW as _ECDSA_LOW_CURVE
+from pcapkit._common.hip_esp_suite_id import ESP_SuiteID as _ESP_SUITE_ID
+from pcapkit._common.hip_group_id import GroupID as _GROUP_ID
+from pcapkit._common.hip_hi_algorithm import HI_ALG as _HI_ALGORITHM
+from pcapkit._common.hip_hit_suite_id import HIT_SuiteID as _HIT_SUITE_ID
+from pcapkit._common.hip_mode_id import ModeID as _MODE_ID
+from pcapkit._common.hip_notification_type import MsgType as _NOTIFICATION_TYPE
+from pcapkit._common.hip_para import ParamType as _HIP_PARA
+from pcapkit._common.hip_reg_failure_type import RegFailType as _REG_FAILURE_TYPE
+from pcapkit._common.hip_reg_type import RegType as _REG_TYPE
+from pcapkit._common.hip_suite_id import SuiteID as _SUITE_ID
+from pcapkit._common.hip_tp_mode_id import TAT_ModeID as _TP_MODE_ID
+from pcapkit._common.hip_types import PktType as _HIP_TYPES
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.transport.transport import TP_PROTO
@@ -58,269 +58,11 @@ from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 __all__ = ['HIP']
 
 
-# # HIP Packet Types
-# _HIP_TYPES = {
-#     0 : 'Reserved',     # [RFC 7401]
-#     1 : 'I1',           # [RFC 7401] the HIP Initiator Packet
-#     2 : 'R1',           # [RFC 7401] the HIP Responder Packet
-#     3 : 'I2',           # [RFC 7401] the Second HIP Initiator Packet
-#     4 : 'R2',           # [RFC 7401] the Second HIP Responder Packet
-#    16 : 'UPDATE',       # [RFC 7401] the HIP Update Packet
-#    17 : 'NOTIFY',       # [RFC 7401] the HIP Notify Packet
-#    18 : 'CLOSE',        # [RFC 7401] the HIP Association Closing Packet
-#    19 : 'CLOSE_ACK',    # [RFC 7401] the HIP Closing Acknowledgment Packet
-#    20 : 'HDRR',         # [RFC 6537] HIP Distributed Hash Table Resource Record
-#    32 : 'HIP_DATA',     # [RFC 6078]
-# }
-
-
-# # HIP Parameter Types
-# _HIP_PARA = {
-#     65 : 'ESP_INFO',                # [RFC 7402] 12
-#    128 : 'R1_Counter',              # [RFC 5201] 12 (v1 only)
-#    129 : 'R1_COUNTER',              # [RFC 7401] 12
-#    193 : 'LOCATOR_SET',             # [RFC 8046]
-#    257 : 'PUZZLE',                  # [RFC 7401] 12
-#    321 : 'SOLUTION',                # [RFC 7401] 20
-#    385 : 'SEQ',                     # [RFC 7401] 4
-#    449 : 'ACK',                     # [RFC 7401]
-#    511 : 'DH_GROUP_LIST',           # [RFC 7401]
-#    513 : 'DIFFIE_HELLMAN',          # [RFC 7401]
-#    577 : 'HIP_TRANSFORM',           # [RFC 5201] (v1 only)
-#    579 : 'HIP_CIPHER',              # [RFC 7401]
-#    608 : 'NAT_TRAVERSAL_MODE',      # [RFC 5770]
-#    610 : 'TRANSACTION_PACING',      # [RFC 5770] 4
-#    641 : 'ENCRYPTED',               # [RFC 7401]
-#    705 : 'HOST_ID',                 # [RFC 7401]
-#    715 : 'HIT_SUITE_LIST',          # [RFC 7401]
-#    768 : 'CERT',                    # [RFC 7401][RFC 8002]
-#    832 : 'NOTIFICATION',            # [RFC 7401]
-#    897 : 'ECHO_REQUEST_SIGNED',     # [RFC 7401]
-#    930 : 'REG_INFO',                # [RFC 8003]
-#    932 : 'REG_REQUEST',             # [RFC 8003]
-#    934 : 'REG_RESPONSE',            # [RFC 8003]
-#    936 : 'REG_FAILED',              # [RFC 8003]
-#    950 : 'REG_FROM',                # [RFC 5770] 20
-#    961 : 'ECHO_RESPONSE_SIGNED',    # [RFC 7401]
-#   2049 : 'TRANSPORT_FORMAT_LIST',   # [RFC 7401]
-#   4095 : 'ESP_TRANSFORM',           # [RFC 7402]
-#   4481 : 'SEQ_DATA',                # [RFC 6078] 4
-#   4545 : 'ACK_DATA',                # [RFC 6078]
-#   4577 : 'PAYLOAD_MIC',             # [RFC 6078]
-#   4580 : 'TRANSACTION_ID',          # [RFC 6078]
-#   4592 : 'OVERLAY_ID',              # [RFC 6079]
-#   4601 : 'ROUTE_DST',               # [RFC 6028]
-#   7680 : 'HIP_TRANSPORT_MODE',      # [RFC 6261]
-#  61505 : 'HIP_MAC',                 # [RFC 7401]
-#  61569 : 'HIP_MAC_2',               # [RFC 7401]
-#  61633 : 'HIP_SIGNATURE_2',         # [RFC 7401]
-#  61697 : 'HIP_SIGNATURE',           # [RFC 7401]
-#  63661 : 'ECHO_REQUEST_UNSIGNED',   # [RFC 7401]
-#  63425 : 'ECHO_RESPONSE_UNSIGNED',  # [RFC 7401]
-#  63998 : 'RELAY_FROM',              # [RFC 5770] 20
-#  64002 : 'RELAY_TO',                # [RFC 5770] 20
-#  64011 : 'OVERLAY_TTL',             # [RFC 6079] 4
-#  64017 : 'ROUTE_VIA',               # [RFC 6028]
-#  65498 : 'FROM',                    # [RFC 8004] 16
-#  65500 : 'RVS_HMAC',                # [RFC 8004]
-#  65502 : 'VIA_RVS',                 # [RFC 8004]
-#  65520 : 'RELAY_HMAC',              # [RFC 5770]
-# }
-
-
 # HIP Parameter Process Functions
 _HIP_PROC = lambda dscp: eval(
     f'lambda self, code, cbit, clen, *, desc, length, version: '
-    f'self._read_para_{dscp.lower()}(code, cbit, clen, desc=desc, length=length, version=version)'
+    f'self._read_para_{dscp.name.split(" [")[0].lower()}(code, cbit, clen, desc=desc, length=length, version=version)'
 )
-
-
-# # Group IDs
-# _GROUP_ID = {
-#     0 : 'Reserved',             # [RFC 7401]
-#     1 : 'DEPRECATED',           # [RFC 5201] 384-bit group
-#     2 : 'DEPRECATED',           # [RFC 5201] OAKLEY well known group 1
-#     3 : '1536-bit MODP group',  # [RFC 7401]
-#     4 : '3072-bit MODP group',  # [RFC 7401]
-#     5 : 'DEPRECATED',           # [RFC 5201] 6144-bit MODP group
-#     6 : 'DEPRECATED',           # [RFC 5201] 8192-bit MODP group
-#     7 : 'NIST P-256',           # [RFC 7401]
-#     8 : 'NIST P-384',           # [RFC 7401]
-#     9 : 'NIST P-521',           # [RFC 7401]
-#    10 : 'SECP160R1',            # [RFC 7401]
-#    11 : '2048-bit MODP group',  # [RFC 7401]
-# }
-
-
-# # Suite IDs
-# _SUITE_ID = {
-#     0 : 'Reserved',                     # [RFC 5201]
-#     1 : 'AES-CBC with HMAC-SHA1',       # [RFC 5201]
-#     2 : '3DES-CBC with HMAC-SHA1',      # [RFC 5201]
-#     3 : '3DES-CBC with HMAC-MD5',       # [RFC 5201]
-#     4 : 'BLOWFISH-CBC with HMAC-SHA1',  # [RFC 5201]
-#     5 : 'NULL-ENCRYPT with HMAC-SHA1',  # [RFC 5201]
-#     6 : 'NULL-ENCRYPT with HMAC-MD5',   # [RFC 5201]
-# }
-
-# # Cipher IDs
-# _CIPHER_ID = {
-#     0 : 'RESERVED',
-#     1 : 'NULL-ENCRYPT',     # [RFC 2410]
-#     2 : 'AES-128-CBC',      # [RFC 3602]
-#     3 : 'RESERVED',
-#     4 : 'AES-256-CBC',      # [RFC 3602]
-# }
-
-
-# # HIP NAT Traversal Modes
-# _MODE_ID = {
-#     0 : 'Reserved',             # [RFC 5770]
-#     1 : 'UDP-ENCAPSULATION',    # [RFC 5770]
-#     2 : 'ICE-STUN-UDP',         # [RFC 5770]
-# }
-
-
-# # HI Algorithm
-# _HI_ALGORITHM = {
-#     0 : 'RESERVED',     # [RFC 7401]
-#     1 : 'NULL-ENCRYPT', # [RFC 2410]
-#     3 : 'DSA',          # [RFC 7401]
-#     5 : 'RSA',          # [RFC 7401]
-#     7 : 'ECDSA',        # [RFC 7401]
-#     9 : 'ECDSA_LOW',    # [RFC 7401]
-# }
-
-
-# # ECDSA Curve Label
-# _ECDSA_CURVE = {
-#     0 : 'RESERVED',     # [RFC 7401]
-#     1 : 'NIST P-256',   # [RFC 7401]
-#     2 : 'NIST P-384',   # [RFC 7401]
-# }
-
-
-# # ECDSA_LOW Curve Label
-# _ECDSA_LOW_CURVE = {
-#     0 : 'RESERVED',     # [RFC 7401]
-#     1 : 'SECP160R1',    # [RFC 7401]
-# }
-
-
-# # DI-Types
-# _DI_TYPE = {
-#     0 : 'NULL', # [RFC 7401] none included
-#     1 : 'FQDN', # [RFC 7401][RFC 1035] Fully Qualified Domain Name, in binary format
-#     2 : 'NAI',  # [RFC 7401][RFC 4282] Network Access Identifier
-# }
-
-
-# # HIT Suite ID
-# _HIT_SUITE_ID = {
-#     0 : 'RESERVED',         # [RFC 7401]
-#     1 : 'RSA,DSA/SHA-256',  # [RFC 7401]
-#     2 : 'ECDSA/SHA-384',    # [RFC 7401]
-#     3 : 'ECDSA_LOW/SHA-1',  # [RFC 7401]
-# }
-
-
-# # HIP Certificate Types
-# _CERT_TYPE = {
-#     0 : 'Reserved',                         # [RFC 8002]
-#     1 : 'X.509 v3',                         # [RFC 8002]
-#     2 : 'Obsoleted',                        # [RFC 8002]
-#     3 : 'Hash and URL of X.509 v3',         # [RFC 8002]
-#     4 : 'Obsoleted',                        # [RFC 8002]
-#     5 : 'LDAP URL of X.509 v3',             # [RFC 8002]
-#     6 : 'Obsoleted',                        # [RFC 8002]
-#     7 : 'Distinguished Name of X.509 v3',   # [RFC 8002]
-#     8 : 'Obsoleted',                        # [RFC 8002]
-# }
-
-
-# # Notify Message Types
-# _NOTIFICATION_TYPE = {
-#     0 : 'Reserved',                                 # [RFC 7401]
-#     1 : 'UNSUPPORTED_CRITICAL_PARAMETER_TYPE',      # [RFC 7401]
-#     7 : 'INVALID_SYNTAX',                           # [RFC 7401]
-#    14 : 'NO_DH_PROPOSAL_CHOSEN',                    # [RFC 7401]
-#    15 : 'INVALID_DH_CHOSEN',                        # [RFC 7401]
-#    16 : 'NO_HIP_PROPOSAL_CHOSEN',                   # [RFC 7401]
-#    17 : 'INVALID_HIP_CIPHER_CHOSEN',                # [RFC 7401]
-#    18 : 'NO_ESP_PROPOSAL_CHOSEN',                   # [RFC 7402]
-#    19 : 'INVALID_ESP_TRANSFORM_CHOSEN',             # [RFC 7402]
-#    20 : 'UNSUPPORTED_HIT_SUITE',                    # [RFC 7401]
-#    24 : 'AUTHENTICATION_FAILED',                    # [RFC 7401]
-#    26 : 'CHECKSUM_FAILED',                          # [RFC 7401]
-#    28 : 'HIP_MAC_FAILED',                           # [RFC 7401]
-#    32 : 'ENCRYPTION_FAILED',                        # [RFC 7401]
-#    40 : 'INVALID_HIT',                              # [RFC 7401]
-#    42 : 'BLOCKED_BY_POLICY',                        # [RFC 7401]
-#    44 : 'RESPONDER_BUSY_PLEASE_RETRY',              # [RFC 7401]
-#    46 : 'LOCATOR_TYPE_UNSUPPORTED',                 # [RFC 8046]
-#    48 : 'CREDENTIALS_REQUIRED',                     # [RFC 8002]
-#    50 : 'INVALID_CERTIFICATE',                      # [RFC 8002]
-#    51 : 'REG_REQUIRED',                             # [RFC 8003]
-#    60 : 'NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER',    # [RFC 5770]
-#    61 : 'CONNECTIVITY_CHECKS_FAILED',               # [RFC 5770]
-#    62 : 'MESSAGE_NOT_RELAYED',                      # [RFC 5770]
-#    70 : 'OVERLAY_TTL_EXCEEDED',                     # [RFC 6079]
-#    90 : 'UNKNOWN_NEXT_HOP',                         # [RFC 6028]
-#   100 : 'NO_VALID_HIP_TRANSPORT_MODE',              # [RFC 6261]
-# 16384 : 'I2_ACKNOWLEDGEMENT',                       # [RFC 7401]
-# }
-
-
-# # Registration Types
-# _REG_TYPE = {
-#     0 : 'Unassigned',
-#     1 : 'RENDEZVOUS',       # [RFC 8004]
-#     2 : 'RELAY_UDP_HIP',    # [RFC 5770]
-# }
-
-
-# # Registration Failure Types
-# _REG_FAILURE_TYPE = {
-#     0 : 'Registration requires additional credentials',     # [RFC 8003]
-#     1 : 'Registration type unavailable',                    # [RFC 8003]
-#     2 : 'Insufficient resources',                           # [RFC 8003]
-#     3 : 'Invalid certificate',                              # [RFC 8003]
-#     4 : 'Bad certificate',                                  # [RFC 8003]
-#     5 : 'Unsupported certificate',                          # [RFC 8003]
-#     6 : 'Certificate expired',                              # [RFC 8003]
-#     7 : 'Certificate other',                                # [RFC 8003]
-#     8 : 'Unknown CA',                                       # [RFC 8003]
-# }
-
-
-# # ESP Transform Suite IDs
-# _ESP_SUITE_ID = {
-#     0 : 'RESERVED',                         # [RFC 7402]
-#     1 : 'AES-128-CBC with HMAC-SHA1',       # [RFC 3602][RFC 2404]
-#     2 : 'DEPRECATED',                       # [RFC 7402]
-#     3 : 'DEPRECATED',                       # [RFC 7402]
-#     4 : 'DEPRECATED',                       # [RFC 7402]
-#     5 : 'DEPRECATED',                       # [RFC 7402]
-#     6 : 'DEPRECATED',                       # [RFC 7402]
-#     7 : 'NULL with HMAC-SHA-256',           # [RFC 2410][RFC 4868]
-#     8 : 'AES-128-CBC with HMAC-SHA-256',    # [RFC 3602][RFC 4868]
-#     9 : 'AES-256-CBC with HMAC-SHA-256',    # [RFC 3602][RFC 4868]
-#    10 : 'AES-CCM-8',                        # [RFC 4309]
-#    11 : 'AES-CCM-16',                       # [RFC 4309]
-#    12 : 'AES-GCM with an 8 octet ICV',      # [RFC 4106]
-#    13 : 'AES-GCM with a 16 octet ICV',      # [RFC 4106]
-#    14 : 'AES-CMAC-96',                      # [RFC 4493][RFC 4494]
-#    15 : 'AES-GMAC',                         # [RFC 4543]
-# }
-
-
-# # HIP Transport Modes
-# _TP_MODE_ID = {
-#     0 : 'RESERVED',     # [RFC 6261]
-#     1 : 'DEFAULT',      # [RFC 6261]
-#     2 : 'ESP',          # [RFC 6261]
-#     3 : 'ESP-TCP',      # [RFC 6261]
-# }
 
 
 class HIP(Internet):
@@ -522,14 +264,14 @@ class HIP(Internet):
 
             # extract parameter
             dscp = _HIP_PARA.get(code, 'Unassigned')
-            if 0 <= code <= 1023 or 61440 <= code <= 65535:
-                desc = f'{dscp} (IETF Review)'
-            elif 1024 <= code <= 32767 or 49152 <= code <= 61439:
-                desc = f'{dscp} (Specification Required)'
-            elif 32768 <= code <= 49151:
-                desc = f'{dscp} (Reserved for Private Use)'
-            else:
-                raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
+            # if 0 <= code <= 1023 or 61440 <= code <= 65535:
+            #     desc = f'{dscp} (IETF Review)'
+            # elif 1024 <= code <= 32767 or 49152 <= code <= 61439:
+            #     desc = f'{dscp} (Specification Required)'
+            # elif 32768 <= code <= 49151:
+            #     desc = f'{dscp} (Reserved for Private Use)'
+            # else:
+            #     raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
             data = _HIP_PROC(dscp)(self, code, cbit, clen, desc=desc, length=plen, version=version)
 
             # record parameter data

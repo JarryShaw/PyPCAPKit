@@ -9,6 +9,8 @@ usable for its caller.
 """
 import ipaddress
 
+from pcapkit.protocols.link.link import LINKTYPE
+
 
 __all__ = ['packet2dict', 'tcp_traceflow']
 
@@ -36,7 +38,7 @@ def tcp_traceflow(packet):
         ip = packet.ip if 'IP' in packet else packet.ipv6
         tcp = packet.tcp
         data = dict(
-            protocol = packet.layers[0].layer_name.upper(),
+            protocol = LINKTYPE.get(packet.layers[0].layer_name.upper()),
                                                     # data link type from global header
             index = int(packet.number),             # frame number
             frame = packet2dict(packet),            # extracted packet

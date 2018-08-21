@@ -20,8 +20,8 @@ is described as below.
 import datetime
 import ipaddress
 
-from pcapkit._common.ipv6_router_alert import _ROUTER_ALERT
-from pcapkit._common.ipv6_tid_type import _TID_TYPE
+from pcapkit._common.ipv6_router_alert import RT_ALT as _ROUTER_ALERT
+from pcapkit._common.ipv6_tid_type import TaggerId as _TID_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
@@ -89,15 +89,6 @@ _IPv6_Opts_NULL = {
 }
 
 
-# # TaggerId Types
-# _TID_TYPE = {
-#     '000' : 'NULL',         # [RFC 6621]
-#     '001' : 'DEFAULT',      # [RFC 6621]
-#     '010' : 'IPv4',         # [RFC 6621]
-#     '011' : 'IPv6',         # [RFC 6621]
-# }
-
-
 # QS Functions
 _QS_FUNC = {
     1 : 'Quick-Start Request',          # [RFC 4782]
@@ -112,18 +103,6 @@ _IPv6_Opts_SEED = {
     '10' : '64-Bit Unsigned Integer',               # [RFC 7731]
     '11' : '128-Bit Unsigned Integer',              # [RFC 7731]
 }
-
-
-# # IPv6 Router Alert Option Values
-# _ROUTER_ALERT = {
-#     0 : 'Datagram contains a Multicast Listener Discovery message', # [RFC 2710]
-#     1 : 'Datagram contains RSVP message',                           # [RFC 2711]
-#     2 : 'Datagram contains an Active Networks message',             # [RFC 2711]
-#     3 : 'Reserved',                                                 # [RFC 5350]
-#    68 : 'NSIS NATFW NSLP',                                          # [RFC 5973]
-#    69 : 'MPLS OAM',                                                 # [RFC 7506]
-# 65535 : 'Reserved',
-# }
 
 
 class IPv6_Opts(Internet):

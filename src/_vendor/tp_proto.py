@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import collections
 import csv
 import os
 import re
@@ -8,22 +9,83 @@ import re
 import requests
 
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+###############
+# Defaults
+###############
 
-page = requests.get('https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv')
+
+ROOT, FILE = os.path.split(os.path.abspath(__file__))
+
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+# -*- coding: utf-8 -*-
+
+
+from aenum import IntEnum, extend_enum
+
+
+class {NAME}(IntEnum):
+    """Enumeration class for {NAME}."""
+    _ignore_ = '{NAME} _'
+    {NAME} = vars()
+
+    # {DOCS}
+    {ENUM}
+
+    @staticmethod
+    def get(key, default=-1):
+        """Backport support for original codes."""
+        if isinstance(key, int):
+            return {NAME}(key)
+        if key not in {NAME}._member_map_:
+            extend_enum({NAME}, key, default)
+        return {NAME}[key]
+
+    @classmethod
+    def _missing_(cls, value):
+        """Lookup function used when value is not found."""
+        if not ({FLAG}):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        {MISS}
+        super()._missing_(value)
+'''
+
+
+###############
+# Macros
+###############
+
+
+NAME = 'TransType'
+DOCS = 'Transport Layer Protocol Numbers'
+FLAG = 'isinstance(value, int) and 0 <= value <= 255'
+LINK = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'
+
+
+###############
+# Processors
+###############
+
+
+page = requests.get(LINK)
 data = page.text.strip().split('\r\n')
 
 reader = csv.reader(data)
 header = next(reader)
+record = collections.Counter(map(lambda item: item[1],
+    filter(lambda item: len(item[0].split('-')) != 2, reader)))
 
-def rename(name, code):
-    if re.match(r'Reserved|Unassigned|Deprecated|Experimental', name, re.IGNORECASE):
-        name = f'{name} [{code}]'
+def rename(name, code, *, original):
+    if record[original] > 1:
+        return f'{name} [{code}]'
     return name
 
-lidb = list()
+reader = csv.reader(data)
+header = next(reader)
+
+enum = list()
+miss = list()
 for item in reader:
-    name = item[1]
+    long = item[1]
     rfcs = item[4]
 
     temp = list()
@@ -37,32 +99,38 @@ for item in reader:
     subd = re.sub(r'( )( )*', ' ', item[2].replace('\n', ' '))
     desc = f' {subd}' if item[2] else ''
 
-    split = name.split(' (', 1)
+    split = long.split(' (', 1)
     if len(split) == 2:
-        name = split[0]
-        cmmt = f" ({split[1]}"
+        name, cmmt = split[0], f" ({split[1]}"
     else:
-        name, cmmt = name, ''
+        name, cmmt = long, ''
+    if name == '':
+        name, desc = item[2], ''
 
     try:
-        code = int(item[0])
-        if name == '':
-            name, desc = f'{item[2]} [{code}]', ''
-        renm = rename(name, code)
-        lidb.append(f"{code:>5} : '{renm}',".ljust(80) + (f"#{lrfc}{desc}{cmmt}" if lrfc or desc or cmmt else ''))
-        # print(code, name, ''.join(temp))
-    except ValueError:
-        start, stop = map(int, item[0].split('-'))
-        if name == '':
-            name, desc = item[2], ''
-        for code in range(start, stop+1):
-            renm = rename(name, code)
-            lidb.append(f"{code:>5} : '{renm}',".ljust(80) + (f"#{lrfc}{desc}{cmmt}" if lrfc or desc or cmmt else ''))
-            # print(code, name, ''.join(temp))
+        code, _ = item[0], int(item[0])
+        renm = rename(name, code, original=long)
 
-with open(os.path.join(ROOT, '../_common/tp_proto.py'), 'w') as file:
-    file.write('# -*- coding: utf-8 -*-\n\n\n')
-    file.write('# Transport Layer Protocol Numbers\n')
-    file.write('TP_PROTO = {\n')
-    file.write('\n'.join(map(lambda s: s.rstrip(), lidb)))
-    file.write('\n}\n')
+        pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
+        sufs = f"#{lrfc}{desc}{cmmt}" if lrfc or desc or cmmt else ''
+
+        enum.append(f'{pres}{sufs}')
+    except ValueError:
+        start, stop = item[0].split('-')
+
+        miss.append(f'if {start} <= value <= {stop}:')
+        if lrfc or desc or cmmt:
+            miss.append(f'    #{lrfc}{desc}{cmmt}')
+        miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+        miss.append('    return cls(value)')
+
+
+###############
+# Defaults
+###############
+
+
+ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
+MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
+with open(os.path.join(ROOT, f'../_common/{FILE}'), 'w') as file:
+    file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

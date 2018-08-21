@@ -8,7 +8,7 @@ And the latter is a base class for transport layer
 protocols, eg. TCP and UDP.
 
 """
-from pcapkit._common.tp_proto import TP_PROTO
+from pcapkit._common.tp_proto import TransType as TP_PROTO
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder_ng
 
@@ -18,35 +18,6 @@ from pcapkit.utilities.decorators import beholder_ng
 
 
 __all__ = ['Transport', 'TP_PROTO']
-
-
-# # Transport Layer Protocol Numbers
-# TP_PROTO = {
-#     # Internet Layer
-#     1:  'ICMP',     # Internet Control Message Protocol
-#     2:  'IGMP',     # Internet Group Management Protocol
-#     4:  'IP',       # IP in IP (encapsulation)
-#    41:  'IPv6',     # IPv6 Encapsulation
-#    58:  'ICMPv6',   # ICMP for IPv6
-
-#     # IPv6 Extension Header Types
-#     0:  'HOPOPT',       # IPv6 Hop-by-Hop Option
-#    43:  'IPv6-Route',   # Routing Header for IPv6
-#    44:  'IPv6-Frag',    # Fragment Header for IPv6
-#    50:  'ESP',          # Encapsulating Security Payload
-#    51:  'AH',           # Authentication Header
-#    59:  'IPv6-NoNxt',   # No Next Header for IPv6
-#    60:  'IPv6-Opts',    # Destination Options for IPv6 (before routing / upper-layer header)
-#   135:  'Mobility',     # Mobility Extension Header for IPv6 (currently without upper-layer header)
-#   139:  'HIP',          # Host Identity Protocol
-#   140:  'Shim6',        # Site Multihoming by IPv6 Intermediation
-
-#    # Transport Layer
-#     6:  'TCP',      # Transmission Control Protocol
-#    17:  'UDP',      # User Datagram Protocol
-#    89:  'OSPF',     # Open Shortest Path First
-#   132:  'SCTP',     # Stream Control Transmission Protocol
-# }
 
 
 class Transport(Protocol):

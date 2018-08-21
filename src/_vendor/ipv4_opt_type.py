@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
+import collections
 import csv
 import os
 import re
@@ -8,15 +9,83 @@ import re
 import requests
 
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+###############
+# Defaults
+###############
 
-page = requests.get('https://www.iana.org/assignments/ip-parameters/ip-parameters-1.csv')
+
+ROOT, FILE = os.path.split(os.path.abspath(__file__))
+
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+# -*- coding: utf-8 -*-
+
+
+from aenum import IntEnum, extend_enum
+
+
+class {NAME}(IntEnum):
+    """Enumeration class for {NAME}."""
+    _ignore_ = '{NAME} _'
+    {NAME} = vars()
+
+    # {DOCS}
+    {ENUM}
+
+    @staticmethod
+    def get(key, default=-1):
+        """Backport support for original codes."""
+        if isinstance(key, int):
+            return {NAME}(key)
+        if key not in {NAME}._member_map_:
+            extend_enum({NAME}, key, default)
+        return {NAME}[key]
+
+    @classmethod
+    def _missing_(cls, value):
+        """Lookup function used when value is not found."""
+        if not ({FLAG}):
+            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
+        {MISS}
+'''
+
+
+###############
+# Macros
+###############
+
+
+NAME = 'Options'
+DOCS = 'IP Option Numbers'
+FLAG = 'isinstance(value, int) and 0 <= value <= 255'
+LINK = 'https://www.iana.org/assignments/ip-parameters/ip-parameters-1.csv'
+
+
+###############
+# Processors
+###############
+
+
+page = requests.get(LINK)
 data = page.text.strip().split('\r\n')
 
 reader = csv.reader(data)
 header = next(reader)
+record = collections.Counter(map(lambda item: item[4],
+    filter(lambda item: len(item[3].split('-')) != 2, reader)))
 
-lidb = list()
+def rename(name, code, *, original):
+    if record[original] > 1:
+        return f'{name} [{code}]'
+    return name
+
+reader = csv.reader(data)
+header = next(reader)
+
+enum = list()
+miss = [
+    "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+    'return cls(value)'
+]
 for item in reader:
     code = item[3]
     dscp = item[4]
@@ -34,11 +103,20 @@ for item in reader:
     abbr, name = re.split(r'\W+-\W+', dscp)
     temp = re.sub(r'\[\d+\]', '', name)
     name = f' {temp}' if temp else ''
-    lidb.append(f"{code:>5} : '{abbr or ('Unassigned ['+code+']')}',".ljust(80) + (f'#{desc}{name}' if desc or name else ''))
 
-with open(os.path.join(ROOT, '../_common/ipv4_opt_type.py'), 'w') as file:
-    file.write('# -*- coding: utf-8 -*-\n\n\n')
-    file.write('# IP Option Numbers\n')
-    file.write('OPT_TYPE = {\n')
-    file.write('\n'.join(map(lambda s: s.rstrip(), lidb)))
-    file.write('\n}\n')
+    renm = rename(abbr or f'Unassigned [{code}]', code, original=dscp)
+    pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
+    sufs = f'#{desc}{name}' if desc or name else ''
+
+    enum.append(f'{pres}{sufs}')
+
+
+###############
+# Defaults
+###############
+
+
+ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
+MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
+with open(os.path.join(ROOT, f'../_common/{FILE}'), 'w') as file:
+    file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

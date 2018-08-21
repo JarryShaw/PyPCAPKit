@@ -18,7 +18,7 @@ __all__ = [
     'BoolError', 'BytesError', 'StringError', 'BytearrayError', # TypeError
     'DictError', 'ListError', 'TupleError', 'IterableError',    # TypeError
     'IOObjError', 'ProtocolUnbound', 'CallableError',           # TypeError
-    'InfoError', 'IPError',                                     # TypeError
+    'InfoError', 'IPError', 'EnumError',                        # TypeError
     'FormatError', 'UnsupportedCall',                           # AttributeError
     'FileError',                                                # IOError
     'FileExists',                                               # FileExistsError
@@ -37,7 +37,7 @@ def stacklevel():
     """Fetch curent stack level."""
     tb = traceback.extract_stack()
     for tbitem in tb:
-        if pathlib.Path(tbitem[0]).match('*/pcapkit/*'):
+        if pathlib.Path(tbitem[0]).match('pcapkit'):
             index = tb.index(tbitem)
             break
     else:
@@ -158,6 +158,11 @@ class InfoError(BaseError, TypeError):
 
 class IPError(BaseError, TypeError):
     """The argument(s) must be IP address."""
+    pass
+
+
+class EnumError(BaseError, TypeError):
+    """The argument(s) must be enumeration protocol type."""
     pass
 
 

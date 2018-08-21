@@ -168,4 +168,3 @@ class IPv4_Reassembly(IP_Reassembly):
     def protocol(self):
         """Protocol of current reassembly object."""
         return 'IPv4'
-    

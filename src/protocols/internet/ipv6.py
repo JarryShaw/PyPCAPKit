@@ -43,21 +43,6 @@ from pcapkit.protocols.internet.ip import IP
 __all__ = ['IPv6']
 
 
-# # IPv6 Extension Header Types
-# EXT_HDR = (
-#     'HOPOPT',       # IPv6 Hop-by-Hop Option
-#     'IPv6-Route',   # Routing Header for IPv6
-#     'IPv6-Frag',    # Fragment Header for IPv6
-#     'ESP',          # Encapsulating Security Payload
-#     'AH',           # Authentication Header
-#     'IPv6-NoNxt',   # No Next Header for IPv6
-#     'IPv6-Opts',    # Destination Options for IPv6 (before routing / upper-layer header)
-#     'MH',           # Mobility Extension Header for IPv6 (currently without upper-layer header)
-#     'HIP',          # Host Identity Protocol
-#     'Shim6',        # Site Multihoming by IPv6 Intermediation
-# )
-
-
 class IPv6(IP):
     """This class implements Internet Protocol version 6.
 
@@ -109,7 +94,7 @@ class IPv6(IP):
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.next
+        return self._info.protocol
 
     ##########################################################################
     # Methods.
@@ -263,24 +248,25 @@ class IPv6(IP):
             * dict -- current protocol with next layer extracted
 
         """
-        # recurse if next header is an extensive header
         hdr_len = 40                # header length
         raw_len = ipv6['payload']   # payload length
         _protos = list()            # ProtoChain buffer
+
+        # recurse if next header is an extensive header
         while proto in EXT_HDR:
             # keep original data after fragment header
-            if proto == 'IPv6-Frag':
+            if proto.value == 44:
                 ipv6['fragment'] = self._read_packet(header=hdr_len, payload=raw_len)
 
-            # directly break when No Next Header ocuurs
-            if proto == 'IPv6-NoNxt':
-                proto = None
-                break
+            # # directly break when No Next Header ocuurs
+            # if proto.name == 'IPv6-NoNxt':
+            #     proto = None
+            #     break
 
             # make protocol name
             flag, next_ = self._import_next_layer(proto, version=6, extension=True)
             info, chain, alias = next_.info, next_.protochain, next_.alias
-            name = proto.lstrip('IPv6-').replace('Mobility Header', 'MH').lower() if flag else 'raw'
+            name = proto.name.lstrip('IPv6-').replace('Mobility Header', 'MH').lower() if flag else 'raw'
             ipv6[name] = info
 
             # record protocol name
@@ -300,7 +286,7 @@ class IPv6(IP):
         ipv6['raw_len'] = raw_len
 
         # update next header
-        ipv6['proto'] = None if proto in EXT_HDR else proto
+        ipv6['protocol'] = proto
         ipv6 = super()._decode_next_layer(ipv6, proto, raw_len)
 
         # make ProtoChain
