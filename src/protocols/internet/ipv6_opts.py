@@ -20,7 +20,10 @@ is described as below.
 import datetime
 import ipaddress
 
+from pcapkit._common.ip_qs_func import QS as _QS_FUNC
+from pcapkit._common.ipv6_opt_type import Options as _OPT_TYPE
 from pcapkit._common.ipv6_router_alert import RT_ALT as _ROUTER_ALERT
+from pcapkit._common.ipv6_opt_seed import SeedID as _IPv6_Opts_SEED
 from pcapkit._common.ipv6_tid_type import TaggerId as _TID_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
@@ -86,22 +89,6 @@ _IPv6_Opts_NULL = {
     0xBE : 'RFC3692-style Experiment',                              # [RFC 4727]
     0xDE : 'RFC3692-style Experiment',                              # [RFC 4727]
     0xFE : 'RFC3692-style Experiment',                              # [RFC 4727]
-}
-
-
-# QS Functions
-_QS_FUNC = {
-    1 : 'Quick-Start Request',          # [RFC 4782]
-    2 : 'Report of Approved Rate',      # [RFC 4782]
-}
-
-
-# Seed-ID Types
-_IPv6_Opts_SEED = {
-    '00' : 'IPv6 Source Address',                   # [RFC 7731]
-    '01' : '16-Bit Unsigned Integer',               # [RFC 7731]
-    '10' : '64-Bit Unsigned Integer',               # [RFC 7731]
-    '11' : '128-Bit Unsigned Integer',              # [RFC 7731]
 }
 
 
@@ -276,16 +263,17 @@ class IPv6_Opts(Internet):
             # extract parameter
             abbr, desc = _IPv6_Opts_OPT.get(code, ('None', 'Unassigned'))
             data = _IPv6_Opts_PROC(abbr)(self, code, desc=desc)
+            enum = _OPT_TYPE.get(code)
 
             # record parameter data
             counter += data['length']
-            if abbr in optkind:
+            if enum in optkind:
                 if isinstance(options[abbr], tuple):
                     options[abbr] += (Info(data),)
                 else:
                     options[abbr] = (Info(options[abbr]), Info(data))
             else:
-                optkind.append(abbr)
+                optkind.append(enum)
                 options[abbr] = data
 
         # check threshold
@@ -851,7 +839,7 @@ class IPv6_Opts(Internet):
             desc = desc,
             type = _type,
             length = _size + 2,
-            seed_len = _IPv6_Opts_SEED.get(_smvr[:2]),
+            seed_len = _IPv6_Opts_SEED.get(int(_smvr[:2], base=2)),
             flags = dict(
                 max = True if int(_smvr[2], base=2) else False,
                 verification = True if int(_smvr[3], base=2) else False,

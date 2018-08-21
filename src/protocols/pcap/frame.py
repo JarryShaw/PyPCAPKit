@@ -138,8 +138,9 @@ class Frame(Protocol):
             self._mpkt.pool += 1
 
         # make BytesIO from frame packet data
+        frame['packet'] = bytes_
         self._file = io.BytesIO(bytes_)
-        frame['packet'] = self._read_packet(header=0, payload=length, discard=True)
+        # frame['packet'] = self._read_packet(header=0, payload=length, discard=True)
 
         return self._decode_next_layer(frame, length)
 

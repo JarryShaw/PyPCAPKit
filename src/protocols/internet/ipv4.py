@@ -26,12 +26,12 @@ import collections
 import datetime
 import ipaddress
 
+from pcapkit._common.ip_qs_func import QS as QS_FUNC
 from pcapkit._common.ipv4_classification_level import ClasLvl as _CLASSIFICATION_LEVEL
 from pcapkit._common.ipv4_opt_class import OptCls as opt_class
 from pcapkit._common.ipv4_opt_type import Options as OPT_TYPE
 from pcapkit._common.ipv4_protection_authority import ProtAuth as _PROTECTION_AUTHORITY
 from pcapkit._common.ipv4_router_alert import RT_ALT as _ROUTER_ALERT
-from pcapkit._common.ipv4_qs_func import QS as QS_FUNC
 from pcapkit._common.ipv4_tos_del import Delay as TOS_DEL
 from pcapkit._common.ipv4_tos_ecn import ECN as TOS_ECN
 from pcapkit._common.ipv4_tos_pre import Precedence as TOS_PRE

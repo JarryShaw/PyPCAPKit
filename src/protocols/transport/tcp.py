@@ -29,6 +29,7 @@ Protocol (TCP), whose structure is described as below.
 import struct
 
 from pcapkit._common.tcp_chksum_opt import ChksumOpt as chksum_opt
+from pcapkit._common.tcp_opt_type import Options as OPT_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.transport.transport import Transport
 from pcapkit.utilities.decorators import seekset
@@ -355,10 +356,12 @@ class TCP(Transport):
 
             # fetch corresponding option tuple
             opts = TCP_OPT.get(kind)
+            enum = OPT_TYPE.get(kind)
             if opts is None:
                 len_ = size - counter
                 counter = size
-                options['Unknown'] = self._read_fileng(len_)
+                optkind.append(enum)
+                options[enum.name] = self._read_fileng(len_)
                 break
 
             # extract option
@@ -383,13 +386,13 @@ class TCP(Transport):
 
             # record option data
             counter += len_
-            if dscp in optkind:
+            if enum in optkind:
                 if isinstance(options[dscp], tuple):
                     options[dscp] += (Info(data),)
                 else:
                     options[dscp] = (Info(options[dscp]), Info(data))
             else:
-                optkind.append(dscp)
+                optkind.append(enum)
                 options[dscp] = data
 
             # break when eol triggered
