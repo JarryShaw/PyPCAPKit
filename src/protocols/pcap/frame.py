@@ -239,23 +239,21 @@ class Frame(Protocol):
         """
         seek_cur = self._file.tell()
         try:
-            flag, next_ = self._import_next_layer(self._prot, length)
+            next_ = self._import_next_layer(self._prot, length)
         except Exception as error:
             dict_['error'] = str(error)
             self._file.seek(seek_cur, os.SEEK_SET)
-            flag, next_ = beholder(self._import_next_layer)(self, self._prot, length, error=True)
+            next_ = beholder(self._import_next_layer)(self, self._prot, length, error=True)
         info, chain, alias = next_.info, next_.protochain, next_.alias
 
         # make next layer protocol name
-        if flag:
-            proto, name = str(self._prot.name or 'Raw').lower(), self._prot
-        else:
-            proto, name = 'raw', 'Raw'
+        layer = next_.alias.lower()
+        proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
         self._next = next_
-        self._protos = ProtoChain(name, chain, alias)
-        dict_[proto] = info
+        self._protos = ProtoChain(proto, chain, alias)
+        dict_[layer] = info
         dict_['protocols'] = self._protos.chain
         return dict_
 
@@ -291,4 +289,4 @@ class Frame(Protocol):
             from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(self._file, length, error=error,
                             layer=self._exlayer, protocol=self._exproto)
-        return True, next_
+        return next_

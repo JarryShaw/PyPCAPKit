@@ -247,6 +247,9 @@ class Protocol:
             payload = payload.payload
         raise ProtocolNotFound(f"Layer '{key}' not in Frame")
 
+    def __contains__(self, name):
+        return (name in self._info)
+
     @classmethod
     def __index__(cls):
         return cls.__name__
@@ -370,20 +373,14 @@ class Protocol:
 
         """
         if self._onerror:
-            flag, next_ = beholder(self._import_next_layer)(self, proto, length)
+            next_ = beholder(self._import_next_layer)(self, proto, length)
         else:
-            flag, next_ = self._import_next_layer(proto, length)
+            next_ = self._import_next_layer(proto, length)
         info, chain, alias = next_.info, next_.protochain, next_.alias
 
         # make next layer protocol name
-        if flag:
-            if proto is None and chain:
-                layer = chain.alias[0].lower()
-                proto, chain = chain.tuple[0], None
-            else:
-                layer = str(alias or proto or 'Raw').lower()
-        else:
-            layer, proto = 'raw', 'Raw'
+        layer = next_.alias.lower()
+        proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
         dict_[layer] = info
@@ -406,7 +403,7 @@ class Protocol:
         from pcapkit.protocols.raw import Raw
         next_ = Raw(io.BytesIO(self._read_fileng(length)), length,
                     layer=self._exlayer, protocol=self._exproto)
-        return True, next_
+        return next_
 
     def _check_term_threshold(self):
         """Check if reached termination threshold."""

@@ -54,7 +54,7 @@ def beholder(func):
 
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=str(error))
-            return False, next_
+            return next_
     return behold
 
 
@@ -74,5 +74,5 @@ def beholder_ng(func):
             # raw = Raw(file, length, error=str(error))
             # return analyse(raw.info, raw.protochain, raw.alias)
             next_ = Raw(file, length, error=str(error))
-            return False, next_
+            return next_
     return behold

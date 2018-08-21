@@ -34,7 +34,7 @@ class PCAP:
 
     def __init__(self, filename, *, protocol):
         self._file = filename
-        packet = Header(protocol=protocol).data
+        packet = Header(network=protocol).data
         with open(self._file, 'wb') as file:
             file.write(packet)
 

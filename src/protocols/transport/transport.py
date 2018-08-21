@@ -78,7 +78,7 @@ class Transport(Protocol):
         """
         from pcapkit.foundation.analysis import analyse
         if self._onerror:
-            _, next_ = beholder_ng(analyse)(self._file, length, _termination=self._sigterm)
+            next_ = beholder_ng(analyse)(self._file, length, _termination=self._sigterm)
         else:
             next_ = analyse(self._file, length, _termination=self._sigterm)
-        return True, next_
+        return next_

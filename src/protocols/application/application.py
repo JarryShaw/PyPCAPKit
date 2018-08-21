@@ -6,7 +6,6 @@
 layer protocols, eg. HTTP/1.*, HTTP/2 and etc.
 
 """
-from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -38,7 +37,6 @@ class Application(Protocol):
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
         * _read_packet -- read raw packet data
-        * _make_protochain -- make ProtoChain instance for corresponding protocol
 
     """
     __layer__ = 'Application'
@@ -66,9 +64,9 @@ class Application(Protocol):
     # Utilities.
     ##########################################################################
 
-    def _make_protochain(self):
-        """Make ProtoChain instance for corresponding protocol."""
-        self._protos = ProtoChain(self.__class__.__name__, None, self.alias)
+    # def _make_protochain(self):
+    #     """Make ProtoChain instance for corresponding protocol."""
+    #     self._protos = ProtoChain(self.__class__.__name__, None, self.alias)
 
     def _decode_next_layer(self, dict_, proto=None, length=None):
         """Deprecated."""

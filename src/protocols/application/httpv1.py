@@ -58,7 +58,6 @@ class HTTPv1(HTTP):
         * _read_fileng -- read file buffer
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
-        * _make_protochain -- make ProtoChain instance for corresponding protocol
         * _read_http_header -- read HTTP/1.* header
         * _read_http_body -- read HTTP/1.* body
 

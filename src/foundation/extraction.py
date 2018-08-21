@@ -630,7 +630,7 @@ class Extractor:
             flag, data = ipv6_reassembly(frame)
             if flag:    self._reasm[1](data)
         if self._tcp:
-            flag, data = ipv4_reassembly(frame)
+            flag, data = tcp_reassembly(frame)
             if flag:    self._reasm[2](data)
 
         # trace flows

@@ -12,7 +12,7 @@ __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflo
 def ipv4_reassembly(frame):
     """Make data for IPv4 reassembly."""
     if 'IPv4' in frame:
-        ipv4 = frame['IPv4']
+        ipv4 = frame['IPv4'].info
         if ipv4.flags.df:   return False, None      # dismiss not fragmented frame
         data = dict(
             bufid = (
@@ -37,7 +37,7 @@ def ipv4_reassembly(frame):
 def ipv6_reassembly(frame):
     """Make data for IPv6 reassembly."""
     if 'IPv6' in frame:
-        ipv6 = frame['IPv6']
+        ipv6 = frame['IPv6'].info
         if 'frag' not in ipv6:  return False, None  # dismiss not fragmented frame
         data = dict(
             bufid = (
@@ -63,8 +63,8 @@ def ipv6_reassembly(frame):
 def tcp_reassembly(frame):
     """Make data for TCP reassembly."""
     if 'TCP' in frame:
-        ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
-        tcp = frame['TCP']
+        ip = (frame['IPv4'] if 'IPv4' in frame else frame['IPv6']).info
+        tcp = frame['TCP'].info
         data = dict(
             bufid = (
                 ip.src,                             # source IP address
@@ -91,8 +91,8 @@ def tcp_reassembly(frame):
 def tcp_traceflow(frame, *, data_link):
     """Trace packet flow for TCP."""
     if 'TCP' in frame:
-        ip = frame['IPv4'] if 'IPv4' in frame else frame['IPv6']
-        tcp = frame['TCP']
+        ip = (frame['IPv4'] if 'IPv4' in frame else frame['IPv6']).info
+        tcp = frame['TCP'].info
         data = dict(
             protocol = data_link,                   # data link type from global header
             index = frame.info.number,              # frame number

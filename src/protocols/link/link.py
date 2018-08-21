@@ -117,4 +117,4 @@ class Link(Protocol):
             from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(self._file, length,
                             error=self._onerror, layer=self._exlayer, protocol=self._exproto)
-        return True, next_
+        return next_

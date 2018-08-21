@@ -93,20 +93,14 @@ class Internet(Protocol):
 
         """
         if self._onerror:
-            flag, next_ = beholder(self._import_next_layer)(self, proto, length, version=version)
+            next_ = beholder(self._import_next_layer)(self, proto, length, version=version)
         else:
-            flag, next_ = self._import_next_layer(proto, length, version=version)
+            next_ = self._import_next_layer(proto, length, version=version)
         info, chain, alias = next_.info, next_.protochain, next_.alias
 
         # make next layer protocol name
-        if flag:
-            if proto is None and chain:
-                layer = chain.alias[0].lower()
-                proto, chain = chain.tuple[0], None
-            else:
-                layer = str(alias or proto or 'Raw').lower()
-        else:
-            layer, proto = 'raw', 'Raw'
+        layer = next_.alias.lower()
+        proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
         self._next = next_
@@ -170,4 +164,4 @@ class Internet(Protocol):
         next_ = Protocol(self._file, length,
                             version=version, extension=extension,
                             error=self._onerror, layer=self._exlayer, protocol=self._exproto)
-        return True, next_
+        return next_

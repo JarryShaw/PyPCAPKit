@@ -77,18 +77,18 @@ class Protocol:
     ##########################################################################
 
     @classmethod
-    def index(cls, enum, value, *, pack=False, size=4, lilendian=False):
-        """Return first index of value from a dict or enumeration."""
-        if isinstance(value, (enum.IntEnum, aenum.IntEnum)):
-            index = value.value
+    def index(cls, base, name, *, pack=False, size=4, lilendian=False):
+        """Return first index of name from a dict or enumeration."""
+        if isinstance(name, (enum.IntEnum, aenum.IntEnum)):
+            index = name.value
         else:
             try:
-                if isinstance(enum, (enum.EnumMeta, aenum.EnumMeta)):
-                    index = enum[value]
+                if isinstance(base, (enum.EnumMeta, aenum.EnumMeta)):
+                    index = base[name]
                 else:
-                    index = list(dict_.keys())[list(dict_.values()).index(value)]
+                    index = list(dict_.keys())[list(dict_.values()).index(name)]
             except (ValueError, KeyError):
-                raise ProtocolNotImplemented(f'protocol {value} not implemented') from None
+                raise ProtocolNotImplemented(f'protocol {name} not implemented') from None
         if pack:
             return cls.pack(index, size=size, lilendian=lilendian)
         return index

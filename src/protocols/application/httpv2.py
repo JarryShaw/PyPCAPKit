@@ -69,7 +69,6 @@ class HTTPv2(HTTP):
         * _read_unpack -- read bytes and unpack to integers
         * _read_binary -- read bytes and convert into binaries
         * _read_packet -- read raw packet data
-        * _make_protochain -- make ProtoChain instance for corresponding protocol
         * _read_http_data -- read HTTP/2 DATA frames
         * _read_http_headers -- read HTTP/2 HEADERS frames
         * _read_http_priority -- read HTTP/2 PRIORITY frames
