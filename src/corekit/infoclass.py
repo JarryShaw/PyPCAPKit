@@ -6,7 +6,7 @@
 `dataclasses.dataclass` in Python 3.7 and later versions.
 
 """
-import collections
+import collections.abc
 import copy
 
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -16,7 +16,7 @@ from pcapkit.utilities.validations import dict_check
 __all__ = ['Info']
 
 
-class Info(dict):
+class Info(collections.abc.Mapping):
     """Turn dictionaries into object-like instances.
 
     Methods:
@@ -33,7 +33,7 @@ class Info(dict):
         def __read__(dict_):
             __dict__ = dict()
             for (key, value) in dict_.items():
-                if key in dir(dict):
+                if key in self.__data__:
                     key = f'{key}2'
                 if isinstance(value, dict):
                     __dict__[key] = Info(value)
@@ -42,6 +42,11 @@ class Info(dict):
                     #     key = re.sub(r'\W', '_', key)
                     __dict__[key] = value
             return __dict__
+
+        temp = list()
+        for obj in cls.mro():
+            temp.extend(dir(obj))
+        cls.__data__ = set(temp)
 
         self = super().__new__(cls)
         if dict_ is not None:
@@ -63,18 +68,19 @@ class Info(dict):
 
     __str__ = __repr__
 
+    def __len__(self):
+        return len(self.__dict__)
+
     def __iter__(self):
         return iter(self.__dict__)
 
-    def __contains__(self, name):
-        if name in dir(dict):
-            return super().__contains__(f'{name}2')
-        return super().__contains__(name)
-
     def __getitem__(self, key):
-        if key in dir(dict):
-            return Info(super().__getitem__(f'{key}2'))
-        return Info(super().__getitem__(key))
+        if key in self.__data__:
+            key = f'{key}2'
+        value = self.__dict__[key]
+        if isinstance(value, (dict, collections.abc.Mapping)):
+            return Info(value)
+        return value
 
     def __setattr__(self, name, value):
         raise UnsupportedCall("can't set attribute")
@@ -87,7 +93,7 @@ class Info(dict):
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
                 dict_[key] = value.infotodict()
-            elif isinstance(value, (tuple, list, set)):
+            elif isinstance(value, (tuple, list, set, frozenset, collections.abc.Sequence)):
                 temp = list()
                 for item in value:
                     if isinstance(item, Info):
