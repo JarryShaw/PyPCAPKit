@@ -7,7 +7,7 @@ Global Header
   |-- thiszone -> 0
   |-- sigfigs -> 0
   |-- snaplen -> 262144
-  |-- network -> <LinkType.ETHERNET: 1>
+  |-- network -> No.1 ETHERNET
 
 Frame 1
   |-- frame_info
@@ -30,7 +30,7 @@ Frame 1
   |-- ethernet
   |     |-- dst -> 40-33-1a-d1-85-1c
   |     |-- src -> a4-5e-60-d9-6b-97
-  |     |-- type -> <EtherType.Internet Protocol version 6 (IPv6): 34525>
+  |     |-- type -> No.34525 Internet Protocol version 6 (IPv6)
   |     |-- packet
   |     |     |-- header -> 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd
   |     |     |-- payload
@@ -44,7 +44,7 @@ Frame 1
   |           |-- tclass -> 96
   |           |-- label -> 0
   |           |-- payload -> 32
-  |           |-- next -> <TransType.IPv6-ICMP: 58>
+  |           |-- next -> No.58 IPv6-ICMP
   |           |-- limit -> 255
   |           |-- src -> fe80::a6:87f9:2793:16ee
   |           |-- dst -> fe80::1ccd:7c77:bac7:46b7
@@ -58,7 +58,7 @@ Frame 1
   |           |                1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
   |           |-- hdr_len -> 40
   |           |-- raw_len -> 32
-  |           |-- protocol -> <TransType.IPv6-ICMP: 58>
+  |           |-- protocol -> No.58 IPv6-ICMP
   |           |-- raw
   |                 |-- packet
   |                 |     |--> 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
@@ -86,7 +86,7 @@ Frame 2
   |-- ethernet
   |     |-- dst -> a4-5e-60-d9-6b-97
   |     |-- src -> 40-33-1a-d1-85-1c
-  |     |-- type -> <EtherType.Internet Protocol version 6 (IPv6): 34525>
+  |     |-- type -> No.34525 Internet Protocol version 6 (IPv6)
   |     |-- packet
   |     |     |-- header -> a4 5e 60 d9 6b 97 40 33 1a d1 85 1c 86 dd
   |     |     |-- payload
@@ -99,7 +99,7 @@ Frame 2
   |           |-- tclass -> 96
   |           |-- label -> 0
   |           |-- payload -> 24
-  |           |-- next -> <TransType.IPv6-ICMP: 58>
+  |           |-- next -> No.58 IPv6-ICMP
   |           |-- limit -> 255
   |           |-- src -> fe80::1ccd:7c77:bac7:46b7
   |           |-- dst -> fe80::a6:87f9:2793:16ee
@@ -113,7 +113,7 @@ Frame 2
   |           |                1c cd 7c 77 ba c7 46 b7
   |           |-- hdr_len -> 40
   |           |-- raw_len -> 24
-  |           |-- protocol -> <TransType.IPv6-ICMP: 58>
+  |           |-- protocol -> No.58 IPv6-ICMP
   |           |-- raw
   |                 |-- packet
   |                 |     |--> 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
@@ -140,7 +140,7 @@ Frame 3
   |-- ethernet
   |     |-- dst -> a4-5e-60-d9-6b-97
   |     |-- src -> b8-f8-83-a5-f9-47
-  |     |-- type -> <EtherType.Internet Protocol version 4 (IPv4): 2048>
+  |     |-- type -> No.2048 Internet Protocol version 4 (IPv4)
   |     |-- packet
   |     |     |-- header -> a4 5e 60 d9 6b 97 b8 f8 83 a5 f9 47 08 00
   |     |     |-- payload
@@ -152,11 +152,11 @@ Frame 3
   |           |-- hdr_len -> 20
   |           |-- dsfield
   |           |     |-- dscp
-  |           |     |     |--> <Precedence.Routine: 0>
-  |           |     |     |--> <Delay.NORMAL: 0>
-  |           |     |     |--> <Throughput.NORMAL: 0>
-  |           |     |     |--> <Relibility.NORMAL: 0>
-  |           |     |-- ecn -> <ECN.Not-ECT: 0>
+  |           |     |     |--> No.0 Routine
+  |           |     |     |--> No.0 NORMAL
+  |           |     |     |--> No.0 NORMAL
+  |           |     |     |--> No.0 NORMAL
+  |           |     |-- ecn -> No.0 Not-ECT
   |           |-- len -> 40
   |           |-- id -> 50484
   |           |-- flags
@@ -164,7 +164,7 @@ Frame 3
   |           |     |-- mf -> False
   |           |-- frag_offset -> 0
   |           |-- ttl -> 43
-  |           |-- proto -> <TransType.TCP: 6>
+  |           |-- proto -> No.6 TCP
   |           |-- checksum -> 7a 86
   |           |-- src -> 123.129.210.135
   |           |-- dst -> 192.168.1.100
@@ -223,7 +223,7 @@ Frame 4
   |-- ethernet
   |     |-- dst -> b8-f8-83-a5-f9-47
   |     |-- src -> a4-5e-60-d9-6b-97
-  |     |-- type -> <EtherType.Internet Protocol version 4 (IPv4): 2048>
+  |     |-- type -> No.2048 Internet Protocol version 4 (IPv4)
   |     |-- packet
   |     |     |-- header -> b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00
   |     |     |-- payload
@@ -235,11 +235,11 @@ Frame 4
   |           |-- hdr_len -> 20
   |           |-- dsfield
   |           |     |-- dscp
-  |           |     |     |--> <Precedence.Routine: 0>
-  |           |     |     |--> <Delay.NORMAL: 0>
-  |           |     |     |--> <Throughput.NORMAL: 0>
-  |           |     |     |--> <Relibility.NORMAL: 0>
-  |           |     |-- ecn -> <ECN.Not-ECT: 0>
+  |           |     |     |--> No.0 Routine
+  |           |     |     |--> No.0 NORMAL
+  |           |     |     |--> No.0 NORMAL
+  |           |     |     |--> No.0 NORMAL
+  |           |     |-- ecn -> No.0 Not-ECT
   |           |-- len -> 40
   |           |-- id -> 0
   |           |-- flags
@@ -247,7 +247,7 @@ Frame 4
   |           |     |-- mf -> False
   |           |-- frag_offset -> 0
   |           |-- ttl -> 64
-  |           |-- proto -> <TransType.TCP: 6>
+  |           |-- proto -> No.6 TCP
   |           |-- checksum -> 2a bb
   |           |-- src -> 192.168.1.100
   |           |-- dst -> 123.129.210.135
@@ -306,7 +306,7 @@ Frame 5
   |-- ethernet
   |     |-- dst -> b8-f8-83-a5-f9-47
   |     |-- src -> a4-5e-60-d9-6b-97
-  |     |-- type -> <EtherType.Internet Protocol version 4 (IPv4): 2048>
+  |     |-- type -> No.2048 Internet Protocol version 4 (IPv4)
   |     |-- packet
   |     |     |-- header -> b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00
   |     |     |-- payload
@@ -318,11 +318,11 @@ Frame 5
   |           |-- hdr_len -> 20
   |           |-- dsfield
   |           |     |-- dscp
-  |           |     |     |--> <Precedence.Routine: 0>
-  |           |     |     |--> <Delay.NORMAL: 0>
-  |           |     |     |--> <Throughput.NORMAL: 0>
-  |           |     |     |--> <Relibility.NORMAL: 0>
-  |           |     |-- ecn -> <ECN.Not-ECT: 0>
+  |           |     |     |--> No.0 Routine
+  |           |     |     |--> No.0 NORMAL
+  |           |     |     |--> No.0 NORMAL
+  |           |     |     |--> No.0 NORMAL
+  |           |     |-- ecn -> No.0 Not-ECT
   |           |-- len -> 40
   |           |-- id -> 0
   |           |-- flags
@@ -330,7 +330,7 @@ Frame 5
   |           |     |-- mf -> False
   |           |-- frag_offset -> 0
   |           |-- ttl -> 64
-  |           |-- proto -> <TransType.TCP: 6>
+  |           |-- proto -> No.6 TCP
   |           |-- checksum -> 2a bb
   |           |-- src -> 192.168.1.100
   |           |-- dst -> 123.129.210.135
@@ -395,7 +395,7 @@ Frame 6
   |-- ethernet
   |     |-- dst -> ff-ff-ff-ff-ff-ff
   |     |-- src -> b8-f8-83-a5-f9-47
-  |     |-- type -> <EtherType.Internet Protocol version 4 (IPv4): 2048>
+  |     |-- type -> No.2048 Internet Protocol version 4 (IPv4)
   |     |-- packet
   |     |     |-- header -> ff ff ff ff ff ff b8 f8 83 a5 f9 47 08 00
   |     |     |-- payload
@@ -414,11 +414,11 @@ Frame 6
   |           |-- hdr_len -> 20
   |           |-- dsfield
   |           |     |-- dscp
-  |           |     |     |--> <Precedence.Routine: 0>
-  |           |     |     |--> <Delay.NORMAL: 0>
-  |           |     |     |--> <Throughput.NORMAL: 0>
-  |           |     |     |--> <Relibility.NORMAL: 0>
-  |           |     |-- ecn -> <ECN.Not-ECT: 0>
+  |           |     |     |--> No.0 Routine
+  |           |     |     |--> No.0 NORMAL
+  |           |     |     |--> No.0 NORMAL
+  |           |     |     |--> No.0 NORMAL
+  |           |     |-- ecn -> No.0 Not-ECT
   |           |-- len -> 145
   |           |-- id -> 0
   |           |-- flags
@@ -426,7 +426,7 @@ Frame 6
   |           |     |-- mf -> False
   |           |-- frag_offset -> 0
   |           |-- ttl -> 64
-  |           |-- proto -> <TransType.UDP: 17>
+  |           |-- proto -> No.17 UDP
   |           |-- checksum -> 78 b3
   |           |-- src -> 192.168.1.1
   |           |-- dst -> 255.255.255.255

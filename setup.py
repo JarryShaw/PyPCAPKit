@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.10.1'
+__version__ = '0.10.1.post1'
 
 
 # set-up script for pip distribution
@@ -41,7 +41,7 @@ setuptools.setup(
     },
     packages = [
         'pcapkit',
-        # 'pcapkit._common',
+        'pcapkit._common',
         'pcapkit.corekit',
         'pcapkit.dumpkit',
         'pcapkit.foundation',

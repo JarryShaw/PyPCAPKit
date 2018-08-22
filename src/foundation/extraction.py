@@ -498,7 +498,7 @@ class Extractor:
                 def object_hook(cls, obj):
                     import enum, aenum
                     if isinstance(obj, (enum.IntEnum, aenum.IntEnum)):
-                        return repr(obj)
+                        return f'No.{obj.value} {obj.name}'
                     if isinstance(obj, ipaddress._BaseAddress):
                         return str(obj)
                     if isinstance(obj, Info):
