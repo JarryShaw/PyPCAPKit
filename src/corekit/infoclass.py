@@ -6,6 +6,7 @@
 `dataclasses.dataclass` in Python 3.7 and later versions.
 
 """
+import collections
 import copy
 
 from pcapkit.utilities.exceptions import UnsupportedCall
