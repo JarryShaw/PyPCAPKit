@@ -40,6 +40,12 @@
 
 ## Reconstructioin Test Bench
 
-### [FileIO]
+### [FileIO](https://github.com/JarryShaw/pypcapkit/tree/test/rc/fileio#pypcapkit)
+
+ > [__MERGED__]
 
 &emsp; Under development of the reconstruction for replacing `BytesIO`s with the original `TextIOWrapper` *file-like* object during extraction.
+
+### [ABC](https://github.com/JarryShaw/pypcapkit/tree/test/rc/abc#pypcapkit)
+
+&emsp; Considering replacing `Info` and `ProtoChain` with `collections.abc`. Plus, reconstruct `ProtoChain` algorithm.
