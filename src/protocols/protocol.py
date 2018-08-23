@@ -175,7 +175,7 @@ class Protocol:
         return self
 
     def __repr__(self):
-        repr_ = f"<{self.alias} {self._info}>"
+        repr_ = f"<{self.alias} {self._info!r}>"
         return repr_
 
     @seekset
