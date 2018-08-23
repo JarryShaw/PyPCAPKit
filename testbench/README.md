@@ -48,4 +48,8 @@
 
 ### [ABC](https://github.com/JarryShaw/pypcapkit/tree/test/rc/abc#pypcapkit)
 
-&emsp; Considering replacing `Info` and `ProtoChain` with `collections.abc`. Plus, reconstruct `ProtoChain` algorithm.
+&emsp; Considering replacing `Info` and `ProtoChain` with `collections.abc`.
+
+### [ProtoChain](https://github.com/JarryShaw/pypcapkit/tree/test/rc/protochain#pypcapkit)
+
+&emsp; Considering changing `ProtoChain` algorithm.
