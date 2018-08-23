@@ -1,5 +1,6 @@
 
 *.icloud
+sample/
 testbench/
 
 out
