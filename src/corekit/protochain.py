@@ -7,9 +7,11 @@ collection class `ProtoChain`.
 """
 import collections.abc
 import numbers
+import re
 
-from pcapkit.utilities.exceptions import IndexNotFound
-from pcapkit.utilities.validations import int_check
+from pcapkit.utilities.exceptions import IndexNotFound, ProtocolUnbound
+from pcapkit.utilities.validations import int_check, str_check
+
 
 ###############################################################################
 # from pcapkit.protocols.protocol import Protocol
@@ -64,20 +66,34 @@ class ProtoChain(collections.abc.Collection):
     ##########################################################################
 
     def index(self, name, start=None, stop=None):
-        try:
-            start = start or 0
-            stop = stop or len(self.tuple)
+        start = start or 0
+        stop = stop or len(self.__data__)
 
-            if isinstance(name, str):
-                name = name.lower()
-            if isinstance(start, str):
-                start = self.index(start)
-            if isinstance(stop, str):
-                stop = self.index(stop)
-            int_check(start, stop)
-            return self.proto.index(name, start, stop)
-        except ValueError:
-            raise IndexNotFound(f"'{name}' not in ProtoChain")
+        from pcapkit.protocols.protocol import Protocol
+        if isinstance(name, type) and issubclass(name, Protocol):
+            temp = name.__index__()
+            name = r'|'.join(temp) if isinstance(temp, tuple) else temp
+
+        if isinstance(start, str):
+            start = self.index(start)
+        if isinstance(stop, str):
+            stop = self.index(stop)
+
+        str_check(name)
+        int_check(start, stop)
+
+        data = self.__data__[start:stop]
+        damn = self.__damn__[start:stop]
+
+        for index, zipped in enumerate(zip(data, damn)):
+            if any(map(lambda x: re.fullmatch(name, x, re.IGNORECASE), zipped)):
+                return index
+        raise IndexNotFound(f"'{name}' not in ProtoChain")
+
+        # try:
+        #     return self.proto.index(name, start, stop)
+        # except ValueError:
+        #     raise IndexNotFound(f"'{name}' not in ProtoChain")
 
     ##########################################################################
     # Data modules.
@@ -109,20 +125,23 @@ class ProtoChain(collections.abc.Collection):
             stop = key.stop
             step = key.step
 
-            if not isinstance(start, numbers.Number):
+            if step is not None:
+                raise ProtocolUnbound('protocol slice unbound')
+            if not isinstance(start, numbers.Integral):
                 start = self.index(start)
-            if not isinstance(stop, numbers.Number):
+            if not isinstance(stop, numbers.Integral):
                 stop = self.index(stop)
+
             int_check(start, stop, step)
             key = slice(start, stop, step)
-        elif isinstance(key, numbers.Number):
+        elif isinstance(key, numbers.Integral):
             key = key
         else:
             key = self.index(key)
-        return self.__data__[key]
+        return (self.__data__[key], self.__damn__[key])
 
     def __iter__(self):
-        return iter(self.__damn__)
+        return iter(zip(self.__data__, self.__damn__))
 
     def __len__(self):
         return len(self.__data__)
@@ -130,15 +149,22 @@ class ProtoChain(collections.abc.Collection):
     def __contains__(self, name):
         from pcapkit.protocols.protocol import Protocol
         if isinstance(name, type) and issubclass(name, Protocol):
-            name = name.__index__()
-        if isinstance(name, tuple):
-            for item in name:
-                flag = (item.lower() in self.proto)
-                if flag:    break
-            return flag
-        if isinstance(name, str):
-            name = name.lower()
-        return (name in self.proto)
+            temp = name.__index__()
+            name = r'|'.join(temp) if isinstance(temp, tuple) else temp
+
+        for zipped in zip(self.__data__, self.__damn__):
+            if any(map(lambda x: re.fullmatch(name, x, re.IGNORECASE), zipped)):
+                return True
+        return False
+
+        # if isinstance(name, tuple):
+        #     for item in name:
+        #         flag = (item.lower() in self.proto)
+        #         if flag:    break
+        #     return flag
+        # if isinstance(name, str):
+        #     name = name.lower()
+        # return (name in self.proto)
 
     ##########################################################################
     # Utilities.

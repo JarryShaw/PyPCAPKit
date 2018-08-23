@@ -165,9 +165,10 @@ class Frame(Protocol):
     def __getitem__(self, key):
         # if requests attributes in info dict,
         # else call the original function
-        if key in self._info:
+        try:
             return self._info[key]
-        return super().__getitem__(key)
+        except KeyError:
+            return super().__getitem__(key)
 
         # def _getitem_from_ProtoChain(key):
         #     proto = self._protos[key]

@@ -232,7 +232,7 @@ class Protocol:
 
         # make regex for tuple indexes
         if isinstance(key, tuple):
-            key = '|'.join(map(re.escape, key))
+            key = r'|'.join(map(re.escape, key))
 
         # if it's itself
         if re.fullmatch(key, self.__class__.__name__, re.IGNORECASE):
