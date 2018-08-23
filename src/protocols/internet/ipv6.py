@@ -290,6 +290,7 @@ class IPv6(IP):
         ipv6 = super()._decode_next_layer(ipv6, proto, raw_len)
 
         # make ProtoChain
-        for proto, alias in reversed(_protos):
-            self._protos = ProtoChain(proto, self._protos, alias)
+        self._protos.__extend__(_protos)
+        # for proto, alias in reversed(_protos):
+        #     self._protos = ProtoChain(proto, self._protos, alias)
         return ipv6

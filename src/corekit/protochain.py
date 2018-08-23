@@ -5,6 +5,7 @@
 collection class `ProtoChain`.
 
 """
+import collections.abc
 import numbers
 
 from pcapkit.utilities.exceptions import IndexNotFound
@@ -18,7 +19,7 @@ from pcapkit.utilities.validations import int_check
 __all__ = ['ProtoChain']
 
 
-class ProtoChain:
+class ProtoChain(collections.abc.Collection):
     """Protocols chain.
 
     Properties:
@@ -31,8 +32,8 @@ class ProtoChain:
         * index -- same as `index` function of `tuple` type
 
     Attributes:
-        * __damn__ -- tuple, aliase of protocols in chain
-        * __data__ -- tuple, name of protocols in chain
+        * __damn__ -- list, aliase of protocols in chain
+        * __data__ -- list, name of protocols in chain
 
     """
     ##########################################################################
@@ -41,18 +42,18 @@ class ProtoChain:
 
     @property
     def alias(self):
-        return self.__damn__
+        return tuple(self.__damn__)
 
     @property
     def tuple(self):
-        return self.__data__
+        return tuple(self.__data__)
 
     @property
     def proto(self):
-        proto = list()
-        for name in self.__data__:
-            proto.append(str(name).lower().replace('none', 'raw'))
-        return tuple(proto)
+        # proto = list()
+        # for name in self.__data__:
+        #     proto.append(str(name).lower().replace('none', 'raw'))
+        return tuple(map(lambda name: name.lower(), self.__data__))
 
     @property
     def chain(self):
@@ -84,12 +85,13 @@ class ProtoChain:
 
     def __init__(self, proto, other=None, alias=None):
         alias = alias or proto
-        if other is None:
-            self.__data__ = (proto,)
-            self.__damn__ = (alias,)
-        else:
-            self.__data__ = (proto,) + other.tuple
-            self.__damn__ = (alias,) + other.alias
+
+        self.__data__ = [proto]
+        self.__damn__ = [alias]
+
+        if other is not None:
+            self.__data__.extend(other.tuple)
+            self.__damn__.extend(other.alias)
 
     def __repr__(self):
         repr_ = ', '.join(self.proto)
@@ -122,6 +124,9 @@ class ProtoChain:
     def __iter__(self):
         return iter(self.__damn__)
 
+    def __len__(self):
+        return len(self.__data__)
+
     def __contains__(self, name):
         from pcapkit.protocols.protocol import Protocol
         if isinstance(name, type) and issubclass(name, Protocol):
@@ -134,3 +139,16 @@ class ProtoChain:
         if isinstance(name, str):
             name = name.lower()
         return (name in self.proto)
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def __extend__(self, *args):
+        def __update__(list_, map_):
+            list_.reverse()
+            list_.extend(map_)
+            list_.reverse()
+        filtered = filter(None, reversed(args))
+        __update__(self.__data__, map(lambda x: x[0], filtered))
+        __update__(self.__damn__, map(lambda x: x[1], filtered))

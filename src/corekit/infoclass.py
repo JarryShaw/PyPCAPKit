@@ -59,14 +59,22 @@ class Info(collections.abc.Mapping):
         self.__dict__.update(__read__(kwargs))
         return self
 
-    def __repr__(self):
+    def __str__(self):
         temp = list()
         for (key, value) in self.__dict__.items():
             temp.append(f'{key}={value}')
         args = ', '.join(temp)
         return f'Info({args})'
 
-    __str__ = __repr__
+    def __repr__(self):
+        temp = list()
+        flag = False
+        for (key, value) in self.__dict__.items():
+            if isinstance(value, Info):
+                flag = True;    continue
+            temp.append(f'{key}={value!r}')
+        args = ', '.join(temp)
+        return f"Info({args}{', Info=(...)' if flag else ''})"
 
     def __len__(self):
         return len(self.__dict__)
