@@ -18,7 +18,7 @@ __all__ = [
     'BoolError', 'BytesError', 'StringError', 'BytearrayError', # TypeError
     'DictError', 'ListError', 'TupleError', 'IterableError',    # TypeError
     'IOObjError', 'ProtocolUnbound', 'CallableError',           # TypeError
-    'InfoError', 'IPError', 'EnumError',                        # TypeError
+    'InfoError', 'IPError', 'EnumError', 'ComparisonError',     # TypeError
     'FormatError', 'UnsupportedCall',                           # AttributeError
     'FileError',                                                # IOError
     'FileExists',                                               # FileExistsError
@@ -163,6 +163,11 @@ class IPError(BaseError, TypeError):
 
 class EnumError(BaseError, TypeError):
     """The argument(s) must be enumeration protocol type."""
+    pass
+
+
+class ComparisonError(BaseError, TypeError):
+    """Rich comparison not supported between instances."""
     pass
 
 

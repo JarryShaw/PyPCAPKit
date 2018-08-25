@@ -27,8 +27,9 @@ import chardet
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, ProtocolNotFound, ProtocolUnbound
-from pcapkit.utilities.validations import bool_check, int_check
+from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, \
+    ProtocolNotFound, ProtocolUnbound
+from pcapkit.utilities.validations import bool_check, int_check, str_check
 
 ###############################################################################
 # from pcapkit.protocols.raw import Raw
@@ -48,6 +49,7 @@ abstractmethod = abc.abstractmethod
 abstractproperty = abc.abstractproperty
 
 
+@functools.total_ordering
 class Protocol:
     """Abstract base class for all protocol family.
 
@@ -227,7 +229,11 @@ class Protocol:
             raise ProtocolUnbound('protocol slice unbound')
 
         # if key is a protocol, then fetch protocol indexes
-        if isinstance(key, type) and issubclass(key, Protocol):
+        try:
+            flag = issubclass(value, Protocol)
+        except TypeError:
+            flag = issubclass(type(value), Protocol)
+        if flag or isinstance(value, Protocol):
             key = key.__index__()
 
         # make regex for tuple indexes
@@ -253,6 +259,27 @@ class Protocol:
     @classmethod
     def __index__(cls):
         return cls.__name__
+
+    @classmethod
+    def __eq__(cls, other):
+        try:
+            flag = issubclass(other, Protocol)
+        except TypeError:
+            flag = issubclass(type(other), Protocol)
+
+        if isinstance(other, Protocol) or flag:
+            return (other.__index__ == cls.__index__)
+
+        str_check(other)
+        index = cls.__index__()
+        if isinstance(index, tuple):
+            return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
+        return bool(re.fullmatch(other, index, re.IGNORECASE))
+
+    @classmethod
+    def __lt__(cls, other):
+        return NotImplemented
+        # raise ComparisonError(f"Rich comparison not supported between instances of 'Protocol' and {type(other).__name__!r}")
 
     ##########################################################################
     # Utilities.
@@ -410,7 +437,7 @@ class Protocol:
         index = self.__index__()
         layer = self.__layer__ or ''
 
-        pattern = '|'.join(index) if isinstance(index, tuple) else index
+        pattern = r'|'.join(index) if isinstance(index, tuple) else index
         iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)
 
         layer_match = re.fullmatch(layer, self._exlayer, re.IGNORECASE)

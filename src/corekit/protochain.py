@@ -21,7 +21,7 @@ from pcapkit.utilities.validations import int_check, str_check
 __all__ = ['ProtoChain']
 
 
-class ProtoChain(collections.abc.Collection):
+class ProtoChain(collections.abc.Sequence):
     """Protocols chain.
 
     Properties:
@@ -65,35 +65,65 @@ class ProtoChain(collections.abc.Collection):
     # Methods.
     ##########################################################################
 
-    def index(self, name, start=None, stop=None):
+    def index(self, value, start=None, stop=None):
+        """S.index(value, [start, [stop]]) -> integer -- return first index of value.
+           Raises ValueError if the value is not present.
+           
+           Supporting start and stop arguments is optional, but
+           recommended.
+
+        """
         start = start or 0
         stop = stop or len(self.__data__)
 
         from pcapkit.protocols.protocol import Protocol
-        if isinstance(name, type) and issubclass(name, Protocol):
-            temp = name.__index__()
-            name = r'|'.join(temp) if isinstance(temp, tuple) else temp
+        try:
+            flag = issubclass(value, Protocol)
+        except TypeError:
+            flag = issubclass(type(value), Protocol)
+        if flag or isinstance(value, Protocol):
+            value = value.__index__()
+            if isinstance(value, tuple):
+                value = r'|'.join(map(re.escape, value))
 
         if isinstance(start, str):
             start = self.index(start)
         if isinstance(stop, str):
             stop = self.index(stop)
 
-        str_check(name)
+        str_check(value)
         int_check(start, stop)
 
         data = self.__data__[start:stop]
         damn = self.__damn__[start:stop]
 
         for index, zipped in enumerate(zip(data, damn)):
-            if any(map(lambda x: re.fullmatch(name, x, re.IGNORECASE), zipped)):
+            if any(map(lambda x: re.fullmatch(value, x, re.IGNORECASE), zipped)):
                 return index
-        raise IndexNotFound(f"'{name}' not in ProtoChain")
+        raise IndexNotFound(f"'{value}' not in ProtoChain")
 
         # try:
         #     return self.proto.index(name, start, stop)
         # except ValueError:
         #     raise IndexNotFound(f"'{name}' not in ProtoChain")
+
+    def count(self, value):
+        """S.count(value) -> integer -- return number of occurrences of value"""
+        from pcapkit.protocols.protocol import Protocol
+        try:
+            flag = issubclass(value, Protocol)
+        except TypeError:
+            flag = issubclass(type(value), Protocol)
+        if flag or isinstance(value, Protocol):
+            value = value.__index__()
+            if isinstance(value, tuple):
+                value = r'|'.join(map(re.escape, value))
+
+        count = 0
+        for zipped in zip(self.__data__, self.__damn__):
+            if any(map(lambda x: re.fullmatch(value, x, re.IGNORECASE), zipped)):
+                count += 1
+        return count
 
     ##########################################################################
     # Data modules.
@@ -148,9 +178,14 @@ class ProtoChain(collections.abc.Collection):
 
     def __contains__(self, name):
         from pcapkit.protocols.protocol import Protocol
-        if isinstance(name, type) and issubclass(name, Protocol):
-            temp = name.__index__()
-            name = r'|'.join(temp) if isinstance(temp, tuple) else temp
+        try:
+            flag = issubclass(value, Protocol)
+        except TypeError:
+            flag = issubclass(type(value), Protocol)
+        if flag or isinstance(value, Protocol):
+            name = name.__index__()
+            if isinstance(name, tuple):
+                name = r'|'.join(map(re.escape, temp))
 
         for zipped in zip(self.__data__, self.__damn__):
             if any(map(lambda x: re.fullmatch(name, x, re.IGNORECASE), zipped)):
@@ -165,6 +200,9 @@ class ProtoChain(collections.abc.Collection):
         # if isinstance(name, str):
         #     name = name.lower()
         # return (name in self.proto)
+
+    def __reversed__(self):
+        return reversed(zip(self.__data__, self.__damn__))
 
     ##########################################################################
     # Utilities.
