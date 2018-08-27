@@ -24,7 +24,6 @@ __all__ = ['Protocol']
 # abstract base class utilities
 ABCMeta = abc.ABCMeta
 abstractmethod = abc.abstractmethod
-abstractproperty = abc.abstractproperty
 
 
 class Protocol:
@@ -49,7 +48,8 @@ class Protocol:
     ##########################################################################
 
     # name of current protocol
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self):
         """Name of current protocol."""
         pass

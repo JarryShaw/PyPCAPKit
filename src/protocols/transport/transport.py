@@ -9,6 +9,7 @@ protocols, eg. TCP and UDP.
 
 """
 from pcapkit._common.tp_proto import TransType as TP_PROTO
+from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder_ng
 
@@ -77,7 +78,9 @@ class Transport(Protocol):
 
         """
         from pcapkit.foundation.analysis import analyse
-        if self._onerror:
+        if length == 0:
+            next_ = NoPayload()
+        elif self._onerror:
             next_ = beholder_ng(analyse)(self._file, length, _termination=self._sigterm)
         else:
             next_ = analyse(self._file, length, _termination=self._sigterm)

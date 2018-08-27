@@ -51,7 +51,7 @@
 				}
 			}
 		},
-		"protocols" : "Ethernet:IPv6"
+		"protocols" : "Ethernet:IPv6:Raw"
 	},
 	"Frame 2" : {
 		"frame_info" : {
@@ -96,7 +96,7 @@
 				}
 			}
 		},
-		"protocols" : "Ethernet:IPv6"
+		"protocols" : "Ethernet:IPv6:Raw"
 	},
 	"Frame 3" : {
 		"frame_info" : {
@@ -166,9 +166,7 @@
 						"header" : "00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0 7c 8e 00 00",
 						"payload" : ""
 					},
-					"raw" : {
-						"packet" : "",
-						"error" : null
+					"nopayload" : {
 					}
 				}
 			}
@@ -243,9 +241,7 @@
 						"header" : "d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff f9 3e 00 00",
 						"payload" : ""
 					},
-					"raw" : {
-						"packet" : "",
-						"error" : null
+					"nopayload" : {
 					}
 				}
 			}
@@ -320,9 +316,7 @@
 						"header" : "d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff 2a f4 00 00",
 						"payload" : ""
 					},
-					"raw" : {
-						"packet" : "",
-						"error" : null
+					"nopayload" : {
 					}
 				}
 			}
@@ -389,6 +383,6 @@
 				}
 			}
 		},
-		"protocols" : "Ethernet:IPv4:UDP"
+		"protocols" : "Ethernet:IPv4:UDP:Raw"
 	}
 }

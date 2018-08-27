@@ -98,7 +98,7 @@
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv6</string>
+		<string>Ethernet:IPv6:Raw</string>
 	</dict>
 	<key>Frame 2</key>
 	<dict>
@@ -179,7 +179,7 @@
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv6</string>
+		<string>Ethernet:IPv6:Raw</string>
 	</dict>
 	<key>Frame 3</key>
 	<dict>
@@ -315,10 +315,8 @@
 						<key>payload</key>
 						<data></data>
 					</dict>
-					<key>raw</key>
+					<key>nopayload</key>
 					<dict>
-						<key>packet</key>
-						<data></data>
 					</dict>
 				</dict>
 			</dict>
@@ -460,10 +458,8 @@
 						<key>payload</key>
 						<data></data>
 					</dict>
-					<key>raw</key>
+					<key>nopayload</key>
 					<dict>
-						<key>packet</key>
-						<data></data>
 					</dict>
 				</dict>
 			</dict>
@@ -605,10 +601,8 @@
 						<key>payload</key>
 						<data></data>
 					</dict>
-					<key>raw</key>
+					<key>nopayload</key>
 					<dict>
-						<key>packet</key>
-						<data></data>
 					</dict>
 				</dict>
 			</dict>
@@ -730,7 +724,7 @@
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:UDP</string>
+		<string>Ethernet:IPv4:UDP:Raw</string>
 	</dict>
 </dict>
 </plist>

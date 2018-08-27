@@ -43,7 +43,6 @@ class Raw(Protocol):
         * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
-        * _make_protochain -- make ProtoChain instance for corresponding protocol
 
     """
     ##########################################################################
@@ -93,15 +92,7 @@ class Raw(Protocol):
         self._info = Info(self.read_raw(length, error=error))
 
         self._next = NoPayload()
-        self._make_protochain()
+        self._protos = ProtoChain(self.__class__, self.alias)
 
     def __length_hint__(self):
         pass
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    def _make_protochain(self):
-        """Make ProtoChain instance for corresponding protocol."""
-        self._protos = ProtoChain(self.__class__.__name__, None, self.alias)

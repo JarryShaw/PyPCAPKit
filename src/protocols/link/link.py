@@ -99,7 +99,9 @@ class Link(Protocol):
             * IPX -- internet layer
 
         """
-        if self._sigterm:
+        if length == 0:
+            from pcapkit.protocols.null import NoPayload as Protocol
+        elif self._sigterm:
             from pcapkit.protocols.raw import Raw as Protocol
         elif proto == 0x0806:
             from pcapkit.protocols.link.arp import ARP as Protocol

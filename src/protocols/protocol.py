@@ -27,7 +27,8 @@ import chardet
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, ProtocolNotFound, ProtocolUnbound
+from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, \
+    ProtocolNotFound, ProtocolUnbound
 from pcapkit.utilities.validations import bool_check, int_check
 
 ###############################################################################
@@ -45,9 +46,9 @@ readable = [ ord(char) for char in filter(lambda char: not char.isspace(), strin
 # abstract base class utilities
 ABCMeta = abc.ABCMeta
 abstractmethod = abc.abstractmethod
-abstractproperty = abc.abstractproperty
 
 
+@functools.total_ordering
 class Protocol:
     """Abstract base class for all protocol family.
 
@@ -89,7 +90,8 @@ class Protocol:
     ##########################################################################
 
     # name of current protocol
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self):
         """Name of current protocol."""
         pass
@@ -107,7 +109,8 @@ class Protocol:
         return self._info
 
     # header length of current protocol
-    @abstractproperty
+    @property
+    @abstractmethod
     def length(self):
         """Header length of current protocol."""
         pass
@@ -227,7 +230,11 @@ class Protocol:
             raise ProtocolUnbound('protocol slice unbound')
 
         # if key is a protocol, then fetch protocol indexes
-        if isinstance(key, type) and issubclass(key, Protocol):
+        try:
+            flag = issubclass(key, Protocol)
+        except TypeError:
+            flag = issubclass(type(key), Protocol)
+        if flag or isinstance(key, Protocol):
             key = key.__index__()
 
         # make regex for tuple indexes
@@ -253,6 +260,29 @@ class Protocol:
     @classmethod
     def __index__(cls):
         return cls.__name__
+
+    @classmethod
+    def __eq__(cls, other):
+        try:
+            flag = issubclass(other, Protocol)
+        except TypeError:
+            flag = issubclass(type(other), Protocol)
+
+        if isinstance(other, Protocol) or flag:
+            return (other.__index__ == cls.__index__)
+
+        try:
+            index = cls.__index__()
+            if isinstance(index, tuple):
+                return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
+            return bool(re.fullmatch(other, index, re.IGNORECASE))
+        finally:
+            return False
+
+    @classmethod
+    def __lt__(cls, other):
+        return NotImplemented
+        # raise ComparisonError(f"Rich comparison not supported between instances of 'Protocol' and {type(other).__name__!r}")
 
     ##########################################################################
     # Utilities.
@@ -380,12 +410,12 @@ class Protocol:
 
         # make next layer protocol name
         layer = next_.alias.lower()
-        proto = next_.__class__.__name__
+        # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
         dict_[layer] = info
         self._next = next_
-        self._protos = ProtoChain(proto, chain, alias)
+        self._protos = ProtoChain(self.__class__, self.alias, basis=chain)
         return dict_
 
     def _import_next_layer(self, proto, length=None):
@@ -410,7 +440,7 @@ class Protocol:
         index = self.__index__()
         layer = self.__layer__ or ''
 
-        pattern = '|'.join(index) if isinstance(index, tuple) else index
+        pattern = r'|'.join(index) if isinstance(index, tuple) else index
         iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)
 
         layer_match = re.fullmatch(layer, self._exlayer, re.IGNORECASE)

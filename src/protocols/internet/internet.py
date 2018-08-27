@@ -75,7 +75,7 @@ class Internet(Protocol):
         _prot = TP_PROTO.get(_byte)
         return _prot
 
-    def _decode_next_layer(self, dict_, proto=None, length=None, *, version=4):
+    def _decode_next_layer(self, dict_, proto=None, length=None, *, version=4, ipv6_exthdr=None):
         """Decode next layer extractor.
 
         Positional arguments:
@@ -100,12 +100,15 @@ class Internet(Protocol):
 
         # make next layer protocol name
         layer = next_.alias.lower()
-        proto = next_.__class__.__name__
+        # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
-        self._next = next_
-        self._protos = ProtoChain(proto, chain, alias)
         dict_[layer] = info
+        self._next = next_
+        if ipv6_exthdr is not None:
+            for proto in reversed(ipv6_exthdr):
+                chain = ProtoChain(proto.__class__, proto.alias, basis=chain)
+        self._protos = ProtoChain(self.__class__, self.alias, basis=chain)
         return dict_
 
     def _import_next_layer(self, proto, length=None, *, version=4, extension=False):
@@ -135,7 +138,9 @@ class Internet(Protocol):
             * UDP -- transport layer
 
         """
-        if self._sigterm:
+        if length == 0:
+            from pcapkit.protocols.null import NoPayload as Protocol
+        elif self._sigterm or proto == 59:
             from pcapkit.protocols.raw import Raw as Protocol
         elif proto == 51:
             from pcapkit.protocols.internet.ah import AH as Protocol

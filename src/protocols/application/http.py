@@ -9,6 +9,8 @@ Protocol (HTTP) protocol family, eg. HTTP/1.*, HTTP/2.
 import chardet
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.application.application import Application
 from pcapkit.utilities.exceptions import UnsupportedCall, ProtocolError
 
@@ -67,7 +69,9 @@ class HTTP(Application):
     def __init__(self, _file, length=None, **kwargs):
         self._file = _file
         self._info = Info(self.read_http(length))
-        self._protos = None
+
+        self._next = NoPayload()
+        self._protos = ProtoChain(self.__class__, self.alias)
 
     @classmethod
     def __index__(cls):
