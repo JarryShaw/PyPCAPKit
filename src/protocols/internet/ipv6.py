@@ -36,7 +36,6 @@ import ipaddress
 
 from pcapkit._common.ipv6_ext_hdr import EXT_HDR
 from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.internet.ip import IP
 
 
@@ -264,17 +263,14 @@ class IPv6(IP):
             #     break
 
             # make protocol name
-            flag, next_ = self._import_next_layer(proto, version=6, extension=True)
+            next_ = self._import_next_layer(proto, version=6, extension=True)
             info, chain, alias = next_.info, next_.protochain, next_.alias
             name = proto.name.lstrip('IPv6-').replace('Mobility Header', 'MH').lower() if flag else 'raw'
             ipv6[name] = info
 
             # record protocol name
             # self._protos = ProtoChain(name, chain, alias)
-            _protos.append((name, alias))
-            if not flag:
-                proto = None
-                break
+            _protos.append(next_)
             proto = info.next
 
             # update header & payload length
@@ -287,10 +283,4 @@ class IPv6(IP):
 
         # update next header
         ipv6['protocol'] = proto
-        ipv6 = super()._decode_next_layer(ipv6, proto, raw_len)
-
-        # make ProtoChain
-        self._protos.__extend__(_protos)
-        # for proto, alias in reversed(_protos):
-        #     self._protos = ProtoChain(proto, self._protos, alias)
-        return ipv6
+        return super()._decode_next_layer(ipv6, proto, raw_len, ipv6_exthdr=_protos)

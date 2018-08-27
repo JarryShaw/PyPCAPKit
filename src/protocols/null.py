@@ -9,6 +9,7 @@ recursively `NoPayload` itself.
 import io
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -76,7 +77,7 @@ class NoPayload(Protocol):
         self._next = self
         self._info = Info()
         self._file = io.BytesIO()
-        self._protos = NotImplemented
+        self._protos = ProtoChain()
 
     def __length_hint__(self):
         pass

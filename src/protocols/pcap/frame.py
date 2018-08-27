@@ -19,7 +19,6 @@ import os
 import re
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder
 
@@ -249,11 +248,11 @@ class Frame(Protocol):
 
         # make next layer protocol name
         layer = next_.alias.lower()
-        proto = next_.__class__.__name__
+        # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
         self._next = next_
-        self._protos = ProtoChain(proto, chain, alias)
+        self._protos = chain
         dict_[layer] = info
         dict_['protocols'] = self._protos.chain
         return dict_

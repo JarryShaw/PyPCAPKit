@@ -9,7 +9,8 @@ import collections.abc
 import numbers
 import re
 
-from pcapkit.utilities.exceptions import IndexNotFound, ProtocolUnbound
+from pcapkit.corekit.infoclass import Info
+from pcapkit.utilities.exceptions import IndexNotFound, ProtocolUnbound, IntError
 from pcapkit.utilities.validations import int_check, str_check
 
 
@@ -21,7 +22,156 @@ from pcapkit.utilities.validations import int_check, str_check
 __all__ = ['ProtoChain']
 
 
-class ProtoChain(collections.abc.Sequence):
+class _ProtoList(collections.abc.Collection):
+    """List of protocol classes for ProroChain."""
+    @property
+    def data(self):
+        return self.__data__
+
+    def __init__(self, data=None, *, base=None):
+        self.__data__ = list()
+
+        if data is not None:
+            self.__data__.append(data)
+
+        if base is not None:
+            if isinstance(base, _ProtoList):
+                self.__data__.extend(base.data)
+            else:
+                self.__data__.extend(base)
+
+    def __len__(self):
+        return len(self.__data__)
+
+    def __iter__(self):
+        return iter(self.__data__)
+
+    def __contains__(self, x):
+        from pcapkit.protocols.protocol import Protocol
+        try:
+            flag = issubclass(x, Protocol)
+        except TypeError:
+            flag = issubclass(type(x), Protocol)
+        if flag or isinstance(x, Protocol):
+            return (x in self.__data__)
+
+        try:
+            for data in self.__data__:
+                index = self.__data__.__index__()
+                if isinstance(index, tuple):
+                    index = r'|'.join(index)
+                if re.fullmatch(index, x, re.IGNORECASE):
+                    return True
+        finally:
+            return False
+
+
+class _AliasList(collections.abc.Sequence):
+    """List of protocol aliases for ProtoChain"""
+    @property
+    def data(self):
+        return self.__data__
+
+    def __init__(self, data=None, *, base=None):
+        self.__data__ = list()
+
+        if data is not None:
+            self.__data__.append(data)
+
+        if base is not None:
+            if isinstance(base, _ProtoList):
+                self.__data__.extend(base.data)
+            else:
+                self.__data__.extend(base)
+
+    def __len__(self):
+        return len(self.__data__)
+
+    def __iter__(self):
+        return iter(self.__data__)
+
+    def __getitem__(self, index):
+        return self.__data__[index]
+
+    def __reversed__(self):
+        return reversed(self.__data__)
+
+    def __contains__(self, x):
+        from pcapkit.protocols.protocol import Protocol
+        try:
+            flag = issubclass(x, Protocol)
+        except TypeError:
+            flag = issubclass(type(x), Protocol)
+        if flag or isinstance(x, Protocol):
+            x = x.__index__()
+            if isinstance(x, tuple):
+                x = r'|'.join(x)
+
+        try:
+            for data in self.__data__:
+                if re.fullmatch(x, data, re.IGNORECASE):
+                    return True
+        finally:
+            return False
+
+    def count(self, value):
+        """S.count(value) -> integer -- return number of occurrences of value"""
+        from pcapkit.protocols.protocol import Protocol
+        try:
+            flag = issubclass(value, Protocol)
+        except TypeError:
+            flag = issubclass(type(value), Protocol)
+        if flag or isinstance(value, Protocol):
+            value = value.__index__()
+            if isinstance(value, tuple):
+                value = r'|'.join(value)
+
+        try:
+            return sum(1 for data in self.__data__ if re.fullmatch(value, data, re.IGNORECASE) is not None)
+        finally:
+            return 0
+        # return self.__data__.count(value)
+
+    def index(self, value, start=0, stop=None):
+        """S.index(value, [start, [stop]]) -> integer -- return first index of value.
+           Raises ValueError if the value is not present.
+
+           Supporting start and stop arguments is optional, but
+           recommended.
+        """
+        if start is not None and start < 0:
+            start = max(len(self) + start, 0)
+        if stop is not None and stop < 0:
+            stop += len(self)
+
+        try:
+            if not isinstance(start, numbers.Integral):
+                start = self.index(start)
+            if not isinstance(stop, numbers.Integral):
+                stop = self.index(stop)
+        except IndexNotFound:
+            raise IntError('slice indices must be integers or have an __index__ method') from None
+
+        from pcapkit.protocols.protocol import Protocol
+        try:
+            flag = issubclass(value, Protocol)
+        except TypeError:
+            flag = issubclass(type(value), Protocol)
+        if flag or isinstance(value, Protocol):
+            value = value.__index__()
+            if isinstance(value, tuple):
+                value = r'|'.join(value)
+
+        try:
+            for index, data in enumerate(self.__data__[start:stop]):
+                if re.fullmatch(value, data, re.IGNORECASE):
+                    return index
+        finally:
+            raise IndexNotFound(f'{value!r} is not in {self.__class__.__name__!r}')
+        # return self.__data__.index(value, start, stop)
+
+
+class ProtoChain(collections.abc.Container):
     """Protocols chain.
 
     Properties:
@@ -34,8 +184,8 @@ class ProtoChain(collections.abc.Sequence):
         * index -- same as `index` function of `tuple` type
 
     Attributes:
-        * __damn__ -- list, aliase of protocols in chain
-        * __data__ -- list, name of protocols in chain
+        * __alias__ -- list, aliase of protocols in chain
+        * __proto__ -- list, name of protocols in chain
 
     """
     ##########################################################################
@@ -43,19 +193,16 @@ class ProtoChain(collections.abc.Sequence):
     ##########################################################################
 
     @property
+    def proto(self):
+        return self.__proto__
+
+    @property
     def alias(self):
-        return tuple(self.__damn__)
+        return self.__alias__
 
     @property
     def tuple(self):
-        return tuple(self.__data__)
-
-    @property
-    def proto(self):
-        # proto = list()
-        # for name in self.__data__:
-        #     proto.append(str(name).lower().replace('none', 'raw'))
-        return tuple(map(lambda name: name.lower(), self.__data__))
+        return tuple(proto.__name__ for proto in self.__proto__.data)
 
     @property
     def chain(self):
@@ -66,153 +213,56 @@ class ProtoChain(collections.abc.Sequence):
     ##########################################################################
 
     def index(self, value, start=None, stop=None):
-        """S.index(value, [start, [stop]]) -> integer -- return first index of value.
-           Raises ValueError if the value is not present.
-           
-           Supporting start and stop arguments is optional, but
-           recommended.
-
-        """
-        start = start or 0
-        stop = stop or len(self.__data__)
-
-        from pcapkit.protocols.protocol import Protocol
-        try:
-            flag = issubclass(value, Protocol)
-        except TypeError:
-            flag = issubclass(type(value), Protocol)
-        if flag or isinstance(value, Protocol):
-            value = value.__index__()
-            if isinstance(value, tuple):
-                value = r'|'.join(map(re.escape, value))
-
-        if isinstance(start, str):
-            start = self.index(start)
-        if isinstance(stop, str):
-            stop = self.index(stop)
-
-        str_check(value)
-        int_check(start, stop)
-
-        data = self.__data__[start:stop]
-        damn = self.__damn__[start:stop]
-
-        for index, zipped in enumerate(zip(data, damn)):
-            if any(map(lambda x: re.fullmatch(value, x, re.IGNORECASE), zipped)):
-                return index
-        raise IndexNotFound(f"'{value}' not in ProtoChain")
-
-        # try:
-        #     return self.proto.index(name, start, stop)
-        # except ValueError:
-        #     raise IndexNotFound(f"'{name}' not in ProtoChain")
-
+        """Return first index of value."""
+        return self.__alias__.index(value, start, stop)
+        
     def count(self, value):
-        """S.count(value) -> integer -- return number of occurrences of value"""
-        from pcapkit.protocols.protocol import Protocol
-        try:
-            flag = issubclass(value, Protocol)
-        except TypeError:
-            flag = issubclass(type(value), Protocol)
-        if flag or isinstance(value, Protocol):
-            value = value.__index__()
-            if isinstance(value, tuple):
-                value = r'|'.join(map(re.escape, value))
-
-        count = 0
-        for zipped in zip(self.__data__, self.__damn__):
-            if any(map(lambda x: re.fullmatch(value, x, re.IGNORECASE), zipped)):
-                count += 1
-        return count
+        """Return number of occurrences of value."""
+        return self.__alias__.count(value)
 
     ##########################################################################
     # Data modules.
     ##########################################################################
 
-    def __init__(self, proto, other=None, alias=None):
-        alias = alias or proto
+    def __init__(self, proto=None, alias=None, *, basis=None):
+        if alias is None and proto is not None:
+            alias = getattr(proto, '__name__', type(proto).__name__)
 
-        self.__data__ = [proto]
-        self.__damn__ = [alias]
+        if basis is None:
+            basis = Info(proto=None, alias=None)
 
-        if other is not None:
-            self.__data__.extend(other.tuple)
-            self.__damn__.extend(other.alias)
+        self.__proto__ = _ProtoList(proto, base=basis.proto)
+        self.__alias__ = _AliasList(alias, base=basis.alias)
 
     def __repr__(self):
-        repr_ = ', '.join(self.proto)
-        return f'ProtoChain({repr_})'
+        return f"ProtoChain({', '.join(self.__proto__.data)})"
 
     def __str__(self):
-        for (i, proto) in enumerate(self.__damn__):
-            if proto is None or proto == 'Raw':
-                return ':'.join(self.__damn__[:i])
-        return ':'.join(self.__damn__)
+        # for (i, proto) in enumerate(self.__alias__):
+        #     if proto is None or proto == 'Raw':
+        #         return ':'.join(self.__alias__[:i])
+        return ':'.join(self.__alias__.data)
 
-    def __getitem__(self, key):
-        if isinstance(key, slice):
-            start = key.start
-            stop = key.stop
-            step = key.step
+    # def __getitem__(self, key):
+    #     if isinstance(key, slice):
+    #         start = key.start
+    #         stop = key.stop
+    #         step = key.step
 
-            if step is not None:
-                raise ProtocolUnbound('protocol slice unbound')
-            if not isinstance(start, numbers.Integral):
-                start = self.index(start)
-            if not isinstance(stop, numbers.Integral):
-                stop = self.index(stop)
+    #         if step is not None:
+    #             raise ProtocolUnbound('protocol slice unbound')
+    #         if not isinstance(start, numbers.Integral):
+    #             start = self.index(start)
+    #         if not isinstance(stop, numbers.Integral):
+    #             stop = self.index(stop)
 
-            int_check(start, stop, step)
-            key = slice(start, stop, step)
-        elif isinstance(key, numbers.Integral):
-            key = key
-        else:
-            key = self.index(key)
-        return (self.__data__[key], self.__damn__[key])
-
-    def __iter__(self):
-        return iter(zip(self.__data__, self.__damn__))
-
-    def __len__(self):
-        return len(self.__data__)
+    #         int_check(start, stop, step)
+    #         key = slice(start, stop, step)
+    #     elif isinstance(key, numbers.Integral):
+    #         key = key
+    #     else:
+    #         key = self.index(key)
+    #     return (self.__proto__[key], self.__alias__[key])
 
     def __contains__(self, name):
-        from pcapkit.protocols.protocol import Protocol
-        try:
-            flag = issubclass(value, Protocol)
-        except TypeError:
-            flag = issubclass(type(value), Protocol)
-        if flag or isinstance(value, Protocol):
-            name = name.__index__()
-            if isinstance(name, tuple):
-                name = r'|'.join(map(re.escape, temp))
-
-        for zipped in zip(self.__data__, self.__damn__):
-            if any(map(lambda x: re.fullmatch(name, x, re.IGNORECASE), zipped)):
-                return True
-        return False
-
-        # if isinstance(name, tuple):
-        #     for item in name:
-        #         flag = (item.lower() in self.proto)
-        #         if flag:    break
-        #     return flag
-        # if isinstance(name, str):
-        #     name = name.lower()
-        # return (name in self.proto)
-
-    def __reversed__(self):
-        return reversed(zip(self.__data__, self.__damn__))
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    def __extend__(self, *args):
-        def __update__(list_, map_):
-            list_.reverse()
-            list_.extend(map_)
-            list_.reverse()
-        filtered = filter(None, reversed(args))
-        __update__(self.__data__, map(lambda x: x[0], filtered))
-        __update__(self.__damn__, map(lambda x: x[1], filtered))
+        return ((name in self.__proto__) or (name in self.__alias__))

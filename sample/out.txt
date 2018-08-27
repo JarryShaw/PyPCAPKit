@@ -64,7 +64,7 @@ Frame 1
   |                 |     |--> 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
   |                 |          1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
   |                 |-- error -> NIL
-  |-- protocols -> Ethernet:IPv6
+  |-- protocols -> Ethernet:IPv6:Raw
 
 Frame 2
   |-- frame_info
@@ -119,7 +119,7 @@ Frame 2
   |                 |     |--> 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
   |                 |          1c cd 7c 77 ba c7 46 b7
   |                 |-- error -> NIL
-  |-- protocols -> Ethernet:IPv6
+  |-- protocols -> Ethernet:IPv6:Raw
 
 Frame 3
   |-- frame_info
@@ -199,10 +199,8 @@ Frame 3
   |                 |     |     |--> 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0
   |                 |     |          7c 8e 00 00
   |                 |     |-- payload -> NIL
-  |                 |-- raw
-  |                       |-- packet -> NIL
-  |                       |-- error -> NIL
-  |-- protocols -> Ethernet:IPv4:TCP
+  |                 |-- nopayload
+ NIL  |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 4
   |-- frame_info
@@ -282,10 +280,8 @@ Frame 4
   |                 |     |     |--> d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff
   |                 |     |          f9 3e 00 00
   |                 |     |-- payload -> NIL
-  |                 |-- raw
-  |                       |-- packet -> NIL
-  |                       |-- error -> NIL
-  |-- protocols -> Ethernet:IPv4:TCP
+  |                 |-- nopayload
+ NIL  |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 5
   |-- frame_info
@@ -365,10 +361,8 @@ Frame 5
   |                 |     |     |--> d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff
   |                 |     |          2a f4 00 00
   |                 |     |-- payload -> NIL
-  |                 |-- raw
-  |                       |-- packet -> NIL
-  |                       |-- error -> NIL
-  |-- protocols -> Ethernet:IPv4:TCP
+  |                 |-- nopayload
+ NIL  |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 6
   |-- frame_info
@@ -470,4 +464,4 @@ Frame 6
   |                       |          2d 57 44 52 36 33 30 30 20 36 2e 30 00 0c 00 05
   |                       |          31 2e 37 2e 34
   |                       |-- error -> NIL
-  |-- protocols -> Ethernet:IPv4:UDP
+  |-- protocols -> Ethernet:IPv4:UDP:Raw

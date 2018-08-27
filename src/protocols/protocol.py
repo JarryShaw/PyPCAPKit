@@ -29,7 +29,7 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, \
     ProtocolNotFound, ProtocolUnbound
-from pcapkit.utilities.validations import bool_check, int_check, str_check
+from pcapkit.utilities.validations import bool_check, int_check
 
 ###############################################################################
 # from pcapkit.protocols.raw import Raw
@@ -46,7 +46,6 @@ readable = [ ord(char) for char in filter(lambda char: not char.isspace(), strin
 # abstract base class utilities
 ABCMeta = abc.ABCMeta
 abstractmethod = abc.abstractmethod
-abstractproperty = abc.abstractproperty
 
 
 @functools.total_ordering
@@ -91,7 +90,8 @@ class Protocol:
     ##########################################################################
 
     # name of current protocol
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self):
         """Name of current protocol."""
         pass
@@ -109,7 +109,8 @@ class Protocol:
         return self._info
 
     # header length of current protocol
-    @abstractproperty
+    @property
+    @abstractmethod
     def length(self):
         """Header length of current protocol."""
         pass
@@ -230,10 +231,10 @@ class Protocol:
 
         # if key is a protocol, then fetch protocol indexes
         try:
-            flag = issubclass(value, Protocol)
+            flag = issubclass(key, Protocol)
         except TypeError:
-            flag = issubclass(type(value), Protocol)
-        if flag or isinstance(value, Protocol):
+            flag = issubclass(type(key), Protocol)
+        if flag or isinstance(key, Protocol):
             key = key.__index__()
 
         # make regex for tuple indexes
@@ -270,11 +271,13 @@ class Protocol:
         if isinstance(other, Protocol) or flag:
             return (other.__index__ == cls.__index__)
 
-        str_check(other)
-        index = cls.__index__()
-        if isinstance(index, tuple):
-            return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
-        return bool(re.fullmatch(other, index, re.IGNORECASE))
+        try:
+            index = cls.__index__()
+            if isinstance(index, tuple):
+                return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
+            return bool(re.fullmatch(other, index, re.IGNORECASE))
+        finally:
+            return False
 
     @classmethod
     def __lt__(cls, other):
@@ -407,12 +410,12 @@ class Protocol:
 
         # make next layer protocol name
         layer = next_.alias.lower()
-        proto = next_.__class__.__name__
+        # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
         dict_[layer] = info
         self._next = next_
-        self._protos = ProtoChain(proto, chain, alias)
+        self._protos = ProtoChain(self.__class__, self.alias, basis=chain)
         return dict_
 
     def _import_next_layer(self, proto, length=None):
