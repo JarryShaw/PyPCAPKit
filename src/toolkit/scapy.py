@@ -38,7 +38,7 @@ except ImportError:
 def packet2chain(packet):
     """Fetch Scapy packet protocol chain."""
     if scapy is None:
-        raise ModuleNotFound("No module named 'scapy'")
+        raise ModuleNotFound("No module named 'scapy'", name='scapy')
     chain = [packet.name,]
     payload = packet.payload
     while not isinstance(payload, scapy.all.packet.NoPayload):
@@ -50,7 +50,7 @@ def packet2chain(packet):
 def packet2dict(packet, *, count=NotImplemented):
     """Convert Scapy packet into dict."""
     if scapy is None:
-        raise ModuleNotFound("No module named 'scapy'")
+        raise ModuleNotFound("No module named 'scapy'", name='scapy')
     def wrapper(packet):
         dict_ = packet.fields
         payload = packet.payload
@@ -92,7 +92,7 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
 def ipv6_reassembly(packet, *, count=NotImplemented):
     """Make data for IPv6 reassembly."""
     if scapy is None:
-        raise ModuleNotFound("No module named 'scapy'")
+        raise ModuleNotFound("No module named 'scapy'", name='scapy')
     if 'IPv6' in packet:
         ipv6 = packet['IPv6']
         if scapy.all.IPv6ExtHdrFragment not in ipv6:

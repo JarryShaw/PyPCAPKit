@@ -89,9 +89,9 @@ class TraceFlow:
             pathlib.Path(fout).mkdir(parents=True, exist_ok=True)
         except FileExistsError as error:
             if fmt is None:
-                warnings.warn(str(error), FileWarning, stacklevel=stacklevel())
+                warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
-                raise FileExists(str(error)) from None
+                raise FileExists(*error.args) from None
 
         return output, fmt
 

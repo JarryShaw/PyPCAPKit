@@ -111,7 +111,7 @@ class Header(Protocol):
         """
         _temp = self._read_fileng(4)
         if _temp != b'\xd4\xc3\xb2\xa1':
-            raise FileError('Unknown file format.')
+            raise FileError(5, 'Unknown file format', self._file.name)
 
         _magn = _temp
         _vmaj = self._read_unpack(2, lilendian=True)

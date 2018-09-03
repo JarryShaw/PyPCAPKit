@@ -295,7 +295,7 @@ class Extractor:
                 ifnm = fin
 
         if not os.path.isfile(ifnm):
-            raise FileNotFound(f"[Errno 2] No such file or directory: '{ifnm}'")
+            raise FileNotFound(2, 'No such file or directory', ifnm)
 
         if nofile:
             ofnm = None

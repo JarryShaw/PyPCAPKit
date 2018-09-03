@@ -60,7 +60,7 @@ class BaseError(Exception):
         * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
-    def __init__(self, message=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         index = stacklevel()
         quiet = kwargs.pop('quiet', False)
         if not quiet and index:
@@ -68,7 +68,7 @@ class BaseError(Exception):
             traceback.print_stack(limit=-index)
 
         sys.tracebacklimit = 0
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 ##############################################################################
@@ -192,8 +192,9 @@ class UnsupportedCall(BaseError, AttributeError):
 
 
 class FileError(BaseError, IOError):
-    """Wrong file format."""
-    pass
+    """[Errno 5] Wrong file format."""
+    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 
 ##############################################################################
@@ -202,8 +203,9 @@ class FileError(BaseError, IOError):
 
 
 class FileExists(BaseError, FileExistsError):
-    """File already exists."""
-    pass
+    """[Errno 17] File already exists."""
+    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 
 ##############################################################################
@@ -212,8 +214,9 @@ class FileExists(BaseError, FileExistsError):
 
 
 class FileNotFound(BaseError, FileNotFoundError):
-    """File not found."""
-    pass
+    """[Errno 2] File not found."""
+    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 
 ##############################################################################
@@ -287,4 +290,5 @@ class PacketError(BaseError, KeyError):
 
 class ModuleNotFound(BaseError, ModuleNotFoundError):
     """Module not found."""
-    pass
+    def __init__(self, msg=None, *args, name=None, path=None, **kwargs):
+        super().__init__(msg, *args, name=name, path=path, **kwargs)
