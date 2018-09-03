@@ -62,8 +62,8 @@ class _ProtoList(collections.abc.Collection):
                     index = r'|'.join(index)
                 if re.fullmatch(index, x, re.IGNORECASE):
                     return True
-        finally:
-            return False
+        except: pass
+        return False
 
 
 class _AliasList(collections.abc.Sequence):
@@ -111,8 +111,8 @@ class _AliasList(collections.abc.Sequence):
             for data in self.__data__:
                 if re.fullmatch(x, data, re.IGNORECASE):
                     return True
-        finally:
-            return False
+        except: pass
+        return False
 
     def count(self, value):
         """S.count(value) -> integer -- return number of occurrences of value"""
@@ -128,8 +128,8 @@ class _AliasList(collections.abc.Sequence):
 
         try:
             return sum(1 for data in self.__data__ if re.fullmatch(value, data, re.IGNORECASE) is not None)
-        finally:
-            return 0
+        except: pass
+        return 0
         # return self.__data__.count(value)
 
     def index(self, value, start=0, stop=None):
@@ -166,7 +166,7 @@ class _AliasList(collections.abc.Sequence):
             for index, data in enumerate(self.__data__[start:stop]):
                 if re.fullmatch(value, data, re.IGNORECASE):
                     return index
-        finally:
+        except:
             raise IndexNotFound(f'{value!r} is not in {self.__class__.__name__!r}')
         # return self.__data__.index(value, start, stop)
 

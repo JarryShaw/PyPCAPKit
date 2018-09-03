@@ -162,9 +162,6 @@ class Protocol:
     # Data models.
     ##########################################################################
 
-    # Not hashable
-    __hash__ = None
-
     def __new__(cls, file=None, *args, **kwargs):
         self = super().__new__(cls)
 

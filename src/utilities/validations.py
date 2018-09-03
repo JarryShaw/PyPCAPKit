@@ -7,9 +7,10 @@ arguments for functions and classes. It was first used in
 validators.
 
 """
+import _io
+import collections.abc
 import enum
 import inspect
-import io
 import ipaddress
 import numbers
 
@@ -68,7 +69,7 @@ def bytes_check(*args, func=None):
     """Check if arguments are bytes type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, bytes):
+        if not isinstance(var, (bytes, collections.abc.ByteString)):
             name = type(var).__name__
             raise BytesError(f'Function {func} expected bytes, {name} got instead.')
 
@@ -77,7 +78,7 @@ def bytearray_check(*args, func=None):
     """Check if arguments are bytearray type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, bytearray):
+        if not isinstance(var, (bytearray, collections.abc.ByteString, collections.abc.MutableSequence)):
             name = type(var).__name__
             raise BytearrayError(f'Function {func} expected bytearray, {name} got instead.')
 
@@ -86,7 +87,7 @@ def str_check(*args, func=None):
     """Check if arguments are str type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, str):
+        if not isinstance(var, (str, collections.UserString, collections.abc.Sequence)):
             name = type(var).__name__
             raise StringError(f'Function {func} expected str, {name} got instead.')
 
@@ -104,7 +105,7 @@ def list_check(*args, func=None):
     """Check if arguments are list type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, list):
+        if not isinstance(var, (list, collections.UserList, collections.abc.MutableSequence)):
             name = type(var).__name__
             raise ListError(f'Function {func} expected list, {name} got instead.')
 
@@ -113,7 +114,7 @@ def dict_check(*args, func=None):
     """Check if arguments are dict type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, dict):
+        if not isinstance(var, (dict, collections.UserDict, collections.abc.MutableMapping)):
             name = type(var).__name__
             raise DictError(f'Function {func} expected dict, {name} got instead.')
 
@@ -122,7 +123,7 @@ def tuple_check(*args, func=None):
     """Check if arguments are tuple type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, tuple):
+        if not isinstance(var, (tuple, collections.abc.Sequence)):
             name = type(var).__name__
             raise TupleError(f'Function {func} expected tuple, {name} got instead.')
 
@@ -131,7 +132,7 @@ def io_check(*args, func=None):
     """Check if arguments are file-like object."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, io.IOBase):
+        if not isinstance(var, _io._IOBase):
             name = type(var).__name__
             raise IOObjError(f'Function {func} expected file-like object, {name} got instead.')
 
@@ -144,7 +145,7 @@ def info_check(*args, func=None):
     for var in args:
         if not isinstance(var, Info):
             name = type(var).__name__
-            raise IOObjError(f'Function {func} expected Info instance, {name} got instead.')
+            raise InfoError(f'Function {func} expected Info instance, {name} got instead.')
 
 
 def ip_check(*args, func=None):

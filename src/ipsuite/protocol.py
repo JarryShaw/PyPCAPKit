@@ -8,8 +8,16 @@ protocols.
 
 """
 import abc
+import collections.abc
 import enum
+import functools
+import io
+import numbers
+import re
+import shutil
+import string
 import struct
+import textwrap
 
 import aenum
 
@@ -21,11 +29,16 @@ from pcapkit.utilities.validations import dict_check
 __all__ = ['Protocol']
 
 
+# readable characters' order list
+readable = [ ord(char) for char in filter(lambda char: not char.isspace(), string.printable) ]
+
+
 # abstract base class utilities
 ABCMeta = abc.ABCMeta
 abstractmethod = abc.abstractmethod
 
 
+@functools.total_ordering
 class Protocol:
     """Abstract base class for Internet Protocol Suite.
 
@@ -38,7 +51,9 @@ class Protocol:
     Methods:
         * index -- return first index of value from a dict
         * pack -- pack integers to bytes
-        * update -- update packet data
+
+    Utilities:
+        * __make__ -- make packet data
 
     """
     __metaclass__ = ABCMeta
@@ -64,7 +79,7 @@ class Protocol:
     @property
     def info(self):
         """Info dict of current instance."""
-        return Info(self.__dict__)
+        return Info(self.__args__)
 
     # binary packet data if current instance
     @property
@@ -77,26 +92,27 @@ class Protocol:
     ##########################################################################
 
     @classmethod
-    def index(cls, base, name, *, pack=False, size=4, lilendian=False):
+    def index(cls, name, default=None, *, namespace=None, pack=False, size=4, signed=False, lilendian=False):
         """Return first index of name from a dict or enumeration."""
         if isinstance(name, (enum.IntEnum, aenum.IntEnum)):
             index = name.value
+        elif isinstance(name, numbers.Integral):
+            index = name
         else:
             try:
-                if isinstance(base, (enum.EnumMeta, aenum.EnumMeta)):
-                    index = base[name]
-                else:
+                if isinstance(namespace, (enum.EnumMeta, aenum.EnumMeta)):
+                    index = namespace[name]
+                elif isinstance(namespace, (dict, collections.UserDict, collections.abc.Mapping)):
                     index = list(dict_.keys())[list(dict_.values()).index(name)]
-            except (ValueError, KeyError):
-                raise ProtocolNotImplemented(f'protocol {name} not implemented') from None
+                else:
+                    raise NotImplementedError
+            except (ValueError, KeyError, NotImplementedError):
+                if default is None:
+                    raise ProtocolNotImplemented(f'protocol {name!r} not implemented') from None
+                index = default
         if pack:
-            return cls.pack(index, size=size, lilendian=lilendian)
+            return cls.pack(index, size=size, signed=signed, lilendian=lilendian)
         return index
-
-    @abstractmethod
-    def update(self, **kwargs):
-        """Update packet data."""
-        pass
 
     @staticmethod
     def pack(integer, *, size=1, signed=False, lilendian=False):
@@ -138,20 +154,80 @@ class Protocol:
     # Data models.
     ##########################################################################
 
-    # Not hashable
-    __hash__ = None
-
     def __new__(cls, *args, **kwargs):
         self = super().__new__(cls)
         return self
 
-    def __init__(self, *args, **kwargs):
-        self.__dict__ = kwargs
-        for arg in args:
-            dict_check(arg)
-            self.__dict__.update(arg)
-        self.update()
+    def __init__(self, args={}, **kwargs):
+        if not isinstance(args, Info):
+            dict_check(args)
+
+        self.__args__ = collections.defaultdict(lambda: NotImplemented)
+        self.__args__.update(args)
+        self.__args__.update(kwargs)
+        self.__make__()
+
+    def __bytes__(self):
+        return self.__data__
+
+    def __len__(self):
+        return len(self.__data__)
+
+    def __iter__(self):
+        return iter(self.__data__)
 
     @classmethod
     def __index__(cls):
         return cls.__name__
+
+    # def __truediv__(self, other):
+    #     from pcapkit.ipsuite.packet import Packet
+    #     return Packet(other.data, **{self.alias.lower(): })
+
+    def __repr__(self):
+        repr_ = f"<{self.alias} {self.info!r}>"
+        return repr_
+
+    def __str__(self):
+        hexbuf = ' '.join(textwrap.wrap(self.__data__.hex(), 2))
+        strbuf = ''.join( chr(char) if char in readable else '.' for char in self.__data__ )
+
+        number = shutil.get_terminal_size().columns // 4 - 1
+        length = number * 3
+
+        hexlst = textwrap.wrap(hexbuf, length)
+        strlst = [ buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '') ]
+
+        str_ = '\n'.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))
+        return str_
+
+    @classmethod
+    def __eq__(cls, other):
+        try:
+            flag = issubclass(other, Protocol)
+        except TypeError:
+            flag = issubclass(type(other), Protocol)
+
+        if isinstance(other, Protocol) or flag:
+            return (other.__index__ == cls.__index__)
+
+        try:
+            index = cls.__index__()
+            if isinstance(index, tuple):
+                return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
+            return bool(re.fullmatch(other, index, re.IGNORECASE))
+        finally:
+            return False
+
+    @classmethod
+    def __lt__(cls, other):
+        return NotImplemented
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    @abstractmethod
+    def __make__(self):
+        """Make packet data."""
+        pass

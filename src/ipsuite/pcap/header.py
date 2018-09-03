@@ -4,7 +4,6 @@
 """
 from pcapkit.ipsuite.protocol import Protocol
 from pcapkit.protocols.link.link import LINKTYPE
-from pcapkit.utilities.exceptions import ProtocolNotImplemented
 
 
 __all__ = ['Header']
@@ -12,6 +11,16 @@ __all__ = ['Header']
 
 class Header(Protocol):
     """PCAP global header constructor.
+
+    Keywords:
+        * version_major -- int, major version number (default: 2)
+        * version_minor -- int, minor version number (default: 4)
+        * thiszone -- int, GMT to local correction (default: 0)
+        * sigfigs -- int, accuracy of timestamps (default: 0)
+        * snaplen -- int, max length of captured packets, in octets (default: 262144)
+        * network -- LINKTYPE / str / int, data link type (default: DLT_NULL)
+        * network_default -- int, default value for unknown data link type
+        * network_namespace -- LINKTYPE / dict, data link type namespace (default: LINKTYPE)
 
     Properties:
         * name -- str, name of corresponding protocol
@@ -22,34 +31,34 @@ class Header(Protocol):
     Methods:
         * index -- return first index of value from a dict
         * pack -- pack integers to bytes
-        * update -- update packet data
+
+    Utilities:
+        * __make__ -- make packet data
 
     """
     ##########################################################################
-    # Methods.
+    # Utilities.
     ##########################################################################
 
-    def update(self, **kwargs):
-        """Update packet data."""
-        # update dict
-        self.__dict__.update(kwargs)
-
+    def __make__(self):
+        """Make packet data."""
         # fetch values
-        version_major = self.__dict__.get('version_major', 2)   # major version number
-        version_minor = self.__dict__.get('version_minor', 4)   # minor version number
-        thiszone = self.__dict__.get('thiszone', 0)             # GMT to local correction
-        sigfigs = self.__dict__.get('sigfigs', 0)               # accuracy of timestamps
-        snaplen = self.__dict__.get('snaplen', 262144)          # max length of captured packets, in octets
-        network = self.__dict__.get('network', 'Ethernet')      # data link type
+        version_major = self.__args__.get('version_major', 2)       # major version number
+        version_minor = self.__args__.get('version_minor', 4)       # minor version number
+        thiszone = self.__args__.get('thiszone', 0)                 # GMT to local correction
+        sigfigs = self.__args__.get('sigfigs', 0)                   # accuracy of timestamps
+        snaplen = self.__args__.get('snaplen', 262144)              # max length of captured packets, in octets
+        network = self.__args__.get('network', LINKTYPE['NULL'])    # data link type
+        network_default = self.__args__.get('network_default')      # default value for unknown data link type
+        network_namespace = self.__args__.get('network_namespace', LINKTYPE)
+                                                                    # data link type namespace
 
-        # update packet
-        data = b'\xd4\xc3\xb2\xa1'
-        data += self.pack(version_major, size=2, lilendian=True)
-        data += self.pack(version_minor, size=2, lilendian=True)
-        data += self.pack(thiszone, size=4, lilendian=True)
-        data += self.pack(sigfigs, size=4, lilendian=True)
-        data += self.pack(snaplen, size=4, lilendian=True)
-        data += self.index(LINKTYPE, network, pack=True, lilendian=True)
-
-        # update data
-        self.__data__ = data
+        # make packet
+        self.__data__ = b'\xd4\xc3\xb2\xa1%s%s%s%s%s%s' % (
+            self.pack(version_major, size=2, lilendian=True),
+            self.pack(version_major, size=2, lilendian=True),
+            self.pack(thiszone, size=4, lilendian=True),
+            self.pack(sigfigs, size=4, lilendian=True),
+            self.pack(snaplen, size=4, lilendian=True),
+            self.index(network, network_default, namespace=network_namespace, pack=True, lilendian=True),
+        )

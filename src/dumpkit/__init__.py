@@ -39,6 +39,6 @@ class PCAP:
             file.write(packet)
 
     def __call__(self, frame, **kwargs):
-        packet = Frame(frame).data
+        packet = Frame(frame.frame_info, packet=frame.packet).data
         with open(self._file, 'ab') as file:
             file.write(packet)
