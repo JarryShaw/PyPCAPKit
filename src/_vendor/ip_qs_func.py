@@ -53,17 +53,16 @@ class {NAME}(IntEnum):
 NAME = 'QS'
 DOCS = 'QS Functions'
 FLAG = 'isinstance(value, int) and 0 <= value <= 8'
+DATA = {
+    0:  'Quick-Start Request',
+    8:  'Report of Approved Rate',
+}
 
 
 ###############
 # Processors
 ###############
 
-
-DATA = {
-    0:  'Quick-Start Request',
-    8:  'Report of Approved Rate',
-}
 
 record = collections.Counter(DATA.values())
 

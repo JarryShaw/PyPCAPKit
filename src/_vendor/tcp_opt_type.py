@@ -54,13 +54,14 @@ class {NAME}(IntEnum):
 # Macros
 ###############
 
+
+T, F = True, False
+nm_len, op_len = None, None
+
 NAME = 'Options'
 DOCS = 'TCP Option Kind Numbers'
 FLAG = 'isinstance(value, int) and 0 <= value <= 255'
 LINK = 'https://www.iana.org/assignments/tcp-parameters/tcp-parameters-1.csv'
-
-T, F = True, False
-nm_len, op_len = None, None
 DATA = {                            #   kind  length  type  process  comment            name
     0:  (F, 'eool'),                #     0      -      -      -                [RFC 793] End of Option List
     1:  (F, 'nop'),                 #     1      -      -      -                [RFC 793] No-Operation

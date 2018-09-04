@@ -53,17 +53,16 @@ class {NAME}(IntEnum):
 NAME = 'Relibility'
 DOCS = 'TOS (DS Field) Relibility'
 FLAG = 'isinstance(value, int) and 0 <= value <= 1'
+DATA = {
+    0 : 'Normal',
+    1 : 'High',
+}
 
 
 ###############
 # Processors
 ###############
 
-
-DATA = {
-    0 : 'Normal',
-    1 : 'High',
-}
 
 record = collections.Counter(DATA.values())
 

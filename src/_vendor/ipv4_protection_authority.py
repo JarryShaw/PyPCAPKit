@@ -53,13 +53,6 @@ class {NAME}(IntEnum):
 NAME = 'ProtAuth'
 DOCS = 'Protection Authority Bit Assignments'
 FLAG = 'isinstance(value, int) and 0 <= value <= 7'
-
-
-###############
-# Processors
-###############
-
-
 DATA = {
     0 : 'GENSER',
     1 : 'SIOP-ESI',
@@ -70,6 +63,12 @@ DATA = {
     6 : 'Unassigned',
     7 : 'Field Termination Indicator',
 }
+
+
+###############
+# Processors
+###############
+
 
 record = collections.Counter(DATA.values())
 

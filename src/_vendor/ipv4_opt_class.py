@@ -53,19 +53,18 @@ class {NAME}(IntEnum):
 NAME = 'OptCls'
 DOCS = 'Option Classes'
 FLAG = 'isinstance(value, int) and 0 <= value <= 3'
-
-
-###############
-# Processors
-###############
-
-
 DATA = {
     0 : 'control',
     1 : 'reserved for future use',
     2 : 'debugging and measurement',
     3 : 'reserved for future use',
 }
+
+
+###############
+# Processors
+###############
+
 
 record = collections.Counter(DATA.values())
 

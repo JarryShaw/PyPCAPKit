@@ -92,8 +92,23 @@ class Protocol:
     ##########################################################################
 
     @classmethod
-    def index(cls, name, default=None, *, namespace=None, pack=False, size=4, signed=False, lilendian=False):
-        """Return first index of name from a dict or enumeration."""
+    def index(cls, name, default=None, *, namespace=None, reversed=False,
+                pack=False, size=4, signed=False, lilendian=False):
+        """Return first index of name from a dict or enumeration.
+
+        Positional arguments:
+            * name -- str / int / IntEnum, item to be indexed
+            * default -- int, default value
+
+        Keyword arguments:
+            * namespace -- dict / EnumMeta, namespace for item
+            * reversed -- bool, if namespace is [str -> int] pairs
+            * pack -- bool, if need struct.pack
+            * size -- int, buffer size (default is 4)
+            * signed -- bool, signed flag (default is False)
+            * lilendian -- bool, little-endian flag (default is False)
+
+        """
         if isinstance(name, (enum.IntEnum, aenum.IntEnum)):
             index = name.value
         elif isinstance(name, numbers.Integral):
@@ -103,10 +118,13 @@ class Protocol:
                 if isinstance(namespace, (enum.EnumMeta, aenum.EnumMeta)):
                     index = namespace[name]
                 elif isinstance(namespace, (dict, collections.UserDict, collections.abc.Mapping)):
-                    index = list(dict_.keys())[list(dict_.values()).index(name)]
+                    if reversed:
+                        index = namespace[name]
+                    else:
+                        index = { v: k for k, v in namespace.items() }[name]
                 else:
-                    raise NotImplementedError
-            except (ValueError, KeyError, NotImplementedError):
+                    raise KeyError
+            except KeyError:
                 if default is None:
                     raise ProtocolNotImplemented(f'protocol {name!r} not implemented') from None
                 index = default

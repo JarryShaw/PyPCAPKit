@@ -53,19 +53,18 @@ class {NAME}(IntEnum):
 NAME = 'ECN'
 DOCS = 'TOS ECN FIELD'
 FLAG = 'isinstance(value, int) and 0b00 <= value <= 0b11'
-
-
-###############
-# Processors
-###############
-
-
 DATA = {
     0b00 : 'Not-ECT',
     0b01 : 'ECT(1)',
     0b10 : 'ECT(0)',
     0b11 : 'CE',
 }
+
+
+###############
+# Processors
+###############
+
 
 record = collections.Counter(DATA.values())
 

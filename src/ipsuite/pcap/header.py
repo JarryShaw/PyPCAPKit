@@ -18,9 +18,10 @@ class Header(Protocol):
         * thiszone -- int, GMT to local correction (default: 0)
         * sigfigs -- int, accuracy of timestamps (default: 0)
         * snaplen -- int, max length of captured packets, in octets (default: 262144)
-        * network -- LINKTYPE / str / int, data link type (default: DLT_NULL)
+        * network -- LINKTYPE / IntEnum / str / int, data link type (default: DLT_NULL)
         * network_default -- int, default value for unknown data link type
-        * network_namespace -- LINKTYPE / dict, data link type namespace (default: LINKTYPE)
+        * network_namespace -- LINKTYPE / IntEnum / dict, data link type namespace (default: LINKTYPE)
+        * network_reversed -- bool, if namespace is [str -> int] pairs (default: False)
 
     Properties:
         * name -- str, name of corresponding protocol
@@ -52,6 +53,8 @@ class Header(Protocol):
         network_default = self.__args__.get('network_default')      # default value for unknown data link type
         network_namespace = self.__args__.get('network_namespace', LINKTYPE)
                                                                     # data link type namespace
+        network_reversed = self.__args__.get('network_reversed', False)
+                                                                    # if namespace is [str -> int] pairs
 
         # make packet
         self.__data__ = b'\xd4\xc3\xb2\xa1%s%s%s%s%s%s' % (
@@ -60,5 +63,6 @@ class Header(Protocol):
             self.pack(thiszone, size=4, lilendian=True),
             self.pack(sigfigs, size=4, lilendian=True),
             self.pack(snaplen, size=4, lilendian=True),
-            self.index(network, network_default, namespace=network_namespace, pack=True, lilendian=True),
+            self.index(network, network_default, namespace=network_namespace,
+                        reversed=network_reversed, pack=True, lilendian=True),
         )

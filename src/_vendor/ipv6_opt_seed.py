@@ -53,19 +53,18 @@ class {NAME}(IntEnum):
 NAME = 'SeedID'
 DOCS = 'Seed-ID Types'
 FLAG = 'isinstance(value, int) and 0b00 <= value <= 0b11'
-
-
-###############
-# Processors
-###############
-
-
 DATA = {
     0b00 : 'IPv6 Source Address',                   # [RFC 7731]
     0b01 : '16-Bit Unsigned Integer',               # [RFC 7731]
     0b10 : '64-Bit Unsigned Integer',               # [RFC 7731]
     0b11 : '128-Bit Unsigned Integer',              # [RFC 7731]
 }
+
+
+###############
+# Processors
+###############
+
 
 record = collections.Counter(DATA.values())
 

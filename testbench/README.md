@@ -48,8 +48,12 @@
 
 ### [ABC](https://github.com/JarryShaw/pypcapkit/tree/test/rc/abc#pypcapkit)
 
+ > [__MERGED__]
+
 &emsp; Considering replacing `Info` and `ProtoChain` with `collections.abc`.
 
 ### [ProtoChain](https://github.com/JarryShaw/pypcapkit/tree/test/rc/protochain#pypcapkit)
+
+ > [__MERGED__]
 
 &emsp; Considering changing `ProtoChain` algorithm.

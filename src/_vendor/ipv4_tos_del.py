@@ -53,17 +53,16 @@ class {NAME}(IntEnum):
 NAME = 'Delay'
 DOCS = 'TOS (DS Field) Delay'
 FLAG = 'isinstance(value, int) and 0 <= value <= 1'
+DATA = {
+    0 : 'Normal',
+    1 : 'Low',
+}
 
 
 ###############
 # Processors
 ###############
 
-
-DATA = {
-    0 : 'Normal',
-    1 : 'Low',
-}
 
 record = collections.Counter(DATA.values())
 

@@ -53,6 +53,12 @@ class {NAME}(IntEnum):
 NAME = 'ChksumOpt'
 DOCS = '[RFC 1146]'
 FLAG = 'isinstance(value, int) and 0 <= value <= 255'
+DATA = {
+    0:  'TCP checksum',
+    1:  "8-bit Fletcher's algorithm",
+    2:  "16-bit Fletcher's algorithm",
+    3:  'Redundant Checksum Avoidance',
+}
 
 
 ###############
@@ -60,12 +66,6 @@ FLAG = 'isinstance(value, int) and 0 <= value <= 255'
 ###############
 
 
-DATA = {
-    0:  'TCP checksum',
-    1:  "8-bit Fletcher's algorithm",
-    2:  "16-bit Fletcher's algorithm",
-    3:  'Redundant Checksum Avoidance',
-}
 record = collections.Counter(DATA.values())
 
 def rename(name, code):

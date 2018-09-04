@@ -53,13 +53,6 @@ class {NAME}(IntEnum):
 NAME = 'ClasLvl'
 DOCS = 'Classification Level Encodings'
 FLAG = 'isinstance(value, int) and 0b0000_0000 <= value <= 0b1111_1111'
-
-
-###############
-# Processors
-###############
-
-
 DATA = {
     0b0000_0001 : 'Reserved [4]',
     0b0011_1101 : 'Top Secret',
@@ -70,6 +63,12 @@ DATA = {
     0b1010_1011 : 'Unclassified',
     0b1111_0001 : 'Reserved [1]',
 }
+
+
+###############
+# Processors
+###############
+
 
 record = collections.Counter(DATA.values())
 

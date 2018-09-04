@@ -53,13 +53,6 @@ class {NAME}(IntEnum):
 NAME = 'Precedence'
 DOCS = 'TOS (DS Field) Precedence'
 FLAG = 'isinstance(value, int) and 0b000 <= value <= 0b111'
-
-
-###############
-# Processors
-###############
-
-
 DATA = {
     0b111 : 'Network Control',
     0b110 : 'Internetwork Control',
@@ -70,6 +63,12 @@ DATA = {
     0b001 : 'Priority',
     0b000 : 'Routine',
 }
+
+
+###############
+# Processors
+###############
+
 
 record = collections.Counter(DATA.values())
 
