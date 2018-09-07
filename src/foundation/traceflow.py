@@ -8,6 +8,7 @@ was implemented as the demand of my mate @gousaiyang.
 """
 import copy
 import pathlib
+import sys
 import warnings
 
 ###############################################################################
@@ -116,7 +117,8 @@ class TraceFlow:
         output = self.trace(packet, _check=False, _output=True)
 
         # dump files
-        output(packet['frame'], name=f"Frame {packet['index']}")
+        output(packet['frame'], name=f"Frame {packet['index']}",
+                byteorder=self._endian, nanosecond=self._nnsecd)
 
     def trace(self, packet, *, _check=True, _output=False):
         """Trace packets.
@@ -192,12 +194,14 @@ class TraceFlow:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fout=None, format=None):
+    def __init__(self, *, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):
         """Initialise instance.
 
         Keyword arguments:
             * fout -- str, output path
             * format -- str, output format
+            * byteorder -- str, output file byte order
+            * nanosecond -- bool, output nanosecond-resolution file flag
 
         """
         self._newflg = False    # new packet flag
@@ -207,6 +211,8 @@ class TraceFlow:
         self._foutio, self._fdpext \
                     = self.make_fout(fout, format)
                                 # dump I/O object
+        self._endian = byteorder
+        self._nnsecd = nanosecond
 
     def __call__(self, packet):
         """Dump frame to output files.

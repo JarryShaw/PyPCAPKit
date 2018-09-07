@@ -18,6 +18,7 @@ import os
 import pathlib
 import random
 import re
+import sys
 import textwrap
 import time
 import traceback
@@ -344,8 +345,14 @@ class Extractor:
 
         """
         self._gbhdr = Header(self._ifile)
-        self._dlink = self._gbhdr.protocol
         self._vinfo = self._gbhdr.version
+        self._dlink = self._gbhdr.protocol
+        self._nnsec = self._gbhdr.nanosecond
+
+        if self._trace is not NotImplemented:
+            self._trace._endian = self._gbhdr.byteorder
+            self._trace._nnsecd = self._gbhdr.nanosecond
+
         if not self._flag_q:
             if self._flag_f:
                 ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
@@ -378,7 +385,8 @@ class Extractor:
                     files=False, nofile=False, verbose=False,                   # output settings
                     engine=None, layer=None, protocol=None,                     # extraction settings
                     ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
-                    trace=False, trace_fout=None, trace_format=None):           # trace settings
+                    trace=False, trace_fout=None, trace_format=None,            # trace settings
+                    trace_byteorder=sys.byteorder, trace_nanosecond=False):     # trace settings
         """Initialise PCAP Reader.
 
         Keyword arguments:
@@ -424,6 +432,11 @@ class Extractor:
             * trace_fout -- str, path name for flow tracer if necessary
             * trace_format -- str, output file format of flow tracer
                             <keyword> 'plist' / 'json' / 'tree' / 'html' / 'pcap'
+            * trace_byteorder -- str, output file byte order
+                            <keyword> 'little' / 'big'
+            * trace_nanosecond -- bool, output nanosecond-resolution file flag
+                            <keyword> True / False
+
 
         """
         ifnm, ofnm, fmt, ext, files = \
@@ -473,7 +486,7 @@ class Extractor:
                 warnings.warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
                                 f"using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = None
-            self._trace = TraceFlow(fout=trace_fout, format=trace_format)
+            self._trace = TraceFlow(fout=trace_fout, format=trace_format, byteorder=trace_byteorder, nanosecond=trace_nanosecond)
 
         self._ifile = open(ifnm, 'rb')                      # input file
         if not self._flag_q:
@@ -606,7 +619,7 @@ class Extractor:
         # read frame header
         if not self._flag_m:
             frame = Frame(self._ifile, num=self._frnum+1, proto=self._dlink,
-                            layer=self._exlyr, protocol=self._exptl)
+                            layer=self._exlyr, protocol=self._exptl, nanosecond=self._nnsec)
             self._frnum += 1
 
         # verbose output
@@ -962,7 +975,7 @@ class Extractor:
         try:
             # extraction
             frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
-                            layer=self._exlyr, protocol=self._exptl,
+                            layer=self._exlyr, protocol=self._exptl, nanosecond=self._nnsec,
                             mpkit=mpkit, mpfdp=mpfdp)
             # analysis
             _analyse_frame(frame=frame, mpkit=mpkit)
@@ -1047,7 +1060,7 @@ class Extractor:
         # extract frame
         try:
             frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
-                            layer=self._exlyr, protocol=self._exptl,
+                            layer=self._exlyr, protocol=self._exptl, nanosecond=self._nnsec,
                             mpkit=mpkit, mpfdp=mpfdp)
             # frame._file = NotImplemented
             mpbuf[self._frnum] = frame

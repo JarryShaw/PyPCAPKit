@@ -108,7 +108,10 @@ class Frame(Protocol):
         _ilen = self._read_unpack(4, lilendian=True)
         _olen = self._read_unpack(4, lilendian=True)
 
-        _epch = float(f'{_tsss}.{_tsus}')
+        if self._nsec:
+            _epch = _tsss + _tsus / 1_000_000_000
+        else:
+            _epch = _tsss + _tsus / 1_000_000
         _time = datetime.datetime.fromtimestamp(_epch)
 
         frame = dict(
@@ -123,6 +126,7 @@ class Frame(Protocol):
             time_epoch = _epch,
             len = _ilen,
             cap_len = _olen,
+            nanosecond = self._nsec,
         )
 
 
@@ -147,10 +151,11 @@ class Frame(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, *, num, proto, **kwrags):
+    def __init__(self, file, *, num, proto, nanosecond, **kwrags):
         self._fnum = num
         self._file = file
         self._prot = proto
+        self._nsec = nanosecond
         self._mpfp = kwrags.pop('mpfdp', None)
         self._mpkt = kwrags.pop('mpkit', None)
         self._info = Info(self.read_frame())

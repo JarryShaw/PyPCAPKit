@@ -58,7 +58,8 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
                 files=False, nofile=False, verbose=False,                   # output settings
                 engine=None, layer=None, protocol=None,                     # extraction settings
                 ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
-                trace=False, trace_fout=None, trace_format=None):           # trace settings
+                trace=False, trace_fout=None, trace_format=None,            # trace settings
+                trace_byteorder=sys.byteorder, trace_nanosecond=False):     # trace settings
     """Extract a PCAP file.
 
     Keyword arguments:
@@ -104,6 +105,10 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
         * trace_fout -- str, path name for flow tracer if necessary
         * trace_format -- str, output file format of flow tracer
                         <keyword> 'plist' / 'json' / 'tree' / 'html' / 'pcap'
+        * trace_byteorder -- str, output file byte order
+                        <keyword> 'little' / 'big'
+        * trace_nanosecond -- bool, output nanosecond-resolution file flag
+                        <keyword> True / False
 
     Returns:
         * Extractor -- an Extractor object form `pcapkit.extractor`
@@ -125,7 +130,8 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
                         auto=auto, verbose=verbose, extension=extension,
                         engine=engine, layer=layer, protocol=protocol,
                         ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, strict=strict,
-                        trace=trace, trace_fout=trace_fout, trace_format=trace_format)
+                        trace=trace, trace_fout=trace_fout, trace_format=trace_format,
+                        trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond)
 
 
 def analyse(*, file, length=None):
@@ -178,13 +184,15 @@ def reassemble(*, protocol, strict=False):
         raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
-def trace(*, fout=None, format=None):
+def trace(*, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):
     """Trace TCP flows.
 
     Keyword arguments:
         * fout -- str, output path
         * format -- str, output format
+        * byteorder -- str, output file byte order
+        * nanosecond -- bool, output nanosecond-resolution file flag
 
     """
     str_check(fout or '', format or '')
-    return TraceFlow(fout=fout, format=format)
+    return TraceFlow(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond)

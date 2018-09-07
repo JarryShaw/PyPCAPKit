@@ -25,6 +25,7 @@ __all__ = [
     'FileNotFound',                                             # FileNotFoundError
     'ProtocolNotFound',                                         # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',           # ValueError
+    'EndianError',                                              # ValueError
     'ProtocolNotImplemented',                                   # NotImplementedError
     'StructError',                                              # struct.error
     'FragmentError', 'PacketError',                             # KeyError
@@ -247,6 +248,12 @@ class IndexNotFound(BaseError, ValueError):
 class ProtocolError(BaseError, ValueError):
     """Invalid protocol format."""
     pass
+
+
+class EndianError(BaseError, ValueError):
+    """Invalid endian (byte order)."""
+    pass
+
 
 ##############################################################################
 # NotImplementedError session.

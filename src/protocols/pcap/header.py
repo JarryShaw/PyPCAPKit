@@ -37,6 +37,7 @@ class Header(Protocol):
         * length -- int, header length of global header, i.e. 24
         * version -- VersionInfo, version infomation of input PCAP file
         * protocol -- str, data link type
+        * nanosecond -- bool, nanosecond-resolution flag
 
     Methods:
         * decode_bytes -- try to decode bytes into str
@@ -90,6 +91,16 @@ class Header(Protocol):
         """NotImplemented"""
         raise UnsupportedCall("'Header' object has no attribute 'protochain'")
 
+    @property
+    def byteorder(self):
+        """Header byte order."""
+        return self._byte
+
+    @property
+    def nanosecond(self):
+        """Nanosecond-resolution flag."""
+        return self._nsec
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -109,20 +120,31 @@ class Header(Protocol):
             } pcap_hdr_t;
 
         """
-        _temp = self._read_fileng(4)
-        if _temp != b'\xd4\xc3\xb2\xa1':
+        _magn = self._read_fileng(4)
+        if _magn == b'\xd4\xc3\xb2\xa1':
+            lilendian = True;   self._nsec = False; self._byte = 'little'
+        elif _magn == b'\xa1\xb2\xc3\xd4':
+            lilendian = False;  self._nsec = False; self._byte = 'big'
+        elif _magn == b'\x4d\x3c\xb2\xa1':
+            lilendian = True;  self._nsec = True;   self._byte = 'little'
+        elif _magn == b'\xa1\xb2\x3c\x4d':
+            lilendian = False;  self._nsec = True;  self._byte = 'big'
+        else:
             raise FileError(5, 'Unknown file format', self._file.name)
 
-        _magn = _temp
-        _vmaj = self._read_unpack(2, lilendian=True)
-        _vmin = self._read_unpack(2, lilendian=True)
-        _zone = self._read_unpack(4, lilendian=True, signed=True)
-        _acts = self._read_unpack(4, lilendian=True)
-        _slen = self._read_unpack(4, lilendian=True)
+        _vmaj = self._read_unpack(2, lilendian=lilendian)
+        _vmin = self._read_unpack(2, lilendian=lilendian)
+        _zone = self._read_unpack(4, lilendian=lilendian, signed=True)
+        _acts = self._read_unpack(4, lilendian=lilendian)
+        _slen = self._read_unpack(4, lilendian=lilendian)
         _type = self._read_protos(4)
 
         header = dict(
-            magic_number = _magn,
+            magic_number = dict(
+                data = _magn,
+                byteorder = self._byte,
+                nanosecond = self._nsec,
+            ),
             version_major = _vmaj,
             version_minor = _vmin,
             thiszone = _zone,
