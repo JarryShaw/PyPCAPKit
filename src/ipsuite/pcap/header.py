@@ -47,7 +47,7 @@ class Header(Protocol):
         * network -- LINKTYPE / IntEnum / str / int, data link type (default: DLT_NULL)
             - network_default -- int, default value for unknown data link type
             - network_namespace -- LINKTYPE / IntEnum / dict, data link type namespace (default: LINKTYPE)
-            - network_reversed -- bool, if namespace is <str, int> pairs (default: False)
+            - network_reversed -- bool, if namespace is dict<str: int> pairs (default: False)
 
     Properties:
         * name -- str, name of corresponding protocol
@@ -97,7 +97,7 @@ class Header(Protocol):
         snaplen = self.__args__.get('snaplen', 262144)                  # max length of captured packets, in octets
         network = self.__args__.get('network', LINKTYPE['NULL'])        # data link type
         network_default = self.__args__.get('network_default')          # default value for unknown data link type
-        network_reversed = self.__args__.get('network_reversed', False) # if namespace is <str, int> pairs
+        network_reversed = self.__args__.get('network_reversed', False) # if namespace is dict<str: int> pairs
         network_namespace = self.__args__.get('network_namespace', LINKTYPE)
                                                                         # data link type namespace
 
