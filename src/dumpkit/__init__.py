@@ -47,7 +47,7 @@ class PCAP:
             file.write(packet)
 
     def __call__(self, frame, **kwargs):
-        packet = Frame(frame.get('frame_info', dict()),
+        packet = Frame(frame.get('frame_info', frame),
             packet = frame.packet,
             nanosecond = self._nsec
         ).data

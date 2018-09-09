@@ -172,7 +172,7 @@ class Protocol:
     # Data models.
     ##########################################################################
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, args={}, **kwargs):
         self = super().__new__(cls)
         return self
 

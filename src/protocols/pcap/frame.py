@@ -16,7 +16,6 @@ typedef struct pcaprec_hdr_s {
 import datetime
 import io
 import os
-import re
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.protocol import Protocol
@@ -126,7 +125,6 @@ class Frame(Protocol):
             time_epoch = _epch,
             len = _ilen,
             cap_len = _olen,
-            nanosecond = self._nsec,
         )
 
 
@@ -159,9 +157,7 @@ class Frame(Protocol):
         self._mpfp = kwrags.pop('mpfdp', None)
         self._mpkt = kwrags.pop('mpkit', None)
         self._info = Info(self.read_frame())
-        for attr in dir(self):
-            if re.match('^_mp.*', attr):
-                delattr(self, attr)
+        [ delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self)) ]
 
     def __length_hint__(self):
         return 16

@@ -74,7 +74,7 @@ class Header(file=None, *args, **kwargs)
 ### Initialisation
 
  - Positional arguments:
-    * `file` -- *file*-like object, packet file to be extracted
+    * `file` -- *file-like* object, packet file to be extracted
 
 ### Properties
 
@@ -134,7 +134,7 @@ class Header(file=None, *args, **kwargs)
  > described in [`src/ipsuite/pcap/header.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/ipsuite/pcap/header.py)
 
 ```python
-class Header(*args, **kwargs)
+class Header(args={}, **kwargs)
 ```
 
  > PCAP global header constructor.
@@ -145,24 +145,28 @@ class Header(*args, **kwargs)
  2. `pcapkit.ipsuite.protocol.Protocol`
  3. `pcapkit.ipsuite.pcap.header.Header`
 
-### Keywords
+### Initialisation
 
-| NAME                | TYPE                                                                 | DESCRIPTION                               | DEFAULT VALUE                                   | POSSIBLE VALUES      |
-| :------------------ | :------------------------------------------------------------------- | :---------------------------------------- | :---------------------------------------------- | :------------------- |
-| `byteorder`         | `str`                                                                | header byte order                         | _depends on platform_                           | `'little'` / `'big'` |
-| `lilendian`         | `bool`                                                               | little-endian flag                        | _depends on platform_                           | `True` / `False`     |
-| `bigendian`         | `bool`                                                               | big-endian flag                           | _depends on platform_                           | `True` / `False`     |
-| `nanosecond`        | `bool`                                                               | nanosecond-resolution file flag           | `False`                                         | `True` / `False`     |
-| `version`           | `tuple<int>`                                                         | version information                       | `(2, 4)`                                        |                      |
-| `version_major`     | `int`                                                                | major version number                      | `2`                                             |                      |
-| `version_minor`     | `int`                                                                | minor version number                      | `4`                                             |                      |
-| `thiszone`          | `int`                                                                | GMT to local correction                   | `0`                                             |                      |
-| `sigfigs`           | `int`                                                                | accuracy of timestamps                    | `0`                                             |                      |
-| `snaplen`           | `int`                                                                | max length of captured packets, in octets | `262144`                                        |                      |
-| `network`           | `pcapkit._common.linktype.LinkType` / `enum.IntEnum` / `str` / `int` | data link type                            | `pcapkit.protocols.link.link.LINKTYPE.DLT_NULL` |                      |
-| `network_default`   | `int`                                                                | default value for unknown data link type  |                                                 |                      |
-| `network_namespace` | `pcapkit._common.linktype.LinkType` / `enum.IntEnum` / `str` / `int` | data link type namespace                  | `pcapkit.protocols.link.link.LINKTYPE`          |                      |
-| `network_reversed`  | `bool`                                                               | if namespace is `dict<str: int>` pairs    | `False`                                         | `True` / `False`     |
+ - Positional arguments:
+    * `args` -- *`dict`-like* object (default: `{}`)
+
+ - Keyword arguments:
+    | NAME                | TYPE                                                                 | DESCRIPTION                               | DEFAULT VALUE                                   | POSSIBLE VALUES      |
+    | :------------------ | :------------------------------------------------------------------- | :---------------------------------------- | :---------------------------------------------- | :------------------- |
+    | `byteorder`         | `str`                                                                | header byte order                         | _depends on platform_                           | `'little'` / `'big'` |
+    | `lilendian`         | `bool`                                                               | little-endian flag                        | _depends on platform_                           | `True` / `False`     |
+    | `bigendian`         | `bool`                                                               | big-endian flag                           | _depends on platform_                           | `True` / `False`     |
+    | `nanosecond`        | `bool`                                                               | nanosecond-resolution file flag           | `False`                                         | `True` / `False`     |
+    | `version`           | `tuple<int>`                                                         | version information                       | `(2, 4)`                                        |                      |
+    | `version_major`     | `int`                                                                | major version number                      | `2`                                             |                      |
+    | `version_minor`     | `int`                                                                | minor version number                      | `4`                                             |                      |
+    | `thiszone`          | `int`                                                                | GMT to local correction                   | `0`                                             |                      |
+    | `sigfigs`           | `int`                                                                | accuracy of timestamps                    | `0`                                             |                      |
+    | `snaplen`           | `int`                                                                | max length of captured packets, in octets | `262144`                                        |                      |
+    | `network`           | `pcapkit._common.linktype.LinkType` / `enum.IntEnum` / `str` / `int` | data link type                            | `pcapkit.protocols.link.link.LINKTYPE.DLT_NULL` |                      |
+    | `network_default`   | `int`                                                                | default value for unknown data link type  |                                                 |                      |
+    | `network_namespace` | `pcapkit._common.linktype.LinkType` / `enum.IntEnum` / `str` / `int` | data link type namespace                  | `pcapkit.protocols.link.link.LINKTYPE`          |                      |
+    | `network_reversed`  | `bool`                                                               | if namespace is `dict<str: int>` pairs    | `False`                                         | `True` / `False`     |
 
 ### Properties
 

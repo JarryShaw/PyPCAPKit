@@ -88,7 +88,7 @@ pip install pypcapkit
 &emsp; Or install the latest version from the git repository:
 
 ```sh
-git clone https://github.com/JarryShaw/pypcapkit.git
+git clone https://github.com/JarryShaw/PyPCAPKit.git
 cd pypcapkit
 pip install -e .
 # and to update at any time
