@@ -6,7 +6,7 @@ possible to show only user error stack infomation, when
 exception raised on user's operation.
 
 """
-import pathlib
+import os
 import struct
 import sys
 import traceback
@@ -36,10 +36,10 @@ __all__ = [
 
 def stacklevel():
     """Fetch curent stack level."""
+    pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
     tb = traceback.extract_stack()
-    for tbitem in tb:
-        if pathlib.Path(tbitem[0]).match('pcapkit'):
-            index = tb.index(tbitem)
+    for index, tbitem in enumerate(tb):
+        if pcapkit in tbitem[0]:
             break
     else:
         index = len(tb)
@@ -65,8 +65,9 @@ class BaseError(Exception):
         index = stacklevel()
         quiet = kwargs.pop('quiet', False)
         if not quiet and index:
-            print('Traceback (most recent call last):')
-            traceback.print_stack(limit=-index)
+            fmt_exc = traceback.format_exc(limit=-index)
+            if len(fmt_exc.splitlines(True)) > 1:
+                print(fmt_exc, file=sys.stderr)
 
         sys.tracebacklimit = 0
         super().__init__(*args, **kwargs)
