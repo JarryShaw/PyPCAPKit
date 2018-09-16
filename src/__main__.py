@@ -11,12 +11,14 @@ import os
 import sys
 import warnings
 
+import emoji
+
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.interface import TREE, JSON, PLIST
 
 
 # version number
-__version__ = '0.5.0'
+__version__ = '0.6.0'
 
 
 def get_parser():
@@ -106,10 +108,10 @@ def main():
                             engine=args.engine, extension=args.auto_extension)
 
     if not args.verbose:
-        print(("[x] Loading file {!r}").format((extractor.input)))
+        print(emoji.emojize((":police_car_light: Loading file {!r}").format((extractor.input))))
         for frame in extractor:
             print((' - Frame {:>3d}: {}').format((extractor.length), (extractor.protocol)))
-        print(("[+] Report file{} stored in {!r}").format(('s' if args.files else ''), (extractor.output)))
+        print(emoji.emojize((":beer_mug: Report file{} stored in {!r}").format(('s' if args.files else ''), (extractor.output))))
 
 
 if __name__ == '__main__':
