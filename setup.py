@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.12.0.post1'
+__version__ = '0.12.0.post2'
 
 
 # set-up script for pip distribution
@@ -25,8 +25,8 @@ setuptools.setup(
     description = 'Python multi-engine PCAP analyse kit.',
     long_description = long_desc,
     long_description_content_type='text/markdown',
-    python_requires = '>=3.5',
-    install_requires = ['dictdumper', 'chardet', 'setuptools', 'aenum', 'emoji'],
+    python_requires = '>=3.4',
+    install_requires = ['setuptools', 'dictdumper', 'chardet', 'aenum', 'emoji'],
     extras_require = {
         'all': ['dpkt', 'scapy', 'pyshark'],
         'DPKT': ['dpkt'],

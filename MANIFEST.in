@@ -6,6 +6,7 @@ include _common/*.py
 prune NotImplemented
 prune deprecated
 prune testbench
+prune archive
 prune sample
 prune build
 prune dist
