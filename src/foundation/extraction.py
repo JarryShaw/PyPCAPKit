@@ -86,6 +86,14 @@ else:
     CPU_CNT = os.cpu_count() or 1
 
 
+def mkdir(p):
+    path = pathlib.Path(p)
+    try:
+        path.mkdir(parents=True)
+    except OSError:
+        if path.is_dir():   pass
+
+
 class Extractor:
     """Extractor for PCAP files.
 
@@ -314,12 +322,12 @@ class Extractor:
                     raise FormatError('Output format unspecified.')
                 elif files:
                     ofnm = 'out'
-                    pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
+                    mkdir(ofnm)
                 else:
                     ofnm = f'out.{ext}'
             else:
                 name, fext = os.path.splitext(fout)
-                pathlib.Path(fout).parent.mkdir(parents=True, exist_ok=True)
+                mkdir(fout)
                 if fext:
                     files = False
                     ofnm = fout
@@ -330,7 +338,7 @@ class Extractor:
                     raise FormatError('Output format unspecified.')
                 elif files:
                     ofnm = fout
-                    pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
+                    mkdir(ofnm)
                 elif extension: ofnm = f'{fout}.{ext}'
                 else:           ofnm = fout
 

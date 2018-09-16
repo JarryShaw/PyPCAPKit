@@ -14,7 +14,6 @@ import enum
 import inspect
 import ipaddress
 import numbers
-import typing
 
 import aenum
 

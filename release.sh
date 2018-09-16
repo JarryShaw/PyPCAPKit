@@ -14,7 +14,7 @@ pypi
 
 git pull
 git add .
-if [[ -z $1 ]] ; then
+if [[ -z "$1" ]] ; then
 	git commit -a
 else
 	git commit -a -m "$1"
