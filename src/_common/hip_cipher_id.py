@@ -10,11 +10,11 @@ class CipherID(IntEnum):
     CipherID = vars()
 
     # Cipher IDs
-    CipherID['RESERVED [0]'] = 0                                                # [RFC 7401]
-    CipherID['NULL-ENCRYPT'] = 1                                                # [RFC 7401]
-    CipherID['AES-128-CBC'] = 2                                                 # [RFC 7401]
-    CipherID['RESERVED [3]'] = 3                                                # [RFC 7401]
-    CipherID['AES-256-CBC'] = 4                                                 # [RFC 7401]
+    CipherID['RESERVED [0]'] = 0                                                # [RFC 7401]
+    CipherID['NULL-ENCRYPT'] = 1                                                # [RFC 7401]
+    CipherID['AES-128-CBC'] = 2                                                 # [RFC 7401]
+    CipherID['RESERVED [3]'] = 3                                                # [RFC 7401]
+    CipherID['AES-256-CBC'] = 4                                                 # [RFC 7401]
 
     @staticmethod
     def get(key, default=-1):

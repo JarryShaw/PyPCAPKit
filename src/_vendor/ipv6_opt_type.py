@@ -16,37 +16,37 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
 # -*- coding: utf-8 -*-
 
 
 from aenum import IntEnum, extend_enum
 
 
-class {NAME}(IntEnum):
-    """Enumeration class for {NAME}."""
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
+class {}(IntEnum):
+    """Enumeration class for {}."""
+    _ignore_ = '{} _'
+    {} = vars()
 
-    # {DOCS}
-    {ENUM}
+    # {}
+    {}
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return {NAME}(key)
-        if key not in {NAME}._member_map_:
-            extend_enum({NAME}, key, default)
-        return {NAME}[key]
+            return {}(key)
+        if key not in {}._member_map_:
+            extend_enum({}, key, default)
+        return {}[key]
 
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not ({FLAG}):
+        if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {MISS}
-'''
+        {}
+''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
 
 
 ###############
@@ -59,13 +59,13 @@ DOCS = 'Destination Options and Hop-by-Hop Options'
 FLAG = 'isinstance(value, int) and 0x00 <= value <= 0xFF'
 LINK = 'https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-2.csv'
 DATA = {
-    0x00 : ('pad', 'Pad1'),                                         # [RFC 8200] 0
-    0x01 : ('padn', 'PadN'),                                        # [RFC 8200]
+    0x00 : ('pad', 'Pad1'),                                         # [RFC 8200] 0
+    0x01 : ('padn', 'PadN'),                                        # [RFC 8200]
     0x04 : ('tun', 'Tunnel Encapsulation Limit'),                   # [RFC 2473] 1
     0x05 : ('ra', 'Router Alert'),                                  # [RFC 2711] 2
     0x07 : ('calipso', 'Common Architecture Label IPv6 Security Option'),
                                                                     # [RFC 5570]
-    0x08 : ('smf_dpd', 'Simplified Multicast Forwarding'),          # [RFC 6621]
+    0x08 : ('smf_dpd', 'Simplified Multicast Forwarding'),          # [RFC 6621]
     0x0F : ('pdm', 'Performance and Diagnostic Metrics'),           # [RFC 8250] 10
     0x26 : ('qs', 'Quick-Start'),                                   # [RFC 4782][RFC Errata 2034] 6
     0x63 : ('rpl', 'Routing Protocol for Low-Power and Lossy Networks'),
@@ -94,7 +94,7 @@ record = collections.Counter(map(lambda item: item[4], reader))
 
 def rename(name, code, *, original):
     if record[original] > 1:
-        return f'{name} [{code}]'
+        return ('{} [{}]').format((name), (code))
     return name
 
 reader = csv.reader(data)
@@ -116,20 +116,20 @@ for item in reader:
     for rfc in filter(None, re.split(r'\[|\]', rfcs)):
         if re.match(r'\d+', rfc):   continue
         if 'RFC' in rfc:
-            temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+            temp.append(('[{} {}]').format((rfc[:3]), (rfc[3:])))
         else:
-            temp.append(f'[{rfc}]')
-    desc = f"# {''.join(temp)}" if rfcs else ''
+            temp.append(('[{}]').format((rfc)))
+    desc = ("# {}").format((''.join(temp))) if rfcs else ''
 
     splt = re.split(r' \[\d+\]', dscp)[0]
     subn = re.sub(r'.* \((.*)\)', r'\1', splt)
     name = DATA.get(int(code, base=16), (str(),))[0].upper() or subn
     renm = rename(name or 'Unassigned', code, original=dscp)
 
-    pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
+    pres = ("{}[{!r}] = {}").format((NAME), (renm), (code)).ljust(76)
     sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
-    enum.append(f'{pres}{sufs}')
+    enum.append(('{}{}').format((pres), (sufs)))
 
 
 ###############
@@ -139,5 +139,5 @@ for item in reader:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, f'../_common/{FILE}'), 'w') as file:
+with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

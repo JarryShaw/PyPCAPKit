@@ -11,8 +11,8 @@ class RegType(IntEnum):
 
     # Registration Types
     RegType['Unassigned'] = 0
-    RegType['RENDEZVOUS'] = 1                                                   # [RFC 8004]
-    RegType['RELAY_UDP_HIP'] = 2                                                # [RFC 5770]
+    RegType['RENDEZVOUS'] = 1                                                   # [RFC 8004]
+    RegType['RELAY_UDP_HIP'] = 2                                                # [RFC 5770]
 
     @staticmethod
     def get(key, default=-1):
@@ -32,7 +32,7 @@ class RegType(IntEnum):
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
         if 201 <= value <= 255:
-            # [RFC 8003]
+            # [RFC 8003]
             extend_enum(cls, 'Reserved for Private Use [%d]' % value, value)
             return cls(value)
         super()._missing_(value)

@@ -23,7 +23,7 @@ def get_parser():
     parser = argparse.ArgumentParser(prog='pcapkit', description=(
         'PCAP file extractor and formatted dumper'
     ))
-    parser.add_argument('-V', '--version', action='version', version=f'{__version__}')
+    parser.add_argument('-V', '--version', action='version', version=__version__)
     parser.add_argument('fin', metavar='input-file-name',
                         help=(
                             'The name of input pcap file. If ".pcap" omits, '
@@ -106,10 +106,10 @@ def main():
                             engine=args.engine, extension=args.auto_extension)
 
     if not args.verbose:
-        print(f"🚨 Loading file '{extractor.input}'")
+        print(("[x] Loading file {!r}").format((extractor.input)))
         for frame in extractor:
-            print(f' - Frame {extractor.length:>3d}: {extractor.protocol}')
-        print(f"🍺 Report file{'s' if args.files else ''} stored in '{extractor.output}'")
+            print((' - Frame {:>3d}: {}').format((extractor.length), (extractor.protocol)))
+        print(("[+] Report file{} stored in {!r}").format(('s' if args.files else ''), (extractor.output)))
 
 
 if __name__ == '__main__':

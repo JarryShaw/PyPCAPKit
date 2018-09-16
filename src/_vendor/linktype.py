@@ -14,37 +14,37 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
 # -*- coding: utf-8 -*-
 
 
 from aenum import IntEnum, extend_enum
 
 
-class {NAME}(IntEnum):
-    """Enumeration class for {NAME}."""
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
+class {}(IntEnum):
+    """Enumeration class for {}."""
+    _ignore_ = '{} _'
+    {} = vars()
 
-    # {DOCS}
-    {ENUM}
+    # {}
+    {}
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return {NAME}(key)
-        if key not in {NAME}._member_map_:
-            extend_enum({NAME}, key, default)
-        return {NAME}[key]
+            return {}(key)
+        if key not in {}._member_map_:
+            extend_enum({}, key, default)
+        return {}[key]
 
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not ({FLAG}):
+        if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {MISS}
-'''
+        {}
+''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
 
 
 ###############
@@ -81,20 +81,20 @@ for content in content:
     try:
         code, _ = temp, int(temp)
 
-        pres = f"{NAME}[{name!r}] = {code}".ljust(76)
-        sufs = f"# {desc}"
+        pres = ("{}[{!r}] = {}").format((NAME), (name), (code)).ljust(76)
+        sufs = ("# {}").format((desc))
 
-        enum.append(f'{pres}{sufs}')
+        enum.append(('{}{}').format((pres), (sufs)))
     except ValueError:
         start, stop = map(int, temp.split('-'))
         for code in range(start, stop+1):
-            name = f'USER{code-start}'
+            name = ('USER{}').format((code-start))
             desc = 'DLT_USER{code-start}'
 
-            pres = f"{NAME}[{name!r}] = {code}".ljust(76)
-            sufs = f"# {desc}"
+            pres = ("{}[{!r}] = {}").format((NAME), (name), (code)).ljust(76)
+            sufs = ("# {}").format((desc))
 
-            enum.append(f'{pres}{sufs}')
+            enum.append(('{}{}').format((pres), (sufs)))
 
 
 ###############
@@ -104,5 +104,5 @@ for content in content:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, f'../_common/{FILE}'), 'w') as file:
+with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

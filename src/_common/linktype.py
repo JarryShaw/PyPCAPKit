@@ -124,6 +124,7 @@ class LinkType(IntEnum):
     LinkType['ETHERNET_MPACKET'] = 274                                          # DLT_ETHERNET_MPACKET
     LinkType['DISPLAYPORT_AUX'] = 275                                           # DLT_DISPLAYPORT_AUX
     LinkType['LINUX_SLL2'] = 276                                                # DLT_LINUX_SLL2
+    LinkType['OPENVIZSLA'] = 278                                                # DLT_OPENVIZSLA
 
     @staticmethod
     def get(key, default=-1):

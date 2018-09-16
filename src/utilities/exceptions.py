@@ -6,7 +6,7 @@ possible to show only user error stack infomation, when
 exception raised on user's operation.
 
 """
-import pathlib
+import os
 import struct
 import sys
 import traceback
@@ -18,13 +18,14 @@ __all__ = [
     'BoolError', 'BytesError', 'StringError', 'BytearrayError', # TypeError
     'DictError', 'ListError', 'TupleError', 'IterableError',    # TypeError
     'IOObjError', 'ProtocolUnbound', 'CallableError',           # TypeError
-    'InfoError', 'IPError', 'EnumError',                        # TypeError
+    'InfoError', 'IPError', 'EnumError', 'ComparisonError',     # TypeError
     'FormatError', 'UnsupportedCall',                           # AttributeError
     'FileError',                                                # IOError
     'FileExists',                                               # FileExistsError
     'FileNotFound',                                             # FileNotFoundError
     'ProtocolNotFound',                                         # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',           # ValueError
+    'EndianError',                                              # ValueError
     'ProtocolNotImplemented',                                   # NotImplementedError
     'StructError',                                              # struct.error
     'FragmentError', 'PacketError',                             # KeyError
@@ -35,10 +36,10 @@ __all__ = [
 
 def stacklevel():
     """Fetch curent stack level."""
+    pcapkit = ('{}pcapkit{}').format((os.path.sep), (os.path.sep))
     tb = traceback.extract_stack()
-    for tbitem in tb:
-        if pathlib.Path(tbitem[0]).match('pcapkit'):
-            index = tb.index(tbitem)
+    for index, tbitem in enumerate(tb):
+        if pcapkit in tbitem[0]:
             break
     else:
         index = len(tb)
@@ -60,15 +61,16 @@ class BaseError(Exception):
         * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
-    def __init__(self, message=None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         index = stacklevel()
         quiet = kwargs.pop('quiet', False)
         if not quiet and index:
-            print('Traceback (most recent call last):')
-            traceback.print_stack(limit=-index)
+            fmt_exc = traceback.format_exc(limit=-index)
+            if len(fmt_exc.splitlines(True)) > 1:
+                print(fmt_exc, file=sys.stderr)
 
         sys.tracebacklimit = 0
-        super().__init__(message, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
 
 ##############################################################################
@@ -166,6 +168,11 @@ class EnumError(BaseError, TypeError):
     pass
 
 
+class ComparisonError(BaseError, TypeError):
+    """Rich comparison not supported between instances."""
+    pass
+
+
 ##############################################################################
 # AttributeError session.
 ##############################################################################
@@ -187,8 +194,9 @@ class UnsupportedCall(BaseError, AttributeError):
 
 
 class FileError(BaseError, IOError):
-    """Wrong file format."""
-    pass
+    """[Errno 5] Wrong file format."""
+    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 
 ##############################################################################
@@ -197,8 +205,9 @@ class FileError(BaseError, IOError):
 
 
 class FileExists(BaseError, FileExistsError):
-    """File already exists."""
-    pass
+    """[Errno 17] File already exists."""
+    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 
 ##############################################################################
@@ -207,8 +216,9 @@ class FileExists(BaseError, FileExistsError):
 
 
 class FileNotFound(BaseError, FileNotFoundError):
-    """File not found."""
-    pass
+    """[Errno 2] File not found."""
+    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 
 ##############################################################################
@@ -239,6 +249,12 @@ class IndexNotFound(BaseError, ValueError):
 class ProtocolError(BaseError, ValueError):
     """Invalid protocol format."""
     pass
+
+
+class EndianError(BaseError, ValueError):
+    """Invalid endian (byte order)."""
+    pass
+
 
 ##############################################################################
 # NotImplementedError session.
@@ -282,4 +298,5 @@ class PacketError(BaseError, KeyError):
 
 class ModuleNotFound(BaseError, ModuleNotFoundError):
     """Module not found."""
-    pass
+    def __init__(self, msg=None, *args, name=None, path=None, **kwargs):
+        super().__init__(msg, *args, name=name, path=path, **kwargs)

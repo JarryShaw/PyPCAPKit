@@ -10,9 +10,9 @@ class ECDSA(IntEnum):
     ECDSA = vars()
 
     # ECDSA Curve Label
-    ECDSA['RESERVED'] = 0                                                       # [RFC 7401]
-    ECDSA['NIST P-256'] = 1                                                     # [RFC 7401]
-    ECDSA['NIST P-384'] = 2                                                     # [RFC 7401]
+    ECDSA['RESERVED'] = 0                                                       # [RFC 7401]
+    ECDSA['NIST P-256'] = 1                                                     # [RFC 7401]
+    ECDSA['NIST P-384'] = 2                                                     # [RFC 7401]
 
     @staticmethod
     def get(key, default=-1):

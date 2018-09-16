@@ -16,10 +16,8 @@ typedef struct pcaprec_hdr_s {
 import datetime
 import io
 import os
-import re
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder
 
@@ -73,7 +71,7 @@ class Frame(Protocol):
     @property
     def name(self):
         """Name of corresponding protocol."""
-        return f'Frame {self._fnum}'
+        return ('Frame {}').format((self._fnum))
 
     @property
     def length(self):
@@ -109,7 +107,10 @@ class Frame(Protocol):
         _ilen = self._read_unpack(4, lilendian=True)
         _olen = self._read_unpack(4, lilendian=True)
 
-        _epch = float(f'{_tsss}.{_tsus}')
+        if self._nsec:
+            _epch = _tsss + _tsus / 1_000_000_000
+        else:
+            _epch = _tsss + _tsus / 1_000_000
         _time = datetime.datetime.fromtimestamp(_epch)
 
         frame = dict(
@@ -148,16 +149,15 @@ class Frame(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, *, num, proto, **kwrags):
+    def __init__(self, file, *, num, proto, nanosecond, **kwrags):
         self._fnum = num
         self._file = file
         self._prot = proto
+        self._nsec = nanosecond
         self._mpfp = kwrags.pop('mpfdp', None)
         self._mpkt = kwrags.pop('mpkit', None)
         self._info = Info(self.read_frame())
-        for attr in dir(self):
-            if re.match('^_mp.*', attr):
-                delattr(self, attr)
+        [ delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self)) ]
 
     def __length_hint__(self):
         return 16
@@ -165,9 +165,10 @@ class Frame(Protocol):
     def __getitem__(self, key):
         # if requests attributes in info dict,
         # else call the original function
-        if key in self._info:
+        try:
             return self._info[key]
-        return super().__getitem__(key)
+        except KeyError:
+            return super().__getitem__(key)
 
         # def _getitem_from_ProtoChain(key):
         #     proto = self._protos[key]
@@ -248,11 +249,11 @@ class Frame(Protocol):
 
         # make next layer protocol name
         layer = next_.alias.lower()
-        proto = next_.__class__.__name__
+        # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
         self._next = next_
-        self._protos = ProtoChain(proto, chain, alias)
+        self._protos = chain
         dict_[layer] = info
         dict_['protocols'] = self._protos.chain
         return dict_

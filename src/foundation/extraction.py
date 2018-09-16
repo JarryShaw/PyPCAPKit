@@ -18,6 +18,7 @@ import os
 import pathlib
 import random
 import re
+import sys
 import textwrap
 import time
 import traceback
@@ -59,6 +60,7 @@ from pcapkit.utilities.warnings import FormatWarning, EngineWarning, \
 
 
 __all__ = ['Extractor']
+__fmt__ = format
 
 
 # check list
@@ -156,7 +158,7 @@ class Extractor:
     @property
     def info(self):
         if self._exeng in ('scapy', 'pyshark'):
-            raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'info'")
+            raise UnsupportedCall(("'Extractor(engine={})' object has no attribute 'info'").format((self._exeng)))
         return self._vinfo
 
     @property
@@ -182,13 +184,13 @@ class Extractor:
     @property
     def header(self):
         if self._exeng in ('scapy', 'pyshark'):
-            raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'header'")
+            raise UnsupportedCall(("'Extractor(engine={})' object has no attribute 'header'").format((self._exeng)))
         return self._gbhdr
 
     @property
     def protocol(self):
         if self._flag_a:
-            raise UnsupportedCall(f"'Extractor(auto=True)' object has no attribute 'protocol'")
+            raise UnsupportedCall(("'Extractor(auto=True)' object has no attribute 'protocol'").format(()))
         return self._proto
 
     @property
@@ -237,19 +239,19 @@ class Extractor:
             self._flag_m = tempflag = bool(flag and (self._flag_a and CPU_CNT > 1))
             if self._flag_m:
                 return self._run_pipeline(engine)
-            warnings.warn(f'extraction engine Pipeline Multiprocessing is not available; '
-                            'using default engine instead', EngineWarning, stacklevel=stacklevel())
+            warnings.warn(('extraction engine Pipeline Multiprocessing is not available; '
+                            'using default engine instead').format(()), EngineWarning, stacklevel=stacklevel())
         elif self._exeng == 'server':
             flag, engine = self.import_test('multiprocessing', name='Server Multiprocessing')
             self._flag_m = tempflag = bool(flag and (self._flag_a and CPU_CNT > 2))
             if self._flag_m:
                 return self._run_server(engine)
-            warnings.warn(f'extraction engine Server Multiprocessing is not available; '
-                            'using default engine instead', EngineWarning, stacklevel=stacklevel())
+            warnings.warn(('extraction engine Server Multiprocessing is not available; '
+                            'using default engine instead').format(()), EngineWarning, stacklevel=stacklevel())
         elif self._exeng not in ('default', 'pcapkit'):
             flag = False
-            warnings.warn(f'unsupported extraction engine: {self._exeng}; '
-                            'using default engine instead',
+            warnings.warn(('unsupported extraction engine: {}; '
+                            'using default engine instead').format((self._exeng)),
                             EngineWarning, stacklevel=stacklevel())
 
         # using default/pcapkit engine
@@ -261,7 +263,7 @@ class Extractor:
         layer = self._exlyr
         if layer is not None:
             if layer not in LAYER_LIST:
-                warnings.warn(f'unrecognised layer: {layer}',
+                warnings.warn(('unrecognised layer: {}').format((layer)),
                                 LayerWarning, stacklevel=stacklevel())
 
         protocol = self._exptl
@@ -269,7 +271,7 @@ class Extractor:
             def check_protocol(*args):
                 for arg in args:
                     if arg.lower() not in PROTO_LIST:
-                        warnings.warn(f'unrecognised protocol: {protocol}',
+                        warnings.warn(('unrecognised protocol: {}').format((protocol)),
                                         ProtocolWarning, stacklevel=stacklevel())
             if isinstance(protocol, tuple): check_protocol(*protocol)
             else:                           check_protocol(protocol)
@@ -280,8 +282,8 @@ class Extractor:
             engine = importlib.import_module(engine)
             return True, engine
         except ImportError:
-            warnings.warn(f"extraction engine '{name or engine}' not available; "
-                            'using default engine instead', EngineWarning, stacklevel=stacklevel())
+            warnings.warn(("extraction engine '{}' not available; "
+                            'using default engine instead').format((name or engine)), EngineWarning, stacklevel=stacklevel())
         return False, None
 
     @classmethod
@@ -290,12 +292,12 @@ class Extractor:
             ifnm = 'in.pcap'
         else:
             if extension:
-                ifnm = fin if os.path.splitext(fin)[1] == '.pcap' else f'{fin}.pcap'
+                ifnm = fin if os.path.splitext(fin)[1] == '.pcap' else ('{}.pcap').format((fin))
             else:
                 ifnm = fin
 
         if not os.path.isfile(ifnm):
-            raise FileNotFound(f"[Errno 2] No such file or directory: '{ifnm}'")
+            raise FileNotFound(2, 'No such file or directory', ifnm)
 
         if nofile:
             ofnm = None
@@ -314,7 +316,7 @@ class Extractor:
                     ofnm = 'out'
                     pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
                 else:
-                    ofnm = f'out.{ext}'
+                    ofnm = ('out.{}').format((ext))
             else:
                 name, fext = os.path.splitext(fout)
                 pathlib.Path(fout).parent.mkdir(parents=True, exist_ok=True)
@@ -329,7 +331,7 @@ class Extractor:
                 elif files:
                     ofnm = fout
                     pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
-                elif extension: ofnm = f'{fout}.{ext}'
+                elif extension: ofnm = ('{}.{}').format((fout), (ext))
                 else:           ofnm = fout
 
         return ifnm, ofnm, fmt, ext, files
@@ -344,11 +346,17 @@ class Extractor:
 
         """
         self._gbhdr = Header(self._ifile)
-        self._dlink = self._gbhdr.protocol
         self._vinfo = self._gbhdr.version
+        self._dlink = self._gbhdr.protocol
+        self._nnsec = self._gbhdr.nanosecond
+
+        if self._trace is not NotImplemented:
+            self._trace._endian = self._gbhdr.byteorder
+            self._trace._nnsecd = self._gbhdr.nanosecond
+
         if not self._flag_q:
             if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/Global Header.{self._fext}')
+                ofile = self._ofile(('{}/Global Header.{}').format((self._ofnm), (self._fext)))
                 ofile(self._gbhdr.info, name='Global Header')
                 self._type = ofile.kind
             else:
@@ -378,7 +386,8 @@ class Extractor:
                     files=False, nofile=False, verbose=False,                   # output settings
                     engine=None, layer=None, protocol=None,                     # extraction settings
                     ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
-                    trace=False, trace_fout=None, trace_format=None):           # trace settings
+                    trace=False, trace_fout=None, trace_format=None,            # trace settings
+                    trace_byteorder=sys.byteorder, trace_nanosecond=False):     # trace settings
         """Initialise PCAP Reader.
 
         Keyword arguments:
@@ -424,10 +433,16 @@ class Extractor:
             * trace_fout -- str, path name for flow tracer if necessary
             * trace_format -- str, output file format of flow tracer
                             <keyword> 'plist' / 'json' / 'tree' / 'html' / 'pcap'
+            * trace_byteorder -- str, output file byte order
+                            <keyword> 'little' / 'big'
+            * trace_nanosecond -- bool, output nanosecond-resolution file flag
+                            <keyword> True / False
+
 
         """
         ifnm, ofnm, fmt, ext, files = \
             self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
+        format = __fmt__
 
         self._ifnm = ifnm               # input file name
         self._ofnm = ofnm               # output file name
@@ -470,10 +485,10 @@ class Extractor:
         if trace:
             from pcapkit.foundation.traceflow import TraceFlow
             if self._exeng in ('pyshark',) and re.fullmatch('pcap', str(trace_format), re.IGNORECASE):
-                warnings.warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
-                                f"using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
+                warnings.warn(("'Extractor(engine={})' does not support 'trace_format={}'; "
+                                "using 'trace_format=None' instead").format((self._exeng), (trace_format)), FormatWarning, stacklevel=stacklevel())
                 trace_format = None
-            self._trace = TraceFlow(fout=trace_fout, format=trace_format)
+            self._trace = TraceFlow(fout=trace_fout, format=trace_format, byteorder=trace_byteorder, nanosecond=trace_nanosecond)
 
         self._ifile = open(ifnm, 'rb')                      # input file
         if not self._flag_q:
@@ -490,15 +505,15 @@ class Extractor:
             else:
                 from pcapkit.dumpkit import NotImplementedIO as output
                                                             # no output file
-                warnings.warn(f'unsupported output format: {fmt}; '
-                                'disabled file output feature',
+                warnings.warn(('unsupported output format: {}; '
+                                'disabled file output feature').format((fmt)),
                                 FormatWarning, stacklevel=stacklevel())
             class DictDumper(output):
                 @classmethod
                 def object_hook(cls, obj):
                     import enum, aenum
                     if isinstance(obj, (enum.IntEnum, aenum.IntEnum)):
-                        return f'No.{obj.value} {obj.name}'
+                        return ('No.{} {}').format((obj.value), (obj.name))
                     if isinstance(obj, ipaddress._BaseAddress):
                         return str(obj)
                     if isinstance(obj, Info):
@@ -606,18 +621,18 @@ class Extractor:
         # read frame header
         if not self._flag_m:
             frame = Frame(self._ifile, num=self._frnum+1, proto=self._dlink,
-                            layer=self._exlyr, protocol=self._exptl)
+                            layer=self._exlyr, protocol=self._exptl, nanosecond=self._nnsec)
             self._frnum += 1
 
         # verbose output
         if self._flag_v:
-            print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
+            print((' - Frame {:>3d}: {}').format((self._frnum), (frame.protochain)))
 
         # write plist
-        frnum = f'Frame {self._frnum}'
+        frnum = ('Frame {}').format((self._frnum))
         if not self._flag_q:
             if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                ofile = self._ofile(('{}/{}.{}').format((self._ofnm), (frnum), (self._fext)))
                 ofile(frame.info, name=frnum)
             else:
                 self._ofile(frame.info, name=frnum)
@@ -668,8 +683,8 @@ class Extractor:
         #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
         if self._exlyr != 'None' or self._exptl != 'null':
-            warnings.warn("'Extractor(engine=scapy)' does not support protocol and layer threshold; "
-                            f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored", AttributeWarning, stacklevel=stacklevel())
+            warnings.warn(("'Extractor(engine=scapy)' does not support protocol and layer threshold; "
+                            "'layer={}' and 'protocol={}' ignored").format((self._exlyr), (self._exptl)), AttributeWarning, stacklevel=stacklevel())
 
         # extract & analyse file
         self._expkg = scapy_all
@@ -690,14 +705,14 @@ class Extractor:
         self._frnum += 1
         self._proto = packet2chain(packet)
         if self._flag_v:
-            print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            print((' - Frame {:>3d}: {}').format((self._frnum), (self._proto)))
 
         # write plist
-        frnum = f'Frame {self._frnum}'
+        frnum = ('Frame {}').format((self._frnum))
         if not self._flag_q:
             info = packet2dict(packet)
             if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                ofile = self._ofile(('{}/{}.{}').format((self._ofnm), (frnum), (self._fext)))
                 ofile(info, name=frnum)
             else:
                 self._ofile(info, name=frnum)
@@ -734,8 +749,8 @@ class Extractor:
         #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
         if self._exlyr != 'None' or self._exptl != 'null':
-            warnings.warn("'Extractor(engine=dpkt)' does not support protocol and layer threshold; "
-                            f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored", AttributeWarning, stacklevel=stacklevel())
+            warnings.warn(("'Extractor(engine=dpkt)' does not support protocol and layer threshold; "
+                            "'layer={}' and 'protocol={}' ignored").format((self._exlyr), (self._exptl)), AttributeWarning, stacklevel=stacklevel())
 
         # extract global header
         self.record_header()
@@ -775,14 +790,14 @@ class Extractor:
         self._frnum += 1
         self._proto = packet2chain(packet)
         if self._flag_v:
-            print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            print((' - Frame {:>3d}: {}').format((self._frnum), (self._proto)))
 
         # write plist
-        frnum = f'Frame {self._frnum}'
+        frnum = ('Frame {}').format((self._frnum))
         if not self._flag_q:
             info = packet2dict(packet, timestamp, data_link=self._dlink)
             if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                ofile = self._ofile(('{}/{}.{}').format((self._ofnm), (frnum), (self._fext)))
                 ofile(info, name=frnum)
             else:
                 self._ofile(info, name=frnum)
@@ -819,14 +834,14 @@ class Extractor:
         #                     "so 'auto=False' will be ignored", AttributeWarning, stacklevel=stacklevel())
 
         if self._exlyr != 'None' or self._exptl != 'null':
-            warnings.warn("'Extractor(engine=pyshark)' does not support protocol and layer threshold; "
-                            f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored", AttributeWarning, stacklevel=stacklevel())
+            warnings.warn(("'Extractor(engine=pyshark)' does not support protocol and layer threshold; "
+                            "'layer={}' and 'protocol={}' ignored").format((self._exlyr), (self._exptl)), AttributeWarning, stacklevel=stacklevel())
 
         if (self._ipv4 or self._ipv6 or self._tcp):
             self._ipv4 = self._ipv6 = self._tcp = False
             self._reasm = [None] * 3
-            warnings.warn(f"'Extractor(engine=pyshark)' object dose not support reassembly; "
-                            f"so 'ipv4={self._ipv4}', 'ipv6={self._ipv6}' and 'tcp={self._tcp}' will be ignored",
+            warnings.warn(("'Extractor(engine=pyshark)' object dose not support reassembly; "
+                            "so 'ipv4={}', 'ipv6={}' and 'tcp={}' will be ignored").format((self._ipv4), (self._ipv6), (self._tcp)),
                             AttributeWarning, stacklevel=stacklevel())
 
         # extract & analyse file
@@ -851,14 +866,14 @@ class Extractor:
         self._frnum = int(packet.number)
         self._proto = packet.frame_info.protocols
         if self._flag_v:
-            print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            print((' - Frame {:>3d}: {}').format((self._frnum), (self._proto)))
 
         # write plist
-        frnum = f'Frame {self._frnum}'
+        frnum = ('Frame {}').format((self._frnum))
         if not self._flag_q:
             info = packet2dict(packet)
             if self._flag_f:
-                ofile = self._ofile(f'{self._ofnm}/{frnum}.{self._fext}')
+                ofile = self._ofile(('{}/{}.{}').format((self._ofnm), (frnum), (self._fext)))
                 ofile(info, name=frnum)
             else:
                 self._ofile(info, name=frnum)
@@ -878,12 +893,12 @@ class Extractor:
     def _run_pipeline(self, multiprocessing):
         """Use pipeline multiprocessing to extract PCAP files."""
         if not self._flag_m:
-            raise UnsupportedCall(f"Extractor(engine={self._exeng})' has no attribute '_run_pipline'")
+            raise UnsupportedCall(("Extractor(engine={})' has no attribute '_run_pipline'").format((self._exeng)))
 
         if not self._flag_q:
             self._flag_q = True
-            warnings.warn("'Extractor(engine=pipeline)' does not support output; "
-                            f"'fout={self._ofnm}' ignored", AttributeWarning, stacklevel=stacklevel())
+            warnings.warn(("'Extractor(engine=pipeline)' does not support output; "
+                            "'fout={}' ignored").format((self._ofnm)), AttributeWarning, stacklevel=stacklevel())
 
         self._frnum = 1                                 # frame number (revised)
         self._expkg = multiprocessing                   # multiprocessing module
@@ -962,7 +977,7 @@ class Extractor:
         try:
             # extraction
             frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
-                            layer=self._exlyr, protocol=self._exptl,
+                            layer=self._exlyr, protocol=self._exptl, nanosecond=self._nnsec,
                             mpkit=mpkit, mpfdp=mpfdp)
             # analysis
             _analyse_frame(frame=frame, mpkit=mpkit)
@@ -976,12 +991,12 @@ class Extractor:
     def _run_server(self, multiprocessing):
         """Use server multiprocessing to extract PCAP files."""
         if not self._flag_m:
-            raise UnsupportedCall(f"Extractor(engine={self._exeng})' has no attribute '_run_server'")
+            raise UnsupportedCall(("Extractor(engine={})' has no attribute '_run_server'").format((self._exeng)))
 
         if not self._flag_q:
             self._flag_q = True
-            warnings.warn("'Extractor(engine=pipeline)' does not support output; "
-                            f"'fout={self._ofnm}' ignored", AttributeWarning, stacklevel=stacklevel())
+            warnings.warn(("'Extractor(engine=pipeline)' does not support output; "
+                            "'fout={}' ignored").format((self._ofnm)), AttributeWarning, stacklevel=stacklevel())
 
         self._frnum = 1                                 # frame number (revised)
         self._expkg = multiprocessing                   # multiprocessing module
@@ -1047,7 +1062,7 @@ class Extractor:
         # extract frame
         try:
             frame = Frame(self._ifile, num=self._frnum, proto=self._dlink,
-                            layer=self._exlyr, protocol=self._exptl,
+                            layer=self._exlyr, protocol=self._exptl, nanosecond=self._nnsec,
                             mpkit=mpkit, mpfdp=mpfdp)
             # frame._file = NotImplemented
             mpbuf[self._frnum] = frame

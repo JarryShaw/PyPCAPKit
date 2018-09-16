@@ -7,11 +7,14 @@ arguments for functions and classes. It was first used in
 validators.
 
 """
+# TODO: considering reconstructing validations with `typing` module
+import _io
+import collections.abc
 import enum
 import inspect
-import io
 import ipaddress
 import numbers
+import typing
 
 import aenum
 
@@ -34,7 +37,7 @@ def int_check(*args, func=None):
     for var in args:
         if not isinstance(var, numbers.Integral):
             name = type(var).__name__
-            raise ComplexError(f'Function {func} expected integral number, {name} got instead.')
+            raise ComplexError(('Function {} expected integral number, {} got instead.').format((func), (name)))
 
 
 def real_check(*args, func=None):
@@ -43,7 +46,7 @@ def real_check(*args, func=None):
     for var in args:
         if not isinstance(var, numbers.Real):
             name = type(var).__name__
-            raise ComplexError(f'Function {func} expected real number, {name} got instead.')
+            raise ComplexError(('Function {} expected real number, {} got instead.').format((func), (name)))
 
 
 def complex_check(*args, func=None):
@@ -52,7 +55,7 @@ def complex_check(*args, func=None):
     for var in args:
         if not isinstance(var, numbers.Complex):
             name = type(var).__name__
-            raise ComplexError(f'Function {func} expected complex number, {name} got instead.')
+            raise ComplexError(('Function {} expected complex number, {} got instead.').format((func), (name)))
 
 
 def number_check(*args, func=None):
@@ -61,34 +64,34 @@ def number_check(*args, func=None):
     for var in args:
         if not isinstance(var, numbers.Number):
             name = type(var).__name__
-            raise DigitError(f'Function {func} expected number, {name} got instead.')
+            raise DigitError(('Function {} expected number, {} got instead.').format((func), (name)))
 
 
 def bytes_check(*args, func=None):
     """Check if arguments are bytes type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, bytes):
+        if not isinstance(var, (bytes, collections.abc.ByteString)):
             name = type(var).__name__
-            raise BytesError(f'Function {func} expected bytes, {name} got instead.')
+            raise BytesError(('Function {} expected bytes, {} got instead.').format((func), (name)))
 
 
 def bytearray_check(*args, func=None):
     """Check if arguments are bytearray type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, bytearray):
+        if not isinstance(var, (bytearray, collections.abc.ByteString, collections.abc.MutableSequence)):
             name = type(var).__name__
-            raise BytearrayError(f'Function {func} expected bytearray, {name} got instead.')
+            raise BytearrayError(('Function {} expected bytearray, {} got instead.').format((func), (name)))
 
 
 def str_check(*args, func=None):
     """Check if arguments are str type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, str):
+        if not isinstance(var, (str, collections.UserString, collections.abc.Sequence)):
             name = type(var).__name__
-            raise StringError(f'Function {func} expected str, {name} got instead.')
+            raise StringError(('Function {} expected str, {} got instead.').format((func), (name)))
 
 
 def bool_check(*args, func=None):
@@ -97,43 +100,43 @@ def bool_check(*args, func=None):
     for var in args:
         if not isinstance(var, bool):
             name = type(var).__name__
-            raise BoolError(f'Function {func} expected bool, {name} got instead.')
+            raise BoolError(('Function {} expected bool, {} got instead.').format((func), (name)))
 
 
 def list_check(*args, func=None):
     """Check if arguments are list type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, list):
+        if not isinstance(var, (list, collections.UserList, collections.abc.MutableSequence)):
             name = type(var).__name__
-            raise ListError(f'Function {func} expected list, {name} got instead.')
+            raise ListError(('Function {} expected list, {} got instead.').format((func), (name)))
 
 
 def dict_check(*args, func=None):
     """Check if arguments are dict type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, dict):
+        if not isinstance(var, (dict, collections.UserDict, collections.abc.MutableMapping)):
             name = type(var).__name__
-            raise DictError(f'Function {func} expected dict, {name} got instead.')
+            raise DictError(('Function {} expected dict, {} got instead.').format((func), (name)))
 
 
 def tuple_check(*args, func=None):
     """Check if arguments are tuple type."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, tuple):
+        if not isinstance(var, (tuple, collections.abc.Sequence)):
             name = type(var).__name__
-            raise TupleError(f'Function {func} expected tuple, {name} got instead.')
+            raise TupleError(('Function {} expected tuple, {} got instead.').format((func), (name)))
 
 
 def io_check(*args, func=None):
     """Check if arguments are file-like object."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, io.IOBase):
+        if not isinstance(var, _io._IOBase):
             name = type(var).__name__
-            raise IOObjError(f'Function {func} expected file-like object, {name} got instead.')
+            raise IOObjError(('Function {} expected file-like object, {} got instead.').format((func), (name)))
 
 
 def info_check(*args, func=None):
@@ -144,7 +147,7 @@ def info_check(*args, func=None):
     for var in args:
         if not isinstance(var, Info):
             name = type(var).__name__
-            raise IOObjError(f'Function {func} expected Info instance, {name} got instead.')
+            raise InfoError(('Function {} expected Info instance, {} got instead.').format((func), (name)))
 
 
 def ip_check(*args, func=None):
@@ -153,7 +156,7 @@ def ip_check(*args, func=None):
     for var in args:
         if not isinstance(var, ipaddress._IPAddressBase):
             name = type(var).__name__
-            raise IPError(f'Function {func} expected IP address, {name} got instead.')
+            raise IPError(('Function {} expected IP address, {} got instead.').format((func), (name)))
 
 
 def proto_check(*args, func=None):
@@ -162,7 +165,7 @@ def proto_check(*args, func=None):
     for var in args:
         if not isinstance(var, (enum.EnumMeta, anum.EnumMeta)):
             name = type(var).__name__
-            raise EnumError(f'Function {func} expected enumeration, {name} got instead.')
+            raise EnumError(('Function {} expected enumeration, {} got instead.').format((func), (name)))
 
 
 def frag_check(*args, protocol, func=None):
@@ -173,7 +176,7 @@ def frag_check(*args, protocol, func=None):
     elif 'TCP' in protocol:
         _tcp_frag_check(*args, func=func)
     else:
-        raise FragmentError(f'Unknown fragmented protocol {protocol}.')
+        raise FragmentError(('Unknown fragmented protocol {}.').format((protocol)))
 
 
 def _ip_frag_check(*args, func=None):

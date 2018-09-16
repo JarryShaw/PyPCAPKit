@@ -16,37 +16,37 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
 # -*- coding: utf-8 -*-
 
 
 from aenum import IntEnum, extend_enum
 
 
-class {NAME}(IntEnum):
-    """Enumeration class for {NAME}."""
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
+class {}(IntEnum):
+    """Enumeration class for {}."""
+    _ignore_ = '{} _'
+    {} = vars()
 
-    # {DOCS}
-    {ENUM}
+    # {}
+    {}
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return {NAME}(key)
-        if key not in {NAME}._member_map_:
-            extend_enum({NAME}, key, default)
-        return {NAME}[key]
+            return {}(key)
+        if key not in {}._member_map_:
+            extend_enum({}, key, default)
+        return {}[key]
 
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not ({FLAG}):
+        if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {MISS}
-'''
+        {}
+''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
 
 
 ###############
@@ -75,7 +75,7 @@ record = collections.Counter(map(lambda item: item[4],
 
 def rename(name, code, *, original):
     if record[original] > 1:
-        return f'{name} [{code}]'
+        return ('{} [{}]').format((name), (code))
     return name
 
 reader = csv.reader(data)
@@ -95,20 +95,20 @@ for item in reader:
     for rfc in filter(None, re.split(r'\[|\]', rfcs)):
         if re.match(r'\d+', rfc):   continue
         if 'RFC' in rfc:
-            temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+            temp.append(('[{} {}]').format((rfc[:3]), (rfc[3:])))
         else:
-            temp.append(f'[{rfc}]')
-    desc = f" {''.join(temp)}" if rfcs else ''
+            temp.append(('[{}]').format((rfc)))
+    desc = (" {}").format((''.join(temp))) if rfcs else ''
 
     abbr, name = re.split(r'\W+-\W+', dscp)
     temp = re.sub(r'\[\d+\]', '', name)
-    name = f' {temp}' if temp else ''
+    name = (' {}').format((temp)) if temp else ''
 
-    renm = rename(abbr or f'Unassigned [{code}]', code, original=dscp)
-    pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
-    sufs = f'#{desc}{name}' if desc or name else ''
+    renm = rename(abbr or ('Unassigned [{}]').format((code)), code, original=dscp)
+    pres = ("{}[{!r}] = {}").format((NAME), (renm), (code)).ljust(76)
+    sufs = ('#{}{}').format((desc), (name)) if desc or name else ''
 
-    enum.append(f'{pres}{sufs}')
+    enum.append(('{}{}').format((pres), (sufs)))
 
 
 ###############
@@ -118,5 +118,5 @@ for item in reader:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, f'../_common/{FILE}'), 'w') as file:
+with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

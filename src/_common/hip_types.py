@@ -10,17 +10,17 @@ class PktType(IntEnum):
     PktType = vars()
 
     # HIP Packet Types
-    PktType['Reserved'] = 0                                                     # [RFC 7401]
-    PktType['I1'] = 1                                                           # [RFC 7401] the HIP Initiator Packet
-    PktType['R1'] = 2                                                           # [RFC 7401] the HIP Responder Packet
-    PktType['I2'] = 3                                                           # [RFC 7401] the Second HIP Initiator Packet
-    PktType['R2'] = 4                                                           # [RFC 7401] the Second HIP Responder Packet
-    PktType['UPDATE'] = 16                                                      # [RFC 7401] the HIP Update Packet
-    PktType['NOTIFY'] = 17                                                      # [RFC 7401] the HIP Notify Packet
-    PktType['CLOSE'] = 18                                                       # [RFC 7401] the HIP Association Closing Packet
-    PktType['CLOSE_ACK'] = 19                                                   # [RFC 7401] the HIP Closing Acknowledgment Packet
-    PktType['HDRR'] = 20                                                        # [RFC 6537] HIP Distributed Hash Table Resource Record
-    PktType['HIP_DATA'] = 32                                                    # [RFC 6078]
+    PktType['Reserved'] = 0                                                     # [RFC 7401]
+    PktType['I1'] = 1                                                           # [RFC 7401] the HIP Initiator Packet
+    PktType['R1'] = 2                                                           # [RFC 7401] the HIP Responder Packet
+    PktType['I2'] = 3                                                           # [RFC 7401] the Second HIP Initiator Packet
+    PktType['R2'] = 4                                                           # [RFC 7401] the Second HIP Responder Packet
+    PktType['UPDATE'] = 16                                                      # [RFC 7401] the HIP Update Packet
+    PktType['NOTIFY'] = 17                                                      # [RFC 7401] the HIP Notify Packet
+    PktType['CLOSE'] = 18                                                       # [RFC 7401] the HIP Association Closing Packet
+    PktType['CLOSE_ACK'] = 19                                                   # [RFC 7401] the HIP Closing Acknowledgment Packet
+    PktType['HDRR'] = 20                                                        # [RFC 6537] HIP Distributed Hash Table Resource Record
+    PktType['HIP_DATA'] = 32                                                    # [RFC 6078]
 
     @staticmethod
     def get(key, default=-1):

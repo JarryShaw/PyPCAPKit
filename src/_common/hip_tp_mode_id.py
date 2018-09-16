@@ -10,10 +10,10 @@ class TAT_ModeID(IntEnum):
     TAT_ModeID = vars()
 
     # HIP Transport Modes
-    TAT_ModeID['RESERVED'] = 0                                                  # [RFC 6261]
-    TAT_ModeID['DEFAULT'] = 1                                                   # [RFC 6261]
-    TAT_ModeID['ESP'] = 2                                                       # [RFC 6261]
-    TAT_ModeID['ESP-TCP'] = 3                                                   # [RFC 6261]
+    TAT_ModeID['RESERVED'] = 0                                                  # [RFC 6261]
+    TAT_ModeID['DEFAULT'] = 1                                                   # [RFC 6261]
+    TAT_ModeID['ESP'] = 2                                                       # [RFC 6261]
+    TAT_ModeID['ESP-TCP'] = 3                                                   # [RFC 6261]
 
     @staticmethod
     def get(key, default=-1):

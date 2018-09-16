@@ -8,6 +8,7 @@ was implemented as the demand of my mate @gousaiyang.
 """
 import copy
 import pathlib
+import sys
 import warnings
 
 ###############################################################################
@@ -80,8 +81,8 @@ class TraceFlow:
             from pcapkit.dumpkit import NotImplementedIO as output
                                                             # no output file
             if fmt is not None:
-                warnings.warn(f'Unsupported output format: {fmt}; '
-                                'disabled file output feature',
+                warnings.warn(('Unsupported output format: {}; '
+                                'disabled file output feature').format((fmt)),
                                 FormatWarning, stacklevel=stacklevel())
             return output, ''
 
@@ -89,9 +90,9 @@ class TraceFlow:
             pathlib.Path(fout).mkdir(parents=True, exist_ok=True)
         except FileExistsError as error:
             if fmt is None:
-                warnings.warn(str(error), FileWarning, stacklevel=stacklevel())
+                warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
-                raise FileExists(str(error)) from None
+                raise FileExists(*error.args) from None
 
         return output, fmt
 
@@ -116,7 +117,8 @@ class TraceFlow:
         output = self.trace(packet, _check=False, _output=True)
 
         # dump files
-        output(packet['frame'], name=f"Frame {packet['index']}")
+        output(packet['frame'], name=("Frame {}").format((packet['index'])),
+                byteorder=self._endian, nanosecond=self._nnsecd)
 
     def trace(self, packet, *, _check=True, _output=False):
         """Trace packets.
@@ -148,9 +150,9 @@ class TraceFlow:
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'
+            label = ('{}_{}-{}_{}-{}').format((info.src), (info.srcport), (info.dst), (info.dstport), (info.timestamp))
             self._buffer[BUFID] = dict(
-                fpout = self._foutio(f'{self._fproot}/{label}.{self._fdpext}', protocol=info.protocol),
+                fpout = self._foutio(('{}/{}.{}').format((self._fproot), (label), (self._fdpext)), protocol=info.protocol),
                 index = list(),
                 label = label,
             )
@@ -164,7 +166,7 @@ class TraceFlow:
         if FIN:
             buf = self._buffer.pop(BUFID)
             # fpout, label = buf['fpout'], buf['label']
-            if self._fdpext:    buf['fpout'] = f'{self._fproot}/{label}.{self._fdpext}'
+            if self._fdpext:    buf['fpout'] = ('{}/{}.{}').format((self._fproot), (label), (self._fdpext))
             else:               del buf['fpout']
             buf['index'] = tuple(buf['index'])
             self._stream.append(Info(buf))
@@ -178,7 +180,7 @@ class TraceFlow:
         ret = list()
         for buf in self._buffer.values():
             buf = copy.deepcopy(buf)
-            if self._fdpext:    buf['fpout'] = f"{self._fproot}/{buf['label']}.{self._fdpext}"
+            if self._fdpext:    buf['fpout'] = ("{}/{}.{}").format((self._fproot), (buf['label']), (self._fdpext))
             else:               del buf['fpout']
             buf['index'] = tuple(buf['index'])
             ret.append(Info(buf))
@@ -192,12 +194,14 @@ class TraceFlow:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fout=None, format=None):
+    def __init__(self, *, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):
         """Initialise instance.
 
         Keyword arguments:
             * fout -- str, output path
             * format -- str, output format
+            * byteorder -- str, output file byte order
+            * nanosecond -- bool, output nanosecond-resolution file flag
 
         """
         self._newflg = False    # new packet flag
@@ -207,6 +211,8 @@ class TraceFlow:
         self._foutio, self._fdpext \
                     = self.make_fout(fout, format)
                                 # dump I/O object
+        self._endian = byteorder
+        self._nnsecd = nanosecond
 
     def __call__(self, packet):
         """Dump frame to output files.

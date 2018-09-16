@@ -398,7 +398,7 @@ class IPv4(IP):
 
         """
         if size < 3:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         data = dict(
             kind = kind,
@@ -429,7 +429,7 @@ class IPv4(IP):
 
         """
         if size < 3:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         data = dict(
             kind = kind,
@@ -474,12 +474,12 @@ class IPv4(IP):
 
         """
         if size < 3 or (size - 3) % 4 != 0:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         _rptr = self._read_unpack(1)
 
         if _rptr < 4:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         data = dict(
             kind = kind,
@@ -542,7 +542,7 @@ class IPv4(IP):
 
         """
         if size != 8:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         _type = self._read_opt_type(kind)
         _fcrr = self._read_binary(1)
@@ -553,7 +553,7 @@ class IPv4(IP):
         _qsnn = int(_nonr[:30], base=2)
 
         if _func != 0 and _func != 8:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         data = dict(
             kind = kind,
@@ -603,7 +603,7 @@ class IPv4(IP):
 
         """
         if size > 40 or size < 4:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         _tptr = self._read_unpack(1)
         _oflg = self._read_binary(1)
@@ -611,7 +611,7 @@ class IPv4(IP):
         _flag = int(_flag[4:], base=2)
 
         if _tptr < 5:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         data = dict(
             kind = kind,
@@ -625,7 +625,7 @@ class IPv4(IP):
         endpoint = min(_tptr, size)
         if _flag == 0:
             if (size - 4) % 4 != 0:
-                raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+                raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
             counter = 5
             timestamp = list()
             while counter < endpoint:
@@ -635,7 +635,7 @@ class IPv4(IP):
             data['timestamp'] = timestamp or None
         elif _flag == 1 or _flag == 3:
             if (size - 4) % 8 != 0:
-                raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+                raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
             counter = 5
             ipaddress = list()
             timestamp = list()
@@ -684,7 +684,7 @@ class IPv4(IP):
 
         """
         if size != 12:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         _idnm = self._read_unpack(2)
         _ohcn = self._read_unpack(2)
@@ -741,7 +741,7 @@ class IPv4(IP):
 
         """
         if size < 3:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         _clvl = self._read_unpack(1)
 
@@ -758,7 +758,7 @@ class IPv4(IP):
                 _flag = self._read_binary(1)
                 if (counter < size - 1 and not int(_flag[7], base=2)) \
                         or (counter == size - 1 and int(_flag[7], base=2)):
-                    raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+                    raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
                 _dict = dict()
                 for (index, bit) in enumerate(_flag[:5]):
@@ -795,7 +795,7 @@ class IPv4(IP):
 
         """
         if size != 4:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(('{}: [Optno {}] invalid format').format((self.alias), (kind)))
 
         _code = self._read_unpack(2)
 

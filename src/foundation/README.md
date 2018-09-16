@@ -83,28 +83,28 @@ class Extractor(builtins.object)
                     ip=False, ipv4=False, ipv6=False, tcp=False, strict=False,  # reassembly settings
                     trace=False, trace_fout=None, trace_format=None):           # trace settings
         ```
-        |      NAME      |  TYPE  | DEFAULT |                       KEYWORD                        |                       DESCRIPTION                       |
-        | :------------: | :----: | :-----: | :--------------------------------------------------: | :-----------------------------------------------------: |
-        |     `fin`      | `str`  | `None`  |                                                      | file name to be read; if file not exist, raise an error |
-        |     `fout`     | `str`  | `None`  |                                                      |                 file name to be written                 |
-        |    `format`    | `str`  | `None`  |          `plist` / `json` / `tree` / `html`          |                  file format of output                  |
-        |    `store`     | `bool` | `True`  |                   `True` / `False`                   |             if store extracted packet info              |
-        |   `verbose`    | `bool` | `False` |                   `True` / `False`                   |           if print verbose output information           |
-        |     `auto`     | `bool` | `True`  |                   `True` / `False`                   |              if automatically run till EOF              |
-        |  `extension`   | `bool` | `True`  |                   `True` / `False`                   |      if check and append extensions to output file      |
-        |    `files`     | `bool` | `False` |                   `True` / `False`                   |        if split each frame into different files         |
-        |    `nofile`    | `bool` | `False` |                   `True` / `False`                   |            if no output file is to be dumped            |
-        |    `engine`    | `str`  | `None`  | `default` / `pcapkit` / `scapy` / `dpkt` / `pyshark`  |                    extraction engine                    |
-        |     `layer`    | `str`  | `None`  |  `Link` / `Internet` / `Transport` / `Application`   |                   extract until layer                   |
-        |   `protocol`   | `str`  | `None`  |                                                      |                  extract until protocol                 |
-        |      `ip`      | `bool` | `False` |                   `True` / `False`                   |            if perform IPv4 & IPv6 reassembly            |
-        |     `ipv4`     | `bool` | `False` |                   `True` / `False`                   |               if perform IPv4 reassembly                |
-        |     `ipv6`     | `bool` | `False` |                   `True` / `False`                   |               if perform IPv6 reassembly                |
-        |     `tcp`      | `bool` | `False` |                   `True` / `False`                   |                if perform TCP reassembly                |
-        |    `strict`    | `bool` | `False` |                   `True` / `False`                   |            if set strict flag for reassembly            |
-        |    `trace`     | `bool` | `False` |                   `True` / `False`                   |                if trace TCP packet flows                |
-        |  `trace_fout`  | `str`  | `None`  |                                                      |                root path for flow tracer                |
-        | `trace_format` | `str`  | `None`  | `plist` / `json` / `tree` / `html` / `pcap` / `None` |              output format of flow tracer               |
+        | NAME           | TYPE   | DEFAULT | KEYWORD                                              | DESCRIPTION                                             |
+        | :------------- | :----- | :------ | :--------------------------------------------------- | :------------------------------------------------------ |
+        | `fin`          | `str`  | `None`  |                                                      | file name to be read; if file not exist, raise an error |
+        | `fout`         | `str`  | `None`  |                                                      | file name to be written                                 |
+        | `format`       | `str`  | `None`  | `plist` / `json` / `tree` / `html`                   | file format of output                                   |
+        | `store`        | `bool` | `True`  | `True` / `False`                                     | if store extracted packet info                          |
+        | `verbose`      | `bool` | `False` | `True` / `False`                                     | if print verbose output information                     |
+        | `auto`         | `bool` | `True`  | `True` / `False`                                     | if automatically run till EOF                           |
+        | `extension`    | `bool` | `True`  | `True` / `False`                                     | if check and append extensions to output file           |
+        | `files`        | `bool` | `False` | `True` / `False`                                     | if split each frame into different files                |
+        | `nofile`       | `bool` | `False` | `True` / `False`                                     | if no output file is to be dumped                       |
+        | `engine`       | `str`  | `None`  | `default` / `pcapkit` / `scapy` / `dpkt` / `pyshark` | extraction engine                                       |
+        | `layer`        | `str`  | `None`  | `Link` / `Internet` / `Transport` / `Application`    | extract until layer                                     |
+        | `protocol`     | `str`  | `None`  |                                                      | extract until protocol                                  |
+        | `ip`           | `bool` | `False` | `True` / `False`                                     | if perform IPv4 & IPv6 reassembly                       |
+        | `ipv4`         | `bool` | `False` | `True` / `False`                                     | if perform IPv4 reassembly                              |
+        | `ipv6`         | `bool` | `False` | `True` / `False`                                     | if perform IPv6 reassembly                              |
+        | `tcp`          | `bool` | `False` | `True` / `False`                                     | if perform TCP reassembly                               |
+        | `strict`       | `bool` | `False` | `True` / `False`                                     | if set strict flag for reassembly                       |
+        | `trace`        | `bool` | `False` | `True` / `False`                                     | if trace TCP packet flows                               |
+        | `trace_fout`   | `str`  | `None`  |                                                      | root path for flow tracer                               |
+        | `trace_format` | `str`  | `None`  | `plist` / `json` / `tree` / `html` / `pcap` / `None` | output format of flow tracer                            |
 
 &nbsp;
 

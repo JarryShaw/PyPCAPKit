@@ -10,13 +10,13 @@ class SuiteID(IntEnum):
     SuiteID = vars()
 
     # Suite IDs
-    SuiteID['Reserved'] = 0                                                     # [RFC 5201]
-    SuiteID['AES-CBC with HMAC-SHA1'] = 1                                       # [RFC 5201]
-    SuiteID['3DES-CBC with HMAC-SHA1'] = 2                                      # [RFC 5201]
-    SuiteID['3DES-CBC with HMAC-MD5'] = 3                                       # [RFC 5201]
-    SuiteID['BLOWFISH-CBC with HMAC-SHA1'] = 4                                  # [RFC 5201]
-    SuiteID['NULL-ENCRYPT with HMAC-SHA1'] = 5                                  # [RFC 5201]
-    SuiteID['NULL-ENCRYPT with HMAC-MD5'] = 6                                   # [RFC 5201]
+    SuiteID['Reserved'] = 0                                                     # [RFC 5201]
+    SuiteID['AES-CBC with HMAC-SHA1'] = 1                                       # [RFC 5201]
+    SuiteID['3DES-CBC with HMAC-SHA1'] = 2                                      # [RFC 5201]
+    SuiteID['3DES-CBC with HMAC-MD5'] = 3                                       # [RFC 5201]
+    SuiteID['BLOWFISH-CBC with HMAC-SHA1'] = 4                                  # [RFC 5201]
+    SuiteID['NULL-ENCRYPT with HMAC-SHA1'] = 5                                  # [RFC 5201]
+    SuiteID['NULL-ENCRYPT with HMAC-MD5'] = 6                                   # [RFC 5201]
 
     @staticmethod
     def get(key, default=-1):

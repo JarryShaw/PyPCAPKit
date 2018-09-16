@@ -72,12 +72,12 @@ class OSPF(Link):
     @property
     def name(self):
         """Name of current protocol."""
-        return f'Open Shortest Path First version {self._info.version}'
+        return ('Open Shortest Path First version {}').format((self._info.version))
 
     @property
     def alias(self):
         """Acronym of current protocol."""
-        return f'OSPFv{self._info.version}'
+        return ('OSPFv{}').format((self._info.version))
 
     @property
     def length(self):

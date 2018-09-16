@@ -4,7 +4,7 @@
 
 &emsp; The `pcapkit` project is an open source Python program focus on [PCAP](https://en.wikipedia.org/wiki/Pcap) parsing and analysis, which works as a stream PCAP file extractor. With support of [`dictdumper`](https://github.com/JarryShaw/dictdumper), it shall support multiple output report formats.
 
- > Note that the whole project only supports __Python 3.6__ or later.
+ > Note that the whole project only supports __Python 3.5__ or later.
 
  - [About](#about)
     * [Module Structure](#module-structure)
@@ -63,20 +63,21 @@
 
 &emsp; Besides, due to complexity of `pcapkit`, its extraction procedure takes around *0.01* seconds per packet, which is not ideal enough. Thus, `pcapkit` introduced alternative extraction engines to accelerate this procedure. By now, `pcapkit` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/). Plus, `pcapkit` supports two strategies of multiprocessing (`server` & `pipeline`). For more information, please refer to the document.
 
-|   Engine   | Performance (seconds per packet) |
-| :--------: | :------------------------------: |
-|   `dpkt`   |     `0.0003609057267506917`      |
-|  `scapy`   |      `0.002443440357844035`      |
-| `default`  |      `0.014425251388549805`      |
-| `pipeline` |      `0.014550424114863079`      |
-|  `server`  |      `0.04667099356651306`       |
-| `pyshark`  |       `0.0792640733718872`       |
+| Engine     | Performance (seconds per packet) |
+| :--------- | :------------------------------- |
+| `dpkt`     | `0.0003609057267506917`          |
+| `scapy`    | `0.002443440357844035`           |
+| `default`  | `0.017523006995519`              |
+| `pipeline` | `0.014550424114863079`           |
+| `server`   | `0.04667099356651306`            |
+| `pyshark`  | `0.0792640733718872`             |
+
 
 &nbsp;
 
 ## Installation
 
-> Note that `pcapkit` only supports Python versions __since 3.6__
+> Note that `pcapkit` only supports Python versions __since 3.5__
 
 &emsp; Simply run the following to install the current version from PyPI:
 
@@ -87,7 +88,7 @@ pip install pypcapkit
 &emsp; Or install the latest version from the git repository:
 
 ```sh
-git clone https://github.com/JarryShaw/pypcapkit.git
+git clone https://github.com/JarryShaw/PyPCAPKit.git
 cd pypcapkit
 pip install -e .
 # and to update at any time
@@ -117,72 +118,74 @@ pip install pypcapkit dpkt scapy pyshark
 
 #### Interfaces
 
-|                                           NAME                                           |            DESCRIPTION            |
-| :--------------------------------------------------------------------------------------: | :-------------------------------: |
-| [`extract`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#extract)       |        extract a PCAP file        |
+| NAME                                                                                        | DESCRIPTION                       |
+| :------------------------------------------------------------------------------------------ | :-------------------------------- |
+| [`extract`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#extract)       | extract a PCAP file               |
 | [`analyse`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#analyse)       | analyse application layer packets |
-| [`reassemble`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#reassemble) |  reassemble fragmented datagrams  |
-| [`trace`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#trace)           |      trace TCP packet flows       |
+| [`reassemble`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#reassemble) | reassemble fragmented datagrams   |
+| [`trace`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#trace)           | trace TCP packet flows            |
+
 
 #### Macros
 
 ##### Formats
 
-|                                        NAME                                         |               DESCRIPTION                |
-| :---------------------------------------------------------------------------------: | :--------------------------------------: |
+| NAME                                                                                | DESCRIPTION                              |
+| :---------------------------------------------------------------------------------- | :--------------------------------------- |
 | [`JSON`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#formats)  | JavaScript Object Notation (JSON) format |
-| [`PLIST`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#formats) |    macOS Property List (PLIST) format    |
-| [`TREE`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#formats)  |          Tree-View text format           |
-| [`PCAP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#formats)  |               PCAP format                |
+| [`PLIST`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#formats) | macOS Property List (PLIST) format       |
+| [`TREE`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#formats)  | Tree-View text format                    |
+| [`PCAP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#formats)  | PCAP format                              |
+
 
 ##### Layers
 
-|                                        NAME                                        |    DESCRIPTION    |
-| :--------------------------------------------------------------------------------: | :---------------: |
+| NAME                                                                               | DESCRIPTION       |
+| :--------------------------------------------------------------------------------- | :---------------- |
 | [`RAW`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#layers)   | no specific layer |
-| [`LINK`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#layers)  |  data-link layer  |
-| [`INET`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#layers)  |  internet layer   |
-| [`TRANS`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#layers) |  transport layer  |
+| [`LINK`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#layers)  | data-link layer   |
+| [`INET`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#layers)  | internet layer    |
+| [`TRANS`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#layers) | transport layer   |
 | [`APP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#layers)   | application layer |
 
 ##### Engines
 
-|                                           NAME                                           |                         DESCRIPTION                         |
-| :--------------------------------------------------------------------------------------: | :---------------------------------------------------------: |
-| [`PCAPKit`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)    |                     the default engine                      |
-| [`MPServer`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)   |   the multiprocessing engine with server process strategy   |
-| [`MPPipeline`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines) |      the multiprocessing engine with pipeline strategy      |
-| [`DPKT`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)       |    the [`DPKT`](https://github.com/kbandla/dpkt) engine     |
-| [`Scapy`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)      |           the [`Scapy`](https://scapy.net) engine           |
+| NAME                                                                                     | DESCRIPTION                                                 |
+| :--------------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| [`PCAPKit`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)    | the default engine                                          |
+| [`MPServer`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)   | the multiprocessing engine with server process strategy     |
+| [`MPPipeline`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines) | the multiprocessing engine with pipeline strategy           |
+| [`DPKT`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)       | the [`DPKT`](https://github.com/kbandla/dpkt) engine        |
+| [`Scapy`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)      | the [`Scapy`](https://scapy.net) engine                     |
 | [`PyShark`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#engines)    | the [`PyShark`](https://kiminewt.github.io/pyshark/) engine |
 
 #### Protocols
 
-|                                                 NAME                                                 |             DESCRIPTION             |
-| :--------------------------------------------------------------------------------------------------: | :---------------------------------: |
-| [`NoPayload`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#nopayload)            |             No-Payload              |
-| [`Raw`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#raw)                        |           Raw Packet Data           |
-| [`ARP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#arp)                   |     Address Resolution Protocol     |
-| [`Ethernet`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#ethernet)         |          Ethernet Protocol          |
-| [`L2TP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#l2tp)                 |   Layer Two Tunnelling Protocol     |
-| [`OSPF`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#ospf)                 |      Open Shortest Path First       |
+| NAME                                                                                                 | DESCRIPTION                         |
+| :--------------------------------------------------------------------------------------------------- | :---------------------------------- |
+| [`NoPayload`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#nopayload)            | No-Payload                          |
+| [`Raw`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#raw)                        | Raw Packet Data                     |
+| [`ARP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#arp)                   | Address Resolution Protocol         |
+| [`Ethernet`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#ethernet)         | Ethernet Protocol                   |
+| [`L2TP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#l2tp)                 | Layer Two Tunnelling Protocol       |
+| [`OSPF`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#ospf)                 | Open Shortest Path First            |
 | [`RARP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#rarp)                 | Reverse Address Resolution Protocol |
-| [`VLAN`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#vlan)                 |    802.1Q Customer VLAN Tag Type    |
-| [`AH`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ah)                 |       Authentication Header         |
-| [`HIP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#hip)               |       Host Identity Protocol        |
-| [`HOPOPT`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#hopopt)         |       IPv6 Hop-by-Hop Options       |
-| [`IP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ip)                 |          Internet Protocol          |
-| [`IPsec`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipsec)           |     Internet Protocol Security      |
-| [`IPv4`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv4)             |     Internet Protocol version 4     |
-| [`IPv6`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6)             |     Internet Protocol version 6     |
-| [`IPv6_Frag`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_frag)   |      Fragment Header for IPv6       |
-| [`IPv6_Opts`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_opts)   |    Destination Options for IPv6     |
-| [`IPv6_Route`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_route) |       Routing Header for IPv6       |
-| [`IPX`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipx)               |    Internetwork Packet Exchange     |
-| [`MH`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#mh)                 |           Mobility Header           |
-| [`TCP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#tcp)              |    Transmission Control Protocol    |
-| [`UDP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#udp)              |       User Datagram Protocol        |
-| [`HTTP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/application#http)          |     Hypertext Transfer Protocol     |
+| [`VLAN`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#vlan)                 | 802.1Q Customer VLAN Tag Type       |
+| [`AH`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ah)                 | Authentication Header               |
+| [`HIP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#hip)               | Host Identity Protocol              |
+| [`HOPOPT`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#hopopt)         | IPv6 Hop-by-Hop Options             |
+| [`IP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ip)                 | Internet Protocol                   |
+| [`IPsec`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipsec)           | Internet Protocol Security          |
+| [`IPv4`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv4)             | Internet Protocol version 4         |
+| [`IPv6`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6)             | Internet Protocol version 6         |
+| [`IPv6_Frag`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_frag)   | Fragment Header for IPv6            |
+| [`IPv6_Opts`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_opts)   | Destination Options for IPv6        |
+| [`IPv6_Route`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_route) | Routing Header for IPv6             |
+| [`IPX`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipx)               | Internetwork Packet Exchange        |
+| [`MH`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#mh)                 | Mobility Header                     |
+| [`TCP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#tcp)              | Transmission Control Protocol       |
+| [`UDP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#udp)              | User Datagram Protocol              |
+| [`HTTP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/application#http)          | Hypertext Transfer Protocol         |
 
 &emsp; Documentation can be found in submodules of `pcapkit`. Or, you may find usage sample in the [`test`](https://github.com/JarryShaw/PyPCAPKit/tree/master/test#test-samples) folder. For further information, please refer to the source code -- the docstrings should help you :)
 

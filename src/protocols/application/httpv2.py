@@ -121,7 +121,7 @@ class HTTPv2(HTTP):
             length = len(self)
 
         if length < 9:
-            raise ProtocolError(f'HTTP/2: invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: invalid format').format(()), quiet=True)
 
         _tlen = self._read_unpack(3)
         _type = self._read_unpack(1)
@@ -129,10 +129,10 @@ class HTTPv2(HTTP):
         _rsid = self._read_binary(4)
 
         if _tlen != length:
-            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((_type)), quiet=True)
 
         if int(_rsid[0], base=2):
-            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((_type)), quiet=True)
 
         http = dict(
             length = _tlen,
@@ -142,10 +142,10 @@ class HTTPv2(HTTP):
         )
 
         if http['type'] is None:
-            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((_type)), quiet=True)
 
         if http['type'] in ('SETTINGS', 'PING') and http['sid'] != 0:
-            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((_type)), quiet=True)
 
         _http = _HTTP_FUNC[_type](self, _tlen, _type, _flag)
         http.update(_http)
@@ -170,7 +170,7 @@ class HTTPv2(HTTP):
     def _read_http_none(self, size, kind, flag):
         """Read HTTP packet with unsigned type."""
         if any((int(bit, base=2) for bit in flag)):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         data = dict(
             flags = None,
@@ -220,25 +220,25 @@ class HTTPv2(HTTP):
                 _flag['PADDED'] = True
                 _plen = self._read_unpack(1)
             elif bit:
-                raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+                raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
             else:
                 continue
 
         if _plen > size - 10:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         if _flag['PADDED']:
             _dlen = size - _plen - 1
         else:
             _dlen = size - _plen
         if _dlen < 0:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _data = self._read_fileng(_dlen)
 
         padding = self._read_binary(_plen)
         if any((int(bit, base=2) for bit in padding)):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         data = dict(
             flags = _flag,
@@ -307,7 +307,7 @@ class HTTPv2(HTTP):
                 _wght = self._read_unpack(1)
                 _elen = 5
             elif bit:
-                raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+                raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
             else:
                 continue
 
@@ -316,13 +316,13 @@ class HTTPv2(HTTP):
         else:
             _dlen = size - _plen - _elen
         if _dlen < 0:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _frag = self._read_fileng(_dlen) or None
 
         padding = self._read_binary(_plen)
         if any((int(bit, base=2) for bit in padding)):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         data = dict(
             flags = _flag,
@@ -365,9 +365,9 @@ class HTTPv2(HTTP):
 
         """
         if size != 9:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
         if any((int(bit, base=2) for bit in flag)):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _edep = self._read_binary(4)
         _wght = self._read_unpack(1)
@@ -405,9 +405,9 @@ class HTTPv2(HTTP):
 
         """
         if size != 8:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
         if any((int(bit, base=2) for bit in flag)):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _code = self._read_unpack(4)
 
@@ -447,7 +447,7 @@ class HTTPv2(HTTP):
 
         """
         if size % 5 != 0:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _flag = dict(
             ACK = False,    # bit 0
@@ -456,12 +456,12 @@ class HTTPv2(HTTP):
             if index == 0 and bit:
                 _flag['ACK'] = True
             elif bit:
-                raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+                raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
             else:
                 continue
 
         if _flag['ACK'] and size:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _para = dict()
         counter = 0
@@ -518,7 +518,7 @@ class HTTPv2(HTTP):
 
         """
         if size < 4:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _plen = 0
         _flag = dict(
@@ -532,7 +532,7 @@ class HTTPv2(HTTP):
                 _flag['PADDED'] = True
                 _plen = self._read_unpack(1)
             elif bit:
-                raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+                raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
             else:
                 continue
 
@@ -541,17 +541,17 @@ class HTTPv2(HTTP):
         else:
             _dlen = size - _plen - 4
         if _dlen < 0:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _rpid = self._read_binary(4)
         _frag = self._read_fileng(_dlen) or None
 
         if int(_rpid[0], base=2):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         padding = self._read_binary(_plen)
         if any((int(bit, base=2) for bit in padding)):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         data = dict(
             flags = _flag,
@@ -589,7 +589,7 @@ class HTTPv2(HTTP):
 
         """
         if size != 8:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _flag = dict(
             ACK = False,    # bit 0
@@ -598,7 +598,7 @@ class HTTPv2(HTTP):
             if index == 0 and bit:
                 _flag['ACK'] = True
             elif bit:
-                raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+                raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
             else:
                 continue
 
@@ -643,16 +643,16 @@ class HTTPv2(HTTP):
         """
         _dlen = size - 8
         if _dlen < 0:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
         if any((int(bit, base=2) for bit in flag)):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _rsid = self._read_binary(4)
         _code = self._read_unpack(4)
         _data = self._read_fileng(_dlen) or None
 
         if int(_rsid[0], base=2):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         data = dict(
             flags = None,
@@ -688,14 +688,14 @@ class HTTPv2(HTTP):
 
         """
         if size != 4:
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
         if any((int(bit, base=2) for bit in flag)):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         _size = self._read_binary(4)
 
         if int(_size[0], base=2):
-            raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+            raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
 
         data = dict(
             flags = None,
@@ -734,7 +734,7 @@ class HTTPv2(HTTP):
             if index == 2 and bit:
                 _flag['END_HEADERS'] = True
             elif bit:
-                raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
+                raise ProtocolError(('HTTP/2: [Type {}] invalid format').format((kind)), quiet=True)
             else:
                 continue
 

@@ -20,7 +20,6 @@ __all__ = ['Reassembly']
 
 ABCMeta = abc.ABCMeta
 abstractmethod = abc.abstractmethod
-abstractproperty = abc.abstractproperty
 
 
 class Reassembly(object):
@@ -54,7 +53,8 @@ class Reassembly(object):
     ##########################################################################
 
     # protocol of current packet
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self):
         """Protocol of current packet."""
         pass
@@ -71,7 +71,8 @@ class Reassembly(object):
         """Reassembled datagram."""
         return self.fetch()
 
-    @abstractproperty
+    @property
+    @abstractmethod
     def protocol(self):
         """Protocol of current reassembly object."""
         pass

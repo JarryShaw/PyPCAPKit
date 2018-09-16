@@ -16,7 +16,7 @@ class Options(IntEnum):
     Options['RPL'] = 0x63                                                       # [RFC 6553]
     Options['TUN'] = 0x04                                                       # [RFC 2473]
     Options['RA'] = 0x05                                                        # [RFC 2711]
-    Options['QS'] = 0x26                                                        # [RFC 4782][RFC  Errata 2034]
+    Options['QS'] = 0x26                                                        # [RFC 4782][RFC  Errata            2034]
     Options['CALIPSO'] = 0x07                                                   # [RFC 5570]
     Options['SMF_DPD'] = 0x08                                                   # [RFC 6621]
     Options['HOME'] = 0xC9                                                      # [RFC 6275]

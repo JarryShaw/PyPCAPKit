@@ -9,6 +9,7 @@ recursively `NoPayload` itself.
 import io
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -56,13 +57,13 @@ class NoPayload(Protocol):
     @property
     def length(self):
         """DEPRECATED"""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'length'")
+        raise UnsupportedCall(("'{}' object has no attribute 'length'").format((self.__class__.__name__)))
 
     # name of next layer protocol
     @property
     def protocol(self):
         """DEPRECATED"""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        raise UnsupportedCall(("'{}' object has no attribute 'protocol'").format((self.__class__.__name__)))
 
     ##########################################################################
     # Data models.
@@ -76,7 +77,7 @@ class NoPayload(Protocol):
         self._next = self
         self._info = Info()
         self._file = io.BytesIO()
-        self._protos = NotImplemented
+        self._protos = ProtoChain()
 
     def __length_hint__(self):
         pass
@@ -87,8 +88,8 @@ class NoPayload(Protocol):
 
     def _decode_next_layer(self, dict_, proto=None, length=None):
         """Deprecated."""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
+        raise UnsupportedCall(("'{}' object has no attribute '_decode_next_layer'").format((self.__class__.__name__)))
 
     def _import_next_layer(self, proto, length):
         """Deprecated."""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_import_next_layer'")
+        raise UnsupportedCall(("'{}' object has no attribute '_import_next_layer'").format((self.__class__.__name__)))

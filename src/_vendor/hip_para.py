@@ -16,38 +16,38 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
 # -*- coding: utf-8 -*-
 
 
 from aenum import IntEnum, extend_enum
 
 
-class {NAME}(IntEnum):
-    """Enumeration class for {NAME}."""
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
+class {}(IntEnum):
+    """Enumeration class for {}."""
+    _ignore_ = '{} _'
+    {} = vars()
 
-    # {DOCS}
-    {ENUM}
+    # {}
+    {}
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return {NAME}(key)
-        if key not in {NAME}._member_map_:
-            extend_enum({NAME}, key, default)
-        return {NAME}[key]
+            return {}(key)
+        if key not in {}._member_map_:
+            extend_enum({}, key, default)
+        return {}[key]
 
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not ({FLAG}):
+        if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {MISS}
+        {}
         super()._missing_(value)
-'''
+''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
 
 
 ###############
@@ -76,7 +76,7 @@ record = collections.Counter(map(lambda item: item[1],
 
 def rename(name, code, *, original):
     if record[name] > 1:
-        return f'{name} [{code}]'
+        return ('{} [{}]').format((name), (code))
     return name
 
 reader = csv.reader(data)
@@ -93,32 +93,32 @@ for item in reader:
     group = match.groups()
 
     name = group[0]
-    cmmt = f' {group[1]}' if group[1] else ''
-    plen = f' {plen}' if re.match(r'\d+', plen) else ''
+    cmmt = (' {}').format((group[1])) if group[1] else ''
+    plen = (' {}').format((plen)) if re.match(r'\d+', plen) else ''
 
     temp = list()
     for rfc in filter(None, re.split(r'\[|\]', rfcs)):
         if 'RFC' in rfc:
-            temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+            temp.append(('[{} {}]').format((rfc[:3]), (rfc[3:])))
         else:
-            temp.append(f'[{rfc}]')
-    lrfc = f" {''.join(temp)}" if rfcs else ''
+            temp.append(('[{}]').format((rfc)))
+    lrfc = (" {}").format((''.join(temp))) if rfcs else ''
 
     try:
         code, _ = item[0], int(item[0])
         renm = rename(name, code, original=long)
 
-        pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
-        sufs = f"#{lrfc}{plen}{cmmt}" if lrfc or cmmt or plen else ''
+        pres = ("{}[{!r}] = {}").format((NAME), (renm), (code)).ljust(76)
+        sufs = ("#{}{}{}").format((lrfc), (plen), (cmmt)) if lrfc or cmmt or plen else ''
 
-        enum.append(f'{pres}{sufs}')
+        enum.append(('{}{}').format((pres), (sufs)))
     except ValueError:
         start, stop = item[0].split('-')
 
-        miss.append(f'if {start} <= value <= {stop}:')
+        miss.append(('if {} <= value <= {}:').format((start), (stop)))
         if lrfc or cmmt or plen:
-            miss.append(f"#{lrfc}{plen}{cmmt}")
-        miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+            miss.append(("#{}{}{}").format((lrfc), (plen), (cmmt)))
+        miss.append(("    extend_enum(cls, '{} [%d]' % value, value)").format((name)))
         miss.append('    return cls(value)')
 
 
@@ -129,5 +129,5 @@ for item in reader:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, f'../_common/{FILE}'), 'w') as file:
+with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

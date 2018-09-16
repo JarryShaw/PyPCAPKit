@@ -10,15 +10,15 @@ class RegFailType(IntEnum):
     RegFailType = vars()
 
     # Registration Failure Types
-    RegFailType['Registration requires additional credentials'] = 0             # [RFC 8003]
-    RegFailType['Registration type unavailable'] = 1                            # [RFC 8003]
-    RegFailType['Insufficient resources'] = 2                                   # [RFC 8003]
-    RegFailType['Invalid certificate'] = 3                                      # [RFC 8003]
-    RegFailType['Bad certificate'] = 4                                          # [RFC 8003]
-    RegFailType['Unsupported certificate'] = 5                                  # [RFC 8003]
-    RegFailType['Certificate expired'] = 6                                      # [RFC 8003]
-    RegFailType['Certificate other'] = 7                                        # [RFC 8003]
-    RegFailType['Unknown CA'] = 8                                               # [RFC 8003]
+    RegFailType['Registration requires additional credentials'] = 0             # [RFC 8003]
+    RegFailType['Registration type unavailable'] = 1                            # [RFC 8003]
+    RegFailType['Insufficient resources'] = 2                                   # [RFC 8003]
+    RegFailType['Invalid certificate'] = 3                                      # [RFC 8003]
+    RegFailType['Bad certificate'] = 4                                          # [RFC 8003]
+    RegFailType['Unsupported certificate'] = 5                                  # [RFC 8003]
+    RegFailType['Certificate expired'] = 6                                      # [RFC 8003]
+    RegFailType['Certificate other'] = 7                                        # [RFC 8003]
+    RegFailType['Unknown CA'] = 8                                               # [RFC 8003]
 
     @staticmethod
     def get(key, default=-1):
@@ -38,7 +38,7 @@ class RegFailType(IntEnum):
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
         if 201 <= value <= 255:
-            # [RFC 8003]
+            # [RFC 8003]
             extend_enum(cls, 'Reserved for Private Use [%d]' % value, value)
             return cls(value)
         super()._missing_(value)

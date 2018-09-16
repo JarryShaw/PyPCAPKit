@@ -63,14 +63,14 @@ class Link(pcapkit.protocols.protocol.Protocol)
 
 ##### Link-Layer Header Type Values
 
-| VALUE |                                          NAME                                         |        DESCRIPTION         |
-| :---: | :-----------------------------------------------------------------------------------: | :------------------------: |
-|  `0`  | `Null`                                                                                | BSD loopback encapsulation |
-|  `1`  | [`Ethernet`](#ethernet)                                                               |    IEEE 802.3 Ethernet     |
-| `101` | `Raw`                                                                                 |           Raw IP           |
-| `228` | [`IPv4`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv4) |          Raw IPv4          |
-| `229` | [`IPv6`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6) |          Raw IPv6          |
-| `248` | `SCTP`                                                                                |        SCTP packets        |
+| VALUE | NAME                                                                                     | DESCRIPTION                |
+| :---- | :--------------------------------------------------------------------------------------- | :------------------------- |
+| `0`   | `Null`                                                                                   | BSD loopback encapsulation |
+| `1`   | [`Ethernet`](#ethernet)                                                                  | IEEE 802.3 Ethernet        |
+| `101` | `Raw`                                                                                    | Raw IP                     |
+| `228` | [`IPv4`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv4) | Raw IPv4                   |
+| `229` | [`IPv6`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6) | Raw IPv6                   |
+| `248` | `SCTP`                                                                                   | SCTP packets               |
 
 ## `ARP`
 

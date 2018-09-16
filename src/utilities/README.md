@@ -94,22 +94,22 @@ __NOTE__: positional argument `file` in `behold` must be a *file-like* object.
 type_check(*agrs, func=None)
 ```
 
-|       NAME        |                 DESCRIPTION                 |
-| :---------------: | :-----------------------------------------: |
-|    `int_check`    |      Check if arguments are integrals.      |
-|   `real_check`    |    Check if arguments are real numbers.     |
-|  `complex_check`  |   Check if arguments are complex numbers.   |
-|  `number_check`   |       Check if arguments are numbers.       |
-|   `bytes_check`   |    Check if arguments are `bytes` type.     |
-| `bytearray_check` |  Check if arguments are `bytearray` type.   |
-|    `str_check`    |     Check if arguments are `str` type.      |
-|   `bool_check`    |    Check if arguments are `bytes` type.     |
-|   `list_check`    |     Check if arguments are `list` type.     |
-|   `tuple_check`   |    Check if arguments are `tuple` type.     |
-|    `io_check`     | Check if arguments are *file-like* object.  |
-|   `info_check`    |   Check if arguments are Info instance.     |
-|    `pkt_check`    |    Check if arguments are valid packets.    |
-|   `frag_check`    |   Check if arguments are valid fragments.   |
+| NAME              | DESCRIPTION                                 |
+| :---------------- | :------------------------------------------ |
+| `int_check`       | Check if arguments are integrals.           |
+| `real_check`      | Check if arguments are real numbers.        |
+| `complex_check`   | Check if arguments are complex numbers.     |
+| `number_check`    | Check if arguments are numbers.             |
+| `bytes_check`     | Check if arguments are `bytes` type.        |
+| `bytearray_check` | Check if arguments are `bytearray` type.    |
+| `str_check`       | Check if arguments are `str` type.          |
+| `bool_check`      | Check if arguments are `bytes` type.        |
+| `list_check`      | Check if arguments are `list` type.         |
+| `tuple_check`     | Check if arguments are `tuple` type.        |
+| `io_check`        | Check if arguments are _file-like_ object.  |
+| `info_check`      | Check if arguments are Info instance.       |
+| `pkt_check`       | Check if arguments are valid packets.       |
+| `frag_check`      | Check if arguments are valid fragments.     |
 | `_ip_frag_check`  | Check if arguments are valid IP fragments.  |
 | `_tcp_frag_check` | Check if arguments are valid TCP fragments. |
 
@@ -169,36 +169,36 @@ class BaseError(builtins.Exception)
 class error(pcapkit.utilities.exceptions.BaseError, builtins.Exception)
 ```
 
-|           NAME           |            INHERIT FROM             |                     DESCRIPTION                     |
-| :----------------------: | :---------------------------------: | :-------------------------------------------------: |
-|       `DigitError`       |     `BaseError` / `TypeError`       |       The argument(s) must be (a) number(s).        |
-|        `IntError`        |     `BaseError` / `TypeError`       |          The argument(s) must be integral.          |
-|       `RealError`        |     `BaseError` / `TypeError`       |    The function is not defined for real number.     |
-|      `ComplexError`      |     `BaseError` / `TypeError`       | The function is not defined for `complex` instance. |
-|       `BytesError`       |     `BaseError` / `TypeError`       |        The argument(s) must be `bytes` type.        |
-|     `BytearrayError`     |     `BaseError` / `TypeError`       |      The argument(s) must be `bytearray` type.      |
-|       `BoolError`        |     `BaseError` / `TypeError`       |        The argument(s) must be `bool` type.         |
-|      `StringError`       |     `BaseError` / `TypeError`       |         The argument(s) must be `str` type.         |
-|       `DictError`        |     `BaseError` / `TypeError`       |        The argument(s) must be `dict` type.         |
-|       `ListError`        |     `BaseError` / `TypeError`       |        The argument(s) must be `list` type.         |
-|       `TupleError`       |     `BaseError` / `TypeError`       |        The argument(s) must be `tuple` type.        |
-|     `IterableError`      |     `BaseError` / `TypeError`       |          The argument(s) must be iterable.          |
-|     `CallableError`      |     `BaseError` / `TypeError`       |          The argument(s) must be callable.          |
-|    `ProtocolUnbound`     |     `BaseError` / `TypeError`       |               Protocol slice unbound.               |
-|       `IOObjError`       |     `BaseError` / `TypeError`       |     The argument(s) must be *file-like* object.     |
-|       `InfoError`        |     `BaseError` / `TypeError`       |       The argument(s) must be Info instance.        |
-|      `FormatError`       |   `BaseError` / `AttributeError`    |                 Unknown format(s).                  |
-|    `UnsupportedCall`     |   `BaseError` / `AttributeError`    |       Unsupported function or property call.        |
-|       `FileError`        |      `BaseError` / `IOError`        |                 Wrong file format.                  |
-|      `FileNotFound`      | `BaseError` /  `FileNotFoundError`  |                   File not found.                   |
-|    `ProtocolNotFound`    |     `BaseError` / `IndexError`      |         Protocol not found in `ProtoChain`.         |
-|      `VersionError`      |     `BaseError` / `ValueError`      |                 Unknown IP version.                 |
-|     `IndexNotFound`      |     `BaseError` / `ValueError`      |            Protocol not in `ProtoChain`.            |
-|     `ProtocolError`      |     `BaseError` / `ValueError`      |              Invalid protocol format.               |
-| `ProtocolNotImplemented` | `BaseError` / `NotImplementedError` |              Protocol not implemented.              |
-|     `FragmentError`      |      `BaseError` / `KeyError`       |               Invalid fragment dict.                |
-|      `PacketError`       |      `BaseError` / `KeyError`       |                Invalid packet dict.                 |
-|      `StructError`       |    `BaseError` / `struct.error`     |                   Unpack failed.                    |
+| NAME                     | INHERIT FROM                        | DESCRIPTION                                         |
+| :----------------------- | :---------------------------------- | :-------------------------------------------------- |
+| `DigitError`             | `BaseError` / `TypeError`           | The argument(s) must be (a) number(s).              |
+| `IntError`               | `BaseError` / `TypeError`           | The argument(s) must be integral.                   |
+| `RealError`              | `BaseError` / `TypeError`           | The function is not defined for real number.        |
+| `ComplexError`           | `BaseError` / `TypeError`           | The function is not defined for `complex` instance. |
+| `BytesError`             | `BaseError` / `TypeError`           | The argument(s) must be `bytes` type.               |
+| `BytearrayError`         | `BaseError` / `TypeError`           | The argument(s) must be `bytearray` type.           |
+| `BoolError`              | `BaseError` / `TypeError`           | The argument(s) must be `bool` type.                |
+| `StringError`            | `BaseError` / `TypeError`           | The argument(s) must be `str` type.                 |
+| `DictError`              | `BaseError` / `TypeError`           | The argument(s) must be `dict` type.                |
+| `ListError`              | `BaseError` / `TypeError`           | The argument(s) must be `list` type.                |
+| `TupleError`             | `BaseError` / `TypeError`           | The argument(s) must be `tuple` type.               |
+| `IterableError`          | `BaseError` / `TypeError`           | The argument(s) must be iterable.                   |
+| `CallableError`          | `BaseError` / `TypeError`           | The argument(s) must be callable.                   |
+| `ProtocolUnbound`        | `BaseError` / `TypeError`           | Protocol slice unbound.                             |
+| `IOObjError`             | `BaseError` / `TypeError`           | The argument(s) must be _file-like_ object.         |
+| `InfoError`              | `BaseError` / `TypeError`           | The argument(s) must be Info instance.              |
+| `FormatError`            | `BaseError` / `AttributeError`      | Unknown format(s).                                  |
+| `UnsupportedCall`        | `BaseError` / `AttributeError`      | Unsupported function or property call.              |
+| `FileError`              | `BaseError` / `IOError`             | Wrong file format.                                  |
+| `FileNotFound`           | `BaseError` / `FileNotFoundError`   | File not found.                                     |
+| `ProtocolNotFound`       | `BaseError` / `IndexError`          | Protocol not found in `ProtoChain`.                 |
+| `VersionError`           | `BaseError` / `ValueError`          | Unknown IP version.                                 |
+| `IndexNotFound`          | `BaseError` / `ValueError`          | Protocol not in `ProtoChain`.                       |
+| `ProtocolError`          | `BaseError` / `ValueError`          | Invalid protocol format.                            |
+| `ProtocolNotImplemented` | `BaseError` / `NotImplementedError` | Protocol not implemented.                           |
+| `FragmentError`          | `BaseError` / `KeyError`            | Invalid fragment dict.                              |
+| `PacketError`            | `BaseError` / `KeyError`            | Invalid packet dict.                                |
+| `StructError`            | `BaseError` / `struct.error`        | Unpack failed.                                      |
 
 &nbsp;
 
@@ -222,14 +222,14 @@ class BaseWarning(builtins.Warning)
 class warning(pcapkit.utilities.warnings.BaseWarning, builtins.Warning)
 ```
 
-|        NAME        |           INHERIT FROM            |          DESCRIPTION           |
-| :----------------: | :-------------------------------: | :----------------------------: |
-|  `FormatWarning`   |  `BaseWarning` / `ImportWarning`  | Warning on unknown format(s).  |
-|  `EngineWarning`   |  `BaseWarning` / `ImportWarning`  | Unsupported extraction engine. |
-|   `FileWarning`    | `BaseWarning` / `RuntimeWarning`  |      Warning on file(s).       |
-|   `LayerWarning`   | `BaseWarning` / `RuntimeWarning`  |      Unrecognised layer.       |
-| `ProtocolWarning`  | `BaseWarning` / `RuntimeWarning`  |     Unrecognised protocol.     |
-| `AttributeWarning` | `BaseWarning` / `RuntimeWarning`  |     Unsupported attribute.     |
-|   `DPKTWarning`    | `BaseWarning` / `ResourceWarning` |    Warnings on DPKT usage.     |
-|   `ScapyWarning`   | `BaseWarning` / `ResourceWarning` |    Warnings on Scapy usage.    |
-|  `PySharkWarning`  | `BaseWarning` / `ResourceWarning` |   Warnings on PyShark usage.   |
+| NAME               | INHERIT FROM                      | DESCRIPTION                    |
+| :----------------- | :-------------------------------- | :----------------------------- |
+| `FormatWarning`    | `BaseWarning` / `ImportWarning`   | Warning on unknown format(s).  |
+| `EngineWarning`    | `BaseWarning` / `ImportWarning`   | Unsupported extraction engine. |
+| `FileWarning`      | `BaseWarning` / `RuntimeWarning`  | Warning on file(s).            |
+| `LayerWarning`     | `BaseWarning` / `RuntimeWarning`  | Unrecognised layer.            |
+| `ProtocolWarning`  | `BaseWarning` / `RuntimeWarning`  | Unrecognised protocol.         |
+| `AttributeWarning` | `BaseWarning` / `RuntimeWarning`  | Unsupported attribute.         |
+| `DPKTWarning`      | `BaseWarning` / `ResourceWarning` | Warnings on DPKT usage.        |
+| `ScapyWarning`     | `BaseWarning` / `ResourceWarning` | Warnings on Scapy usage.       |
+| `PySharkWarning`   | `BaseWarning` / `ResourceWarning` | Warnings on PyShark usage.     |

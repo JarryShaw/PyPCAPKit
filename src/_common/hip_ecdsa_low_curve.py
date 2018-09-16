@@ -10,8 +10,8 @@ class ECDSA_LOW(IntEnum):
     ECDSA_LOW = vars()
 
     # ECDSA_LOW Curve Label
-    ECDSA_LOW['RESERVED'] = 0                                                   # [RFC 7401]
-    ECDSA_LOW['SECP160R1'] = 1                                                  # [RFC 7401]
+    ECDSA_LOW['RESERVED'] = 0                                                   # [RFC 7401]
+    ECDSA_LOW['SECP160R1'] = 1                                                  # [RFC 7401]
 
     @staticmethod
     def get(key, default=-1):

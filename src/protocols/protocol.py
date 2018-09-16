@@ -27,7 +27,8 @@ import chardet
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, ProtocolNotFound, ProtocolUnbound
+from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, \
+    ProtocolNotFound, ProtocolUnbound
 from pcapkit.utilities.validations import bool_check, int_check
 
 ###############################################################################
@@ -45,9 +46,9 @@ readable = [ ord(char) for char in filter(lambda char: not char.isspace(), strin
 # abstract base class utilities
 ABCMeta = abc.ABCMeta
 abstractmethod = abc.abstractmethod
-abstractproperty = abc.abstractproperty
 
 
+@functools.total_ordering
 class Protocol:
     """Abstract base class for all protocol family.
 
@@ -89,7 +90,8 @@ class Protocol:
     ##########################################################################
 
     # name of current protocol
-    @abstractproperty
+    @property
+    @abstractmethod
     def name(self):
         """Name of current protocol."""
         pass
@@ -107,7 +109,8 @@ class Protocol:
         return self._info
 
     # header length of current protocol
-    @abstractproperty
+    @property
+    @abstractmethod
     def length(self):
         """Header length of current protocol."""
         pass
@@ -152,15 +155,12 @@ class Protocol:
         try:
             return urllib.parse.unquote(url, encoding=encoding, errors=errors)
         except UnicodeError:
-            str_ = url.replace('%', '\\x')
-            return ast.literal_eval(f'r"{str_}"')
+            str_ = url.replace('%', r'\x')
+            return ast.literal_eval(('r{!r}').format((str_)))
 
     ##########################################################################
     # Data models.
     ##########################################################################
-
-    # Not hashable
-    __hash__ = None
 
     def __new__(cls, file=None, *args, **kwargs):
         self = super().__new__(cls)
@@ -175,7 +175,7 @@ class Protocol:
         return self
 
     def __repr__(self):
-        repr_ = f"<{self.alias} {self._info!r}>"
+        repr_ = ("<{} {!r}>").format((self.alias), (self._info))
         return repr_
 
     @seekset
@@ -191,7 +191,7 @@ class Protocol:
         hexlst = textwrap.wrap(hexbuf, length)
         strlst = [ buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '') ]
 
-        str_ = '\n'.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))
+        str_ = '\n'.join(map(lambda x: ('{}    {}').format((x[0].ljust(length)), (x[1])), zip(hexlst, strlst)))
         return str_
 
     @seekset
@@ -227,12 +227,16 @@ class Protocol:
             raise ProtocolUnbound('protocol slice unbound')
 
         # if key is a protocol, then fetch protocol indexes
-        if isinstance(key, type) and issubclass(key, Protocol):
+        try:
+            flag = issubclass(key, Protocol)
+        except TypeError:
+            flag = issubclass(type(key), Protocol)
+        if flag or isinstance(key, Protocol):
             key = key.__index__()
 
         # make regex for tuple indexes
         if isinstance(key, tuple):
-            key = '|'.join(map(re.escape, key))
+            key = r'|'.join(map(re.escape, key))
 
         # if it's itself
         if re.fullmatch(key, self.__class__.__name__, re.IGNORECASE):
@@ -245,7 +249,7 @@ class Protocol:
             if re.fullmatch(key, payload.__class__.__name__, re.IGNORECASE):
                 return payload
             payload = payload.payload
-        raise ProtocolNotFound(f"Layer '{key}' not in Frame")
+        raise ProtocolNotFound(("Layer {!r} not in Frame").format((key)))
 
     def __contains__(self, name):
         return (name in self._info)
@@ -253,6 +257,29 @@ class Protocol:
     @classmethod
     def __index__(cls):
         return cls.__name__
+
+    @classmethod
+    def __eq__(cls, other):
+        try:
+            flag = issubclass(other, Protocol)
+        except TypeError:
+            flag = issubclass(type(other), Protocol)
+
+        if isinstance(other, Protocol) or flag:
+            return (other.__index__ == cls.__index__)
+
+        try:
+            index = cls.__index__()
+            if isinstance(index, tuple):
+                return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
+            return bool(re.fullmatch(other, index, re.IGNORECASE))
+        finally:
+            return False
+
+    @classmethod
+    def __lt__(cls, other):
+        return NotImplemented
+        # raise ComparisonError(f"Rich comparison not supported between instances of 'Protocol' and {type(other).__name__!r}")
 
     ##########################################################################
     # Utilities.
@@ -306,14 +333,14 @@ class Protocol:
             buf = int.from_bytes(mem, end, signed=signed)
         else:
             try:
-                fmt = f'{endian}{kind}'
+                fmt = ('{}{}').format((endian), (kind))
                 mem = self._file.read(size)
                 buf = struct.unpack(fmt, mem)[0]
             except struct.error:
                 if quiet:
                     return None
                 else:
-                    raise StructError(f'{self.__class__.__name__}: unpack failed') from None
+                    raise StructError(('{}: unpack failed').format((self.__class__.__name__))) from None
         return buf
 
     def _read_binary(self, size=1):
@@ -380,12 +407,12 @@ class Protocol:
 
         # make next layer protocol name
         layer = next_.alias.lower()
-        proto = next_.__class__.__name__
+        # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
         dict_[layer] = info
         self._next = next_
-        self._protos = ProtoChain(proto, chain, alias)
+        self._protos = ProtoChain(self.__class__, self.alias, basis=chain)
         return dict_
 
     def _import_next_layer(self, proto, length=None):
@@ -410,7 +437,7 @@ class Protocol:
         index = self.__index__()
         layer = self.__layer__ or ''
 
-        pattern = '|'.join(index) if isinstance(index, tuple) else index
+        pattern = r'|'.join(index) if isinstance(index, tuple) else index
         iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)
 
         layer_match = re.fullmatch(layer, self._exlayer, re.IGNORECASE)
