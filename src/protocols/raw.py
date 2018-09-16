@@ -59,13 +59,13 @@ class Raw(Protocol):
     @property
     def length(self):
         """DEPRECATED"""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'length'")
+        raise UnsupportedCall(f"{self.__class__.__name__!r} object has no attribute 'length'")
 
     # name of next layer protocol
     @property
     def protocol(self):
         """DEPRECATED"""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        raise UnsupportedCall(f"{self.__class__.__name__!r} object has no attribute 'protocol'")
 
     ##########################################################################
     # Methods.

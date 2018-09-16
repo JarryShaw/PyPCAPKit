@@ -59,13 +59,13 @@ DOCS = 'Destination Options and Hop-by-Hop Options'
 FLAG = 'isinstance(value, int) and 0x00 <= value <= 0xFF'
 LINK = 'https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-2.csv'
 DATA = {
-    0x00 : ('pad', 'Pad1'),                                         # [RFC 8200] 0
-    0x01 : ('padn', 'PadN'),                                        # [RFC 8200]
+    0x00 : ('pad', 'Pad1'),                                         # [RFC 8200] 0
+    0x01 : ('padn', 'PadN'),                                        # [RFC 8200]
     0x04 : ('tun', 'Tunnel Encapsulation Limit'),                   # [RFC 2473] 1
     0x05 : ('ra', 'Router Alert'),                                  # [RFC 2711] 2
     0x07 : ('calipso', 'Common Architecture Label IPv6 Security Option'),
                                                                     # [RFC 5570]
-    0x08 : ('smf_dpd', 'Simplified Multicast Forwarding'),          # [RFC 6621]
+    0x08 : ('smf_dpd', 'Simplified Multicast Forwarding'),          # [RFC 6621]
     0x0F : ('pdm', 'Performance and Diagnostic Metrics'),           # [RFC 8250] 10
     0x26 : ('qs', 'Quick-Start'),                                   # [RFC 4782][RFC Errata 2034] 6
     0x63 : ('rpl', 'Routing Protocol for Low-Power and Lossy Networks'),

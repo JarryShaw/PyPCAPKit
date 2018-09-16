@@ -10,10 +10,10 @@ class AuthType(IntEnum):
     AuthType = vars()
 
     # Authentication Types
-    AuthType['No Authentication'] = 0                                           # [RFC 1583]
-    AuthType['Simple Password Authentication'] = 1                              # [RFC 1583]
-    AuthType['Cryptographic authentication'] = 2                                # [RFC 2328][RFC 5709]
-    AuthType['Cryptographic Authentication with Extended Sequence Numbers'] = 3 # [RFC 7474]
+    AuthType['No Authentication'] = 0                                           # [RFC 1583]
+    AuthType['Simple Password Authentication'] = 1                              # [RFC 1583]
+    AuthType['Cryptographic authentication'] = 2                                # [RFC 2328][RFC 5709]
+    AuthType['Cryptographic Authentication with Extended Sequence Numbers'] = 3 # [RFC 7474]
 
     @staticmethod
     def get(key, default=-1):
@@ -33,7 +33,7 @@ class AuthType(IntEnum):
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
         if 256 <= value <= 65535:
-            # [RFC 6549]
+            # [RFC 6549]
             extend_enum(cls, 'Deprecated [%d]' % value, value)
             return cls(value)
         super()._missing_(value)

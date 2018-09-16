@@ -10,7 +10,7 @@ with open('./README.md', 'r') as file:
 
 
 # version string
-__version__ = '0.11.2'
+__version__ = '0.11.3'
 
 
 # set-up script for pip distribution
@@ -25,7 +25,7 @@ setuptools.setup(
     description = 'Python multi-engine PCAP analyse kit.',
     long_description = long_desc,
     long_description_content_type='text/markdown',
-    python_requires = '>=3.6',
+    python_requires = '>=3.5',
     install_requires = ['dictdumper', 'chardet', 'setuptools', 'aenum'],
     extras_require = {
         'all': ['dpkt', 'scapy', 'pyshark'],
@@ -76,11 +76,10 @@ setuptools.setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Natural Language :: English',
-        'Operating System :: MacOS',
-        'Operating System :: Microsoft :: Windows',
-        'Operating System :: Unix',
+        'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: Implementation',

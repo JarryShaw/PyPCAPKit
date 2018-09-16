@@ -94,7 +94,7 @@ for item in reader:
             temp.append(f'[{rfc[:3]} {rfc[3:]}]')
         else:
             temp.append(f'[{rfc}]')
-    desc = f"# {''.join(temp)}" if rfcs else ''
+    desc = f"# {''.join(temp)}" if rfcs else ''
 
     try:
         code, _ = item[0], int(item[0])

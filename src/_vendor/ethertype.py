@@ -94,7 +94,7 @@ for item in reader:
             temp.append(f'[{rfc[:3]} {rfc[3:]}]')
         else:
             temp.append(f'[{rfc}]')
-    desc = re.sub(r'( )( )*', ' ', f"# {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
+    desc = re.sub(r'( )( )*', ' ', f"# {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
 
     try:
         code, _ = item[1], int(item[1], base=16)

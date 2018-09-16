@@ -60,6 +60,7 @@ from pcapkit.utilities.warnings import FormatWarning, EngineWarning, \
 
 
 __all__ = ['Extractor']
+__fmt__ = format
 
 
 # check list
@@ -441,6 +442,7 @@ class Extractor:
         """
         ifnm, ofnm, fmt, ext, files = \
             self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
+        format = __fmt__
 
         self._ifnm = ifnm               # input file name
         self._ofnm = ofnm               # output file name

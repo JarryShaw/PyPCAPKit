@@ -10,22 +10,22 @@ class ESP_SuiteID(IntEnum):
     ESP_SuiteID = vars()
 
     # ESP Transform Suite IDs
-    ESP_SuiteID['RESERVED'] = 0                                                 # [RFC 7402]
-    ESP_SuiteID['AES-128-CBC with HMAC-SHA1'] = 1                               # [RFC 3602][RFC 2404]
-    ESP_SuiteID['DEPRECATED [2]'] = 2                                           # [RFC 7402]
-    ESP_SuiteID['DEPRECATED [3]'] = 3                                           # [RFC 7402]
-    ESP_SuiteID['DEPRECATED [4]'] = 4                                           # [RFC 7402]
-    ESP_SuiteID['DEPRECATED [5]'] = 5                                           # [RFC 7402]
-    ESP_SuiteID['DEPRECATED [6]'] = 6                                           # [RFC 7402]
-    ESP_SuiteID['NULL with HMAC-SHA-256'] = 7                                   # [RFC 2410][RFC 4868]
-    ESP_SuiteID['AES-128-CBC with HMAC-SHA-256'] = 8                            # [RFC 3602][RFC 4868]
-    ESP_SuiteID['AES-256-CBC with HMAC-SHA-256'] = 9                            # [RFC 3602][RFC 4868]
-    ESP_SuiteID['AES-CCM-8'] = 10                                               # [RFC 4309]
-    ESP_SuiteID['AES-CCM-16'] = 11                                              # [RFC 4309]
-    ESP_SuiteID['AES-GCM with an 8 octet ICV'] = 12                             # [RFC 4106]
-    ESP_SuiteID['AES-GCM with a 16 octet ICV'] = 13                             # [RFC 4106]
-    ESP_SuiteID['AES-CMAC-96'] = 14                                             # [RFC 4493][RFC 4494]
-    ESP_SuiteID['AES-GMAC'] = 15                                                # [RFC 4543]
+    ESP_SuiteID['RESERVED'] = 0                                                 # [RFC 7402]
+    ESP_SuiteID['AES-128-CBC with HMAC-SHA1'] = 1                               # [RFC 3602][RFC 2404]
+    ESP_SuiteID['DEPRECATED [2]'] = 2                                           # [RFC 7402]
+    ESP_SuiteID['DEPRECATED [3]'] = 3                                           # [RFC 7402]
+    ESP_SuiteID['DEPRECATED [4]'] = 4                                           # [RFC 7402]
+    ESP_SuiteID['DEPRECATED [5]'] = 5                                           # [RFC 7402]
+    ESP_SuiteID['DEPRECATED [6]'] = 6                                           # [RFC 7402]
+    ESP_SuiteID['NULL with HMAC-SHA-256'] = 7                                   # [RFC 2410][RFC 4868]
+    ESP_SuiteID['AES-128-CBC with HMAC-SHA-256'] = 8                            # [RFC 3602][RFC 4868]
+    ESP_SuiteID['AES-256-CBC with HMAC-SHA-256'] = 9                            # [RFC 3602][RFC 4868]
+    ESP_SuiteID['AES-CCM-8'] = 10                                               # [RFC 4309]
+    ESP_SuiteID['AES-CCM-16'] = 11                                              # [RFC 4309]
+    ESP_SuiteID['AES-GCM with an 8 octet ICV'] = 12                             # [RFC 4106]
+    ESP_SuiteID['AES-GCM with a 16 octet ICV'] = 13                             # [RFC 4106]
+    ESP_SuiteID['AES-CMAC-96'] = 14                                             # [RFC 4493][RFC 4494]
+    ESP_SuiteID['AES-GMAC'] = 15                                                # [RFC 4543]
 
     @staticmethod
     def get(key, default=-1):

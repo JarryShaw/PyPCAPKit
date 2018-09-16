@@ -155,8 +155,8 @@ class Protocol:
         try:
             return urllib.parse.unquote(url, encoding=encoding, errors=errors)
         except UnicodeError:
-            str_ = url.replace('%', '\\x')
-            return ast.literal_eval(f'r"{str_}"')
+            str_ = url.replace('%', r'\x')
+            return ast.literal_eval(f'r{str_!r}')
 
     ##########################################################################
     # Data models.
@@ -249,7 +249,7 @@ class Protocol:
             if re.fullmatch(key, payload.__class__.__name__, re.IGNORECASE):
                 return payload
             payload = payload.payload
-        raise ProtocolNotFound(f"Layer '{key}' not in Frame")
+        raise ProtocolNotFound(f"Layer {key!r} not in Frame")
 
     def __contains__(self, name):
         return (name in self._info)

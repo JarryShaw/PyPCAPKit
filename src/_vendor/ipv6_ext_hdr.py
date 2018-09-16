@@ -87,7 +87,7 @@ for item in reader:
             temp.append(f'[{rfc[:3]} {rfc[3:]}]')
         else:
             temp.append(f'[{rfc}]')
-    lrfc = re.sub(r'( )( )*', ' ', f" {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
+    lrfc = re.sub(r'( )( )*', ' ', f" {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
 
     subd = re.sub(r'( )( )*', ' ', item[2].replace('\n', ' '))
     desc = f' {subd}' if item[2] else ''

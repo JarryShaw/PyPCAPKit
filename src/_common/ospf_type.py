@@ -11,11 +11,11 @@ class PktType(IntEnum):
 
     # OSPF Packet Types
     PktType['Reserved'] = 0
-    PktType['Hello'] = 1                                                        # [RFC 2328]
-    PktType['Database Description'] = 2                                         # [RFC 2328]
-    PktType['Link State Request'] = 3                                           # [RFC 2328]
-    PktType['Link State Update'] = 4                                            # [RFC 2328]
-    PktType['Link State Ack'] = 5                                               # [RFC 2328]
+    PktType['Hello'] = 1                                                        # [RFC 2328]
+    PktType['Database Description'] = 2                                         # [RFC 2328]
+    PktType['Link State Request'] = 3                                           # [RFC 2328]
+    PktType['Link State Update'] = 4                                            # [RFC 2328]
+    PktType['Link State Ack'] = 5                                               # [RFC 2328]
 
     @staticmethod
     def get(key, default=-1):

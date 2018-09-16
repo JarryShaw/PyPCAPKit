@@ -4,7 +4,7 @@
 
 &emsp; The `pcapkit` project is an open source Python program focus on [PCAP](https://en.wikipedia.org/wiki/Pcap) parsing and analysis, which works as a stream PCAP file extractor. With support of [`dictdumper`](https://github.com/JarryShaw/dictdumper), it shall support multiple output report formats.
 
- > Note that the whole project only supports __Python 3.6__ or later.
+ > Note that the whole project only supports __Python 3.5__ or later.
 
  - [About](#about)
     * [Module Structure](#module-structure)
@@ -77,7 +77,7 @@
 
 ## Installation
 
-> Note that `pcapkit` only supports Python versions __since 3.6__
+> Note that `pcapkit` only supports Python versions __since 3.5__
 
 &emsp; Simply run the following to install the current version from PyPI:
 

@@ -49,8 +49,6 @@
 		<integer>86</integer>
 		<key>cap_len</key>
 		<integer>86</integer>
-		<key>nanosecond</key>
-		<false/>
 		<key>packet</key>
 		<data>QDMa0YUcpF5g2WuXht1gAAAAACA6//6AAAAAAAAAAKaH+SeTFu7+gAAAAAAAABzNfHe6x0a3hwAOqgAAAAD+gAAAAAAAABzNfHe6x0a3AQGkXmDZa5c=</data>
 		<key>ethernet</key>
@@ -132,8 +130,6 @@
 		<integer>78</integer>
 		<key>cap_len</key>
 		<integer>78</integer>
-		<key>nanosecond</key>
-		<false/>
 		<key>packet</key>
 		<data>pF5g2WuXQDMa0YUcht1gAAAAABg6//6AAAAAAAAAHM18d7rHRrf+gAAAAAAAAACmh/knkxbuiAA/gkAAAAD+gAAAAAAAABzNfHe6x0a3</data>
 		<key>ethernet</key>
@@ -215,8 +211,6 @@
 		<integer>54</integer>
 		<key>cap_len</key>
 		<integer>54</integer>
-		<key>nanosecond</key>
-		<false/>
 		<key>packet</key>
 		<data>pF5g2WuXuPiDpflHCABFAAAoxTRAACsGeoZ7gdKHwKgBZABQ18DVn7FUpnqg/1ARfLB8jgAA</data>
 		<key>ethernet</key>
@@ -360,8 +354,6 @@
 		<integer>54</integer>
 		<key>cap_len</key>
 		<integer>54</integer>
-		<key>nanosecond</key>
-		<false/>
 		<key>packet</key>
 		<data>uPiDpflHpF5g2WuXCABFAAAoAABAAEAGKrvAqAFke4HSh9fAAFCmeqD/1Z+xVVAQ///5PgAA</data>
 		<key>ethernet</key>
@@ -505,8 +497,6 @@
 		<integer>54</integer>
 		<key>cap_len</key>
 		<integer>54</integer>
-		<key>nanosecond</key>
-		<false/>
 		<key>packet</key>
 		<data>uPiDpflHpF5g2WuXCABFAAAoAABAAEAGKrvAqAFke4HSh9ewAFAt1I0hbWV0blAR//8q9AAA</data>
 		<key>ethernet</key>
@@ -650,8 +640,6 @@
 		<integer>159</integer>
 		<key>cap_len</key>
 		<integer>159</integer>
-		<key>nanosecond</key>
-		<false/>
 		<key>packet</key>
 		<data>////////uPiDpflHCABFAACRAABAAEAReLPAqAEB/////5JEE4kAfWOxAQEOAOErg8f5iwBnAAAABgAKVEwtV0RSNjMwMAALAAM2LjAABwABAQAFABFCOC1GOC04My1BNS1GOS00NwAIAAsxOTIuMTY4LjEuMQAJAAp0cGxvZ2luLmNuAAoADlRMLVdEUjYzMDAgNi4wAAwABTEuNy40</data>
 		<key>ethernet</key>

@@ -1,6 +1,6 @@
 # PyPCAPKit Manual
 
-&emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.6__. The following is a manual for this library.
+&emsp; `pcapkit` is an open source library for PCAP extraction and analysis, written in __Python 3.5__. The following is a manual for this library.
 
  - [Interface](#interface)
     * [Module Manual](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/interface#interface-manual)

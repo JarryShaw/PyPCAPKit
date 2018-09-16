@@ -13,13 +13,13 @@ class Sockets(IntEnum):
     Sockets['Routing Information Packet'] = 0x0001
     Sockets['Echo Protocol Packet'] = 0x0002
     Sockets['Error Handling Packet'] = 0x0003
-    Sockets['Netware Core Protocol'] = 0x0451                                   # NCP - used by Novell Netware servers
+    Sockets['NetWare Core Protocol'] = 0x0451                                   # NCP - used by Novell NetWare servers
     Sockets['Service Advertising Protocol'] = 0x0452                            # SAP
     Sockets['Routing Information Protocol'] = 0x0453                            # RIP
     Sockets['NetBIOS'] = 0x0455
     Sockets['Diagnostic Packet'] = 0x0456
     Sockets['Serialization Packet'] = 0x0457                                    # used for NCP as well
-    Sockets['Used by Novell Netware Client'] = 0x4003
+    Sockets['Used by Novell NetWare Client'] = 0x4003
     Sockets['IPX'] = 0x8060
     Sockets['TCP over IPXF'] = 0x9091
     Sockets['UDP over IPXF'] = 0x9092

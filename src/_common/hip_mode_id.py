@@ -10,9 +10,9 @@ class ModeID(IntEnum):
     ModeID = vars()
 
     # HIP NAT Traversal Modes
-    ModeID['Reserved'] = 0                                                      # [RFC 5770]
-    ModeID['UDP-ENCAPSULATION'] = 1                                             # [RFC 5770]
-    ModeID['ICE-STUN-UDP'] = 2                                                  # [RFC 5770]
+    ModeID['Reserved'] = 0                                                      # [RFC 5770]
+    ModeID['UDP-ENCAPSULATION'] = 1                                             # [RFC 5770]
+    ModeID['ICE-STUN-UDP'] = 2                                                  # [RFC 5770]
 
     @staticmethod
     def get(key, default=-1):
