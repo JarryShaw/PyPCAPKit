@@ -91,7 +91,7 @@ def mkdir(p):
     try:
         path.mkdir(parents=True)
     except OSError:
-        if path.is_dir():   pass
+        if not path.is_dir():   raise
 
 
 class Extractor:
