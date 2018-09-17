@@ -8,7 +8,7 @@ cp -r src setup.py release/
 cd release/
 
 # perform f2format
-f2format src
+f2format -n src
 if [[ "$?" -ne "0" ]] ; then
     exit 1
 fi
@@ -35,13 +35,13 @@ else
 fi
 git push
 
-# archive original files
-for file in $( ls archive ) ; do
-    if [[ -d "archive/${file}" ]] ; then
-        tar -cvzf "archive/${file}.tar.gz" "archive/${file}"
-        rm -rf "archive/${file}"
-    fi
-done
+# # archive original files
+# for file in $( ls archive ) ; do
+#     if [[ -d "archive/${file}" ]] ; then
+#         tar -cvzf "archive/${file}.tar.gz" "archive/${file}"
+#         rm -rf "archive/${file}"
+#     fi
+# done
 
 # upload develop environment
 cd ..
