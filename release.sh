@@ -27,6 +27,9 @@ twine upload dist/* -r pypitest --skip-existing
 
 # upload to GitHub
 git pull
+if [[ "$?" -ne "0" ]] ; then
+    exit 1
+fi
 git add .
 if [[ -z "$1" ]] ; then
     git commit -a
@@ -46,6 +49,9 @@ git push
 # upload develop environment
 cd ..
 git pull
+if [[ "$?" -ne "0" ]] ; then
+    exit 1
+fi
 git add .
 if [[ -z "$1" ]] ; then
     git commit -a
