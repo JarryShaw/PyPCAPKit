@@ -69,7 +69,7 @@ class HTTPv1(HTTP):
     @property
     def alias(self):
         """Acronym of current protocol."""
-        return ('HTTP/{}').format((self._info.header[self.__receipt__].version))
+        return 'HTTP/{}'.format(self._info.header[self.__receipt__].version)
 
     ##########################################################################
     # Methods.
@@ -171,7 +171,7 @@ class HTTPv1(HTTP):
 
         try:
             for item in lists:
-                key = self.decode(item[0].strip()).replace(receipt, ('{}_field').format((receipt)))
+                key = self.decode(item[0].strip()).replace(receipt, '{}_field'.format(receipt))
                 value = self.decode(item[1].strip())
                 if key in header:
                     if isinstance(header[key], tuple):

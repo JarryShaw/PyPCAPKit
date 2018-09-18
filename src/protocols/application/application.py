@@ -60,8 +60,8 @@ class Application(Protocol):
 
     def _decode_next_layer(self, dict_, proto=None, length=None):
         """Deprecated."""
-        raise UnsupportedCall(("'{}' object has no attribute '_decode_next_layer'").format((self.__class__.__name__)))
+        raise UnsupportedCall("'{}' object has no attribute '_decode_next_layer'".format(self.__class__.__name__))
 
     def _import_next_layer(self, proto, length):
         """Deprecated."""
-        raise UnsupportedCall(("'{}' object has no attribute '_import_next_layer'").format((self.__class__.__name__)))
+        raise UnsupportedCall("'{}' object has no attribute '_import_next_layer'".format(self.__class__.__name__))

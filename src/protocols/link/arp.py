@@ -160,7 +160,7 @@ class ARP(Link):
         if re.match(r'.*Ethernet.*', _htype, re.IGNORECASE):
             _ptype = ETHERTYPE.get(_ptty)
         else:
-            _ptype = ('Unknown [{}]').format((_ptty))
+            _ptype = 'Unknown [{}]'.format(_ptty)
 
         arp = dict(
             htype = _htype,

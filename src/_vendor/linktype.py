@@ -14,7 +14,7 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -44,7 +44,7 @@ class {}(IntEnum):
         if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -81,20 +81,20 @@ for content in content:
     try:
         code, _ = temp, int(temp)
 
-        pres = ("{}[{!r}] = {}").format((NAME), (name), (code)).ljust(76)
-        sufs = ("# {}").format((desc))
+        pres = "{}[{!r}] = {}".format(NAME, name, code).ljust(76)
+        sufs = "# {}".format(desc)
 
-        enum.append(('{}{}').format((pres), (sufs)))
+        enum.append('{}{}'.format(pres, sufs))
     except ValueError:
         start, stop = map(int, temp.split('-'))
         for code in range(start, stop+1):
-            name = ('USER{}').format((code-start))
+            name = 'USER{}'.format(code-start)
             desc = 'DLT_USER{code-start}'
 
-            pres = ("{}[{!r}] = {}").format((NAME), (name), (code)).ljust(76)
-            sufs = ("# {}").format((desc))
+            pres = "{}[{!r}] = {}".format(NAME, name, code).ljust(76)
+            sufs = "# {}".format(desc)
 
-            enum.append(('{}{}').format((pres), (sufs)))
+            enum.append('{}{}'.format(pres, sufs))
 
 
 ###############
@@ -104,5 +104,5 @@ for content in content:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

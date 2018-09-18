@@ -167,7 +167,7 @@ class _AliasList(collections.abc.Sequence):
                 if re.fullmatch(value, data, re.IGNORECASE):
                     return index
         except:
-            raise IndexNotFound(('{!r} is not in {!r}').format((value), (self.__class__.__name__)))
+            raise IndexNotFound('{!r} is not in {!r}'.format(value, self.__class__.__name__))
         # return self.__data__.index(value, start, stop)
 
 
@@ -235,7 +235,7 @@ class ProtoChain(collections.abc.Container):
         self.__alias__ = _AliasList(alias, base=basis.alias)
 
     def __repr__(self):
-        return ("ProtoChain({})").format((', '.join(self.__proto__.data)))
+        return "ProtoChain({})".format(', '.join(self.__proto__.data))
 
     def __str__(self):
         # for (i, proto) in enumerate(self.__alias__):

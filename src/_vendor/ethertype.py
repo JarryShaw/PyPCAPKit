@@ -16,7 +16,7 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -47,7 +47,7 @@ class {}(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
         super()._missing_(value)
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -76,7 +76,7 @@ record = collections.Counter(map(lambda item: item[4],
 
 def rename(name, code):
     if record[name] > 1:
-        name = ('{} [0x{}]').format((name), (code))
+        name = '{} [0x{}]'.format(name, code)
     return name
 
 reader = csv.reader(data)
@@ -91,27 +91,27 @@ for item in reader:
     temp = list()
     for rfc in filter(None, re.split(r'\[|\]', rfcs)):
         if 'RFC' in rfc:
-            temp.append(('[{} {}]').format((rfc[:3]), (rfc[3:])))
+            temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
         else:
-            temp.append(('[{}]').format((rfc)))
-    desc = re.sub(r'( )( )*', ' ', ("# {}").format((''.join(temp))).replace('\n', ' ')) if rfcs else ''
+            temp.append('[{}]'.format(rfc))
+    desc = re.sub(r'( )( )*', ' ', "# {}".format(''.join(temp)).replace('\n', ' ')) if rfcs else ''
 
     try:
         code, _ = item[1], int(item[1], base=16)
         renm = re.sub(r'( )( )*', ' ', rename(name, code).replace('\n', ' '))
 
-        pres = ("{}[{!r}] = 0x{}").format((NAME), (renm), (code)).ljust(76)
-        sufs = ("\n{}{}").format((' '*80), (desc)) if len(pres) >= 80 else desc
+        pres = "{}[{!r}] = 0x{}".format(NAME, renm, code).ljust(76)
+        sufs = "\n{}{}".format(' '*80, desc) if len(pres) >= 80 else desc
 
-        enum.append(('{}{}').format((pres), (sufs)))
+        enum.append('{}{}'.format(pres, sufs))
     except ValueError:
         start, stop = item[1].split('-')
         more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
-        miss.append(('if 0x{} <= value <= 0x{}:').format((start), (stop)))
+        miss.append('if 0x{} <= value <= 0x{}:'.format(start, stop))
         if more:
-            miss.append(('    {}').format((more)))
-        miss.append(("    extend_enum(cls, '{} [0x%s]' % hex(value)[2:].upper().zfill(4), value)").format((name)))
+            miss.append('    {}'.format(more))
+        miss.append("    extend_enum(cls, '{} [0x%s]' % hex(value)[2:].upper().zfill(4), value)".format(name))
         miss.append('    return cls(value)')
 
 
@@ -122,5 +122,5 @@ for item in reader:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

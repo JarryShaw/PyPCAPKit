@@ -181,7 +181,7 @@ def reassemble(*, protocol, strict=False):
     elif protocol == 'TCP':
         return TCP_Reassembly(strict=strict)
     else:
-        raise FormatError(('Unsupported reassembly protocol: {}').format((protocol)))
+        raise FormatError('Unsupported reassembly protocol: {}'.format(protocol))
 
 
 def trace(*, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):

@@ -16,7 +16,7 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -47,7 +47,7 @@ class {}(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
         super()._missing_(value)
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -76,7 +76,7 @@ record = collections.Counter(map(lambda item: item[1],
 
 def rename(name, code, *, original):
     if record[name] > 1:
-        return ('{} [{}]').format((name), (code))
+        return '{} [{}]'.format(name, code)
     return name
 
 reader = csv.reader(data)
@@ -91,33 +91,33 @@ for item in reader:
     if ' - ' in long:
         name, cmmt = long.split(' -')
     elif ' (' in long:
-        cmmt, name = (" {}").format((long.strip(')'))).split(' (')
+        cmmt, name = " {}".format(long.strip(')')).split(' (')
     else:
         name, cmmt = long, ''
 
     temp = list()
     for rfc in filter(None, re.split(r'\[|\]', rfcs)):
         if 'RFC' in rfc:
-            temp.append(('[{} {}]').format((rfc[:3]), (rfc[3:])))
+            temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
         else:
-            temp.append(('[{}]').format((rfc)))
-    desc = (" {}").format((''.join(temp))) if rfcs else ''
+            temp.append('[{}]'.format(rfc))
+    desc = " {}".format(''.join(temp)) if rfcs else ''
 
     try:
         code, _ = item[0], int(item[0])
         renm = rename(name, code, original=long)
 
-        pres = ("{}[{!r}] = {}").format((NAME), (renm), (code)).ljust(76)
-        sufs = ('#{}{}').format((desc), (cmmt)) if desc or cmmt else ''
+        pres = "{}[{!r}] = {}".format(NAME, renm, code).ljust(76)
+        sufs = '#{}{}'.format(desc, cmmt) if desc or cmmt else ''
 
-        enum.append(('{}{}').format((pres), (sufs)))
+        enum.append('{}{}'.format(pres, sufs))
     except ValueError:
         start, stop = item[0].split('-')
 
-        miss.append(('if {} <= value <= {}:').format((start), (stop)))
+        miss.append('if {} <= value <= {}:'.format(start, stop))
         if desc or cmmt:
-            miss.append(('    #{}{}').format((desc), (cmmt)))
-        miss.append(("    extend_enum(cls, '{} [%d]' % value, value)").format((name)))
+            miss.append('    #{}{}'.format(desc, cmmt))
+        miss.append("    extend_enum(cls, '{} [%d]' % value, value)".format(name))
         miss.append('    return cls(value)')
 
 
@@ -128,5 +128,5 @@ for item in reader:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

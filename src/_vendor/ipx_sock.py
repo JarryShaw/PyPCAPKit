@@ -15,7 +15,7 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -46,7 +46,7 @@ class {}(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
         super()._missing_(value)
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -88,17 +88,17 @@ for item in content:
     try:
         code, _ = pval, int(pval, base=16)
 
-        pres = ("{}[{!r}] = {}").format((NAME), (name), (code)).ljust(76)
-        sufs = ('# {}').format((desc)) if desc else ''
+        pres = "{}[{!r}] = {}".format(NAME, name, code).ljust(76)
+        sufs = '# {}'.format(desc) if desc else ''
 
-        enum.append(('{}{}').format((pres), (sufs)))
+        enum.append('{}{}'.format(pres, sufs))
     except ValueError:
         start, stop = pval.split('-')
 
-        miss.append(('if {} <= value <= {}:').format((start), (stop)))
+        miss.append('if {} <= value <= {}:'.format(start, stop))
         if desc:
-            miss.append(('    # {}').format((desc)))
-        miss.append(("    extend_enum(cls, '{} [0x%s]' % hex(value)[2:].upper().zfill(4), value)").format((name)))
+            miss.append('    # {}'.format(desc))
+        miss.append("    extend_enum(cls, '{} [0x%s]' % hex(value)[2:].upper().zfill(4), value)".format(name))
         miss.append('    return cls(value)')
 
 
@@ -109,5 +109,5 @@ for item in content:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

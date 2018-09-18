@@ -16,7 +16,7 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -46,7 +46,7 @@ class {}(IntEnum):
         if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -75,7 +75,7 @@ record = collections.Counter(map(lambda item: item[1],
 
 def rename(name, code, *, original):
     if record[original] > 1:
-        return ('{} [{}]').format((name), (code))
+        return '{} [{}]'.format(name, code)
     return name
 
 reader = csv.reader(data)
@@ -93,25 +93,25 @@ for item in reader:
     temp = list()
     for rfc in filter(None, re.split(r'\[|\]', rfcs)):
         if 'RFC' in rfc:
-            temp.append(('[{} {}]').format((rfc[:3]), (rfc[3:])))
+            temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
         else:
-            temp.append(('[{}]').format((rfc)))
-    desc = (" {}").format((''.join(temp))) if rfcs else ''
+            temp.append('[{}]'.format(rfc))
+    desc = " {}".format(''.join(temp)) if rfcs else ''
 
     split = long.split(' (', 1)
     if len(split) == 2:
         name = split[0]
-        cmmt = (" ({}").format((split[1]))
+        cmmt = " ({}".format(split[1])
     else:
         name, cmmt = long, ''
 
     code, _ = item[0], int(item[0])
     renm = rename(name, code, original=long)
 
-    pres = ("{}[{!r}] = {}").format((NAME), (renm), (code)).ljust(76)
-    sufs = ('# {}{}').format((desc), (cmmt)) if desc or cmmt else ''
+    pres = "{}[{!r}] = {}".format(NAME, renm, code).ljust(76)
+    sufs = '# {}{}'.format(desc, cmmt) if desc or cmmt else ''
 
-    enum.append(('{}{}').format((pres), (sufs)))
+    enum.append('{}{}'.format(pres, sufs))
 
 
 ###############
@@ -121,5 +121,5 @@ for item in reader:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

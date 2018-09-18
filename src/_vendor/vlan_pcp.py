@@ -15,7 +15,7 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -45,7 +45,7 @@ class {}(IntEnum):
         if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -87,12 +87,12 @@ for item in content:
     match = re.match(r'(\d) *(\(.*\))*', prio)
     group = match.groups()
 
-    code = ('0b{}').format((bin(int(pval))[2:].zfill(3)))
+    code = '0b{}'.format(bin(int(pval))[2:].zfill(3))
 
-    pres = ("{}[{!r}] = {}").format((NAME), (abbr), (code)).ljust(76)
-    sufs = ("# {} - {} {}").format((group[0]), (desc), (group[1] or ''))
+    pres = "{}[{!r}] = {}".format(NAME, abbr, code).ljust(76)
+    sufs = "# {} - {} {}".format(group[0], desc, group[1] or '')
 
-    enum.append(('{}{}').format((pres), (sufs)))
+    enum.append('{}{}'.format(pres, sufs))
 
 
 ###############
@@ -102,5 +102,5 @@ for item in content:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

@@ -16,7 +16,7 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -46,7 +46,7 @@ class {}(IntEnum):
         if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -94,7 +94,7 @@ record = collections.Counter(map(lambda item: item[4], reader))
 
 def rename(name, code, *, original):
     if record[original] > 1:
-        return ('{} [{}]').format((name), (code))
+        return '{} [{}]'.format(name, code)
     return name
 
 reader = csv.reader(data)
@@ -116,20 +116,20 @@ for item in reader:
     for rfc in filter(None, re.split(r'\[|\]', rfcs)):
         if re.match(r'\d+', rfc):   continue
         if 'RFC' in rfc:
-            temp.append(('[{} {}]').format((rfc[:3]), (rfc[3:])))
+            temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
         else:
-            temp.append(('[{}]').format((rfc)))
-    desc = ("# {}").format((''.join(temp))) if rfcs else ''
+            temp.append('[{}]'.format(rfc))
+    desc = "# {}".format(''.join(temp)) if rfcs else ''
 
     splt = re.split(r' \[\d+\]', dscp)[0]
     subn = re.sub(r'.* \((.*)\)', r'\1', splt)
     name = DATA.get(int(code, base=16), (str(),))[0].upper() or subn
     renm = rename(name or 'Unassigned', code, original=dscp)
 
-    pres = ("{}[{!r}] = {}").format((NAME), (renm), (code)).ljust(76)
+    pres = "{}[{!r}] = {}".format(NAME, renm, code).ljust(76)
     sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
-    enum.append(('{}{}').format((pres), (sufs)))
+    enum.append('{}{}'.format(pres, sufs))
 
 
 ###############
@@ -139,5 +139,5 @@ for item in reader:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

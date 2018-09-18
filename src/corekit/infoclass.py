@@ -34,7 +34,7 @@ class Info(collections.abc.Mapping):
             __dict__ = dict()
             for (key, value) in dict_.items():
                 if key in self.__data__:
-                    key = ('{}2').format((key))
+                    key = '{}2'.format(key)
                 if isinstance(value, dict):
                     __dict__[key] = Info(value)
                 else:
@@ -62,9 +62,9 @@ class Info(collections.abc.Mapping):
     def __str__(self):
         temp = list()
         for (key, value) in self.__dict__.items():
-            temp.append(('{}={}').format((key), (value)))
+            temp.append('{}={}'.format(key, value))
         args = ', '.join(temp)
-        return ('Info({})').format((args))
+        return 'Info({})'.format(args)
 
     def __repr__(self):
         temp = list()
@@ -72,9 +72,9 @@ class Info(collections.abc.Mapping):
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
                 flag = True;    continue
-            temp.append(('{}={!r}').format((key), (value)))
+            temp.append('{}={!r}'.format(key, value))
         args = ', '.join(temp)
-        return ("Info({}{})").format((args), (', Info=(...)' if flag else ''))
+        return "Info({}{})".format(args, ', Info=(...)' if flag else '')
 
     def __len__(self):
         return len(self.__dict__)
@@ -84,7 +84,7 @@ class Info(collections.abc.Mapping):
 
     def __getitem__(self, key):
         if key in self.__data__:
-            key = ('{}2').format((key))
+            key = '{}2'.format(key)
         value = self.__dict__[key]
         if isinstance(value, (dict, collections.abc.Mapping)):
             return Info(value)

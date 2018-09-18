@@ -108,10 +108,10 @@ def main():
                             engine=args.engine, extension=args.auto_extension)
 
     if not args.verbose:
-        print(emoji.emojize((":police_car_light: Loading file {!r}").format((extractor.input))))
+        print(emoji.emojize(":police_car_light: Loading file {!r}".format(extractor.input)))
         for frame in extractor:
-            print((' - Frame {:>3d}: {}').format((extractor.length), (extractor.protocol)))
-        print(emoji.emojize((":beer_mug: Report file{} stored in {!r}").format(('s' if args.files else ''), (extractor.output))))
+            print(' - Frame {:>3d}: {}'.format(extractor.length, extractor.protocol))
+        print(emoji.emojize(":beer_mug: Report file{} stored in {!r}".format('s' if args.files else '', extractor.output)))
 
 
 if __name__ == '__main__':

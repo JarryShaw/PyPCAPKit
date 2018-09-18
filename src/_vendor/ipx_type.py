@@ -15,7 +15,7 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -45,7 +45,7 @@ class {}(IntEnum):
         if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -89,10 +89,10 @@ for item in content:
     else:
         name, cmmt = desc, ''
 
-    pres = ("{}[{!r}] = {}").format((NAME), (name), (pval)).ljust(76)
-    sufs = ('# {}').format((cmmt)) if cmmt else ''
+    pres = "{}[{!r}] = {}".format(NAME, name, pval).ljust(76)
+    sufs = '# {}'.format(cmmt) if cmmt else ''
 
-    enum.append(('{}{}').format((pres), (sufs)))
+    enum.append('{}{}'.format(pres, sufs))
 
 
 ###############
@@ -102,5 +102,5 @@ for item in content:
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

@@ -82,7 +82,7 @@ class Header(Protocol):
                 if lilendian:   return _MAGIC_NUM[('little', True)], True
 
             if byteorder.lower() not in ('little', 'big'):
-                raise EndianError(("unknown byte order: {!r}").format((byteorder)))
+                raise EndianError("unknown byte order: {!r}".format(byteorder))
 
             magic_number = _MAGIC_NUM[(byteorder.lower(), nanosecond)]
             return magic_number, (byteorder.lower() == 'little')

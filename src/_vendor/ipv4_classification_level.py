@@ -12,7 +12,7 @@ import os
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: ('''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
 # -*- coding: utf-8 -*-
 
 
@@ -42,7 +42,7 @@ class {}(IntEnum):
         if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {}
-''').format((NAME), (NAME), (NAME), (NAME), (DOCS), (ENUM), (NAME), (NAME), (NAME), (NAME), (FLAG), (MISS))
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 ###############
@@ -74,11 +74,11 @@ record = collections.Counter(DATA.values())
 
 def binary(code):
     temp = bin(code)[2:].upper().zfill(8)
-    return ('0b{}_{}').format((temp[:4]), (temp[4:]))
+    return '0b{}_{}'.format(temp[:4], temp[4:])
 
 def rename(name, code):
     if record[name] > 1:
-        name = ('{} [{}]').format((name), (code))
+        name = '{} [{}]'.format(name, code)
     return name
 
 enum = list()
@@ -90,7 +90,7 @@ miss = [
 for code, name in DATA.items():
     code = binary(code)
     renm = rename(name, code)
-    enum.append(("{}[{!r}] = {}").format((NAME), (renm), (code)).ljust(76))
+    enum.append("{}[{!r}] = {}".format(NAME, renm, code).ljust(76))
 
 
 ###############
@@ -100,5 +100,5 @@ for code, name in DATA.items():
 
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-with open(os.path.join(ROOT, ('../_common/{}').format((FILE))), 'w') as file:
+with open(os.path.join(ROOT, '../_common/{}'.format(FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))
