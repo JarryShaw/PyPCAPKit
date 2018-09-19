@@ -40,7 +40,7 @@ from pcapkit.protocols.pcap.frame import Frame
 from pcapkit.protocols.pcap.header import Header
 from pcapkit.protocols.transport.transport import TP_PROTO
 from pcapkit.utilities.exceptions import stacklevel, CallableError, \
-        FileNotFound, UnsupportedCall, IterableError
+        FileNotFound, UnsupportedCall, IterableError, FormatError
 from pcapkit.utilities.warnings import FormatWarning, EngineWarning, \
         LayerWarning, ProtocolWarning, AttributeWarning, DPKTWarning
 
@@ -327,7 +327,7 @@ class Extractor:
                     ofnm = 'out.{}'.format(ext)
             else:
                 name, fext = os.path.splitext(fout)
-                mkdir(fout)
+                mkdir(os.path.split(fout)[1])
                 if fext:
                     files = False
                     ofnm = fout
