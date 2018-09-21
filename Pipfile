@@ -4,18 +4,20 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-scapy = "*"
-dpkt = "*"
-pyshark = "*"
 chardet = "*"
-pdoc = "*"
 pypcapkit = "*"
-"beautifulsoup4" = "*"
-requests = "*"
-"html5lib" = "*"
 aenum = "*"
+setuptools = "*"
+dictdumper = "*"
+emoji = "*"
 
 [dev-packages]
+pyshark = "*"
+dpkt = "*"
+scapy = "*"
+"beautifulsoup4" = "*"
+"html5lib" = "*"
+requests = "*"
 
 [requires]
 python_version = "3.7"

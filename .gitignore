@@ -22,7 +22,7 @@ test/pcapkit
 test/dictdumper
 deprecated/
 
-# Created by https://www.gitignore.io/api/macos,python
+# Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 
 ### macOS ###
 # General
@@ -93,6 +93,7 @@ pip-delete-this-directory.txt
 # Unit test / coverage reports
 htmlcov/
 .tox/
+.nox/
 .coverage
 .coverage.*
 .cache
@@ -127,6 +128,10 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# IPython
+profile_default/
+ipython_config.py
+
 # pyenv
 .python-version
 
@@ -157,6 +162,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+.dmypy.json
+dmypy.json
 
 ### Python Patch ###
 .venv/
@@ -173,5 +180,12 @@ venv.bak/
 pyvenv.cfg
 pip-selfcheck.json
 
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 
-# End of https://www.gitignore.io/api/macos,python
+
+# End of https://www.gitignore.io/api/macos,python,visualstudiocode
