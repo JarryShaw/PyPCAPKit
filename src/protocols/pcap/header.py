@@ -122,13 +122,21 @@ class Header(Protocol):
         """
         _magn = self._read_fileng(4)
         if _magn == b'\xd4\xc3\xb2\xa1':
-            lilendian = True;   self._nsec = False; self._byte = 'little'
+            lilendian = True
+            self._nsec = False
+            self._byte = 'little'
         elif _magn == b'\xa1\xb2\xc3\xd4':
-            lilendian = False;  self._nsec = False; self._byte = 'big'
+            lilendian = False
+            self._nsec = False
+            self._byte = 'big'
         elif _magn == b'\x4d\x3c\xb2\xa1':
-            lilendian = True;  self._nsec = True;   self._byte = 'little'
+            lilendian = True
+            self._nsec = True
+            self._byte = 'little'
         elif _magn == b'\xa1\xb2\x3c\x4d':
-            lilendian = False;  self._nsec = True;  self._byte = 'big'
+            lilendian = False
+            self._nsec = True
+            self._byte = 'big'
         else:
             raise FileError(5, 'Unknown file format', self._file.name)
 
@@ -140,17 +148,17 @@ class Header(Protocol):
         _type = self._read_protos(4)
 
         header = dict(
-            magic_number = dict(
-                data = _magn,
-                byteorder = self._byte,
-                nanosecond = self._nsec,
+            magic_number=dict(
+                data=_magn,
+                byteorder=self._byte,
+                nanosecond=self._nsec,
             ),
-            version_major = _vmaj,
-            version_minor = _vmin,
-            thiszone = _zone,
-            sigfigs = _acts,
-            snaplen = _slen,
-            network = _type,
+            version_major=_vmaj,
+            version_minor=_vmin,
+            thiszone=_zone,
+            sigfigs=_acts,
+            snaplen=_slen,
+            network=_type,
         )
 
         return header
@@ -159,7 +167,7 @@ class Header(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, **kwrags):
+    def __init__(self, file, **kwargs):
         self._file = file
         self._info = Info(self.read_header())
 

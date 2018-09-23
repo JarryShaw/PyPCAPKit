@@ -5,7 +5,7 @@
 only, which implements extractor for 802.1QCustomer
 VLAN Tag Type, whose structure is described as below.
 
-Octets      Bits        Name                    Discription
+Octets      Bits        Name                    Description
   1           0     vlan.tci                Tag Control Information
   1           0     vlan.tci.pcp            Priority Code Point
   1           3     vlan.tci.dei            Drop Eligible Indicator
@@ -84,7 +84,7 @@ class VLAN(Link):
         """Read 802.1Q Customer VLAN Tag Type.
 
         Structure of 802.1Q Customer VLAN Tag Type [RFC 7042]:
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               1           0     vlan.tci                Tag Control Information
               1           0     vlan.tci.pcp            Priority Code Point
               1           3     vlan.tci.dei            Drop Eligible Indicator
@@ -99,12 +99,12 @@ class VLAN(Link):
         _type = self._read_protos(2)
 
         vlan = dict(
-            tci = dict(
-                pcp = _PCP.get(int(_tcif[:3], base=2)),
-                dei = True if _tcif[3] else False,
-                vid = int(_tcif[4:], base=2),
+            tci=dict(
+                pcp=_PCP.get(int(_tcif[:3], base=2)),
+                dei=True if _tcif[3] else False,
+                vid=int(_tcif[4:], base=2),
             ),
-            type = _type,
+            type=_type,
         )
 
         length -= 4

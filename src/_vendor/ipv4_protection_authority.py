@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import os
-
 
 ###############
 # Defaults
@@ -12,7 +10,8 @@ import os
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 
@@ -54,14 +53,14 @@ NAME = 'ProtAuth'
 DOCS = 'Protection Authority Bit Assignments'
 FLAG = 'isinstance(value, int) and 0 <= value <= 7'
 DATA = {
-    0 : 'GENSER',
-    1 : 'SIOP-ESI',
-    2 : 'SCI',
-    3 : 'NSA',
-    4 : 'DOE',
-    5 : 'Unassigned',
-    6 : 'Unassigned',
-    7 : 'Field Termination Indicator',
+    0: 'GENSER',
+    1: 'SIOP-ESI',
+    2: 'SCI',
+    3: 'NSA',
+    4: 'DOE',
+    5: 'Unassigned',
+    6: 'Unassigned',
+    7: 'Field Termination Indicator',
 }
 
 
@@ -72,10 +71,12 @@ DATA = {
 
 record = collections.Counter(DATA.values())
 
+
 def rename(name, code):
     if record[name] > 1:
         name = '{} [{}]'.format(name, code)
     return name
+
 
 enum = list()
 miss = [

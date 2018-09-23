@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import os
-
 
 ###############
 # Defaults
@@ -12,7 +10,8 @@ import os
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 
@@ -54,10 +53,10 @@ NAME = 'ECN'
 DOCS = 'TOS ECN FIELD'
 FLAG = 'isinstance(value, int) and 0b00 <= value <= 0b11'
 DATA = {
-    0b00 : 'Not-ECT',
-    0b01 : 'ECT(1)',
-    0b10 : 'ECT(0)',
-    0b11 : 'CE',
+    0b00: 'Not-ECT',
+    0b01: 'ECT(1)',
+    0b10: 'ECT(0)',
+    0b11: 'CE',
 }
 
 
@@ -68,10 +67,12 @@ DATA = {
 
 record = collections.Counter(DATA.values())
 
+
 def rename(name, code):
     if record[name] > 1:
         name = '{} [0b{}]'.format(name, bin(code)[2:].zfill(2))
     return name
+
 
 enum = list()
 miss = [

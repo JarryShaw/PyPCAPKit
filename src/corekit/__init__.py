@@ -11,5 +11,4 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.version import VersionInfo
 
-
 __all__ = ['Info', 'ProtoChain', 'VersionInfo']

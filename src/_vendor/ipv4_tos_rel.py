@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import os
-
 
 ###############
 # Defaults
@@ -12,7 +10,8 @@ import os
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 
@@ -50,12 +49,12 @@ class {}(IntEnum):
 ###############
 
 
-NAME = 'Relibility'
-DOCS = 'TOS (DS Field) Relibility'
+NAME = 'Reliability'
+DOCS = 'TOS (DS Field) Reliability'
 FLAG = 'isinstance(value, int) and 0 <= value <= 1'
 DATA = {
-    0 : 'Normal',
-    1 : 'High',
+    0: 'Normal',
+    1: 'High',
 }
 
 
@@ -66,10 +65,12 @@ DATA = {
 
 record = collections.Counter(DATA.values())
 
+
 def rename(name, code):
     if record[name] > 1:
         name = '{} [{}]'.format(name, code)
     return name
+
 
 enum = list()
 miss = [

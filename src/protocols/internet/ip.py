@@ -10,7 +10,6 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.decorators import seekset
 
-
 __all__ = ['IP']
 
 
@@ -23,9 +22,9 @@ class IP(Internet):
     - Encapsulating Security Payload (ESP) [RFC 4303]
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol

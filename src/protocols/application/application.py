@@ -9,7 +9,6 @@ layer protocols, eg. HTTP/1.*, HTTP/2 and etc.
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
-
 __all__ = ['Application']
 
 
@@ -17,9 +16,9 @@ class Application(Protocol):
     """Abstract base class for transport layer protocol family.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Application`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import os
-
 
 ###############
 # Defaults
@@ -12,7 +10,8 @@ import os
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 
@@ -54,14 +53,14 @@ NAME = 'ClasLvl'
 DOCS = 'Classification Level Encodings'
 FLAG = 'isinstance(value, int) and 0b0000_0000 <= value <= 0b1111_1111'
 DATA = {
-    0b0000_0001 : 'Reserved [4]',
-    0b0011_1101 : 'Top Secret',
-    0b0101_1010 : 'Secret',
-    0b1001_0110 : 'Confidential',
-    0b0110_0110 : 'Reserved [3]',
-    0b1100_1100 : 'Reserved [2]',
-    0b1010_1011 : 'Unclassified',
-    0b1111_0001 : 'Reserved [1]',
+    0b0000_0001: 'Reserved [4]',
+    0b0011_1101: 'Top Secret',
+    0b0101_1010: 'Secret',
+    0b1001_0110: 'Confidential',
+    0b0110_0110: 'Reserved [3]',
+    0b1100_1100: 'Reserved [2]',
+    0b1010_1011: 'Unclassified',
+    0b1111_0001: 'Reserved [1]',
 }
 
 
@@ -72,14 +71,17 @@ DATA = {
 
 record = collections.Counter(DATA.values())
 
+
 def binary(code):
     temp = bin(code)[2:].upper().zfill(8)
     return '0b{}_{}'.format(temp[:4], temp[4:])
+
 
 def rename(name, code):
     if record[name] > 1:
         name = '{} [{}]'.format(name, code)
     return name
+
 
 enum = list()
 miss = [

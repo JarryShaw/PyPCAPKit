@@ -18,39 +18,40 @@ Protocol (HTTP/2), whose structure is described as below.
 import collections
 
 from pcapkit._common.http_error_code import ErrCode as _ERROR_CODE
-from pcapkit._common.http_para_name import Settings as _PRAR_NAME
+from pcapkit._common.http_para_name import Settings as _PARA_NAME
 from pcapkit._common.http_type import PktType as _HTTP_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.http import HTTP
 from pcapkit.utilities.exceptions import ProtocolError
 
-
+# TODO: Considering replacing flags with `aenum.IntFlag`.
 __all__ = ['HTTPv2']
 
-
 # HTTP/2 Functions
-_read_http_none = lambda self, size, kind, flag: self._read_http_none(size, kind, flag)     # Unsigned
-_HTTP_FUNC = collections.defaultdict(lambda : _read_http_none, {
-    0x00 : lambda self, size, kind, flag: self._read_http_data(size, kind, flag),           # DATA
-    0x01 : lambda self, size, kind, flag: self._read_http_headers(size, kind, flag),        # HEADERS
-    0x02 : lambda self, size, kind, flag: self._read_http_priority(size, kind, flag),       # PRIORITY
-    0x03 : lambda self, size, kind, flag: self._read_http_rst_stream(size, kind, flag),     # RST_STREAM
-    0x04 : lambda self, size, kind, flag: self._read_http_settings(size, kind, flag),       # SETTINGS
-    0x05 : lambda self, size, kind, flag: self._read_http_push_promise(size, kind, flag),   # PUSH_PROMISE
-    0x06 : lambda self, size, kind, flag: self._read_http_ping(size, kind, flag),           # PING
-    0x07 : lambda self, size, kind, flag: self._read_http_goaway(size, kind, flag),         # GOAWAY
-    0x08 : lambda self, size, kind, flag: self._read_http_window_update(size, kind, flag),  # WINDOW_UPDATE
-    0x09 : lambda self, size, kind, flag: self._read_http_continuation(size, kind, flag),   # CONTINUATION
-})
+_HTTP_FUNC = collections.defaultdict(
+    lambda self, size, kind, flag: self._read_http_none(size, kind, flag),                      # Unsigned
+    {
+        0x00: lambda self, size, kind, flag: self._read_http_data(size, kind, flag),            # DATA
+        0x01: lambda self, size, kind, flag: self._read_http_headers(size, kind, flag),         # HEADERS
+        0x02: lambda self, size, kind, flag: self._read_http_priority(size, kind, flag),        # PRIORITY
+        0x03: lambda self, size, kind, flag: self._read_http_rst_stream(size, kind, flag),      # RST_STREAM
+        0x04: lambda self, size, kind, flag: self._read_http_settings(size, kind, flag),        # SETTINGS
+        0x05: lambda self, size, kind, flag: self._read_http_push_promise(size, kind, flag),    # PUSH_PROMISE
+        0x06: lambda self, size, kind, flag: self._read_http_ping(size, kind, flag),            # PING
+        0x07: lambda self, size, kind, flag: self._read_http_goaway(size, kind, flag),          # GOAWAY
+        0x08: lambda self, size, kind, flag: self._read_http_window_update(size, kind, flag),   # WINDOW_UPDATE
+        0x09: lambda self, size, kind, flag: self._read_http_continuation(size, kind, flag),    # CONTINUATION
+    }
+)
 
 
 class HTTPv2(HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/2).
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Application`
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
@@ -108,7 +109,7 @@ class HTTPv2(HTTP):
             |                   Frame Payload (0...)                      ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type
               4          32     http.flags              Flags
@@ -135,10 +136,10 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(_type), quiet=True)
 
         http = dict(
-            length = _tlen,
-            type = _HTTP_TYPE.get(_type),
-            sid = int(_rsid[1:], base=2),
-            packet = self._read_packet(_tlen),
+            length=_tlen,
+            type=_HTTP_TYPE.get(_type),
+            sid=int(_rsid[1:], base=2),
+            packet=self._read_packet(_tlen),
         )
 
         if http['type'] is None:
@@ -173,8 +174,8 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(kind), quiet=True)
 
         data = dict(
-            flags = None,
-            payload = self._read_fileng(size - 9) or None,
+            flags=None,
+            payload=self._read_fileng(size - 9) or None,
         )
 
         return data
@@ -197,7 +198,7 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (0)
               4          32     http.flags              Flags
@@ -210,8 +211,8 @@ class HTTPv2(HTTP):
         """
         _plen = 0
         _flag = dict(
-            END_STREAM = False, # bit 0
-            PADDED = False,     # bit 3
+            END_STREAM=False,   # bit 0
+            PADDED=False,       # bit 3
         )
         for index, bit in enumerate(flag):
             if index == 0 and bit:
@@ -241,8 +242,8 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(kind), quiet=True)
 
         data = dict(
-            flags = _flag,
-            data = _data,
+            flags=_flag,
+            data=_data,
         )
         if _flag['PADDED']:
             data['ped_len'] = _plen
@@ -271,7 +272,7 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (1)
               4          32     http.flags              Flags
@@ -288,10 +289,10 @@ class HTTPv2(HTTP):
         _plen = 0
         _elen = 0
         _flag = dict(
-            END_STREAM = False,     # bit 0
-            END_HEADERS = False,    # bit 2
-            PADDED = False,         # bit 3
-            PRIORITY = False,       # bit 5
+            END_STREAM=False,       # bit 0
+            END_HEADERS=False,      # bit 2
+            PADDED=False,           # bit 3
+            PRIORITY=False,         # bit 5
         )
         for index, bit in enumerate(flag):
             if index == 0 and bit:
@@ -325,8 +326,8 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(kind), quiet=True)
 
         data = dict(
-            flags = _flag,
-            frag = _frag,
+            flags=_flag,
+            frag=_frag,
         )
         if _flag['PADDED']:
             data['ped_len'] = _plen
@@ -353,7 +354,7 @@ class HTTPv2(HTTP):
             |   Weight (8)  |
             +-+-------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (2)
               4          32     http.flags              Flags
@@ -373,10 +374,10 @@ class HTTPv2(HTTP):
         _wght = self._read_unpack(1)
 
         data = dict(
-            flags = None,
-            exclusive = True if int(_edep[0], base=2) else False,
-            deps = int(_edep[1:], base=2),
-            weight = _wght + 1,
+            flags=None,
+            exclusive=True if int(_edep[0], base=2) else False,
+            deps=int(_edep[1:], base=2),
+            weight=_wght + 1,
         )
 
         return data
@@ -395,7 +396,7 @@ class HTTPv2(HTTP):
             |                        Error Code (32)                        |
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (2)
               4          32     http.flags              Flags
@@ -412,8 +413,8 @@ class HTTPv2(HTTP):
         _code = self._read_unpack(4)
 
         data = dict(
-            flags = None,
-            error = _ERROR_CODE.get(_code, _code),
+            flags=None,
+            error=_ERROR_CODE.get(_code, _code),
         )
 
         return data
@@ -435,7 +436,7 @@ class HTTPv2(HTTP):
             +---------------------------------------------------------------+
             |                          ......                               |
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (2)
               4          32     http.flags              Flags
@@ -450,7 +451,7 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(kind), quiet=True)
 
         _flag = dict(
-            ACK = False,    # bit 0
+            ACK=False,      # bit 0
         )
         for index, bit in enumerate(flag):
             if index == 0 and bit:
@@ -468,7 +469,7 @@ class HTTPv2(HTTP):
         while counter < size:
             _stid = self._read_unpack(1)
             _pval = self._read_unpack(4)
-            _pkey = _PRAR_NAME.get(_stid, 'Unsigned')
+            _pkey = _PARA_NAME.get(_stid, 'Unsigned')
             if _pkey in _para:
                 if isinstance(_para[_pkey], tuple):
                     _para[_pkey] += (_pval,)
@@ -478,7 +479,7 @@ class HTTPv2(HTTP):
                 _para[_pkey] = _pval
 
         data = dict(
-            flags = _flag,
+            flags=_flag,
         )
         data.update(_para)
 
@@ -504,7 +505,7 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (1)
               4          32     http.flags              Flags
@@ -522,8 +523,8 @@ class HTTPv2(HTTP):
 
         _plen = 0
         _flag = dict(
-            END_HEADERS = False,    # bit 2
-            PADDED = False,         # bit 3
+            END_HEADERS=False,      # bit 2
+            PADDED=False,           # bit 3
         )
         for index, bit in enumerate(flag):
             if index == 2 and bit:
@@ -554,9 +555,9 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(kind), quiet=True)
 
         data = dict(
-            flags = _flag,
-            pid = int(_rpid[1:], base=2),
-            frag = _frag,
+            flags=_flag,
+            pid=int(_rpid[1:], base=2),
+            frag=_frag,
         )
         if _flag['PADDED']:
             data['ped_len'] = _plen
@@ -579,7 +580,7 @@ class HTTPv2(HTTP):
             |                                                               |
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (2)
               4          32     http.flags              Flags
@@ -592,7 +593,7 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(kind), quiet=True)
 
         _flag = dict(
-            ACK = False,    # bit 0
+            ACK=False,      # bit 0
         )
         for index, bit in enumerate(flag):
             if index == 0 and bit:
@@ -605,8 +606,8 @@ class HTTPv2(HTTP):
         _data = self._read_fileng(8)
 
         data = dict(
-            flags = _flag,
-            data = _data,
+            flags=_flag,
+            data=_data,
         )
 
         return data
@@ -629,7 +630,7 @@ class HTTPv2(HTTP):
             |                  Additional Debug Data (*)                    |
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (2)
               4          32     http.flags              Flags
@@ -655,10 +656,10 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(kind), quiet=True)
 
         data = dict(
-            flags = None,
-            last_sid = int(_rsid[1:], base=2),
-            error = _ERROR_CODE.get(_code, _code),
-            data = _data,
+            flags=None,
+            last_sid=int(_rsid[1:], base=2),
+            error=_ERROR_CODE.get(_code, _code),
+            data=_data,
         )
 
         return data
@@ -677,7 +678,7 @@ class HTTPv2(HTTP):
             |R|              Window Size Increment (31)                     |
             +-+-------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (2)
               4          32     http.flags              Flags
@@ -698,8 +699,8 @@ class HTTPv2(HTTP):
             raise ProtocolError('HTTP/2: [Type {}] invalid format'.format(kind), quiet=True)
 
         data = dict(
-            flags = None,
-            window = int(_size[1:], base=2),
+            flags=None,
+            window=int(_size[1:], base=2),
         )
 
         return data
@@ -718,7 +719,7 @@ class HTTPv2(HTTP):
             |                   Header Block Fragment (*)                 ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     http.length             Length
               3          24     http.type               Type (2)
               4          32     http.flags              Flags
@@ -728,7 +729,7 @@ class HTTPv2(HTTP):
 
         """
         _flag = dict(
-            END_HEADERS = False,    # bit 2
+            END_HEADERS=False,      # bit 2
         )
         for index, bit in enumerate(flag):
             if index == 2 and bit:
@@ -741,8 +742,8 @@ class HTTPv2(HTTP):
         _frag = self._read_fileng(size) or None
 
         data = dict(
-            flags = _flag,
-            frag = _frag,
+            flags=_flag,
+            frag=_frag,
         )
 
         return data

@@ -4,23 +4,23 @@
 from aenum import IntEnum, extend_enum
 
 
-class Relibility(IntEnum):
-    """Enumeration class for Relibility."""
-    _ignore_ = 'Relibility _'
-    Relibility = vars()
+class Reliability(IntEnum):
+    """Enumeration class for Reliability."""
+    _ignore_ = 'Reliability _'
+    Reliability = vars()
 
-    # TOS (DS Field) Relibility
-    Relibility['NORMAL'] = 0
-    Relibility['HIGH'] = 1
+    # TOS (DS Field) Reliability
+    Reliability['NORMAL'] = 0
+    Reliability['HIGH'] = 1
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return Relibility(key)
-        if key not in Relibility._member_map_:
-            extend_enum(Relibility, key, default)
-        return Relibility[key]
+            return Reliability(key)
+        if key not in Reliability._member_map_:
+            extend_enum(Reliability, key, default)
+        return Reliability[key]
 
     @classmethod
     def _missing_(cls, value):

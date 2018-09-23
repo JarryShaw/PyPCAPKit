@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import csv
 import os
 import re
 
 import requests
-
 
 ###############
 # Defaults
@@ -16,7 +14,8 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 
@@ -72,16 +71,19 @@ data = page.text.strip().split('\r\n')
 reader = csv.reader(data)
 header = next(reader)
 record = collections.Counter(map(lambda item: item[1],
-    filter(lambda item: len(item[0].split('-')) != 2, reader)))
+                                 filter(lambda item: len(item[0].split('-')) != 2, reader)))
+
 
 def hexlify(code):
     temp = hex(code)[2:].upper().zfill(8)
     return '0x{}_{}'.format(temp[:4], temp[4:])
 
+
 def rename(name, code):
     if record[name] > 1:
         return '{} [{}]'.format(name, code)
     return name
+
 
 reader = csv.reader(data)
 header = next(reader)
@@ -118,7 +120,8 @@ for item in reader:
         if desc or dscp:
             miss.append('#{}{}'.format(desc, dscp))
         miss.append('    temp = hex(value)[2:].upper().zfill(8)')
-        miss.append("    extend_enum(cls, '{} [0x%s]' % (temp[:4]+'_'+temp[4:]), value)".format(name))
+        miss.append(
+            "    extend_enum(cls, '{} [0x%s]' % (temp[:4]+'_'+temp[4:]), value)".format(name))
         miss.append('    return cls(value)')
 
 

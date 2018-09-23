@@ -12,10 +12,8 @@ import sys
 import warnings
 
 import emoji
-
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.interface import TREE, JSON, PLIST
-
+from pcapkit.interface import JSON, PLIST, TREE
 
 # version number
 __version__ = '0.6.0'
@@ -95,17 +93,22 @@ def main():
     args = parser.parse_args()
     warnings.simplefilter('ignore')
 
-    if args.format:     fmt = args.format
-    elif args.json:     fmt = JSON
-    elif args.plist:    fmt = PLIST
-    elif args.tree:     fmt = TREE
-    else:               fmt = None
+    if args.format:
+        fmt = args.format
+    elif args.json:
+        fmt = JSON
+    elif args.plist:
+        fmt = PLIST
+    elif args.tree:
+        fmt = TREE
+    else:
+        fmt = None
 
     extractor = Extractor(store=False, format=fmt,
-                            fin=args.fin, fout=args.fout,
-                            auto=args.verbose, files=args.files,
-                            layer=args.layer, protocol=args.protocol,
-                            engine=args.engine, extension=args.auto_extension)
+                          fin=args.fin, fout=args.fout,
+                          auto=args.verbose, files=args.files,
+                          layer=args.layer, protocol=args.protocol,
+                          engine=args.engine, extension=args.auto_extension)
 
     if not args.verbose:
         print(emoji.emojize(":police_car_light: Loading file {!r}".format(extractor.input)))

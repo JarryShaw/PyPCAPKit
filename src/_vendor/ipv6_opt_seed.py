@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import os
-
 
 ###############
 # Defaults
@@ -12,7 +10,8 @@ import os
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 
@@ -54,10 +53,10 @@ NAME = 'SeedID'
 DOCS = 'Seed-ID Types'
 FLAG = 'isinstance(value, int) and 0b00 <= value <= 0b11'
 DATA = {
-    0b00 : 'IPv6 Source Address',                   # [RFC 7731]
-    0b01 : '16-Bit Unsigned Integer',               # [RFC 7731]
-    0b10 : '64-Bit Unsigned Integer',               # [RFC 7731]
-    0b11 : '128-Bit Unsigned Integer',              # [RFC 7731]
+    0b00: 'IPv6 Source Address',                   # [RFC 7731]
+    0b01: '16-Bit Unsigned Integer',               # [RFC 7731]
+    0b10: '64-Bit Unsigned Integer',               # [RFC 7731]
+    0b11: '128-Bit Unsigned Integer',              # [RFC 7731]
 }
 
 
@@ -68,10 +67,12 @@ DATA = {
 
 record = collections.Counter(DATA.values())
 
+
 def rename(name, code):
     if record[name] > 1:
         name = '{} [{}]'.format(name, code)
     return name
+
 
 enum = list()
 miss = [

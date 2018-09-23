@@ -14,12 +14,7 @@ import copy
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.validations import frag_check, int_check
 
-
 __all__ = ['Reassembly']
-
-
-ABCMeta = abc.ABCMeta
-abstractmethod = abc.abstractmethod
 
 
 class Reassembly(object):
@@ -40,13 +35,13 @@ class Reassembly(object):
         * run -- run automatically
 
     Attributes:
-        * _strflg -- bool, stirct mode flag
+        * _strflg -- bool, strict mode flag
         * _newflg -- bool, if new packets reassembled flag
         * _buffer -- dict, buffer field
         * _dtgram -- list, reassembled datagram
 
     """
-    __metaclass__ = ABCMeta
+    __metaclass__ = abc.ABCMeta
 
     ##########################################################################
     # Properties.
@@ -54,7 +49,7 @@ class Reassembly(object):
 
     # protocol of current packet
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def name(self):
         """Protocol of current packet."""
         pass
@@ -72,7 +67,7 @@ class Reassembly(object):
         return self.fetch()
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def protocol(self):
         """Protocol of current reassembly object."""
         pass
@@ -82,7 +77,7 @@ class Reassembly(object):
     ##########################################################################
 
     # reassembly procedure
-    @abstractmethod
+    @abc.abstractmethod
     def reassembly(self, info):
         """Reassembly procedure.
 
@@ -96,7 +91,7 @@ class Reassembly(object):
         pass
 
     # submit reassembled payload
-    @abstractmethod
+    @abc.abstractmethod
     def submit(self, buf, **kwargs):
         """Submit reassembled payload.
 
@@ -160,7 +155,7 @@ class Reassembly(object):
 
         """
         self._newflg = False    # new packets reassembled
-        self._strflg = strict   # stirct mode flag
+        self._strflg = strict   # strict mode flag
         self._buffer = dict()   # buffer field
         self._dtgram = list()   # reassembled datagram
 

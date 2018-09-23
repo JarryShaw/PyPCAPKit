@@ -17,7 +17,6 @@ from pcapkit.utilities.decorators import beholder_ng
 # from pcapkit.fundation.analysis import analyse
 ###############################################################################
 
-
 __all__ = ['Transport', 'TP_PROTO']
 
 
@@ -25,7 +24,7 @@ class Transport(Protocol):
     """Abstract base class for transport layer protocol family.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
         * layer -- str, `Transport`
         * length -- int, header length of corresponding protocol

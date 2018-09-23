@@ -10,7 +10,6 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.utilities.exceptions import UnsupportedCall
 
-
 __all__ = 'IPsec'
 
 
@@ -21,9 +20,9 @@ class IPsec(IP):
     - Encapsulating Security Payload (ESP) [RFC 4303]
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol

@@ -22,17 +22,15 @@ import ipaddress
 from pcapkit._common.ipv6_routing_type import RT_TYPE as _ROUTING_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.utilities.exceptions import UnsupportedCall, ProtocolError
-
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 __all__ = ['IPv6_Route']
 
-
 # IPv6 Routing Processors
 _ROUTE_PROC = {
-    0 : 'src',                          # [RFC 5095] DEPRECATED
-    2 : '2',                            # [RFC 6275]
-    3 : 'rpl',                          # [RFC 6554]
+    0: 'src',                          # [RFC 5095] DEPRECATED
+    2: '2',                            # [RFC 6275]
+    3: 'rpl',                          # [RFC 6554]
 }
 
 
@@ -40,9 +38,9 @@ class IPv6_Route(Internet):
     """This class implements Routing Header for IPv6.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -77,7 +75,7 @@ class IPv6_Route(Internet):
 
     @property
     def alias(self):
-        """Acronym of corresponding procotol."""
+        """Acronym of corresponding protocol."""
         return 'IPv6-Route'
 
     @property
@@ -88,7 +86,7 @@ class IPv6_Route(Internet):
     @property
     def payload(self):
         """Payload of current instance."""
-        if self.extension:
+        if self._extf:
             raise UnsupportedCall("'{}' object has no attribute 'payload'".format(self.__class__.__name__))
         return self._next
 
@@ -115,7 +113,7 @@ class IPv6_Route(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     route.next              Next Header
               1           8     route.length            Header Extensive Length
               2          16     route.type              Routing Type
@@ -132,16 +130,16 @@ class IPv6_Route(Internet):
         _left = self._read_unpack(1)
 
         ipv6_route = dict(
-            next = _next,
-            length = (_hlen + 1) * 8,
-            type = _ROUTING_TYPE.get(_type, 'Unassigned'),
-            seg_left = _left,
+            next=_next,
+            length=(_hlen + 1) * 8,
+            type=_ROUTING_TYPE.get(_type, 'Unassigned'),
+            seg_left=_left,
         )
 
         _dlen = _hlen * 8 - 4
         if _dlen:
             _func = _ROUTE_PROC.get(_type, 'none')
-            _data = eval('self._read_data_type_{}'.format(func))(_dlen)
+            _data = eval('self._read_data_type_{}'.format(_func))(_dlen)
             ipv6_route.update(_data)
 
         length -= ipv6_route['length']
@@ -158,11 +156,11 @@ class IPv6_Route(Internet):
 
     def __init__(self, _file, length=None, *, extension=False, **kwargs):
         self._file = _file
+        self._extf = extension
         self._info = Info(self.read_ipv6_route(length, extension))
 
     def __length_hint__(self):
         return 4
-
 
     ##########################################################################
     # Utilities.
@@ -182,7 +180,7 @@ class IPv6_Route(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     route.next              Next Header
               1           8     route.length            Header Extensive Length
               2          16     route.type              Routing Type
@@ -193,15 +191,15 @@ class IPv6_Route(Internet):
         _data = self._read_fileng(length)
 
         data = dict(
-            data = _data,
+            data=_data,
         )
 
         return data
 
     def _read_data_type_src(self, length):
-        """Read IPv6-Route Souce Route data.
+        """Read IPv6-Route Source Route data.
 
-        Structure of IPv6-Route Souce Route data [RFC 5095]:
+        Structure of IPv6-Route Source Route data [RFC 5095]:
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |  Hdr Ext Len  | Routing Type=0| Segments Left |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -236,7 +234,7 @@ class IPv6_Route(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     route.next              Next Header
               1           8     route.length            Header Extensive Length
               2          16     route.type              Routing Type
@@ -252,7 +250,7 @@ class IPv6_Route(Internet):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))
 
         data = dict(
-            ip = tuple(_addr),
+            ip=tuple(_addr),
         )
 
         return data
@@ -275,7 +273,7 @@ class IPv6_Route(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     route.next              Next Header
               1           8     route.length            Header Extensive Length
               2          16     route.type              Routing Type
@@ -291,7 +289,7 @@ class IPv6_Route(Internet):
         _home = self._read_fileng(16)
 
         data = dict(
-            ip = ipaddress.ip_address(_home),
+            ip=ipaddress.ip_address(_home),
         )
 
         return data
@@ -314,7 +312,7 @@ class IPv6_Route(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     route.next              Next Header
               1           8     route.length            Header Extensive Length
               2          16     route.type              Routing Type
@@ -345,10 +343,10 @@ class IPv6_Route(Internet):
         _pads = self._read_fileng(_plen)
 
         data = dict(
-            cmpri = _inti,
-            cmpre = _inte,
-            pad = _plen,
-            ip = tuple(_addr),
+            cmpri=_inti,
+            cmpre=_inte,
+            pad=_plen,
+            ip=tuple(_addr),
         )
 
         return data

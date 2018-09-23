@@ -17,7 +17,6 @@ from pcapkit.reassembly import *
 from pcapkit.toolkit import *
 from pcapkit.utilities import *
 
-
 __all__ = [
     # pcapkit.corekit
     'Info',                                                 # Info Class
@@ -37,7 +36,7 @@ __all__ = [
     'extract', 'analyse', 'reassemble', 'trace',            # Interface Functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
-    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'PCAPKit',
+    'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',
                                                             # Engine Macros
 
     # pcapkit.ipsuite

@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import csv
 import os
 import re
 
 import requests
-
 
 ###############
 # Defaults
@@ -16,7 +14,8 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, ENUM: '''\
+
+def LINE(NAME, DOCS, ENUM): return '''\
 # -*- coding: utf-8 -*-
 
 
@@ -63,20 +62,24 @@ data = page.text.strip().split('\r\n')
 reader = csv.reader(data)
 header = next(reader)
 record = collections.Counter(map(lambda item: item[1],
-    filter(lambda item: len(item[0].split('-')) != 2, reader)))
+                                 filter(lambda item: len(item[0].split('-')) != 2, reader)))
+
 
 def rename(name, code, *, original):
     if record[original] > 1:
         return '{} [{}]'.format(name, code)
     return name
 
+
 reader = csv.reader(data)
 header = next(reader)
 
 enum = list()
+miss = list()
 for item in reader:
     flag = item[3]
-    if flag != 'Y': continue
+    if flag != 'Y':
+        continue
 
     name = item[1]
     rfcs = item[4]
@@ -87,7 +90,8 @@ for item in reader:
             temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
         else:
             temp.append('[{}]'.format(rfc))
-    lrfc = re.sub(r'( )( )*', ' ', " {}".format(''.join(temp)).replace('\n', ' ')) if rfcs else ''
+    lrfc = re.sub(r'( )( )*', ' ',
+                  " {}".format(''.join(temp)).replace('\n', ' ')) if rfcs else ''
 
     subd = re.sub(r'( )( )*', ' ', item[2].replace('\n', ' '))
     desc = ' {}'.format(subd) if item[2] else ''

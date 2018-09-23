@@ -6,7 +6,7 @@ which implements extractor for (Dynamic) Reverse Address
 Resolution Protocol (RARP/DRARP), whose structure is
 described as below.
 
-Octets      Bits        Name                    Discription
+Octets      Bits        Name                    Description
   0           0     rarp.htype              Hardware Type
   2          16     rarp.ptype              Protocol Type
   4          32     rarp.hlen               Hardware Address Length
@@ -19,7 +19,6 @@ Octets      Bits        Name                    Discription
 
 """
 from pcapkit.protocols.link.arp import ARP
-
 
 __all__ = ['RARP']
 

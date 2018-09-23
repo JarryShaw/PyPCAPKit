@@ -3,11 +3,11 @@
 
 `pcapkit.reassembly.ip` contains `IP_Reassembly` only,
 which is the base class for IPv4 and IPv6 reassembly.
-The following algorithm implementment is based on IP
+The following algorithm implement is based on IP
 reassembly procedure introduced in RFC 791, using
 `RCVBT` (fragment receivedbit table). Though another
 algorithm is explained in RFC 815, replacing `RCVBT`,
-however, this implementment still used the elder one.
+however, this implement still used the elder one.
 And here is the pseudo-code:
 
 Notations:
@@ -97,7 +97,7 @@ class IP_Reassembly(Reassembly):
         * run -- run automatically
 
     Attributes:
-        * _strflg -- bool, stirct mode flag
+        * _strflg -- bool, strict mode flag
         * _buffer -- dict, buffer field
         * _dtgram -- tuple, reassembled datagram
 
@@ -119,7 +119,7 @@ class IP_Reassembly(Reassembly):
         MF = info.mf        # More Fragments flag
         TL = info.tl        # Total Length
 
-        # when unfragmented (possibly discarded) packet received
+        # when non-fragmented (possibly discarded) packet received
         if not FO and not MF:
             if BUFID in self._buffer:
                 self._dtgram += self.submit(self._buffer[BUFID])
@@ -129,11 +129,11 @@ class IP_Reassembly(Reassembly):
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
             self._buffer[BUFID] = dict(
-                TDL = 0,                        # Total Data Length
-                RCVBT = bytearray(8191),        # Fragment Received Bit Table
-                index = list(),                 # index record
-                header = bytearray(),           # header buffer
-                datagram = bytearray(65535),    # data buffer
+                TDL=0,                          # Total Data Length
+                RCVBT=bytearray(8191),          # Fragment Received Bit Table
+                index=list(),                   # index record
+                header=bytearray(),             # header buffer
+                datagram=bytearray(65535),      # data buffer
             )
 
         # append packet index
@@ -192,28 +192,28 @@ class IP_Reassembly(Reassembly):
             byte = bytearray()
             # extract received payload
             for (bctr, bit) in enumerate(RCVBT):
-                if bit: # received bit
+                if bit:     # received bit
                     this = bctr * 8
                     that = this + 8
                     byte += datagram[this:that]
-                else:   # missing bit
+                else:       # missing bit
                     if byte:    # strip empty payload
                         data.append(bytes(byte))
                     byte = bytearray()
             # strip empty packets
             if data or header:
                 packet = Info(
-                    NotImplemented = True,
-                    index = tuple(index),
-                    header = header or None,
-                    payload = tuple(data) or None,
+                    NotImplemented=True,
+                    index=tuple(index),
+                    header=header or None,
+                    payload=tuple(data) or None,
                 )
         # if datagram is reassembled in whole
         else:
             payload = datagram[:TDL]
             packet = Info(
-                NotImplemented = False,
-                index = tuple(index),
-                packet = (bytes(header) + bytes(payload)) or None,
+                NotImplemented=False,
+                index=tuple(index),
+                packet=(bytes(header) + bytes(payload)) or None,
             )
         return [packet]

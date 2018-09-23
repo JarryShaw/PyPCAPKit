@@ -21,7 +21,6 @@ which implements extractor for Layer Two Tunnelling Protocol
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 
-
 __all__ = ['L2TP']
 
 
@@ -98,7 +97,7 @@ class L2TP(Link):
             |      Offset Size (opt)        |    Offset pad... (opt)
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     l2tp.flags              Flags and Version Info
               0           0     l2tp.flags.type         Type (0/1)
               0           1     l2tp.flags.len          Length
@@ -130,26 +129,26 @@ class L2TP(Link):
         _size = self._read_unpack(2) if int(_flag[6]) else 0
 
         l2tp = dict(
-            flags = dict(
-                type = 'Control' if int(_flag[0]) else 'Data',
-                len = True if int(_flag[1]) else False,
-                seq = True if int(_flag[4]) else False,
-                offset = True if int(_flag[6]) else False,
-                prio = True if int(_flag[7]) else False,
+            flags=dict(
+                type='Control' if int(_flag[0]) else 'Data',
+                len=True if int(_flag[1]) else False,
+                seq=True if int(_flag[4]) else False,
+                offset=True if int(_flag[6]) else False,
+                prio=True if int(_flag[7]) else False,
             ),
-            ver = int(_vers, base=16),
-            length = _hlen,
-            tunnelid = _tnnl,
-            sessionid = _sssn,
-            ns = _nseq,
-            nr = _nrec,
-            offset = 8*_size or None,
+            ver=int(_vers, base=16),
+            length=_hlen,
+            tunnelid=_tnnl,
+            sessionid=_sssn,
+            ns=_nseq,
+            nr=_nrec,
+            offset=8*_size or None,
         )
 
         hdr_len = _hlen or (6 + 2*(int(_flag[1]) + 2*int(_flag[4]) + int(_flag[6])))
         l2tp['hdr_len'] = hdr_len + _size * 8
         # if _size:
-            # l2tp['padding'] = self._read_fileng(_size * 8)
+        #     l2tp['padding'] = self._read_fileng(_size * 8)
 
         length -= l2tp['hdr_len']
         l2tp['packet'] = self._read_packet(header=l2tp['hdr_len'], payload=length)

@@ -3,11 +3,11 @@
 
 `pcapkit.reassembly.ipv4` contains `IPv4_Reassembly`
 only, which reconstructs fragmented IPv4 packets back to
-origin. The following algorithm implementment is based on IP
+origin. The following algorithm implement is based on IP
 reassembly procedure introduced in RFC 791, using
 `RCVBT` (fragment receivedbit table). Though another
 algorithm is explained in RFC 815, replacing `RCVBT`,
-however, this implementment still used the elder one.
+however, this implement still used the elder one.
 And here is the pseudo-code:
 
 Notations:
@@ -72,7 +72,6 @@ Algorithm:
 """
 from pcapkit.reassembly.ip import IP_Reassembly
 
-
 __all__ = ['IPv4_Reassembly']
 
 
@@ -103,7 +102,7 @@ class IPv4_Reassembly(IP_Reassembly):
         * run -- run automatically
 
     Attributes:
-        * _strflg -- bool, stirct mode flag
+        * _strflg -- bool, strict mode flag
         * _buffer -- dict, buffer field
         * _dtgram -- tuple, reassembled datagram
 

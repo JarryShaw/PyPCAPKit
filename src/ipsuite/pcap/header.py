@@ -78,8 +78,10 @@ class Header(Protocol):
             if lilendian is not None and bigendian is not None:
                 if lilendian == bigendian:
                     raise EndianError('unresolved byte order')
-                if bigendian:   return _MAGIC_NUM[('big', False)], False
-                if lilendian:   return _MAGIC_NUM[('little', True)], True
+                if bigendian:
+                    return _MAGIC_NUM[('big', False)], False
+                if lilendian:
+                    return _MAGIC_NUM[('little', True)], True
 
             if byteorder.lower() not in ('little', 'big'):
                 raise EndianError("unknown byte order: {!r}".format(byteorder))
@@ -88,27 +90,26 @@ class Header(Protocol):
             return magic_number, (byteorder.lower() == 'little')
 
         # fetch values
-        magic_number, lilendian = __make_magic__()                      # make magic number
-        version = self.__args__.get('version', (2, 4))                  # version information
-        version_major = self.__args__.get('version_major', version[0])  # major version number
-        version_minor = self.__args__.get('version_minor', version[1])  # minor version number
-        thiszone = self.__args__.get('thiszone', 0)                     # GMT to local correction
-        sigfigs = self.__args__.get('sigfigs', 0)                       # accuracy of timestamps
-        snaplen = self.__args__.get('snaplen', 262144)                  # max length of captured packets, in octets
-        network = self.__args__.get('network', LINKTYPE['NULL'])        # data link type
-        network_default = self.__args__.get('network_default')          # default value for unknown data link type
-        network_reversed = self.__args__.get('network_reversed', False) # if namespace is dict<str: int> pairs
-        network_namespace = self.__args__.get('network_namespace', LINKTYPE)
-                                                                        # data link type namespace
+        magic_number, lilendian = __make_magic__()                            # make magic number
+        version = self.__args__.get('version', (2, 4))                        # version information
+        version_major = self.__args__.get('version_major', version[0])        # major version number
+        version_minor = self.__args__.get('version_minor', version[1])        # minor version number
+        thiszone = self.__args__.get('thiszone', 0)                           # GMT to local correction
+        sigfigs = self.__args__.get('sigfigs', 0)                             # accuracy of timestamps
+        snaplen = self.__args__.get('snaplen', 262144)                        # max length of cap. packets, in octets
+        network = self.__args__.get('network', LINKTYPE['NULL'])              # data link type
+        network_default = self.__args__.get('network_default')                # default val. for unknown data link type
+        network_reversed = self.__args__.get('network_reversed', False)       # if namespace is dict<str: int> pairs
+        network_namespace = self.__args__.get('network_namespace', LINKTYPE)  # data link type namespace
 
         # make packet
-        self.__data__ = b'%s%s%s%s%s%s%s' % (
+        return b'%s%s%s%s%s%s%s' % (
             magic_number,
             self.pack(version_major, size=2, lilendian=lilendian),
-            self.pack(version_major, size=2, lilendian=lilendian),
+            self.pack(version_minor, size=2, lilendian=lilendian),
             self.pack(thiszone, size=4, lilendian=lilendian),
             self.pack(sigfigs, size=4, lilendian=lilendian),
             self.pack(snaplen, size=4, lilendian=lilendian),
             self.index(network, network_default, namespace=network_namespace,
-                        reversed=network_reversed, pack=True, lilendian=lilendian),
+                       reversed=network_reversed, pack=True, lilendian=lilendian),
         )

@@ -7,13 +7,11 @@ Protocol (HTTP) protocol family, eg. HTTP/1.*, HTTP/2.
 
 """
 import chardet
-
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.application.application import Application
-from pcapkit.utilities.exceptions import UnsupportedCall, ProtocolError
-
+from pcapkit.protocols.null import NoPayload
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 __all__ = ['HTTP']
 
@@ -25,9 +23,9 @@ class HTTP(Application):
     - Hypertext Transfer Protocol version 2 (HTTP/2) [RFC 7540]
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Application`
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance

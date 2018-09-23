@@ -3,7 +3,7 @@
 
 `pcapkit.reassembly.tcp` contains `TCP_Reassembly` only,
 which reconstructs fragmented TCP packets back to origin.
-The algorithm for TCP reassembly is decribed as below.
+The algorithm for TCP reassembly is described as below.
 
 Notations:
 
@@ -15,63 +15,63 @@ Notations:
     HDL     - Hole Discriptor List
     ISN     - Initial Sequence Number
     src     - source IP
-    dst     - destionation IP
+    dst     - destination IP
     srcport - source TCP port
-    dstport - destionation TCP port
+    dstport - destination TCP port
 
 Algorithm:
 
-    DO { 
-        BUFID <- src|dst|srcport|dstport|ACK;  
-        IF (SYN is true) { 
-            IF (buffer with BUFID is allocated) { 
-                flush all reassembly for this BUFID; 
-                submit datagram to next step; 
-            } 
-        }  
-
-        IF (no buffer with BUFID is allocated) { 
-            allocate reassembly resources with BUFID; 
-            ISN <- DSN; 
-            put data from fragment into data buffer with BUFID
-                [from octet fragment.first to octet fragment.last]; 
-            update HDL; 
-        }  
-
-        IF (FIN is true) { 
-            submit datagram to next step; 
-            free all reassembly resources for this BUFID; 
-            BREAK. 
+    DO {
+        BUFID <- src|dst|srcport|dstport|ACK;
+        IF (SYN is true) {
+            IF (buffer with BUFID is allocated) {
+                flush all reassembly for this BUFID;
+                submit datagram to next step;
+            }
         }
-      } give up until (next fragment);
 
-    update HDL: { 
-        DO { 
-            select the next hole descriptor from HDL;  
+        IF (no buffer with BUFID is allocated) {
+            allocate reassembly resources with BUFID;
+            ISN <- DSN;
+            put data from fragment into data buffer with BUFID
+                [from octet fragment.first to octet fragment.last];
+            update HDL;
+        }
 
-            IF (fragment.first >= hole.first) CONTINUE. 
-            IF (fragment.last <= hole.first) CONTINUE.  
+        IF (FIN is true) {
+            submit datagram to next step;
+            free all reassembly resources for this BUFID;
+            BREAK.
+        }
+    } give up until (next fragment);
 
-            delete the current entry from HDL;  
+    update HDL: {
+        DO {
+            select the next hole descriptor from HDL;
 
-            IF (fragment.first >= hole.first) { 
-                create new entry "new_hole" in HDL; 
-                new_hole.first <- hole.first; 
-                new_hole.last <- fragment.first - 1; 
-                BREAK. 
-            }  
+            IF (fragment.first >= hole.first) CONTINUE.
+            IF (fragment.last <= hole.first) CONTINUE.
 
-            IF (fragment.last <= hole.last) { 
-                create new entry "new_hole" in HDL; 
-                new_hole.first <- fragment.last + 1 ;
-                new_hole.last <- hole.last; 
-                BREAK. 
+            delete the current entry from HDL;
+
+            IF (fragment.first >= hole.first) {
+                create new entry "new_hole" in HDL;
+                new_hole.first <- hole.first;
+                new_hole.last <- fragment.first - 1;
+                BREAK.
+            }
+
+            IF (fragment.last <= hole.last) {
+                create new entry "new_hole" in HDL;
+                new_hole.first <- fragment.last + 1;
+                new_hole.last <- hole.last;
+                BREAK.
             }
         } give up until (no entry from HDL)
-     }
+    }
 
-The following algorithm implementment is based on `IP Datagram
-Reassembly Algorithm` introduced in RFC 815. It descripted an
+The following algorithm implement is based on `IP Datagram
+Reassembly Algorithm` introduced in RFC 815. It described an
 algorithm dealing with `RCVBT` (fragment received bit table)
 appeared in RFC 791. And here is the process:
 
@@ -101,7 +101,6 @@ import sys
 from pcapkit.corekit.infoclass import Info
 from pcapkit.foundation.analysis import analyse
 from pcapkit.reassembly.reassembly import Reassembly
-
 
 __all__ = ['TCP_Reassembly']
 
@@ -133,7 +132,7 @@ class TCP_Reassembly(Reassembly):
         * run -- run automatically
 
     Attributes:
-        * _strflg -- bool, stirct mode flag
+        * _strflg -- bool, strict mode flag
         * _buffer -- dict, buffer field
         * _dtgram -- tuple, reassembled datagram
 
@@ -146,8 +145,6 @@ class TCP_Reassembly(Reassembly):
                 tcp.dstport,                # destination port
             ),
             num = frame.number,             # original packet range number
-            ack = tcp.ack,                  # acknowledgement
-            dsn = tcp.seq,                  # data sequence number
             syn = tcp.flags.syn,            # synchronise flag
             fin = tcp.flags.fin,            # finish flag
             len = tcp.raw_len,              # payload length, header excludes
@@ -196,7 +193,7 @@ class TCP_Reassembly(Reassembly):
            |                        |--> 'hdl' : (list) hole descriptor list
            |                        |               |--> (Info) hole --> hole descriptor
            |                        |                       |--> "first" --> (int) start of hole
-           |                        |                       |--> "last" --> (int) stop ofhole
+           |                        |                       |--> "last" --> (int) stop of hole
            |                        |--> (int) ACK : (dict)
            |                        |               |--> 'ind' : (list) list of reassembled packets
            |                        |               |               |--> (int) packet range number
@@ -248,22 +245,22 @@ class TCP_Reassembly(Reassembly):
         # initialise buffer with BUFID & ACK
         if BUFID not in self._buffer:
             self._buffer[BUFID] = {
-                'hdl' : [Info(first=info.len, last=sys.maxsize),],
-                ACK : dict(
-                    ind = list(),
-                    isn = info.dsn,
-                    len = info.len,
-                    raw = info.payload,
+                'hdl': [Info(first=info.len, last=sys.maxsize)],
+                ACK: dict(
+                    ind=list(),
+                    isn=info.dsn,
+                    len=info.len,
+                    raw=info.payload,
                 ),
             }
 
         # initialise buffer with ACK
         if ACK not in self._buffer[BUFID]:
             self._buffer[BUFID][ACK] = dict(
-                ind = list(),
-                isn = info.dsn,
-                len = info.len,
-                raw = info.payload,
+                ind=list(),
+                isn=info.dsn,
+                len=info.len,
+                raw=info.payload,
             )
 
         # append packet index
@@ -272,46 +269,46 @@ class TCP_Reassembly(Reassembly):
         # record fragment payload
         ISN = self._buffer[BUFID][ACK]['isn']   # Initial Sequence Number
         RAW = self._buffer[BUFID][ACK]['raw']   # Raw Payload Data
-        if DSN >= ISN:  # if fragment goes after exsisting payload
+        if DSN >= ISN:  # if fragment goes after existing payload
             LEN = self._buffer[BUFID][ACK]['len']
             GAP = DSN - (ISN + LEN)     # gap length between payloads
-            if GAP >= 0:    # if fragment goes after exsisting payload
+            if GAP >= 0:    # if fragment goes after existing payload
                 RAW += bytearray(GAP) + info.payload
-            else:           # if fragment partially overlaps exsisting payload
+            else:           # if fragment partially overlaps existing payload
                 RAW[DSN-ISN:] = info.payload
-        else:           # if fragment exceeds exsisting payload
+        else:           # if fragment exceeds existing payload
             LEN = info.len
             GAP = ISN - (DSN + LEN)     # gap length between payloads
             self._buffer[BUFID][ACK]['isn'] = DSN
-            if GAP >= 0:    # if fragment exceeds exsisting payload
+            if GAP >= 0:    # if fragment exceeds existing payload
                 RAW = info.payload + bytearray(GAP) + RAW
-            else:           # if fragment partially overlaps exsisting payload
+            else:           # if fragment partially overlaps existing payload
                 RAW = info.payload + RAW[ISN-GAP:]
         self._buffer[BUFID][ACK]['raw'] = RAW       # update payload datagram
         self._buffer[BUFID][ACK]['len'] = len(RAW)  # update payload length
 
         # update hole descriptor list
         HDL = copy.deepcopy(self._buffer[BUFID]['hdl'])
-        for (index, hole) in enumerate(self._buffer[BUFID]['hdl']): # step one
-            if info.first > hole.last:                              # step two
+        for (index, hole) in enumerate(self._buffer[BUFID]['hdl']):     # step one
+            if info.first > hole.last:                                  # step two
                 continue
-            if info.last < hole.first:                              # step three
+            if info.last < hole.first:                                  # step three
                 continue
-            del HDL[index]                                          # step four
-            if info.first > hole.first:                             # step five
+            del HDL[index]                                              # step four
+            if info.first > hole.first:                                 # step five
                 new_hole = Info(
-                    first = hole.first,
-                    last = info.first - 1,
+                    first=hole.first,
+                    last=info.first - 1,
                 )
                 HDL.insert(index, new_hole)
-            if info.last < hole.last and not FIN:                   # step six
+            if info.last < hole.last and not FIN:                       # step six
                 new_hole = Info(
-                    first = info.last + 1,
-                    last = hole.last
+                    first=info.last + 1,
+                    last=hole.last
                 )
                 HDL.insert(index+1, new_hole)
-            break                                                   # step seven
-        self._buffer[BUFID]['hdl'] = HDL                            # update HDL
+            break                                                       # step seven
+        self._buffer[BUFID]['hdl'] = HDL                                # update HDL
 
         # when FIN is set, submit buffer of this session
         if FIN:
@@ -352,15 +349,15 @@ class TCP_Reassembly(Reassembly):
                     data.append(byte)
                 if data:    # strip empty buffer
                     packet = Info(
-                        NotImplemented = True,
-                        id = Info(
-                            src = (bufid[0], bufid[2]),
-                            dst = (bufid[1], bufid[3]),
-                            ack = ack,
+                        NotImplemented=True,
+                        id=Info(
+                            src=(bufid[0], bufid[2]),
+                            dst=(bufid[1], bufid[3]),
+                            ack=ack,
                         ),
-                        index = tuple(buffer['ind']),
-                        payload = tuple(data) or None,
-                        packets = tuple([ analyse(io.BytesIO(frag), len(frag)) for frag in data ]),
+                        index=tuple(buffer['ind']),
+                        payload=tuple(data) or None,
+                        packets=tuple([analyse(io.BytesIO(frag), len(frag)) for frag in data]),
                     )
                     datagram.append(packet)
             # if this buffer is implemented
@@ -369,15 +366,15 @@ class TCP_Reassembly(Reassembly):
                 data = buffer['raw']
                 if data:    # strip empty buffer
                     packet = Info(
-                        NotImplemented = False,
-                        id = Info(
-                            src = (bufid[0], bufid[2]),
-                            dst = (bufid[1], bufid[3]),
-                            ack = ack,
+                        NotImplemented=False,
+                        id=Info(
+                            src=(bufid[0], bufid[2]),
+                            dst=(bufid[1], bufid[3]),
+                            ack=ack,
                         ),
-                        index = tuple(buffer['ind']),
-                        payload = bytes(data) or None,
-                        packets = (analyse(io.BytesIO(data), len(data)),),
+                        index=tuple(buffer['ind']),
+                        payload=bytes(data) or None,
+                        packets=(analyse(io.BytesIO(data), len(data)),),
                     )
                     datagram.append(packet)
         return datagram

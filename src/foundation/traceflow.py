@@ -11,16 +11,13 @@ import pathlib
 import sys
 import warnings
 
-###############################################################################
-# from dictdumper import PLIST, JSON, Tree, JavaScript, XML
-###############################################################################
-
 from pcapkit.corekit.infoclass import Info
-from pcapkit.utilities.exceptions import stacklevel, FileExists
-from pcapkit.utilities.warnings import FormatWarning, FileWarning
+from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.validations import pkt_check
+from pcapkit.utilities.warnings import FileWarning, FormatWarning
 
 ###############################################################################
+# from dictdumper import JSON, PLIST, XML, JavaScript, Tree
 # from pcapkit.dumpkit import PCAP, NotImplementedIO
 ###############################################################################
 
@@ -63,40 +60,40 @@ class TraceFlow:
             * output -- dumper of specified format
 
         """
-        if fmt == 'pcap':
-            from pcapkit.dumpkit import PCAP as output      # output PCAP file
-        elif fmt == 'plist':
-            from dictdumper import PLIST as output          # output PLIST file
-        elif fmt == 'json':
-            from dictdumper import JSON as output           # output JSON file
-        elif fmt == 'tree':
-            from dictdumper import Tree as output           # output treeview text file
+        if fmt == 'pcap':       # output PCAP file
+            from pcapkit.dumpkit import PCAP as output
+        elif fmt == 'plist':    # output PLIST file
+            from dictdumper import PLIST as output
+        elif fmt == 'json':     # output JSON file
+            from dictdumper import JSON as output
+        elif fmt == 'tree':     # output treeview text file
+            from dictdumper import Tree as output
             fmt = 'txt'
-        elif fmt == 'html':
-            from dictdumper import JavaScript as output     # output JavaScript file
+        elif fmt == 'html':     # output JavaScript file
+            from dictdumper import JavaScript as output
             fmt = 'js'
-        elif fmt == 'xml':
-            from dictdumper import XML as output            # output XML file
-        else:
+        elif fmt == 'xml':      # output XML file
+            from dictdumper import XML as output
+        else:                   # no output file
             from pcapkit.dumpkit import NotImplementedIO as output
-                                                            # no output file
             if fmt is not None:
-                warnings.warn('Unsupported output format: {}; '
-                                'disabled file output feature'.format(fmt),
-                                FormatWarning, stacklevel=stacklevel())
+                warnings.warn('Unsupported output format: {}; disabled file output feature'.format(fmt),
+                              FormatWarning, stacklevel=stacklevel())
             return output, ''
 
         try:
             path = pathlib.Path(fout)
             path.mkdir(parents=True)
         except FileExistsError as error:
-            if path.is_dir():   pass
+            if path.is_dir():
+                pass
             elif fmt is None:
                 warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
                 raise FileExists(*error.args) from None
         except OSError:
-            if not path.is_dir():   raise
+            if not path.is_dir():
+                raise
 
         return output, fmt
 
@@ -122,7 +119,7 @@ class TraceFlow:
 
         # dump files
         output(packet['frame'], name="Frame {}".format(packet['index']),
-                byteorder=self._endian, nanosecond=self._nnsecd)
+               byteorder=self._endian, nanosecond=self._nnsecd)
 
     def trace(self, packet, *, _check=True, _output=False):
         """Trace packets.
@@ -140,9 +137,9 @@ class TraceFlow:
             pkt_check(packet)
         info = Info(packet)
 
+        # Buffer Identifier
         BUFID = tuple(sorted([str(info.src), str(info.srcport), str(info.dst), str(info.dstport)]))
-                            # Buffer Identifier
-        SYN = info.syn      # Synchronise Flag (Establishment)
+        # SYN = info.syn      # Synchronise Flag (Establishment)
         FIN = info.fin      # Finish Flag (Termination)
 
         # # when SYN is set, reset buffer of this seesion
@@ -156,9 +153,9 @@ class TraceFlow:
         if BUFID not in self._buffer:
             label = '{}_{}-{}_{}-{}'.format(info.src, info.srcport, info.dst, info.dstport, info.timestamp)
             self._buffer[BUFID] = dict(
-                fpout = self._foutio('{}/{}.{}'.format(self._fproot, label, self._fdpext), protocol=info.protocol),
-                index = list(),
-                label = label,
+                fpout=self._foutio('{}/{}.{}'.format(self._fproot, label, self._fdpext), protocol=info.protocol),
+                index=list(),
+                label=label,
             )
 
         # trace frame record
@@ -170,8 +167,10 @@ class TraceFlow:
         if FIN:
             buf = self._buffer.pop(BUFID)
             # fpout, label = buf['fpout'], buf['label']
-            if self._fdpext:    buf['fpout'] = '{}/{}.{}'.format(self._fproot, label, self._fdpext)
-            else:               del buf['fpout']
+            if self._fdpext:
+                buf['fpout'] = '{}/{}.{}'.format(self._fproot, label, self._fdpext)
+            else:
+                del buf['fpout']
             buf['index'] = tuple(buf['index'])
             self._stream.append(Info(buf))
 
@@ -184,8 +183,10 @@ class TraceFlow:
         ret = list()
         for buf in self._buffer.values():
             buf = copy.deepcopy(buf)
-            if self._fdpext:    buf['fpout'] = "{}/{}.{}".format(self._fproot, buf['label'], self._fdpext)
-            else:               del buf['fpout']
+            if self._fdpext:
+                buf['fpout'] = "{}/{}.{}".format(self._fproot, buf['label'], self._fdpext)
+            else:
+                del buf['fpout']
             buf['index'] = tuple(buf['index'])
             ret.append(Info(buf))
         ret += self._stream
@@ -212,11 +213,11 @@ class TraceFlow:
         self._fproot = fout     # output root path
         self._buffer = dict()   # buffer field
         self._stream = list()   # stream index
-        self._foutio, self._fdpext \
-                    = self.make_fout(fout, format)
-                                # dump I/O object
         self._endian = byteorder
         self._nnsecd = nanosecond
+
+        # dump I/O object
+        self._foutio, self._fdpext = self.make_fout(fout, format)
 
     def __call__(self, packet):
         """Dump frame to output files.

@@ -5,8 +5,6 @@
 link layer, with detailed implementation and methods.
 
 """
-# TODO: Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.
-
 # Base Class for Link Layer
 from pcapkit.protocols.link.link import Link
 
@@ -23,7 +21,7 @@ from pcapkit.protocols.link.vlan import VLAN
 # Link-Layer Header Type Values
 from pcapkit.protocols.link.link import LINKTYPE
 
-
+# TODO: Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.
 __all__ = [
     'LINKTYPE',                             # Protocol Numbers
     'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP', 'VLAN',

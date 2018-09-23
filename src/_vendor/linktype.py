@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 import os
 import re
 
 import requests
-
 
 ###############
 # Defaults
@@ -14,7 +12,8 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: '''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 
@@ -63,7 +62,7 @@ LINK = 'http://www.tcpdump.org/linktypes.html'
 ###############
 
 
-page = requests.get('http://www.tcpdump.org/linktypes.html')
+page = requests.get(LINK)
 table = re.split(r'\<[/]*table.*\>', page.text)[1]
 content = re.split(r'\<tr valign=top\>', table)[1:]
 

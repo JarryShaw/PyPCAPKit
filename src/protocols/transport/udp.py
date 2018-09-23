@@ -21,7 +21,6 @@ which implements extractor for User Datagram Protocol
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.transport.transport import Transport
 
-
 __all__ = ['UDP']
 
 
@@ -29,9 +28,9 @@ class UDP(Transport):
     """This class implements User Datagram Protocol.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Transport`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -101,7 +100,7 @@ class UDP(Transport):
             |          data octets ...
             +---------------- ...
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     udp.srcport             Source Port
               2          16     udp.dstport             Destination Port
               4          32     udp.len                 Length (header includes)
@@ -117,10 +116,10 @@ class UDP(Transport):
         _csum = self._read_fileng(2)
 
         udp = dict(
-            srcport = _srcp,
-            dstport = _dstp,
-            len = _tlen,
-            checksum = _csum,
+            srcport=_srcp,
+            dstport=_dstp,
+            len=_tlen,
+            checksum=_csum,
         )
 
         length = udp['len'] - 8

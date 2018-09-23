@@ -17,7 +17,6 @@ from pcapkit.ipsuite.pcap import *
 # Abstract Base Class
 from pcapkit.ipsuite.protocol import Protocol as IPSProtocol
 
-
 __all__ = [
     'IPSHeader', 'IPSFrame'                     # PCAP Headers
 ]

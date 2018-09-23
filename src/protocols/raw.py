@@ -12,7 +12,6 @@ from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
-
 __all__ = ['Raw']
 
 
@@ -77,8 +76,8 @@ class Raw(Protocol):
             length = len(self)
 
         raw = dict(
-            packet = self._read_packet(length),
-            error = error or None,
+            packet=self._read_packet(length),
+            error=error or None,
         )
 
         return raw

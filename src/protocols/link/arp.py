@@ -5,7 +5,7 @@
 which implements extractor for (Inverse) Address Resolution
 Protocol (ARP/InARP), whose structure is described as below.
 
-Octets      Bits        Name                    Discription
+Octets      Bits        Name                    Description
   0           0     arp.htype               Hardware Type
   2          16     arp.ptype               Protocol Type
   4          32     arp.hlen                Hardware Address Length
@@ -22,12 +22,11 @@ import ipaddress
 import re
 import textwrap
 
-from pcapkit._common.arp_oper import OperType as OPER
 from pcapkit._common.arp_hrd import HrdType as HRD
+from pcapkit._common.arp_oper import OperType as OPER
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import ETHERTYPE
 from pcapkit.protocols.link.link import Link
-
 
 __all__ = ['ARP']
 
@@ -118,7 +117,7 @@ class ARP(Link):
         """Read Address Resolution Protocol.
 
         Structure of ARP header [RFC 826]:
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     arp.htype               Hardware Type
               2          16     arp.ptype               Protocol Type
               4          32     arp.hlen                Hardware Address Length
@@ -163,16 +162,16 @@ class ARP(Link):
             _ptype = 'Unknown [{}]'.format(_ptty)
 
         arp = dict(
-            htype = _htype,
-            ptype = _ptype,
-            hlen = _hlen,
-            plen = _plen,
-            oper = OPER.get(_oper),
-            sha = _shwa,
-            spa = _spta,
-            tha = _thwa,
-            tpa = _tpta,
-            len = 8 + _hlen * 2 + _plen * 2,
+            htype=_htype,
+            ptype=_ptype,
+            hlen=_hlen,
+            plen=_plen,
+            oper=OPER.get(_oper),
+            sha=_shwa,
+            spa=_spta,
+            tha=_thwa,
+            tpa=_tpta,
+            len=8 + _hlen * 2 + _plen * 2,
         )
 
         length -= arp['len']
@@ -222,7 +221,7 @@ class ARP(Link):
 
         Positional arguments:
             * length -- int, protocol address length
-            * hptype -- int, protocol type
+            * ptype -- int, protocol type
 
         Returns:
             * str -- IP address
@@ -237,7 +236,7 @@ class ARP(Link):
         #                     # counter for consecutive groups of zero value
         #     ptr_ = 0        # start pointer of consecutive groups of zero value
         #     last = False    # if last hextet/group is zero value
-        #     ommt = False    # ommitted flag, since IPv6 address can ommit to `::` only once
+        #     omit = False    # omitted flag, since IPv6 address can omit to `::` only once
 
         #     for index in range(8):
         #         hex_ = self._read_fileng(2).hex().lstrip('0')
@@ -257,7 +256,7 @@ class ARP(Link):
         #     ptr_ = max(ctr_, key=ctr_.get) if ctr_ else 0   # fetch start pointer with longest zero values
         #     end_ = ptr_ + ctr_[ptr_]                        # calculate end pointer
 
-        #     if ctr_[ptr_] > 1:      # only ommit if zero values are in a consecutive group
+        #     if ctr_[ptr_] > 1:      # only omit if zero values are in a consecutive group
         #         del adlt[ptr_:end_] # remove zero values
 
         #         if ptr_ == 0 and end_ == 8:     # insert `::` if IPv6 unspecified address (::)
