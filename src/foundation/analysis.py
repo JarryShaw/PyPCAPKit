@@ -17,7 +17,6 @@ from pcapkit.utilities.exceptions import ProtocolError
 # from pcapkit.protocols.application.httpv2 import HTTPv2
 ###############################################################################
 
-
 __all__ = ['analyse']
 
 
@@ -27,14 +26,16 @@ def analyse(file, length=None, *, _termination=False):
     if not _termination:
         # HTTP/1.* analysis
         flag, http = _analyse_httpv1(file, length, seekset=seekset)
-        if flag:    return http
+        if flag:
+            return http
 
         # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
-        # NB: the NOTE abrove is deprecated, since validations are performed
+        # NB: the NOTE above is deprecated, since validations are performed
 
         # HTTP/2 analysis
         flag, http = _analyse_httpv2(file, length, seekset=seekset)
-        if flag:    return http
+        if flag:
+            return http
 
     # raw packet analysis
     return Raw(file, length)

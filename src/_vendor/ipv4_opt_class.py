@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import os
-
 
 ###############
 # Defaults
@@ -12,7 +10,8 @@ import os
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
 # -*- coding: utf-8 -*-
 
 
@@ -54,10 +53,10 @@ NAME = 'OptCls'
 DOCS = 'Option Classes'
 FLAG = 'isinstance(value, int) and 0 <= value <= 3'
 DATA = {
-    0 : 'control',
-    1 : 'reserved for future use',
-    2 : 'debugging and measurement',
-    3 : 'reserved for future use',
+    0: 'control',
+    1: 'reserved for future use',
+    2: 'debugging and measurement',
+    3: 'reserved for future use',
 }
 
 
@@ -68,10 +67,12 @@ DATA = {
 
 record = collections.Counter(DATA.values())
 
+
 def rename(name, code):
     if record[name] > 1:
         name = f'{name} [{code}]'
     return name
+
 
 enum = list()
 miss = [

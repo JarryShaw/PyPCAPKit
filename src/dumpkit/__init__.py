@@ -11,7 +11,6 @@ import sys
 from pcapkit.ipsuite.pcap.frame import Frame
 from pcapkit.ipsuite.pcap.header import Header
 
-
 __all__ = ['PCAP', 'NotImplementedIO']
 
 
@@ -35,21 +34,22 @@ class PCAP:
         return 'pcap'
 
     def __init__(self, filename, *, protocol,
-                    byteorder=sys.byteorder, nanosecond=False):
+                 byteorder=sys.byteorder, nanosecond=False):
         self._file = filename
         self._nsec = nanosecond
         packet = Header(
-            network = protocol,
-            byteorder = byteorder,
-            nanosecond = nanosecond,
+            network=protocol,
+            byteorder=byteorder,
+            nanosecond=nanosecond,
         ).data
         with open(self._file, 'wb') as file:
             file.write(packet)
 
     def __call__(self, frame, **kwargs):
-        packet = Frame(frame.get('frame_info', frame),
-            packet = frame.packet,
-            nanosecond = self._nsec
+        packet = Frame(
+            frame.get('frame_info', frame),
+            packet=frame.packet,
+            nanosecond=self._nsec
         ).data
         with open(self._file, 'ab') as file:
             file.write(packet)

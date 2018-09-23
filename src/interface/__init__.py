@@ -17,24 +17,22 @@ from pcapkit.reassembly.ipv4 import IPv4_Reassembly
 from pcapkit.reassembly.ipv6 import IPv6_Reassembly
 from pcapkit.reassembly.tcp import TCP_Reassembly
 from pcapkit.utilities.exceptions import FormatError
-from pcapkit.utilities.validations import bool_check, int_check, io_check, str_check
-
+from pcapkit.utilities.validations import (bool_check, int_check, io_check,
+                                           str_check)
 
 __all__ = [
     'extract', 'analyse', 'reassemble', 'trace',            # interface functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
-    'DPKT', 'Scapy', 'PyShark', 'MPSearver', 'MPPipeline', 'PCAPKit',
+    'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',
                                                             # engine macros
 ]
 
-
 # output file formats
-TREE  = 'tree'
-JSON  = 'json'
+TREE = 'tree'
+JSON = 'json'
 PLIST = 'plist'
-PCAP  = 'pcap'
-
+PCAP = 'pcap'
 
 # layer thresholds
 RAW = 'None'
@@ -43,23 +41,22 @@ INET = 'Internet'
 TRANS = 'Transport'
 APP = 'Application'
 
-
 # extraction engines
 DPKT = 'dpkt'
 Scapy = 'scapy'
 PCAPKit = 'default'
 PyShark = 'pyshark'
-MPSearver = 'server'
+MPServer = 'server'
 MPPipeline = 'pipeline'
 
 
-def extract(*, fin=None, fout=None, format=None,                            # basic settings
-                auto=True, extension=True, store=True,                      # internal settings
-                files=False, nofile=False, verbose=False,                   # output settings
-                engine=None, layer=None, protocol=None,                     # extraction settings
-                ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
-                trace=False, trace_fout=None, trace_format=None,            # trace settings
-                trace_byteorder=sys.byteorder, trace_nanosecond=False):     # trace settings
+def extract(fin=None, fout=None, format=None,                           # basic settings
+            auto=True, extension=True, store=True,                      # internal settings
+            files=False, nofile=False, verbose=False,                   # output settings
+            engine=None, layer=None, protocol=None,                     # extraction settings
+            ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
+            trace=False, trace_fout=None, trace_format=None,            # trace settings
+            trace_byteorder=sys.byteorder, trace_nanosecond=False):     # trace settings
     """Extract a PCAP file.
 
     Keyword arguments:
@@ -70,7 +67,7 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
 
         * auto -- bool, if automatically run till EOF (default is True)
                         <keyword> True / False
-        * extension -- bool, if check and append axtensions to output file (default is True)
+        * extension -- bool, if check and append extensions to output file (default is True)
                         <keyword> True / False
         * store -- bool, if store extracted packet info (default is True)
                         <keyword> True / False
@@ -120,21 +117,21 @@ def extract(*, fin=None, fout=None, format=None,                            # ba
         protocol = protocol.__index__()
 
     str_check(fin or '', fout or '', format or '',
-                trace_fout or '', trace_format or '',
-                engine or '', layer or '', *(protocol or ''))
+              trace_fout or '', trace_format or '',
+              engine or '', layer or '', *(protocol or ''))
     bool_check(files, nofile, verbose, auto, extension, store,
-                ip, ipv4, ipv6, tcp, strict, trace)
+               ip, ipv4, ipv6, tcp, strict, trace)
 
     return Extractor(fin=fin, fout=fout, format=format,
-                        store=store, files=files, nofile=nofile,
-                        auto=auto, verbose=verbose, extension=extension,
-                        engine=engine, layer=layer, protocol=protocol,
-                        ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, strict=strict,
-                        trace=trace, trace_fout=trace_fout, trace_format=trace_format,
-                        trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond)
+                     store=store, files=files, nofile=nofile,
+                     auto=auto, verbose=verbose, extension=extension,
+                     engine=engine, layer=layer, protocol=protocol,
+                     ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, strict=strict,
+                     trace=trace, trace_fout=trace_fout, trace_format=trace_format,
+                     trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond)
 
 
-def analyse(*, file, length=None):
+def analyse(file, length=None):
     """Analyse application layer packets.
 
     Keyword arguments:
@@ -154,7 +151,7 @@ def analyse(*, file, length=None):
     return analyse2(file, length)
 
 
-def reassemble(*, protocol, strict=False):
+def reassemble(protocol, strict=False):
     """Reassemble fragmented datagrams.
 
     Keyword arguments:
@@ -184,7 +181,7 @@ def reassemble(*, protocol, strict=False):
         raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
-def trace(*, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):
+def trace(fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):
     """Trace TCP flows.
 
     Keyword arguments:

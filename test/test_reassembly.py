@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 import os
 import pprint
 import textwrap
@@ -8,7 +7,6 @@ import time
 
 import chardet
 import pcapkit
-
 
 os.system('> ../sample/out')
 

@@ -11,31 +11,29 @@ import struct
 import sys
 import traceback
 
-
 __all__ = [
-    'BaseError',                                                # Exception
-    'DigitError', 'IntError', 'RealError', 'ComplexError',      # TypeError
-    'BoolError', 'BytesError', 'StringError', 'BytearrayError', # TypeError
-    'DictError', 'ListError', 'TupleError', 'IterableError',    # TypeError
-    'IOObjError', 'ProtocolUnbound', 'CallableError',           # TypeError
-    'InfoError', 'IPError', 'EnumError', 'ComparisonError',     # TypeError
-    'FormatError', 'UnsupportedCall',                           # AttributeError
-    'FileError',                                                # IOError
-    'FileExists',                                               # FileExistsError
-    'FileNotFound',                                             # FileNotFoundError
-    'ProtocolNotFound',                                         # IndexError
-    'VersionError', 'IndexNotFound', 'ProtocolError',           # ValueError
-    'EndianError',                                              # ValueError
-    'ProtocolNotImplemented',                                   # NotImplementedError
-    'StructError',                                              # struct.error
-    'FragmentError', 'PacketError',                             # KeyError
-    'ModuleNotFound',                                           # ModuleNotFoundError
+    'BaseError',                                                    # Exception
+    'DigitError', 'IntError', 'RealError', 'ComplexError',          # TypeError
+    'BoolError', 'BytesError', 'StringError', 'BytearrayError',     # TypeError
+    'DictError', 'ListError', 'TupleError', 'IterableError',        # TypeError
+    'IOObjError', 'ProtocolUnbound', 'CallableError',               # TypeError
+    'InfoError', 'IPError', 'EnumError', 'ComparisonError',         # TypeError
+    'FormatError', 'UnsupportedCall',                               # AttributeError
+    'FileError',                                                    # IOError
+    'FileExists',                                                   # FileExistsError
+    'FileNotFound',                                                 # FileNotFoundError
+    'ProtocolNotFound',                                             # IndexError
+    'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
+    'EndianError',                                                  # ValueError
+    'ProtocolNotImplemented',                                       # NotImplementedError
+    'StructError',                                                  # struct.error
+    'FragmentError', 'PacketError',                                 # KeyError
+    'ModuleNotFound',                                               # ModuleNotFoundError
 ]
 
 
-
 def stacklevel():
-    """Fetch curent stack level."""
+    """Fetch current stack level."""
     pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
     tb = traceback.extract_stack()
     for index, tbitem in enumerate(tb):
@@ -195,7 +193,8 @@ class UnsupportedCall(BaseError, AttributeError):
 
 class FileError(BaseError, IOError):
     """[Errno 5] Wrong file format."""
-    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+
+    def __init__(self, errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
         super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 
@@ -206,7 +205,8 @@ class FileError(BaseError, IOError):
 
 class FileExists(BaseError, FileExistsError):
     """[Errno 17] File already exists."""
-    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+
+    def __init__(self, errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
         super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 
@@ -217,7 +217,7 @@ class FileExists(BaseError, FileExistsError):
 
 class FileNotFound(BaseError, FileNotFoundError):
     """[Errno 2] File not found."""
-    def __init__(errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
+    def __init__(self, errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
         super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
 

@@ -24,9 +24,7 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.http import HTTP
 from pcapkit.utilities.exceptions import ProtocolError
 
-
 __all__ = ['HTTPv1']
-
 
 # utility regular expressions
 _RE_METHOD = re.compile(rb'GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE')
@@ -38,9 +36,9 @@ class HTTPv1(HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/1.*).
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Application`
         * protocol -- str, name of next layer protocol
         * protochain -- ProtoChain, protocol chain of current instance
@@ -86,7 +84,7 @@ class HTTPv1(HTTP):
 
         """
         if length is None:
-            length =  len(self)
+            length = len(self)
 
         packet = self._file.read(length)
         try:
@@ -98,13 +96,13 @@ class HTTPv1(HTTP):
         body_unpacked = self._read_http_body(body) or None
 
         http = dict(
-            receipt = http_receipt,
-            header = header_unpacked,
-            body = body_unpacked,
-            raw = dict(
-                header = header,
-                body = body,
-                packet = self._read_packet(length),
+            receipt=http_receipt,
+            header=header_unpacked,
+            body=body_unpacked,
+            raw=dict(
+                header=header,
+                body=body,
+                packet=self._read_packet(length),
             ),
         )
         self.__receipt__ = http_receipt
@@ -140,7 +138,7 @@ class HTTPv1(HTTP):
             startline, headerfield = header.split(b'\r\n', 1)
             para1, para2, para3 = re.split(rb'\s+', startline, 2)
             fields = headerfield.split(b'\r\n')
-            lists = ( re.split(rb'\s*:\s*', field, 1) for field in fields )
+            lists = (re.split(rb'\s*:\s*', field, 1) for field in fields)
         except ValueError:
             raise ProtocolError('HTTP: invalid format', quiet=True)
 
@@ -151,19 +149,19 @@ class HTTPv1(HTTP):
         if match1 and match2:
             receipt = 'request'
             header = dict(
-                request = dict(
-                    method = self.decode(para1),
-                    target = self.decode(para2),
-                    version = self.decode(match2.group('version')),
+                request=dict(
+                    method=self.decode(para1),
+                    target=self.decode(para2),
+                    version=self.decode(match2.group('version')),
                 ),
             )
         elif match3 and match4:
             receipt = 'response'
             header = dict(
-                response = dict(
-                    version = self.decode(match3.group('version')),
-                    status = int(para2),
-                    phrase = self.decode(para3),
+                response=dict(
+                    version=self.decode(match3.group('version')),
+                    status=int(para2),
+                    phrase=self.decode(para3),
                 ),
             )
         else:

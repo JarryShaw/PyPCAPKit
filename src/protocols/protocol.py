@@ -2,7 +2,7 @@
 """root protocol
 
 `pcapkit.protocols.protocol` contains `Protocol` only,
-which is an abstract base clss for all protocol family,
+which is an abstract base class for all protocol family,
 with pre-defined utility arguments and methods of specified
 protocols.
 
@@ -23,29 +23,22 @@ import textwrap
 import urllib
 
 import chardet
-
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import BoolError, BytesError, StructError, \
-    ProtocolNotFound, ProtocolUnbound
+from pcapkit.utilities.exceptions import (BoolError, BytesError,
+                                          ProtocolNotFound, ProtocolUnbound,
+                                          StructError)
 from pcapkit.utilities.validations import bool_check, int_check
 
 ###############################################################################
 # from pcapkit.protocols.raw import Raw
 ###############################################################################
 
-
 __all__ = ['Protocol']
 
-
 # readable characters' order list
-readable = [ ord(char) for char in filter(lambda char: not char.isspace(), string.printable) ]
-
-
-# abstract base class utilities
-ABCMeta = abc.ABCMeta
-abstractmethod = abc.abstractmethod
+readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
 
 
 @functools.total_ordering
@@ -79,11 +72,11 @@ class Protocol:
         * _read_packet -- read raw packet data
         * _decode_next_layer -- decode next layer protocol type
         * _import_next_layer -- import next layer protocol extractor
-        * _cheak_term_threshold -- check if reached termination threshold
+        * _check_term_threshold -- check if reached termination threshold
 
     """
     __layer__ = None
-    __metaclass__ = ABCMeta
+    __metaclass__ = abc.ABCMeta
 
     ##########################################################################
     # Properties.
@@ -91,7 +84,7 @@ class Protocol:
 
     # name of current protocol
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def name(self):
         """Name of current protocol."""
         pass
@@ -110,7 +103,7 @@ class Protocol:
 
     # header length of current protocol
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def length(self):
         """Header length of current protocol."""
         pass
@@ -147,7 +140,7 @@ class Protocol:
         try:
             return byte.decode(charset or 'utf-8', errors=errors)
         except UnicodeError:
-            return r''.join( chr(char) for char in byte )
+            return r''.join(chr(char) for char in byte)
 
     @staticmethod
     def unquote(url, *, encoding='utf-8', errors='replace'):
@@ -183,13 +176,13 @@ class Protocol:
         bytes_ = self._read_fileng()
 
         hexbuf = ' '.join(textwrap.wrap(bytes_.hex(), 2))
-        strbuf = ''.join( chr(char) if char in readable else '.' for char in bytes_ )
+        strbuf = ''.join(chr(char) if char in readable else '.' for char in bytes_)
 
         number = shutil.get_terminal_size().columns // 4 - 1
         length = number * 3
 
         hexlst = textwrap.wrap(hexbuf, length)
-        strlst = [ buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '') ]
+        strlst = [buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '')]
 
         str_ = '\n'.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))
         return str_
@@ -204,7 +197,7 @@ class Protocol:
         """Total length of correspoding protocol."""
         return len(self._read_fileng())
 
-    @abstractmethod
+    @abc.abstractmethod
     def __length_hint__(self):
         pass
 
@@ -279,7 +272,8 @@ class Protocol:
     @classmethod
     def __lt__(cls, other):
         return NotImplemented
-        # raise ComparisonError(f"Rich comparison not supported between instances of 'Protocol' and {type(other).__name__!r}")
+        # raise ComparisonError(f"Rich comparison not supported between instances of 'Protocol' "
+        #                       f"and {type(other).__name__!r}")
 
     ##########################################################################
     # Utilities.
@@ -321,11 +315,16 @@ class Protocol:
 
         """
         endian = '<' if lilendian else '>'
-        if size == 8:   kind = 'q' if signed else 'Q'   # unpack to 8-byte integer (long long)
-        elif size == 4: kind = 'i' if signed else 'I'   # unpack to 4-byte integer (int / long)
-        elif size == 2: kind = 'h' if signed else 'H'   # unpack to 2-byte integer (short)
-        elif size == 1: kind = 'b' if signed else 'B'   # unpack to 1-byte integer (char)
-        else:           kind = None                     # do not unpack
+        if size == 8:       # unpack to 8-byte integer (long long)
+            kind = 'q' if signed else 'Q'
+        elif size == 4:     # unpack to 4-byte integer (int / long)
+            kind = 'i' if signed else 'I'
+        elif size == 2:     # unpack to 2-byte integer (short)
+            kind = 'h' if signed else 'H'
+        elif size == 1:     # unpack to 1-byte integer (char)
+            kind = 'b' if signed else 'B'
+        else:               # do not unpack
+            kind = None
 
         if kind is None:
             mem = self._file.read(size)
@@ -403,7 +402,7 @@ class Protocol:
             next_ = beholder(self._import_next_layer)(self, proto, length)
         else:
             next_ = self._import_next_layer(proto, length)
-        info, chain, alias = next_.info, next_.protochain, next_.alias
+        info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
         layer = next_.alias.lower()

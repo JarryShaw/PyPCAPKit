@@ -5,7 +5,7 @@
 which implements extractor for Internetwork Packet
 Exchange (IPX), whose structure is described as below.
 
-Octets      Bits        Name                    Discription
+Octets      Bits        Name                    Description
   0           0     ipx.cksum               Checksum
   2          16     ipx.len                 Packet Length (header includes)
   4          32     ipx.count               Transport Control (hop count)
@@ -14,11 +14,12 @@ Octets      Bits        Name                    Discription
   18        144     ipx.src                 Source Address
 
 """
+import textwrap
+
 from pcapkit._common.ipx_sock import Sockets as SOCK
 from pcapkit._common.ipx_type import PktType as TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
-
 
 __all__ = ['IPX']
 
@@ -27,9 +28,9 @@ class IPX(Internet):
     """This class implements Internetwork Packet Exchange.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -62,7 +63,7 @@ class IPX(Internet):
 
     @property
     def name(self):
-        """Name of corresponding procotol."""
+        """Name of corresponding protocol."""
         return 'Internetwork Packet Exchange'
 
     @property
@@ -93,7 +94,7 @@ class IPX(Internet):
         """Read Internetwork Packet Exchange.
 
         Structure of IPX header [RFC 1132]:
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ipx.cksum               Checksum
               2          16     ipx.len                 Packet Length (header includes)
               4          32     ipx.count               Transport Control (hop count)
@@ -113,19 +114,19 @@ class IPX(Internet):
         _srca = self._read_ipx_address()
 
         ipx = dict(
-            chksum = _csum,
-            len = _tlen,
-            count = _ctrl,
-            type = TYPE.get(_type),
-            dst = _dsta,
-            src = _srca,
+            chksum=_csum,
+            len=_tlen,
+            count=_ctrl,
+            type=TYPE.get(_type),
+            dst=_dsta,
+            src=_srca,
         )
 
         proto = ipx['type']
         length = ipx['len'] - 30
         ipx['packet'] = self._read_packet(header=30, payload=length)
 
-        return self._read_next_layer(ipx, proto, length)
+        return self._decode_next_layer(ipx, proto, length)
 
     ##########################################################################
     # Data models.
@@ -146,13 +147,13 @@ class IPX(Internet):
         """Read IPX address field.
 
         Structure of IPX address:
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ipx.addr.network        Network Number
               4          32     ipx.addr.node           Node Number
               10         80     ipx.addr.socket         Socket Number
 
         """
-        # Adress Number
+        # Address Number
         _byte = self._read_fileng(4)
         _ntwk = ':'.join(textwrap.wrap(_byte.hex(), 2))
 
@@ -169,10 +170,10 @@ class IPX(Internet):
         _addr = ':'.join(_list)
 
         addr = dict(
-            network = _ntwk,
-            node = _maca,
-            socket = SOCK.get(int(_sock.hex(), base=16)) or _sock,
-            addr = _addr,
+            network=_ntwk,
+            node=_maca,
+            socket=SOCK.get(int(_sock.hex(), base=16)) or _sock,
+            addr=_addr,
         )
 
         return addr

@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 import os
 import re
 
 import bs4
 import requests
-
 
 ###############
 # Defaults
@@ -15,7 +13,8 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
 # -*- coding: utf-8 -*-
 
 
@@ -79,7 +78,8 @@ for item in content:
     pval = ' '.join(line[0].stripped_strings)
     dscp = ' '.join(line[1].stripped_strings)
 
-    data = list(filter(None, map(lambda s: s.strip(), re.split(r'\W*,|\(|\)\W*', dscp))))
+    data = list(filter(None, map(lambda s: s.strip(),
+                                 re.split(r'\W*,|\(|\)\W*', dscp))))
     if len(data) == 2:
         name, desc = data
     else:
@@ -98,7 +98,8 @@ for item in content:
         miss.append(f'if {start} <= value <= {stop}:')
         if desc:
             miss.append(f'    # {desc}')
-        miss.append(f"    extend_enum(cls, '{name} [0x%s]' % hex(value)[2:].upper().zfill(4), value)")
+        miss.append(
+            f"    extend_enum(cls, '{name} [0x%s]' % hex(value)[2:].upper().zfill(4), value)")
         miss.append('    return cls(value)')
 
 

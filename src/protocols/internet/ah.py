@@ -22,8 +22,8 @@ whose structure is described as below.
 """
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ipsec import IPsec
-from pcapkit.utilities.exceptions import VersionError, ProtocolError, UnsupportedCall
-
+from pcapkit.utilities.exceptions import (ProtocolError, UnsupportedCall,
+                                          VersionError)
 
 __all__ = ['AH']
 
@@ -32,9 +32,9 @@ class AH(IPsec):
     """This class implements Authentication Header.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -64,7 +64,7 @@ class AH(IPsec):
 
     @property
     def name(self):
-        """Name of corresponding procotol."""
+        """Name of corresponding protocol."""
         return 'Authentication Header'
 
     @property
@@ -75,7 +75,7 @@ class AH(IPsec):
     @property
     def payload(self):
         """Payload of current instance."""
-        if self.extension:
+        if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
@@ -106,7 +106,7 @@ class AH(IPsec):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ah.next                 Next Header
               1           8     ah.length               Payload Length
               2          16     -                       Reserved (must be zero)
@@ -130,11 +130,11 @@ class AH(IPsec):
         _chkv = self._read_fileng(_vlen)
 
         ah = dict(
-            next = _next,
-            length = _tlen,
-            spi = _scpi,
-            seq = dsnf,
-            icv = _chkv,
+            next=_next,
+            length=_tlen,
+            spi=_scpi,
+            seq=_dsnf,
+            icv=_chkv,
         )
 
         if version == 6:
@@ -163,6 +163,7 @@ class AH(IPsec):
 
     def __init__(self, _file, length=None, *, version=4, extension=False, **kwargs):
         self._file = _file
+        self._extf = extension
         self._info = Info(self.read_ah(length, version, extension))
 
     def __length_hint__(self):

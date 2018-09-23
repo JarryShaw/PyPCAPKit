@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import csv
 import os
 import re
 
 import requests
-
 
 ###############
 # Defaults
@@ -16,7 +14,8 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
 # -*- coding: utf-8 -*-
 
 
@@ -72,12 +71,14 @@ data = page.text.strip().split('\r\n')
 reader = csv.reader(data)
 header = next(reader)
 record = collections.Counter(map(lambda item: item[1],
-    filter(lambda item: len(item[0].split('-')) != 2, reader)))
+                                 filter(lambda item: len(item[0].split('-')) != 2, reader)))
+
 
 def rename(name, code):
     if record[name] > 1:
         return f'{name} [{code}]'
     return name
+
 
 reader = csv.reader(data)
 header = next(reader)

@@ -21,84 +21,76 @@ import datetime
 import ipaddress
 
 from pcapkit._common.ip_qs_func import QS as _QS_FUNC
+from pcapkit._common.ipv6_opt_seed import SeedID as _HOPOPT_SEED
 from pcapkit._common.ipv6_opt_type import Options as _OPT_TYPE
 from pcapkit._common.ipv6_router_alert import RT_ALT as _ROUTER_ALERT
-from pcapkit._common.ipv6_opt_seed import SeedID as _HOPOPT_SEED
 from pcapkit._common.ipv6_tid_type import TaggerId as _TID_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
-
 __all__ = ['HOPOPT']
-
 
 # HOPOPT Unknown Option Actions
 _HOPOPT_ACT = {
-    '00' : 'skip over this option and continue processing the header',
-    '01' : 'discard the packet',
-    '10' : 'discard the packet and, regardless of whether or not the'
-           "packet's Destination Address was a multicast address, send an"
-           "ICMP Parameter Problem, Code 2, message to the packet's"
-           'Source Address, pointing to the unrecognized Option Type',
-    '11' : "discard the packet and, only if the packet's Destination"
-           'Address was not a multicast address, send an ICMP Parameter'
-           "Problem, Code 2, message to the packet's Source Address,"
-           'pointing to the unrecognized Option Type',
+    '00': 'skip over this option and continue processing the header',
+    '01': 'discard the packet',
+    '10': 'discard the packet and, regardless of whether or not the'
+          "packet's Destination Address was a multicast address, send an"
+          "ICMP Parameter Problem, Code 2, message to the packet's"
+          'Source Address, pointing to the unrecognized Option Type',
+    '11': "discard the packet and, only if the packet's Destination"
+          'Address was not a multicast address, send an ICMP Parameter'
+          "Problem, Code 2, message to the packet's Source Address,"
+          'pointing to the unrecognized Option Type',
 }
-
 
 # HOPOPT Options
 _HOPOPT_OPT = {
-    0x00 : ('pad', 'Pad1'),                                         # [RFC 8200] 0
-    0x01 : ('pad', 'PadN'),                                         # [RFC 8200]
-    0x04 : ('tun', 'Tunnel Encapsulation Limit'),                   # [RFC 2473] 1
-    0x05 : ('ra', 'Router Alert'),                                  # [RFC 2711] 2
-    0x07 : ('calipso', 'Common Architecture Label IPv6 Security Option'),
-                                                                    # [RFC 5570]
-    0x08 : ('smf_dpd', 'Simplified Multicast Forwarding'),          # [RFC 6621]
-    0x0F : ('pdm', 'Performance and Diagnostic Metrics'),           # [RFC 8250] 10
-    0x26 : ('qs', 'Quick-Start'),                                   # [RFC 4782][RFC Errata 2034] 6
-    0x63 : ('rpl', 'Routing Protocol for Low-Power and Lossy Networks'),
-                                                                    # [RFC 6553]
-    0x6D : ('mpl', 'Multicast Protocol for Low-Power and Lossy Networks'),
-                                                                    # [RFC 7731]
-    0x8B : ('ilnp', 'Identifier-Locator Network Protocol Nonce'),   # [RFC 6744]
-    0x8C : ('lio', 'Line-Identification Option'),                   # [RFC 6788]
-    0xC2 : ('jumbo', 'Jumbo Payload'),                              # [RFC 2675]
-    0xC9 : ('home', 'Home Address'),                                # [RFC 6275]
-    0xEE : ('ip_dff', 'Depth-First Forwarding'),                    # [RFC 6971]
+    0x00: ('pad', 'Pad1'),                                                  # [RFC 8200] 0
+    0x01: ('pad', 'PadN'),                                                  # [RFC 8200]
+    0x04: ('tun', 'Tunnel Encapsulation Limit'),                            # [RFC 2473] 1
+    0x05: ('ra', 'Router Alert'),                                           # [RFC 2711] 2
+    0x07: ('calipso', 'Common Architecture Label IPv6 Security Option'),    # [RFC 5570]
+    0x08: ('smf_dpd', 'Simplified Multicast Forwarding'),                   # [RFC 6621]
+    0x0F: ('pdm', 'Performance and Diagnostic Metrics'),                    # [RFC 8250] 10
+    0x26: ('qs', 'Quick-Start'),                                            # [RFC 4782][RFC Errata 2034] 6
+    0x63: ('rpl', 'Routing Protocol for Low-Power and Lossy Networks'),     # [RFC 6553]
+    0x6D: ('mpl', 'Multicast Protocol for Low-Power and Lossy Networks'),   # [RFC 7731]
+    0x8B: ('ilnp', 'Identifier-Locator Network Protocol Nonce'),            # [RFC 6744]
+    0x8C: ('lio', 'Line-Identification Option'),                            # [RFC 6788]
+    0xC2: ('jumbo', 'Jumbo Payload'),                                       # [RFC 2675]
+    0xC9: ('home', 'Home Address'),                                         # [RFC 6275]
+    0xEE: ('ip_dff', 'Depth-First Forwarding'),                             # [RFC 6971]
 }
 
-
-# HOPOPT Option Process Functions
-_HOPOPT_PROC = lambda abbr: eval(
-    f'lambda self, code, *, desc: self._read_opt_{abbr}(code, desc=desc)'
-)
-
-
-# HOPOPT Unknown Option Descrptions
+# HOPOPT Unknown Option Descriptions
 _HOPOPT_NULL = {
-    0x1E : 'RFC3692-style Experiment [0x1E]',                       # [RFC 4727]
-    0x3E : 'RFC3692-style Experiment [0x3E]',                       # [RFC 4727]
-    0x4D : 'Deprecated [0x4D]',                                     # [RFC 7731]
-    0x5E : 'RFC3692-style Experiment [0x5E]',                       # [RFC 4727]
-    0x7E : 'RFC3692-style Experiment [0x7E]',                       # [RFC 4727]
-    0x8A : 'Endpoint Identification [0x8A]',                        # DEPRECATED
-    0x9E : 'RFC3692-style Experiment [0x9E]',                       # [RFC 4727]
-    0xBE : 'RFC3692-style Experiment [0xBE]',                       # [RFC 4727]
-    0xDE : 'RFC3692-style Experiment [0xDE]',                       # [RFC 4727]
-    0xFE : 'RFC3692-style Experiment [0xFE]',                       # [RFC 4727]
+    0x1E: 'RFC3692-style Experiment [0x1E]',                                # [RFC 4727]
+    0x3E: 'RFC3692-style Experiment [0x3E]',                                # [RFC 4727]
+    0x4D: 'Deprecated [0x4D]',                                              # [RFC 7731]
+    0x5E: 'RFC3692-style Experiment [0x5E]',                                # [RFC 4727]
+    0x7E: 'RFC3692-style Experiment [0x7E]',                                # [RFC 4727]
+    0x8A: 'Endpoint Identification [0x8A]',                                 # DEPRECATED
+    0x9E: 'RFC3692-style Experiment [0x9E]',                                # [RFC 4727]
+    0xBE: 'RFC3692-style Experiment [0xBE]',                                # [RFC 4727]
+    0xDE: 'RFC3692-style Experiment [0xDE]',                                # [RFC 4727]
+    0xFE: 'RFC3692-style Experiment [0xFE]',                                # [RFC 4727]
 }
+
+
+def _HOPOPT_PROC(abbr):
+    """HOPOPT option process functions."""
+    return eval(f'lambda self, code, *, desc: self._read_opt_{abbr}(code, desc=desc)')
 
 
 class HOPOPT(Internet):
     """This class implements IPv6 Hop-by-Hop Options.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -139,7 +131,7 @@ class HOPOPT(Internet):
     @property
     def payload(self):
         """Payload of current instance."""
-        if self.extension:
+        if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
@@ -166,7 +158,7 @@ class HOPOPT(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hopopt.next             Next Header
               1           8     hopopt.length           Header Extensive Length
               2          16     hopopt.options          Options
@@ -180,8 +172,8 @@ class HOPOPT(Internet):
         # _opts = self._read_fileng(_hlen*8+6)
 
         hopopt = dict(
-            next = _next,
-            length = (_hlen + 1) * 8,
+            next=_next,
+            length=(_hlen + 1) * 8,
         )
 
         options = self._read_hopopt_options(_hlen * 8 + 6)
@@ -202,6 +194,7 @@ class HOPOPT(Internet):
 
     def __init__(self, _file, length=None, *, extension=False, **kwargs):
         self._file = _file
+        self._extf = extension
         self._info = Info(self.read_hopopt(length, extension))
 
     def __length_hint__(self):
@@ -222,18 +215,20 @@ class HOPOPT(Internet):
 
         Structure of option type field [RFC 791]:
 
-            Octets      Bits        Name                    Discriptions
+            Octets      Bits        Name                    Descriptions
               0           0     hopopt.opt.type.value   Option Number
               0           0     hopopt.opt.type.action  Action (00-11)
               0           2     hopopt.opt.type.change  Change Flag (0/1)
 
         """
         bin_ = bin(kind)[2:].zfill(8)
+
         type_ = dict(
-            value = kind,
-            action = _HOPOPT_ACT.get(bin_[:2]),
-            change = True if int(bin_[2], base=2) else False,
+            value=kind,
+            action=_HOPOPT_ACT.get(bin_[:2]),
+            change=True if int(bin_[2], base=2) else False,
         )
+
         return type_
 
     def _read_hopopt_options(self, length):
@@ -253,7 +248,8 @@ class HOPOPT(Internet):
         while counter < length:
             # break when eol triggered
             code = self._read_unpack(1)
-            if not code:    break
+            if not code:
+                break
 
             # extract parameter
             abbr, desc = _HOPOPT_OPT.get(code, ('none', 'Unassigned'))
@@ -285,7 +281,7 @@ class HOPOPT(Internet):
             |  Option Type  |  Opt Data Len |  Option Data
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hopopt.opt.type         Option Type
               0           0     hopopt.opt.type.value   Option Number
               0           0     hopopt.opt.type.action  Action (00-11)
@@ -299,10 +295,10 @@ class HOPOPT(Internet):
         _data = self._read_fileng(_size)
 
         opt = dict(
-            desc = _HOPOPT_NULL.get(code, desc),
-            type = _type,
-            length = _size + 2,
-            data = _data,
+            desc=_HOPOPT_NULL.get(code, desc),
+            type=_type,
+            length=_size + 2,
+            data=_data,
         )
 
         return opt
@@ -316,7 +312,7 @@ class HOPOPT(Internet):
                 |       0       |
                 +-+-+-+-+-+-+-+-+
 
-                Octets      Bits        Name                    Discription
+                Octets      Bits        Name                    Description
                   0           0     hopopt.pad.type         Option Type
                   0           0     hopopt.pad.type.value   Option Number
                   0           0     hopopt.pad.type.action  Action (00)
@@ -327,7 +323,7 @@ class HOPOPT(Internet):
                 |       1       |  Opt Data Len |  Option Data
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
 
-                Octets      Bits        Name                    Discription
+                Octets      Bits        Name                    Description
                   0           0     hopopt.pad.type         Option Type
                   0           0     hopopt.pad.type.value   Option Number
                   0           0     hopopt.pad.type.action  Action (00)
@@ -340,19 +336,19 @@ class HOPOPT(Internet):
 
         if code == 0:
             opt = dict(
-                desc = desc,
-                type = _type,
-                length = 1,
+                desc=desc,
+                type=_type,
+                length=1,
             )
         elif code == 1:
             _size = self._read_unpack(1)
             _padn = self._read_fileng(_size)
 
             opt = dict(
-                desc = desc,
-                type = _type,
-                length = _size + 2,
-                padding = _padn,
+                desc=desc,
+                type=_type,
+                length=_size + 2,
+                padding=_padn,
             )
         else:
             raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
@@ -369,7 +365,7 @@ class HOPOPT(Internet):
             | Tun Encap Lim |PadN Opt Type=1|Opt Data Len=1 |       0       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hopopt.tun.type         Option Type
               0           0     hopopt.tun.type.value   Option Number
               0           0     hopopt.tun.type.action  Action (00)
@@ -385,10 +381,10 @@ class HOPOPT(Internet):
         _limt = self._read_unpack(1)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            limit = _limt,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            limit=_limt,
         )
 
         return opt
@@ -401,7 +397,7 @@ class HOPOPT(Internet):
             |0 0 0|0 0 1 0 1|0 0 0 0 0 0 1 0|        Value (2 octets)       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hopopt.ra.type          Option Type
               0           0     hopopt.ra.type.value    Option Number
               0           0     hopopt.ra.type.action   Action (00)
@@ -421,16 +417,16 @@ class HOPOPT(Internet):
         elif 36 <= _rval <= 67:
             _dscp = f'QoS NSLP Aggregation Level {_rval-36}'            # [RFC 5974]
         elif 65503 <= _rval <= 65534:
-            _dscp = 'Reserved for experimental use'                     # [RFC 5350]
+            _dscp = 'Reserved for experimental use'                     # [RFC 5350]
         else:
             _dscp = _ROUTER_ALERT.get(_rval, 'Unassigned')
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            value = _rval,
-            alert = _dscp,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            value=_rval,
+            alert=_dscp,
         )
 
         return opt
@@ -449,7 +445,7 @@ class HOPOPT(Internet):
             |      Compartment Bitmap (Optional; variable length)      |
             +-------------+---------------+-------------+--------------+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     hopopt.calipso.type         Option Type
               0           0     hopopt.calipso.type.value   Option Number
               0           0     hopopt.calipso.type.action  Action (00)
@@ -474,13 +470,13 @@ class HOPOPT(Internet):
         _csum = self._read_fileng(2)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            domain = _cmpt,
-            cmpt_len = _clen * 4,
-            level = _sens,
-            chksum = _csum,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            domain=_cmpt,
+            cmpt_len=_clen * 4,
+            level=_sens,
+            chksum=_csum,
         )
 
         if _clen:
@@ -491,7 +487,7 @@ class HOPOPT(Internet):
 
         _plen = _size - _clen * 4 - 8
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return opt
 
@@ -510,7 +506,7 @@ class HOPOPT(Internet):
                 |                               |            Identifier  ...
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                Octets      Bits        Name                        Discription
+                Octets      Bits        Name                        Description
                   0           0     hopopt.smf_dpd.type         Option Type
                   0           0     hopopt.smf_dpd.type.value   Option Number
                   0           0     hopopt.smf_dpd.type.action  Action (00)
@@ -531,7 +527,7 @@ class HOPOPT(Internet):
                 |1|    Hash Assist Value (HAV) ...
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-                Octets      Bits        Name                        Discription
+                Octets      Bits        Name                        Description
                   0           0     hopopt.smf_dpd.type         Option Type
                   0           0     hopopt.smf_dpd.type.value   Option Number
                   0           0     hopopt.smf_dpd.type.action  Action (00)
@@ -555,13 +551,13 @@ class HOPOPT(Internet):
                 _iden = self._read_fileng(_size-1)
 
                 opt = dict(
-                    desc = desc,
-                    type = _type,
-                    length = _size + 2,
-                    dpd_type = _mode,
-                    tid_type = _tidt,
-                    tid_len = _tidl,
-                    id = _iden,
+                    desc=desc,
+                    type=_type,
+                    length=_size + 2,
+                    dpd_type=_mode,
+                    tid_type=_tidt,
+                    tid_len=_tidl,
+                    id=_iden,
                 )
             elif _tidt == 'IPv4':
                 if _tidl != 3:
@@ -570,14 +566,14 @@ class HOPOPT(Internet):
                 _iden = self._read_fileng(_size-4)
 
                 opt = dict(
-                    desc = desc,
-                    type = _type,
-                    length = _size + 2,
-                    dpd_type = _mode,
-                    tid_type = _tidt,
-                    tid_len = _tidl,
-                    tid = ipaddress.ip_address(_tidf),
-                    id = _iden,
+                    desc=desc,
+                    type=_type,
+                    length=_size + 2,
+                    dpd_type=_mode,
+                    tid_type=_tidt,
+                    tid_len=_tidl,
+                    tid=ipaddress.ip_address(_tidf),
+                    id=_iden,
                 )
             elif _tidt == 'IPv6':
                 if _tidl != 15:
@@ -586,39 +582,39 @@ class HOPOPT(Internet):
                 _iden = self._read_fileng(_size-15)
 
                 opt = dict(
-                    desc = desc,
-                    type = _type,
-                    length = _size + 2,
-                    dpd_type = _mode,
-                    tid_type = _tidt,
-                    tid_len = _tidl,
-                    tid = ipaddress.ip_address(_tidf),
-                    id = _iden,
+                    desc=desc,
+                    type=_type,
+                    length=_size + 2,
+                    dpd_type=_mode,
+                    tid_type=_tidt,
+                    tid_len=_tidl,
+                    tid=ipaddress.ip_address(_tidf),
+                    id=_iden,
                 )
             else:
                 _tidf = self._read_unpack(_tidl+1)
                 _iden = self._read_fileng(_size-_tidl-2)
 
                 opt = dict(
-                    desc = desc,
-                    type = _type,
-                    length = _size + 2,
-                    dpd_type = _mode,
-                    tid_type = _tidt,
-                    tid_len = _tidl,
-                    tid = _tidf,
-                    id = _iden,
+                    desc=desc,
+                    type=_type,
+                    length=_size + 2,
+                    dpd_type=_mode,
+                    tid_type=_tidt,
+                    tid_len=_tidl,
+                    tid=_tidf,
+                    id=_iden,
                 )
         elif _tidd[0] == '1':
             _data = self._read_binary(_size-1)
 
             opt = dict(
-                desc = desc,
-                type = _type,
-                length = _size + 2,
-                dpd_type = _mode,
-                tid_type = _tidt,
-                hav = _tidd[1:] + _data,
+                desc=desc,
+                type=_type,
+                length=_size + 2,
+                dpd_type=_mode,
+                tid_type=_tidt,
+                hav=_tidd[1:] + _data,
             )
         else:
             raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
@@ -639,7 +635,7 @@ class HOPOPT(Internet):
             |   Delta Time Last Received    |  Delta Time Last Sent         |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hopopt.pdm.type         Option Type
               0           0     hopopt.pdm.type.value   Option Number
               0           0     hopopt.pdm.type.action  Action (00)
@@ -665,15 +661,15 @@ class HOPOPT(Internet):
         _dtls = self._read_unpack(2)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            scaledtlr = datetime.timedelta(seconds=_stlr),
-            scaledtls = datetime.timedelta(seconds=_stls),
-            psntp = _psnt,
-            psnlr = _psnl,
-            deltatlr = datetime.timedelta(seconds=_dtlr),
-            deltatls = datetime.timedelta(seconds=_dtls),
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            scaledtlr=datetime.timedelta(seconds=_stlr),
+            scaledtls=datetime.timedelta(seconds=_stls),
+            psntp=_psnt,
+            psnlr=_psnl,
+            deltatlr=datetime.timedelta(seconds=_dtlr),
+            deltatls=datetime.timedelta(seconds=_dtls),
         )
 
         return opt
@@ -701,7 +697,7 @@ class HOPOPT(Internet):
                 |                        QS Nonce                           | R |
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hopopt.qs.type          Option Type
               0           0     hopopt.qs.type.value    Option Number
               0           0     hopopt.qs.type.action   Action (00)
@@ -717,7 +713,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 6:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
 
         _fcrr = self._read_binary(1)
         _func = int(_fcrr[:4], base=2)
@@ -727,15 +723,15 @@ class HOPOPT(Internet):
         _qsnn = int(_nonr[:30], base=2)
 
         if _func != 0 and _func != 8:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
 
         data = dict(
-            type = _type,
-            length = _size + 2,
-            func = _QS_FUNC.get(_func),
-            rate = 40000 * (2 ** _rate) / 1000,
-            ttl = None if func else _rate,
-            nounce = _qsnn,
+            type=_type,
+            length=_size + 2,
+            func=_QS_FUNC.get(_func),
+            rate=40000 * (2 ** _rate) / 1000,
+            ttl=None if _func else _rate,
+            nounce=_qsnn,
         )
 
         return data
@@ -754,7 +750,7 @@ class HOPOPT(Internet):
             |                         (sub-TLVs)                            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     hopopt.rpl.type             Option Type
               0           0     hopopt.rpl.type.value       Option Number
               0           0     hopopt.rpl.type.action      Action (01)
@@ -778,16 +774,16 @@ class HOPOPT(Internet):
         _rank = self._read_unpack(2)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            flags = dict(
-                down = True if int(_flag[0], base=2) else False,
-                rank_error = True if int(_flag[1], base=2) else False,
-                fwd_error = True if int(_flag[2], base=2) else False,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            flags=dict(
+                down=True if int(_flag[0], base=2) else False,
+                rank_error=True if int(_flag[1], base=2) else False,
+                fwd_error=True if int(_flag[2], base=2) else False,
             ),
-            id = _rpld,
-            rank = _rank,
+            id=_rpld,
+            rank=_rank,
         )
 
         if _size > 4:
@@ -807,7 +803,7 @@ class HOPOPT(Internet):
             | S |M|V|  rsv  |   sequence    |      seed-id (optional)       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     hopopt.mpl.type             Option Type
               0           0     hopopt.mpl.type.value       Option Number
               0           0     hopopt.mpl.type.action      Action (01)
@@ -822,24 +818,23 @@ class HOPOPT(Internet):
               4          32     hopopt.mpl.seed_id          Seed-ID
 
         """
-        if _size < 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
-
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
+        if _size < 2:
+            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
         _smvr = self._read_binary(1)
         _seqn = self._read_unpack(1)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            seed_len = _HOPOPT_SEED.get(int(_smvr[:2], base=2)),
-            flags = dict(
-                max = True if int(_smvr[2], base=2) else False,
-                verification = True if int(_smvr[3], base=2) else False,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            seed_len=_HOPOPT_SEED.get(int(_smvr[:2], base=2)),
+            flags=dict(
+                max=True if int(_smvr[2], base=2) else False,
+                verification=True if int(_smvr[3], base=2) else False,
             ),
-            seq = _seqn,
+            seq=_seqn,
         )
 
         _kind = _smvr[:2]
@@ -863,7 +858,7 @@ class HOPOPT(Internet):
 
         _plen = _size - opt['seed_len']
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return opt
 
@@ -879,7 +874,7 @@ class HOPOPT(Internet):
             /                         Nonce Value                           /
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     hopopt.ilnp.type            Option Type
               0           0     hopopt.ilnp.type.value      Option Number
               0           0     hopopt.ilnp.type.action     Action (10)
@@ -893,10 +888,10 @@ class HOPOPT(Internet):
         _nval = self._read_fileng(_size)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            value = _nval,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            value=_nval,
         )
 
         return opt
@@ -913,7 +908,7 @@ class HOPOPT(Internet):
             | LineIDLen     |     Line ID...
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     hopopt.lio.type             Option Type
               0           0     hopopt.lio.type.value       Option Number
               0           0     hopopt.lio.type.action      Action (10)
@@ -929,16 +924,16 @@ class HOPOPT(Internet):
         _line = self._read_fileng(_llen)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            lid_len = _llen,
-            lid = _line,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            lid_len=_llen,
+            lid=_line,
         )
 
         _plen = _size - _llen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return opt
 
@@ -952,7 +947,7 @@ class HOPOPT(Internet):
             |                     Jumbo Payload Length                      |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     hopopt.jumbo.type           Option Type
               0           0     hopopt.jumbo.type.value     Option Number
               0           0     hopopt.jumbo.type.action    Action (11)
@@ -968,10 +963,10 @@ class HOPOPT(Internet):
         _jlen = self._read_unpack(4)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            payload_len = _jlen,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            payload_len=_jlen,
         )
 
         return opt
@@ -994,7 +989,7 @@ class HOPOPT(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     hopopt.home.type            Option Type
               0           0     hopopt.home.type.value      Option Number
               0           0     hopopt.home.type.action     Action (11)
@@ -1010,10 +1005,10 @@ class HOPOPT(Internet):
         _addr = self._read_fileng(16)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            ip = ipaddress.ip_address(_addr),
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            ip=ipaddress.ip_address(_addr),
         )
 
         return opt
@@ -1030,13 +1025,13 @@ class HOPOPT(Internet):
             |VER|D|R|0|0|0|0|        Sequence Number        |      Pad1     |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     hopopt.ip_dff.type          Option Type
               0           0     hopopt.ip_dff.type.value    Option Number
               0           0     hopopt.ip_dff.type.action   Action (11)
               0           2     hopopt.ip_dff.type.change   Change Flag (1)
               1           8     hopopt.ip_dff.length        Length of Option Data
-              2          16     hopopt.ip_dff.version       Verion
+              2          16     hopopt.ip_dff.version       Version
               2          18     hopopt.ip_dff.flags         Flags
               2          18     hopopt.ip_dff.flags.dup     DUP Flag
               2          19     hopopt.ip_dff.flags.ret     RET Flag
@@ -1052,15 +1047,15 @@ class HOPOPT(Internet):
         _seqn = self._read_unpack(2)
 
         opt = dict(
-            desc = desc,
-            type = _type,
-            length = _size + 2,
-            version = _verf[:2],
-            flags = dict(
-                dup = True if int(_verf[2], base=2) else False,
-                ret = True if int(_verf[3], base=2) else False,
+            desc=desc,
+            type=_type,
+            length=_size + 2,
+            version=_verf[:2],
+            flags=dict(
+                dup=True if int(_verf[2], base=2) else False,
+                ret=True if int(_verf[3], base=2) else False,
             ),
-            seq = _seqn,
+            seq=_seqn,
         )
 
         return opt

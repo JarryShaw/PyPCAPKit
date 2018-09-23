@@ -5,7 +5,7 @@
 only, which implements extractor for Ethernet Protocol,
 whose structure is described as below.
 
-Octets      Bits        Name                    Discription
+Octets      Bits        Name                    Description
   0           0     eth.dst                 Destination MAC Address
   1           8     eth.src                 Source MAC Address
   2          16     eth.type                Protocol (Internet Layer)
@@ -15,7 +15,6 @@ import textwrap
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
-
 
 __all__ = ['Ethernet']
 
@@ -94,7 +93,7 @@ class Ethernet(Link):
         """Read Ethernet Protocol.
 
         Structure of Ethernet Protocol header [RFC 7042]:
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     eth.dst                 Destination MAC Address
               1           8     eth.src                 Source MAC Address
               2          16     eth.type                Protocol (Internet Layer)
@@ -108,9 +107,9 @@ class Ethernet(Link):
         _type = self._read_protos(2)
 
         ethernet = dict(
-            dst = _dstm,
-            src = _srcm,
-            type = _type,
+            dst=_dstm,
+            src=_srcm,
+            type=_type,
         )
 
         length -= 14

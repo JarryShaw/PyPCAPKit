@@ -2,7 +2,7 @@
 """root protocol
 
 `pcapkit.ipsuite.protocol` contains `Protocol` only,
-which is an abstract base clss for all protocol family,
+which is an abstract base class for all protocol family,
 with pre-defined utility arguments and methods of specified
 protocols.
 
@@ -20,22 +20,14 @@ import struct
 import textwrap
 
 import aenum
-
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import ProtocolNotImplemented, StructError
 from pcapkit.utilities.validations import dict_check
 
-
 __all__ = ['Protocol']
 
-
 # readable characters' order list
-readable = [ ord(char) for char in filter(lambda char: not char.isspace(), string.printable) ]
-
-
-# abstract base class utilities
-ABCMeta = abc.ABCMeta
-abstractmethod = abc.abstractmethod
+readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
 
 
 @functools.total_ordering
@@ -56,7 +48,7 @@ class Protocol:
         * __make__ -- make packet data
 
     """
-    __metaclass__ = ABCMeta
+    __metaclass__ = abc.ABCMeta
 
     ##########################################################################
     # Properties.
@@ -64,7 +56,7 @@ class Protocol:
 
     # name of current protocol
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def name(self):
         """Name of current protocol."""
         pass
@@ -93,7 +85,7 @@ class Protocol:
 
     @classmethod
     def index(cls, name, default=None, *, namespace=None, reversed=False,
-                pack=False, size=4, signed=False, lilendian=False):
+              pack=False, size=4, signed=False, lilendian=False):
         """Return first index of name from a dict or enumeration.
 
         Positional arguments:
@@ -121,7 +113,7 @@ class Protocol:
                     if reversed:
                         index = namespace[name]
                     else:
-                        index = { v: k for k, v in namespace.items() }[name]
+                        index = {v: k for k, v in namespace.items()}[name]
                 else:
                     raise KeyError
             except KeyError:
@@ -132,8 +124,8 @@ class Protocol:
             return cls.pack(index, size=size, signed=signed, lilendian=lilendian)
         return index
 
-    @staticmethod
-    def pack(integer, *, size=1, signed=False, lilendian=False):
+    @classmethod
+    def pack(cls, integer, *, size=1, signed=False, lilendian=False):
         """Pack integers to bytes.
 
         Positional arguments:
@@ -151,11 +143,16 @@ class Protocol:
 
         """
         endian = '<' if lilendian else '>'
-        if size == 8:   kind = 'q' if signed else 'Q'   # unpack to 8-byte integer (long long)
-        elif size == 4: kind = 'i' if signed else 'I'   # unpack to 4-byte integer (int / long)
-        elif size == 2: kind = 'h' if signed else 'H'   # unpack to 2-byte integer (short)
-        elif size == 1: kind = 'b' if signed else 'B'   # unpack to 1-byte integer (char)
-        else:           kind = None                     # do not unpack
+        if size == 8:                       # unpack to 8-byte integer (long long)
+            kind = 'q' if signed else 'Q'
+        elif size == 4:                     # unpack to 4-byte integer (int / long)
+            kind = 'i' if signed else 'I'
+        elif size == 2:                     # unpack to 2-byte integer (short)
+            kind = 'h' if signed else 'H'
+        elif size == 1:                     # unpack to 1-byte integer (char)
+            kind = 'b' if signed else 'B'
+        else:                               # do not unpack
+            kind = None
 
         if kind is None:
             end = 'little' if lilendian else 'big'
@@ -165,7 +162,7 @@ class Protocol:
                 fmt = f'{endian}{kind}'
                 buf = struct.pack(fmt, integer)
             except struct.error:
-                raise StructError(f'{self.__class__.__name__}: pack failed') from None
+                raise StructError(f'{cls.__name__}: pack failed') from None
         return buf
 
     ##########################################################################
@@ -183,7 +180,7 @@ class Protocol:
         self.__args__ = collections.defaultdict(lambda: NotImplemented)
         self.__args__.update(args)
         self.__args__.update(kwargs)
-        self.__make__()
+        self.__data__ = self.__make__()
 
     def __bytes__(self):
         return self.__data__
@@ -208,13 +205,13 @@ class Protocol:
 
     def __str__(self):
         hexbuf = ' '.join(textwrap.wrap(self.__data__.hex(), 2))
-        strbuf = ''.join( chr(char) if char in readable else '.' for char in self.__data__ )
+        strbuf = ''.join(chr(char) if char in readable else '.' for char in self.__data__)
 
         number = shutil.get_terminal_size().columns // 4 - 1
         length = number * 3
 
         hexlst = textwrap.wrap(hexbuf, length)
-        strlst = [ buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '') ]
+        strlst = [buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '')]
 
         str_ = '\n'.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))
         return str_
@@ -245,7 +242,7 @@ class Protocol:
     # Utilities.
     ##########################################################################
 
-    @abstractmethod
+    @abc.abstractmethod
     def __make__(self):
         """Make packet data."""
         pass

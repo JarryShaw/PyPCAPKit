@@ -14,8 +14,7 @@ IPv6 (IPv6-Frag), whose structure is described as below.
 """
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.utilities.exceptions import UnsupportedCall, ProtocolError
-
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 __all__ = ['IPv6_Frag']
 
@@ -24,9 +23,9 @@ class IPv6_Frag(Internet):
     """This class implements Fragment Header for IPv6.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -61,7 +60,7 @@ class IPv6_Frag(Internet):
 
     @property
     def alias(self):
-        """Acronym of corresponding procotol."""
+        """Acronym of corresponding protocol."""
         return 'IPv6-Frag'
 
     @property
@@ -72,7 +71,7 @@ class IPv6_Frag(Internet):
     @property
     def payload(self):
         """Payload of current instance."""
-        if self.extension:
+        if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
@@ -95,7 +94,7 @@ class IPv6_Frag(Internet):
             |                         Identification                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     frag.next               Next Header
               1           8     -                       Reserved
               2          16     frag.offset             Fragment Offset
@@ -113,11 +112,11 @@ class IPv6_Frag(Internet):
         _ipid = self._read_unpack(4)
 
         ipv6_frag = dict(
-            next = _next,
-            length = 8,
-            offset = int(_offm[:13], base=2),
-            mf = True if int(_offm[15], base=2) else False,
-            id = _ipid,
+            next=_next,
+            length=8,
+            offset=int(_offm[:13], base=2),
+            mf=True if int(_offm[15], base=2) else False,
+            id=_ipid,
         )
 
         length -= ipv6_frag['length']
@@ -134,6 +133,7 @@ class IPv6_Frag(Internet):
 
     def __init__(self, _file, length=None, *, extension=False, **kwargs):
         self._file = _file
+        self._extf = extension
         self._info = Info(self.read_ipv6_frag(length, extension))
 
     def __length_hint__(self):

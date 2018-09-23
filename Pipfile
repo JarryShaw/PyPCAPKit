@@ -18,6 +18,10 @@ scapy = "*"
 "beautifulsoup4" = "*"
 "html5lib" = "*"
 requests = "*"
+rope = "*"
+lxml = "*"
+pycodestyle = "*"
+pylint = "*"
 
 [requires]
 python_version = "3.7"

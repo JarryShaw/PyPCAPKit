@@ -28,7 +28,6 @@ from pcapkit.utilities.decorators import beholder
 # from pcapkit.protocols.raw import Raw
 ###############################################################################
 
-
 __all__ = ['Frame']
 
 
@@ -83,7 +82,7 @@ class Frame(Protocol):
     ##########################################################################
 
     def index(self, name):
-        return self._proto.index(name)
+        return self._protos.index(name)
 
     def read_frame(self):
         """Read each block after global header.
@@ -114,19 +113,18 @@ class Frame(Protocol):
         _time = datetime.datetime.fromtimestamp(_epch)
 
         frame = dict(
-            frame_info = dict(
-                ts_sec = _tsss,
-                ts_usec = _tsus,
-                incl_len = _ilen,
-                orig_len = _olen,
+            frame_info=dict(
+                ts_sec=_tsss,
+                ts_usec=_tsus,
+                incl_len=_ilen,
+                orig_len=_olen,
             ),
-            time = _time,
-            number = self._fnum,
-            time_epoch = _epch,
-            len = _ilen,
-            cap_len = _olen,
+            time=_time,
+            number=self._fnum,
+            time_epoch=_epch,
+            len=_ilen,
+            cap_len=_olen,
         )
-
 
         # load packet data
         length = frame['len']
@@ -149,15 +147,15 @@ class Frame(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, *, num, proto, nanosecond, **kwrags):
+    def __init__(self, file, *, num, proto, nanosecond, **kwargs):
         self._fnum = num
         self._file = file
         self._prot = proto
         self._nsec = nanosecond
-        self._mpfp = kwrags.pop('mpfdp', None)
-        self._mpkt = kwrags.pop('mpkit', None)
+        self._mpfp = kwargs.pop('mpfdp', None)
+        self._mpkt = kwargs.pop('mpkit', None)
         self._info = Info(self.read_frame())
-        [ delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self)) ]
+        [delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self))]
 
     def __length_hint__(self):
         return 16
@@ -198,7 +196,7 @@ class Frame(Protocol):
         #     raise IndexNotFound(f"'{key}' not in Frame")
         #
         # # make return Info item
-        # dict_ = self._info.infotodict()
+        # dict_ = self._info.info2dict()
         # for (level, proto) in enumerate(self._protos):
         #     proto = proto or 'raw'
         #     dict_ = dict_[proto.lower()]
@@ -207,7 +205,8 @@ class Frame(Protocol):
         # return Info(dict_)
 
     def __index__(self=None):
-        if self is None:    return 'Frame'
+        if self is None:
+            return 'Frame'
         if getattr(self, '_fnum', None) is None:
             return self.__class__.__name__
         return self._fnum
@@ -217,9 +216,9 @@ class Frame(Protocol):
             name = name.__index__()
         if isinstance(name, tuple):
             for item in name:
-                flag = (item in self._protos)
-                if flag:    break
-            return flag
+                if item in self._protos:
+                    return True
+            return False
         return ((name in self._info) or (name in self._protos))
 
     ##########################################################################
@@ -245,7 +244,7 @@ class Frame(Protocol):
             dict_['error'] = str(error)
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = beholder(self._import_next_layer)(self, self._prot, length, error=True)
-        info, chain, alias = next_.info, next_.protochain, next_.alias
+        info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
         layer = next_.alias.lower()
@@ -289,5 +288,5 @@ class Frame(Protocol):
         else:
             from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(self._file, length, error=error,
-                            layer=self._exlayer, protocol=self._exproto)
+                         layer=self._exlayer, protocol=self._exproto)
         return next_

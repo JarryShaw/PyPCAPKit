@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import csv
 import os
 import re
 
 import requests
-
 
 ###############
 # Defaults
@@ -16,7 +14,8 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
 # -*- coding: utf-8 -*-
 
 
@@ -72,12 +71,14 @@ data = page.text.strip().split('\r\n')
 reader = csv.reader(data)
 header = next(reader)
 record = collections.Counter(map(lambda item: item[4],
-    filter(lambda item: len(item[1].split('-')) != 2, reader)))
+                                 filter(lambda item: len(item[1].split('-')) != 2, reader)))
+
 
 def rename(name, code):
     if record[name] > 1:
         name = f'{name} [0x{code}]'
     return name
+
 
 reader = csv.reader(data)
 header = next(reader)
@@ -94,7 +95,8 @@ for item in reader:
             temp.append(f'[{rfc[:3]} {rfc[3:]}]')
         else:
             temp.append(f'[{rfc}]')
-    desc = re.sub(r'( )( )*', ' ', f"# {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
+    desc = re.sub(r'( )( )*', ' ',
+                  f"# {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
 
     try:
         code, _ = item[1], int(item[1], base=16)
@@ -111,7 +113,8 @@ for item in reader:
         miss.append(f'if 0x{start} <= value <= 0x{stop}:')
         if more:
             miss.append(f'    {more}')
-        miss.append(f"    extend_enum(cls, '{name} [0x%s]' % hex(value)[2:].upper().zfill(4), value)")
+        miss.append(
+            f"    extend_enum(cls, '{name} [0x%s]' % hex(value)[2:].upper().zfill(4), value)")
         miss.append('    return cls(value)')
 
 

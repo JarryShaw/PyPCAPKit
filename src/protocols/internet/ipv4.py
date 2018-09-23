@@ -27,21 +27,22 @@ import datetime
 import ipaddress
 
 from pcapkit._common.ip_qs_func import QS as QS_FUNC
-from pcapkit._common.ipv4_classification_level import ClasLvl as _CLASSIFICATION_LEVEL
+from pcapkit._common.ipv4_classification_level import \
+    ClasLvl as _CLASSIFICATION_LEVEL
 from pcapkit._common.ipv4_opt_class import OptCls as opt_class
 from pcapkit._common.ipv4_opt_type import Options as OPT_TYPE
-from pcapkit._common.ipv4_protection_authority import ProtAuth as _PROTECTION_AUTHORITY
+from pcapkit._common.ipv4_protection_authority import \
+    ProtAuth as _PROTECTION_AUTHORITY
 from pcapkit._common.ipv4_router_alert import RT_ALT as _ROUTER_ALERT
 from pcapkit._common.ipv4_tos_del import Delay as TOS_DEL
 from pcapkit._common.ipv4_tos_ecn import ECN as TOS_ECN
 from pcapkit._common.ipv4_tos_pre import Precedence as TOS_PRE
-from pcapkit._common.ipv4_tos_rel import Relibility as TOS_REL
+from pcapkit._common.ipv4_tos_rel import Reliability as TOS_REL
 from pcapkit._common.ipv4_tos_thr import Throughput as TOS_THR
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.utilities.exceptions import ProtocolError
-
 
 __all__ = ['IPv4']
 
@@ -77,32 +78,32 @@ T = True
 F = False
 
 process_opt = {
-    0:  lambda self, size, kind: self._read_mode_donone(size, kind),    # do nothing
-    1:  lambda self, size, kind: self._read_mode_unpack(size, kind),    # unpack according to size
-    2:  lambda self, size, kind: self._read_mode_route(size, kind),     # route data
-    3:  lambda self, size, kind: self._read_mode_qs(size, kind),        # Quick-Start
-    4:  lambda self, size, kind: self._read_mode_ts(size, kind),        # Time Stamp
-    5:  lambda self, size, kind: self._read_mode_tr(size, kind),        # Traceroute
-    6:  lambda self, size, kind: self._read_mode_sec(size, kind),       # (Extended) Security
-    7:  lambda self, size, kind: self._read_mode_rsralt(size, kind),    # Router Alert
+    0: lambda self, size, kind: self._read_mode_donone(size, kind),    # do nothing
+    1: lambda self, size, kind: self._read_mode_unpack(size, kind),    # unpack according to size
+    2: lambda self, size, kind: self._read_mode_route(size, kind),     # route data
+    3: lambda self, size, kind: self._read_mode_qs(size, kind),        # Quick-Start
+    4: lambda self, size, kind: self._read_mode_ts(size, kind),        # Time Stamp
+    5: lambda self, size, kind: self._read_mode_tr(size, kind),        # Traceroute
+    6: lambda self, size, kind: self._read_mode_sec(size, kind),       # (Extended) Security
+    7: lambda self, size, kind: self._read_mode_rsralt(size, kind),    # Router Alert
 }
 
-IPv4_OPT = {                        #   copy  class  number  kind  length  process          name
-    0:  (F, 'eool'),                #     0     0       0      0      -       -     [RFC 791] End of Option List
-    1:  (F, 'nop'),                 #     0     0       1      1      -       -     [RFC 791] No-Operation
-    7:  (T, 'rr', 2),               #     0     0       7      7      N       2     [RFC 791] Record Route
-   11:  (T, 'mtup', 1),             #     0     0      11     11      4       1     [RFC 1063][RFC 1191] MTU Probe
-   12:  (T, 'mtur', 1),             #     0     0      12     12      4       1     [RFC 1063][RFC 1191] MTU Reply
-   25:  (T, 'qs', 3),               #     0     0      25     25      8       3     [RFC 4782] Quick-Start
-   68:  (T, 'ts', 4),               #     0     2       4     68      N       4     [RFC 791] Time Stamp
-   82:  (T, 'tr', 5),               #     0     2      18     82      N       5     [RFC 1393][RFC 6814] Traceroute
-  130:  (T, 'sec', 6),              #     1     0       2    130      N       6     [RFC 1108] Security
-  131:  (T, 'lsr', 2),              #     1     0       3    131      N       2     [RFC 791] Loose Source Route
-  133:  (T, 'esec', 6),             #     1     0       5    133      N       6     [RFC 1108] Extended Security
-  136:  (T, 'sid', 1),              #     1     0       8    136      4       1     [RFC 791][RFC 6814] Stream ID
-  137:  (T, 'ssr', 2),              #     1     0       9    137      N       2     [RFC 791] Strict Source Route
-  145:  (T, 'eip', 0),              #     1     0      17    145      N       0     [RFC 1385][RFC 6814] Extended Internet Protocol
-  148:  (T, 'rtralt', 7),           #     1     0      20    148      4       7     [RFC 2113] Router Alert
+IPv4_OPT = {                 # # copy  class  number  kind  length  process          name
+    0:    (F, 'eool'),       # #   0     0       0      0      -       -     [RFC 791] End of Option List
+    1:    (F, 'nop'),        # #   0     0       1      1      -       -     [RFC 791] No-Operation
+    7:    (T, 'rr', 2),      # #   0     0       7      7      N       2     [RFC 791] Record Route
+    11:   (T, 'mtup', 1),    # #   0     0      11     11      4       1     [RFC 1063][RFC 1191] MTU Probe
+    12:   (T, 'mtur', 1),    # #   0     0      12     12      4       1     [RFC 1063][RFC 1191] MTU Reply
+    25:   (T, 'qs', 3),      # #   0     0      25     25      8       3     [RFC 4782] Quick-Start
+    68:   (T, 'ts', 4),      # #   0     2       4     68      N       4     [RFC 791] Time Stamp
+    82:   (T, 'tr', 5),      # #   0     2      18     82      N       5     [RFC 1393][RFC 6814] Traceroute
+    130:  (T, 'sec', 6),     # #   1     0       2    130      N       6     [RFC 1108] Security
+    131:  (T, 'lsr', 2),     # #   1     0       3    131      N       2     [RFC 791] Loose Source Route
+    133:  (T, 'esec', 6),    # #   1     0       5    133      N       6     [RFC 1108] Extended Security
+    136:  (T, 'sid', 1),     # #   1     0       8    136      4       1     [RFC 791][RFC 6814] Stream ID
+    137:  (T, 'ssr', 2),     # #   1     0       9    137      N       2     [RFC 791] Strict Source Route
+    145:  (T, 'eip', 0),     # #   1     0      17    145      N       0     [RFC 1385][RFC 6814] Ext. Inet. Protocol
+    148:  (T, 'rtralt', 7),  # #   1     0      20    148      4       7     [RFC 2113] Router Alert
 }
 
 
@@ -110,9 +111,9 @@ class IPv4(IP):
     """This class implements Internet Protocol version 4.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -146,7 +147,7 @@ class IPv4(IP):
 
     @property
     def name(self):
-        """Name of corresponding procotol."""
+        """Name of corresponding protocol."""
         return 'Internet Protocol version 4'
 
     @property
@@ -184,9 +185,9 @@ class IPv4(IP):
             |                    Options                    |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.version              Version (4)
-              0           4     ip.hdr_len              Interal Header Length (IHL)
+              0           4     ip.hdr_len              Internal Header Length (IHL)
               1           8     ip.dsfield.dscp         Differentiated Services Code Point (DSCP)
               1          14     ip.dsfield.ecn          Explicit Congestion Notification (ECN)
               2          16     ip.len                  Total Length
@@ -218,29 +219,29 @@ class IPv4(IP):
         _dsta = self._read_ipv4_addr()
 
         ipv4 = dict(
-            version = _vihl[0],
-            hdr_len = int(_vihl[1], base=16) * 4,
-            dsfield = dict(
-                dscp = (
+            version=_vihl[0],
+            hdr_len=int(_vihl[1], base=16) * 4,
+            dsfield=dict(
+                dscp=(
                     TOS_PRE.get(int(_dscp[:3], base=2)),
                     TOS_DEL.get(int(_dscp[3], base=2)),
                     TOS_THR.get(int(_dscp[4], base=2)),
                     TOS_REL.get(int(_dscp[5], base=2)),
                 ),
-                ecn = TOS_ECN.get(int(_dscp[-2:], base=2)),
+                ecn=TOS_ECN.get(int(_dscp[-2:], base=2)),
             ),
-            len = _tlen,
-            id = _iden,
-            flags = dict(
-                df = True if int(_frag[1]) else False,
-                mf = True if int(_frag[2]) else False,
+            len=_tlen,
+            id=_iden,
+            flags=dict(
+                df=True if int(_frag[1]) else False,
+                mf=True if int(_frag[2]) else False,
             ),
-            frag_offset = int(_frag[3:], base=2) * 8,
-            ttl = _ttol,
-            proto = _prot,
-            checksum = _csum,
-            src = _srca,
-            dst = _dsta,
+            frag_offset=int(_frag[3:], base=2) * 8,
+            ttl=_ttol,
+            proto=_prot,
+            checksum=_csum,
+            src=_srca,
+            dst=_dsta,
         )
 
         _optl = ipv4['hdr_len'] - 20
@@ -293,18 +294,20 @@ class IPv4(IP):
 
         Structure of option type field [RFC 791]:
 
-            Octets      Bits        Name                    Discriptions
+            Octets      Bits        Name                    Descriptions
               0           0     ip.opt.type.copy        Copied Flag (0/1)
               0           1     ip.opt.type.class       Option Class (0-3)
               0           3     ip.opt.type.number      Option Number
 
         """
         bin_ = bin(kind)[2:].zfill(8)
+
         type_ = {
-            'copy' : bool(int(bin_[0], base=2)),
-            'class' : opt_class.get(int(bin_[1:3], base=2)),
-            'number' : int(bin_[3:], base=2),
+            'copy': bool(int(bin_[0], base=2)),
+            'class': opt_class.get(int(bin_[1:3], base=2)),
+            'number': int(bin_[3:], base=2),
         }
+
         return type_
 
     def _read_ipv4_options(self, size=None):
@@ -343,17 +346,18 @@ class IPv4(IP):
                     data = process_opt[opts[2]](self, byte, kind)
                 else:       # permission options (length is 2)
                     data = dict(
-                        kind = kind,                        # option kind
-                        type = self._read_opt_type(kind),   # option type info
-                        length = 2,                         # option length
-                        flag = True,                        # permission flag
+                        kind=kind,                          # option kind
+                        type=self._read_opt_type(kind),     # option type info
+                        length=2,                           # option length
+                        flag=True,                          # permission flag
                     )
             else:           # 1-bytes options
                 byte = 1
+
                 data = dict(
-                    kind = kind,                        # option kind
-                    type = self._read_opt_type(kind),   # option type info
-                    length = 1,                         # option length
+                    kind=kind,                          # option kind
+                    type=self._read_opt_type(kind),     # option type info
+                    length=1,                           # option length
                 )
 
             # record option data
@@ -368,19 +372,20 @@ class IPv4(IP):
                 options[desc] = data
 
             # break when eol triggered
-            if not kind:    break
+            if not kind:
+                break
 
         # get padding
         if counter < size:
             len_ = size - counter
-            padding = self._read_binary(len_)
+            self._read_binary(len_)
 
         return tuple(optkind), options
 
     def _read_mode_donone(self, size, kind):
         """Read options request no process.
 
-        Positional arguemnts:
+        Positional arguments:
             * size - int, length of option
             * kind - int, option kind value
 
@@ -388,7 +393,7 @@ class IPv4(IP):
             * dict -- extracted option
 
         Structure of IPv4 options:
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.opt.kind             Kind
               0           0     ip.opt.type.copy        Copied Flag
               0           1     ip.opt.type.class       Option Class
@@ -401,17 +406,18 @@ class IPv4(IP):
             raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
 
         data = dict(
-            kind = kind,
-            type = self._read_opt_type(kind),
-            length = size,
-            data = self._read_fileng(size),
+            kind=kind,
+            type=self._read_opt_type(kind),
+            length=size,
+            data=self._read_fileng(size),
         )
+
         return data
 
     def _read_mode_unpack(self, size, kind):
         """Read options request unpack process.
 
-        Positional arguemnts:
+        Positional arguments:
             * size - int, length of option
             * kind - int, option kind value
 
@@ -419,7 +425,7 @@ class IPv4(IP):
             * dict -- extracted option
 
         Structure of IPv4 options:
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.opt.kind             Kind
               0           0     ip.opt.type.copy        Copied Flag
               0           1     ip.opt.type.class       Option Class
@@ -432,17 +438,18 @@ class IPv4(IP):
             raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
 
         data = dict(
-            kind = kind,
-            type = self._read_opt_type(kind),
-            length = size,
-            data = self._read_unpack(size),
+            kind=kind,
+            type=self._read_opt_type(kind),
+            length=size,
+            data=self._read_unpack(size),
         )
+
         return data
 
     def _read_mode_route(self, size, kind):
         """Read options with route data.
 
-        Positional arguemnts:
+        Positional arguments:
             * size - int, length of option
             * kind - int, 7/131/137 (RR/LSR/SSR)
 
@@ -463,7 +470,7 @@ class IPv4(IP):
                 |00000111| length | pointer|     route data    |
                 +--------+--------+--------+---------//--------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.opt.kind             Kind (7/131/137)
               0           0     ip.opt.type.copy        Copied Flag (0)
               0           1     ip.opt.type.class       Option Class (0/1)
@@ -482,10 +489,10 @@ class IPv4(IP):
             raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
 
         data = dict(
-            kind = kind,
-            type = self._read_opt_type(kind),
-            length = size,
-            pointer = _tptr,
+            kind=kind,
+            type=self._read_opt_type(kind),
+            length=size,
+            pointer=_rptr,
         )
 
         counter = 4
@@ -501,7 +508,7 @@ class IPv4(IP):
     def _read_mode_qs(self, size, kind):
         """Read Quick Start option.
 
-        Positional arguemnts:
+        Positional arguments:
             * size - int, length of option
             * kind - int, 25 (QS)
 
@@ -528,7 +535,7 @@ class IPv4(IP):
                 |                        QS Nonce                           | R |
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.qs.kind              Kind (25)
               0           0     ip.qs.type.copy         Copied Flag (0)
               0           1     ip.qs.type.class        Option Class (0)
@@ -556,13 +563,13 @@ class IPv4(IP):
             raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
 
         data = dict(
-            kind = kind,
-            type = _type,
-            length = size,
-            func = QS_FUNC.get(_func),
-            rate = 40000 * (2 ** _rate) / 1000,
-            ttl = None if func else _rate,
-            nounce = _qsnn,
+            kind=kind,
+            type=_type,
+            length=size,
+            func=QS_FUNC.get(_func),
+            rate=40000 * (2 ** _rate) / 1000,
+            ttl=None if _func else _rate,
+            nounce=_qsnn,
         )
 
         return data
@@ -570,7 +577,7 @@ class IPv4(IP):
     def _read_mode_ts(self, size, kind):
         """Read Time Stamp option.
 
-        Positional asrguemnts:
+        Positional arguments:
             * size - int, length of option
             * kind - int, 68 (TS)
 
@@ -589,7 +596,7 @@ class IPv4(IP):
                               .
                               .
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.ts.kind              Kind (25)
               0           0     ip.ts.type.copy         Copied Flag (0)
               0           1     ip.ts.type.class        Option Class (0)
@@ -608,18 +615,18 @@ class IPv4(IP):
         _tptr = self._read_unpack(1)
         _oflg = self._read_binary(1)
         _oflw = int(_oflg[:4], base=2)
-        _flag = int(_flag[4:], base=2)
+        _flag = int(_oflg[4:], base=2)
 
         if _tptr < 5:
             raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
 
         data = dict(
-            kind = kind,
-            type = self._read_opt_type(kind),
-            length = size,
-            pointer = _tptr,
-            overflow = _oflw,
-            flag = _flag,
+            kind=kind,
+            type=self._read_opt_type(kind),
+            length=size,
+            pointer=_tptr,
+            overflow=_oflw,
+            flag=_flag,
         )
 
         endpoint = min(_tptr, size)
@@ -631,7 +638,7 @@ class IPv4(IP):
             while counter < endpoint:
                 counter += 4
                 time = self._read_unpack(4, lilendian=True)
-                timestamp.appned(datetime.datetime.fromtimestamp(time))
+                timestamp.append(datetime.datetime.fromtimestamp(time))
             data['timestamp'] = timestamp or None
         elif _flag == 1 or _flag == 3:
             if (size - 4) % 8 != 0:
@@ -654,7 +661,7 @@ class IPv4(IP):
     def _read_mode_tr(self, size, kind):
         """Read Traceroute option.
 
-        Positional arguemnts:
+        Positional arguments:
             size - int, length of option
             kind - int, 82 (TR)
 
@@ -671,7 +678,7 @@ class IPv4(IP):
             |                     Originator IP Address                     |
             +---------------+---------------+---------------+---------------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.tr.kind              Kind (82)
               0           0     ip.tr.type.copy         Copied Flag (0)
               0           1     ip.tr.type.class        Option Class (0)
@@ -692,13 +699,13 @@ class IPv4(IP):
         _ipad = self._read_ipv4_addr()
 
         data = dict(
-            kind = kind,
-            type = self._read_opt_type(kind),
-            length = size,
-            id = _idnm,
-            ohc = _ohcn,
-            rhc = _rhcn,
-            ip = _ipad,
+            kind=kind,
+            type=self._read_opt_type(kind),
+            length=size,
+            id=_idnm,
+            ohc=_ohcn,
+            rhc=_rhcn,
+            ip=_ipad,
         )
 
         return data
@@ -706,7 +713,7 @@ class IPv4(IP):
     def _read_mode_sec(self, size, kind):
         """Read options with security info.
 
-        Positional arguemnts:
+        Positional arguments:
             size - int, length of option
             kind - int, 130 (SEC )/ 133 (ESEC)
 
@@ -730,7 +737,7 @@ class IPv4(IP):
                                            SECURITY INFO     SECURITY
                                             FORMAT CODE        INFO
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.sec.kind             Kind (130)
               0           0     ip.sec.type.copy        Copied Flag (1)
               0           1     ip.sec.type.class       Option Class (0)
@@ -746,10 +753,10 @@ class IPv4(IP):
         _clvl = self._read_unpack(1)
 
         data = dict(
-            kind = kind,
-            type = self._read_opt_type(kind),
-            length = size,
-            level = _CLASSIFICATION_LEVEL.get(_clvl, _clvl),
+            kind=kind,
+            type=self._read_opt_type(kind),
+            length=size,
+            level=_CLASSIFICATION_LEVEL.get(_clvl, _clvl),
         )
 
         if size > 3:
@@ -772,7 +779,7 @@ class IPv4(IP):
     def _read_mode_rsralt(self, size, kind):
         """Read Router Alert option.
 
-        Positional arguemnts:
+        Positional arguments:
             size - int, length of option
             kind - int, 148 (RTRALT)
 
@@ -784,7 +791,7 @@ class IPv4(IP):
             |10010100|00000100|  2 octet value  |
             +--------+--------+--------+--------+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ip.rsralt.kind          Kind (148)
               0           0     ip.rsralt.type.copy     Copied Flag (1)
               0           1     ip.rsralt.type.class    Option Class (0)
@@ -800,11 +807,11 @@ class IPv4(IP):
         _code = self._read_unpack(2)
 
         data = dict(
-            kind = kind,
-            type = self._read_opt_type(kind),
-            length = size,
-            alert = _ROUTER_ALERT.get(_code, 'Reserved'),
-            code = _code,
+            kind=kind,
+            type=self._read_opt_type(kind),
+            length=size,
+            alert=_ROUTER_ALERT.get(_code, 'Reserved'),
+            code=_code,
         )
 
         return data

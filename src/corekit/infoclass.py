@@ -12,7 +12,6 @@ import copy
 from pcapkit.utilities.exceptions import UnsupportedCall
 from pcapkit.utilities.validations import dict_check
 
-
 __all__ = ['Info']
 
 
@@ -20,7 +19,7 @@ class Info(collections.abc.Mapping):
     """Turn dictionaries into object-like instances.
 
     Methods:
-        * infotodict -- reverse Info object into dict type
+        * info2dict -- reverse Info object into dict type
 
     Notes:
         * Info objects inherit from `dict` type
@@ -71,7 +70,8 @@ class Info(collections.abc.Mapping):
         flag = False
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
-                flag = True;    continue
+                flag = True
+                continue
             temp.append(f'{key}={value!r}')
         args = ', '.join(temp)
         return f"Info({args}{', Info=(...)' if flag else ''})"
@@ -96,16 +96,16 @@ class Info(collections.abc.Mapping):
     def __delattr__(self, name):
         raise UnsupportedCall("can't delete attribute")
 
-    def infotodict(self):
+    def info2dict(self):
         dict_ = dict()
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
-                dict_[key] = value.infotodict()
+                dict_[key] = value.info2dict()
             elif isinstance(value, (tuple, list, set, frozenset, collections.abc.Sequence)):
                 temp = list()
                 for item in value:
                     if isinstance(item, Info):
-                        temp.append(item.infotodict())
+                        temp.append(item.info2dict())
                     else:
                         temp.append(item)
                 dict_[key] = value.__class__(temp)

@@ -44,7 +44,8 @@ from pcapkit._common.hip_hit_suite_id import HIT_SuiteID as _HIT_SUITE_ID
 from pcapkit._common.hip_mode_id import ModeID as _MODE_ID
 from pcapkit._common.hip_notification_type import MsgType as _NOTIFICATION_TYPE
 from pcapkit._common.hip_para import ParamType as _HIP_PARA
-from pcapkit._common.hip_reg_failure_type import RegFailType as _REG_FAILURE_TYPE
+from pcapkit._common.hip_reg_failure_type import \
+    RegFailType as _REG_FAILURE_TYPE
 from pcapkit._common.hip_reg_type import RegType as _REG_TYPE
 from pcapkit._common.hip_suite_id import SuiteID as _SUITE_ID
 from pcapkit._common.hip_tp_mode_id import TAT_ModeID as _TP_MODE_ID
@@ -54,24 +55,23 @@ from pcapkit.protocols.internet.internet import Internet
 from pcapkit.protocols.transport.transport import TP_PROTO
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
-
 __all__ = ['HIP']
 
 
-# HIP Parameter Process Functions
-_HIP_PROC = lambda dscp: eval(
-    f'lambda self, code, cbit, clen, *, desc, length, version: '
-    f'self._read_para_{dscp.name.split(" [")[0].lower()}(code, cbit, clen, desc=desc, length=length, version=version)'
-)
+def _HIP_PROC(dscp):
+    """HIP parameter process functions."""
+    return eval('lambda self, code, cbit, clen, *, desc, length, version: '
+                f'self._read_para_{dscp.name.split(" [")[0].lower()}(code, cbit, clen, '
+                'desc=desc, length=length, version=version)')
 
 
 class HIP(Internet):
     """This class implements Host Identity Protocol.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -108,7 +108,7 @@ class HIP(Internet):
 
     @property
     def alias(self):
-        """Acronym of corresponding procotol."""
+        """Acronym of corresponding protocol."""
         return f'HIPv{self._info.version}'
 
     @property
@@ -119,7 +119,7 @@ class HIP(Internet):
     @property
     def payload(self):
         """Payload of current instance."""
-        if self.extension:
+        if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
@@ -159,7 +159,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hip.next                Next Header
               1           8     hip.length              Header Length
               2          16     -                       Reserved (0)
@@ -191,16 +191,16 @@ class HIP(Internet):
         _rhit = self._read_unpack(16)
 
         hip = dict(
-            next = _next,
-            length = (_hlen + 1) * 8,
-            type = _HIP_TYPES.get(int(_type[1:], base=2), 'Unassigned'),
-            version = int(_vers[:4], base=2),
-            chksum = _csum,
-            control = dict(
-                anonymous = True if int(_ctrl[15], base=2) else False,
+            next=_next,
+            length=(_hlen + 1) * 8,
+            type=_HIP_TYPES.get(int(_type[1:], base=2), 'Unassigned'),
+            version=int(_vers[:4], base=2),
+            chksum=_csum,
+            control=dict(
+                anonymous=True if int(_ctrl[15], base=2) else False,
             ),
-            shit = _shit,
-            rhit = _rhit,
+            shit=_shit,
+            rhit=_rhit,
         )
 
         _prml = _hlen - 38
@@ -223,6 +223,7 @@ class HIP(Internet):
 
     def __init__(self, _file, length=None, *, extension=False, **kwargs):
         self._file = _file
+        self._extf = extension
         self._info = Info(self.read_hip(length, extension))
 
     def __length_hint__(self):
@@ -246,13 +247,14 @@ class HIP(Internet):
 
         """
         counter = 0         # length of read parameters
-        optkind = tuple()   # parameter type list
+        optkind = list()    # parameter type list
         options = dict()    # dict of parameter data
 
         while counter < length:
             # break when eol triggered
             kind = self._read_binary(2)
-            if not kind:    break
+            if not kind:
+                break
 
             # get parameter type & C-bit
             code = int(kind, base=2)
@@ -272,7 +274,7 @@ class HIP(Internet):
             #     desc = f'{dscp} (Reserved for Private Use)'
             # else:
             #     raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
-            data = _HIP_PROC(dscp)(self, code, cbit, clen, desc=desc, length=plen, version=version)
+            data = _HIP_PROC(dscp)(self, code, cbit, clen, desc=dscp, length=plen, version=version)
 
             # record parameter data
             counter += plen
@@ -306,7 +308,7 @@ class HIP(Internet):
             |                                               |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     para.type               Parameter Type
               1          15     para.critical           Critical Bit
               2          16     para.length             Length of Contents
@@ -315,15 +317,15 @@ class HIP(Internet):
 
         """
         unassigned = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            contents = self._read_fileng(clen),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            contents=self._read_fileng(clen),
         )
 
         plen = length - clen
         if plen:
-            padding = self._read_fileng(plen)
+            self._read_fileng(plen)
 
         return unassigned
 
@@ -343,7 +345,7 @@ class HIP(Internet):
             |                            NEW SPI                            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     esp_info.type           Parameter Type
               1          15     esp_info.critical       Critical Bit
               2          16     esp_info.length         Length of Contents
@@ -362,12 +364,12 @@ class HIP(Internet):
         _news = self._read_unpack(2)
 
         esp_info = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            index = _kind,
-            old_spi = _olds,
-            new_spi = _news,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            index=_kind,
+            old_spi=_olds,
+            new_spi=_news,
         )
 
         return esp_info
@@ -387,7 +389,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ri_counter.type         Parameter Type
               1          15     ri_counter.critical     Critical Bit
               2          16     ri_counter.length       Length of Contents
@@ -400,14 +402,14 @@ class HIP(Internet):
         if code == 128 and version != 1:
             raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
 
-        _resv = self._read_file(4)
+        _resv = self._read_fileng(4)
         _genc = self._read_unpack(8)
 
         r1_counter = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            count = _genc,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            count=_genc,
         )
 
         return r1_counter
@@ -443,14 +445,14 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     locator_set.type        Parameter Type
               1          15     locator_set.critical    Critical Bit
               2          16     locator_set.length      Length of Contents
               4          32     locator.traffic         Traffic Type
               5          40     locator.type            Locator Type
               6          48     locator.length          Locator Length
-              7          56     -                       Reseved
+              7          56     -                       Reserved
               7          63     locator.preferred       Preferred Locator
               8          64     locator.lifetime        Locator Lifetime
               12         96     locator.object          Locator
@@ -462,8 +464,8 @@ class HIP(Internet):
                 return ipaddress.ip_address(self._read_fileng(16))
             elif kind == 1 and size == 20:
                 return dict(
-                    spi = self._read_unpack(4),
-                    ip = ipaddress.ip_address(self._read_fileng(16)),
+                    spi=self._read_unpack(4),
+                    ip=ipaddress.ip_address(self._read_fileng(16)),
                 )
             else:
                 raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
@@ -480,19 +482,19 @@ class HIP(Internet):
             _lobj = _read_locator(_loct, _locl)
 
             _locs.append(Info(
-                traffic = _traf,
-                type = _loct,
-                length = _locl,
-                preferred = int(_resp[7], base=2),
-                lifetime = _life,
-                object = _lobj,
+                traffic=_traf,
+                type=_loct,
+                length=_locl,
+                preferred=int(_resp[7], base=2),
+                lifetime=_life,
+                object=_lobj,
             ))
 
         locator_set = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            locator = tuple(_locs),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            locator=tuple(_locs),
         )
 
         return locator_set
@@ -513,7 +515,7 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     puzzle.type             Parameter Type
               1          15     puzzle.critical         Critical Bit
               2          16     puzzle.length           Length of Contents
@@ -532,18 +534,18 @@ class HIP(Internet):
         _rand = self._read_unpack(clen-4)
 
         puzzle = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            number = _numk,
-            lifetime = 2 ** (_time - 32),
-            opaque = _opak,
-            random = _rand,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            number=_numk,
+            lifetime=2 ** (_time - 32),
+            opaque=_opak,
+            random=_rand,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return puzzle
 
@@ -566,7 +568,7 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     solution.type           Parameter Type
               1          15     solution.critical       Critical Bit
               2          16     solution.length         Length of Contents
@@ -589,19 +591,19 @@ class HIP(Internet):
         _solv = self._read_unpack((clen-4)//2)
 
         solution = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            number = _numk,
-            lifetime = 2 ** (_time - 32),
-            opaque = _opak,
-            random = _rand,
-            solution = _solv,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            number=_numk,
+            lifetime=2 ** (_time - 32),
+            opaque=_opak,
+            random=_rand,
+            solution=_solv,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return solution
 
@@ -617,7 +619,7 @@ class HIP(Internet):
             |                            Update ID                          |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     seq.type                Parameter Type
               1          15     seq.critical            Critical Bit
               2          16     seq.length              Length of Contents
@@ -630,10 +632,10 @@ class HIP(Internet):
         _upid = self._read_unpack(4)
 
         seq = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = _upid,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=_upid,
         )
 
         return seq
@@ -652,7 +654,7 @@ class HIP(Internet):
             /                       peer Update ID n                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ack.type                Parameter Type
               1          15     ack.critical            Critical Bit
               2          16     ack.length              Length of Contents
@@ -667,10 +669,10 @@ class HIP(Internet):
             _upid.append(self._read_unpack(4))
 
         ack = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = tuple(_upid),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=tuple(_upid),
         )
 
         return ack
@@ -689,7 +691,7 @@ class HIP(Internet):
             | DH GROUP ID #n|                Padding                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     dh_group_list.type      Parameter Type
               1          15     dh_group_list.critical  Critical Bit
               2          16     dh_group_list.length    Length of Contents
@@ -701,15 +703,15 @@ class HIP(Internet):
             _dhid.append(_GROUP_ID.get(self._read_unpack(1), 'Unassigned'))
 
         dh_group_list = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = tuple(_dhid),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=tuple(_dhid),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return dh_group_list
 
@@ -729,7 +731,7 @@ class HIP(Internet):
             /                               |            Padding            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     diffie_hellman.type     Parameter Type
               1          15     diffie_hellman.critical Critical Bit
               2          16     diffie_hellman.length   Length of Contents
@@ -744,17 +746,17 @@ class HIP(Internet):
         _pval = self._read_fileng(_vlen)
 
         diffie_hellman = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = _GROUP_ID.get(_gpid, 'Unassigned'),
-            pub_len = _vlen,
-            pub_val = _pval,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=_GROUP_ID.get(_gpid, 'Unassigned'),
+            pub_len=_vlen,
+            pub_val=_pval,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return diffie_hellman
 
@@ -772,7 +774,7 @@ class HIP(Internet):
             |            Suite ID #n        |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hip_transform.type      Parameter Type
               1          15     hip_transform.critical  Critical Bit
               2          16     hip_transform.length    Length of Contents
@@ -791,15 +793,15 @@ class HIP(Internet):
             _stid.append(_SUITE_ID.get(self._read_unpack(2), 'Unassigned'))
 
         hip_transform = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = _stid,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=_stid,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return hip_transform
 
@@ -817,7 +819,7 @@ class HIP(Internet):
             |          Cipher ID #n         |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hip_cipher.type         Parameter Type
               1          15     hip_cipher.critical     Critical Bit
               2          16     hip_cipher.length       Length of Contents
@@ -834,15 +836,15 @@ class HIP(Internet):
             _cpid.append(_CIPHER_ID.get(self._read_unpack(2), 'Unassigned'))
 
         hip_cipher = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = _cpid,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=_cpid,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return hip_cipher
 
@@ -862,7 +864,7 @@ class HIP(Internet):
             |           Mode ID #n          |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     nat_traversal_mode.type     Parameter Type
               1          15     nat_traversal_mode.critical Critical Bit
               2          16     nat_traversal_mode.length   Length of Contents
@@ -881,15 +883,15 @@ class HIP(Internet):
             _mdid.append(_MODE_ID.get(self._read_unpack(2), 'Unassigned'))
 
         nat_traversal_mode = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = _mdid,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=_mdid,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return nat_traversal_mode
 
@@ -905,7 +907,7 @@ class HIP(Internet):
             |                            Min Ta                             |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Discription
+            Octets      Bits        Name                        Description
               0           0     transaction_pacing.type     Parameter Type
               1          15     transaction_pacing.critical Critical Bit
               2          16     transaction_pacing.length   Length of Contents
@@ -918,10 +920,10 @@ class HIP(Internet):
         _data = self._read_unpack(4)
 
         transaction_pacing = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            min_ta = _data,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            min_ta=_data,
         )
 
         return transaction_pacing
@@ -947,7 +949,7 @@ class HIP(Internet):
             /                               |            Padding            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                Discription
+            Octets      Bits        Name                Description
               0           0     encrypted.type      Parameter Type
               1          15     encrypted.critical  Critical Bit
               2          16     encrypted.length    Length of Contents
@@ -962,15 +964,15 @@ class HIP(Internet):
         _data = self._read_fileng(clen-4)
 
         encrypted = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            raw = _data,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            raw=_data,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return encrypted
 
@@ -992,7 +994,7 @@ class HIP(Internet):
             /                                               |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                Discription
+            Octets      Bits        Name                Description
               0           0     host_id.type        Parameter Type
               1          15     host_id.critical    Critical Bit
               2          16     host_id.length      Length of Contents
@@ -1010,13 +1012,13 @@ class HIP(Internet):
             algorithm = _HI_ALGORITHM.get(code, 'Unassigned')
             if algorithm == 'ECDSA':
                 host_id = dict(
-                    curve = _ECDSA_CURVE.get(self._read_unpack(2)),
-                    pubkey = self._read_fileng(length-2),
+                    curve=_ECDSA_CURVE.get(self._read_unpack(2)),
+                    pubkey=self._read_fileng(length-2),
                 )
             elif algorithm == 'ECDSA_LOW':
                 host_id = dict(
-                    curve = _ECDSA_LOW_CURVE.get(self._read_unpack(2)),
-                    pubkey = self._read_fileng(length-2),
+                    curve=_ECDSA_LOW_CURVE.get(self._read_unpack(2)),
+                    pubkey=self._read_fileng(length-2),
                 )
             else:
                 host_id = self._read_fileng(length)
@@ -1035,20 +1037,20 @@ class HIP(Internet):
         _didf = _read_domain_identifier(_didt)
 
         host_id = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id_len = _hlen,
-            di_type = _didf[0],
-            di_len = _didf[1],
-            algorithm = _hidf[0],
-            host_id = _hidf[1],
-            domain_id = _didf[2],
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id_len=_hlen,
+            di_type=_didf[0],
+            di_len=_didf[1],
+            algorithm=_hidf[0],
+            host_id=_hidf[1],
+            domain_id=_didf[2],
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return host_id
 
@@ -1066,7 +1068,7 @@ class HIP(Internet):
             |     ID #n     |                Padding                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     hit_suite_list.type     Parameter Type
               1          15     hit_suite_list.critical Critical Bit
               2          16     hit_suite_list.length   Length of Contents
@@ -1080,15 +1082,15 @@ class HIP(Internet):
             _hsid.append(_HIT_SUITE_ID.get(self._read_unpack(1), 'Unassigned'))
 
         hit_suite_list = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = tuple(_hsid),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=tuple(_hsid),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return hit_suite_list
 
@@ -1108,7 +1110,7 @@ class HIP(Internet):
             /                               |   Padding (variable length)   |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                Discription
+            Octets      Bits        Name                Description
               0           0     cert.type           Parameter Type
               1          15     cert.critical       Critical Bit
               2          16     cert.length         Length of Contents
@@ -1127,19 +1129,19 @@ class HIP(Internet):
         _ctdt = self._read_fileng(clen-4)
 
         cert = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            group = _GROUP_ID.get(_ctgp, 'Unassigned'),
-            count = _ctct,
-            id = _ctid,
-            cert_type = _CERT_TYPE.get(_cttp, 'Unassigned'),
-            certificate = _ctdt,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            group=_GROUP_ID.get(_ctgp, 'Unassigned'),
+            count=_ctct,
+            id=_ctid,
+            cert_type=_CERT_TYPE.get(_cttp, 'Unassigned'),
+            certificate=_ctdt,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return cert
 
@@ -1160,7 +1162,7 @@ class HIP(Internet):
             /                                               |     Padding   |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     notification.type       Parameter Type
               1          15     notification.critical   Critical Bit
               2          16     notification.length     Length of Contents
@@ -1190,16 +1192,16 @@ class HIP(Internet):
                 raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
 
         notification = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            msg_type = _type,
-            data = _data,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            msg_type=_type,
+            data=_data,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return notification
 
@@ -1215,7 +1217,7 @@ class HIP(Internet):
             |                 Opaque data (variable length)                 |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     echo_request_signed.type        Parameter Type
               1          15     echo_request_signed.critical    Critical Bit
               2          16     echo_request_signed.length      Length of Contents
@@ -1225,15 +1227,15 @@ class HIP(Internet):
         _data = self._read_fileng(clen)
 
         echo_request_signed = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            data = _data,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            data=_data,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return echo_request_signed
 
@@ -1253,7 +1255,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     reg_info.type           Parameter Type
               1          15     reg_info.critical       Critical Bit
               2          16     reg_info.length         Length of Contents
@@ -1282,16 +1284,16 @@ class HIP(Internet):
             _type.append(_kind)
 
         reg_info = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            lifetime = _life(_mint, _maxt),
-            reg_type = tuple(_type),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            lifetime=_life(_mint, _maxt),
+            reg_type=tuple(_type),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return reg_info
 
@@ -1311,7 +1313,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     reg_request.type            Parameter Type
               1          15     reg_request.critical        Critical Bit
               2          16     reg_request.length          Length of Contents
@@ -1340,16 +1342,16 @@ class HIP(Internet):
             _type.append(_kind)
 
         reg_request = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            lifetime = _life(_mint, _maxt),
-            reg_type = tuple(_type),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            lifetime=_life(_mint, _maxt),
+            reg_type=tuple(_type),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return reg_request
 
@@ -1369,7 +1371,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     reg_response.type           Parameter Type
               1          15     reg_response.critical       Critical Bit
               2          16     reg_response.length         Length of Contents
@@ -1398,16 +1400,16 @@ class HIP(Internet):
             _type.append(_kind)
 
         reg_response = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            lifetime = _life(_mint, _maxt),
-            reg_type = tuple(_type),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            lifetime=_life(_mint, _maxt),
+            reg_type=tuple(_type),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return reg_response
 
@@ -1427,7 +1429,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     reg_failed.type             Parameter Type
               1          15     reg_failed.critical         Critical Bit
               2          16     reg_failed.length           Length of Contents
@@ -1456,16 +1458,16 @@ class HIP(Internet):
             _type.append(_kind)
 
         reg_failed = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            lifetime = _life(_mint, _maxt),
-            reg_type = tuple(_type),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            lifetime=_life(_mint, _maxt),
+            reg_type=tuple(_type),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return reg_failed
 
@@ -1486,7 +1488,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     reg_from.type               Parameter Type
               1          15     reg_from.critical           Critical Bit
               2          16     reg_from.length             Length of Contents
@@ -1505,12 +1507,12 @@ class HIP(Internet):
         _addr = self._read_fileng(16)
 
         reg_from = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            port = _port,
-            protocol = TP_PROTO.get(_ptcl),
-            ip = ipaddress.ip_address(_addr),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            port=_port,
+            protocol=TP_PROTO.get(_ptcl),
+            ip=ipaddress.ip_address(_addr),
         )
 
         return reg_from
@@ -1527,7 +1529,7 @@ class HIP(Internet):
             |                 Opaque data (variable length)                 |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     echo_response_signed.type       Parameter Type
               1          15     echo_response_signed.critical   Critical Bit
               2          16     echo_response_signed.length     Length of Contents
@@ -1537,15 +1539,15 @@ class HIP(Internet):
         _data = self._read_fileng(clen)
 
         echo_response_signed = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            data = _data,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            data=_data,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return echo_response_signed
 
@@ -1563,7 +1565,7 @@ class HIP(Internet):
             /          TF type #n           |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     transport_format_list.type      Parameter Type
               1          15     transport_format_list.critical  Critical Bit
               2          16     transport_format_list.length    Length of Contents
@@ -1580,15 +1582,15 @@ class HIP(Internet):
             _tfid.append(self._read_unpack(2))
 
         transport_format_list = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            tf_type = tuple(_tfid),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            tf_type=tuple(_tfid),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return transport_format_list
 
@@ -1608,7 +1610,7 @@ class HIP(Internet):
             |          Suite ID #n          |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     esp_transform.type              Parameter Type
               1          15     esp_transform.critical          Critical Bit
               2          16     esp_transform.length            Length of Contents
@@ -1627,15 +1629,15 @@ class HIP(Internet):
             _stid.append(_ESP_SUITE_ID.get(self._read_unpack(2), 'Unassigned'))
 
         esp_transform = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = tuple(_stid),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=tuple(_stid),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return esp_transform
 
@@ -1651,7 +1653,7 @@ class HIP(Internet):
             |                        Sequence number                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     seq_data.type                   Parameter Type
               1          15     seq_data.critical               Critical Bit
               2          16     seq_data.length                 Length of Contents
@@ -1664,10 +1666,10 @@ class HIP(Internet):
         _seqn = self._read_unpack(4)
 
         seq_data = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            seq = _seqn,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            seq=_seqn,
         )
 
         return seq_data
@@ -1685,7 +1687,7 @@ class HIP(Internet):
             /                                                               /
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     ack_data.type                   Parameter Type
               1          15     ack_data.critical               Critical Bit
               2          16     ack_data.length                 Length of Contents
@@ -1700,10 +1702,10 @@ class HIP(Internet):
             _ackn.append(self._read_unpack(4))
 
         ack_data = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            ack = tuple(_ackn),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            ack=tuple(_ackn),
         )
 
         return ack_data
@@ -1727,7 +1729,7 @@ class HIP(Internet):
             |                                               |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     payload_mic.type                Parameter Type
               1          15     payload_mic.critical            Critical Bit
               2          16     payload_mic.length              Length of Contents
@@ -1744,17 +1746,17 @@ class HIP(Internet):
         _micv = self._read_fileng(clen-8)
 
         payload_mic = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            next = TP_PROTO.get(_next),
-            data = _data,
-            value = _micv,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            next=TP_PROTO.get(_next),
+            data=_data,
+            value=_micv,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return payload_mic
 
@@ -1772,7 +1774,7 @@ class HIP(Internet):
             /                                               |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     transaction_id.type             Parameter Type
               1          15     transaction_id.critical         Critical Bit
               2          16     transaction_id.length           Length of Contents
@@ -1782,15 +1784,15 @@ class HIP(Internet):
         _tsid = self._read_unpack(clen)
 
         transaction_id = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = _tsid,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=_tsid,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return transaction_id
 
@@ -1808,7 +1810,7 @@ class HIP(Internet):
             /                                               |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     overlay_id.type                 Parameter Type
               1          15     overlay_id.critical             Critical Bit
               2          16     overlay_id.length               Length of Contents
@@ -1818,15 +1820,15 @@ class HIP(Internet):
         _olid = self._read_unpack(clen)
 
         overlay_id = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            id = _olid,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            id=_olid,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return overlay_id
 
@@ -1855,7 +1857,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     route_dst.type                  Parameter Type
               1          15     route_dst.critical              Critical Bit
               2          16     route_dst.length                Length of Contents
@@ -1877,14 +1879,14 @@ class HIP(Internet):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))
 
         route_dst = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            flags = dict(
-                symmetric = True if int(_flag[0], base=2) else False,
-                must_follow = True if int(_flag[1], base=2) else False,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            flags=dict(
+                symmetric=True if int(_flag[0], base=2) else False,
+                must_follow=True if int(_flag[1], base=2) else False,
             ),
-            ip = tuple(_addr),
+            ip=tuple(_addr),
         )
 
         return route_dst
@@ -1905,7 +1907,7 @@ class HIP(Internet):
             |          Mode ID #n           |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     hip_transport_mode.type         Parameter Type
               1          15     hip_transport_mode.critical     Critical Bit
               2          16     hip_transport_mode.length       Length of Contents
@@ -1924,16 +1926,16 @@ class HIP(Internet):
             _mdid.append(_TP_MODE_ID.get(self._read_unpack(2), 'Unassigned'))
 
         hip_transport_mode = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            port = _port,
-            id = tuple(_mdid),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            port=_port,
+            id=tuple(_mdid),
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return hip_transport_mode
 
@@ -1953,7 +1955,7 @@ class HIP(Internet):
             |                               |            Padding            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     hip_mac.type                    Parameter Type
               1          15     hip_mac.critical                Critical Bit
               2          16     hip_mac.length                  Length of Contents
@@ -1964,15 +1966,15 @@ class HIP(Internet):
         _hmac = self._read_fileng(clen)
 
         hip_mac = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            hmac = _hmac,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            hmac=_hmac,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return hip_mac
 
@@ -1992,7 +1994,7 @@ class HIP(Internet):
             |                               |            Padding            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     hip_mac_2.type                  Parameter Type
               1          15     hip_mac_2.critical              Critical Bit
               2          16     hip_mac_2.length                Length of Contents
@@ -2003,15 +2005,15 @@ class HIP(Internet):
         _hmac = self._read_fileng(clen)
 
         hip_mac_2 = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            hmac = _hmac,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            hmac=_hmac,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return hip_mac_2
 
@@ -2029,7 +2031,7 @@ class HIP(Internet):
             /                               |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     hip_signature_2.type            Parameter Type
               1          15     hip_signature_2.critical        Critical Bit
               2          16     hip_signature_2.length          Length of Contents
@@ -2042,16 +2044,16 @@ class HIP(Internet):
         _sign = self._read_fileng(clen-2)
 
         hip_signature_2 = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            algorithm = _HI_ALGORITHM.get(_algo, 'Unassigned'),
-            signature = _sign,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            algorithm=_HI_ALGORITHM.get(_algo, 'Unassigned'),
+            signature=_sign,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return hip_signature_2
 
@@ -2069,7 +2071,7 @@ class HIP(Internet):
             /                               |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     hip_signature.type              Parameter Type
               1          15     hip_signature.critical          Critical Bit
               2          16     hip_signature.length            Length of Contents
@@ -2082,16 +2084,16 @@ class HIP(Internet):
         _sign = self._read_fileng(clen-2)
 
         hip_signature = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            algorithm = _HI_ALGORITHM.get(_algo, 'Unassigned'),
-            signature = _sign,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            algorithm=_HI_ALGORITHM.get(_algo, 'Unassigned'),
+            signature=_sign,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return hip_signature
 
@@ -2107,7 +2109,7 @@ class HIP(Internet):
             |                 Opaque data (variable length)                 |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     echo_request_unsigned.type      Parameter Type
               1          15     echo_request_unsigned.critical  Critical Bit
               2          16     echo_request_unsigned.length    Length of Contents
@@ -2117,15 +2119,15 @@ class HIP(Internet):
         _data = self._read_fileng(clen)
 
         echo_request_unsigned = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            data = _data,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            data=_data,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return echo_request_unsigned
 
@@ -2141,7 +2143,7 @@ class HIP(Internet):
             |                 Opaque data (variable length)                 |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     echo_response_unsigned.type     Parameter Type
               1          15     echo_response_unsigned.critical Critical Bit
               2          16     echo_response_unsigned.length   Length of Contents
@@ -2151,15 +2153,15 @@ class HIP(Internet):
         _data = self._read_fileng(clen)
 
         echo_response_unsigned = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            data = _data,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            data=_data,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return echo_response_unsigned
 
@@ -2180,7 +2182,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     relay_from.type             Parameter Type
               1          15     relay_from.critical         Critical Bit
               2          16     relay_from.length           Length of Contents
@@ -2199,12 +2201,12 @@ class HIP(Internet):
         _addr = self._read_fileng(16)
 
         relay_from = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            port = _port,
-            protocol = TP_PROTO.get(_ptcl),
-            ip = ipaddress.ip_address(_addr),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            port=_port,
+            protocol=TP_PROTO.get(_ptcl),
+            ip=ipaddress.ip_address(_addr),
         )
 
         return relay_from
@@ -2226,7 +2228,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     relay_to.type               Parameter Type
               1          15     relay_to.critical           Critical Bit
               2          16     relay_to.length             Length of Contents
@@ -2245,12 +2247,12 @@ class HIP(Internet):
         _addr = self._read_fileng(16)
 
         relay_to = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            port = _port,
-            protocol = TP_PROTO.get(_ptcl),
-            ip = ipaddress.ip_address(_addr),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            port=_port,
+            protocol=TP_PROTO.get(_ptcl),
+            ip=ipaddress.ip_address(_addr),
         )
 
         return relay_to
@@ -2267,7 +2269,7 @@ class HIP(Internet):
             |             TTL               |            Reserved           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     overlay_ttl.type                Parameter Type
               1          15     overlay_ttl.critical            Critical Bit
               2          16     overlay_ttl.length              Length of Contents
@@ -2281,10 +2283,10 @@ class HIP(Internet):
         _ttln = self._read_unpack(2)
 
         overlay_ttl = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            ttl = _ttln,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            ttl=_ttln,
         )
 
         return overlay_ttl
@@ -2314,7 +2316,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     route_via.type                  Parameter Type
               1          15     route_via.critical              Critical Bit
               2          16     route_via.length                Length of Contents
@@ -2336,14 +2338,14 @@ class HIP(Internet):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))
 
         route_via = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            flags = dict(
-                symmetric = True if int(_flag[0], base=2) else False,
-                must_follow = True if int(_flag[1], base=2) else False,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            flags=dict(
+                symmetric=True if int(_flag[0], base=2) else False,
+                must_follow=True if int(_flag[1], base=2) else False,
             ),
-            ip = tuple(_addr),
+            ip=tuple(_addr),
         )
 
         return route_via
@@ -2363,7 +2365,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     from.type                       Parameter Type
               1          15     from.critical                   Critical Bit
               2          16     from.length                     Length of Contents
@@ -2376,10 +2378,10 @@ class HIP(Internet):
         _addr = self._read_fileng(16)
 
         from_ = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            ip = ipaddress.ip_address(_addr),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            ip=ipaddress.ip_address(_addr),
         )
 
         return from_
@@ -2398,7 +2400,7 @@ class HIP(Internet):
             |                               |            Padding            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     rvs_hmac.type                   Parameter Type
               1          15     rvs_hmac.critical               Critical Bit
               2          16     rvs_hmac.length                 Length of Contents
@@ -2409,15 +2411,15 @@ class HIP(Internet):
         _hmac = self._read_fileng(clen)
 
         rvs_hmac = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            hmac = _hmac,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            hmac=_hmac,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return rvs_hmac
 
@@ -2444,7 +2446,7 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     via_rvs.type                    Parameter Type
               1          15     via_rvs.critical                Critical Bit
               2          16     via_rvs.length                  Length of Contents
@@ -2460,10 +2462,10 @@ class HIP(Internet):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))
 
         via_rvs = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            ip = tuple(_addr),
+            type=desc,
+            critical=cbit,
+            length=clen,
+            ip=tuple(_addr),
         )
 
         return via_rvs
@@ -2482,7 +2484,7 @@ class HIP(Internet):
             |                               |            Padding            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Discription
+            Octets      Bits        Name                            Description
               0           0     relay_hmac.type                 Parameter Type
               1          15     relay_hmac.critical             Critical Bit
               2          16     relay_hmac.length               Length of Contents
@@ -2493,14 +2495,14 @@ class HIP(Internet):
         _hmac = self._read_fileng(clen)
 
         relay_hmac = dict(
-            type = desc,
-            critical = cbit,
-            length = clen,
-            hmac = _hmac,
+            type=desc,
+            critical=cbit,
+            length=clen,
+            hmac=_hmac,
         )
 
         _plen = length - clen
         if _plen:
-            padding = self._read_fileng(_plen)
+            self._read_fileng(_plen)
 
         return relay_hmac

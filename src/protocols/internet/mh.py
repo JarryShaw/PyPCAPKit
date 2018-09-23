@@ -18,13 +18,12 @@ whose structure is described as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-# TODO: Implements extractor for message data of all MH types.
 from pcapkit._common.mh_mobility_type import PktType as _MOBILITY_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
-
+# TODO: Implements extractor for message data of all MH types.
 __all__ = ['MH']
 
 
@@ -32,9 +31,9 @@ class MH(Internet):
     """This class implements Mobility Header.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -104,7 +103,7 @@ class MH(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     mh.next                 Next Header
               1           8     mh.length               Header Length
               2          16     mh.type                 Mobility Header Type
@@ -124,10 +123,10 @@ class MH(Internet):
         # _data = self._read_fileng((_hlen+1)*8)
 
         mh = dict(
-            next = _next,
-            length = (_hlen + 1) * 8,
-            type = _MOBILITY_TYPE.get(_type, 'Unassigned'),
-            chksum = _csum,
+            next=_next,
+            length=(_hlen + 1) * 8,
+            type=_MOBILITY_TYPE.get(_type, 'Unassigned'),
+            chksum=_csum,
         )
 
         length -= mh['length']

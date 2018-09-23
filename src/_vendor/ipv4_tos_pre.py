@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 import collections
 import os
-
 
 ###############
 # Defaults
@@ -12,7 +10,8 @@ import os
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
 # -*- coding: utf-8 -*-
 
 
@@ -54,14 +53,14 @@ NAME = 'Precedence'
 DOCS = 'TOS (DS Field) Precedence'
 FLAG = 'isinstance(value, int) and 0b000 <= value <= 0b111'
 DATA = {
-    0b111 : 'Network Control',
-    0b110 : 'Internetwork Control',
-    0b101 : 'CRITIC/ECP',
-    0b100 : 'Flash Override',
-    0b011 : 'Flash',
-    0b010 : 'Immediate',
-    0b001 : 'Priority',
-    0b000 : 'Routine',
+    0b111: 'Network Control',
+    0b110: 'Internetwork Control',
+    0b101: 'CRITIC/ECP',
+    0b100: 'Flash Override',
+    0b011: 'Flash',
+    0b010: 'Immediate',
+    0b001: 'Priority',
+    0b000: 'Routine',
 }
 
 
@@ -72,10 +71,12 @@ DATA = {
 
 record = collections.Counter(DATA.values())
 
+
 def rename(name, code):
     if record[name] > 1:
         name = f'{name} [{code}]'
     return name
+
 
 enum = list()
 miss = [

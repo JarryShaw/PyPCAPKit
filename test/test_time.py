@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 import statistics
 import time
 
 import pcapkit
-
 
 for engine in {'default', 'pyshark', 'scapy', 'dpkt', 'pipline', 'server'}:
     lid = list()

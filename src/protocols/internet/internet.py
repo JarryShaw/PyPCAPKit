@@ -14,7 +14,6 @@ from pcapkit.protocols.protocol import Protocol
 from pcapkit.protocols.transport.transport import TP_PROTO
 from pcapkit.utilities.decorators import beholder
 
-
 __all__ = ['Internet', 'ETHERTYPE']
 
 
@@ -22,9 +21,9 @@ class Internet(Protocol):
     """Abstract base class for internet layer protocol family.
 
     Properties:
-        * name -- str, name of corresponding procotol
+        * name -- str, name of corresponding protocol
         * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
+        * alias -- str, acronym of corresponding protocol
         * layer -- str, `Internet`
         * length -- int, header length of corresponding protocol
         * protocol -- str, name of next layer protocol
@@ -96,7 +95,7 @@ class Internet(Protocol):
             next_ = beholder(self._import_next_layer)(self, proto, length, version=version)
         else:
             next_ = self._import_next_layer(proto, length, version=version)
-        info, chain, alias = next_.info, next_.protochain, next_.alias
+        info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
         layer = next_.alias.lower()
@@ -166,7 +165,6 @@ class Internet(Protocol):
             from pcapkit.protocols.transport.udp import UDP as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol
-        next_ = Protocol(self._file, length,
-                            version=version, extension=extension,
-                            error=self._onerror, layer=self._exlayer, protocol=self._exproto)
+        next_ = Protocol(self._file, length, version=version, extension=extension,
+                         error=self._onerror, layer=self._exlayer, protocol=self._exproto)
         return next_

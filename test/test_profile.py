@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
-
 import cProfile
 import pstats
 
 import pcapkit
 
 
-for engine in {'default', 'pyshark', 'scapy', 'dpkt', 'pipline', 'server'}:
-    test = lambda : pcapkit.extract(fin='../sample/in.pcap', store=False, nofile=True, engine=engine)
+def test():
+    return pcapkit.extract(fin='../sample/in.pcap',
+                           store=False, nofile=True, engine=engine)
 
+
+for engine in {'default', 'pyshark', 'scapy', 'dpkt', 'pipline', 'server'}:
     profiler = cProfile.Profile()
     profiler.runcall(test)
 

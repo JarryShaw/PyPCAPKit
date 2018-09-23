@@ -22,11 +22,10 @@ which implements extractor for Open Shortest Path First
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-from pcapkit._common.ospf_type import PktType as TYPE
 from pcapkit._common.ospf_auth import AuthType as AUTH
+from pcapkit._common.ospf_type import PktType as TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
-
 
 __all__ = ['OSPF']
 
@@ -113,7 +112,7 @@ class OSPF(Link):
            |                       Authentication                          |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     ospf.version            Version #
               1           8     ospf.type               Type (0/1)
               2          16     ospf.len                Packet Length (header includes)
@@ -136,13 +135,13 @@ class OSPF(Link):
         _autp = self._read_unpack(2)
 
         ospf = dict(
-            version = _vers,
-            type = TYPE.get(_type),
-            len = _tlen,
-            router_id = _rtid,
-            area_id = _area,
-            chksum = _csum,
-            autype = AUTH.get(_autp) or 'Reserved',
+            version=_vers,
+            type=TYPE.get(_type),
+            len=_tlen,
+            router_id=_rtid,
+            area_id=_area,
+            chksum=_csum,
+            autype=AUTH.get(_autp) or 'Reserved',
         )
 
         if _autp == 2:
@@ -189,7 +188,7 @@ class OSPF(Link):
             |                 Cryptographic sequence number                 |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Discription
+            Octets      Bits        Name                    Description
               0           0     -                       Reserved (must be zero)
               2          16     ospf.auth.key_id        Key ID
               3          24     ospf.auth.len           Auth Data Length
@@ -202,9 +201,9 @@ class OSPF(Link):
         _seqn = self._read_unpack(4)
 
         auth = dict(
-            key_id = _keys,
-            len = _alen,
-            seq = _seqn,
+            key_id=_keys,
+            len=_alen,
+            seq=_seqn,
         )
 
         return auth

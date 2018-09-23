@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
 import pcapkit
-
 
 for frame in pcapkit.extract(fin='../sample/http.pcap', nofile=True, auto=False):
     # check if this frame contains HTTP

@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 import os
 import re
 
 import bs4
 import requests
-
 
 ###############
 # Defaults
@@ -15,7 +13,8 @@ import requests
 
 ROOT, FILE = os.path.split(os.path.abspath(__file__))
 
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
 # -*- coding: utf-8 -*-
 
 

@@ -6,24 +6,24 @@ collection class `ProtoChain`.
 
 """
 import collections.abc
+import contextlib
 import numbers
 import re
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.utilities.exceptions import IndexNotFound, ProtocolUnbound, IntError
+from pcapkit.utilities.exceptions import (IndexNotFound, IntError,
+                                          ProtocolUnbound)
 from pcapkit.utilities.validations import int_check, str_check
-
 
 ###############################################################################
 # from pcapkit.protocols.protocol import Protocol
 ###############################################################################
 
-
 __all__ = ['ProtoChain']
 
 
 class _ProtoList(collections.abc.Collection):
-    """List of protocol classes for ProroChain."""
+    """List of protocol classes for ProtoChain."""
     @property
     def data(self):
         return self.__data__
@@ -55,14 +55,13 @@ class _ProtoList(collections.abc.Collection):
         if flag or isinstance(x, Protocol):
             return (x in self.__data__)
 
-        try:
+        with contextlib.suppress(Exception):
             for data in self.__data__:
-                index = self.__data__.__index__()
+                index = data.__index__()
                 if isinstance(index, tuple):
                     index = r'|'.join(index)
                 if re.fullmatch(index, x, re.IGNORECASE):
                     return True
-        except: pass
         return False
 
 
@@ -107,11 +106,10 @@ class _AliasList(collections.abc.Sequence):
             if isinstance(x, tuple):
                 x = r'|'.join(x)
 
-        try:
+        with contextlib.suppress(Exception):
             for data in self.__data__:
                 if re.fullmatch(x, data, re.IGNORECASE):
                     return True
-        except: pass
         return False
 
     def count(self, value):
@@ -126,9 +124,8 @@ class _AliasList(collections.abc.Sequence):
             if isinstance(value, tuple):
                 value = r'|'.join(value)
 
-        try:
+        with contextlib.suppress(Exception):
             return sum(1 for data in self.__data__ if re.fullmatch(value, data, re.IGNORECASE) is not None)
-        except: pass
         return 0
         # return self.__data__.count(value)
 
@@ -166,7 +163,7 @@ class _AliasList(collections.abc.Sequence):
             for index, data in enumerate(self.__data__[start:stop]):
                 if re.fullmatch(value, data, re.IGNORECASE):
                     return index
-        except:
+        except Exception:
             raise IndexNotFound(f'{value!r} is not in {self.__class__.__name__!r}')
         # return self.__data__.index(value, start, stop)
 
@@ -184,7 +181,7 @@ class ProtoChain(collections.abc.Container):
         * index -- same as `index` function of `tuple` type
 
     Attributes:
-        * __alias__ -- list, aliase of protocols in chain
+        * __alias__ -- list, alias of protocols in chain
         * __proto__ -- list, name of protocols in chain
 
     """
@@ -215,7 +212,7 @@ class ProtoChain(collections.abc.Container):
     def index(self, value, start=None, stop=None):
         """Return first index of value."""
         return self.__alias__.index(value, start, stop)
-        
+
     def count(self, value):
         """Return number of occurrences of value."""
         return self.__alias__.count(value)
