@@ -599,7 +599,7 @@ class Extractor:
 
             # shutdown & cleanup
             self._mpmng.shutdown()
-            [delattr(attr) for attr in filter(lambda s: s.startswith('_mp'), dir(self))]
+            [delattr(self, attr) for attr in filter(lambda s: s.startswith('_mp'), dir(self))]
             self._frnum -= 2
             # map(lambda attr: delattr(self, attr), filter(lambda attr: re.match('^_mp.*', attr), dir(self)))
 

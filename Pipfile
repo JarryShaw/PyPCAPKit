@@ -12,6 +12,7 @@ dictdumper = "*"
 emoji = "*"
 
 [dev-packages]
+pypcapkit = {path = ".", editable = true}
 pyshark = "*"
 dpkt = "*"
 scapy = "*"
@@ -22,6 +23,7 @@ rope = "*"
 lxml = "*"
 pycodestyle = "*"
 pylint = "*"
+ipython = "*"
 
 [requires]
 python_version = "3.7"

@@ -193,7 +193,6 @@ class UnsupportedCall(BaseError, AttributeError):
 
 class FileError(BaseError, IOError):
     """[Errno 5] Wrong file format."""
-
     def __init__(self, errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
         super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
@@ -205,7 +204,6 @@ class FileError(BaseError, IOError):
 
 class FileExists(BaseError, FileExistsError):
     """[Errno 17] File already exists."""
-
     def __init__(self, errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
         super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
 
