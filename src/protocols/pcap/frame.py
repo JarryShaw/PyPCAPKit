@@ -288,5 +288,5 @@ class Frame(Protocol):
         else:
             from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(self._file, length, error=error,
-                         layer=self._exlayer, protocol=self._exproto)
+                         layer=self._exlayer, protocol=self._exproto)  # pylint: disable=E1101
         return next_

@@ -70,7 +70,7 @@ class AH(IPsec):
     @property
     def length(self):
         """Info dict of current instance."""
-        return self._info.length
+        return self._info.length  # pylint: disable=E1101
 
     @property
     def payload(self):
@@ -82,7 +82,7 @@ class AH(IPsec):
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.next
+        return self._info.next  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

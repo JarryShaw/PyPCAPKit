@@ -6,7 +6,8 @@ only, which is a base class for Hypertext Transfer
 Protocol (HTTP) protocol family, eg. HTTP/1.*, HTTP/2.
 
 """
-import chardet
+import abc
+
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
@@ -74,3 +75,11 @@ class HTTP(Application):
     @classmethod
     def __index__(cls):
         return ('HTTPv1', 'HTTPv2')
+
+    ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @abc.abstractmethod
+    def read_http(self, length):
+        pass

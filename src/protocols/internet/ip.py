@@ -55,13 +55,13 @@ class IP(Internet):
     @property
     def src(self):
         """Source IP address."""
-        return self._info.src
+        return self._info.src  # pylint: disable=E1101
 
     # destination IP address
     @property
     def dst(self):
         """Destination IP address."""
-        return self._info.dst
+        return self._info.dst  # pylint: disable=E1101
 
     ##########################################################################
     # Data models.

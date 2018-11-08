@@ -74,7 +74,7 @@ class Header(Protocol):
     @property
     def version(self):
         """Version infomation of input PCAP file."""
-        return VersionInfo(self._info.version_major, self._info.version_minor)
+        return VersionInfo(self._info.version_major, self._info.version_minor)  # pylint: disable=E1101
 
     @property
     def payload(self):
@@ -84,7 +84,7 @@ class Header(Protocol):
     @property
     def protocol(self):
         """Data link type."""
-        return self._info.network
+        return self._info.network  # pylint: disable=E1101
 
     @property
     def protochain(self):

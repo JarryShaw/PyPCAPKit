@@ -20,6 +20,7 @@ import struct
 import textwrap
 
 import aenum
+
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import ProtocolNotImplemented, StructError
 from pcapkit.utilities.validations import dict_check

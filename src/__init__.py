@@ -54,7 +54,7 @@ different sections.
 
 """
 # All Reference
-import pcapkit.__all__ as all
+import pcapkit.__all__ as all  # pylint: disable
 
 # Interface
 from pcapkit.interface import *

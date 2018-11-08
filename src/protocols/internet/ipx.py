@@ -74,17 +74,17 @@ class IPX(Internet):
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.type
+        return self._info.type  # pylint: disable=E1101
 
     @property
     def src(self):
         """Source IPX address."""
-        return self._info.src.addr
+        return self._info.src.addr  # pylint: disable=E1101
 
     @property
     def dst(self):
         """Destination IPX address."""
-        return self._info.dst.addr
+        return self._info.dst.addr  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

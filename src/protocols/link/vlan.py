@@ -74,7 +74,7 @@ class VLAN(Link):
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.type
+        return self._info.type  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

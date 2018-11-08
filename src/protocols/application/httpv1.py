@@ -7,14 +7,14 @@ below.
 
 METHOD URL HTTP/VERSION\r\n :==: REQUEST LINE
 <key> : <value>\r\n         :==: REQUEST HEADER
-............  (Elipsis)     :==: REQUEST HEADER
-\r\n                        :==: REQUEST SEPERATOR
+............  (Ellipsis)    :==: REQUEST HEADER
+\r\n                        :==: REQUEST SEPARATOR
 <body>                      :==: REQUEST BODY (optional)
 
 HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
 <key> : <value>\r\n         :==: RESPONSE HEADER
-............  (Elipsis)     :==: RESPONSE HEADER
-\r\n                        :==: RESPONSE SEPERATOR
+............  (Ellipsis)    :==: RESPONSE HEADER
+\r\n                        :==: RESPONSE SEPARATOR
 <body>                      :==: RESPONSE BODY (optional)
 
 """
@@ -67,7 +67,7 @@ class HTTPv1(HTTP):
     @property
     def alias(self):
         """Acronym of current protocol."""
-        return f'HTTP/{self._info.header[self.__receipt__].version}'
+        return f'HTTP/{self._info.header[self.__receipt__].version}'  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

@@ -71,12 +71,12 @@ class OSPF(Link):
     @property
     def name(self):
         """Name of current protocol."""
-        return f'Open Shortest Path First version {self._info.version}'
+        return f'Open Shortest Path First version {self._info.version}'  # pylint: disable=E1101
 
     @property
     def alias(self):
         """Acronym of current protocol."""
-        return f'OSPFv{self._info.version}'
+        return f'OSPFv{self._info.version}'  # pylint: disable=E1101
 
     @property
     def length(self):
@@ -86,7 +86,7 @@ class OSPF(Link):
     @property
     def type(self):
         """OSPF packet type."""
-        return self._info.type
+        return self._info.type  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

@@ -92,22 +92,22 @@ class ARP(Link):
     @property
     def length(self):
         """Header length of current protocol."""
-        return self._info.len
+        return self._info.len  # pylint: disable=E1101
 
     @property
     def src(self):
         """Sender hardware & protocol address."""
-        return (self._info.sha, self._info.spa)
+        return (self._info.sha, self._info.spa)  # pylint: disable=E1101
 
     @property
     def dst(self):
         """Target hardware & protocol address."""
-        return (self._info.tha, self._info.tpa)
+        return (self._info.tha, self._info.tpa)  # pylint: disable=E1101
 
     @property
     def type(self):
         """Hardware & protocol type."""
-        return (self._info.htype, self._info.ptype)
+        return (self._info.htype, self._info.ptype)  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

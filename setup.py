@@ -3,7 +3,7 @@
 import setuptools
 
 # version string
-__version__ = '0.12.2'
+__version__ = '0.12.3'
 
 # README
 with open('./README.md', 'r') as file:
@@ -17,7 +17,7 @@ setuptools.setup(
     author_email='jarryshaw@icloud.com',
     url='https://github.com/JarryShaw/pypcapkit',
     license='GNU General Public License v3 (GPLv3)',
-    keywords='computer-networking pcap-analyzer pcap-parser',
+    keywords='computer-networking pcap-analyser pcap-parser',
     description='Python multi-engine PCAP analyse kit.',
     long_description=long_desc,
     long_description_content_type='text/markdown',

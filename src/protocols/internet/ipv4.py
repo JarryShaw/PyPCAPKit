@@ -153,12 +153,12 @@ class IPv4(IP):
     @property
     def length(self):
         """Header length of corresponding protocol."""
-        return self._info.hdr_len
+        return self._info.hdr_len  # pylint: disable=E1101
 
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.proto
+        return self._info.proto  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

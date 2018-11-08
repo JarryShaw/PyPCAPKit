@@ -94,7 +94,7 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
     if 'IPv6' in packet:
         ipv6 = packet['IPv6']
-        if scapy_all.IPv6ExtHdrFragment not in ipv6:
+        if scapy_all.IPv6ExtHdrFragment not in ipv6:  # pylint: disable=E1101
             return False, None                      # dismiss not fragmented packet
         ipv6_frag = ipv6['IPv6ExtHdrFragment']
         data = dict(

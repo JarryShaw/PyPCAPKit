@@ -5,25 +5,25 @@ name = "pypi"
 
 [packages]
 chardet = "*"
-pypcapkit = "*"
 aenum = "*"
 setuptools = "*"
 dictdumper = "*"
 emoji = "*"
 
 [dev-packages]
-pypcapkit = {path = ".", editable = true}
+pcapkit = {editable = true, path = "."}
 pyshark = "*"
 dpkt = "*"
 scapy = "*"
 "beautifulsoup4" = "*"
 "html5lib" = "*"
 requests = "*"
-rope = "*"
-lxml = "*"
-pycodestyle = "*"
-pylint = "*"
 ipython = "*"
+rope = "*"
+"autopep8" = "*"
+pylint = "*"
+pycodestyle = "*"
+isort = {extras = ["pipfile", "requirements"], version = "*"}
 
 [requires]
 python_version = "3.7"

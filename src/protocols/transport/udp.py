@@ -73,12 +73,12 @@ class UDP(Transport):
     @property
     def src(self):
         """Source port."""
-        return self._info.src
+        return self._info.src  # pylint: disable=E1101
 
     @property
     def dst(self):
         """Destination port."""
-        return self._info.dst
+        return self._info.dst  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

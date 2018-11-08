@@ -4,21 +4,19 @@
 `pcapkit.foundation.extraction` contains `Extractor` only,
 which synthesises file I/O and protocol analysis,
 coordinates information exchange in all network layers,
-extracst parametres from a PCAP file.
+extracts parametres from a PCAP file.
 
 """
 import collections
 import copy
 import datetime
 import importlib
-import io
 import ipaddress
 import os
 import pathlib
 import random
 import re
 import sys
-import textwrap
 import time
 import traceback
 import warnings
@@ -80,7 +78,7 @@ PROTO_LIST = {
 if os.name == 'posix' and 'SC_NPROCESSORS_CONF' in os.sysconf_names:
     CPU_CNT = os.sysconf('SC_NPROCESSORS_CONF')
 elif 'sched_getaffinity' in os.__all__:
-    CPU_CNT = len(os.sched_getaffinity(0))
+    CPU_CNT = len(os.sched_getaffinity(0))  # pylint: disable=E1101
 else:
     CPU_CNT = os.cpu_count() or 1
 
@@ -655,15 +653,15 @@ class Extractor:
         if self._ipv4:
             flag, data = ipv4_reassembly(frame)
             if flag:
-                self._reasm[0](data)
+                self._reasm[0](data)  # pylint: disable=E1102
         if self._ipv6:
             flag, data = ipv6_reassembly(frame)
             if flag:
-                self._reasm[1](data)
+                self._reasm[1](data)  # pylint: disable=E1102
         if self._tcp:
             flag, data = tcp_reassembly(frame)
             if flag:
-                self._reasm[2](data)
+                self._reasm[2](data)  # pylint: disable=E1102
 
         # trace flows
         if self._flag_t:
@@ -747,15 +745,15 @@ class Extractor:
         if self._ipv4:
             flag, data = ipv4_reassembly(packet, count=self._frnum)
             if flag:
-                self._reasm[0](data)
+                self._reasm[0](data)  # pylint: disable=E1102
         if self._ipv6:
             flag, data = ipv6_reassembly(packet, count=self._frnum)
             if flag:
-                self._reasm[1](data)
+                self._reasm[1](data)  # pylint: disable=E1102
         if self._tcp:
             flag, data = tcp_reassembly(packet, count=self._frnum)
             if flag:
-                self._reasm[2](data)
+                self._reasm[2](data)  # pylint: disable=E1102
 
         # trace flows
         if self._flag_t:
@@ -838,15 +836,15 @@ class Extractor:
         if self._ipv4:
             flag, data = ipv4_reassembly(packet, count=self._frnum)
             if flag:
-                self._reasm[0](data)
+                self._reasm[0](data)  # pylint: disable=E1102
         if self._ipv6:
             flag, data = ipv6_reassembly(packet, count=self._frnum)
             if flag:
-                self._reasm[1](data)
+                self._reasm[1](data)  # pylint: disable=E1102
         if self._tcp:
             flag, data = tcp_reassembly(packet, count=self._frnum)
             if flag:
-                self._reasm[2](data)
+                self._reasm[2](data)  # pylint: disable=E1102
 
         # trace flows
         if self._flag_t:

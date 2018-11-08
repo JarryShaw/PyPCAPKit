@@ -7,11 +7,11 @@ is now deprecated and merged with `pcapkit`.
 
 """
 import argparse
-import os
 import sys
 import warnings
 
 import emoji
+
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.interface import JSON, PLIST, TREE
 
@@ -112,7 +112,7 @@ def main():
 
     if not args.verbose:
         print(emoji.emojize(f":police_car_light: Loading file {extractor.input!r}"))
-        for frame in extractor:
+        for _ in extractor:
             print(f' - Frame {extractor.length:>3d}: {extractor.protocol}')
         print(emoji.emojize(f":beer_mug: Report file{'s' if args.files else ''} stored in {extractor.output!r}"))
 

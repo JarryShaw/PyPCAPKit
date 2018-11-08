@@ -12,17 +12,16 @@ import ast
 import copy
 import functools
 import io
-import numbers
 import os
 import re
 import shutil
 import string
 import struct
-import sys
 import textwrap
 import urllib
 
 import chardet
+
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
@@ -167,6 +166,11 @@ class Protocol:
 
         return self
 
+    @abc.abstractmethod
+    def __init__(self, file=None, *args, **kwargs):
+        self._file = file
+        self._info = Info()
+
     def __repr__(self):
         repr_ = f"<{self.alias} {self._info!r}>"
         return repr_
@@ -194,7 +198,7 @@ class Protocol:
 
     @seekset
     def __len__(self):
-        """Total length of correspoding protocol."""
+        """Total length of corresponding protocol."""
         return len(self._read_fileng())
 
     @abc.abstractmethod
@@ -398,7 +402,7 @@ class Protocol:
             * dict -- current protocol with next layer extracted
 
         """
-        if self._onerror:
+        if self._onerror:  # pylint: disable=E1101
             next_ = beholder(self._import_next_layer)(self, proto, length)
         else:
             next_ = self._import_next_layer(proto, length)
@@ -428,7 +432,7 @@ class Protocol:
         """
         from pcapkit.protocols.raw import Raw
         next_ = Raw(io.BytesIO(self._read_fileng(length)), length,
-                    layer=self._exlayer, protocol=self._exproto)
+                    layer=self._exlayer, protocol=self._exproto)  # pylint: disable=E1101
         return next_
 
     def _check_term_threshold(self):
@@ -437,9 +441,9 @@ class Protocol:
         layer = self.__layer__ or ''
 
         pattern = r'|'.join(index) if isinstance(index, tuple) else index
-        iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)
+        iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)  # pylint: disable=E1101
 
-        layer_match = re.fullmatch(layer, self._exlayer, re.IGNORECASE)
+        layer_match = re.fullmatch(layer, self._exlayer, re.IGNORECASE)  # pylint: disable=E1101
         protocol_match = filter(lambda string: re.fullmatch(pattern, string, re.IGNORECASE), iterable)
 
         return bool(list(protocol_match) or layer_match)

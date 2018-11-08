@@ -102,19 +102,19 @@ class HIP(Internet):
     @property
     def name(self):
         """Name of current protocol."""
-        if self._info.version == 2:
+        if self._info.version == 2:  # pylint: disable=E1101
             return 'Host Identity Protocol Version 2'
         return 'Host Identity Protocol'
 
     @property
     def alias(self):
         """Acronym of corresponding protocol."""
-        return f'HIPv{self._info.version}'
+        return f'HIPv{self._info.version}'  # pylint: disable=E1101
 
     @property
     def length(self):
         """Header length of current protocol."""
-        return self._info.length
+        return self._info.length  # pylint: disable=E1101
 
     @property
     def payload(self):
@@ -126,7 +126,7 @@ class HIP(Internet):
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.next
+        return self._info.next  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

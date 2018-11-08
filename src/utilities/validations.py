@@ -10,6 +10,8 @@ validators.
 import collections.abc
 import enum
 import inspect
+# TODO: considering reconstructing validations with `typing` module
+import io
 import ipaddress
 import numbers
 
@@ -20,9 +22,6 @@ from pcapkit.utilities.exceptions import (BoolError, BytearrayError,
                                           InfoError, IntError, IOObjError,
                                           IPError, ListError, PacketError,
                                           RealError, StringError, TupleError)
-
-# TODO: considering reconstructing validations with `typing` module
-import _io
 
 __all__ = [
     'int_check', 'real_check', 'complex_check', 'number_check',
@@ -146,7 +145,7 @@ def io_check(*args, func=None):
     """Check if arguments are file-like object."""
     func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, _io._IOBase):
+        if not isinstance(var, io.IOBase):
             name = type(var).__name__
             raise IOObjError(
                 f'Function {func} expected file-like object, {name} got instead.')
@@ -232,8 +231,7 @@ def pkt_check(*args, func=None):
         real_check(var.get('timestamp'), func=func)
         ip_check(var.get('src'), var.get('dst'), func=func)
         bool_check(var.get('syn'), var.get('fin'), func=func)
-        int_check(var.get('srcport'), var.get(
-            'dstport'), var.get('index'), func=func)
+        int_check(var.get('srcport'), var.get('dstport'), var.get('index'), func=func)
 
 
 ###############################################################################

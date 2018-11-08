@@ -100,7 +100,7 @@ class Link(Protocol):
         """
         if length == 0:
             from pcapkit.protocols.null import NoPayload as Protocol
-        elif self._sigterm:
+        elif self._sigterm:  # pylint: disable=E1101
             from pcapkit.protocols.raw import Raw as Protocol
         elif proto == 0x0806:
             from pcapkit.protocols.link.arp import ARP as Protocol
@@ -116,6 +116,6 @@ class Link(Protocol):
             from pcapkit.protocols.internet.ipx import IPX as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol
-        next_ = Protocol(self._file, length, error=self._onerror,
-                         layer=self._exlayer, protocol=self._exproto)
+        next_ = Protocol(self._file, length, error=self._onerror,  # pylint: disable=E1101
+                         layer=self._exlayer, protocol=self._exproto)  # pylint: disable=E1101
         return next_

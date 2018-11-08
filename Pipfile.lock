@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "b57910d34e867efbea682701624de8806dfc2b98ad5672473372a0270e6363a2"
+            "sha256": "7ff873b24ac4c2d920e1f6a3a6f90e476fff3ba19cd3c2d7e7928e2cbe91c08b"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -48,14 +48,6 @@
             ],
             "index": "pypi",
             "version": "==0.5.1"
-        },
-        "pypcapkit": {
-            "hashes": [
-                "sha256:5650f7f214c418192149fd2b264d7220998f0d31e18dade93d94b0e80c892eb6",
-                "sha256:56b8070cac5ac460ce40729bf32e20978be521c3825a050eb5e9e1669bfdbe9e"
-            ],
-            "index": "pypi",
-            "version": "==0.12.2"
         }
     },
     "develop": {
@@ -82,6 +74,13 @@
                 "sha256:39870f07180e50c5a1c73a6de7b7cb487d6db649c0acd9917f154617e09f9e94"
             ],
             "version": "==2.1.0.dev0"
+        },
+        "autopep8": {
+            "hashes": [
+                "sha256:1b8d42ebba751a91090d3adb5c06840b1151d71ed43e1c7a9ed6911bfe8ebe6c"
+            ],
+            "index": "pypi",
+            "version": "==1.4.2"
         },
         "backcall": {
             "hashes": [
@@ -176,11 +175,16 @@
             "version": "==0.2.0"
         },
         "isort": {
+            "extras": [
+                "pipfile",
+                "requirements"
+            ],
             "hashes": [
                 "sha256:1153601da39a25b14ddc54955dbbacbb6b2d19135386699e2ad58517953b34af",
                 "sha256:b9c40e9750f3d77e6e4d441d8b0266cf555e7cdabdcff33c4fd06366ca761ef8",
                 "sha256:ec9ef8f4a9bc6f71eec99e1806bfa2de401650d996c59330782b89a5555c1497"
             ],
+            "index": "pypi",
             "version": "==4.3.4"
         },
         "jedi": {
@@ -269,7 +273,6 @@
                 "sha256:edd9c13a97f6550f9da2236126bb51c092b3b1ce6187f2bd966533ad794bbb5e",
                 "sha256:fa39ea60d527fbdd94215b5e5552f1c6a912624521093f1384a491a8ad89ad8b"
             ],
-            "index": "pypi",
             "version": "==4.2.5"
         },
         "mccabe": {
@@ -285,6 +288,10 @@
                 "sha256:895c63e93b94ac1e1690f5fdd40b65f07c8171e3e53cbd7793b5b96c0e0a7f24"
             ],
             "version": "==0.3.1"
+        },
+        "pcapkit": {
+            "editable": true,
+            "path": "."
         },
         "pexpect": {
             "hashes": [
@@ -345,14 +352,6 @@
             ],
             "index": "pypi",
             "version": "==2.1.1"
-        },
-        "pypcapkit": {
-            "hashes": [
-                "sha256:5650f7f214c418192149fd2b264d7220998f0d31e18dade93d94b0e80c892eb6",
-                "sha256:56b8070cac5ac460ce40729bf32e20978be521c3825a050eb5e9e1669bfdbe9e"
-            ],
-            "index": "pypi",
-            "version": "==0.12.2"
         },
         "pyshark": {
             "hashes": [

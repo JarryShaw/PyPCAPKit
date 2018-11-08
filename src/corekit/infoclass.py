@@ -73,7 +73,7 @@ class Info(collections.abc.Mapping):
                 flag = True
                 continue
             temp.append(f'{key}={value!r}')
-        args = ', '.join(temp)
+        args = ', '.join(temp) or '...'
         return f"Info({args}{', Info=(...)' if flag else ''})"
 
     def __len__(self):

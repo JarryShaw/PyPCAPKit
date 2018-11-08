@@ -71,19 +71,19 @@ class Ethernet(Link):
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.type
+        return self._info.type  # pylint: disable=E1101
 
     # source mac address
     @property
     def src(self):
         """Source mac address."""
-        return self._info.src
+        return self._info.src  # pylint: disable=E1101
 
     # destination mac address
     @property
     def dst(self):
         """Destination mac address."""
-        return self._info.dst
+        return self._info.dst  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

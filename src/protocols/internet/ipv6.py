@@ -87,12 +87,12 @@ class IPv6(IP):
     @property
     def length(self):
         """Header length of corresponding protocol."""
-        return self._info.hdr_len
+        return self._info.hdr_len  # pylint: disable=E1101
 
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.protocol
+        return self._info.protocol  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.
@@ -270,11 +270,11 @@ class IPv6(IP):
             # record protocol name
             # self._protos = ProtoChain(name, chain, alias)
             _protos.append(next_)
-            proto = info.next
+            proto = info.next  # pylint: disable=E1101
 
             # update header & payload length
-            hdr_len += info.length
-            raw_len -= info.length
+            hdr_len += info.length  # pylint: disable=E1101
+            raw_len -= info.length  # pylint: disable=E1101
 
         # record real header & payload length (headers exclude)
         ipv6['hdr_len'] = hdr_len

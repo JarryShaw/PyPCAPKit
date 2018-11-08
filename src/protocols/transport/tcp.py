@@ -12,7 +12,7 @@ Protocol (TCP), whose structure is described as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |                        Sequence Number                        |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Acknowledgment Number                      |
+|                   Acknowledgement Number                      |
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 |  Data |           |U|A|P|R|S|F|                               |
 | Offset| Reserved  |R|C|S|S|Y|I|            Window             |
@@ -212,17 +212,17 @@ class TCP(Transport):
     @property
     def length(self):
         """Header length of current protocol."""
-        return self._info.hdr_len
+        return self._info.hdr_len  # pylint: disable=E1101
 
     @property
     def src(self):
         """Source port."""
-        return self._info.srcport
+        return self._info.srcport  # pylint: disable=E1101
 
     @property
     def dst(self):
         """Destination port."""
-        return self._info.dstport
+        return self._info.dstport  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.
@@ -240,7 +240,7 @@ class TCP(Transport):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |                        Sequence Number                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                    Acknowledgment Number                      |
+            |                   Acknowledgement Number                      |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Data |           |U|A|P|R|S|F|                               |
             | Offset| Reserved  |R|C|S|S|Y|I|            Window             |
@@ -258,14 +258,14 @@ class TCP(Transport):
               0           0     tcp.srcport             Source Port
               2          16     tcp.dstport             Destination Port
               4          32     tcp.seq                 Sequence Number
-              8          64     tcp.ack                 Acknowledgment Number (if ACK set)
+              8          64     tcp.ack                 Acknowledgement Number (if ACK set)
               12         96     tcp.hdr_len             Data Offset
               12        100     -                       Reserved (must be zero)
               12        103     tcp.flags.ns            ECN Concealment Protection (NS)
               13        104     tcp.flags.cwr           Congestion Window Reduced (CWR)
               13        105     tcp.flags.ecn           ECN-Echo (ECE)
               13        106     tcp.flags.urg           Urgent (URG)
-              13        107     tcp.flags.ack           Acknowledgment (ACK)
+              13        107     tcp.flags.ack           Acknowledgement (ACK)
               13        108     tcp.flags.push          Push Function (PSH)
               13        109     tcp.flags.reset         Reset Connection (RST)
               13        110     tcp.flags.syn           Synchronize Sequence Numbers (SYN)

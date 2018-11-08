@@ -138,9 +138,11 @@ class TraceFlow:
         info = Info(packet)
 
         # Buffer Identifier
-        BUFID = tuple(sorted([str(info.src), str(info.srcport), str(info.dst), str(info.dstport)]))
+        BUFID = tuple(sorted([str(info.src), str(info.srcport),    # pylint: disable=E1101
+                              str(info.dst), str(info.dstport)]))  # pylint: disable=E1101
         # SYN = info.syn      # Synchronise Flag (Establishment)
-        FIN = info.fin      # Finish Flag (Termination)
+        # Finish Flag (Termination)
+        FIN = info.fin        # pylint: disable=E1101
 
         # # when SYN is set, reset buffer of this seesion
         # if SYN and BUFID in self._buffer:
@@ -151,15 +153,16 @@ class TraceFlow:
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'
+            label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'  # pylint: disable=E1101
             self._buffer[BUFID] = dict(
-                fpout=self._foutio(f'{self._fproot}/{label}.{self._fdpext}', protocol=info.protocol),
+                fpout=self._foutio(f'{self._fproot}/{label}.{self._fdpext}',
+                                   protocol=info.protocol),  # pylint: disable=E1101
                 index=list(),
                 label=label,
             )
 
         # trace frame record
-        self._buffer[BUFID]['index'].append(info.index)
+        self._buffer[BUFID]['index'].append(info.index)  # pylint: disable=E1101
         fpout = self._buffer[BUFID]['fpout']
         label = self._buffer[BUFID]['label']
 

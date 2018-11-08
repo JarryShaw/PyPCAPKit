@@ -81,7 +81,7 @@ class IPv6_Route(Internet):
     @property
     def length(self):
         """Header length of current protocol."""
-        return self._info.length
+        return self._info.length  # pylint: disable=E1101
 
     @property
     def payload(self):
@@ -93,7 +93,7 @@ class IPv6_Route(Internet):
     @property
     def protocol(self):
         """Name of next layer protocol."""
-        return self._info.next
+        return self._info.next  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

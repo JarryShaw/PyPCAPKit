@@ -70,12 +70,12 @@ class L2TP(Link):
     @property
     def length(self):
         """Header length of current protocol."""
-        return self._info.hdr_len
+        return self._info.hdr_len  # pylint: disable=E1101
 
     @property
     def type(self):
         """L2TP type."""
-        return self._info.flags.type
+        return self._info.flags.type  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.

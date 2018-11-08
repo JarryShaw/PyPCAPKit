@@ -175,7 +175,7 @@ class ProtoChain(collections.abc.Container):
         * alias -- tuple, aliases of protocols in chain
         * tuple -- tuple, name of protocols in chain
         * proto -- tuple, lowercase name of protocols in chain
-        * chain -- str, chain of protocols seperated by colons
+        * chain -- str, chain of protocols separated by colons
 
     Methods:
         * index -- same as `index` function of `tuple` type
