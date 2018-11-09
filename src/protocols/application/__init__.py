@@ -10,12 +10,13 @@ implementation and methods.
 from pcapkit.protocols.application.application import Application
 
 # Utility Classes for Protocols
+from pcapkit.protocols.application.ftp import FTP
 from pcapkit.protocols.application.httpv1 import HTTPv1
 from pcapkit.protocols.application.httpv2 import HTTPv2
 
 # Deprecated / Base Classes
 from pcapkit.protocols.application.http import HTTP
 
-# TODO: Implements BGP, DHCP, DNS, FTP, IMAP, IDAP, MQTT, NNTP, NTP,
-# #     ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, SSL, TELNET, TLS, XMPP.
-__all__ = ['HTTPv1', 'HTTPv2']
+# TODO: Implements BGP, DHCP, DNS, IMAP, IDAP, MQTT, NNTP, NTP,
+#       ONC:RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, SSL, TELNET, TLS, XMPP.
+__all__ = ['FTP', 'HTTPv1', 'HTTPv2']

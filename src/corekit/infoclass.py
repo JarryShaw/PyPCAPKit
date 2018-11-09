@@ -67,14 +67,13 @@ class Info(collections.abc.Mapping):
 
     def __repr__(self):
         temp = list()
-        flag = False
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
-                flag = True
-                continue
-            temp.append(f'{key}={value!r}')
-        args = ', '.join(temp) or '...'
-        return f"Info({args}{', Info=(...)' if flag else ''})"
+                temp.append(f'{key}=Info(...)')
+            else:
+                temp.append(f'{key}={value!r}')
+        args = ', '.join(temp)
+        return f"Info({args})"
 
     def __len__(self):
         return len(self.__dict__)

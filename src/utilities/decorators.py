@@ -8,6 +8,7 @@ decorators, including `seekset` and `beholder`.
 import functools
 import io
 import os
+import traceback
 
 ###############################################################################
 # from pcapkit.protocols.raw import Raw
@@ -48,11 +49,13 @@ def beholder(func):
         seek_cur = self._file.tell()
         try:
             return func(proto, length, *args, **kwargs)
-        except Exception as error:
+        except Exception:
             from pcapkit.protocols.raw import Raw
+            error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
+            # error = traceback.format_exc()
 
             self._file.seek(seek_cur, os.SEEK_SET)
-            next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=str(error))
+            next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=error)
             return next_
     return behold
 
@@ -64,14 +67,16 @@ def beholder_ng(func):
         seek_cur = file.tell()
         try:
             return func(file, length, *args, **kwargs)
-        except Exception as error:
+        except Exception:
             # from pcapkit.foundation.analysis import analyse
             from pcapkit.protocols.raw import Raw
+            error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
+            # error = traceback.format_exc()
 
             file.seek(seek_cur, os.SEEK_SET)
 
             # raw = Raw(file, length, error=str(error))
             # return analyse(raw.info, raw.protochain, raw.alias)
-            next_ = Raw(file, length, error=str(error))
+            next_ = Raw(file, length, error=error)
             return next_
     return behold

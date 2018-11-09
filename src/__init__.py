@@ -67,6 +67,7 @@ from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.raw import Raw
 from pcapkit.protocols.link.arp import ARP
 from pcapkit.protocols.link.ethernet import Ethernet
+from pcapkit.protocols.application.ftp import FTP
 from pcapkit.protocols.link.l2tp import L2TP
 from pcapkit.protocols.link.ospf import OSPF
 from pcapkit.protocols.link.rarp import RARP
@@ -100,5 +101,5 @@ __all__ = [
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
     'TCP', 'UDP',                                           # Transport Layer
-    'HTTP',                                                 # Application Layer
+    'FTP', 'HTTP',                                          # Application Layer
 ]

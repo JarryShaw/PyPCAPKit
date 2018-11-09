@@ -13,6 +13,7 @@ from pcapkit.utilities.decorators import seekset_ng
 from pcapkit.utilities.exceptions import ProtocolError
 
 ###############################################################################
+# from pcapkit.protocols.application.ftp import FTP
 # from pcapkit.protocols.application.httpv1 import HTTPv1
 # from pcapkit.protocols.application.httpv2 import HTTPv2
 ###############################################################################
@@ -37,6 +38,11 @@ def analyse(file, length=None, *, _termination=False):
         if flag:
             return http
 
+        # FTP analysis
+        flag, ftp = _analyse_ftp(file, length, seekset=seekset)
+        if flag:
+            return ftp
+
     # raw packet analysis
     return Raw(file, length)
 
@@ -59,3 +65,13 @@ def _analyse_httpv2(file, length, *, seekset=os.SEEK_SET):
     except ProtocolError:
         return False, None
     return True, http
+
+
+@seekset_ng
+def _analyse_ftp(file, length, *, seekset=os.SEEK_SET):
+    try:
+        from pcapkit.protocols.application.ftp import FTP
+        ftp = FTP(file, length)
+    except ProtocolError:
+        return False, None
+    return True, ftp

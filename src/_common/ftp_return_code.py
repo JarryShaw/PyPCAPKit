@@ -61,8 +61,8 @@ class ReturnCode(IntEnum):
     ReturnCode['Invalid username or password.'] = 430
     ReturnCode['Requested host unavailable.'] = 434
     ReturnCode['Requested file action not taken.'] = 450
-    ReturnCode['Requested action aborted.'] = 451
-    ReturnCode['Requested action not taken.'] = 452
+    ReturnCode['Requested action aborted. [451]'] = 451
+    ReturnCode['Requested action not taken. [452]'] = 452
     ReturnCode['Syntax error in parameters or arguments.'] = 501
     ReturnCode['Command not implemented.'] = 502
     ReturnCode['Bad sequence of commands.'] = 503
@@ -70,10 +70,10 @@ class ReturnCode(IntEnum):
     ReturnCode['Not logged in.'] = 530
     ReturnCode['Need account for storing files.'] = 532
     ReturnCode['Could Not Connect to Server - Policy Requires SSL.'] = 534
-    ReturnCode['Requested action not taken.'] = 550
-    ReturnCode['Requested action aborted.'] = 551
+    ReturnCode['Requested action not taken. [550]'] = 550
+    ReturnCode['Requested action aborted. [551]'] = 551
     ReturnCode['Requested file action aborted.'] = 552
-    ReturnCode['Requested action not taken.'] = 553
+    ReturnCode['Requested action not taken. [553]'] = 553
     ReturnCode['Integrity protected reply.'] = 631
     ReturnCode['Confidentiality and integrity protected reply.'] = 632
     ReturnCode['Confidentiality protected reply.'] = 633
@@ -95,5 +95,5 @@ class ReturnCode(IntEnum):
         code = str(value)
         kind = KIND.get(code[0], 'Reserved')
         info = INFO.get(code[1], 'Reserved')
-        extend_enum(cls, '[%s] %s' % (kind, info), value)
+        extend_enum(cls, '%s - %s [%s]' % (kind, info, value), value)
         return cls(value)
