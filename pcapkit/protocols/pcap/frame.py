@@ -16,6 +16,7 @@ typedef struct pcaprec_hdr_s {
 import datetime
 import io
 import os
+import traceback
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.protocol import Protocol
@@ -240,8 +241,8 @@ class Frame(Protocol):
         seek_cur = self._file.tell()
         try:
             next_ = self._import_next_layer(self._prot, length)
-        except Exception as error:
-            dict_['error'] = str(error)
+        except Exception:
+            dict_['error'] = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = beholder(self._import_next_layer)(self, self._prot, length, error=True)
         info, chain = next_.info, next_.protochain

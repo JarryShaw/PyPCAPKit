@@ -11,7 +11,6 @@ protocols, eg. TCP and UDP.
 from pcapkit._common.tp_proto import TransType as TP_PROTO
 from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.protocols.raw import Raw as NextLayer
 from pcapkit.utilities.decorators import beholder_ng
 
 ###############################################################################
@@ -77,12 +76,15 @@ class Transport(Protocol):
             * str -- alias of next layer
 
         """
-        if self._exproto == 'null' and self._exlayer == 'None':
+        if self._exproto == 'null' or self._exlayer == 'None':  # pylint: disable=E1101
+            from pcapkit.protocols.raw import Raw as NextLayer
+        else:
             from pcapkit.foundation.analysis import analyse as NextLayer
+        # from pcapkit.foundation.analysis import analyse as NextLayer
         if length == 0:
             next_ = NoPayload()
-        elif self._onerror:
-            next_ = beholder_ng(NextLayer)(self._file, length, _termination=self._sigterm)
+        elif self._onerror:  # pylint: disable=E1101
+            next_ = beholder_ng(NextLayer)(self._file, length, _termination=self._sigterm)  # pylint: disable=E1101
         else:
-            next_ = NextLayer(self._file, length, _termination=self._sigterm)
+            next_ = NextLayer(self._file, length, _termination=self._sigterm)  # pylint: disable=E1101
         return next_

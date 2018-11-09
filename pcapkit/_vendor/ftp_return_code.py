@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import collections
 import os
 import re
 
@@ -65,7 +66,7 @@ class {NAME}(IntEnum):
         code = str(value)
         kind = KIND.get(code[0], 'Reserved')
         info = INFO.get(code[1], 'Reserved')
-        extend_enum(cls, '[%s] %s' % (kind, info), value)
+        extend_enum(cls, '%s - %s [%s]' % (kind, info, value), value)
         return cls(value)
 '''
 
@@ -93,6 +94,28 @@ table = soup.find_all('table', class_='wikitable')[2]
 content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)
 header = next(content)
 
+temp = list()
+for item in content:
+    line = item.find_all('td')
+
+    code = ' '.join(line[0].stripped_strings)
+    if len(code) != 3:
+        continue
+    desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
+    temp.append(desc)
+record = collections.Counter(temp)
+
+
+def rename(name, code):
+    if record[name] > 1:
+        name = f'{name} [{code}]'
+    return name
+
+
+table = soup.find_all('table', class_='wikitable')[2]
+content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)
+header = next(content)
+
 enum = list()
 for item in content:
     line = item.find_all('td')
@@ -101,7 +124,7 @@ for item in content:
     if len(code) != 3:
         continue
     desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
-    enum.append(f'{NAME}[{desc!r}] = {code}')
+    enum.append(f'{NAME}[{rename(desc, code)!r}] = {code}')
 
 
 ###############

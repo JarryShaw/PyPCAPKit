@@ -70,7 +70,7 @@ PROTO_LIST = {
     'internet', 'ah', 'hip', 'hopopt', 'ip', 'ipsec', 'ipv4', 'ipv6', 'ipv6_frag',
     'ipv6_opts', 'ipv6_route', 'ipx', 'mh',                 # Internet layer
     'transport', 'tcp', 'udp',                              # Transport layer
-    'application', 'http', 'httpv1', 'httpv2',              # Application layer
+    'application', 'ftp', 'http', 'httpv1', 'httpv2',       # Application layer
 }
 
 
@@ -330,7 +330,7 @@ class Extractor:
                     ofnm = f'out.{ext}'
             else:
                 fext = os.path.splitext(fout)[1]
-                mkdir(os.path.split(fout)[1])
+                mkdir(os.path.split(fout)[0])
                 if fext:
                     files = False
                     ofnm = fout

@@ -53,7 +53,7 @@ __all__ = [
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
     'TCP', 'UDP',                                           # Transport Layer
-    'HTTP',                                                 # Application Layer
+    'FTP', 'HTTP',                                          # Application Layer
 
     # pcapkit.reassembly
     'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
