@@ -19,7 +19,7 @@ as below.
 """
 import ipaddress
 
-from pcapkit._common.ipv6_routing_type import RT_TYPE as _ROUTING_TYPE
+from pcapkit.const.ipv6.routing import Routing as _ROUTING_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall

@@ -20,71 +20,46 @@ __version__ = '0.6.0'
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(prog='pcapkit', description=(
-        'PCAP file extractor and formatted dumper'
-    ))
+    parser = argparse.ArgumentParser(prog='pcapkit',
+                                     description='PCAP file extractor and formatted dumper')
     parser.add_argument('-V', '--version', action='version', version=__version__)
     parser.add_argument('fin', metavar='input-file-name',
-                        help=(
-                            'The name of input pcap file. If ".pcap" omits, '
-                            'it will be automatically appended.'
-                        ))
-    parser.add_argument('-o', '--output', action='store', metavar='file-name',
-                        dest='fout', help=(
-                            'The name of input pcap file. If format extension '
-                            'omits, it will be automatically appended.'
-                        ))
-    parser.add_argument('-f', '--format', action='store', metavar='format',
-                        dest='format', help=(
-                            'Print a extraction report in the specified output '
-                            'format. Available are all formats supported by '
-                            'dictdumper, e.g.: json, plist, and tree.'
-                        ))
+                        help=('The name of input pcap file. If ".pcap" omits, '
+                              'it will be automatically appended.'))
+    parser.add_argument('-o', '--output', action='store', metavar='file-name', dest='fout',
+                        help=('The name of input pcap file. If format extension '
+                              'omits, it will be automatically appended.'))
+    parser.add_argument('-f', '--format', action='store', metavar='format', dest='format',
+                        help=('Print a extraction report in the specified output '
+                              'format. Available are all formats supported by '
+                              'dictdumper, e.g.: json, plist, and tree.'))
     parser.add_argument('-j', '--json', action='store_true', default=False,
-                        help=(
-                            'Display extraction report as json. This will yield '
-                            '"raw" output that may be used by external tools. '
-                            'This option overrides all other options.'
-                        ))
+                        help=('Display extraction report as json. This will yield '
+                              '"raw" output that may be used by external tools. '
+                              'This option overrides all other options.'))
     parser.add_argument('-p', '--plist', action='store_true', default=False,
-                        help=(
-                            'Display extraction report as macOS Property List '
-                            '(plist). This will yield "raw" output that may be '
-                            'used by external tools. This option overrides all '
-                            'other options.'
-                        ))
+                        help=('Display extraction report as macOS Property List '
+                              '(plist). This will yield "raw" output that may be '
+                              'used by external tools. This option overrides all '
+                              'other options.'))
     parser.add_argument('-t', '--tree', action='store_true', default=False,
-                        help=(
-                            'Display extraction report as tree view text. This '
-                            'will yield "raw" output that may be used by external '
-                            'tools. This option overrides all other options.'
-                        ))
+                        help=('Display extraction report as tree view text. This '
+                              'will yield "raw" output that may be used by external '
+                              'tools. This option overrides all other options.'))
     parser.add_argument('-a', '--auto-extension', action='store_true', default=False,
-                        help=(
-                            'If output file extension omits, append automatically.'
-                        ))
+                        help='If output file extension omits, append automatically.')
     parser.add_argument('-v', '--verbose', action='store_false', default=True,
-                        help=(
-                            'Show more information.'
-                        ))
+                        help='Show more information.')
     parser.add_argument('-F', '--files', action='store_true', default=False,
-                        help=(
-                            'Split each frame into different files.'
-                        ))
-    parser.add_argument('-E', '--engine', action='store', dest='engine',
-                        default='default', metavar='PKG', help=(
-                            'Indicate extraction engine. Note that except '
-                            'default or pcapkit engine, all other engines '
-                            'need support of corresponding packages.'
-                        ))
-    parser.add_argument('-P', '--protocol', action='store', dest='protocol',
-                        default='null', metavar='PROTOCOL', help=(
-                            'Indicate extraction stops after which protocol.'
-                        ))
-    parser.add_argument('-L', '--layer', action='store', dest='layer',
-                        default='None', metavar='LAYER', help=(
-                            'Indicate extract frames until which layer.'
-                        ))
+                        help='Split each frame into different files.')
+    parser.add_argument('-E', '--engine', action='store', dest='engine', default='default', metavar='PKG',
+                        help=('Indicate extraction engine. Note that except '
+                              'default or pcapkit engine, all other engines '
+                              'need support of corresponding packages.'))
+    parser.add_argument('-P', '--protocol', action='store', dest='protocol', default='null', metavar='PROTOCOL',
+                        help='Indicate extraction stops after which protocol.')
+    parser.add_argument('-L', '--layer', action='store', dest='layer', default='None', metavar='LAYER',
+                        help='Indicate extract frames until which layer.')
     return parser
 
 

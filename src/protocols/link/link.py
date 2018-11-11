@@ -8,8 +8,8 @@ class for link layer protocols, eg. ARP/InARP, Ethernet,
 L2TP, OSPF, RARP/DRARP and etc.
 
 """
-from pcapkit._common.linktype import LinkType as LINKTYPE
-from pcapkit.protocols.internet.internet import ETHERTYPE
+from pcapkit.const.misc.ethertype import EtherType as ETHERTYPE
+from pcapkit.const.misc.linktype import LinkType as LINKTYPE
 from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['Link', 'LINKTYPE']
@@ -100,7 +100,7 @@ class Link(Protocol):
         """
         if length == 0:
             from pcapkit.protocols.null import NoPayload as Protocol
-        elif self._sigterm:  # pylint: disable=E1101
+        elif self._sigterm:
             from pcapkit.protocols.raw import Raw as Protocol
         elif proto == 0x0806:
             from pcapkit.protocols.link.arp import ARP as Protocol
@@ -116,6 +116,6 @@ class Link(Protocol):
             from pcapkit.protocols.internet.ipx import IPX as Protocol
         else:
             from pcapkit.protocols.raw import Raw as Protocol
-        next_ = Protocol(self._file, length, error=self._onerror,  # pylint: disable=E1101
-                         layer=self._exlayer, protocol=self._exproto)  # pylint: disable=E1101
+        next_ = Protocol(self._file, length, error=self._onerror,
+                         layer=self._exlayer, protocol=self._exproto)
         return next_

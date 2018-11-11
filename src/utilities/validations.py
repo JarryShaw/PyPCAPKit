@@ -7,15 +7,17 @@ arguments for functions and classes. It was first used in
 validators.
 
 """
+# TODO: considering reconstructing validations with `typing` module
+
 import collections.abc
 import enum
 import inspect
-# TODO: considering reconstructing validations with `typing` module
 import io
 import ipaddress
 import numbers
 
 import aenum
+
 from pcapkit.utilities.exceptions import (BoolError, BytearrayError,
                                           BytesError, ComplexError, DictError,
                                           DigitError, EnumError, FragmentError,

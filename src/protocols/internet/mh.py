@@ -18,12 +18,13 @@ whose structure is described as below.
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-from pcapkit._common.mh_mobility_type import PktType as _MOBILITY_TYPE
+# TODO: Implements extractor for message data of all MH types.
+
+from pcapkit.const.mh.packet import Packet as _MOBILITY_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
-# TODO: Implements extractor for message data of all MH types.
 __all__ = ['MH']
 
 

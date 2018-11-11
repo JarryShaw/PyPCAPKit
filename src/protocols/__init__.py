@@ -5,6 +5,8 @@
 with detailed implementation and methods.
 
 """
+# TODO: Implement specified classes for MAC and IP addresses.
+
 # Base Class for Protocols
 from pcapkit.protocols.protocol import Protocol
 
@@ -24,7 +26,6 @@ from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.protocols.application.http import HTTP
 
-# TODO: Implement specified classes for MAC and IP addresses.
 __all__ = [
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                # Protocol Numbers
     'Header', 'Frame',                                  # PCAP Headers

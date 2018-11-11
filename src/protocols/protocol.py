@@ -41,7 +41,7 @@ readable = [ord(char) for char in filter(lambda char: not char.isspace(), string
 
 
 @functools.total_ordering
-class Protocol:
+class Protocol(metaclass=abc.ABCMeta):
     """Abstract base class for all protocol family.
 
     Properties:
@@ -74,8 +74,11 @@ class Protocol:
         * _check_term_threshold -- check if reached termination threshold
 
     """
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
     __layer__ = None
-    __metaclass__ = abc.ABCMeta
 
     ##########################################################################
     # Properties.
@@ -168,6 +171,13 @@ class Protocol:
 
     @abc.abstractmethod
     def __init__(self, file=None, *args, **kwargs):
+        self._onerror = kwargs.pop('error', False)
+        self._exlayer = kwargs.pop('layer', str())
+        self._exproto = kwargs.pop('protocol', str())
+
+        self._seekset = (file or io.BytesIO()).tell()
+        self._sigterm = self._check_term_threshold()
+
         self._file = file
         self._info = Info()
 
@@ -201,7 +211,6 @@ class Protocol:
         """Total length of corresponding protocol."""
         return len(self._read_fileng())
 
-    @abc.abstractmethod
     def __length_hint__(self):
         pass
 
@@ -402,7 +411,7 @@ class Protocol:
             * dict -- current protocol with next layer extracted
 
         """
-        if self._onerror:  # pylint: disable=E1101
+        if self._onerror:
             next_ = beholder(self._import_next_layer)(self, proto, length)
         else:
             next_ = self._import_next_layer(proto, length)
@@ -432,7 +441,7 @@ class Protocol:
         """
         from pcapkit.protocols.raw import Raw
         next_ = Raw(io.BytesIO(self._read_fileng(length)), length,
-                    layer=self._exlayer, protocol=self._exproto)  # pylint: disable=E1101
+                    layer=self._exlayer, protocol=self._exproto)
         return next_
 
     def _check_term_threshold(self):
@@ -441,9 +450,9 @@ class Protocol:
         layer = self.__layer__ or ''
 
         pattern = r'|'.join(index) if isinstance(index, tuple) else index
-        iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)  # pylint: disable=E1101
+        iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)
 
-        layer_match = re.fullmatch(layer, self._exlayer, re.IGNORECASE)  # pylint: disable=E1101
+        layer_match = re.fullmatch(layer, self._exlayer, re.IGNORECASE)
         protocol_match = filter(lambda string: re.fullmatch(pattern, string, re.IGNORECASE), iterable)
 
         return bool(list(protocol_match) or layer_match)

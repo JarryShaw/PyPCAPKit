@@ -57,7 +57,7 @@
  - ToolKit (`pcapkit.toolkit`) -- capability tools for `pcapkit` implementation
  - DumpKit (`pcapkit.dumpkit`) -- dump utilities for `pcapkit` implementation
 
-![](https://github.com/JarryShaw/PyPCAPKit/blob/master/doc/jspcap.png)
+![](https://github.com/JarryShaw/PyPCAPKit/blob/master/doc/img/jspcap.png)
 
 ### Engine Comparison
 

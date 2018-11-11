@@ -3,6 +3,11 @@
 # print a trace of simple commands
 set -x
 
+# update const scripts
+for file in src/vendor/*/*.py ; do
+    pipenv run python3 $file
+done
+
 # duplicate distribution files
 mkdir -p release
 rm -rf release/src \

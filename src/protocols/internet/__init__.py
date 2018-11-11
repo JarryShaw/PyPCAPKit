@@ -6,6 +6,8 @@ in internet layer, with detailed implementation and
 methods.
 
 """
+# TODO: Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.
+
 # Base Class for Internet Layer
 from pcapkit.protocols.internet.internet import Internet
 
@@ -30,7 +32,6 @@ from pcapkit.protocols.internet.internet import ETHERTYPE
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.internet.ipsec import IPsec
 
-# TODO: Implements ECN, ESP, ICMP, ICMPv6, IGMP, Shim6.
 __all__ = [
     'ETHERTYPE',                                        # Protocol Numbers
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',         # Internet Layer

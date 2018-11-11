@@ -2,10 +2,6 @@
 """user defined warnings
 
 """
-##############################################################################
-# import warnings
-##############################################################################
-
 
 __all__ = [
     'BaseWarning',                                                  # Warning
@@ -14,7 +10,6 @@ __all__ = [
                                                                     # RuntimeWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning'                 # ResourceWarning
 ]
-
 
 ##############################################################################
 # BaseWarning (abc of warnings) session.

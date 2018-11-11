@@ -21,6 +21,8 @@ from pcapkit.utilities.warnings import FileWarning, FormatWarning
 # from pcapkit.dumpkit import PCAP, NotImplementedIO
 ###############################################################################
 
+__all__ = ['TraceFlow']
+
 
 class TraceFlow:
     """Trace TCP flows.

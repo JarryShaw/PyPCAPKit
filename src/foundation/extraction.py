@@ -7,6 +7,8 @@ coordinates information exchange in all network layers,
 extracts parametres from a PCAP file.
 
 """
+# TODO: implement engine support for pypcap & pycapfile
+
 import collections
 import copy
 import datetime
@@ -21,10 +23,10 @@ import time
 import traceback
 import warnings
 
+from pcapkit.const.misc.transtype import TransType as TP_PROTO
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.pcap.frame import Frame
 from pcapkit.protocols.pcap.header import Header
-from pcapkit.protocols.transport.transport import TP_PROTO
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound,
                                           FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
@@ -56,7 +58,6 @@ from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning,
 # import scapy.all
 ###############################################################################
 
-# TODO: implement engine support for pypcap & pycapfile
 __all__ = ['Extractor']
 __fmt__ = format
 

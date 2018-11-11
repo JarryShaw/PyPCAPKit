@@ -13,7 +13,7 @@ Octets      Bits        Name                    Description
   3          24     vlan.type               Protocol (Internet Layer)
 
 """
-from pcapkit._common.vlan_pcp import PrioLvl as _PCP
+from pcapkit.const.vlan.priority_level import PriorityLevel as _PCP
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 

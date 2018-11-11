@@ -20,11 +20,11 @@ as below.
 import datetime
 import ipaddress
 
-from pcapkit._common.ip_qs_func import QS as _QS_FUNC
-from pcapkit._common.ipv6_opt_seed import SeedID as _HOPOPT_SEED
-from pcapkit._common.ipv6_opt_type import Options as _OPT_TYPE
-from pcapkit._common.ipv6_router_alert import RT_ALT as _ROUTER_ALERT
-from pcapkit._common.ipv6_tid_type import TaggerId as _TID_TYPE
+from pcapkit.const.ipv6.option import Option as _OPT_TYPE
+from pcapkit.const.ipv6.qs_function import QS_Function as _QS_FUNC
+from pcapkit.const.ipv6.router_alert import RouterAlert as _ROUTER_ALERT
+from pcapkit.const.ipv6.seed_id import SeedID as _HOPOPT_SEED
+from pcapkit.const.ipv6.tagger_id import TaggerId as _TID_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall

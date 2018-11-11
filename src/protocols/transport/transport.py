@@ -8,7 +8,7 @@ And the latter is a base class for transport layer
 protocols, eg. TCP and UDP.
 
 """
-from pcapkit._common.tp_proto import TransType as TP_PROTO
+from pcapkit.const.misc.transtype import TransType as TP_PROTO
 from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder_ng
@@ -76,15 +76,15 @@ class Transport(Protocol):
             * str -- alias of next layer
 
         """
-        if self._exproto == 'null' or self._exlayer == 'None':  # pylint: disable=E1101
+        if self._exproto == 'null' or self._exlayer == 'None':
             from pcapkit.protocols.raw import Raw as NextLayer
         else:
             from pcapkit.foundation.analysis import analyse as NextLayer
         # from pcapkit.foundation.analysis import analyse as NextLayer
         if length == 0:
             next_ = NoPayload()
-        elif self._onerror:  # pylint: disable=E1101
-            next_ = beholder_ng(NextLayer)(self._file, length, _termination=self._sigterm)  # pylint: disable=E1101
+        elif self._onerror:
+            next_ = beholder_ng(NextLayer)(self._file, length, _termination=self._sigterm)
         else:
-            next_ = NextLayer(self._file, length, _termination=self._sigterm)  # pylint: disable=E1101
+            next_ = NextLayer(self._file, length, _termination=self._sigterm)
         return next_

@@ -327,4 +327,5 @@
         "wikitable"
     ],
     "python.pythonPath": "/Users/jarryshaw/.virtualenvs/pypcapkit-SkM2_hK5/bin/python",
+    "python.linting.pylintEnabled": true,
 }

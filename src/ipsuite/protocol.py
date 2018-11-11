@@ -32,7 +32,7 @@ readable = [ord(char) for char in filter(lambda char: not char.isspace(), string
 
 
 @functools.total_ordering
-class Protocol:
+class Protocol(metaclass=abc.ABCMeta):
     """Abstract base class for Internet Protocol Suite.
 
     Properties:
@@ -49,8 +49,6 @@ class Protocol:
         * __make__ -- make packet data
 
     """
-    __metaclass__ = abc.ABCMeta
-
     ##########################################################################
     # Properties.
     ##########################################################################
