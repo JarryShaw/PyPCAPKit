@@ -11,8 +11,8 @@ import ipaddress
 import time
 import warnings
 
-from pcapkit.protocols.link.link import LINKTYPE
-from pcapkit.protocols.transport.transport import TP_PROTO
+from pcapkit.const.misc.linktype import LinkType as LINKTYPE
+from pcapkit.const.misc.transtype import TransType as TP_PROTO
 from pcapkit.utilities.exceptions import ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning
 

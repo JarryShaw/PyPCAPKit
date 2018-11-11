@@ -11,8 +11,8 @@ import os
 import traceback
 
 ###############################################################################
+# from pcapkit.foundation.analysis import analyse
 # from pcapkit.protocols.raw import Raw
-# # from pcapkit.foundation.analysis import analyse
 ###############################################################################
 
 __all__ = ['seekset', 'seekset_ng', 'beholder', 'beholder_ng']

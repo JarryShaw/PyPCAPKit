@@ -16,8 +16,8 @@ Octets      Bits        Name                    Description
 """
 import textwrap
 
-from pcapkit._common.ipx_sock import Sockets as SOCK
-from pcapkit._common.ipx_type import PktType as TYPE
+from pcapkit.const.ipx.packet import Packet as TYPE
+from pcapkit.const.ipx.socket import Socket as SOCK
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 

@@ -4,13 +4,15 @@
 """
 import re
 
-from pcapkit._common.ftp_command import Command
-from pcapkit._common.ftp_return_code import ReturnCode
+from pcapkit.const.ftp.command import Command
+from pcapkit.const.ftp.return_code import ReturnCode
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
 from pcapkit.protocols.null import NoPayload
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+
+__all__ = ['FTP']
 
 
 class FTP(Application):

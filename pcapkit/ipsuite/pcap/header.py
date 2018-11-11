@@ -4,10 +4,9 @@
 """
 import sys
 
+from pcapkit.const.misc.linktype import LinkType as LINKTYPE
 from pcapkit.ipsuite.protocol import Protocol
-from pcapkit.protocols.link.link import LINKTYPE
 from pcapkit.utilities.exceptions import EndianError
-
 
 __all__ = ['Header']
 
@@ -63,6 +62,15 @@ class Header(Protocol):
         * __make__ -- make packet data
 
     """
+    ##########################################################################
+    # Properties.
+    ##########################################################################
+
+    @property
+    def name(self):
+        """Name of corresponding protocol."""
+        return 'Global Header'
+
     ##########################################################################
     # Utilities.
     ##########################################################################

@@ -3,7 +3,7 @@
 import setuptools
 
 # version string
-__version__ = '0.12.4'
+__version__ = '0.12.5'
 
 # README
 with open('./README.md', 'r') as file:
@@ -37,7 +37,7 @@ setuptools.setup(
     },
     packages=[
         'pcapkit',
-        'pcapkit._common',
+        'pcapkit.const',
         'pcapkit.corekit',
         'pcapkit.dumpkit',
         'pcapkit.foundation',

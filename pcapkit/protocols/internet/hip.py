@@ -32,27 +32,30 @@ Protocol (HIP), whose structure is described as below.
 import collections
 import ipaddress
 
-from pcapkit._common.hip_cert_type import CertType as _CERT_TYPE
-from pcapkit._common.hip_cipher_id import CipherID as _CIPHER_ID
-from pcapkit._common.hip_di_type import DI_TYPE as _DI_TYPE
-from pcapkit._common.hip_ecdsa_curve import ECDSA as _ECDSA_CURVE
-from pcapkit._common.hip_ecdsa_low_curve import ECDSA_LOW as _ECDSA_LOW_CURVE
-from pcapkit._common.hip_esp_suite_id import ESP_SuiteID as _ESP_SUITE_ID
-from pcapkit._common.hip_group_id import GroupID as _GROUP_ID
-from pcapkit._common.hip_hi_algorithm import HI_ALG as _HI_ALGORITHM
-from pcapkit._common.hip_hit_suite_id import HIT_SuiteID as _HIT_SUITE_ID
-from pcapkit._common.hip_mode_id import ModeID as _MODE_ID
-from pcapkit._common.hip_notification_type import MsgType as _NOTIFICATION_TYPE
-from pcapkit._common.hip_para import ParamType as _HIP_PARA
-from pcapkit._common.hip_reg_failure_type import \
-    RegFailType as _REG_FAILURE_TYPE
-from pcapkit._common.hip_reg_type import RegType as _REG_TYPE
-from pcapkit._common.hip_suite_id import SuiteID as _SUITE_ID
-from pcapkit._common.hip_tp_mode_id import TAT_ModeID as _TP_MODE_ID
-from pcapkit._common.hip_types import PktType as _HIP_TYPES
+from pcapkit.const.hip.certificate import Certificate as _CERT_TYPE
+from pcapkit.const.hip.cipher import Cipher as _CIPHER_ID
+from pcapkit.const.hip.di import DI as _DI_TYPE
+from pcapkit.const.hip.ecdsa_curve import ECDSA_Curve as _ECDSA_CURVE
+from pcapkit.const.hip.ecdsa_low_curve import \
+    ECDSA_LOW_Curve as _ECDSA_LOW_CURVE
+from pcapkit.const.hip.esp_transform_suite import \
+    ESP_TransformSuite as _ESP_SUITE_ID
+from pcapkit.const.hip.group import Group as _GROUP_ID
+from pcapkit.const.hip.hi_algorithm import HI_Algorithm as _HI_ALGORITHM
+from pcapkit.const.hip.hit_suite import HIT_Suite as _HIT_SUITE_ID
+from pcapkit.const.hip.nat_traversal import NAT_Traversal as _MODE_ID
+from pcapkit.const.hip.notify_message import \
+    NotifyMessage as _NOTIFICATION_TYPE
+from pcapkit.const.hip.packet import Packet as _HIP_TYPES
+from pcapkit.const.hip.parameter import Parameter as _HIP_PARA
+from pcapkit.const.hip.registration import Registration as _REG_TYPE
+from pcapkit.const.hip.registration_failure import \
+    RegistrationFailure as _REG_FAILURE_TYPE
+from pcapkit.const.hip.suite import Suite as _SUITE_ID
+from pcapkit.const.hip.transport import Transport as _TP_MODE_ID
+from pcapkit.const.misc.transtype import TransType as TP_PROTO
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.transport.transport import TP_PROTO
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 __all__ = ['HIP']

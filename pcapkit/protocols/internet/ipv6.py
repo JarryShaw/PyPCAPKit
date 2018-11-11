@@ -30,14 +30,15 @@ which implements extractor for Internet Protocol version 6
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
+# TODO: Implements IPv6 extension headers.
+
 import collections
 import ipaddress
 
-from pcapkit._common.ipv6_ext_hdr import EXT_HDR
+from pcapkit.const.ipv6.extension_header import ExtensionHeader as EXT_HDR
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ip import IP
 
-# TODO: Implements IPv6 extension headers.
 __all__ = ['IPv6']
 
 

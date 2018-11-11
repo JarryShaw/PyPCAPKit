@@ -8,10 +8,10 @@ latter is a base class for internet layer protocols, eg.
 AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 
 """
-from pcapkit._common.ethertype import EtherType as ETHERTYPE
+from pcapkit.const.misc.ethertype import EtherType as ETHERTYPE
+from pcapkit.const.misc.transtype import TransType as TP_PROTO
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.protocols.transport.transport import TP_PROTO
 from pcapkit.utilities.decorators import beholder
 
 __all__ = ['Internet', 'ETHERTYPE']
@@ -91,7 +91,7 @@ class Internet(Protocol):
             * dict -- current protocol with next layer extracted
 
         """
-        if self._onerror:  # pylint: disable=E1101
+        if self._onerror:
             next_ = beholder(self._import_next_layer)(self, proto, length, version=version)
         else:
             next_ = self._import_next_layer(proto, length, version=version)
@@ -139,7 +139,7 @@ class Internet(Protocol):
         """
         if length == 0:
             from pcapkit.protocols.null import NoPayload as Protocol
-        elif self._sigterm or proto == 59:  # pylint: disable=E1101
+        elif self._sigterm or proto == 59:
             from pcapkit.protocols.raw import Raw as Protocol
         elif proto == 51:
             from pcapkit.protocols.internet.ah import AH as Protocol
@@ -166,5 +166,5 @@ class Internet(Protocol):
         else:
             from pcapkit.protocols.raw import Raw as Protocol
         next_ = Protocol(self._file, length, version=version, extension=extension,
-                         error=self._onerror, layer=self._exlayer, protocol=self._exproto)  # pylint: disable=E1101
+                         error=self._onerror, layer=self._exlayer, protocol=self._exproto)
         return next_

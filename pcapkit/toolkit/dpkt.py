@@ -9,7 +9,7 @@ its caller.
 """
 import ipaddress
 
-from pcapkit.protocols.transport.transport import TP_PROTO
+from pcapkit.const.misc.transtype import TransType as TP_PROTO
 
 __all__ = [
     'ipv6_hdr_len', 'packet2chain', 'packet2dict',

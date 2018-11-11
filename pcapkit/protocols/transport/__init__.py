@@ -6,6 +6,8 @@ in transport layer, with detailed implementation and
 methods.
 
 """
+# TODO: Implements DCCP, RSVP, STCP.
+
 # Base Class for Transport Layer
 from pcapkit.protocols.transport.transport import Transport
 
@@ -16,7 +18,7 @@ from pcapkit.protocols.transport.udp import UDP
 # Transport Layer Protocol Numbers
 from pcapkit.protocols.transport.transport import TP_PROTO
 
-# TODO: Implements DCCP, RSVP, STCP.
+
 __all__ = [
     'TP_PROTO',     # Protocol Numbers
     'TCP', 'UDP',   # Transport Layer Protocols

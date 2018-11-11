@@ -22,8 +22,8 @@ which implements extractor for Open Shortest Path First
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-from pcapkit._common.ospf_auth import AuthType as AUTH
-from pcapkit._common.ospf_type import PktType as TYPE
+from pcapkit.const.ospf.authentication import Authentication as AUTH
+from pcapkit.const.ospf.packet import Packet as TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 

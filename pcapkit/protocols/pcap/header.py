@@ -19,7 +19,7 @@ typedef struct pcap_hdr_s {
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.protocols.link.link import LINKTYPE
+from pcapkit.const.misc.linktype import LinkType as LINKTYPE
 from pcapkit.utilities.exceptions import FileError, UnsupportedCall
 from pcapkit.utilities.validations import int_check
 

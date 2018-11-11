@@ -15,16 +15,17 @@ Protocol (HTTP/2), whose structure is described as below.
 +---------------------------------------------------------------+
 
 """
+# TODO: Considering replacing flags with `aenum.IntFlag`.
+
 import collections
 
-from pcapkit._common.http_error_code import ErrCode as _ERROR_CODE
-from pcapkit._common.http_para_name import Settings as _PARA_NAME
-from pcapkit._common.http_type import PktType as _HTTP_TYPE
+from pcapkit.const.http.error_code import ErrorCode as _ERROR_CODE
+from pcapkit.const.http.frame import Frame as _HTTP_TYPE
+from pcapkit.const.http.setting import Setting as _PARA_NAME
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.http import HTTP
 from pcapkit.utilities.exceptions import ProtocolError
 
-# TODO: Considering replacing flags with `aenum.IntFlag`.
 __all__ = ['HTTPv2']
 
 # HTTP/2 Functions

@@ -29,8 +29,8 @@ Protocol (TCP), whose structure is described as below.
 import ipaddress
 import struct
 
-from pcapkit._common.tcp_chksum_opt import ChksumOpt as chksum_opt
-from pcapkit._common.tcp_opt_type import Options as OPT_TYPE
+from pcapkit.const.tcp.checksum import Checksum as chksum_opt
+from pcapkit.const.tcp.option import Option as OPT_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.transport.transport import Transport
 from pcapkit.utilities.decorators import seekset
