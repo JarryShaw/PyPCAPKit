@@ -25,6 +25,11 @@ def analyse(file, length=None, *, _termination=False):
     """Analyse application layer packets."""
     seekset = file.tell()
     if not _termination:
+        # FTP analysis
+        flag, ftp = _analyse_ftp(file, length, seekset=seekset)
+        if flag:
+            return ftp
+
         # HTTP/1.* analysis
         flag, http = _analyse_httpv1(file, length, seekset=seekset)
         if flag:
@@ -37,11 +42,6 @@ def analyse(file, length=None, *, _termination=False):
         flag, http = _analyse_httpv2(file, length, seekset=seekset)
         if flag:
             return http
-
-        # FTP analysis
-        flag, ftp = _analyse_ftp(file, length, seekset=seekset)
-        if flag:
-            return ftp
 
     # raw packet analysis
     return Raw(file, length)

@@ -76,7 +76,7 @@ class Transport(Protocol):
             * str -- alias of next layer
 
         """
-        if self._exproto == 'null' or self._exlayer == 'None':
+        if self._exproto == 'null' and self._exlayer == 'None':
             from pcapkit.protocols.raw import Raw as NextLayer
         else:
             from pcapkit.foundation.analysis import analyse as NextLayer
