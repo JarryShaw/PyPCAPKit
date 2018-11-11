@@ -2,6 +2,7 @@
 """file transfer protocol
 
 """
+import contextlib
 import re
 
 from pcapkit.const.ftp.command import Command
@@ -65,29 +66,37 @@ class FTP(Application):
     ##########################################################################
 
     def read_ftp(self, length):
-        text = self._read_fileng(length)
-        if not text.endswith(b'\r\n'):
+        byte = self._read_fileng(length)
+        if (not byte.endswith(b'\r\n')) or (len(byte.splitlines()) > 1):
             raise ProtocolError('FTP: invalid format', quiet=True)
+        text = self.decode(byte.strip())
 
-        temp = text.strip().split(maxsplit=1)
-        if len(temp) == 2:
-            pref, suff = temp
-        else:
-            pref = temp[0].strip(b'-')
-            suff = bytes()
+        if re.match(r'^\d{3}', text):
+            pref = int(text[:3])
+            flag = False
+            with contextlib.suppress(IndexError):
+                flag = True if text[3] == '-' else False
+            suff = text[4:] or None
 
-        try:
-            code = ReturnCode.get(int(pref))
+            code = ReturnCode.get(pref)
             ftp = dict(
                 type='response',
                 code=code,
-                arg=self.decode(suff),
+                arg=suff,
+                mf=flag,
             )
-        except ValueError:
-            cmmd = Command.get(self.decode(pref))
+        else:
+            temp = text.split(maxsplit=1)
+            if len(temp) == 2:
+                pref, suff = temp
+            else:
+                pref, suff = text, None
+
+            cmmd = Command.get(pref)
             ftp = dict(
                 type='request',
                 command=cmmd,
-                arg=self.decode(suff),
+                arg=suff,
             )
+
         return ftp
