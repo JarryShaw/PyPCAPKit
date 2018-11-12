@@ -34,6 +34,11 @@ from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning,
                                         EngineWarning, FormatWarning,
                                         LayerWarning, ProtocolWarning)
 
+try:
+    import pathlib2 as pathlib
+except ImportError:
+    import pathlib
+
 ###############################################################################
 # import enum
 # import multiprocessing
@@ -82,15 +87,6 @@ elif 'sched_getaffinity' in os.__all__:
     CPU_CNT = len(os.sched_getaffinity(0))  # pylint: disable=E1101
 else:
     CPU_CNT = os.cpu_count() or 1
-
-
-def mkdir(p):
-    path = pathlib.Path(p)
-    try:
-        path.mkdir(parents=True)
-    except OSError:
-        if not path.is_dir():
-            raise
 
 
 class Extractor:
@@ -326,12 +322,12 @@ class Extractor:
                     raise FormatError('Output format unspecified.')
                 elif files:
                     ofnm = 'out'
-                    mkdir(ofnm)
+                    pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
                 else:
                     ofnm = f'out.{ext}'
             else:
                 fext = os.path.splitext(fout)[1]
-                mkdir(os.path.split(fout)[0])
+                pathlib.Path(os.path.split(fout)[0]).mkdir(parents=True, exist_ok=True)
                 if fext:
                     files = False
                     ofnm = fout
@@ -342,7 +338,7 @@ class Extractor:
                     raise FormatError('Output format unspecified.')
                 elif files:
                     ofnm = fout
-                    mkdir(ofnm)
+                    pathlib.Path(ofnm).mkdir(parents=True, exist_ok=True)
                 elif extension:
                     ofnm = f'{fout}.{ext}'
                 else:

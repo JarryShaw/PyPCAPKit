@@ -16,6 +16,11 @@ from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.validations import pkt_check
 from pcapkit.utilities.warnings import FileWarning, FormatWarning
 
+try:
+    import pathlib2 as pathlib
+except ImportError:
+    import pathlib
+
 ###############################################################################
 # from dictdumper import JSON, PLIST, XML, JavaScript, Tree
 # from pcapkit.dumpkit import PCAP, NotImplementedIO
@@ -84,18 +89,12 @@ class TraceFlow:
             return output, ''
 
         try:
-            path = pathlib.Path(fout)
-            path.mkdir(parents=True)
+            pathlib.Path(fout).mkdir(parents=True, exist_ok=True)
         except FileExistsError as error:
-            if path.is_dir():
-                pass
-            elif fmt is None:
+            if fmt is None:
                 warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
                 raise FileExists(*error.args) from None
-        except OSError:
-            if not path.is_dir():
-                raise
 
         return output, fmt
 
