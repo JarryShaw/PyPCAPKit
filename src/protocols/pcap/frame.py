@@ -108,9 +108,9 @@ class Frame(Protocol):
         _olen = self._read_unpack(4, lilendian=True)
 
         if self._nsec:
-            _epch = _tsss + _tsus / 1_000_000_000
+            _epch = _tsss + _tsus / 1000000000
         else:
-            _epch = _tsss + _tsus / 1_000_000
+            _epch = _tsss + _tsus / 1000000
         _time = datetime.datetime.fromtimestamp(_epch)
 
         frame = dict(

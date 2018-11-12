@@ -3,11 +3,16 @@
 
 """
 import datetime
+import sys
 import time
 
 from pcapkit.ipsuite.protocol import Protocol
 
 __all__ = ['Frame']
+
+# check Python version
+version_info = sys.version_info
+py37 = (version_info.major >= 3 and version_info.minor >= 7)
 
 
 class Frame(Protocol):
@@ -63,10 +68,12 @@ class Frame(Protocol):
             nanosecond = self.__args__.get('nanosecond', False)         # nanosecond-resolution file flag
             timestamp = self.__args__.get('timestamp', time.time())     # timestamp
             now = datetime.datetime.fromtimestamp(timestamp)            # timestamp datetime instance
+            if py37 and nanosecond:
+                _default_ts_usec = time.time_ns() % 1000000000
+            else:
+                _default_ts_usec = now.microsecond * (1000 if nanosecond else 1)
             ts_sec = self.__args__.get('ts_sec', now.second)            # timestamp seconds
-            ts_usec = self.__args__.get(
-                'ts_usec', now.microsecond * (1_000 if nanosecond else 1)
-            )                                                           # timestamp microseconds
+            ts_usec = self.__args__.get('ts_usec', _default_ts_usec)    # timestamp microseconds
             return ts_sec, ts_usec
 
         # fetch values
