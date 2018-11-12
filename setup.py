@@ -3,7 +3,7 @@
 import setuptools
 
 # version string
-__version__ = '0.12.8'
+__version__ = '0.12.9'
 
 # README
 with open('./README.md', 'r') as file:
