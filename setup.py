@@ -3,7 +3,7 @@
 import setuptools
 
 # version string
-__version__ = '0.12.7'
+__version__ = '0.12.8'
 
 # README
 with open('./README.md', 'r') as file:
@@ -28,6 +28,7 @@ setuptools.setup(
         'DPKT': ['dpkt'],
         'Scapy': ['scapy'],
         'PyShark': ['pyshark'],
+        ':python_version == "3.4"': ['pathlib2>=2.3.2'],
     },
     # py_modules = ['pcapkit'],
     entry_points={
@@ -38,6 +39,18 @@ setuptools.setup(
     packages=[
         'pcapkit',
         'pcapkit.const',
+        'pcapkit.const.arp',
+        'pcapkit.const.ftp',
+        'pcapkit.const.hip',
+        'pcapkit.const.http',
+        'pcapkit.const.ipv4',
+        'pcapkit.const.ipv6',
+        'pcapkit.const.ipx',
+        'pcapkit.const.mh',
+        'pcapkit.const.misc',
+        'pcapkit.const.ospf',
+        'pcapkit.const.tcp',
+        'pcapkit.const.vlan',
         'pcapkit.corekit',
         'pcapkit.dumpkit',
         'pcapkit.foundation',
