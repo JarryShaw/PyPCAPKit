@@ -84,6 +84,7 @@ class FTP(Application):
                 code=code,
                 arg=suff,
                 mf=flag,
+                raw=byte,
             )
         else:
             temp = text.split(maxsplit=1)
@@ -97,6 +98,7 @@ class FTP(Application):
                 type='request',
                 command=cmmd,
                 arg=suff,
+                raw=byte,
             )
 
         return ftp

@@ -34,10 +34,10 @@ def seekset_ng(func):
     """Read file from start then set back to original."""
     @functools.wraps(func)
     def seekcur(file, *args, seekset=os.SEEK_SET, **kw):
-        seek_cur = file.tell()
+        # seek_cur = file.tell()
         file.seek(seekset, os.SEEK_SET)
         return_ = func(file, *args, seekset=seekset, **kw)
-        file.seek(seek_cur, os.SEEK_SET)
+        # file.seek(seek_cur, os.SEEK_SET)
         return return_
     return seekcur
 

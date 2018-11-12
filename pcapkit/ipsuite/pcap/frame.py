@@ -2,7 +2,6 @@
 """
 
 """
-import datetime
 import sys
 import time
 
@@ -67,12 +66,11 @@ class Frame(Protocol):
             """Make timestamp."""
             nanosecond = self.__args__.get('nanosecond', False)         # nanosecond-resolution file flag
             timestamp = self.__args__.get('timestamp', time.time())     # timestamp
-            now = datetime.datetime.fromtimestamp(timestamp)            # timestamp datetime instance
+            ts_sec = self.__args__.get('ts_sec', int(timestamp))        # timestamp seconds
             if py37 and nanosecond:
                 _default_ts_usec = time.time_ns() % 1000000000
             else:
-                _default_ts_usec = now.microsecond * (1000 if nanosecond else 1)
-            ts_sec = self.__args__.get('ts_sec', now.second)            # timestamp seconds
+                _default_ts_usec = int((timestamp - ts_sec) * (1000000000 if nanosecond else 1000000))
             ts_usec = self.__args__.get('ts_usec', _default_ts_usec)    # timestamp microseconds
             return ts_sec, ts_usec
 
