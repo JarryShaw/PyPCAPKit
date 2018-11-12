@@ -1,14 +1,13 @@
 global-include *.py
 
 include doc/*
-include _common/*.py
+include const/*/*.py
 
 prune NotImplemented
 prune deprecated
 prune testbench
-prune _contrib
-prune _vendor
 prune archive
+prune vendor
 prune sample
 prune build
 prune dist
