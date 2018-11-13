@@ -43,6 +43,9 @@ def analyse(file, length=None, *, _termination=False):
         if flag:
             return http
 
+        # backup file offset
+        file.seek(seekset, os.SEEK_SET)
+
     # raw packet analysis
     return Raw(file, length)
 

@@ -9,7 +9,7 @@ class defaultInfo(Info):
         try:
             return super().__getitem__(key)
         except KeyError:
-            return Info(name=None,
+            return Info(name='%s' % key,
                         feat='TVFS',
                         desc='Trivial Virtual File Store',
                         type=('parameter setting',),
