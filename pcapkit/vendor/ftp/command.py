@@ -63,7 +63,7 @@ for item in reader:
     rfcs = tuple(temp) or None
 
     if cmmd == '-N/A-':
-        MISS = '\n'.ljust(25).join((f'Info(name=None,',
+        MISS = '\n'.ljust(25).join((f"Info(name='%s' % key,",
                                     f'feat={feat!r},',
                                     f'desc={desc!r},',
                                     f'type={kind!r},',
