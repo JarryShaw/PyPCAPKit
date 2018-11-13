@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import setuptools
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 # version string
-__version__ = '0.12.9'
+__version__ = '0.12.9.post1'
 
 # README
 with open('./README.md', 'r') as file:
     long_desc = file.read()
 
 # set-up script for pip distribution
-setuptools.setup(
+setup(
     name='pypcapkit',
     version=__version__,
     author='Jarry Shaw',
@@ -22,7 +25,7 @@ setuptools.setup(
     long_description=long_desc,
     long_description_content_type='text/markdown',
     python_requires='>=3.4',
-    install_requires=['setuptools', 'dictdumper', 'chardet', 'aenum', 'emoji'],
+    install_requires=['dictdumper', 'chardet', 'aenum', 'emoji'],
     extras_require={
         'all': ['dpkt', 'scapy', 'pyshark'],
         'DPKT': ['dpkt'],
