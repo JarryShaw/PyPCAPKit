@@ -20,7 +20,9 @@ cp -rf src \
        README.md \
        MANIFEST.in \
        .gitattributes release/
-rm -rf release/**/.DS_Store
+rm -rf release/src/protocols/*/NotImplemented \
+       release/**/__pycache__ \
+       release/**/.DS_Store
 cd release/
 mv src pcapkit
 
