@@ -1,15 +1,9 @@
+global-exclude .DS_Store
+
+global-include *.md
 global-include *.py
 
-include doc/*
-include const/*/*.py
+include README.md
+include LICENSE
 
 prune NotImplemented
-prune deprecated
-prune testbench
-prune archive
-prune vendor
-prune sample
-prune build
-prune dist
-prune test
-prune src
