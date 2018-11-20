@@ -4,7 +4,7 @@ import pkg_resources
 import setuptools
 
 # version string
-__version__ = '0.12.9.post3'
+__version__ = '0.12.9.post4'
 
 # set-up script for pip distribution
 setuptools.setup(
@@ -36,7 +36,7 @@ setuptools.setup(
         ]
     },
     packages=setuptools.find_namespace_packages(
-        include=['pcapkit.*'],
+        include=['pcapkit', 'pcapkit.*'],
         exclude=['pcapkit.vendor.*', 'pcapkit.vendor', '*.NotImplemented'],
     ),
     # packages=[
