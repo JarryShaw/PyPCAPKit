@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
-import pkg_resources
 import setuptools
 
 # version string
-__version__ = '0.12.9.post4'
+__version__ = '0.12.9.post5'
+
+# README
+with open('README.md') as file:
+    long_description = file.read()
 
 # set-up script for pip distribution
 setuptools.setup(
@@ -16,7 +19,8 @@ setuptools.setup(
     license='GNU General Public License v3 (GPLv3)',
     keywords='computer-networking pcap-analyser pcap-parser',
     description='Python multi-engine PCAP analyse kit.',
-    long_description=pkg_resources.resource_string(__name__, 'README.md').decode(),
+    long_description=long_description,
+    # long_description=pkg_resources.resource_string(__name__, 'README.md').decode(),
     long_description_content_type='text/markdown',
     python_requires='>=3.4',
     include_package_data=True,
@@ -35,45 +39,45 @@ setuptools.setup(
             'pcapkit = pcapkit.__main__:main',
         ]
     },
-    packages=setuptools.find_namespace_packages(
-        include=['pcapkit', 'pcapkit.*'],
-        exclude=['pcapkit.vendor.*', 'pcapkit.vendor', '*.NotImplemented'],
-    ),
-    # packages=[
-    #     'pcapkit',
-    #     'pcapkit.const',
-    #     'pcapkit.const.arp',
-    #     'pcapkit.const.ftp',
-    #     'pcapkit.const.hip',
-    #     'pcapkit.const.http',
-    #     'pcapkit.const.ipv4',
-    #     'pcapkit.const.ipv6',
-    #     'pcapkit.const.ipx',
-    #     'pcapkit.const.mh',
-    #     'pcapkit.const.misc',
-    #     'pcapkit.const.ospf',
-    #     'pcapkit.const.tcp',
-    #     'pcapkit.const.vlan',
-    #     'pcapkit.corekit',
-    #     'pcapkit.dumpkit',
-    #     'pcapkit.foundation',
-    #     'pcapkit.interface',
-    #     'pcapkit.ipsuite',
-    #     'pcapkit.ipsuite.pcap',
-    #     'pcapkit.ipsuite.application',
-    #     'pcapkit.ipsuite.internet',
-    #     'pcapkit.ipsuite.link',
-    #     'pcapkit.ipsuite.transport',
-    #     'pcapkit.protocols',
-    #     'pcapkit.protocols.pcap',
-    #     'pcapkit.protocols.application',
-    #     'pcapkit.protocols.internet',
-    #     'pcapkit.protocols.link',
-    #     'pcapkit.protocols.transport',
-    #     'pcapkit.reassembly',
-    #     'pcapkit.toolkit',
-    #     'pcapkit.utilities',
-    # ],
+    # packages=setuptools.find_namespace_packages(
+    #     include=['pcapkit', 'pcapkit.*'],
+    #     exclude=['pcapkit.vendor.*', 'pcapkit.vendor', '*.NotImplemented'],
+    # ),
+    packages=[
+        'pcapkit',
+        'pcapkit.const',
+        'pcapkit.const.arp',
+        'pcapkit.const.ftp',
+        'pcapkit.const.hip',
+        'pcapkit.const.http',
+        'pcapkit.const.ipv4',
+        'pcapkit.const.ipv6',
+        'pcapkit.const.ipx',
+        'pcapkit.const.mh',
+        'pcapkit.const.misc',
+        'pcapkit.const.ospf',
+        'pcapkit.const.tcp',
+        'pcapkit.const.vlan',
+        'pcapkit.corekit',
+        'pcapkit.dumpkit',
+        'pcapkit.foundation',
+        'pcapkit.interface',
+        'pcapkit.ipsuite',
+        'pcapkit.ipsuite.pcap',
+        'pcapkit.ipsuite.application',
+        'pcapkit.ipsuite.internet',
+        'pcapkit.ipsuite.link',
+        'pcapkit.ipsuite.transport',
+        'pcapkit.protocols',
+        'pcapkit.protocols.pcap',
+        'pcapkit.protocols.application',
+        'pcapkit.protocols.internet',
+        'pcapkit.protocols.link',
+        'pcapkit.protocols.transport',
+        'pcapkit.reassembly',
+        'pcapkit.toolkit',
+        'pcapkit.utilities',
+    ],
     package_data={
         '': [
             'LICENSE',

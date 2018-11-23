@@ -33,14 +33,18 @@ mv -f dist/*.egg eggs/ 2> /dev/null
 mv -f dist/*.whl wheels/ 2> /dev/null
 mv -f dist/*.tar.gz sdist/ 2> /dev/null
 
-# make Python >=3.6 distribution
-python3 setup.py sdist bdist_egg bdist_wheel
+# fetch platform spec
+platform=$( python3 -c "import distutils.util; print(distutils.util.get_platform().replace('-', '_').replace('.', '_'))" )
+python3 setup.py sdist
 file=$( ls dist/*.tar.gz )
 name=${file%*.tar.gz*}
-cp "${name}-py3-none-any.whl" "${name}-py37-none-any.whl"
-cp "${name}-py3-none-any.whl" "${name}-py36-none-any.whl"
-mv "${name}-py3.7.egg" "${name}-py3.6.egg"
-rm dist/*.tar.gz "${name}-py3-none-any.whl"
+rm dist/*.tar.gz
+
+# make Python >=3.6 distribution
+python3.7 setup.py bdist_egg bdist_wheel
+mv "${name}-py3-none-any.whl" "${name}-cp37-none-${platform}.whl"
+python3.6 setup.py bdist_egg bdist_wheel
+mv "${name}-py3-none-any.whl" "${name}-cp36-none-${platform}.whl"
 
 # perform f2format
 f2format -n src
@@ -59,13 +63,11 @@ fi
 #               /System/Library/Frameworks/Python.framework/Versions/?.?/bin/python?.? ; do
 #     $python setup.py bdist_egg
 # done
-python3 setup.py sdist bdist_egg bdist_wheel
-cp "${name}-py3-none-any.whl" "${name}-py35-none-any.whl"
-cp "${name}-py3-none-any.whl" "${name}-py34-none-any.whl"
-cp "${name}-py3.7.egg" "${name}-py3.5.egg"
-cp "${name}-py3.7.egg" "${name}-py3.4.egg"
-cp "${name}-py3.6.egg" "${name}-py3.7.egg"
-rm "${name}-py3-none-any.whl"
+pypy3 setup.py bdist_wheel
+mv "${name}-py3-none-any.whl" "${name}-pp35-none-${platform}.whl"
+python3.4 setup.py bdist_egg
+python3.5 setup.py bdist_egg
+python3 setup.py sdist bdist_wheel
 
 # distribute to PyPI and TestPyPI
 twine upload dist/* -r pypi --skip-existing

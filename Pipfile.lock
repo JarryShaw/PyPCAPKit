@@ -35,11 +35,11 @@
         },
         "dictdumper": {
             "hashes": [
-                "sha256:cfaecd08913a5643493d1b20b063f472908741344ee9db6fa5aa10b1b456586e",
-                "sha256:de4cebb1f4741ecf8dadb43d4c54c7c84dd8e9e7e97124329359e93f80db85b6"
+                "sha256:6a214fe34eedfd2c181d257ce44986e13e372a72d532c57d7274707571c75ae0",
+                "sha256:acf532525a36efbccfac6d01937c7846f95617744f69899e7f6eadbf6a8815bb"
             ],
             "index": "pypi",
-            "version": "==0.6.2"
+            "version": "==0.6.5.post1"
         },
         "emoji": {
             "hashes": [
@@ -77,10 +77,10 @@
         },
         "autopep8": {
             "hashes": [
-                "sha256:1b8d42ebba751a91090d3adb5c06840b1151d71ed43e1c7a9ed6911bfe8ebe6c"
+                "sha256:33d2b5325b7e1afb4240814fe982eea3a92ebea712869bfd08b3c0393404248c"
             ],
             "index": "pypi",
-            "version": "==1.4.2"
+            "version": "==1.4.3"
         },
         "backcall": {
             "hashes": [
@@ -122,11 +122,11 @@
         },
         "dictdumper": {
             "hashes": [
-                "sha256:cfaecd08913a5643493d1b20b063f472908741344ee9db6fa5aa10b1b456586e",
-                "sha256:de4cebb1f4741ecf8dadb43d4c54c7c84dd8e9e7e97124329359e93f80db85b6"
+                "sha256:6a214fe34eedfd2c181d257ce44986e13e372a72d532c57d7274707571c75ae0",
+                "sha256:acf532525a36efbccfac6d01937c7846f95617744f69899e7f6eadbf6a8815bb"
             ],
             "index": "pypi",
-            "version": "==0.6.2"
+            "version": "==0.6.5.post1"
         },
         "dpkt": {
             "hashes": [
@@ -355,18 +355,18 @@
         },
         "pyshark": {
             "hashes": [
-                "sha256:8965e8e2da50a7fe97f80b0b8db676a0bfc131aa8f4d6017e6b0cedc46b11288"
+                "sha256:d46c7470561243c02abb32c31eff8817a76dcc4fa29df976378e172429639d8b"
             ],
             "index": "pypi",
-            "version": "==0.4.1"
+            "version": "==0.4.2.2"
         },
         "requests": {
             "hashes": [
-                "sha256:99dcfdaaeb17caf6e526f32b6a7b780461512ab3f1d992187801694cba42770c",
-                "sha256:a84b8c9ab6239b578f22d1c21d51b696dcfe004032bb80ea832398d6909d7279"
+                "sha256:65b3a120e4329e33c9889db89c80976c5272f56ea92d3e74da8a463992e3ff54",
+                "sha256:ea881206e59f41dbd0bd445437d792e43906703fff75ca8ff43ccdb11f33f263"
             ],
             "index": "pypi",
-            "version": "==2.20.0"
+            "version": "==2.20.1"
         },
         "rope": {
             "hashes": [
