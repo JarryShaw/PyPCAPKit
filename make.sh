@@ -32,6 +32,7 @@ rm -rf build 2> /dev/null
 mv -f dist/*.egg eggs/ 2> /dev/null
 mv -f dist/*.whl wheels/ 2> /dev/null
 mv -f dist/*.tar.gz sdist/ 2> /dev/null
+rm -rf dist 2> /dev/null
 
 # fetch platform spec
 platform=$( python3 -c "import distutils.util; print(distutils.util.get_platform().replace('-', '_').replace('.', '_'))" )
