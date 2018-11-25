@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import setuptools
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 # version string
-__version__ = '0.12.9.post5'
+__version__ = '0.12.10.post1'
 
 # README
 with open('README.md') as file:
     long_description = file.read()
 
 # set-up script for pip distribution
-setuptools.setup(
+setup(
     name='pypcapkit',
     version=__version__,
     author='Jarry Shaw',

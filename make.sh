@@ -67,7 +67,7 @@ pypy3 setup.py bdist_wheel
 mv "${name}-py3-none-any.whl" "${name}-pp35-none-${platform}.whl"
 python3.4 setup.py bdist_egg
 python3.5 setup.py bdist_egg
-python3 setup.py sdist bdist_wheel
+python3 setup.py sdist
 
 # distribute to PyPI and TestPyPI
 twine upload dist/* -r pypi --skip-existing

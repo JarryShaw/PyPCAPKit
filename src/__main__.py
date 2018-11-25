@@ -16,7 +16,7 @@ from pcapkit.foundation.extraction import Extractor
 from pcapkit.interface import JSON, PLIST, TREE
 
 # version number
-__version__ = '0.6.0'
+__version__ = '0.6.1'
 
 
 def get_parser():
@@ -86,10 +86,16 @@ def main():
                           engine=args.engine, extension=args.auto_extension)
 
     if not args.verbose:
-        print(emoji.emojize(f":police_car_light: Loading file {extractor.input!r}"))
+        try:
+            print(emoji.emojize(f":police_car_light: Loading file {extractor.input!r}"))
+        except UnicodeEncodeError:
+            print(f"[*] Loading file {extractor.input!r}")
         for _ in extractor:
             print(f' - Frame {extractor.length:>3d}: {extractor.protocol}')
-        print(emoji.emojize(f":beer_mug: Report file{'s' if args.files else ''} stored in {extractor.output!r}"))
+        try:
+            print(emoji.emojize(f":beer_mug: Report file{'s' if args.files else ''} stored in {extractor.output!r}"))
+        except UnicodeEncodeError:
+            print(f"[*] Report file{'s' if args.files else ''} stored in {extractor.output!r}")
 
 
 if __name__ == '__main__':
