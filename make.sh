@@ -58,9 +58,9 @@ fi
 #               /System/Library/Frameworks/Python.framework/Versions/?.?/bin/python?.? ; do
 #     $python setup.py bdist_egg
 # done
+python3.5 setup.py bdist_egg bdist_wheel --plat-name="${platform}" --python-tag='cp35'
+python3.4 setup.py bdist_egg bdist_wheel --plat-name="${platform}" --python-tag='cp34'
 pypy3 setup.py bdist_wheel --plat-name="${platform}" --python-tag='pp35'
-python3.5 setup.py bdist_egg
-python3.4 setup.py bdist_egg
 python3 setup.py sdist
 
 # distribute to PyPI and TestPyPI

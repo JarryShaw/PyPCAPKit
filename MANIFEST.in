@@ -6,4 +6,5 @@ global-include *.py
 include README.md
 include LICENSE
 
-prune NotImplemented
+prune pcapkit/protocols/*/NotImplemented
+prune pcapkit/vendor
