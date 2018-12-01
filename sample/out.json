@@ -10,7 +10,8 @@
 		"thiszone" : 0,
 		"sigfigs" : 0,
 		"snaplen" : 262144,
-		"network" : "No.1 ETHERNET"
+		"network" : "No.1 ETHERNET",
+		"packet" : "d4 c3 b2 a1 02 00 04 00 00 00 00 00 00 00 00 00 00 00 04 00 01 00 00 00"
 	},
 	"Frame 1" : {
 		"frame_info" : {

@@ -16,6 +16,8 @@ typedef struct pcap_hdr_s {
 } pcap_hdr_t;
 
 """
+import io
+
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.protocol import Protocol
@@ -147,6 +149,9 @@ class Header(Protocol):
         _slen = self._read_unpack(4, lilendian=lilendian)
         _type = self._read_protos(4)
 
+        _byte = self._read_packet(24)
+        self._file = io.BytesIO(_byte) 
+
         header = dict(
             magic_number=dict(
                 data=_magn,
@@ -159,6 +164,7 @@ class Header(Protocol):
             sigfigs=_acts,
             snaplen=_slen,
             network=_type,
+            packet=_byte,
         )
 
         return header

@@ -11,6 +11,9 @@ Global Header
   |-- sigfigs -> 0
   |-- snaplen -> 262144
   |-- network -> No.1 ETHERNET
+  |-- packet
+        |--> d4 c3 b2 a1 02 00 04 00 00 00 00 00 00 00 00 00
+             00 00 04 00 01 00 00 00
 
 Frame 1
   |-- frame_info
@@ -203,7 +206,7 @@ Frame 3
   |                 |     |          7c 8e 00 00
   |                 |     |-- payload -> NIL
   |                 |-- nopayload
- NIL  |-- protocols -> Ethernet:IPv4:TCP
+  |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 4
   |-- frame_info
@@ -284,7 +287,7 @@ Frame 4
   |                 |     |          f9 3e 00 00
   |                 |     |-- payload -> NIL
   |                 |-- nopayload
- NIL  |-- protocols -> Ethernet:IPv4:TCP
+  |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 5
   |-- frame_info
@@ -365,7 +368,7 @@ Frame 5
   |                 |     |          2a f4 00 00
   |                 |     |-- payload -> NIL
   |                 |-- nopayload
- NIL  |-- protocols -> Ethernet:IPv4:TCP
+  |-- protocols -> Ethernet:IPv4:TCP
 
 Frame 6
   |-- frame_info

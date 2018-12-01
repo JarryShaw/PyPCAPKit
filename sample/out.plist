@@ -25,6 +25,8 @@
 		<integer>262144</integer>
 		<key>network</key>
 		<string>No.1 ETHERNET</string>
+		<key>packet</key>
+		<data>1MOyoQIABAAAAAAAAAAAAAAABAABAAAA</data>
 	</dict>
 	<key>Frame 1</key>
 	<dict>

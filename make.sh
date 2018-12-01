@@ -42,7 +42,7 @@ python3.7 setup.py bdist_egg bdist_wheel --plat-name="${platform}" --python-tag=
 python3.6 setup.py bdist_egg bdist_wheel --plat-name="${platform}" --python-tag='cp36'
 
 # perform f2format
-f2format -n src
+f2format -n pcapkit
 ret="$?"
 if [[ $ret -ne "0" ]] ; then
     exit $ret
