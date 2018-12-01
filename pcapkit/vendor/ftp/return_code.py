@@ -35,14 +35,14 @@ for item in content:
     code = ' '.join(line[0].stripped_strings)
     if len(code) != 3:
         continue
-    desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
+    desc = "{}.".format(' '.join(line[1].stripped_strings).split('.')[0].strip())
     temp.append(desc)
 record = collections.Counter(temp)
 
 
 def rename(name, code):
     if record[name] > 1:
-        name = f'{name} [{code}]'
+        name = '{} [{}]'.format(name, code)
     return name
 
 
@@ -57,8 +57,8 @@ for item in content:
     code = ' '.join(line[0].stripped_strings)
     if len(code) != 3:
         continue
-    desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
-    enum.append(f'{NAME}[{rename(desc, code)!r}] = {code}')
+    desc = "{}.".format(' '.join(line[1].stripped_strings).split('.')[0].strip())
+    enum.append('{}[{!r}] = {}'.format(NAME, rename(desc, code), code))
 
 ###############
 # Defaults
@@ -70,7 +70,7 @@ ROOT, STEM = os.path.split(temp)
 ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 
 
-def LINE(NAME, DOCS, FLAG, ENUM): return f'''\
+def LINE(NAME, DOCS, FLAG, ENUM): return '''\
 # -*- coding: utf-8 -*-
 
 from aenum import IntEnum, extend_enum
@@ -94,37 +94,37 @@ INFO = {{
 }}
 
 
-class {NAME}(IntEnum):
-    """Enumeration class for {NAME}."""
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
+class {}(IntEnum):
+    """Enumeration class for {}."""
+    _ignore_ = '{} _'
+    {} = vars()
 
-    # {DOCS}
-    {ENUM}
+    # {}
+    {}
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return {NAME}(key)
-        if key not in {NAME}._member_map_:
-            extend_enum({NAME}, key, default)
-        return {NAME}[key]
+            return {}(key)
+        if key not in {}._member_map_:
+            extend_enum({}, key, default)
+        return {}[key]
 
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not ({FLAG}):
+        if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         code = str(value)
         kind = KIND.get(code[0], 'Reserved')
         info = INFO.get(code[1], 'Reserved')
         extend_enum(cls, '%s - %s [%s]' % (kind, info, value), value)
         return cls(value)
-'''
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG)
 
 
 with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, f'../const/{STEM}'))
-with open(os.path.join(ROOT, f'../const/{STEM}/{FILE}'), 'w') as file:
+    os.mkdir(os.path.join(ROOT, '../const/{}'.format(STEM)))
+with open(os.path.join(ROOT, '../const/{}/{}'.format(STEM, FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM))

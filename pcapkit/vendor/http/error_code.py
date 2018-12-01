@@ -32,12 +32,12 @@ record = collections.Counter(map(lambda item: item[1],
 
 def hexlify(code):
     temp = hex(code)[2:].upper().zfill(8)
-    return f'0x{temp[:4]}_{temp[4:]}'
+    return '0x{}_{}'.format(temp[:4], temp[4:])
 
 
 def rename(name, code):
     if record[name] > 1:
-        return f'{name} [{code}]'
+        return '{} [{}]'.format(name, code)
     return name
 
 
@@ -54,30 +54,30 @@ for item in reader:
     temp = list()
     for rfc in filter(None, re.split(r'\[|\]', rfcs)):
         if 'RFC' in rfc:
-            temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+            temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
         else:
-            temp.append(f'[{rfc}]')
-    desc = f" {''.join(temp)}" if rfcs else ''
-    dscp = f' {dscp}' if dscp else ''
+            temp.append('[{}]'.format(rfc))
+    desc = " {}".format(''.join(temp)) if rfcs else ''
+    dscp = ' {}'.format(dscp) if dscp else ''
 
     try:
         temp = int(item[0], base=16)
         code = hexlify(temp)
         renm = rename(name, code)
 
-        pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
-        sufs = f'#{desc}{dscp}' if desc or dscp else ''
+        pres = "{}[{!r}] = {}".format(NAME, renm, code).ljust(76)
+        sufs = '#{}{}'.format(desc, dscp) if desc or dscp else ''
 
-        enum.append(f'{pres}{sufs}')
+        enum.append('{}{}'.format(pres, sufs))
     except ValueError:
         start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
 
-        miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
+        miss.append('if {} <= value <= {}:'.format(hexlify(start), hexlify(stop)))
         if desc or dscp:
-            miss.append(f'#{desc}{dscp}')
+            miss.append('#{}{}'.format(desc, dscp))
         miss.append('    temp = hex(value)[2:].upper().zfill(8)')
         miss.append(
-            f"    extend_enum(cls, '{name} [0x%s]' % (temp[:4]+'_'+temp[4:]), value)")
+            "    extend_enum(cls, '{} [0x%s]' % (temp[:4]+'_'+temp[4:]), value)".format(name))
         miss.append('    return cls(value)')
 
 ###############
@@ -91,40 +91,40 @@ ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
 
 
-def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 from aenum import IntEnum, extend_enum
 
 
-class {NAME}(IntEnum):
-    """Enumeration class for {NAME}."""
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
+class {}(IntEnum):
+    """Enumeration class for {}."""
+    _ignore_ = '{} _'
+    {} = vars()
 
-    # {DOCS}
-    {ENUM}
+    # {}
+    {}
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return {NAME}(key)
-        if key not in {NAME}._member_map_:
-            extend_enum({NAME}, key, default)
-        return {NAME}[key]
+            return {}(key)
+        if key not in {}._member_map_:
+            extend_enum({}, key, default)
+        return {}[key]
 
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not ({FLAG}):
+        if not ({}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {MISS}
+        {}
         super()._missing_(value)
-'''
+'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
 
 
 with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, f'../const/{STEM}'))
-with open(os.path.join(ROOT, f'../const/{STEM}/{FILE}'), 'w') as file:
+    os.mkdir(os.path.join(ROOT, '../const/{}'.format(STEM)))
+with open(os.path.join(ROOT, '../const/{}/{}'.format(STEM, FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

@@ -76,7 +76,7 @@ class MH(Internet):
     def payload(self):
         """Payload of current instance."""
         if self.extension:  # pylint: disable=E1101
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
+            raise UnsupportedCall("'{}' object has no attribute 'payload'".format(self.__class__.__name__))
         return self._next
 
     @property

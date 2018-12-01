@@ -32,16 +32,16 @@ CONF = dict(
 )
 
 
-def make(cmmd, feat, desc, kind, conf, rfcs): return f'''\
-{cmmd}=Info(
-        name={cmmd!r},
-        feat={feat!r},
-        desc={desc!r},
-        type={kind!r},
-        conf={conf!r},
-        note={rfcs!r}
+def make(cmmd, feat, desc, kind, conf, rfcs): return '''\
+{}=Info(
+        name={!r},
+        feat={!r},
+        desc={!r},
+        type={!r},
+        conf={!r},
+        note={!r}
     )\
-'''
+'''.format(cmmd, cmmd, feat, desc, kind, conf, rfcs)
 
 
 page = requests.get(LINK)
@@ -59,16 +59,16 @@ for item in reader:
     conf = CONF.get(item[4].split()[0])
     temp = list()
     for rfc in filter(lambda s: 'RFC' in s, re.split(r'\[|\]', item[5])):
-        temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+        temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
     rfcs = tuple(temp) or None
 
     if cmmd == '-N/A-':
-        MISS = '\n'.ljust(25).join((f"Info(name='%s' % key,",
-                                    f'feat={feat!r},',
-                                    f'desc={desc!r},',
-                                    f'type={kind!r},',
-                                    f'conf={conf!r},',
-                                    f'note={rfcs!r})'))
+        MISS = '\n'.ljust(25).join(("Info(name='%s' % key,".format(),
+                                    'feat={!r},'.format(feat),
+                                    'desc={!r},'.format(desc),
+                                    'type={!r},'.format(kind),
+                                    'conf={!r},'.format(conf),
+                                    'note={!r})'.format(rfcs)))
     else:
         info[cmmd] = make(cmmd, feat, desc, kind, conf, rfcs)
 
@@ -82,7 +82,7 @@ ROOT, STEM = os.path.split(temp)
 INFO = ',\n    '.join(map(lambda s: s.strip(), info.values()))
 
 
-def LINE(NAME, DOCS, INFO, MISS): return f'''\
+def LINE(NAME, DOCS, INFO, MISS): return '''\
 # -*- coding: utf-8 -*-
 
 from pcapkit.corekit.infoclass import Info
@@ -94,17 +94,17 @@ class defaultInfo(Info):
         try:
             return super().__getitem__(key)
         except KeyError:
-            return {MISS}
+            return {}
 
 
-# {DOCS}
-{NAME} = defaultInfo(
-    {INFO}
+# {}
+{} = defaultInfo(
+    {}
 )
-'''
+'''.format(MISS, DOCS, NAME, INFO)
 
 
 with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, f'../const/{STEM}'))
-with open(os.path.join(ROOT, f'../const/{STEM}/{FILE}'), 'w') as file:
+    os.mkdir(os.path.join(ROOT, '../const/{}'.format(STEM)))
+with open(os.path.join(ROOT, '../const/{}/{}'.format(STEM, FILE)), 'w') as file:
     file.write(LINE(NAME, DOCS, INFO, MISS))

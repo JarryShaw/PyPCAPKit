@@ -40,7 +40,7 @@ def int_check(*args, func=None):
         if not isinstance(var, numbers.Integral):
             name = type(var).__name__
             raise ComplexError(
-                f'Function {func} expected integral number, {name} got instead.')
+                'Function {} expected integral number, {} got instead.'.format(func, name))
 
 
 def real_check(*args, func=None):
@@ -50,7 +50,7 @@ def real_check(*args, func=None):
         if not isinstance(var, numbers.Real):
             name = type(var).__name__
             raise ComplexError(
-                f'Function {func} expected real number, {name} got instead.')
+                'Function {} expected real number, {} got instead.'.format(func, name))
 
 
 def complex_check(*args, func=None):
@@ -60,7 +60,7 @@ def complex_check(*args, func=None):
         if not isinstance(var, numbers.Complex):
             name = type(var).__name__
             raise ComplexError(
-                f'Function {func} expected complex number, {name} got instead.')
+                'Function {} expected complex number, {} got instead.'.format(func, name))
 
 
 def number_check(*args, func=None):
@@ -70,7 +70,7 @@ def number_check(*args, func=None):
         if not isinstance(var, numbers.Number):
             name = type(var).__name__
             raise DigitError(
-                f'Function {func} expected number, {name} got instead.')
+                'Function {} expected number, {} got instead.'.format(func, name))
 
 
 def bytes_check(*args, func=None):
@@ -80,7 +80,7 @@ def bytes_check(*args, func=None):
         if not isinstance(var, (bytes, collections.abc.ByteString)):
             name = type(var).__name__
             raise BytesError(
-                f'Function {func} expected bytes, {name} got instead.')
+                'Function {} expected bytes, {} got instead.'.format(func, name))
 
 
 def bytearray_check(*args, func=None):
@@ -90,7 +90,7 @@ def bytearray_check(*args, func=None):
         if not isinstance(var, (bytearray, collections.abc.ByteString, collections.abc.MutableSequence)):
             name = type(var).__name__
             raise BytearrayError(
-                f'Function {func} expected bytearray, {name} got instead.')
+                'Function {} expected bytearray, {} got instead.'.format(func, name))
 
 
 def str_check(*args, func=None):
@@ -100,7 +100,7 @@ def str_check(*args, func=None):
         if not isinstance(var, (str, collections.UserString, collections.abc.Sequence)):
             name = type(var).__name__
             raise StringError(
-                f'Function {func} expected str, {name} got instead.')
+                'Function {} expected str, {} got instead.'.format(func, name))
 
 
 def bool_check(*args, func=None):
@@ -110,7 +110,7 @@ def bool_check(*args, func=None):
         if not isinstance(var, bool):
             name = type(var).__name__
             raise BoolError(
-                f'Function {func} expected bool, {name} got instead.')
+                'Function {} expected bool, {} got instead.'.format(func, name))
 
 
 def list_check(*args, func=None):
@@ -120,7 +120,7 @@ def list_check(*args, func=None):
         if not isinstance(var, (list, collections.UserList, collections.abc.MutableSequence)):
             name = type(var).__name__
             raise ListError(
-                f'Function {func} expected list, {name} got instead.')
+                'Function {} expected list, {} got instead.'.format(func, name))
 
 
 def dict_check(*args, func=None):
@@ -130,7 +130,7 @@ def dict_check(*args, func=None):
         if not isinstance(var, (dict, collections.UserDict, collections.abc.MutableMapping)):
             name = type(var).__name__
             raise DictError(
-                f'Function {func} expected dict, {name} got instead.')
+                'Function {} expected dict, {} got instead.'.format(func, name))
 
 
 def tuple_check(*args, func=None):
@@ -140,7 +140,7 @@ def tuple_check(*args, func=None):
         if not isinstance(var, (tuple, collections.abc.Sequence)):
             name = type(var).__name__
             raise TupleError(
-                f'Function {func} expected tuple, {name} got instead.')
+                'Function {} expected tuple, {} got instead.'.format(func, name))
 
 
 def io_check(*args, func=None):
@@ -150,7 +150,7 @@ def io_check(*args, func=None):
         if not isinstance(var, io.IOBase):
             name = type(var).__name__
             raise IOObjError(
-                f'Function {func} expected file-like object, {name} got instead.')
+                'Function {} expected file-like object, {} got instead.'.format(func, name))
 
 
 def info_check(*args, func=None):
@@ -162,7 +162,7 @@ def info_check(*args, func=None):
         if not isinstance(var, Info):
             name = type(var).__name__
             raise InfoError(
-                f'Function {func} expected Info instance, {name} got instead.')
+                'Function {} expected Info instance, {} got instead.'.format(func, name))
 
 
 def ip_check(*args, func=None):
@@ -172,7 +172,7 @@ def ip_check(*args, func=None):
         if not isinstance(var, ipaddress._IPAddressBase):
             name = type(var).__name__
             raise IPError(
-                f'Function {func} expected IP address, {name} got instead.')
+                'Function {} expected IP address, {} got instead.'.format(func, name))
 
 
 def enum_check(*args, func=None):
@@ -182,7 +182,7 @@ def enum_check(*args, func=None):
         if not isinstance(var, (enum.EnumMeta, aenum.EnumMeta)):
             name = type(var).__name__
             raise EnumError(
-                f'Function {func} expected enumeration, {name} got instead.')
+                'Function {} expected enumeration, {} got instead.'.format(func, name))
 
 
 def frag_check(*args, protocol, func=None):
@@ -193,7 +193,7 @@ def frag_check(*args, protocol, func=None):
     elif 'TCP' in protocol:
         _tcp_frag_check(*args, func=func)
     else:
-        raise FragmentError(f'Unknown fragmented protocol {protocol}.')
+        raise FragmentError('Unknown fragmented protocol {}.'.format(protocol))
 
 
 def _ip_frag_check(*args, func=None):

@@ -34,7 +34,7 @@ __all__ = [
 
 def stacklevel():
     """Fetch current stack level."""
-    pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
+    pcapkit = '{}pcapkit{}'.format(os.path.sep, os.path.sep)
     tb = traceback.extract_stack()
     for index, tbitem in enumerate(tb):
         if pcapkit in tbitem[0]:

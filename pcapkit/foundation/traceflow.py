@@ -84,7 +84,7 @@ class TraceFlow:
         else:                   # no output file
             from pcapkit.dumpkit import NotImplementedIO as output
             if fmt is not None:
-                warnings.warn(f'Unsupported output format: {fmt}; disabled file output feature',
+                warnings.warn('Unsupported output format: {}; disabled file output feature'.format(fmt),
                               FormatWarning, stacklevel=stacklevel())
             return output, ''
 
@@ -119,7 +119,7 @@ class TraceFlow:
         output = self.trace(packet, _check=False, _output=True)
 
         # dump files
-        output(packet['frame'], name=f"Frame {packet['index']}",
+        output(packet['frame'], name="Frame {}".format(packet['index']),
                byteorder=self._endian, nanosecond=self._nnsecd)
 
     def trace(self, packet, *, _check=True, _output=False):
@@ -154,9 +154,9 @@ class TraceFlow:
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'  # pylint: disable=E1101
+            label = '{}_{}-{}_{}-{}'.format(info.src, info.srcport, info.dst, info.dstport, info.timestamp)  # pylint: disable=E1101
             self._buffer[BUFID] = dict(
-                fpout=self._foutio(f'{self._fproot}/{label}.{self._fdpext}',
+                fpout=self._foutio('{}/{}.{}'.format(self._fproot, label, self._fdpext),
                                    protocol=info.protocol),  # pylint: disable=E1101
                 index=list(),
                 label=label,
@@ -172,7 +172,7 @@ class TraceFlow:
             buf = self._buffer.pop(BUFID)
             # fpout, label = buf['fpout'], buf['label']
             if self._fdpext:
-                buf['fpout'] = f'{self._fproot}/{label}.{self._fdpext}'
+                buf['fpout'] = '{}/{}.{}'.format(self._fproot, label, self._fdpext)
             else:
                 del buf['fpout']
             buf['index'] = tuple(buf['index'])
@@ -188,7 +188,7 @@ class TraceFlow:
         for buf in self._buffer.values():
             buf = copy.deepcopy(buf)
             if self._fdpext:
-                buf['fpout'] = f"{self._fproot}/{buf['label']}.{self._fdpext}"
+                buf['fpout'] = "{}/{}.{}".format(self._fproot, buf['label'], self._fdpext)
             else:
                 del buf['fpout']
             buf['index'] = tuple(buf['index'])
