@@ -1,7 +1,6 @@
 # Change Log
 
-## [Unreleased](https://github.com/JarryShaw/PyPCAPKit/tree/HEAD)
-
+## [v0.13.0](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.0) (2018-12-08)
 **Fixed bugs:**
 
 - NameError: name 'packet' is not defined [\#2](https://github.com/JarryShaw/PyPCAPKit/issues/2)
