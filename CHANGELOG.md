@@ -1,5 +1,8 @@
 # Change Log
 
+## [v0.13.0.post1](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.0.post1) (2018-12-08)
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.0...v0.13.0.post1)
+
 ## [v0.13.0](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.0) (2018-12-08)
 **Fixed bugs:**
 
