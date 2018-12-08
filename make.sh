@@ -67,19 +67,23 @@ python3 setup.py sdist
 twine upload dist/* -r pypi --skip-existing
 twine upload dist/* -r pypitest --skip-existing
 
+# get version string
+version=$( cat setup.py | grep "^__version__" | sed "s/__version__ = '\(.*\)'/\1/" )
+
 # upload to GitHub
-git pull
-ret="$?"
-if [[ $ret -ne "0" ]] ; then
-    exit $ret
-fi
-git add .
+git pull && \
+git tag "v${version}" && \
+git add . && \
 if [[ -z "$1" ]] ; then
     git commit -a -S
 else
     git commit -a -S -m "$1"
-fi
+fi && \
 git push
+ret="$?"
+if [[ $ret -ne "0" ]] ; then
+    exit $ret
+fi
 
 # # archive original files
 # for file in $( ls archive ) ; do
@@ -91,15 +95,44 @@ git push
 
 # upload develop environment
 cd ..
-git pull
-ret="$?"
-if [[ $ret -ne "0" ]] ; then
-    exit $ret
-fi
-git add .
+git pull && \
+git tag "v${version}" && \
+git add . && \
 if [[ -z "$1" ]] ; then
     git commit -a -S
 else
     git commit -a -S -m "$1"
+fi && \
+git push
+ret="$?"
+if [[ $ret -ne "0" ]] ; then
+    exit $ret
 fi
+
+# file new release
+go run github.com/aktau/github-release release \
+    --user JarryShaw \
+    --repo PyPCAPKit \
+    --tag "v${version}" \
+    --name "PyPCAPKit v${version}" \
+    --description "$1"
+ret="$?"
+if [[ $ret -ne "0" ]] ; then
+    exit $ret
+fi
+
+# update maintenance information
+cd ..
+maintainer changelog && \
+maintainer contributor && \
+maintainer contributing
+ret="$?"
+if [[ $ret -ne "0" ]] ; then
+    exit $ret
+fi
+
+# aftermath
+git pull && \
+git add . && \
+git commit -a -S -m "Regular update after distribution" && \
 git push
