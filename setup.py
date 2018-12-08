@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 # version string
-__version__ = '0.12.11'
+__version__ = '0.13.0'
 
 # README
 with open('README.md') as file:
@@ -19,7 +19,7 @@ setup(
     author='Jarry Shaw',
     author_email='jarryshaw@icloud.com',
     url='https://github.com/JarryShaw/pypcapkit',
-    license='GNU General Public License v3 (GPLv3)',
+    license='Apache Software License',
     keywords='computer-networking pcap-analyser pcap-parser',
     description='Python multi-engine PCAP analyse kit.',
     long_description=long_description,
@@ -93,7 +93,7 @@ setup(
         'Environment :: MacOS X',
         'Environment :: Win32 (MS Windows)',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+        'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
