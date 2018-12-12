@@ -6,10 +6,10 @@ except ImportError:
     from distutils.core import setup
 
 # version string
-__version__ = '0.13.0.post1'
+__version__ = '0.13.0.post2'
 
 # README
-with open('README.md') as file:
+with open('README.md', encoding='utf-8') as file:
     long_description = file.read()
 
 # set-up script for pip distribution
