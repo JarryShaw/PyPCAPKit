@@ -35,11 +35,17 @@
         },
         "dictdumper": {
             "hashes": [
-                "sha256:6a214fe34eedfd2c181d257ce44986e13e372a72d532c57d7274707571c75ae0",
-                "sha256:acf532525a36efbccfac6d01937c7846f95617744f69899e7f6eadbf6a8815bb"
+                "sha256:35657a28bafeb416eea91161fe03ad9b73d01206d368bfca68edf06ddbb98921",
+                "sha256:5a0fe58d75c59c1baa86b7b3570f28a3d7f31620e54c88bfe033b5f956a2efd4",
+                "sha256:643fd8286f4fa384e52419e250f0993f2bdf6cc7cc5bcd2914f6b0437d22b118",
+                "sha256:b4d4c82fa208f4954fc151db43441c8d7b3384175970e5258411f7b928d92dfa",
+                "sha256:bbc7f7f7addccf4f31806018f427843d798cc904ab8c3bc6189306b47a230053",
+                "sha256:ea728ce02920a3aed052c1a8676c7098359701e298918efbc62c0eba846f807f",
+                "sha256:fee5e9b30e0d17c2bfcb85ac7cbf4ebe0b2a25af89b194f6a66b4d0e82b02aa5",
+                "sha256:fffdb67f4596355e6298ae3d4232d3917ac24d872cc1445757dc5e56a2323a35"
             ],
             "index": "pypi",
-            "version": "==0.6.5.post1"
+            "version": "==0.7.0"
         },
         "emoji": {
             "hashes": [
@@ -70,10 +76,10 @@
         },
         "astroid": {
             "hashes": [
-                "sha256:37f8e89d0e78a649edeb3751b408e96d103e76a1df19d79a0a3b559d0f4f7cd1",
-                "sha256:39870f07180e50c5a1c73a6de7b7cb487d6db649c0acd9917f154617e09f9e94"
+                "sha256:35b032003d6a863f5dcd7ec11abd5cd5893428beaa31ab164982403bcb311f22",
+                "sha256:6a5d668d7dc69110de01cdf7aeec69a679ef486862a0850cc0fd5571505b6b7e"
             ],
-            "version": "==2.1.0.dev0"
+            "version": "==2.1.0"
         },
         "autopep8": {
             "hashes": [
@@ -100,10 +106,10 @@
         },
         "certifi": {
             "hashes": [
-                "sha256:339dc09518b07e2fa7eda5450740925974815557727d6bd35d319c1524a04a4c",
-                "sha256:6d58c986d22b038c8c0df30d639f23a3e6d172a05c3583e766f4c0b785c0986a"
+                "sha256:47f9c83ef4c0c621eaef743f133f09fa8a74a9b75f037e8624f83bd1b6626cb7",
+                "sha256:993f830721089fef441cdfeb4b2c8c9df86f0c63239f06bd025a76a7daddb033"
             ],
-            "version": "==2018.10.15"
+            "version": "==2018.11.29"
         },
         "chardet": {
             "hashes": [
@@ -122,19 +128,25 @@
         },
         "dictdumper": {
             "hashes": [
-                "sha256:6a214fe34eedfd2c181d257ce44986e13e372a72d532c57d7274707571c75ae0",
-                "sha256:acf532525a36efbccfac6d01937c7846f95617744f69899e7f6eadbf6a8815bb"
+                "sha256:35657a28bafeb416eea91161fe03ad9b73d01206d368bfca68edf06ddbb98921",
+                "sha256:5a0fe58d75c59c1baa86b7b3570f28a3d7f31620e54c88bfe033b5f956a2efd4",
+                "sha256:643fd8286f4fa384e52419e250f0993f2bdf6cc7cc5bcd2914f6b0437d22b118",
+                "sha256:b4d4c82fa208f4954fc151db43441c8d7b3384175970e5258411f7b928d92dfa",
+                "sha256:bbc7f7f7addccf4f31806018f427843d798cc904ab8c3bc6189306b47a230053",
+                "sha256:ea728ce02920a3aed052c1a8676c7098359701e298918efbc62c0eba846f807f",
+                "sha256:fee5e9b30e0d17c2bfcb85ac7cbf4ebe0b2a25af89b194f6a66b4d0e82b02aa5",
+                "sha256:fffdb67f4596355e6298ae3d4232d3917ac24d872cc1445757dc5e56a2323a35"
             ],
             "index": "pypi",
-            "version": "==0.6.5.post1"
+            "version": "==0.7.0"
         },
         "dpkt": {
             "hashes": [
-                "sha256:aeb238020f689a1f7d328368d4fbaaaea48256249720e93e49343a053733735f",
-                "sha256:c6a7ee878fa3d56e2c1fb44846f937046ba03b035da27382596e76f8d9f32967"
+                "sha256:472c8fbf992f913cee2760fed8fb4253a600d7fb2210c793e2c0c0c23eb3b629",
+                "sha256:52a92ecd5ca04d5bd852bb11cb2eac4bbe38b42a7c472e0d950eeb9f82a81e54"
             ],
             "index": "pypi",
-            "version": "==1.9.1"
+            "version": "==1.9.2"
         },
         "emoji": {
             "hashes": [
@@ -161,11 +173,11 @@
         },
         "ipython": {
             "hashes": [
-                "sha256:a5781d6934a3341a1f9acb4ea5acdc7ea0a0855e689dbe755d070ca51e995435",
-                "sha256:b10a7ddd03657c761fc503495bc36471c8158e3fc948573fb9fe82a7029d8efd"
+                "sha256:6a9496209b76463f1dec126ab928919aaf1f55b38beb9219af3fe202f6bbdd12",
+                "sha256:f69932b1e806b38a7818d9a1e918e5821b685715040b48e59c657b3c7961b742"
             ],
             "index": "pypi",
-            "version": "==7.1.1"
+            "version": "==7.2.0"
         },
         "ipython-genutils": {
             "hashes": [
@@ -340,18 +352,18 @@
         },
         "pygments": {
             "hashes": [
-                "sha256:78f3f434bcc5d6ee09020f92ba487f95ba50f1e3ef83ae96b9d5ffa1bab25c5d",
-                "sha256:dbae1046def0efb574852fab9e90209b23f556367b5a320c0bcb871c77c3e8cc"
+                "sha256:6301ecb0997a52d2d31385e62d0a4a4cf18d2f2da7054a5ddad5c366cd39cee7",
+                "sha256:82666aac15622bd7bb685a4ee7f6625dd716da3ef7473620c192c0168aae64fc"
             ],
-            "version": "==2.2.0"
+            "version": "==2.3.0"
         },
         "pylint": {
             "hashes": [
-                "sha256:1d6d3622c94b4887115fe5204982eee66fdd8a951cf98635ee5caee6ec98c3ec",
-                "sha256:31142f764d2a7cd41df5196f9933b12b7ee55e73ef12204b648ad7e556c119fb"
+                "sha256:689de29ae747642ab230c6d37be2b969bf75663176658851f456619aacf27492",
+                "sha256:771467c434d0d9f081741fec1d64dfb011ed26e65e12a28fe06ca2f61c4d556c"
             ],
             "index": "pypi",
-            "version": "==2.1.1"
+            "version": "==2.2.2"
         },
         "pyshark": {
             "hashes": [
@@ -384,10 +396,10 @@
         },
         "six": {
             "hashes": [
-                "sha256:70e8a77beed4562e7f14fe23a786b54f6296e34344c23bc42f07b15018ff98e9",
-                "sha256:832dc0e10feb1aa2c68dcc57dbb658f1c7e65b9b61af69048abc87a2db00a0eb"
+                "sha256:3350809f0555b11f552448330d0b52d5f24c91a322ea4a15ef22629740f3761c",
+                "sha256:d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"
             ],
-            "version": "==1.11.0"
+            "version": "==1.12.0"
         },
         "traitlets": {
             "hashes": [
