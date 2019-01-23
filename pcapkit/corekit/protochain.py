@@ -11,6 +11,7 @@ import numbers
 import re
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.utilities.compat import Collection
 from pcapkit.utilities.exceptions import (IndexNotFound, IntError,
                                           ProtocolUnbound)
 from pcapkit.utilities.validations import int_check, str_check
@@ -22,7 +23,7 @@ from pcapkit.utilities.validations import int_check, str_check
 __all__ = ['ProtoChain']
 
 
-class _ProtoList(collections.abc.Collection):
+class _ProtoList(Collection):
     """List of protocol classes for ProtoChain."""
     @property
     def data(self):

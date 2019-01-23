@@ -11,6 +11,8 @@ import struct
 import sys
 import traceback
 
+from pcapkit.utilities.compat import ModuleNotFoundError
+
 __all__ = [
     'BaseError',                                                    # Exception
     'DigitError', 'IntError', 'RealError', 'ComplexError',          # TypeError

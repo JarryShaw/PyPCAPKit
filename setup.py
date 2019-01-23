@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 # version string
-__version__ = '0.13.0.post2'
+__version__ = '0.13.1'
 
 # README
 with open('README.md', encoding='utf-8') as file:
@@ -28,7 +28,13 @@ setup(
     python_requires='>=3.4',
     include_package_data=True,
     zip_safe=True,
-    install_requires=['dictdumper', 'chardet', 'aenum', 'emoji'],
+    install_requires=[
+        'dictdumper',   # for formatted output
+        'chardet',      # for bytes decode
+        'aenum',        # for const types
+        'emoji',        # for CLI display
+        'tbtrim',       # for refined exceptions
+    ],
     extras_require={
         'all': ['dpkt', 'scapy', 'pyshark'],
         'DPKT': ['dpkt'],

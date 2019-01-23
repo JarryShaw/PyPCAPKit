@@ -44,7 +44,7 @@ class Option(IntEnum):
     Option['Reserved [32]'] = 32
     Option['Reserved [33]'] = 33
     Option['FASTOPEN'] = 34                                                     # [RFC 7413]
-    Option['Reserved [69]'] = 69
+    Option['Encryption Negotiation'] = 69                                       # [RFC -ietf-tcpinc-tcpeno-19]
     Option['Reserved [70]'] = 70
     Option['Reserved [76]'] = 76
     Option['Reserved [77]'] = 77

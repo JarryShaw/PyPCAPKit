@@ -7,6 +7,7 @@ decorater function `seekset` and `beholder`, and several
 user-refined exceptions and validations.
 
 """
+from pcapkit.utilities.compat import *
 from pcapkit.utilities.decorators import *
 from pcapkit.utilities.exceptions import *
 from pcapkit.utilities.validations import *

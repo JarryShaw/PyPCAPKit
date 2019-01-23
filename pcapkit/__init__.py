@@ -53,6 +53,11 @@ different sections.
     dump utilities for `pcapkit` implementation
 
 """
+# set up sys.excepthook
+import os
+import tbtrim
+tbtrim.set_trim_rule(lambda filename: '{}pcapkit{}'.format(os.path.sep, os.path.sep) in filename)
+
 # All Reference
 import pcapkit.__all__ as all  # pylint: disable
 

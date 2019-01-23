@@ -27,17 +27,13 @@ from pcapkit.const.misc.transtype import TransType as TP_PROTO
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.pcap.frame import Frame
 from pcapkit.protocols.pcap.header import Header
+from pcapkit.utilities.compat import pathlib
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound,
                                           FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning,
                                         EngineWarning, FormatWarning,
                                         LayerWarning, ProtocolWarning)
-
-try:
-    import pathlib2 as pathlib
-except ImportError:
-    import pathlib
 
 ###############################################################################
 # import enum

@@ -12,14 +12,10 @@ import sys
 import warnings
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.utilities.compat import pathlib
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.validations import pkt_check
 from pcapkit.utilities.warnings import FileWarning, FormatWarning
-
-try:
-    import pathlib2 as pathlib
-except ImportError:
-    import pathlib
 
 ###############################################################################
 # from dictdumper import JSON, PLIST, XML, JavaScript, Tree
