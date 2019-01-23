@@ -1,5 +1,6 @@
 
 *.icloud
+Pipfile.lock
 
 out
 *.js

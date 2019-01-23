@@ -9,6 +9,7 @@ aenum = "*"
 setuptools = "*"
 dictdumper = "*"
 emoji = "*"
+tbtrim = "*"
 
 [dev-packages]
 pcapkit = {editable = true, path = "."}
