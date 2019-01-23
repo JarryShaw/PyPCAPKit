@@ -25,3 +25,6 @@
 [submodule "testbench/rc:protochain"]
 	path = testbench/rc:protochain
 	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/rc/protochain
+[submodule "testbench/rc:protocols"]
+	path = testbench/rc:protocols
+	url = http://github.com/JarryShaw/PyPCAPKit/tree/test/rc/protocols
