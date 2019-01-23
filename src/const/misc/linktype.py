@@ -126,6 +126,8 @@ class LinkType(IntEnum):
     LinkType['DISPLAYPORT_AUX'] = 275                                           # DLT_DISPLAYPORT_AUX
     LinkType['LINUX_SLL2'] = 276                                                # DLT_LINUX_SLL2
     LinkType['OPENVIZSLA'] = 278                                                # DLT_OPENVIZSLA
+    LinkType['EBHSCR'] = 279                                                    # DLT_EBHSCR
+    LinkType['VPP_DISPATCH'] = 280                                              # DLT_VPP_DISPATCH
 
     @staticmethod
     def get(key, default=-1):
