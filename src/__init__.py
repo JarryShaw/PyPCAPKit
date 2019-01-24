@@ -55,8 +55,14 @@ different sections.
 """
 # set up sys.excepthook
 import os
+
 import tbtrim
-tbtrim.set_trim_rule(lambda filename: f'{os.path.sep}pcapkit{os.path.sep}' in filename)
+
+from pcapkit.utilities.exceptions import BaseError
+
+ROOT = os.path.dirname(os.path.relpath(__file__))
+tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
+                     exception=BaseError, strict=False)
 
 # All Reference
 import pcapkit.__all__ as all  # pylint: disable
