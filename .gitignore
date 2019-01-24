@@ -1,4 +1,6 @@
 
+/.vscode/
+
 *.icloud
 Pipfile.lock
 
@@ -17,6 +19,7 @@ out
 !in.pcap
 *.cap
 *.dat
+*~orig*
 
 sample/test
 test/pcapkit
