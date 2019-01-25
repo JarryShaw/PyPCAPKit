@@ -9,18 +9,14 @@ version  = $(shell cat setup.py | grep "^__version__" | sed "s/__version__ = '\(
 message  =
 
 clean: clean-pyc clean-misc clean-pypi
-release: release-master release-devel
+const: update-const
+release: release-master
 pipenv: update-pipenv
 pypi: dist-pypi dist-upload
-setup: setup-version
 
 # setup pipenv
 setup-pipenv: clean-pipenv
 	pipenv install --dev
-
-# update version string
-setup-version:
-	python3 setup-version.py
 
 # remove *.pyc
 clean-pyc:
@@ -57,7 +53,7 @@ update-pipenv:
 update-const:
 	set -x
 	for file in src/vendor/*/*.py ; do \
-		pipenv run python3 $file \
+		pipenv run python3 $${file} ; \
 	done
 
 # update maintenance information
@@ -147,24 +143,21 @@ release-master:
 		--name "PyPCAPKit v$(version)" \
 		--description "$(message)"
 
-# file new release on devel
-release-devel:
-	go run github.com/aktau/github-release release \
-		--user JarryShaw \
-		--repo PyPCAPKit \
-		--tag "v$(version).devel" \
-		--name "PyPCAPKit v$(version).devel" \
-		--description "$(message)" \
-		--target "devel" \
-		--pre-release
+# run pre-distribution process
+dist-pre: const
 
-# run distribution process
-distro:
-	$(MAKE) message=$(message) \
-		setup-version update-const dist-prep
-	$(MAKE) message=$(message) DIR=release \
+# run post-distribution process
+dist-post:
+	$(MAKE) message="$(message)" DIR=release \
 		clean pypi git-tag git-upload
-	$(MAKE) message=$(message) \
-		git-upload release setup-formula
-	$(MAKE) message=$(message) \
-		update-maintainer git-aftermath
+	$(MAKE) message="$(message)" \
+		git-upload release update-maintainer git-aftermath
+
+# run full distribution process
+dist-all: dist-pre dist-prep dist-post
+
+# run distro process in devel
+dist-devel: dist-pre git-upload
+
+# run distro process in master
+dist-master: dist-prep dist-post
