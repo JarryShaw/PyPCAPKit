@@ -26,7 +26,7 @@ clean-pyc:
 # remove devel files
 clean-misc: clean-pyc
 	find $(DIR) -iname .DS_Store | xargs rm -f
-	find $(DIR) -iname NotImplemented | xargs rm -f
+	find $(DIR) -iname NotImplemented | xargs rm -rf
 
 # remove pipenv
 clean-pipenv:
