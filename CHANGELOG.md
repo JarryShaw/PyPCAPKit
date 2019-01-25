@@ -1,5 +1,14 @@
 # Change Log
 
+## [Unreleased](https://github.com/JarryShaw/PyPCAPKit/tree/HEAD)
+
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.2...HEAD)
+
+**Merged pull requests:**
+
+- Fixed minor bugs in Makefile [\#13](https://github.com/JarryShaw/PyPCAPKit/pull/13) ([JarryShaw](https://github.com/JarryShaw))
+- Update Makefile [\#12](https://github.com/JarryShaw/PyPCAPKit/pull/12) ([JarryShaw](https://github.com/JarryShaw))
+
 ## [v0.13.2](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.2) (2019-01-24)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.1...v0.13.2)
 
