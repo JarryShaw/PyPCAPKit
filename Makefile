@@ -102,7 +102,7 @@ dist-prep:
 		  .gitignore \
 		  LICENSE \
 		  MANIFEST.in \
-		  README.rst \
+		  README.md \
 		  src \
 		  setup.py \
 		  setup.cfg release/
