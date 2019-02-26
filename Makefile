@@ -12,7 +12,7 @@ clean: clean-pyc clean-misc clean-pypi
 const: update-const
 release: release-master
 pipenv: update-pipenv
-pypi: dist-pypi dist-upload
+pypi: dist-upload
 
 # setup pipenv
 setup-pipenv: clean-pipenv
@@ -63,7 +63,7 @@ update-maintainer:
 	go run github.com/gaocegege/maintainer contributing
 
 # make PyPI distribution
-dist-pypi: clean-pypi dist-pypi-new dist-pypi-old
+dist-pypi: clean-pypi dist-pypi-new dist-pypi-old dist-linux
 
 # make Python >=3.6 distribution
 .ONESHELL:
@@ -85,9 +85,17 @@ dist-pypi-old: dist-f2format
 	pypy3 setup.py bdist_wheel --plat-name="$(platform)" --python-tag='pp35'
 	python3 setup.py sdist
 
+# make Linux distribution
+.ONESHELL:
+dist-linux:
+	cd $(DIR)/docker
+	sed "s/LABEL version.*/LABEL version $(shell date +%Y.%m.%d)/" Dockerfile > Dockerfile.tmp
+	mv Dockerfile.tmp Dockerfile
+	docker-compose up --build
+
 # upload PyPI distribution
 .ONESHELL:
-dist-upload:
+dist-upload: dist-pypi
 	cd $(DIR)
 	twine check dist/*
 	twine upload dist/* -r pypi --skip-existing
