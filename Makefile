@@ -111,6 +111,7 @@ dist-prep:
 		  LICENSE \
 		  MANIFEST.in \
 		  README.md \
+                  docker \
 		  src \
 		  setup.py \
 		  setup.cfg release/
