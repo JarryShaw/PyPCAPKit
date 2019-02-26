@@ -31,8 +31,9 @@ record = collections.Counter(map(lambda item: item[1],
 
 
 def hexlify(code):
-    temp = hex(code)[2:].upper().zfill(8)
-    return '0x{}_{}'.format(temp[:4], temp[4:])
+    # temp = hex(code)[2:].upper().zfill(8)
+    # return f'0x{temp[:4]}_{temp[4:]}'
+    return '0x{}'.format(hex(code)[2:].upper().zfill(8))
 
 
 def rename(name, code):
@@ -76,8 +77,7 @@ for item in reader:
         if desc or dscp:
             miss.append('#{}{}'.format(desc, dscp))
         miss.append('    temp = hex(value)[2:].upper().zfill(8)')
-        miss.append(
-            "    extend_enum(cls, '{} [0x%s]' % (temp[:4]+'_'+temp[4:]), value)".format(name))
+        miss.append("    extend_enum(cls, '{} [0x%s]' % (temp[:4]+'_'+temp[4:]), value)".format(name))
         miss.append('    return cls(value)')
 
 ###############

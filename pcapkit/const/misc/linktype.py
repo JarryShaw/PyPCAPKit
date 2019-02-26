@@ -128,6 +128,8 @@ class LinkType(IntEnum):
     LinkType['OPENVIZSLA'] = 278                                                # DLT_OPENVIZSLA
     LinkType['EBHSCR'] = 279                                                    # DLT_EBHSCR
     LinkType['VPP_DISPATCH'] = 280                                              # DLT_VPP_DISPATCH
+    LinkType['DSA_TAG_BRCM'] = 281                                              # DLT_DSA_TAG_BRCM
+    LinkType['DSA_TAG_BRCM_PREPEND'] = 282                                      # DLT_DSA_TAG_BRCM_PREPEND
 
     @staticmethod
     def get(key, default=-1):
