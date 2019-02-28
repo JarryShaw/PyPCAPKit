@@ -1,3 +1,5 @@
+.PHONY: clean const date dist release pipenv pypi update
+
 SHELL := /usr/local/bin/bash
 DIR   ?= .
 
@@ -10,9 +12,19 @@ message  =
 
 clean: clean-pyc clean-misc clean-pypi
 const: update-const
+dist: dist-pypi dist-upload
 release: release-master
 pipenv: update-pipenv
-pypi: dist-upload
+update: update-const update-date
+
+pypi:
+	DIR=release $(MAKE) dist-prep dist
+
+.ONESHELL:
+update-date:
+	cd $(DIR)/docker
+	sed "s/LABEL version.*/LABEL version $(shell date +%Y.%m.%d)/" Dockerfile > Dockerfile.tmp
+	mv Dockerfile.tmp Dockerfile
 
 # setup pipenv
 setup-pipenv: clean-pipenv
@@ -89,13 +101,11 @@ dist-pypi-old: dist-f2format
 .ONESHELL:
 dist-linux:
 	cd $(DIR)/docker
-	sed "s/LABEL version.*/LABEL version $(shell date +%Y.%m.%d)/" Dockerfile > Dockerfile.tmp
-	mv Dockerfile.tmp Dockerfile
 	docker-compose up --build
 
 # upload PyPI distribution
 .ONESHELL:
-dist-upload: dist-pypi
+dist-upload:
 	cd $(DIR)
 	twine check dist/*
 	twine upload dist/* -r pypi --skip-existing
@@ -111,7 +121,7 @@ dist-prep:
 		  LICENSE \
 		  MANIFEST.in \
 		  README.md \
-                  docker \
+				  docker \
 		  src \
 		  setup.py \
 		  setup.cfg release/
@@ -153,12 +163,12 @@ release-master:
 		--description "$(message)"
 
 # run pre-distribution process
-dist-pre: const
+dist-pre: update
 
 # run post-distribution process
 dist-post:
 	$(MAKE) message="$(message)" DIR=release \
-		clean pypi git-tag git-upload
+		clean dist git-tag git-upload
 	$(MAKE) message="$(message)" \
 		git-upload release update-maintainer git-aftermath
 

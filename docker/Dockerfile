@@ -1,6 +1,6 @@
 # basic info
 FROM library/ubuntu
-LABEL version "2019.02.26"
+LABEL version 2019.02.28
 LABEL description "Ubuntu Environment"
 
 # prepare environment
@@ -52,4 +52,4 @@ RUN rm -rf \
     apt-get clean
 
 # copy source
-COPY . /f2format
+COPY . /pypcapkit
