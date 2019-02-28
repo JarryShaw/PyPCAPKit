@@ -1,5 +1,18 @@
 # Change Log
 
+## [v0.13.3.post1](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.3.post1) (2019-02-28)
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.3...v0.13.3.post1)
+
+**Merged pull requests:**
+
+- New distribution \[0.13.3.post1\] [\#21](https://github.com/JarryShaw/PyPCAPKit/pull/21) ([JarryShaw](https://github.com/JarryShaw))
+- Fixed minor bugs [\#20](https://github.com/JarryShaw/PyPCAPKit/pull/20) ([JarryShaw](https://github.com/JarryShaw))
+- Fixed minor bugs [\#19](https://github.com/JarryShaw/PyPCAPKit/pull/19) ([JarryShaw](https://github.com/JarryShaw))
+- Regular update [\#18](https://github.com/JarryShaw/PyPCAPKit/pull/18) ([JarryShaw](https://github.com/JarryShaw))
+-  Fixed minor bugs in Makefile [\#17](https://github.com/JarryShaw/PyPCAPKit/pull/17) ([JarryShaw](https://github.com/JarryShaw))
+- Renamed testbench submodules [\#16](https://github.com/JarryShaw/PyPCAPKit/pull/16) ([JarryShaw](https://github.com/JarryShaw))
+- Update test branch [\#15](https://github.com/JarryShaw/PyPCAPKit/pull/15) ([JarryShaw](https://github.com/JarryShaw))
+
 ## [v0.13.3](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.3) (2019-02-26)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.2...v0.13.3)
 
