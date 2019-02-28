@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 # version string
-__version__ = '0.13.3'
+__version__ = '0.13.3.post1'
 
 # README
 with open('README.md', encoding='utf-8') as file:

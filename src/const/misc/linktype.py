@@ -40,22 +40,22 @@ class LinkType(IntEnum):
     LinkType['SCCP'] = 142                                                      # DLT_SCCP
     LinkType['DOCSIS'] = 143                                                    # DLT_DOCSIS
     LinkType['LINUX_IRDA'] = 144                                                # DLT_LINUX_IRDA
-    LinkType['USER0'] = 147                                                     # DLT_USER{code-start}
-    LinkType['USER1'] = 148                                                     # DLT_USER{code-start}
-    LinkType['USER2'] = 149                                                     # DLT_USER{code-start}
-    LinkType['USER3'] = 150                                                     # DLT_USER{code-start}
-    LinkType['USER4'] = 151                                                     # DLT_USER{code-start}
-    LinkType['USER5'] = 152                                                     # DLT_USER{code-start}
-    LinkType['USER6'] = 153                                                     # DLT_USER{code-start}
-    LinkType['USER7'] = 154                                                     # DLT_USER{code-start}
-    LinkType['USER8'] = 155                                                     # DLT_USER{code-start}
-    LinkType['USER9'] = 156                                                     # DLT_USER{code-start}
-    LinkType['USER10'] = 157                                                    # DLT_USER{code-start}
-    LinkType['USER11'] = 158                                                    # DLT_USER{code-start}
-    LinkType['USER12'] = 159                                                    # DLT_USER{code-start}
-    LinkType['USER13'] = 160                                                    # DLT_USER{code-start}
-    LinkType['USER14'] = 161                                                    # DLT_USER{code-start}
-    LinkType['USER15'] = 162                                                    # DLT_USER{code-start}
+    LinkType['USER0'] = 147                                                     # DLT_USER0
+    LinkType['USER1'] = 148                                                     # DLT_USER1
+    LinkType['USER2'] = 149                                                     # DLT_USER2
+    LinkType['USER3'] = 150                                                     # DLT_USER3
+    LinkType['USER4'] = 151                                                     # DLT_USER4
+    LinkType['USER5'] = 152                                                     # DLT_USER5
+    LinkType['USER6'] = 153                                                     # DLT_USER6
+    LinkType['USER7'] = 154                                                     # DLT_USER7
+    LinkType['USER8'] = 155                                                     # DLT_USER8
+    LinkType['USER9'] = 156                                                     # DLT_USER9
+    LinkType['USER10'] = 157                                                    # DLT_USER10
+    LinkType['USER11'] = 158                                                    # DLT_USER11
+    LinkType['USER12'] = 159                                                    # DLT_USER12
+    LinkType['USER13'] = 160                                                    # DLT_USER13
+    LinkType['USER14'] = 161                                                    # DLT_USER14
+    LinkType['USER15'] = 162                                                    # DLT_USER15
     LinkType['IEEE802_11_AVS'] = 163                                            # DLT_IEEE802_11_RADIO_AVS
     LinkType['BACNET_MS_TP'] = 165                                              # DLT_BACNET_MS_TP
     LinkType['PPP_PPPD'] = 166                                                  # DLT_PPP_PPPD
@@ -143,7 +143,7 @@ class LinkType(IntEnum):
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not (isinstance(value, int) and 0 <= value <= 0xFFFF_FFFF):
+        if not (isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned [%d]' % value, value)
         return cls(value)
