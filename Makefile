@@ -63,7 +63,7 @@ update-pipenv:
 # update const scripts
 .ONESHELL:
 update-const:
-	set -x
+	set -ex
 	for file in src/vendor/*/*.py ; do \
 		pipenv run python3 $${file} ; \
 	done
