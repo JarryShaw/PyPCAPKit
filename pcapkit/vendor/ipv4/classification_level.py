@@ -10,7 +10,7 @@ import os
 
 NAME = 'ClassificationLevel'
 DOCS = 'Classification Level Encodings'
-FLAG = 'isinstance(value, int) and 0b0000_0000 <= value <= 0b1111_1111'
+FLAG = 'isinstance(value, int) and 0b00000000 <= value <= 0b11111111'
 DATA = {
     0b0000_0001: 'Reserved [4]',
     0b0011_1101: 'Top Secret',
@@ -30,8 +30,7 @@ record = collections.Counter(DATA.values())
 
 
 def binary(code):
-    temp = bin(code)[2:].upper().zfill(8)
-    return '0b{}_{}'.format(temp[:4], temp[4:])
+    return '0b{}'.format(bin(code)[2:].upper().zfill(8))
 
 
 def rename(name, code):

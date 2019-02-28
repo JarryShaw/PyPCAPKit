@@ -14,7 +14,7 @@ import requests
 
 NAME = 'ErrorCode'
 DOCS = 'HTTP/2 Error Code'
-FLAG = 'isinstance(value, int) and 0x0000_0000 <= value <= 0xFFFF_FFFF'
+FLAG = 'isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF'
 LINK = 'https://www.iana.org/assignments/http2-parameters/error-code.csv'
 
 ###############

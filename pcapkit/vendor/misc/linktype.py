@@ -12,7 +12,7 @@ import requests
 
 NAME = 'LinkType'
 DOCS = 'Link-Layer Header Type Values'
-FLAG = 'isinstance(value, int) and 0 <= value <= 0xFFFF_FFFF'
+FLAG = 'isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF'
 LINK = 'http://www.tcpdump.org/linktypes.html'
 
 ###############
@@ -45,7 +45,7 @@ for content in content:
         start, stop = map(int, temp.split('-'))
         for code in range(start, stop+1):
             name = 'USER{}'.format(code-start)
-            desc = 'DLT_USER{code-start}'
+            desc = 'DLT_USER{}'.format(code-start)
 
             pres = "{}[{!r}] = {}".format(NAME, name, code).ljust(76)
             sufs = "# {}".format(desc)

@@ -36,7 +36,7 @@ class ErrorCode(IntEnum):
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not (isinstance(value, int) and 0x0000_0000 <= value <= 0xFFFF_FFFF):
+        if not (isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0000000E <= value <= 0xFFFFFFFF:
             temp = hex(value)[2:].upper().zfill(8)
