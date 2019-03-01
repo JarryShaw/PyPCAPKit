@@ -1,5 +1,13 @@
 # Change Log
 
+## [v0.13.3.post2](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.3.post2) (2019-03-01)
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.3.post1...v0.13.3.post2)
+
+**Merged pull requests:**
+
+- Fixed minor bugs in Makefile [\#23](https://github.com/JarryShaw/PyPCAPKit/pull/23) ([JarryShaw](https://github.com/JarryShaw))
+- New distribution \[0.13.3.post2\] [\#22](https://github.com/JarryShaw/PyPCAPKit/pull/22) ([JarryShaw](https://github.com/JarryShaw))
+
 ## [v0.13.3.post1](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.3.post1) (2019-02-28)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.3...v0.13.3.post1)
 
