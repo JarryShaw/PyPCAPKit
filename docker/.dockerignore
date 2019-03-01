@@ -1,0 +1,20 @@
+# macOS files
+.DS_Store
+
+# Python comfiled files
+*.pyc
+__pycache__/
+
+# test scripts
+dev_*
+test_*
+
+# Git files
+.git/
+.git*
+
+# misc files
+*~orig*
+*.egg
+*.whl
+*.tar.gz
