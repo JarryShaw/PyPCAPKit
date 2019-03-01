@@ -22,6 +22,7 @@ pypi:
 
 .ONESHELL:
 update-date:
+	set -ex
 	cd $(DIR)/docker
 	sed "s/LABEL version.*/LABEL version $(shell date +%Y.%m.%d)/" Dockerfile > Dockerfile.tmp
 	mv Dockerfile.tmp Dockerfile
@@ -80,6 +81,7 @@ dist-pypi: clean-pypi dist-pypi-new dist-pypi-old dist-linux
 # make Python >=3.6 distribution
 .ONESHELL:
 dist-pypi-new:
+	set -ex
 	cd $(DIR)
 	python3.7 setup.py bdist_egg bdist_wheel --plat-name="$(platform)" --python-tag='cp37'
 	python3.6 setup.py bdist_egg bdist_wheel --plat-name="$(platform)" --python-tag='cp36'
@@ -91,6 +93,7 @@ dist-f2format:
 # make Python <3.6 distribution
 .ONESHELL:
 dist-pypi-old: dist-f2format
+	set -ex
 	cd $(DIR)
 	python3.5 setup.py bdist_egg bdist_wheel --plat-name="$(platform)" --python-tag='cp35'
 	python3.4 setup.py bdist_egg bdist_wheel --plat-name="$(platform)" --python-tag='cp34'
@@ -100,12 +103,14 @@ dist-pypi-old: dist-f2format
 # make Linux distribution
 .ONESHELL:
 dist-linux:
+	set -ex
 	cd $(DIR)/docker
 	docker-compose up --build
 
 # upload PyPI distribution
 .ONESHELL:
 dist-upload:
+	set -ex
 	cd $(DIR)
 	twine check dist/*
 	twine upload dist/* -r pypi --skip-existing
@@ -130,12 +135,14 @@ dist-prep:
 # add tag
 .ONESHELL:
 git-tag:
+	set -ex
 	cd $(DIR)
 	git tag "v$(version)"
 
 # upload to GitHub
 .ONESHELL:
 git-upload:
+	set -ex
 	cd $(DIR)
 	git pull
 	git add .
