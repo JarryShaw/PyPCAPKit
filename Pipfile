@@ -6,10 +6,9 @@ name = "pypi"
 [packages]
 chardet = "*"
 aenum = "*"
-setuptools = "*"
-dictdumper = "*"
+dictdumper = ">=0.7.0.post1"
 emoji = "*"
-tbtrim = "*"
+tbtrim = ">=0.2.1"
 
 [dev-packages]
 pcapkit = {editable = true, path = "."}
