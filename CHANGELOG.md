@@ -1,5 +1,13 @@
 # Change Log
 
+## [v0.14.0](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.0) (2019-03-02)
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.3.post2...v0.14.0)
+
+**Merged pull requests:**
+
+- New distribution \[0.14.0\] [\#25](https://github.com/JarryShaw/PyPCAPKit/pull/25) ([JarryShaw](https://github.com/JarryShaw))
+- Add .dockerignore [\#24](https://github.com/JarryShaw/PyPCAPKit/pull/24) ([JarryShaw](https://github.com/JarryShaw))
+
 ## [v0.13.3.post2](https://github.com/JarryShaw/PyPCAPKit/tree/v0.13.3.post2) (2019-03-01)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.3.post1...v0.13.3.post2)
 
