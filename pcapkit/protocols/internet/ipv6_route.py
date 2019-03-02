@@ -87,7 +87,7 @@ class IPv6_Route(Internet):
     def payload(self):
         """Payload of current instance."""
         if self._extf:
-            raise UnsupportedCall("'{}' object has no attribute 'payload'".format(self.__class__.__name__))
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
     @property
@@ -139,7 +139,7 @@ class IPv6_Route(Internet):
         _dlen = _hlen * 8 - 4
         if _dlen:
             _func = _ROUTE_PROC.get(_type, 'none')
-            _data = eval('self._read_data_type_{}'.format(_func))(_dlen)
+            _data = eval(f'self._read_data_type_{_func}')(_dlen)
             ipv6_route.update(_data)
 
         length -= ipv6_route['length']
@@ -283,7 +283,7 @@ class IPv6_Route(Internet):
 
         """
         if length != 20:
-            raise ProtocolError('{}: [Typeno 2] invalid format'.format(self.alias))
+            raise ProtocolError(f'{self.alias}: [Typeno 2] invalid format')
 
         _resv = self._read_fileng(4)
         _home = self._read_fileng(16)

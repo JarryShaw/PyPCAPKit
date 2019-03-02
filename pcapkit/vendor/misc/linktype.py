@@ -37,20 +37,20 @@ for content in content:
     try:
         code, _ = temp, int(temp)
 
-        pres = "{}[{!r}] = {}".format(NAME, name, code).ljust(76)
-        sufs = "# {}".format(desc)
+        pres = f"{NAME}[{name!r}] = {code}".ljust(76)
+        sufs = f"# {desc}"
 
-        enum.append('{}{}'.format(pres, sufs))
+        enum.append(f'{pres}{sufs}')
     except ValueError:
         start, stop = map(int, temp.split('-'))
         for code in range(start, stop+1):
-            name = 'USER{}'.format(code-start)
-            desc = 'DLT_USER{}'.format(code-start)
+            name = f'USER{code-start}'
+            desc = f'DLT_USER{code-start}'
 
-            pres = "{}[{!r}] = {}".format(NAME, name, code).ljust(76)
-            sufs = "# {}".format(desc)
+            pres = f"{NAME}[{name!r}] = {code}".ljust(76)
+            sufs = f"# {desc}"
 
-            enum.append('{}{}'.format(pres, sufs))
+            enum.append(f'{pres}{sufs}')
 
 ###############
 # Defaults
@@ -63,40 +63,40 @@ ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
 
 
-def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
 # -*- coding: utf-8 -*-
 
 from aenum import IntEnum, extend_enum
 
 
-class {}(IntEnum):
-    """Enumeration class for {}."""
-    _ignore_ = '{} _'
-    {} = vars()
+class {NAME}(IntEnum):
+    """Enumeration class for {NAME}."""
+    _ignore_ = '{NAME} _'
+    {NAME} = vars()
 
-    # {}
-    {}
+    # {DOCS}
+    {ENUM}
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return {}(key)
-        if key not in {}._member_map_:
-            extend_enum({}, key, default)
-        return {}[key]
+            return {NAME}(key)
+        if key not in {NAME}._member_map_:
+            extend_enum({NAME}, key, default)
+        return {NAME}[key]
 
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not ({}):
+        if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {}
+        {MISS}
         super()._missing_(value)
-'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
+'''
 
 
 with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, '../const/{}'.format(STEM)))
-with open(os.path.join(ROOT, '../const/{}/{}'.format(STEM, FILE)), 'w') as file:
+    os.mkdir(os.path.join(ROOT, f'../const/{STEM}'))
+with open(os.path.join(ROOT, f'../const/{STEM}/{FILE}'), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

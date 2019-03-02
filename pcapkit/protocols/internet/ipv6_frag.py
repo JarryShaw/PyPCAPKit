@@ -72,7 +72,7 @@ class IPv6_Frag(Internet):
     def payload(self):
         """Payload of current instance."""
         if self._extf:
-            raise UnsupportedCall("'{}' object has no attribute 'payload'".format(self.__class__.__name__))
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
     @property

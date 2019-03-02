@@ -32,7 +32,7 @@ record = collections.Counter(map(lambda item: item[4],
 
 def rename(name, code, *, original):
     if record[original] > 1:
-        return '{} [{}]'.format(name, code)
+        return f'{name} [{code}]'
     return name
 
 
@@ -54,20 +54,20 @@ for item in reader:
         if re.match(r'\d+', rfc):
             continue
         if 'RFC' in rfc:
-            temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
+            temp.append(f'[{rfc[:3]} {rfc[3:]}]')
         else:
-            temp.append('[{}]'.format(rfc))
-    desc = " {}".format(''.join(temp)) if rfcs else ''
+            temp.append(f'[{rfc}]')
+    desc = f" {''.join(temp)}" if rfcs else ''
 
     abbr, name = re.split(r'\W+-\W+', dscp)
     temp = re.sub(r'\[\d+\]', '', name)
-    name = ' {}'.format(temp) if temp else ''
+    name = f' {temp}' if temp else ''
 
-    renm = rename(abbr or 'Unassigned [{}]'.format(code), code, original=dscp)
-    pres = "{}[{!r}] = {}".format(NAME, renm, code).ljust(76)
-    sufs = '#{}{}'.format(desc, name) if desc or name else ''
+    renm = rename(abbr or f'Unassigned [{code}]', code, original=dscp)
+    pres = f"{NAME}[{renm!r}] = {code}".ljust(76)
+    sufs = f'#{desc}{name}' if desc or name else ''
 
-    enum.append('{}{}'.format(pres, sufs))
+    enum.append(f'{pres}{sufs}')
 
 ###############
 # Defaults
@@ -80,40 +80,40 @@ ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
 
 
-def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
+def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
 # -*- coding: utf-8 -*-
 
 from aenum import IntEnum, extend_enum
 
 
-class {}(IntEnum):
-    """Enumeration class for {}."""
-    _ignore_ = '{} _'
-    {} = vars()
+class {NAME}(IntEnum):
+    """Enumeration class for {NAME}."""
+    _ignore_ = '{NAME} _'
+    {NAME} = vars()
 
-    # {}
-    {}
+    # {DOCS}
+    {ENUM}
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return {}(key)
-        if key not in {}._member_map_:
-            extend_enum({}, key, default)
-        return {}[key]
+            return {NAME}(key)
+        if key not in {NAME}._member_map_:
+            extend_enum({NAME}, key, default)
+        return {NAME}[key]
 
     @classmethod
     def _missing_(cls, value):
         """Lookup function used when value is not found."""
-        if not ({}):
+        if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {}
+        {MISS}
         super()._missing_(value)
-'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
+'''
 
 
 with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, '../const/{}'.format(STEM)))
-with open(os.path.join(ROOT, '../const/{}/{}'.format(STEM, FILE)), 'w') as file:
+    os.mkdir(os.path.join(ROOT, f'../const/{STEM}'))
+with open(os.path.join(ROOT, f'../const/{STEM}/{FILE}'), 'w') as file:
     file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))

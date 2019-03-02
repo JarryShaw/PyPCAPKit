@@ -50,12 +50,12 @@ class IPsec(IP):
     @property
     def src(self):
         """NotImplemented"""
-        raise UnsupportedCall("'{}' object has no attribute 'src'".format(self.__class__.__name__))
+        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'src'")
 
     @property
     def dst(self):
         """NotImplemented"""
-        raise UnsupportedCall("'{}' object has no attribute 'dst'".format(self.__class__.__name__))
+        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'dst'")
 
     ##########################################################################
     # Data models.

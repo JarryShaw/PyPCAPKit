@@ -151,7 +151,7 @@ class Protocol(metaclass=abc.ABCMeta):
             return urllib.parse.unquote(url, encoding=encoding, errors=errors)
         except UnicodeError:
             str_ = url.replace('%', r'\x')
-            return ast.literal_eval('r{!r}'.format(str_))
+            return ast.literal_eval(f'r{str_!r}')
 
     ##########################################################################
     # Data models.
@@ -182,7 +182,7 @@ class Protocol(metaclass=abc.ABCMeta):
         self._info = Info()
 
     def __repr__(self):
-        repr_ = "<{} {!r}>".format(self.alias, self._info)
+        repr_ = f"<{self.alias} {self._info!r}>"
         return repr_
 
     @seekset
@@ -198,7 +198,7 @@ class Protocol(metaclass=abc.ABCMeta):
         hexlst = textwrap.wrap(hexbuf, length)
         strlst = [buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '')]
 
-        str_ = '\n'.join(map(lambda x: '{}    {}'.format(x[0].ljust(length), x[1]), zip(hexlst, strlst)))
+        str_ = '\n'.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))
         return str_
 
     @seekset
@@ -255,7 +255,7 @@ class Protocol(metaclass=abc.ABCMeta):
             if re.fullmatch(key, payload.__class__.__name__, re.IGNORECASE):
                 return payload
             payload = payload.payload
-        raise ProtocolNotFound("Layer {!r} not in Frame".format(key))
+        raise ProtocolNotFound(f"Layer {key!r} not in Frame")
 
     def __contains__(self, name):
         return (name in self._info)
@@ -345,14 +345,14 @@ class Protocol(metaclass=abc.ABCMeta):
             buf = int.from_bytes(mem, end, signed=signed)
         else:
             try:
-                fmt = '{}{}'.format(endian, kind)
+                fmt = f'{endian}{kind}'
                 mem = self._file.read(size)
                 buf = struct.unpack(fmt, mem)[0]
             except struct.error:
                 if quiet:
                     return None
                 else:
-                    raise StructError('{}: unpack failed'.format(self.__class__.__name__)) from None
+                    raise StructError(f'{self.__class__.__name__}: unpack failed') from None
         return buf
 
     def _read_binary(self, size=1):

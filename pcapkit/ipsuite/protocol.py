@@ -117,7 +117,7 @@ class Protocol(metaclass=abc.ABCMeta):
                     raise KeyError
             except KeyError:
                 if default is None:
-                    raise ProtocolNotImplemented('protocol {!r} not implemented'.format(name)) from None
+                    raise ProtocolNotImplemented(f'protocol {name!r} not implemented') from None
                 index = default
         if pack:
             return cls.pack(index, size=size, signed=signed, lilendian=lilendian)
@@ -158,10 +158,10 @@ class Protocol(metaclass=abc.ABCMeta):
             buf = integer.to_bytes(size, end, signed=signed)
         else:
             try:
-                fmt = '{}{}'.format(endian, kind)
+                fmt = f'{endian}{kind}'
                 buf = struct.pack(fmt, integer)
             except struct.error:
-                raise StructError('{}: pack failed'.format(cls.__name__)) from None
+                raise StructError(f'{cls.__name__}: pack failed') from None
         return buf
 
     ##########################################################################
@@ -199,7 +199,7 @@ class Protocol(metaclass=abc.ABCMeta):
     #     return Packet(other.data, **{self.alias.lower(): })
 
     def __repr__(self):
-        repr_ = "<{} {!r}>".format(self.alias, self.info)
+        repr_ = f"<{self.alias} {self.info!r}>"
         return repr_
 
     def __str__(self):
@@ -212,7 +212,7 @@ class Protocol(metaclass=abc.ABCMeta):
         hexlst = textwrap.wrap(hexbuf, length)
         strlst = [buf for buf in iter(functools.partial(io.StringIO(strbuf).read, number), '')]
 
-        str_ = '\n'.join(map(lambda x: '{}    {}'.format(x[0].ljust(length), x[1]), zip(hexlst, strlst)))
+        str_ = '\n'.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))
         return str_
 
     @classmethod

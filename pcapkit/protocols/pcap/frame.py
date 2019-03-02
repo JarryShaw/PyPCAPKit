@@ -71,7 +71,7 @@ class Frame(Protocol):
     @property
     def name(self):
         """Name of corresponding protocol."""
-        return 'Frame {}'.format(self._fnum)
+        return f'Frame {self._fnum}'
 
     @property
     def length(self):
