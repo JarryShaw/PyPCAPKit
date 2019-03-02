@@ -133,6 +133,7 @@ def tcp_reassembly(packet, *, count=NotImplemented):
             dsn=tcp.seq,                            # data sequence number
             syn=bool(tcp.flags.S),                  # synchronise flag
             fin=bool(tcp.flags.F),                  # finish flag
+            rst=bool(tcp.flags.R),                  # reset connection flag
             payload=bytearray(bytes(tcp.payload)),  # raw bytearray type payload
         )
         raw_len = len(tcp.payload)                  # payload length, header excludes
