@@ -9,8 +9,9 @@ Notations:
 
     DSN     - Data Sequence Number
     ACK     - TCP Acknowledgement
-    FIN     - TCP Finish Flag
     SYN     - TCP Synchronisation Flag
+    FIN     - TCP Finish Flag
+    RST     - TCP Reset Connection Flag
     BUFID   - Buffer Identifier
     HDL     - Hole Discriptor List
     ISN     - Initial Sequence Number
@@ -38,7 +39,7 @@ Algorithm:
             update HDL;
         }
 
-        IF (FIN is true) {
+        IF (FIN is true or RST is true) {
             submit datagram to next step;
             free all reassembly resources for this BUFID;
             BREAK.
@@ -76,22 +77,22 @@ algorithm dealing with `RCVBT` (fragment received bit table)
 appeared in RFC 791. And here is the process:
 
 1. Select the next hole descriptor from the hole descriptor
-  list. If there are no more entries, go to step eight.
+   list. If there are no more entries, go to step eight.
 2. If fragment.first is greater than hole.last, go to step one.
 3. If fragment.last is less than hole.first, go to step one.
 4. Delete the current entry from the hole descriptor list.
 5. If fragment.first is greater than hole.first, then create a
-  new hole descriptor "new_hole" with new_hole.first equal to
-  hole.first, and new_hole.last equal to fragment.first minus
-  one.
+   new hole descriptor "new_hole" with new_hole.first equal to
+   hole.first, and new_hole.last equal to fragment.first minus
+   one.
 6. If fragment.last is less than hole.last and
-  fragment.more_fragments is true, then create a new hole descriptor
-  "new_hole", with new_hole.first equal to fragment.last plus
-  one and new_hole.last equal to hole.last.
+   fragment.more_fragments is true, then create a new hole
+   descriptor "new_hole", with new_hole.first equal to
+   fragment.last plus one and new_hole.last equal to hole.last.
 7. Go to step one.
 8. If the hole descriptor list is now empty, the datagram is now
-  complete. Pass it on to the higher level protocol processor
-  for further handling. Otherwise, return.
+   complete. Pass it on to the higher level protocol processor
+   for further handling. Otherwise, return.
 
 """
 import copy
@@ -147,6 +148,7 @@ class TCP_Reassembly(Reassembly):
             num = frame.number,             # original packet range number
             syn = tcp.flags.syn,            # synchronise flag
             fin = tcp.flags.fin,            # finish flag
+            rst = tcp.flags.rst,            # reset connection flag
             len = tcp.raw_len,              # payload length, header excludes
             first = tcp.seq,                # this sequence number
             last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
@@ -235,6 +237,7 @@ class TCP_Reassembly(Reassembly):
         DSN = info.dsn      # Data Sequence Number
         ACK = info.ack      # Acknowledgement Number
         FIN = info.fin      # Finish Flag (Termination)
+        RST = info.rst      # Reset Connection Flag (Termination)
         SYN = info.syn      # Synchronise Flag (Establishment)
 
         # when SYN is set, reset buffer of this session
@@ -301,7 +304,7 @@ class TCP_Reassembly(Reassembly):
                     last=info.first - 1,
                 )
                 HDL.insert(index, new_hole)
-            if info.last < hole.last and not FIN:                       # step six
+            if info.last < hole.last and not FIN and not RST:           # step six
                 new_hole = Info(
                     first=info.last + 1,
                     last=hole.last
@@ -310,8 +313,8 @@ class TCP_Reassembly(Reassembly):
             break                                                       # step seven
         self._buffer[BUFID]['hdl'] = HDL                                # update HDL
 
-        # when FIN is set, submit buffer of this session
-        if FIN:
+        # when FIN/RST is set, submit buffer of this session
+        if FIN or RST:
             self._dtgram += self.submit(self._buffer[BUFID], bufid=BUFID)
             del self._buffer[BUFID]
 
@@ -357,7 +360,7 @@ class TCP_Reassembly(Reassembly):
                         ),
                         index=tuple(buffer['ind']),
                         payload=tuple(data) or None,
-                        packets=tuple([analyse(io.BytesIO(frag), len(frag)) for frag in data]),
+                        packets=tuple(analyse(io.BytesIO(frag), len(frag)) for frag in data),
                     )
                     datagram.append(packet)
             # if this buffer is implemented

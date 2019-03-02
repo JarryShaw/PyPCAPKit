@@ -130,6 +130,7 @@ class LinkType(IntEnum):
     LinkType['VPP_DISPATCH'] = 280                                              # DLT_VPP_DISPATCH
     LinkType['DSA_TAG_BRCM'] = 281                                              # DLT_DSA_TAG_BRCM
     LinkType['DSA_TAG_BRCM_PREPEND'] = 282                                      # DLT_DSA_TAG_BRCM_PREPEND
+    LinkType['IEEE802_15_4_TAP'] = 283                                          # DLT_IEEE802_15_4_TAP
 
     @staticmethod
     def get(key, default=-1):

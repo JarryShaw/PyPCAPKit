@@ -416,6 +416,7 @@ class TCP_Reassembly(pcapkit.reassembly.reassembly.Reassembly)
             dsn = tcp.seq,                  # data sequence number
             syn = tcp.flags.syn,            # synchronise flag
             fin = tcp.flags.fin,            # finish flag
+            rst = tcp.flags.rst,            # reset connection flag
             len = tcp.raw_len,              # payload length, header excludes
             first = tcp.seq,                # this sequence number
             last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number

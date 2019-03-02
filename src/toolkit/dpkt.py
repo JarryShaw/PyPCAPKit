@@ -127,6 +127,7 @@ def tcp_reassembly(packet, *, count=NotImplemented):
             num=count,                                          # original packet range number
             ack=tcp.ack,                                        # acknowledgement
             dsn=tcp.seq,                                        # data sequence number
+            rst=bool(int(flags[5])),                            # reset connection flag
             syn=bool(int(flags[6])),                            # synchronise flag
             fin=bool(int(flags[7])),                            # finish flag
             payload=bytearray(tcp.pack()[tcp.__hdr_len__:]),    # raw bytearray type payload
