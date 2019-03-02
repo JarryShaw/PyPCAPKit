@@ -76,6 +76,7 @@ def tcp_reassembly(frame):
             dsn=tcp.seq,                                    # data sequence number
             syn=tcp.flags.syn,                              # synchronise flag
             fin=tcp.flags.fin,                              # finish flag
+            rst=tcp.flags.rst,                              # reset connection flag
             payload=bytearray(tcp.packet.payload or b''),   # raw bytearray type payload
         )
         raw_len = len(data['payload'])                      # payload length, header excludes

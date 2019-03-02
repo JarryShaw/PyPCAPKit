@@ -263,11 +263,11 @@ class TCP(Transport):
               12        100     -                       Reserved (must be zero)
               12        103     tcp.flags.ns            ECN Concealment Protection (NS)
               13        104     tcp.flags.cwr           Congestion Window Reduced (CWR)
-              13        105     tcp.flags.ecn           ECN-Echo (ECE)
+              13        105     tcp.flags.ece           ECN-Echo (ECE)
               13        106     tcp.flags.urg           Urgent (URG)
               13        107     tcp.flags.ack           Acknowledgement (ACK)
-              13        108     tcp.flags.push          Push Function (PSH)
-              13        109     tcp.flags.reset         Reset Connection (RST)
+              13        108     tcp.flags.psh           Push Function (PSH)
+              13        109     tcp.flags.rst           Reset Connection (RST)
               13        110     tcp.flags.syn           Synchronize Sequence Numbers (SYN)
               13        111     tcp.flags.fin           Last Packet from Sender (FIN)
               14        112     tcp.window_size         Size of Receive Window
@@ -298,11 +298,11 @@ class TCP(Transport):
             flags=dict(
                 ns=True if int(_lenf[7]) else False,
                 cwr=True if int(_flag[0]) else False,
-                ecn=True if int(_flag[1]) else False,
+                ece=True if int(_flag[1]) else False,
                 urg=True if int(_flag[2]) else False,
                 ack=True if int(_flag[3]) else False,
-                push=True if int(_flag[4]) else False,
-                reset=True if int(_flag[5]) else False,
+                psh=True if int(_flag[4]) else False,
+                rst=True if int(_flag[5]) else False,
                 syn=True if int(_flag[6]) else False,
                 fin=True if int(_flag[7]) else False,
             ),

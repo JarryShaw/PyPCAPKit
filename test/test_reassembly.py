@@ -40,5 +40,5 @@ with open('../sample/out', 'a') as file:
             file.write('\n')
         print()
         file.write('\n\n')
-        file.write('—' * 80)
+        file.write('-' * 80)
         file.write('\n\n')
