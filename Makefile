@@ -8,7 +8,7 @@ platform = $(shell python3 -c "import distutils.util; print(distutils.util.get_p
 # get version string
 version  = $(shell cat setup.py | grep "^__version__" | sed "s/__version__ = '\(.*\)'/\1/")
 # commit message
-message  =
+message  ?= ""
 
 clean: clean-pyc clean-misc clean-pypi
 const: update-const

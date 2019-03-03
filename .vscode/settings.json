@@ -328,6 +328,6 @@
         "wght",
         "wikitable"
     ],
-    "python.pythonPath": "/Users/jarryshaw/.virtualenvs/PyPCAPKit-Eosm5v0t/bin/python",
     "python.linting.pylintEnabled": true,
+    "python.pythonPath": "/Users/jarryshaw/.virtualenvs/PyPCAPKit-Eosm5v0t/bin/python"
 }
