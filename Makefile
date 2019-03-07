@@ -66,7 +66,7 @@ update-pipenv:
 update-const:
 	set -ex
 	for file in src/vendor/*/*.py ; do \
-		pipenv run python3 $${file} ; \
+	    pipenv run python3 $${file} ; \
 	done
 
 # update maintenance information
@@ -120,16 +120,16 @@ dist-upload:
 dist-prep:
 	mkdir -p release
 	rm -rf release/src \
-		   release/pcapkit
+	       release/pcapkit
 	cp -r .gitattributes \
-		  .gitignore \
-		  LICENSE \
-		  MANIFEST.in \
-		  README.md \
-				  docker \
-		  src \
-		  setup.py \
-		  setup.cfg release/
+	      .gitignore \
+	      LICENSE \
+	      MANIFEST.in \
+	      README.md \
+	              docker \
+	      src \
+	      setup.py \
+	      setup.cfg release/
 	mv release/src release/pcapkit
 
 # add tag
@@ -147,9 +147,9 @@ git-upload:
 	git pull
 	git add .
 	if [[ -z "$(message)" ]] ; then \
-		git commit -a -S ; \
+	    git commit -a -S ; \
 	else \
-		git commit -a -S -m "$(message)" ; \
+	    git commit -a -S -m "$(message)" ; \
 	fi
 	git push
 
@@ -163,11 +163,11 @@ git-aftermath:
 # file new release on master
 release-master:
 	go run github.com/aktau/github-release release \
-		--user JarryShaw \
-		--repo PyPCAPKit \
-		--tag "v$(version)" \
-		--name "PyPCAPKit v$(version)" \
-		--description "$(message)"
+	    --user JarryShaw \
+	    --repo PyPCAPKit \
+	    --tag "v$(version)" \
+	    --name "PyPCAPKit v$(version)" \
+	    --description "$(message)"
 
 # run pre-distribution process
 dist-pre: update
@@ -175,9 +175,9 @@ dist-pre: update
 # run post-distribution process
 dist-post:
 	$(MAKE) message="$(message)" DIR=release \
-		clean dist git-tag git-upload
+	    clean dist git-tag git-upload
 	$(MAKE) message="$(message)" \
-		git-upload release update-maintainer git-aftermath
+	    git-upload release update-maintainer git-aftermath
 
 # run full distribution process
 dist-all: dist-pre dist-prep dist-post
