@@ -1,5 +1,13 @@
 # Change Log
 
+## [v0.14.1](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.1) (2019-03-07)
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.0...v0.14.1)
+
+**Merged pull requests:**
+
+- Remove .vscode once for good [\#27](https://github.com/JarryShaw/PyPCAPKit/pull/27) ([JarryShaw](https://github.com/JarryShaw))
+-  New distribution \[0.14.1\] [\#26](https://github.com/JarryShaw/PyPCAPKit/pull/26) ([JarryShaw](https://github.com/JarryShaw))
+
 ## [v0.14.0](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.0) (2019-03-02)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.13.3.post2...v0.14.0)
 
