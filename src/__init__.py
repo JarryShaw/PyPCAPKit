@@ -53,16 +53,22 @@ different sections.
     dump utilities for `pcapkit` implementation
 
 """
-# set up sys.excepthook
 import os
+import warnings
 
 import tbtrim
 
-from pcapkit.utilities.exceptions import BaseError
+from pcapkit.utilities.exceptions import DEVMODE, BaseError
 
-ROOT = os.path.dirname(os.path.relpath(__file__))
-tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
-                     exception=BaseError, strict=False)
+# set up sys.excepthook
+if DEVMODE:
+    warnings.showwarning('development mode enabled', RuntimeWarning,
+                         filename=__file__, lineno=0,
+                         line=f"PCAPKIT_DEVMODE={os.environ['PCAPKIT_DEVMODE']}")
+else:
+    ROOT = os.path.dirname(os.path.relpath(__file__))
+    tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
+                         exception=BaseError, strict=False)
 
 # All Reference
 import pcapkit.__all__ as all  # pylint: disable
