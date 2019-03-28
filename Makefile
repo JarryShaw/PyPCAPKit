@@ -1,5 +1,7 @@
 .PHONY: clean const date dist release pipenv pypi update
 
+export PIPENV_VENV_IN_PROJECT=1
+
 SHELL := /usr/local/bin/bash
 DIR   ?= .
 

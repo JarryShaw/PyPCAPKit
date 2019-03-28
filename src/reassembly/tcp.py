@@ -95,7 +95,6 @@ appeared in RFC 791. And here is the process:
    for further handling. Otherwise, return.
 
 """
-import copy
 import io
 import sys
 
@@ -250,68 +249,69 @@ class TCP_Reassembly(Reassembly):
             self._buffer[BUFID] = {
                 'hdl': [Info(first=info.len, last=sys.maxsize)],
                 ACK: dict(
-                    ind=list(),
+                    ind=[info.num],
                     isn=info.dsn,
                     len=info.len,
                     raw=info.payload,
                 ),
             }
-
-        # initialise buffer with ACK
-        if ACK not in self._buffer[BUFID]:
-            self._buffer[BUFID][ACK] = dict(
-                ind=list(),
-                isn=info.dsn,
-                len=info.len,
-                raw=info.payload,
-            )
-
-        # append packet index
-        self._buffer[BUFID][ACK]['ind'].append(info.num)
-
-        # record fragment payload
-        ISN = self._buffer[BUFID][ACK]['isn']   # Initial Sequence Number
-        RAW = self._buffer[BUFID][ACK]['raw']   # Raw Payload Data
-        if DSN >= ISN:  # if fragment goes after existing payload
-            LEN = self._buffer[BUFID][ACK]['len']
-            GAP = DSN - (ISN + LEN)     # gap length between payloads
-            if GAP >= 0:    # if fragment goes after existing payload
-                RAW += bytearray(GAP) + info.payload
-            else:           # if fragment partially overlaps existing payload
-                RAW[DSN-ISN:] = info.payload
-        else:           # if fragment exceeds existing payload
-            LEN = info.len
-            GAP = ISN - (DSN + LEN)     # gap length between payloads
-            self._buffer[BUFID][ACK]['isn'] = DSN
-            if GAP >= 0:    # if fragment exceeds existing payload
-                RAW = info.payload + bytearray(GAP) + RAW
-            else:           # if fragment partially overlaps existing payload
-                RAW = info.payload + RAW[ISN-GAP:]
-        self._buffer[BUFID][ACK]['raw'] = RAW       # update payload datagram
-        self._buffer[BUFID][ACK]['len'] = len(RAW)  # update payload length
-
-        # update hole descriptor list
-        HDL = copy.deepcopy(self._buffer[BUFID]['hdl'])
-        for (index, hole) in enumerate(self._buffer[BUFID]['hdl']):     # step one
-            if info.first > hole.last:                                  # step two
-                continue
-            if info.last < hole.first:                                  # step three
-                continue
-            del HDL[index]                                              # step four
-            if info.first > hole.first:                                 # step five
-                new_hole = Info(
-                    first=hole.first,
-                    last=info.first - 1,
+        else:
+            # initialise buffer with ACK
+            if ACK not in self._buffer[BUFID]:
+                self._buffer[BUFID][ACK] = dict(
+                    ind=[info.num],
+                    isn=info.dsn,
+                    len=info.len,
+                    raw=info.payload,
                 )
-                HDL.insert(index, new_hole)
-            if info.last < hole.last and not FIN and not RST:           # step six
-                new_hole = Info(
-                    first=info.last + 1,
-                    last=hole.last
-                )
-                HDL.insert(index+1, new_hole)
-            break                                                       # step seven
-        self._buffer[BUFID]['hdl'] = HDL                                # update HDL
+            else:
+                # append packet index
+                self._buffer[BUFID][ACK]['ind'].append(info.num)
+
+                # record fragment payload
+                ISN = self._buffer[BUFID][ACK]['isn']   # Initial Sequence Number
+                RAW = self._buffer[BUFID][ACK]['raw']   # Raw Payload Data
+                if DSN >= ISN:  # if fragment goes after existing payload
+                    LEN = self._buffer[BUFID][ACK]['len']
+                    GAP = DSN - (ISN + LEN)     # gap length between payloads
+                    if GAP >= 0:    # if fragment goes after existing payload
+                        RAW += bytearray(GAP) + info.payload
+                    else:           # if fragment partially overlaps existing payload
+                        RAW[DSN-ISN:] = info.payload
+                else:           # if fragment exceeds existing payload
+                    LEN = info.len
+                    GAP = ISN - (DSN + LEN)     # gap length between payloads
+                    self._buffer[BUFID][ACK]['isn'] = DSN
+                    if GAP >= 0:    # if fragment exceeds existing payload
+                        RAW = info.payload + bytearray(GAP) + RAW
+                    else:           # if fragment partially overlaps existing payload
+                        RAW = info.payload + RAW[ISN-GAP:]
+                self._buffer[BUFID][ACK]['raw'] = RAW       # update payload datagram
+                self._buffer[BUFID][ACK]['len'] = len(RAW)  # update payload length
+
+            # update hole descriptor list
+            HDL = self._buffer[BUFID]['hdl']
+            for (index, hole) in enumerate(HDL):                            # step one
+                if info.first > hole.last:                                  # step two
+                    continue
+                if info.last < hole.first:                                  # step three
+                    continue
+                del HDL[index]                                              # step four
+                if info.first > hole.first:                                 # step five
+                    new_hole = Info(
+                        first=hole.first,
+                        last=info.first - 1,
+                    )
+                    HDL.insert(index, new_hole)
+                    index += 1
+                if info.last < hole.last and not FIN and not RST:           # step six
+                    new_hole = Info(
+                        first=info.last + 1,
+                        last=hole.last
+                    )
+                    HDL.insert(index, new_hole)
+                break                                                       # step seven
+            self._buffer[BUFID]['hdl'] = HDL                                # update HDL
 
         # when FIN/RST is set, submit buffer of this session
         if FIN or RST:
