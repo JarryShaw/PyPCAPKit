@@ -70,10 +70,9 @@ class BaseError(Exception):
         * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, quiet=False, **kwargs):
         if DEVMODE:
             index = stacklevel()
-            quiet = kwargs.pop('quiet', False)
             if not quiet and index:
                 fmt_exc = traceback.format_exc(limit=-index)
                 if len(fmt_exc.splitlines(True)) > 1:
