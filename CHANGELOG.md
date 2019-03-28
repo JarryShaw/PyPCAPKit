@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.14.2](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.2) (2019-03-28)
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.1...v0.14.2)
+
+**Merged pull requests:**
+
+- New distribution \[0.14.2\] [\#28](https://github.com/JarryShaw/PyPCAPKit/pull/28) ([JarryShaw](https://github.com/JarryShaw))
+
 ## [v0.14.1](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.1) (2019-03-07)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.0...v0.14.1)
 
