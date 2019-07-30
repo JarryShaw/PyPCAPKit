@@ -66,7 +66,7 @@ if DEVMODE:
                          filename=__file__, lineno=0,
                          line=f"PCAPKIT_DEVMODE={os.environ['PCAPKIT_DEVMODE']}")
 else:
-    ROOT = os.path.dirname(os.path.relpath(__file__))
+    ROOT = os.path.dirname(os.path.abspath(__file__))
     tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
                          exception=BaseError, strict=False)
 
