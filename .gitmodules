@@ -1,30 +1,40 @@
 [submodule "release"]
 	path = release
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/release
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = release
 [submodule "testbench/mp-manager"]
 	path = testbench/mp-manager
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/mp/manager
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/mp/manager
 [submodule "testbench/mp-prototype"]
 	path = testbench/mp-prototype
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/mp/prototype
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/mp/prototype
 [submodule "testbench/mp-queue"]
 	path = testbench/mp-queue
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/mp/queue
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/mp/queue
 [submodule "testbench/mp-server"]
 	path = testbench/mp-server
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/mp/server
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/mp/server
 [submodule "testbench/mp-tempfile"]
 	path = testbench/mp-tempfile
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/mp/tempfile
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/mp/tempfile
 [submodule "testbench/rc-abc"]
 	path = testbench/rc-abc
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/rc/abc
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/rc/abc
 [submodule "testbench/rc-fileio"]
 	path = testbench/rc-fileio
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/rc/fileio
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/rc/fileio
 [submodule "testbench/rc-protochain"]
 	path = testbench/rc-protochain
-	url = https://github.com/JarryShaw/PyPCAPKit/tree/test/rc/protochain
+	url = https://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/rc/protochain
 [submodule "testbench/rc-protocols"]
 	path = testbench/rc-protocols
-	url = http://github.com/JarryShaw/PyPCAPKit/tree/test/rc/protocols
+	url = http://github.com/JarryShaw/PyPCAPKit.git
+	branch = test/rc/protocols
