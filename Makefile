@@ -164,15 +164,13 @@ git-aftermath:
 	git push
 
 # file new release on master
-.ONESHELL:
 release-master:
-	message=$$(git log -1 --pretty=%B)
 	go run github.com/aktau/github-release release \
 	    --user JarryShaw \
 	    --repo PyPCAPKit \
 	    --tag "v$(version)" \
 	    --name "PyPCAPKit v$(version)" \
-	    --description "$(message)"
+	    --description "$$(git log -1 --pretty=%B)"
 
 # run pre-distribution process
 dist-pre: update
