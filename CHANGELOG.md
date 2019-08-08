@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.14.3](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.3) (2019-08-08)
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.2...v0.14.3)
+
+**Closed issues:**
+
+- InfoClass instanciation calls `os.stat`, ruining performance [\#29](https://github.com/JarryShaw/PyPCAPKit/issues/29)
+
 ## [v0.14.2](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.2) (2019-03-28)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.1...v0.14.2)
 

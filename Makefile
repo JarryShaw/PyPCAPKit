@@ -164,8 +164,9 @@ git-aftermath:
 	git push
 
 # file new release on master
+.ONESHELL:
 release-master:
-	$(eval message := $(shell git log -1 --pretty=%B))
+	message=$$(git log -1 --pretty=%B)
 	go run github.com/aktau/github-release release \
 	    --user JarryShaw \
 	    --repo PyPCAPKit \
