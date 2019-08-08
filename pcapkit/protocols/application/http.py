@@ -59,7 +59,7 @@ class HTTP(Application):
     @property
     def length(self):
         """Deprecated."""
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'length'")
+        raise UnsupportedCall("'{}' object has no attribute 'length'".format(self.__class__.__name__))
 
     ##########################################################################
     # Data models.

@@ -87,15 +87,15 @@ def main():
 
     if not args.verbose:
         try:
-            print(emoji.emojize(f":police_car_light: Loading file {extractor.input!r}"))
+            print(emoji.emojize(":police_car_light: Loading file {!r}".format(extractor.input)))
         except UnicodeEncodeError:
-            print(f"[*] Loading file {extractor.input!r}")
+            print("[*] Loading file {!r}".format(extractor.input))
         for _ in extractor:
-            print(f' - Frame {extractor.length:>3d}: {extractor.protocol}')
+            print(' - Frame {:>3d}: {}'.format(extractor.length, extractor.protocol))
         try:
-            print(emoji.emojize(f":beer_mug: Report file{'s' if args.files else ''} stored in {extractor.output!r}"))
+            print(emoji.emojize(":beer_mug: Report file{} stored in {!r}".format('s' if args.files else '', extractor.output)))
         except UnicodeEncodeError:
-            print(f"[*] Report file{'s' if args.files else ''} stored in {extractor.output!r}")
+            print("[*] Report file{} stored in {!r}".format('s' if args.files else '', extractor.output))
 
 
 if __name__ == '__main__':

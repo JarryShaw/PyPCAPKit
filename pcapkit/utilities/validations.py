@@ -18,12 +18,10 @@ import numbers
 
 import aenum
 
-from pcapkit.utilities.exceptions import (BoolError, BytearrayError,
-                                          BytesError, ComplexError, DictError,
-                                          DigitError, EnumError, FragmentError,
-                                          InfoError, IntError, IOObjError,
-                                          IPError, ListError, PacketError,
-                                          RealError, StringError, TupleError)
+from pcapkit.utilities.exceptions import (BoolError, BytearrayError, BytesError, ComplexError,
+                                          DictError, DigitError, EnumError, FragmentError,
+                                          InfoError, IntError, IOObjError, IPError, ListError,
+                                          PacketError, RealError, StringError, TupleError)
 
 __all__ = [
     'int_check', 'real_check', 'complex_check', 'number_check',
@@ -33,207 +31,203 @@ __all__ = [
 ]
 
 
-def int_check(*args, func=None):
+def int_check(*args, stacklevel=2):
     """Check if arguments are integrals."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, numbers.Integral):
             name = type(var).__name__
-            raise ComplexError(
-                f'Function {func} expected integral number, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise IntError('Function {} expected integral number, {} got instead.'.format(func, name))
 
 
-def real_check(*args, func=None):
+def real_check(*args, stacklevel=2):
     """Check if arguments are real numbers."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, numbers.Real):
             name = type(var).__name__
-            raise ComplexError(
-                f'Function {func} expected real number, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise RealError('Function {} expected real number, {} got instead.'.format(func, name))
 
 
-def complex_check(*args, func=None):
+def complex_check(*args, stacklevel=2):
     """Check if arguments are complex numbers."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, numbers.Complex):
             name = type(var).__name__
-            raise ComplexError(
-                f'Function {func} expected complex number, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise ComplexError('Function {} expected complex number, {} got instead.'.format(func, name))
 
 
-def number_check(*args, func=None):
+def number_check(*args, stacklevel=2):
     """Check if arguments are numbers."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, numbers.Number):
             name = type(var).__name__
-            raise DigitError(
-                f'Function {func} expected number, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise DigitError('Function {} expected number, {} got instead.'.format(func, name))
 
 
-def bytes_check(*args, func=None):
+def bytes_check(*args, stacklevel=2):
     """Check if arguments are bytes type."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, (bytes, collections.abc.ByteString)):
             name = type(var).__name__
-            raise BytesError(
-                f'Function {func} expected bytes, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise BytesError('Function {} expected bytes, {} got instead.'.format(func, name))
 
 
-def bytearray_check(*args, func=None):
+def bytearray_check(*args, stacklevel=2):
     """Check if arguments are bytearray type."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, (bytearray, collections.abc.ByteString, collections.abc.MutableSequence)):
-            name = type(var).__name__
-            raise BytearrayError(
-                f'Function {func} expected bytearray, {name} got instead.')
+            name = type(var).__name__func = inspect.stack()[stacklevel][3]
+            func = inspect.stack()[stacklevel][3]
+            raise BytearrayError('Function {} expected bytearray, {} got instead.'.format(func, name))
 
 
-def str_check(*args, func=None):
+def str_check(*args, stacklevel=2):
     """Check if arguments are str type."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, (str, collections.UserString, collections.abc.Sequence)):
             name = type(var).__name__
-            raise StringError(
-                f'Function {func} expected str, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise StringError('Function {} expected str, {} got instead.'.format(func, name))
 
 
-def bool_check(*args, func=None):
+def bool_check(*args, stacklevel=2):
     """Check if arguments are bytes type."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, bool):
             name = type(var).__name__
-            raise BoolError(
-                f'Function {func} expected bool, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise BoolError('Function {} expected bool, {} got instead.'.format(func, name))
 
 
-def list_check(*args, func=None):
+def list_check(*args, stacklevel=2):
     """Check if arguments are list type."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, (list, collections.UserList, collections.abc.MutableSequence)):
             name = type(var).__name__
-            raise ListError(
-                f'Function {func} expected list, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise ListError('Function {} expected list, {} got instead.'.format(func, name))
 
 
-def dict_check(*args, func=None):
+def dict_check(*args, stacklevel=2):
     """Check if arguments are dict type."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, (dict, collections.UserDict, collections.abc.MutableMapping)):
             name = type(var).__name__
-            raise DictError(
-                f'Function {func} expected dict, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise DictError('Function {} expected dict, {} got instead.'.format(func, name))
 
 
-def tuple_check(*args, func=None):
+def tuple_check(*args, stacklevel=2):
     """Check if arguments are tuple type."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, (tuple, collections.abc.Sequence)):
             name = type(var).__name__
-            raise TupleError(
-                f'Function {func} expected tuple, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise TupleError('Function {} expected tuple, {} got instead.'.format(func, name))
 
 
-def io_check(*args, func=None):
+def io_check(*args, stacklevel=2):
     """Check if arguments are file-like object."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, io.IOBase):
             name = type(var).__name__
-            raise IOObjError(
-                f'Function {func} expected file-like object, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise IOObjError('Function {} expected file-like object, {} got instead.'.format(func, name))
 
 
-def info_check(*args, func=None):
+def info_check(*args, stacklevel=2):
     """Check if arguments are Info instance."""
     from pcapkit.corekit.infoclass import Info
 
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, Info):
             name = type(var).__name__
-            raise InfoError(
-                f'Function {func} expected Info instance, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise InfoError('Function {} expected Info instance, {} got instead.'.format(func, name))
 
 
-def ip_check(*args, func=None):
+def ip_check(*args, stacklevel=2):
     """Check if arguments are IP addresses."""
-    func = func or inspect.stack()[2][3]
     for var in args:
-        if not isinstance(var, ipaddress._IPAddressBase):
+        if not isinstance(var, ipaddress._IPAddressBase):  # pylint: disable=protected-access
             name = type(var).__name__
-            raise IPError(
-                f'Function {func} expected IP address, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise IPError('Function {} expected IP address, {} got instead.'.format(func, name))
 
 
-def enum_check(*args, func=None):
+def enum_check(*args, stacklevel=2):
     """Check if arguments are of protocol type."""
-    func = func or inspect.stack()[2][3]
     for var in args:
         if not isinstance(var, (enum.EnumMeta, aenum.EnumMeta)):
             name = type(var).__name__
-            raise EnumError(
-                f'Function {func} expected enumeration, {name} got instead.')
+            func = inspect.stack()[stacklevel][3]
+            raise EnumError('Function {} expected enumeration, {} got instead.'.format(func, name))
 
 
-def frag_check(*args, protocol, func=None):
+def frag_check(*args, protocol, stacklevel=3):
     """Check if arguments are valid fragments."""
-    func = func or inspect.stack()[2][3]
     if 'IP' in protocol:
-        _ip_frag_check(*args, func=func)
+        try:
+            _ip_frag_check(*args, stacklevel=stacklevel)
+        except KeyError as error:
+            raise FragmentError('Missing fragment key: {}'.format(error.args[0]))
+        except Exception as error:
+            raise FragmentError('Malformed fragment object: {}'.format(error))
     elif 'TCP' in protocol:
-        _tcp_frag_check(*args, func=func)
+        try:
+            _tcp_frag_check(*args, stacklevel=stacklevel)
+        except KeyError as error:
+            raise FragmentError('Missing fragment key: {}'.format(error.args[0]))
+        except Exception as error:
+            raise FragmentError('Malformed fragment object: {}'.format(error))
     else:
-        raise FragmentError(f'Unknown fragmented protocol {protocol}.')
+        raise FragmentError('Unknown fragmented protocol {}.'.format(protocol))
 
 
-def _ip_frag_check(*args, func=None):
+def _ip_frag_check(*args, stacklevel=3):
     """Check if arguments are valid IP fragments."""
-    func = func or inspect.stack()[2][3]
     for var in args:
-        dict_check(var, func=func)
-        bufid = var.get('bufid')
-        str_check(bufid[3], func=func)
-        bool_check(var.get('mf'), func=func)
-        ip_check(bufid[0], bufid[1], func=func)
-        bytearray_check(var.get('header'), var.get('payload'), func=func)
-        int_check(bufid[2], var.get('num'), var.get('fo'),
-                  var.get('ihl'), var.get('tl'), func=func)
+        dict_check(var, stacklevel=stacklevel)
+        bufid = var['bufid']
+        str_check(bufid[3], stacklevel=stacklevel)
+        bool_check(var['mf'], stacklevel=stacklevel)
+        ip_check(bufid[0], bufid[1], stacklevel=stacklevel)
+        bytearray_check(var['header'], var['payload'], stacklevel=stacklevel)
+        int_check(bufid[2], var['num'], var['fo'],
+                  var['ihl'], var['tl'], stacklevel=stacklevel)
 
 
-def _tcp_frag_check(*args, func=None):
+def _tcp_frag_check(*args, stacklevel=3):
     """Check if arguments are valid TCP fragments."""
-    func = func or inspect.stack()[2][3]
     for var in args:
-        dict_check(var, func=func)
-        bufid = var.get('bufid')
-        ip_check(bufid[0], bufid[1], func=func)
-        bytearray_check(var.get('payload'), func=func)
-        bool_check(var.get('syn'), var.get('fin'), func=func)
-        int_check(bufid[2], bufid[3], var.get('num'), var.get('ack'), var.get('dsn'),
-                  var.get('first'), var.get('last'), var.get('len'), func=func)
+        dict_check(var, stacklevel=stacklevel)
+        bufid = var['bufid']
+        ip_check(bufid[0], bufid[1], stacklevel=stacklevel)
+        bytearray_check(var['payload'], stacklevel=stacklevel)
+        bool_check(var['syn'], var['fin'], stacklevel=stacklevel)
+        int_check(bufid[2], bufid[3], var['num'], var['ack'], var['dsn'],
+                  var['first'], var['last'], var['len'], stacklevel=stacklevel)
 
 
-def pkt_check(*args, func=None):
+def pkt_check(*args, stacklevel=3):
     """Check if arguments are valid packets."""
-    func = func or inspect.stack()[2][3]
-    for var in args:
-        dict_check(var, func=func)
-        dict_check(var.get('frame'), func=func)
-        enum_check(var.get('protocol'), func=func)
-        real_check(var.get('timestamp'), func=func)
-        ip_check(var.get('src'), var.get('dst'), func=func)
-        bool_check(var.get('syn'), var.get('fin'), func=func)
-        int_check(var.get('srcport'), var.get('dstport'), var.get('index'), func=func)
+    try:
+        for var in args:
+            dict_check(var, stacklevel=stacklevel)
+            dict_check(var['frame'], stacklevel=stacklevel)
+            enum_check(var['protocol'], stacklevel=stacklevel)
+            real_check(var['timestamp'], stacklevel=stacklevel)
+            ip_check(var['src'], var['dst'], stacklevel=stacklevel)
+            bool_check(var['syn'], var['fin'], stacklevel=stacklevel)
+            int_check(var['srcport'], var['dstport'], var['index'], stacklevel=stacklevel)
+    except KeyError as error:
+        raise PacketError('Missing packet key: {}'.format(error.args[0]))
+    except Exception as error:
+        raise PacketError('Malformed packet object: {}'.format(error))
 
 
 ###############################################################################

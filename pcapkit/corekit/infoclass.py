@@ -33,7 +33,7 @@ class Info(collections.abc.Mapping):
             __dict__ = dict()
             for (key, value) in dict_.items():
                 if key in self.__data__:
-                    key = f'{key}2'
+                    key = '{}2'.format(key)
                 if isinstance(value, dict):
                     __dict__[key] = Info(value)
                 else:
@@ -61,19 +61,19 @@ class Info(collections.abc.Mapping):
     def __str__(self):
         temp = list()
         for (key, value) in self.__dict__.items():
-            temp.append(f'{key}={value}')
+            temp.append('{}={}'.format(key, value))
         args = ', '.join(temp)
-        return f'Info({args})'
+        return 'Info({})'.format(args)
 
     def __repr__(self):
         temp = list()
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
-                temp.append(f'{key}=Info(...)')
+                temp.append('{}=Info(...)'.format(key))
             else:
-                temp.append(f'{key}={value!r}')
+                temp.append('{}={!r}'.format(key, value))
         args = ', '.join(temp)
-        return f"Info({args})"
+        return "Info({})".format(args)
 
     def __len__(self):
         return len(self.__dict__)
@@ -83,7 +83,7 @@ class Info(collections.abc.Mapping):
 
     def __getitem__(self, key):
         if key in self.__data__:
-            key = f'{key}2'
+            key = '{}2'.format(key)
         value = self.__dict__[key]
         if isinstance(value, (dict, collections.abc.Mapping)):
             return Info(value)

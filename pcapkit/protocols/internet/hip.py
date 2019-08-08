@@ -64,8 +64,8 @@ __all__ = ['HIP']
 def _HIP_PROC(dscp):
     """HIP parameter process functions."""
     return eval('lambda self, code, cbit, clen, *, desc, length, version: '
-                f'self._read_para_{dscp.name.split(" [")[0].lower()}(code, cbit, clen, '
-                'desc=desc, length=length, version=version)')
+                'self._read_para_{}(code, cbit, clen, '
+                'desc=desc, length=length, version=version)'.format(dscp.name.split(" [")[0].lower()))
 
 
 class HIP(Internet):
@@ -112,7 +112,7 @@ class HIP(Internet):
     @property
     def alias(self):
         """Acronym of corresponding protocol."""
-        return f'HIPv{self._info.version}'  # pylint: disable=E1101
+        return 'HIPv{}'.format(self._info.version)  # pylint: disable=E1101
 
     @property
     def length(self):
@@ -123,7 +123,7 @@ class HIP(Internet):
     def payload(self):
         """Payload of current instance."""
         if self._extf:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
+            raise UnsupportedCall("'{}' object has no attribute 'payload'".format(self.__class__.__name__))
         return self._next
 
     @property
@@ -292,7 +292,7 @@ class HIP(Internet):
 
         # check threshold
         if counter != length:
-            raise ProtocolError(f'HIPv{version}: invalid format')
+            raise ProtocolError('HIPv{}: invalid format'.format(version))
 
         return tuple(optkind), options
 
@@ -359,7 +359,7 @@ class HIP(Internet):
 
         """
         if clen != 12:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _resv = self._read_fileng(2)
         _kind = self._read_unpack(2)
@@ -401,9 +401,9 @@ class HIP(Internet):
 
         """
         if clen != 12:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
         if code == 128 and version != 1:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid parameter'.format(version, code))
 
         _resv = self._read_fileng(4)
         _genc = self._read_unpack(8)
@@ -471,7 +471,7 @@ class HIP(Internet):
                     ip=ipaddress.ip_address(self._read_fileng(16)),
                 )
             else:
-                raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _size = 0           # length of read locators
         _locs = list()      # list of locators
@@ -529,7 +529,7 @@ class HIP(Internet):
 
         """
         if version == 1 and clen != 12:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _numk = self._read_unpack(1)
         _time = self._read_unpack(1)
@@ -583,9 +583,9 @@ class HIP(Internet):
 
         """
         if version == 1 and clen != 20:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
         if (clen - 4) % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _numk = self._read_unpack(1)
         _time = self._read_unpack(1)
@@ -630,7 +630,7 @@ class HIP(Internet):
 
         """
         if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _upid = self._read_unpack(4)
 
@@ -665,7 +665,7 @@ class HIP(Internet):
 
         """
         if clen % 4 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _upid = list()
         for _ in range(clen // 4):
@@ -787,9 +787,9 @@ class HIP(Internet):
 
         """
         if version != 1:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid parameter'.format(version, code))
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _stid = list()
         for _ in range(clen // 2):
@@ -832,7 +832,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _cpid = list()
         for _ in range(clen // 2):
@@ -878,7 +878,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _resv = self._read_fileng(2)
         _mdid = list()
@@ -918,7 +918,7 @@ class HIP(Internet):
 
         """
         if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _data = self._read_unpack(4)
 
@@ -1192,7 +1192,7 @@ class HIP(Internet):
             elif 40960 <= _code <= 65535:
                 _type = 'Unassigned (Reserved for Private Use; Status Message)'
             else:
-                raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         notification = dict(
             type=desc,
@@ -1283,7 +1283,7 @@ class HIP(Internet):
                 elif 201 <= _code <= 255:
                     _kind = 'Unassigned (Reserved for Private Use)'
                 else:
-                    raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                    raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
             _type.append(_kind)
 
         reg_info = dict(
@@ -1341,7 +1341,7 @@ class HIP(Internet):
                 elif 201 <= _code <= 255:
                     _kind = 'Unassigned (Reserved for Private Use)'
                 else:
-                    raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                    raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
             _type.append(_kind)
 
         reg_request = dict(
@@ -1399,7 +1399,7 @@ class HIP(Internet):
                 elif 201 <= _code <= 255:
                     _kind = 'Unassigned (Reserved for Private Use)'
                 else:
-                    raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                    raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
             _type.append(_kind)
 
         reg_response = dict(
@@ -1457,7 +1457,7 @@ class HIP(Internet):
                 elif 201 <= _code <= 255:
                     _kind = 'Unassigned (Reserved for Private Use)'
                 else:
-                    raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                    raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
             _type.append(_kind)
 
         reg_failed = dict(
@@ -1502,7 +1502,7 @@ class HIP(Internet):
 
         """
         if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _port = self._read_unpack(2)
         _ptcl = self._read_unpack(1)
@@ -1578,7 +1578,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _tfid = list()
         for _ in range(clen // 2):
@@ -1624,7 +1624,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _resv = self._read_fileng(2)
         _stid = list()
@@ -1664,7 +1664,7 @@ class HIP(Internet):
 
         """
         if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _seqn = self._read_unpack(4)
 
@@ -1698,7 +1698,7 @@ class HIP(Internet):
 
         """
         if clen % 4 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _ackn = list()
         for _ in range(clen // 4):
@@ -1873,7 +1873,7 @@ class HIP(Internet):
 
         """
         if (clen - 4) % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _flag = self._read_binary(2)
         _resv = self._read_fileng(2)
@@ -1921,7 +1921,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _port = self._read_unpack(2)
         _mdid = list()
@@ -2196,7 +2196,7 @@ class HIP(Internet):
 
         """
         if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _port = self._read_unpack(2)
         _ptcl = self._read_unpack(1)
@@ -2242,7 +2242,7 @@ class HIP(Internet):
 
         """
         if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _port = self._read_unpack(2)
         _ptcl = self._read_unpack(1)
@@ -2281,7 +2281,7 @@ class HIP(Internet):
 
         """
         if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _ttln = self._read_unpack(2)
 
@@ -2332,7 +2332,7 @@ class HIP(Internet):
 
         """
         if (clen - 4) % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _flag = self._read_binary(2)
         _resv = self._read_fileng(2)
@@ -2376,7 +2376,7 @@ class HIP(Internet):
 
         """
         if clen != 16:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _addr = self._read_fileng(16)
 
@@ -2458,7 +2458,7 @@ class HIP(Internet):
 
         """
         if clen % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError('HIPv{}: [Parano {}] invalid format'.format(version, code))
 
         _addr = list()
         for _ in range(clen // 16):

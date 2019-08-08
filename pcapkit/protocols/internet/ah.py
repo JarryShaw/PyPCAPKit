@@ -76,7 +76,7 @@ class AH(IPsec):
     def payload(self):
         """Payload of current instance."""
         if self._extf:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
+            raise UnsupportedCall("'{}' object has no attribute 'payload'".format(self.__class__.__name__))
         return self._next
 
     @property
@@ -142,12 +142,12 @@ class AH(IPsec):
         elif version == 4:
             _plen = 4 - (_tlen % 4)
         else:
-            raise VersionError(f'Unknown IP version {version}')
+            raise VersionError('Unknown IP version {}'.format(version))
 
         if _plen:   # explicit padding in need
             padding = self._read_binary(_plen)
             if any((int(bit, base=2) for bit in padding)):
-                raise ProtocolError(f'{self.alias}: invalid format')
+                raise ProtocolError('{}: invalid format'.format(self.alias))
 
         length -= ah['length']
         ah['packet'] = self._read_packet(header=ah['length'], payload=length)

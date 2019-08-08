@@ -33,10 +33,19 @@ __all__ = [
     'ModuleNotFound',                                               # ModuleNotFoundError
 ]
 
+# boolean mappings
+BOOLEAN_STATES = {'1': True, '0': False,
+                  'yes': True, 'no': False,
+                  'true': True, 'false': False,
+                  'on': True, 'off': False}
+
+# DEVMODE flag
+DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', '').lower(), False)
+
 
 def stacklevel():
     """Fetch current stack level."""
-    pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
+    pcapkit = '{}pcapkit{}'.format(os.path.sep, os.path.sep)
     tb = traceback.extract_stack()
     for index, tbitem in enumerate(tb):
         if pcapkit in tbitem[0]:
@@ -61,15 +70,15 @@ class BaseError(Exception):
         * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
 
     """
-    def __init__(self, *args, **kwargs):
-        index = stacklevel()
-        quiet = kwargs.pop('quiet', False)
-        if not quiet and index:
-            fmt_exc = traceback.format_exc(limit=-index)
-            if len(fmt_exc.splitlines(True)) > 1:
-                print(fmt_exc, file=sys.stderr)
-
-        sys.tracebacklimit = 0
+    def __init__(self, *args, quiet=False, **kwargs):
+        if DEVMODE:
+            index = stacklevel()
+            if not quiet and index:
+                fmt_exc = traceback.format_exc(limit=-index)
+                if len(fmt_exc.splitlines(True)) > 1:
+                    print(fmt_exc, file=sys.stderr)
+        else:
+            sys.tracebacklimit = 0
         super().__init__(*args, **kwargs)
 
 

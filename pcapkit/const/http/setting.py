@@ -16,6 +16,7 @@ class Setting(IntEnum):
     Setting['INITIAL_WINDOW_SIZE'] = 0x0004                                     # [RFC 7540, Section 6.5.2] 65535
     Setting['MAX_FRAME_SIZE'] = 0x0005                                          # [RFC 7540, Section 6.5.2] 16384
     Setting['MAX_HEADER_LIST_SIZE'] = 0x0006                                    # [RFC 7540, Section 6.5.2] infinite
+    Setting['Unassigned'] = 0x0007
     Setting['SETTINGS_ENABLE_CONNECT_PROTOCOL'] = 0x0008                        # [RFC 8441] 0
     Setting['TLS_RENEG_PERMITTED'] = 0x0010                                     # [MS-HTTP2E][Gabriel_Montenegro] 0x00
 
@@ -33,9 +34,6 @@ class Setting(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 0x0007 <= value <= 0x000F:
-            extend_enum(cls, 'Unassigned [0x%s]' % hex(value)[2:].upper().zfill(4), value)
-            return cls(value)
         if 0x0009 <= value <= 0x000F:
             extend_enum(cls, 'Unassigned [0x%s]' % hex(value)[2:].upper().zfill(4), value)
             return cls(value)

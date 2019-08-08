@@ -81,7 +81,7 @@ _HOPOPT_NULL = {
 
 def _HOPOPT_PROC(abbr):
     """HOPOPT option process functions."""
-    return eval(f'lambda self, code, *, desc: self._read_opt_{abbr}(code, desc=desc)')
+    return eval('lambda self, code, *, desc: self._read_opt_{}(code, desc=desc)'.format(abbr))
 
 
 class HOPOPT(Internet):
@@ -132,7 +132,7 @@ class HOPOPT(Internet):
     def payload(self):
         """Payload of current instance."""
         if self._extf:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
+            raise UnsupportedCall("'{}' object has no attribute 'payload'".format(self.__class__.__name__))
         return self._next
 
     @property
@@ -269,7 +269,7 @@ class HOPOPT(Internet):
 
         # check threshold
         if counter != length:
-            raise ProtocolError(f'{self.alias}: invalid format')
+            raise ProtocolError('{}: invalid format'.format(self.alias))
 
         return tuple(optkind), options
 
@@ -351,7 +351,7 @@ class HOPOPT(Internet):
                 padding=_padn,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
 
         return opt
 
@@ -377,7 +377,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 1:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _limt = self._read_unpack(1)
 
         opt = dict(
@@ -409,13 +409,13 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _rval = self._read_unpack(2)
 
         if 4 <= _rval <= 35:
-            _dscp = f'Aggregated Reservation Nesting Level {_rval-4}'   # [RFC 3175]
+            _dscp = 'Aggregated Reservation Nesting Level {}'.format(_rval-4)   # [RFC 3175]
         elif 36 <= _rval <= 67:
-            _dscp = f'QoS NSLP Aggregation Level {_rval-36}'            # [RFC 5974]
+            _dscp = 'QoS NSLP Aggregation Level {}'.format(_rval-36)            # [RFC 5974]
         elif 65503 <= _rval <= 65534:
             _dscp = 'Reserved for experimental use'                     # [RFC 5350]
         else:
@@ -461,11 +461,11 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 8 and _size % 8 != 0:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _cmpt = self._read_unpack(4)
         _clen = self._read_unpack(1)
         if _clen % 2 != 0:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _sens = self._read_unpack(1)
         _csum = self._read_fileng(2)
 
@@ -547,7 +547,7 @@ class HOPOPT(Internet):
             _tidl = int(_tidd[4:], base=2)
             if _tidt == 'NULL':
                 if _tidl != 0:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
                 _iden = self._read_fileng(_size-1)
 
                 opt = dict(
@@ -561,7 +561,7 @@ class HOPOPT(Internet):
                 )
             elif _tidt == 'IPv4':
                 if _tidl != 3:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
                 _tidf = self._read_fileng(4)
                 _iden = self._read_fileng(_size-4)
 
@@ -577,7 +577,7 @@ class HOPOPT(Internet):
                 )
             elif _tidt == 'IPv6':
                 if _tidl != 15:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
                 _tidf = self._read_fileng(15)
                 _iden = self._read_fileng(_size-15)
 
@@ -617,7 +617,7 @@ class HOPOPT(Internet):
                 hav=_tidd[1:] + _data,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
 
         return opt
 
@@ -652,7 +652,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 10:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _stlr = self._read_unpack(1)
         _stls = self._read_unpack(1)
         _psnt = self._read_unpack(2)
@@ -713,7 +713,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 6:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
 
         _fcrr = self._read_binary(1)
         _func = int(_fcrr[:4], base=2)
@@ -723,7 +723,7 @@ class HOPOPT(Internet):
         _qsnn = int(_nonr[:30], base=2)
 
         if _func != 0 and _func != 8:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
 
         data = dict(
             type=_type,
@@ -768,7 +768,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 4:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _flag = self._read_binary(1)
         _rpld = self._read_unpack(1)
         _rank = self._read_unpack(2)
@@ -821,7 +821,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _smvr = self._read_binary(1)
         _seqn = self._read_unpack(1)
 
@@ -840,18 +840,18 @@ class HOPOPT(Internet):
         _kind = _smvr[:2]
         if _kind == '00':
             if _size != 2:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         elif _kind == '01':
             if _size != 4:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
             opt['seed_id'] = self._read_unpack(2)
         elif _kind == '10':
             if _size != 10:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
             opt['seed_id'] = self._read_unpack(8)
         elif _kind == '11':
             if _size != 18:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
             opt['seed_id'] = self._read_unpack(16)
         else:
             opt['seed_id'] = self._read_unpack(_size-2)
@@ -959,7 +959,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 4:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _jlen = self._read_unpack(4)
 
         opt = dict(
@@ -1001,7 +1001,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 16:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _addr = self._read_fileng(16)
 
         opt = dict(
@@ -1042,7 +1042,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError('{}: [Optno {}] invalid format'.format(self.alias, code))
         _verf = self._read_binary(1)
         _seqn = self._read_unpack(2)
 
