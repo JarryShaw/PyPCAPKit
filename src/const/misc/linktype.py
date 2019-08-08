@@ -131,6 +131,11 @@ class LinkType(IntEnum):
     LinkType['DSA_TAG_BRCM'] = 281                                              # DLT_DSA_TAG_BRCM
     LinkType['DSA_TAG_BRCM_PREPEND'] = 282                                      # DLT_DSA_TAG_BRCM_PREPEND
     LinkType['IEEE802_15_4_TAP'] = 283                                          # DLT_IEEE802_15_4_TAP
+    LinkType['DSA_TAG_DSA'] = 284                                               # DLT_DSA_TAG_DSA
+    LinkType['DSA_TAG_EDSA'] = 285                                              # DLT_DSA_TAG_EDSA
+    LinkType['ELEE'] = 286                                                      # DLT_ELEE
+    LinkType['Z_WAVE_SERIAL'] = 287                                             # DLT_Z_WAVE_SERIAL
+    LinkType['USB_2_0'] = 288                                                   # DLT_USB_2_0
 
     @staticmethod
     def get(key, default=-1):

@@ -156,11 +156,11 @@
 					"flags" : {
 						"ns" : false,
 						"cwr" : false,
-						"ecn" : false,
+						"ece" : false,
 						"urg" : false,
 						"ack" : true,
-						"push" : false,
-						"reset" : false,
+						"psh" : false,
+						"rst" : false,
 						"syn" : false,
 						"fin" : true
 					},
@@ -231,11 +231,11 @@
 					"flags" : {
 						"ns" : false,
 						"cwr" : false,
-						"ecn" : false,
+						"ece" : false,
 						"urg" : false,
 						"ack" : true,
-						"push" : false,
-						"reset" : false,
+						"psh" : false,
+						"rst" : false,
 						"syn" : false,
 						"fin" : false
 					},
@@ -306,11 +306,11 @@
 					"flags" : {
 						"ns" : false,
 						"cwr" : false,
-						"ecn" : false,
+						"ece" : false,
 						"urg" : false,
 						"ack" : true,
-						"push" : false,
-						"reset" : false,
+						"psh" : false,
+						"rst" : false,
 						"syn" : false,
 						"fin" : true
 					},

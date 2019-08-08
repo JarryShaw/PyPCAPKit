@@ -190,11 +190,11 @@ Frame 3
   |                 |-- flags
   |                 |     |-- ns -> False
   |                 |     |-- cwr -> False
-  |                 |     |-- ecn -> False
+  |                 |     |-- ece -> False
   |                 |     |-- urg -> False
   |                 |     |-- ack -> True
-  |                 |     |-- push -> False
-  |                 |     |-- reset -> False
+  |                 |     |-- psh -> False
+  |                 |     |-- rst -> False
   |                 |     |-- syn -> False
   |                 |     |-- fin -> True
   |                 |-- window_size -> 31920
@@ -271,11 +271,11 @@ Frame 4
   |                 |-- flags
   |                 |     |-- ns -> False
   |                 |     |-- cwr -> False
-  |                 |     |-- ecn -> False
+  |                 |     |-- ece -> False
   |                 |     |-- urg -> False
   |                 |     |-- ack -> True
-  |                 |     |-- push -> False
-  |                 |     |-- reset -> False
+  |                 |     |-- psh -> False
+  |                 |     |-- rst -> False
   |                 |     |-- syn -> False
   |                 |     |-- fin -> False
   |                 |-- window_size -> 65535
@@ -352,11 +352,11 @@ Frame 5
   |                 |-- flags
   |                 |     |-- ns -> False
   |                 |     |-- cwr -> False
-  |                 |     |-- ecn -> False
+  |                 |     |-- ece -> False
   |                 |     |-- urg -> False
   |                 |     |-- ack -> True
-  |                 |     |-- push -> False
-  |                 |     |-- reset -> False
+  |                 |     |-- psh -> False
+  |                 |     |-- rst -> False
   |                 |     |-- syn -> False
   |                 |     |-- fin -> True
   |                 |-- window_size -> 65535

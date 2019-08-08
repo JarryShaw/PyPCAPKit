@@ -1,9 +1,4 @@
 
-.vscode/
-
-*.icloud
-Pipfile.lock
-
 out
 *.js
 !out.js

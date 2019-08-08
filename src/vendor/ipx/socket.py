@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=wrong-import-position
 
 ###############################################################################
 import sys
@@ -8,9 +9,11 @@ sys.path.pop(0)  # noqa
 import contextlib
 import os
 import re
+import webbrowser
+import tempfile
 
 import bs4
-import requests
+# import requests
 
 ###############
 # Macros
@@ -25,11 +28,21 @@ LINK = 'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number
 # Processors
 ###############
 
-page = requests.get(LINK)
-soup = bs4.BeautifulSoup(page.text, 'html5lib')
+# page = requests.get(LINK)
+# soup = bs4.BeautifulSoup(page.text, 'html5lib')
+with tempfile.TemporaryDirectory(prefix=f'{os.path.realpath(os.curdir)}/') as tempdir:
+    index_html = os.path.join(tempdir, 'index.html')
+
+    webbrowser.open(LINK)
+    print(f'Please save the HTML code as {index_html!r}.')
+    input('Press ENTER to continue...')
+
+    with open(index_html) as file:
+        text = file.read()
+soup = bs4.BeautifulSoup(text, 'html5lib')
 
 table = soup.find_all('table', class_='wikitable')[3]
-content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)
+content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
 header = next(content)
 
 enum = list()
@@ -75,7 +88,7 @@ ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
 MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
 
 
-def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
 # -*- coding: utf-8 -*-
 
 from aenum import IntEnum, extend_enum

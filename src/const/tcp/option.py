@@ -39,12 +39,12 @@ class Option(IntEnum):
     Option['QS'] = 27                                                           # [RFC 4782]
     Option['TIMEOUT'] = 28                                                      # [RFC 5482]
     Option['AO'] = 29                                                           # [RFC 5925]
-    Option['MP'] = 30                                                           # [RFC 6824]
+    Option['MP'] = 30                                                           # [RFC -ietf-mptcp-rfc6824bis-18]
     Option['Reserved [31]'] = 31
     Option['Reserved [32]'] = 32
     Option['Reserved [33]'] = 33
     Option['FASTOPEN'] = 34                                                     # [RFC 7413]
-    Option['Encryption Negotiation'] = 69                                       # [RFC -ietf-tcpinc-tcpeno-19]
+    Option['Encryption Negotiation'] = 69                                       # [RFC 8547]
     Option['Reserved [70]'] = 70
     Option['Reserved [76]'] = 76
     Option['Reserved [77]'] = 77

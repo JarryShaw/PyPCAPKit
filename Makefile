@@ -5,8 +5,6 @@ export PIPENV_VENV_IN_PROJECT=1
 SHELL := /usr/local/bin/bash
 DIR   ?= .
 
-# fetch platform spec
-platform = $(shell python3 -c "import distutils.util; print(distutils.util.get_platform().replace('-', '_').replace('.', '_'))")
 # get version string
 version  = $(shell cat setup.py | grep "^__version__" | sed "s/__version__ = '\(.*\)'/\1/")
 # commit message
@@ -78,36 +76,39 @@ update-maintainer:
 	go run github.com/gaocegege/maintainer contributing
 
 # make PyPI distribution
-dist-pypi: clean-pypi dist-pypi-new dist-pypi-old dist-linux
+# dist-pypi: clean-pypi dist-pypi-new dist-pypi-old dist-linux
+dist-pypi: clean-pypi dist-pypi-new dist-pypi-old
 
 # make Python >=3.6 distribution
 .ONESHELL:
 dist-pypi-new:
 	set -ex
 	cd $(DIR)
-	python3.7 setup.py bdist_egg bdist_wheel --plat-name="$(platform)" --python-tag='cp37'
-	python3.6 setup.py bdist_egg bdist_wheel --plat-name="$(platform)" --python-tag='cp36'
+	~/.pyenv/versions/3.8-dev/bin/python3.8 setup.py bdist_egg bdist_wheel --python-tag='cp38'
+	~/.pyenv/versions/3.7.4/bin/python3.7 setup.py bdist_egg bdist_wheel --python-tag='cp37'
+	~/.pyenv/versions/3.6.9/bin/python3.6 setup.py bdist_egg bdist_wheel --python-tag='cp36'
+	~/.pyenv/versions/pypy3.6-7.1.1/bin/pypy3 setup.py bdist_egg bdist_wheel --python-tag='pp36'
 
 # perform f2format
 dist-f2format:
-	f2format -n $(DIR)/pcapkit
+	pipenv run f2format -n $(DIR)/pcapkit
 
 # make Python <3.6 distribution
 .ONESHELL:
 dist-pypi-old: dist-f2format
 	set -ex
 	cd $(DIR)
-	python3.5 setup.py bdist_egg bdist_wheel --plat-name="$(platform)" --python-tag='cp35'
-	python3.4 setup.py bdist_egg bdist_wheel --plat-name="$(platform)" --python-tag='cp34'
-	pypy3 setup.py bdist_wheel --plat-name="$(platform)" --python-tag='pp35'
-	python3 setup.py sdist
+	~/.pyenv/versions/3.5.7/bin/python3.5 setup.py bdist_egg bdist_wheel --python-tag='cp35'
+	~/.pyenv/versions/3.4.10/bin/python3.4 setup.py bdist_egg bdist_wheel --python-tag='cp34'
+	~/.pyenv/versions/pypy3.5-7.0.0/bin/pypy3 setup.py bdist_egg bdist_wheel --python-tag='pp35'
+	pipenv run python setup.py sdist
 
-# make Linux distribution
-.ONESHELL:
-dist-linux:
-	set -ex
-	cd $(DIR)/docker
-	docker-compose up --build
+# # make Linux distribution
+# .ONESHELL:
+# dist-linux:
+# 	set -ex
+# 	cd $(DIR)/docker
+# 	docker-compose up --build
 
 # upload PyPI distribution
 .ONESHELL:
@@ -164,6 +165,7 @@ git-aftermath:
 
 # file new release on master
 release-master:
+	$(eval message := $(shell git log -1 --pretty=%B))
 	go run github.com/aktau/github-release release \
 	    --user JarryShaw \
 	    --repo PyPCAPKit \

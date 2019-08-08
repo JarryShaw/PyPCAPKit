@@ -296,15 +296,15 @@
 						<false/>
 						<key>cwr</key>
 						<false/>
-						<key>ecn</key>
+						<key>ece</key>
 						<false/>
 						<key>urg</key>
 						<false/>
 						<key>ack</key>
 						<true/>
-						<key>push</key>
+						<key>psh</key>
 						<false/>
-						<key>reset</key>
+						<key>rst</key>
 						<false/>
 						<key>syn</key>
 						<false/>
@@ -439,15 +439,15 @@
 						<false/>
 						<key>cwr</key>
 						<false/>
-						<key>ecn</key>
+						<key>ece</key>
 						<false/>
 						<key>urg</key>
 						<false/>
 						<key>ack</key>
 						<true/>
-						<key>push</key>
+						<key>psh</key>
 						<false/>
-						<key>reset</key>
+						<key>rst</key>
 						<false/>
 						<key>syn</key>
 						<false/>
@@ -582,15 +582,15 @@
 						<false/>
 						<key>cwr</key>
 						<false/>
-						<key>ecn</key>
+						<key>ece</key>
 						<false/>
 						<key>urg</key>
 						<false/>
 						<key>ack</key>
 						<true/>
-						<key>push</key>
+						<key>psh</key>
 						<false/>
-						<key>reset</key>
+						<key>rst</key>
 						<false/>
 						<key>syn</key>
 						<false/>

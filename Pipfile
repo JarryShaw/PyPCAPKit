@@ -11,19 +11,17 @@ emoji = "*"
 tbtrim = ">=0.2.1"
 
 [dev-packages]
-pcapkit = {editable = true, path = "."}
+pypcapkit = {editable = true, path = "."}
 pyshark = "*"
 dpkt = "*"
 scapy = "*"
-"beautifulsoup4" = "*"
-"html5lib" = "*"
+bs4 = "*"
+html5lib = "*"
 requests = "*"
 ipython = "*"
-rope = "*"
-"autopep8" = "*"
+autopep8 = "*"
 pylint = "*"
-pycodestyle = "*"
-isort = {extras = ["pipfile", "requirements"], version = "*"}
+f2format = "*"
 
 [requires]
 python_version = "3.7"
