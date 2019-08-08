@@ -63,7 +63,7 @@
 
 &emsp; Besides, due to complexity of `pcapkit`, its extraction procedure takes around ~0.01~ *0.0009* seconds per packet, which is not ideal enough. Thus, `pcapkit` introduced alternative extraction engines to accelerate this procedure. By now, `pcapkit` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/). Plus, `pcapkit` supports two strategies of multiprocessing (`server` & `pipeline`). For more information, please refer to the document.
 
-> PyPCAPKit finally boosts a bit up thanks to @59e5aaf4 with issue #29 🎉
+> PyPCAPKit finally boosts a bit up thanks to [@59e5aaf4](https://github.com/59e5aaf4) with issue [#29](https://github.com/JarryShaw/PyPCAPKit/issues/29) 🎉
 
 #### Test environment
 
