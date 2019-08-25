@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -23,7 +24,7 @@ class ProtectionAuthority(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return ProtectionAuthority(key)
-        if key not in ProtectionAuthority._member_map_:
+        if key not in ProtectionAuthority._member_map_:  # pylint: disable=no-member
             extend_enum(ProtectionAuthority, key, default)
         return ProtectionAuthority[key]
 
@@ -34,4 +35,3 @@ class ProtectionAuthority(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned [%d]' % value, value)
         return cls(value)
-        super()._missing_(value)

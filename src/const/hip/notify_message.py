@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -50,7 +51,7 @@ class NotifyMessage(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return NotifyMessage(key)
-        if key not in NotifyMessage._member_map_:
+        if key not in NotifyMessage._member_map_:  # pylint: disable=no-member
             extend_enum(NotifyMessage, key, default)
         return NotifyMessage[key]
 
@@ -100,4 +101,4 @@ class NotifyMessage(IntEnum):
             # [RFC 7401]
             extend_enum(cls, 'Reserved for Private Use [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

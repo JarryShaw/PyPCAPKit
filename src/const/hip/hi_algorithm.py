@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -25,7 +26,7 @@ class HI_Algorithm(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return HI_Algorithm(key)
-        if key not in HI_Algorithm._member_map_:
+        if key not in HI_Algorithm._member_map_:  # pylint: disable=no-member
             extend_enum(HI_Algorithm, key, default)
         return HI_Algorithm[key]
 
@@ -37,4 +38,4 @@ class HI_Algorithm(IntEnum):
         if 10 <= value <= 65535:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -26,7 +27,7 @@ class Packet(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Packet(key)
-        if key not in Packet._member_map_:
+        if key not in Packet._member_map_:  # pylint: disable=no-member
             extend_enum(Packet, key, default)
         return Packet[key]
 
@@ -44,4 +45,4 @@ class Packet(IntEnum):
         if 33 <= value <= 127:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

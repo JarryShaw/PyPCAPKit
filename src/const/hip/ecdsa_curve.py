@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -18,7 +19,7 @@ class ECDSA_Curve(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return ECDSA_Curve(key)
-        if key not in ECDSA_Curve._member_map_:
+        if key not in ECDSA_Curve._member_map_:  # pylint: disable=no-member
             extend_enum(ECDSA_Curve, key, default)
         return ECDSA_Curve[key]
 
@@ -30,4 +31,4 @@ class ECDSA_Curve(IntEnum):
         if 3 <= value <= 65535:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

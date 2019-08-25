@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -17,7 +18,7 @@ class TOS_REL(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return TOS_REL(key)
-        if key not in TOS_REL._member_map_:
+        if key not in TOS_REL._member_map_:  # pylint: disable=no-member
             extend_enum(TOS_REL, key, default)
         return TOS_REL[key]
 
@@ -28,4 +29,3 @@ class TOS_REL(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned [%d]' % value, value)
         return cls(value)
-        super()._missing_(value)

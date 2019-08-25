@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -18,7 +19,7 @@ class Registration(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Registration(key)
-        if key not in Registration._member_map_:
+        if key not in Registration._member_map_:  # pylint: disable=no-member
             extend_enum(Registration, key, default)
         return Registration[key]
 
@@ -34,4 +35,4 @@ class Registration(IntEnum):
             # [RFC 8003]
             extend_enum(cls, 'Reserved for Private Use [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

@@ -3,8 +3,16 @@ global-exclude .DS_Store
 global-include *.md
 global-include *.py
 
+prune .venv
+prune archive
+prune devel
+prune release
+prune src
+prune test
+prune testbench
+
 include README.md
 include LICENSE
 
 prune pcapkit/protocols/*/NotImplemented
-prune pcapkit/vendor
+# prune pcapkit/vendor

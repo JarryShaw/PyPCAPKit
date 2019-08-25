@@ -1,56 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import collections
-import contextlib
-import os
 
-###############
-# Macros
-###############
+from pcapkit.vendor.default import Vendor
 
-NAME = 'QS_Function'
-DOCS = 'QS Functions'
-FLAG = 'isinstance(value, int) and 0 <= value <= 8'
+__all__ = ['QS_Function']
+
 DATA = {
     0:  'Quick-Start Request',
     8:  'Report of Approved Rate',
 }
 
-###############
-# Processors
-###############
-
-record = collections.Counter(DATA.values())
-
-
-def rename(name, code):
-    if record[name] > 1:
-        name = f'{name} [{code}]'
-    return name
-
-
-enum = list()
-miss = [
-    "extend_enum(cls, 'Unassigned [%d]' % value, value)",
-    'return cls(value)'
-]
-for code, name in DATA.items():
-    renm = rename(name, code)
-    enum.append(f"{NAME}[{renm!r}] = {code}".ljust(76))
-
-###############
-# Defaults
-###############
-
-temp, FILE = os.path.split(os.path.abspath(__file__))
-ROOT, STEM = os.path.split(temp)
-
-ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
-MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-
-
-def LINE(NAME, DOCS, FLAG, ENUM, MISS): return f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -68,7 +31,7 @@ class {NAME}(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return {NAME}(key)
-        if key not in {NAME}._member_map_:
+        if key not in {NAME}._member_map_:  # pylint: disable=no-member
             extend_enum({NAME}, key, default)
         return {NAME}[key]
 
@@ -78,11 +41,39 @@ class {NAME}(IntEnum):
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {MISS}
-        super()._missing_(value)
 '''
 
 
-with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, f'../const/{STEM}'))
-with open(os.path.join(ROOT, f'../const/{STEM}/{FILE}'), 'w') as file:
-    file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))
+class QS_Function(Vendor):
+    """QS Functions"""
+
+    FLAG = 'isinstance(value, int) and 0 <= value <= 8'
+
+    def request(self):
+        return DATA
+
+    def count(self, data):
+        return collections.Counter(data.values())
+
+    def process(self, data):
+        enum = list()
+        miss = [
+            "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+            'return cls(value)'
+        ]
+        for code, name in DATA.items():
+            renm = self.rename(name, code)
+            enum.append(f"{self.NAME}[{renm!r}] = {code}".ljust(76))
+        return enum, miss
+
+    def context(self, data):
+        enum, miss = self.process(data)
+
+        ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
+        MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
+
+        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, MISS)
+
+
+if __name__ == "__main__":
+    QS_Function()

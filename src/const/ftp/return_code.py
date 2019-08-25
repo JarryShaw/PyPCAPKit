@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -81,7 +82,7 @@ class ReturnCode(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return ReturnCode(key)
-        if key not in ReturnCode._member_map_:
+        if key not in ReturnCode._member_map_:  # pylint: disable=no-member
             extend_enum(ReturnCode, key, default)
         return ReturnCode[key]
 

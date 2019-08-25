@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -31,7 +32,7 @@ class ESP_TransformSuite(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return ESP_TransformSuite(key)
-        if key not in ESP_TransformSuite._member_map_:
+        if key not in ESP_TransformSuite._member_map_:  # pylint: disable=no-member
             extend_enum(ESP_TransformSuite, key, default)
         return ESP_TransformSuite[key]
 
@@ -43,4 +44,4 @@ class ESP_TransformSuite(IntEnum):
         if 16 <= value <= 65535:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

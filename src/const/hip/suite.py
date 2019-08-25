@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -22,7 +23,7 @@ class Suite(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Suite(key)
-        if key not in Suite._member_map_:
+        if key not in Suite._member_map_:  # pylint: disable=no-member
             extend_enum(Suite, key, default)
         return Suite[key]
 
@@ -34,4 +35,4 @@ class Suite(IntEnum):
         if 7 <= value <= 65535:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

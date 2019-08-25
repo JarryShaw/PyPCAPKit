@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -25,7 +26,7 @@ class Setting(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Setting(key)
-        if key not in Setting._member_map_:
+        if key not in Setting._member_map_:  # pylint: disable=no-member
             extend_enum(Setting, key, default)
         return Setting[key]
 
@@ -44,4 +45,4 @@ class Setting(IntEnum):
             # [RFC 7540]
             extend_enum(cls, 'Reserved for Experimental Use [0x%s]' % hex(value)[2:].upper().zfill(4), value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

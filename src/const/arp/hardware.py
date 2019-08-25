@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -56,7 +57,7 @@ class Hardware(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Hardware(key)
-        if key not in Hardware._member_map_:
+        if key not in Hardware._member_map_:  # pylint: disable=no-member
             extend_enum(Hardware, key, default)
         return Hardware[key]
 
@@ -71,4 +72,4 @@ class Hardware(IntEnum):
         if 258 <= value <= 65534:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

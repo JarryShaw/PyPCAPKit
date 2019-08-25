@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -29,7 +30,7 @@ class ErrorCode(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return ErrorCode(key)
-        if key not in ErrorCode._member_map_:
+        if key not in ErrorCode._member_map_:  # pylint: disable=no-member
             extend_enum(ErrorCode, key, default)
         return ErrorCode[key]
 
@@ -42,4 +43,4 @@ class ErrorCode(IntEnum):
             temp = hex(value)[2:].upper().zfill(8)
             extend_enum(cls, 'Unassigned [0x%s]' % (temp[:4]+'_'+temp[4:]), value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

@@ -1,23 +1,11 @@
 # -*- coding: utf-8 -*-
 
-import contextlib
 import csv
-import os
 import re
 
-import requests
+from pcapkit.vendor.default import Vendor
 
-###############
-# Macros
-###############
-
-NAME = 'Command'
-DOCS = 'FTP Command'
-LINK = 'https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions-2.csv'
-
-###############
-# Processors
-###############
+__all__ = ['Command']
 
 KIND = dict(
     a='access control',
@@ -31,8 +19,7 @@ CONF = dict(
     h='historic',
 )
 
-
-def make(cmmd, feat, desc, kind, conf, rfcs): return f'''\
+make = lambda cmmd, feat, desc, kind, conf, rfcs: f'''\
 {cmmd}=Info(
         name={cmmd!r},
         feat={feat!r},
@@ -43,47 +30,9 @@ def make(cmmd, feat, desc, kind, conf, rfcs): return f'''\
     )\
 '''
 
-
-page = requests.get(LINK)
-data = page.text.strip().split('\r\n')
-
-reader = csv.reader(data)
-header = next(reader)
-
-info = dict()
-for item in reader:
-    cmmd = item[0].strip('+')
-    feat = item[1] or None
-    desc = re.sub(r'{.*}', r'', item[2]).strip() or None
-    kind = tuple(KIND.get(s) for s in item[3].split('/')) or None
-    conf = CONF.get(item[4].split()[0])
-    temp = list()
-    for rfc in filter(lambda s: 'RFC' in s, re.split(r'\[|\]', item[5])):
-        temp.append(f'[{rfc[:3]} {rfc[3:]}]')
-    rfcs = tuple(temp) or None
-
-    if cmmd == '-N/A-':
-        MISS = '\n'.ljust(25).join((f"Info(name='%s' % key,",
-                                    f'feat={feat!r},',
-                                    f'desc={desc!r},',
-                                    f'type={kind!r},',
-                                    f'conf={conf!r},',
-                                    f'note={rfcs!r})'))
-    else:
-        info[cmmd] = make(cmmd, feat, desc, kind, conf, rfcs)
-
-###############
-# Defaults
-###############
-
-temp, FILE = os.path.split(os.path.abspath(__file__))
-ROOT, STEM = os.path.split(temp)
-
-INFO = ',\n    '.join(map(lambda s: s.strip(), info.values()))
-
-
-def LINE(NAME, DOCS, INFO, MISS): return f'''\
+LINE = lambda NAME, DOCS, INFO, MISS: f'''\
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from pcapkit.corekit.infoclass import Info
 
@@ -104,7 +53,43 @@ class defaultInfo(Info):
 '''
 
 
-with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, f'../const/{STEM}'))
-with open(os.path.join(ROOT, f'../const/{STEM}/{FILE}'), 'w') as file:
-    file.write(LINE(NAME, DOCS, INFO, MISS))
+class Command(Vendor):
+    """FTP Command"""
+
+    LINK = 'https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions-2.csv'
+
+    def process(self, data):
+        reader = csv.reader(data)
+        next(reader)  # header
+
+        info = dict()
+        for item in reader:
+            cmmd = item[0].strip('+')
+            feat = item[1] or None
+            desc = re.sub(r'{.*}', r'', item[2]).strip() or None
+            kind = tuple(KIND.get(s) for s in item[3].split('/')) or None
+            conf = CONF.get(item[4].split()[0])
+            temp = list()
+            for rfc in filter(lambda s: 'RFC' in s, re.split(r'\[|\]', item[5])):
+                temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+            rfcs = tuple(temp) or None
+
+            if cmmd == '-N/A-':
+                MISS = '\n'.ljust(25).join((f"Info(name='%s' % key,",
+                                            f'feat={feat!r},',
+                                            f'desc={desc!r},',
+                                            f'type={kind!r},',
+                                            f'conf={conf!r},',
+                                            f'note={rfcs!r})'))
+            else:
+                info[cmmd] = make(cmmd, feat, desc, kind, conf, rfcs)
+        return info, MISS
+
+    def context(self, data):
+        info, MISS = self.process(data)
+        INFO = ',\n    '.join(map(lambda s: s.strip(), info.values()))  # pylint: disable=dict-values-not-iterating
+        return LINE(self.NAME, self.DOCS, INFO, MISS)
+
+
+if __name__ == "__main__":
+    Command()

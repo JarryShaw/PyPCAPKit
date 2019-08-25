@@ -1,88 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import collections
-import contextlib
 import os
 import tempfile
 import webbrowser
 
 import bs4
-# import requests
+import requests
 
-###############
-# Macros
-###############
+from pcapkit.vendor.default import Vendor
 
-NAME = 'ReturnCode'
-DOCS = 'FTP Server Return Code'
-FLAG = 'isinstance(value, int) and 100 <= value <= 659'
-LINK = 'https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes'
-
-###############
-# Processors
-###############
-
-# page = requests.get(LINK)
-# soup = bs4.BeautifulSoup(page.text, 'html5lib')
-with tempfile.TemporaryDirectory(prefix=f'{os.path.realpath(os.curdir)}/') as tempdir:
-    index_html = os.path.join(tempdir, 'index.html')
-
-    webbrowser.open(LINK)
-    print(f'Please save the HTML code as {index_html!r}.')
-    input('Press ENTER to continue...')
-
-    with open(index_html) as file:
-        text = file.read()
-soup = bs4.BeautifulSoup(text, 'html5lib')
-
-table = soup.find_all('table', class_='wikitable')[2]
-content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
-header = next(content)
-
-temp = list()
-for item in content:
-    line = item.find_all('td')
-
-    code = ' '.join(line[0].stripped_strings)
-    if len(code) != 3:
-        continue
-    desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
-    temp.append(desc)
-record = collections.Counter(temp)
-
-
-def rename(name, code):  # pylint: disable=redefined-outer-name
-    if record[name] > 1:
-        name = f'{name} [{code}]'
-    return name
-
-
-table = soup.find_all('table', class_='wikitable')[2]
-content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
-header = next(content)
-
-enum = list()
-for item in content:
-    line = item.find_all('td')
-
-    code = ' '.join(line[0].stripped_strings)
-    if len(code) != 3:
-        continue
-    desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
-    enum.append(f'{NAME}[{rename(desc, code)!r}] = {code}')
-
-###############
-# Defaults
-###############
-
-temp, FILE = os.path.split(os.path.abspath(__file__))
-ROOT, STEM = os.path.split(temp)
-
-ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
-
+__all__ = ['ReturnCode']
 
 LINE = lambda NAME, DOCS, FLAG, ENUM: f'''\
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
 
 from aenum import IntEnum, extend_enum
 
@@ -118,7 +50,7 @@ class {NAME}(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return {NAME}(key)
-        if key not in {NAME}._member_map_:
+        if key not in {NAME}._member_map_:  # pylint: disable=no-member
             extend_enum({NAME}, key, default)
         return {NAME}[key]
 
@@ -135,7 +67,66 @@ class {NAME}(IntEnum):
 '''
 
 
-with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, f'../const/{STEM}'))
-with open(os.path.join(ROOT, f'../const/{STEM}/{FILE}'), 'w') as file:
-    file.write(LINE(NAME, DOCS, FLAG, ENUM))
+class ReturnCode(Vendor):
+    """FTP Server Return Code"""
+
+    FLAG = 'isinstance(value, int) and 100 <= value <= 659'
+    LINK = 'https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes'
+
+    def request(self):
+        try:
+            page = requests.get(self.LINK)
+            soup = bs4.BeautifulSoup(page.text, 'html5lib')
+        except requests.RequestException:
+            with tempfile.TemporaryDirectory(prefix=f'{os.path.realpath(os.curdir)}{os.path.sep}') as tempdir:
+                index_html = os.path.join(tempdir, 'index.html')
+
+                webbrowser.open(self.LINK)
+                print(f'Please save the HTML code at {index_html}')
+                input('Press ENTER to continue...')
+
+                with open(index_html) as file:
+                    text = file.read()
+            soup = bs4.BeautifulSoup(text, 'html5lib')
+        return soup
+
+    def context(self, soup):  # pylint: disable=arguments-differ
+        enum = self.process(soup)
+        ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
+        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM)
+
+    def process(self, soup):  # pylint: disable=arguments-differ
+        table = soup.find_all('table', class_='wikitable')[2]
+        content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
+        next(content)  # header
+
+        enum = list()
+        for item in content:
+            line = item.find_all('td')
+
+            code = ' '.join(line[0].stripped_strings)
+            if len(code) != 3:
+                continue
+            desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
+            enum.append(f'{self.NAME}[{self.rename(desc, code)!r}] = {code}')
+        return enum
+
+    def count(self, soup):  # pylint: disable=arguments-differ, no-self-use
+        table = soup.find_all('table', class_='wikitable')[2]
+        content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
+        next(content)  # header
+
+        temp = list()
+        for item in content:
+            line = item.find_all('td')
+
+            code = ' '.join(line[0].stripped_strings)
+            if len(code) != 3:
+                continue
+            desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
+            temp.append(desc)
+        return collections.Counter(temp)
+
+
+if __name__ == "__main__":
+    ReturnCode()
