@@ -54,7 +54,7 @@ setup(
     # py_modules = ['pcapkit'],
     entry_points={
         'console_scripts': [
-            'pcapkit = pcapkit.__main__:main',
+            'pcapkit-cli = pcapkit.__main__:main',
         ]
     },
     # packages=setuptools.find_namespace_packages(
