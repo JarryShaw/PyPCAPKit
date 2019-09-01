@@ -21,13 +21,14 @@ emoji = "*"
 tbtrim = ">=0.2.1"
 
 [dev-packages]
-pypcapkit = {editable = true, path = "."}
+pypcapkit = {editable = true,path = "."}
 pyshark = "*"
 dpkt = "*"
 scapy = "*"
+pathlib2 = "*"
 bs4 = "*"
 html5lib = "*"
-requests = "*"
+requests = {extras = ["socks"],version = "*"}
 ipython = "*"
 autopep8 = "*"
 pylint = "*"

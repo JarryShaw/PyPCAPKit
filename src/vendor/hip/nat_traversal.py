@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""HIP NAT Traversal Modes"""
 
 from pcapkit.vendor.default import Vendor
 

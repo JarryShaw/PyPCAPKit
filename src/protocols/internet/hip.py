@@ -53,7 +53,7 @@ from pcapkit.const.hip.registration_failure import \
     RegistrationFailure as _REG_FAILURE_TYPE
 from pcapkit.const.hip.suite import Suite as _SUITE_ID
 from pcapkit.const.hip.transport import Transport as _TP_MODE_ID
-from pcapkit.const.misc.transtype import TransType as TP_PROTO
+from pcapkit.const.reg.transtype import TransType as TP_PROTO
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall

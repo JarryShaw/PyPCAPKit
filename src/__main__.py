@@ -20,7 +20,7 @@ __version__ = '0.6.1'
 
 
 def get_parser():
-    parser = argparse.ArgumentParser(prog='pcapkit',
+    parser = argparse.ArgumentParser(prog='pcapkit-cli',
                                      description='PCAP file extractor and formatted dumper')
     parser.add_argument('-V', '--version', action='version', version=__version__)
     parser.add_argument('fin', metavar='input-file-name',

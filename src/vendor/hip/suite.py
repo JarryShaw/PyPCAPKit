@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""HIP Suite IDs"""
 
 from pcapkit.vendor.default import Vendor
 

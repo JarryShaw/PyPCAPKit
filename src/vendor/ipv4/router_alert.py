@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""IPv4 Router Alert Option Values"""
 
 import csv
 import re
@@ -36,10 +37,13 @@ class RouterAlert(Vendor):
                 code, _ = item[0], int(item[0])
                 renm = self.rename(name, code)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}".ljust(76)
+                pres = f"{self.NAME}[{renm!r}] = {code}"
                 sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
-                enum.append(f'{pres}{sufs}')
+                if len(pres) > 74:
+                    sufs = f"\n{' '*80}{sufs}"
+
+                enum.append(f'{pres.ljust(76)}{sufs}')
             except ValueError:
                 start, stop = map(int, item[0].split('-'))
                 more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
@@ -48,9 +52,12 @@ class RouterAlert(Vendor):
                     base = name.rstrip('s 0-31')
                     for code in range(start, stop+1):
                         renm = f'{base} {code-start}'
-                        pres = f"{self.NAME}[{renm!r}] = {code}".ljust(76)
+                        pres = f"{self.NAME}[{renm!r}] = {code}"
 
-                        enum.append(f'{pres}{more}')
+                        if len(pres) > 74:
+                            sufs = f"\n{' '*80}{sufs}"
+
+                        enum.append(f'{pres.ljust(76)}{more}')
                 else:
                     miss.append(f'if {start} <= value <= {stop}:')
                     if more:

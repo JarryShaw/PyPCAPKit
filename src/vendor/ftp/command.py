@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""FTP Command"""
 
 import csv
 import re
@@ -33,6 +34,7 @@ make = lambda cmmd, feat, desc, kind, conf, rfcs: f'''\
 LINE = lambda NAME, DOCS, INFO, MISS: f'''\
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""{DOCS}"""
 
 from pcapkit.corekit.infoclass import Info
 

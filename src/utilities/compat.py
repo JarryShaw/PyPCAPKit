@@ -11,7 +11,7 @@ __all__ = [
 ]
 
 if sys.version_info[:2] < (3, 6):
-    class ModuleNotFoundError(ImportError):
+    class ModuleNotFoundError(ImportError):  # pylint: disable=redefined-builtin
         pass
 else:
     ModuleNotFoundError = builtins.ModuleNotFoundError
@@ -29,14 +29,14 @@ if sys.version_info[:2] <= (3, 5):
                 return NotImplemented
         return True
 
-    class Collection(collections.abc.Sized, collections.abc.Iterable, collections.abc.Container):
+    class Collection(collections.abc.Sized, collections.abc.Iterable, collections.abc.Container):  # pylint: disable=abstract-method
 
         __slots__ = ()
 
         @classmethod
         def __subclasshook__(cls, C):
             if cls is Collection:
-                return _check_methods(C,  "__len__", "__iter__", "__contains__")
+                return _check_methods(C, "__len__", "__iter__", "__contains__")
             return NotImplemented
 else:
     Collection = collections.abc.Collection

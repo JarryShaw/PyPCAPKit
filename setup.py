@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 # version string
-__version__ = '0.14.3'
+__version__ = '0.14.4'
 
 # README
 with open('README.md', encoding='utf-8') as file:
@@ -32,14 +32,23 @@ setup(
         'dictdumper>=0.7.0.post1',  # for formatted output
         'chardet',                  # for bytes decode
         'aenum',                    # for const types
-        'emoji',                    # for CLI display
         'tbtrim>=0.2.1',            # for refined exceptions
     ],
     extras_require={
-        'all': ['dpkt', 'scapy', 'pyshark'],
+        'all': [
+            'emoji',
+            'dpkt', 'scapy', 'pyshark',
+            'requests[socks]', 'bs4', 'html5lib',
+        ],
+        # for CLI display
+        'cli': ['emoji'],
+        # for normal users
         'DPKT': ['dpkt'],
         'Scapy': ['scapy'],
         'PyShark': ['pyshark'],
+        # for developers
+        'vendor': ['requests[socks]', 'bs4', 'html5lib'],
+        # version compatibility
         ':python_version == "3.4"': ['pathlib2>=2.3.2'],
     },
     # py_modules = ['pcapkit'],
@@ -63,8 +72,8 @@ setup(
         'pcapkit.const.ipv6',
         'pcapkit.const.ipx',
         'pcapkit.const.mh',
-        'pcapkit.const.misc',
         'pcapkit.const.ospf',
+        'pcapkit.const.reg',
         'pcapkit.const.tcp',
         'pcapkit.const.vlan',
         'pcapkit.corekit',
@@ -95,8 +104,8 @@ setup(
         'pcapkit.vendor.ipv6',
         'pcapkit.vendor.ipx',
         'pcapkit.vendor.mh',
-        'pcapkit.vendor.misc',
         'pcapkit.vendor.ospf',
+        'pcapkit.vendor.reg',
         'pcapkit.vendor.tcp',
         'pcapkit.vendor.vlan',
     ],

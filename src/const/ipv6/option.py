@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""Destination Options and Hop-by-Hop Options"""
 
 from aenum import IntEnum, extend_enum
 
@@ -41,7 +43,7 @@ class Option(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Option(key)
-        if key not in Option._member_map_:
+        if key not in Option._member_map_:  # pylint: disable=no-member
             extend_enum(Option, key, default)
         return Option[key]
 
@@ -52,4 +54,3 @@ class Option(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned [0x%s]' % hex(value)[2:].upper().zfill(2), value)
         return cls(value)
-        super()._missing_(value)

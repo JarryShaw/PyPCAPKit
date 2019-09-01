@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""HIP HI Algorithm"""
 
 from pcapkit.vendor.default import Vendor
 

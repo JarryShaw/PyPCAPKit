@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""HIP Cipher IDs"""
 
 from pcapkit.vendor.default import Vendor
 

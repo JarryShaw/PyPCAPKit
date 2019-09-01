@@ -70,8 +70,6 @@ Algorithm:
     }
 
 """
-import copy
-
 from pcapkit.corekit.infoclass import Info
 from pcapkit.reassembly.reassembly import Reassembly
 
@@ -79,7 +77,7 @@ from pcapkit.reassembly.reassembly import Reassembly
 __all__ = ['IP_Reassembly']
 
 
-class IP_Reassembly(Reassembly):
+class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
     """Reassembly for IP payload.
 
     Properties:
@@ -164,7 +162,7 @@ class IP_Reassembly(Reassembly):
             self._dtgram += self.submit(self._buffer[BUFID], checked=True)
             del self._buffer[BUFID]
 
-    def submit(self, buf, *, checked=False):
+    def submit(self, buf, *, checked=False):  # pylint: disable=arguments-differ
         """Submit reassembled payload.
 
         Positional arguments:

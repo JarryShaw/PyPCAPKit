@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
+"""FTP Server Return Code"""
 
 import collections
-import os
-import tempfile
-import webbrowser
 
 import bs4
-import requests
 
 from pcapkit.vendor.default import Vendor
 
@@ -15,6 +12,7 @@ __all__ = ['ReturnCode']
 LINE = lambda NAME, DOCS, FLAG, ENUM: f'''\
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""{DOCS}"""
 
 from aenum import IntEnum, extend_enum
 
@@ -73,22 +71,8 @@ class ReturnCode(Vendor):
     FLAG = 'isinstance(value, int) and 100 <= value <= 659'
     LINK = 'https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes'
 
-    def request(self):
-        try:
-            page = requests.get(self.LINK)
-            soup = bs4.BeautifulSoup(page.text, 'html5lib')
-        except requests.RequestException:
-            with tempfile.TemporaryDirectory(prefix=f'{os.path.realpath(os.curdir)}{os.path.sep}') as tempdir:
-                index_html = os.path.join(tempdir, 'index.html')
-
-                webbrowser.open(self.LINK)
-                print(f'Please save the HTML code at {index_html}')
-                input('Press ENTER to continue...')
-
-                with open(index_html) as file:
-                    text = file.read()
-            soup = bs4.BeautifulSoup(text, 'html5lib')
-        return soup
+    def request(self, text):  # pylint: disable=signature-differs
+        return bs4.BeautifulSoup(text, 'html5lib')
 
     def context(self, soup):  # pylint: disable=arguments-differ
         enum = self.process(soup)

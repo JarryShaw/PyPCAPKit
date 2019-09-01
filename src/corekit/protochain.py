@@ -12,9 +12,7 @@ import re
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.compat import Collection
-from pcapkit.utilities.exceptions import (IndexNotFound, IntError,
-                                          ProtocolUnbound)
-from pcapkit.utilities.validations import int_check, str_check
+from pcapkit.utilities.exceptions import IndexNotFound, IntError
 
 ###############################################################################
 # from pcapkit.protocols.protocol import Protocol
@@ -54,7 +52,7 @@ class _ProtoList(Collection):
         except TypeError:
             flag = issubclass(type(x), Protocol)
         if flag or isinstance(x, Protocol):
-            return (x in self.__data__)
+            return x in self.__data__
 
         with contextlib.suppress(Exception):
             for data in self.__data__:
@@ -130,7 +128,7 @@ class _AliasList(collections.abc.Sequence):
         return 0
         # return self.__data__.count(value)
 
-    def index(self, value, start=0, stop=None):
+    def index(self, value, start=0, stop=None):  # pylint: disable=inconsistent-return-statements
         """S.index(value, [start, [stop]]) -> integer -- return first index of value.
            Raises ValueError if the value is not present.
 
@@ -263,4 +261,4 @@ class ProtoChain(collections.abc.Container):
     #     return (self.__proto__[key], self.__alias__[key])
 
     def __contains__(self, name):
-        return ((name in self.__proto__) or (name in self.__alias__))
+        return (name in self.__proto__) or (name in self.__alias__)

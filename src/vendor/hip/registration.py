@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""HIP Registration Types"""
 
 from pcapkit.vendor.default import Vendor
 

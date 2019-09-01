@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import, unused-wildcard-import
 """library foundation
 
 `pcapkit.foundation` is a collection of fundations for `pcapkit`,

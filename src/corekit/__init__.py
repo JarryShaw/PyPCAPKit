@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import
 """core utilities
 
 `pcapkit.corekit` is the collection of core utilities for

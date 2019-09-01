@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""ARP Operation Codes [RFC 826][RFC 5494]"""
 
 from pcapkit.vendor.default import Vendor
 

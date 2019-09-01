@@ -199,7 +199,7 @@ class TraceFlow:
     # Not hashable
     __hash__ = None
 
-    def __init__(self, *, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):
+    def __init__(self, *, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):  # pylint: disable=redefined-builtin
         """Initialise instance.
 
         Keyword arguments:

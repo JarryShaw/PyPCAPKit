@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""ECDSA Curve Label"""
 
 from aenum import IntEnum, extend_enum
 

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""HTTP/2 Frame Type"""
 
 from aenum import IntEnum, extend_enum
 

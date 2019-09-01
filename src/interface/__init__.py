@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=bad-continuation
 """user interface
 
 `pcapkit.interface` defines several user-oriented
@@ -50,12 +51,12 @@ MPServer = 'server'
 MPPipeline = 'pipeline'
 
 
-def extract(fin=None, fout=None, format=None,                           # basic settings
+def extract(fin=None, fout=None, format=None,                           # basic settings  # pylint: disable=redefined-builtin
             auto=True, extension=True, store=True,                      # internal settings
             files=False, nofile=False, verbose=False,                   # output settings
             engine=None, layer=None, protocol=None,                     # extraction settings
             ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
-            trace=False, trace_fout=None, trace_format=None,            # trace settings
+            trace=False, trace_fout=None, trace_format=None,            # trace settings  # pylint: disable=redefined-outer-name
             trace_byteorder=sys.byteorder, trace_nanosecond=False):     # trace settings
     """Extract a PCAP file.
 
@@ -173,15 +174,14 @@ def reassemble(protocol, strict=False):
 
     if protocol == 'IPv4':
         return IPv4_Reassembly(strict=strict)
-    elif protocol == 'IPv6':
+    if protocol == 'IPv6':
         return IPv6_Reassembly(strict=strict)
-    elif protocol == 'TCP':
+    if protocol == 'TCP':
         return TCP_Reassembly(strict=strict)
-    else:
-        raise FormatError(f'Unsupported reassembly protocol: {protocol}')
+    raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
-def trace(fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):
+def trace(fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):  # pylint: disable=redefined-builtin
     """Trace TCP flows.
 
     Keyword arguments:

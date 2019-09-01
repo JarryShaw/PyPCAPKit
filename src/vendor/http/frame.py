@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""HTTP/2 Frame Type"""
 
 import csv
 import re
@@ -41,10 +42,13 @@ class Frame(Vendor):
                 code = hexlify(temp)
                 renm = self.rename(name, code)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}".ljust(76)
+                pres = f"{self.NAME}[{renm!r}] = {code}"
                 sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
-                enum.append(f'{pres}{sufs}')
+                if len(pres) > 74:
+                    sufs = f"\n{' '*80}{sufs}"
+
+                enum.append(f'{pres.ljust(76)}{sufs}')
             except ValueError:
                 start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
                 more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)

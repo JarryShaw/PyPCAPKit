@@ -15,7 +15,8 @@ const: update-const
 dist: dist-pypi dist-upload
 release: release-master
 pipenv: update-pipenv
-update: update-const update-date
+# update: update-const update-date
+update: update-const
 
 pypi:
 	DIR=release $(MAKE) dist-prep dist

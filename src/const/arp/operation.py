@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""Operation Codes [RFC 826][RFC 5494]"""
 
 from aenum import IntEnum, extend_enum
 

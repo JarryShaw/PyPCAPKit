@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""IPv4 Option Numbers"""
 
 import collections
 import csv
@@ -7,38 +8,6 @@ import re
 from pcapkit.vendor.default import Vendor
 
 __all__ = ['OptionNumber']
-
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
-# -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-
-from aenum import IntEnum, extend_enum
-
-
-class {NAME}(IntEnum):
-    """Enumeration class for {NAME}."""
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
-
-    # {DOCS}
-    {ENUM}
-
-    @staticmethod
-    def get(key, default=-1):
-        """Backport support for original codes."""
-        if isinstance(key, int):
-            return {NAME}(key)
-        if key not in {NAME}._member_map_:  # pylint: disable=no-member
-            extend_enum({NAME}, key, default)
-        return {NAME}[key]
-
-    @classmethod
-    def _missing_(cls, value):
-        """Lookup function used when value is not found."""
-        if not ({FLAG}):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {MISS}
-'''
 
 
 class OptionNumber(Vendor):
@@ -52,11 +21,6 @@ class OptionNumber(Vendor):
         next(reader)  # header
         return collections.Counter(map(lambda item: item[4],  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[3].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
-
-    def rename(self, name, code, *, original):  # pylint: disable=arguments-differ
-        if self.record[original] > 1:
-            return f'{name} [{code}]'
-        return name
 
     def process(self, data):
         reader = csv.reader(data)
@@ -87,19 +51,14 @@ class OptionNumber(Vendor):
             name = f' {temp}' if temp else ''
 
             renm = self.rename(abbr or f'Unassigned [{code}]', code, original=dscp)
-            pres = f"{self.NAME}[{renm!r}] = {code}".ljust(76)
+            pres = f"{self.NAME}[{renm!r}] = {code}"
             sufs = f'#{desc}{name}' if desc or name else ''
 
-            enum.append(f'{pres}{sufs}')
+            if len(pres) > 74:
+                sufs = f"\n{' '*80}{sufs}"
+
+            enum.append(f'{pres.ljust(76)}{sufs}')
         return enum, miss
-
-    def context(self, data):
-        enum, miss = self.process(data)
-
-        ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
-        MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-
-        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, MISS)
 
 
 if __name__ == "__main__":

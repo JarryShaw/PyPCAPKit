@@ -1,4 +1,7 @@
 
+pcapkit-*-tempdir/
+pcapkit-temp.html
+
 out
 *.js
 !out.js

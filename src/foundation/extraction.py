@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=fixme, bad-continuation, attribute-defined-outside-init, protected-access
 """extractor for PCAP files
 
 `pcapkit.foundation.extraction` contains `Extractor` only,
@@ -20,19 +21,15 @@ import random
 import re
 import sys
 import time
-import traceback
 import warnings
 
-from pcapkit.const.misc.transtype import TransType as TP_PROTO
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.pcap.frame import Frame
 from pcapkit.protocols.pcap.header import Header
 from pcapkit.utilities.compat import pathlib
-from pcapkit.utilities.exceptions import (CallableError, FileNotFound,
-                                          FormatError, IterableError,
+from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
-from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning,
-                                        EngineWarning, FormatWarning,
+from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWarning, FormatWarning,
                                         LayerWarning, ProtocolWarning)
 
 ###############################################################################
@@ -221,7 +218,7 @@ class Extractor:
     # Methods.
     ##########################################################################
 
-    def run(self):
+    def run(self):  # pylint: disable=inconsistent-return-statements
         """Start extraction."""
         flag = True
         if self._exeng == 'dpkt':
@@ -292,7 +289,7 @@ class Extractor:
         if fin is None:
             ifnm = 'in.pcap'
         else:
-            if extension:
+            if extension:  # pylint: disable=else-if-used
                 ifnm = fin if os.path.splitext(fin)[1] == '.pcap' else f'{fin}.pcap'
             else:
                 ifnm = fin
@@ -314,7 +311,7 @@ class Extractor:
                 ext = fmt
 
             if fout is None:
-                if fmt_none:
+                if fmt_none:  # pylint: disable=no-else-raise
                     raise FormatError('Output format unspecified.')
                 elif files:
                     ofnm = 'out'
@@ -387,7 +384,7 @@ class Extractor:
     __hash__ = None
 
     def __init__(self, *,
-                 fin=None, fout=None, format=None,                          # basic settings
+                 fin=None, fout=None, format=None,                          # basic settings  # pylint: disable=redefined-builtin
                  auto=True, extension=True, store=True,                     # internal settings
                  files=False, nofile=False, verbose=False,                  # output settings
                  engine=None, layer=None, protocol=None,                    # extraction settings
@@ -574,7 +571,7 @@ class Extractor:
         """Aftermath for multiprocessing."""
         if not self._flag_e and self._flag_m:
             # join processes
-            [proc.join() for proc in self._mpprc]
+            [proc.join() for proc in self._mpprc]  # pylint: disable=expression-not-assigned
             if self._exeng == 'server':
                 self._mpsvc.join()
 
@@ -590,7 +587,7 @@ class Extractor:
 
             # shutdown & cleanup
             self._mpmng.shutdown()
-            [delattr(self, attr) for attr in filter(lambda s: s.startswith('_mp'), dir(self))]
+            [delattr(self, attr) for attr in filter(lambda s: s.startswith('_mp'), dir(self))]  # pylint: disable=expression-not-assigned
             self._frnum -= 2
             # map(lambda attr: delattr(self, attr), filter(lambda attr: re.match('^_mp.*', attr), dir(self)))
 
@@ -604,12 +601,11 @@ class Extractor:
         """Headquarters for frame reader."""
         if self._exeng == 'scapy':
             return self._scapy_read_frame()
-        elif self._exeng == 'dpkt':
+        if self._exeng == 'dpkt':
             return self._dpkt_read_frame()
-        elif self._exeng == 'pyshark':
+        if self._exeng == 'pyshark':
             return self._pyshark_read_frame()
-        else:
-            return self._default_read_frame()
+        return self._default_read_frame()
 
     def _default_read_frame(self, *, frame=None, mpkit=None):
         """Read frames with default engine.
@@ -973,7 +969,7 @@ class Extractor:
 
             # check buffer
             if len(self._mpprc) >= CPU_CNT:
-                [proc.join() for proc in self._mpprc[:-4]]
+                [proc.join() for proc in self._mpprc[:-4]]  # pylint: disable=expression-not-assigned
                 del self._mpprc[:-4]
 
     def _pipeline_read_frame(self, *, mpfdp, mpkit):
@@ -1078,7 +1074,7 @@ class Extractor:
 
             # check buffer
             if len(self._mpprc) >= CPU_CNT - 1:
-                [proc.join() for proc in self._mpprc[:-4]]
+                [proc.join() for proc in self._mpprc[:-4]]  # pylint: disable=expression-not-assigned
                 del self._mpprc[:-4]
 
     def _server_extract_frame(self, *, mpfdp, mpkit, mpbuf):

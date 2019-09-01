@@ -4,11 +4,15 @@
 """
 
 __all__ = [
-    'BaseWarning',                                                  # Warning
-    'FormatWarning', 'EngineWarning',                               # ImportWarning
+    # UserWarning
+    'BaseWarning',
+    # ImportWarning
+    'FormatWarning', 'EngineWarning',
+    # RuntimeWarning
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
-                                                                    # RuntimeWarning
-    'DPKTWarning', 'ScapyWarning', 'PySharkWarning'                 # ResourceWarning
+    'DevModeWarning', 'VendorRequestWarning',
+    # ResourceWarning
+    'DPKTWarning', 'ScapyWarning', 'PySharkWarning'
 ]
 
 ##############################################################################
@@ -16,9 +20,10 @@ __all__ = [
 ##############################################################################
 
 
-class BaseWarning(Warning):
+class BaseWarning(UserWarning):
     """Base warning class of all kinds."""
-    def __init__(self, *args, **kwargs):
+
+    def __init__(self, *args, **kwargs):  # pylint: disable=useless-super-delegation
         # warnings.simplefilter('default')
         super().__init__(*args, **kwargs)
 
@@ -30,12 +35,10 @@ class BaseWarning(Warning):
 
 class FormatWarning(BaseWarning, ImportWarning):
     """Warning on unknown format(s)."""
-    pass
 
 
 class EngineWarning(BaseWarning, ImportWarning):
     """Unsupported extraction engine."""
-    pass
 
 
 ##############################################################################
@@ -45,22 +48,26 @@ class EngineWarning(BaseWarning, ImportWarning):
 
 class FileWarning(BaseWarning, RuntimeWarning):
     """Warning on file(s)."""
-    pass
 
 
 class LayerWarning(BaseWarning, RuntimeWarning):
     """Unrecognised layer."""
-    pass
 
 
 class ProtocolWarning(BaseWarning, RuntimeWarning):
     """Unrecognised protocol."""
-    pass
 
 
 class AttributeWarning(BaseWarning, RuntimeWarning):
     """Unsupported attribute."""
-    pass
+
+
+class DevModeWarning(BaseWarning, RuntimeWarning):
+    """Run in development mode."""
+
+
+class VendorRequestWarning(BaseWarning, RuntimeWarning):
+    """Vendor request connection failed."""
 
 
 ##############################################################################
@@ -70,14 +77,11 @@ class AttributeWarning(BaseWarning, RuntimeWarning):
 
 class DPKTWarning(BaseWarning, ResourceWarning):
     """Warnings on DPKT usage."""
-    pass
 
 
 class ScapyWarning(BaseWarning, ResourceWarning):
     """Warnings on Scapy usage."""
-    pass
 
 
 class PySharkWarning(BaseWarning, ResourceWarning):
     """Warnings on PyShark usage."""
-    pass

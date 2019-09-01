@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+"""IPv6 Extension Header Types"""
 
+import collections
 import csv
 import re
 
@@ -10,6 +12,7 @@ __all__ = ['ExtensionHeader']
 LINE = lambda NAME, DOCS, ENUM: f'''\
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""{DOCS}"""
 
 from aenum import IntEnum, extend_enum
 
@@ -38,10 +41,11 @@ class ExtensionHeader(Vendor):
 
     LINK = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'
 
-    def rename(self, name, code, *, original):  # pylint: disable=arguments-differ
-        if self.record[original] > 1:
-            return f'{name} [{code}]'
-        return name
+    def count(self, data):
+        reader = csv.reader(data)
+        next(reader)  # header
+        return collections.Counter(map(lambda item: item[1] or item[2],  # pylint: disable=map-builtin-not-iterating
+                                       filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def process(self, data):
         reader = csv.reader(data)
@@ -81,10 +85,13 @@ class ExtensionHeader(Vendor):
                     name, desc = item[2], ''
                 renm = self.rename(name, code, original=item[1])
 
-                pres = f"{self.NAME}[{renm!r}] = {code}".ljust(76)
+                pres = f"{self.NAME}[{renm!r}] = {code}"
                 sufs = f"#{lrfc}{desc}{cmmt}" if lrfc or desc or cmmt else ''
 
-                enum.append(f'{pres}{sufs}')
+                if len(pres) > 74:
+                    sufs = f"\n{' '*80}{sufs}"
+
+                enum.append(f'{pres.ljust(76)}{sufs}')
             except ValueError:
                 start, stop = item[0].split('-')
                 if not name:

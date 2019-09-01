@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""IPv4 Router Alert Option Values"""
 
 from aenum import IntEnum, extend_enum
 

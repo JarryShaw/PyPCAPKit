@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=protected-access
 """decorator functions
 
 `pcapkit.utilities.decorators` contains several useful
@@ -33,7 +34,7 @@ def seekset(func):
 def seekset_ng(func):
     """Read file from start then set back to original."""
     @functools.wraps(func)
-    def seekcur(file, *args, seekset=os.SEEK_SET, **kw):
+    def seekcur(file, *args, seekset=os.SEEK_SET, **kw):  # pylint: disable=redefined-outer-name
         # seek_cur = file.tell()
         file.seek(seekset, os.SEEK_SET)
         return_ = func(file, *args, seekset=seekset, **kw)

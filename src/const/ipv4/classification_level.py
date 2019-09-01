@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""Classification Level Encodings"""
 
 from aenum import IntEnum, extend_enum
 

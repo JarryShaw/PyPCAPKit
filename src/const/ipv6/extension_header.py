@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""IPv6 Extension Header Types"""
 
 from aenum import IntEnum, extend_enum
 

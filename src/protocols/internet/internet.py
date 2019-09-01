@@ -8,8 +8,8 @@ latter is a base class for internet layer protocols, eg.
 AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
 
 """
-from pcapkit.const.misc.ethertype import EtherType as ETHERTYPE
-from pcapkit.const.misc.transtype import TransType as TP_PROTO
+from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
+from pcapkit.const.reg.transtype import TransType as TP_PROTO
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder

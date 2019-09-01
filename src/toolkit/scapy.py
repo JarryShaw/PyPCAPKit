@@ -11,8 +11,8 @@ import ipaddress
 import time
 import warnings
 
-from pcapkit.const.misc.linktype import LinkType as LINKTYPE
-from pcapkit.const.misc.transtype import TransType as TP_PROTO
+from pcapkit.const.reg.linktype import LinkType as LINKTYPE
+from pcapkit.const.reg.transtype import TransType as TP_PROTO
 from pcapkit.utilities.exceptions import ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning
 
@@ -45,7 +45,7 @@ def packet2chain(packet):
     return ':'.join(chain)
 
 
-def packet2dict(packet, *, count=NotImplemented):
+def packet2dict(packet):
     """Convert Scapy packet into dict."""
     if scapy_all is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')

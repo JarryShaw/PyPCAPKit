@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""TOS (DS Field) Delay"""
 
 from aenum import IntEnum, extend_enum
 

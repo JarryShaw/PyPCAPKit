@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""Ethertype IEEE 802 Numbers"""
 
 from aenum import IntEnum, extend_enum
 
@@ -131,7 +133,8 @@ class EtherType(IntEnum):
     EtherType['TCP/IP Compression'] = 0x876B                                    # [RFC 1144][RFC 1701]
     EtherType['IP Autonomous Systems'] = 0x876C                                 # [RFC 1701]
     EtherType['Secure Data'] = 0x876D                                           # [RFC 1701]
-    EtherType['IEEE Std 802.3 - Ethernet Passive Optical Network (EPON)'] = 0x8808# [EPON][RFC 7042]
+    EtherType['IEEE Std 802.3 - Ethernet Passive Optical Network (EPON)'] = 0x8808
+                                                                                # [EPON][RFC 7042]
     EtherType['Point-to-Point Protocol (PPP)'] = 0x880B                         # [RFC 7042]
     EtherType['General Switch Management Protocol (GSMP)'] = 0x880C             # [RFC 7042]
     EtherType['MPLS'] = 0x8847                                                  # [RFC 5332]
@@ -140,23 +143,29 @@ class EtherType(IntEnum):
     EtherType['PPP over Ethernet (PPPoE) Discovery Stage'] = 0x8863             # [RFC 2516]
     EtherType['PPP over Ethernet (PPPoE) Session Stage'] = 0x8864               # [RFC 2516]
     EtherType['IEEE Std 802.1X - Port-based network access control'] = 0x888E   # [IEEE]
-    EtherType['IEEE Std 802.1Q - Service VLAN tag identifier (S-Tag)'] = 0x88A8 # [IEEE]
+    EtherType['IEEE Std 802.1Q - Service VLAN tag identifier (S-Tag)'] = 0x88A8
+                                                                                # [IEEE]
     EtherType['IEEE Std 802 - Local Experimental Ethertype [0x88B5]'] = 0x88B5  # [IEEE]
     EtherType['IEEE Std 802 - Local Experimental Ethertype [0x88B6]'] = 0x88B6  # [IEEE]
     EtherType['IEEE Std 802 - OUI Extended Ethertype'] = 0x88B7                 # [IEEE]
     EtherType['IEEE Std 802.11 - Pre-Authentication (802.11i)'] = 0x88C7        # [IEEE]
-    EtherType['IEEE Std 802.1AB - Link Layer Discovery Protocol (LLDP)'] = 0x88CC# [IEEE]
+    EtherType['IEEE Std 802.1AB - Link Layer Discovery Protocol (LLDP)'] = 0x88CC
+                                                                                # [IEEE]
     EtherType['IEEE Std 802.1AE - Media Access Control Security'] = 0x88E5      # [IEEE]
     EtherType['Provider Backbone Bridging Instance tag'] = 0x88E7               # [IEEE Std 802.1Q-2014]
     EtherType['IEEE Std 802.1Q - Multiple VLAN Registration Protocol (MVRP)'] = 0x88F5
                                                                                 # [IEEE]
     EtherType['IEEE Std 802.1Q - Multiple Multicast Registration Protocol (MMRP)'] = 0x88F6
                                                                                 # [IEEE]
-    EtherType['IEEE Std 802.11 - Fast Roaming Remote Request (802.11r)'] = 0x890D# [IEEE]
-    EtherType['IEEE Std 802.21 - Media Independent Handover Protocol'] = 0x8917 # [IEEE]
-    EtherType['IEEE Std 802.1Qbe - Multiple I-SID Registration Protocol'] = 0x8929# [IEEE]
+    EtherType['IEEE Std 802.11 - Fast Roaming Remote Request (802.11r)'] = 0x890D
+                                                                                # [IEEE]
+    EtherType['IEEE Std 802.21 - Media Independent Handover Protocol'] = 0x8917
+                                                                                # [IEEE]
+    EtherType['IEEE Std 802.1Qbe - Multiple I-SID Registration Protocol'] = 0x8929
+                                                                                # [IEEE]
     EtherType['TRILL Fine Grained Labeling (FGL)'] = 0x893B                     # [RFC 7172]
-    EtherType['IEEE Std 802.1Qbg - ECP Protocol (also used in 802.1BR)'] = 0x8940# [IEEE]
+    EtherType['IEEE Std 802.1Qbg - ECP Protocol (also used in 802.1BR)'] = 0x8940
+                                                                                # [IEEE]
     EtherType['TRILL RBridge Channel'] = 0x8946                                 # [RFC 7178]
     EtherType['GeoNetworking as defined in ETSI EN 302 636-4-1'] = 0x8947       # [IEEE]
     EtherType['NSH (Network Service Header)'] = 0x894F                          # [RFC 8300]
@@ -176,7 +185,7 @@ class EtherType(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return EtherType(key)
-        if key not in EtherType._member_map_:
+        if key not in EtherType._member_map_:  # pylint: disable=no-member
             extend_enum(EtherType, key, default)
         return EtherType[key]
 
@@ -409,4 +418,4 @@ class EtherType(IntEnum):
             # [Neil_Sembower]
             extend_enum(cls, 'ISC Bunker Ramo [0x%s]' % hex(value)[2:].upper().zfill(4), value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

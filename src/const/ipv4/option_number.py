@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
+"""IP Option Numbers"""
 
 from aenum import IntEnum, extend_enum
 

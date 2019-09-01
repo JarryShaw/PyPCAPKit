@@ -11,7 +11,7 @@ import struct
 import sys
 import traceback
 
-from pcapkit.utilities.compat import ModuleNotFoundError
+from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 
 __all__ = [
     'BaseError',                                                    # Exception
@@ -27,7 +27,7 @@ __all__ = [
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
     'EndianError',                                                  # ValueError
-    'ProtocolNotImplemented',                                       # NotImplementedError
+    'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'FragmentError', 'PacketError',                                 # KeyError
     'ModuleNotFound',                                               # ModuleNotFoundError
@@ -40,7 +40,7 @@ BOOLEAN_STATES = {'1': True, '0': False,
                   'on': True, 'off': False}
 
 # DEVMODE flag
-DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', '').lower(), False)
+DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold(), False)
 
 
 def stacklevel():
@@ -52,7 +52,7 @@ def stacklevel():
             break
     else:
         index = len(tb)
-    return (index-1)
+    return index-1
 
 
 ##############################################################################
@@ -67,7 +67,7 @@ class BaseError(Exception):
         * Turn off system-default traceback function by set `sys.tracebacklimit` to 0.
         * But bugs appear in Python 3.6, so we have to set `sys.tracebacklimit` to None.
             > this note is deprecated since Python fixed the problem above
-        * In Python 2.7, `trace.print_stack(limit=None)` dose not support negative limit.
+        * In Python 2.7, `trace.print_stack(limit)` dose not support negative limit.
 
     """
     def __init__(self, *args, quiet=False, **kwargs):
@@ -89,97 +89,78 @@ class BaseError(Exception):
 
 class DigitError(BaseError, TypeError):
     """The argument(s) must be (a) number(s)."""
-    pass
 
 
 class IntError(BaseError, TypeError):
     """The argument(s) must be integral."""
-    pass
 
 
 class RealError(BaseError, TypeError):
     """The function is not defined for real number."""
-    pass
 
 
 class ComplexError(BaseError, TypeError):
     """The function is not defined for complex instance."""
-    pass
 
 
 class BytesError(BaseError, TypeError):
     """The argument(s) must be bytes type."""
-    pass
 
 
 class BytearrayError(BaseError, TypeError):
     """The argument(s) must be bytearray type."""
-    pass
 
 
 class BoolError(BaseError, TypeError):
     """The argument(s) must be bool type."""
-    pass
 
 
 class StringError(BaseError, TypeError):
     """The argument(s) must be str type."""
-    pass
 
 
 class DictError(BaseError, TypeError):
     """The argument(s) must be dict type."""
-    pass
 
 
 class ListError(BaseError, TypeError):
     """The argument(s) must be list type."""
-    pass
 
 
 class TupleError(BaseError, TypeError):
     """The argument(s) must be tuple type."""
-    pass
 
 
 class IterableError(BaseError, TypeError):
     """The argument(s) must be iterable."""
-    pass
 
 
 class CallableError(BaseError, TypeError):
     """The argument(s) must be callable."""
-    pass
 
 
 class ProtocolUnbound(BaseError, TypeError):
     """Protocol slice unbound."""
-    pass
 
 
 class IOObjError(BaseError, TypeError):
     """The argument(s) must be file-like object."""
-    pass
 
 
 class InfoError(BaseError, TypeError):
     """The argument(s) must be Info instance."""
-    pass
 
 
 class IPError(BaseError, TypeError):
     """The argument(s) must be IP address."""
-    pass
 
 
 class EnumError(BaseError, TypeError):
     """The argument(s) must be enumeration protocol type."""
-    pass
 
 
 class ComparisonError(BaseError, TypeError):
     """Rich comparison not supported between instances."""
-    pass
 
 
 ##############################################################################
@@ -189,12 +170,10 @@ class ComparisonError(BaseError, TypeError):
 
 class FormatError(BaseError, AttributeError):
     """Unknown format(s)."""
-    pass
 
 
 class UnsupportedCall(BaseError, AttributeError):
     """Unsupported function or property call."""
-    pass
 
 
 ##############################################################################
@@ -204,8 +183,7 @@ class UnsupportedCall(BaseError, AttributeError):
 
 class FileError(BaseError, IOError):
     """[Errno 5] Wrong file format."""
-    def __init__(self, errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
-        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
+    # args: errno, strerror, filename, winerror, filename2
 
 
 ##############################################################################
@@ -215,8 +193,7 @@ class FileError(BaseError, IOError):
 
 class FileExists(BaseError, FileExistsError):
     """[Errno 17] File already exists."""
-    def __init__(self, errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
-        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
+    # args: errno, strerror, filename, winerror, filename2
 
 
 ##############################################################################
@@ -226,8 +203,7 @@ class FileExists(BaseError, FileExistsError):
 
 class FileNotFound(BaseError, FileNotFoundError):
     """[Errno 2] File not found."""
-    def __init__(self, errno=None, strerror=None, filename=None, winerror=None, filename2=None, *args, **kwargs):
-        super().__init__(errno, strerror, filename, winerror, filename2, *args, **kwargs)
+    # args: errno, strerror, filename, winerror, filename2
 
 
 ##############################################################################
@@ -237,7 +213,6 @@ class FileNotFound(BaseError, FileNotFoundError):
 
 class ProtocolNotFound(BaseError, IndexError):
     """Protocol not found in ProtoChain."""
-    pass
 
 
 ##############################################################################
@@ -247,22 +222,18 @@ class ProtocolNotFound(BaseError, IndexError):
 
 class VersionError(BaseError, ValueError):
     """Unknown IP version."""
-    pass
 
 
 class IndexNotFound(BaseError, ValueError):
     """Protocol not in ProtoChain."""
-    pass
 
 
 class ProtocolError(BaseError, ValueError):
     """Invalid protocol format."""
-    pass
 
 
 class EndianError(BaseError, ValueError):
     """Invalid endian (byte order)."""
-    pass
 
 
 ##############################################################################
@@ -272,7 +243,10 @@ class EndianError(BaseError, ValueError):
 
 class ProtocolNotImplemented(BaseError, NotImplementedError):
     """Protocol not implemented."""
-    pass
+
+
+class VendorNotImplemented(BaseError, NotImplementedError):
+    """Vendor not implemented."""
 
 
 ##############################################################################
@@ -282,7 +256,6 @@ class ProtocolNotImplemented(BaseError, NotImplementedError):
 
 class StructError(BaseError, struct.error):
     """Unpack failed."""
-    pass
 
 
 ##############################################################################
@@ -292,12 +265,10 @@ class StructError(BaseError, struct.error):
 
 class FragmentError(BaseError, KeyError):
     """Invalid fragment dict."""
-    pass
 
 
 class PacketError(BaseError, KeyError):
     """Invalid packet dict."""
-    pass
 
 
 ##############################################################################
@@ -307,5 +278,4 @@ class PacketError(BaseError, KeyError):
 
 class ModuleNotFound(BaseError, ModuleNotFoundError):
     """Module not found."""
-    def __init__(self, msg=None, *args, name=None, path=None, **kwargs):
-        super().__init__(msg, *args, name=name, path=path, **kwargs)
+    # kwargs: name, path

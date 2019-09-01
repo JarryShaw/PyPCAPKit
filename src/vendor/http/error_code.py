@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""HTTP/2 Error Code"""
 
 import csv
 import re
@@ -45,10 +46,13 @@ class ErrorCode(Vendor):
                 code = hexlify(temp)
                 renm = self.rename(name, code)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}".ljust(76)
+                pres = f"{self.NAME}[{renm!r}] = {code}"
                 sufs = f'#{desc}{dscp}' if desc or dscp else ''
 
-                enum.append(f'{pres}{sufs}')
+                if len(pres) > 74:
+                    sufs = f"\n{' '*80}{sufs}"
+
+                enum.append(f'{pres.ljust(76)}{sufs}')
             except ValueError:
                 start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
 
