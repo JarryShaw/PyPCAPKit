@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""IP Option Numbers"""
 
 from aenum import IntEnum, extend_enum
 
@@ -45,7 +47,7 @@ class OptionNumber(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return OptionNumber(key)
-        if key not in OptionNumber._member_map_:
+        if key not in OptionNumber._member_map_:  # pylint: disable=no-member
             extend_enum(OptionNumber, key, default)
         return OptionNumber[key]
 
@@ -56,4 +58,3 @@ class OptionNumber(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned [%d]' % value, value)
         return cls(value)
-        super()._missing_(value)

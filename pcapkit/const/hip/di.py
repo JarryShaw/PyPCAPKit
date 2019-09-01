@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""DI-Types"""
 
 from aenum import IntEnum, extend_enum
 
@@ -18,7 +20,7 @@ class DI(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return DI(key)
-        if key not in DI._member_map_:
+        if key not in DI._member_map_:  # pylint: disable=no-member
             extend_enum(DI, key, default)
         return DI[key]
 
@@ -30,4 +32,4 @@ class DI(IntEnum):
         if 3 <= value <= 15:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

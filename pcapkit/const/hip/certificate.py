@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""HIP Certificate Types"""
 
 from aenum import IntEnum, extend_enum
 
@@ -24,7 +26,7 @@ class Certificate(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Certificate(key)
-        if key not in Certificate._member_map_:
+        if key not in Certificate._member_map_:  # pylint: disable=no-member
             extend_enum(Certificate, key, default)
         return Certificate[key]
 
@@ -36,4 +38,4 @@ class Certificate(IntEnum):
         if 9 <= value <= 255:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

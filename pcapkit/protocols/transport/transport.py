@@ -8,7 +8,7 @@ And the latter is a base class for transport layer
 protocols, eg. TCP and UDP.
 
 """
-from pcapkit.const.misc.transtype import TransType as TP_PROTO
+from pcapkit.const.reg.transtype import TransType as TP_PROTO
 from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder_ng

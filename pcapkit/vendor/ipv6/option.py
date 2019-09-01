@@ -1,21 +1,14 @@
 # -*- coding: utf-8 -*-
+"""IPv6 Destination Options and Hop-by-Hop Options"""
 
 import collections
-import contextlib
 import csv
-import os
 import re
 
-import requests
+from pcapkit.vendor.default import Vendor
 
-###############
-# Macros
-###############
+__all__ = ['Option']
 
-NAME = 'Option'
-DOCS = 'Destination Options and Hop-by-Hop Options'
-FLAG = 'isinstance(value, int) and 0x00 <= value <= 0xFF'
-LINK = 'https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-2.csv'
 DATA = {
     # [RFC 8200] 0
     0x00: ('pad', 'Pad1'),
@@ -42,105 +35,59 @@ DATA = {
     0xEE: ('ip_dff', 'Depth-First Forwarding'),                    # [RFC 6971]
 }
 
-###############
-# Processors
-###############
 
-page = requests.get(LINK)
-data = page.text.strip().split('\r\n')
+class Option(Vendor):
+    """Destination Options and Hop-by-Hop Options"""
 
-reader = csv.reader(data)
-header = next(reader)
-record = collections.Counter(map(lambda item: item[4], reader))
+    FLAG = 'isinstance(value, int) and 0x00 <= value <= 0xFF'
+    LINK = 'https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-2.csv'
 
+    def count(self, data):
+        reader = csv.reader(data)
+        next(reader)  # header
+        return collections.Counter(map(lambda item: item[4], reader))  # pylint: disable=map-builtin-not-iterating
 
-def rename(name, code, *, original):
-    if record[original] > 1:
-        return '{} [{}]'.format(name, code)
-    return name
+    def process(self, data):
+        reader = csv.reader(data)
+        next(reader)  # header
 
+        enum = list()
+        miss = [
+            "extend_enum(cls, 'Unassigned [0x%s]' % hex(value)[2:].upper().zfill(2), value)",
+            'return cls(value)'
+        ]
+        for item in reader:
+            if not item[0]:
+                continue
 
-reader = csv.reader(data)
-header = next(reader)
+            code = item[0]
+            dscp = item[4]
+            rfcs = item[5]
 
-enum = list()
-miss = [
-    "extend_enum(cls, 'Unassigned [0x%s]' % hex(value)[2:].upper().zfill(2), value)",
-    'return cls(value)'
-]
-for item in reader:
-    if not item[0]:
-        continue
+            temp = list()
+            for rfc in filter(None, re.split(r'\[|\]', rfcs)):
+                if re.match(r'\d+', rfc):
+                    continue
+                if 'RFC' in rfc:
+                    temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
+                else:
+                    temp.append('[{}]'.format(rfc))
+            desc = "# {}".format(''.join(temp)) if rfcs else ''
 
-    code = item[0]
-    dscp = item[4]
-    rfcs = item[5]
+            splt = re.split(r' \[\d+\]', dscp)[0]
+            subn = re.sub(r'.* \((.*)\)', r'\1', splt)
+            name = DATA.get(int(code, base=16), (str(),))[0].upper() or subn
+            renm = self.rename(name or 'Unassigned', code, original=dscp)
 
-    temp = list()
-    for rfc in filter(None, re.split(r'\[|\]', rfcs)):
-        if re.match(r'\d+', rfc):
-            continue
-        if 'RFC' in rfc:
-            temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
-        else:
-            temp.append('[{}]'.format(rfc))
-    desc = "# {}".format(''.join(temp)) if rfcs else ''
+            pres = "{}[{!r}] = {}".format(self.NAME, renm, code)
+            sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
-    splt = re.split(r' \[\d+\]', dscp)[0]
-    subn = re.sub(r'.* \((.*)\)', r'\1', splt)
-    name = DATA.get(int(code, base=16), (str(),))[0].upper() or subn
-    renm = rename(name or 'Unassigned', code, original=dscp)
+            if len(pres) > 74:
+                sufs = "\n{}{}".format(' '*80, sufs)
 
-    pres = "{}[{!r}] = {}".format(NAME, renm, code).ljust(76)
-    sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
-
-    enum.append('{}{}'.format(pres, sufs))
-
-###############
-# Defaults
-###############
-
-temp, FILE = os.path.split(os.path.abspath(__file__))
-ROOT, STEM = os.path.split(temp)
-
-ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
-MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
+            enum.append('{}{}'.format(pres.ljust(76), sufs))
+        return enum, miss
 
 
-def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
-# -*- coding: utf-8 -*-
-
-from aenum import IntEnum, extend_enum
-
-
-class {}(IntEnum):
-    """Enumeration class for {}."""
-    _ignore_ = '{} _'
-    {} = vars()
-
-    # {}
-    {}
-
-    @staticmethod
-    def get(key, default=-1):
-        """Backport support for original codes."""
-        if isinstance(key, int):
-            return {}(key)
-        if key not in {}._member_map_:
-            extend_enum({}, key, default)
-        return {}[key]
-
-    @classmethod
-    def _missing_(cls, value):
-        """Lookup function used when value is not found."""
-        if not ({}):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {}
-        super()._missing_(value)
-'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
-
-
-with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, '../const/{}'.format(STEM)))
-with open(os.path.join(ROOT, '../const/{}/{}'.format(STEM, FILE)), 'w') as file:
-    file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))
+if __name__ == "__main__":
+    Option()

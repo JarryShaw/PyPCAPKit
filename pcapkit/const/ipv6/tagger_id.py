@@ -1,27 +1,29 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""TaggerID Types"""
 
 from aenum import IntEnum, extend_enum
 
 
-class TaggerId(IntEnum):
-    """Enumeration class for TaggerId."""
-    _ignore_ = 'TaggerId _'
-    TaggerId = vars()
+class TaggerID(IntEnum):
+    """Enumeration class for TaggerID."""
+    _ignore_ = 'TaggerID _'
+    TaggerID = vars()
 
-    # TaggerId Types
-    TaggerId['NULL'] = 0                                                        # [RFC 6621]
-    TaggerId['DEFAULT'] = 1                                                     # [RFC 6621]
-    TaggerId['IPv4'] = 2                                                        # [RFC 6621]
-    TaggerId['IPv6'] = 3                                                        # [RFC 6621]
+    # TaggerID Types
+    TaggerID['NULL'] = 0                                                        # [RFC 6621]
+    TaggerID['DEFAULT'] = 1                                                     # [RFC 6621]
+    TaggerID['IPv4'] = 2                                                        # [RFC 6621]
+    TaggerID['IPv6'] = 3                                                        # [RFC 6621]
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return TaggerId(key)
-        if key not in TaggerId._member_map_:
-            extend_enum(TaggerId, key, default)
-        return TaggerId[key]
+            return TaggerID(key)
+        if key not in TaggerID._member_map_:  # pylint: disable=no-member
+            extend_enum(TaggerID, key, default)
+        return TaggerID[key]
 
     @classmethod
     def _missing_(cls, value):
@@ -31,4 +33,4 @@ class TaggerId(IntEnum):
         if 4 <= value <= 7:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

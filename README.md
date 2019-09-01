@@ -61,17 +61,30 @@
 
 ### Engine Comparison
 
-&emsp; Besides, due to complexity of `pcapkit`, its extraction procedure takes around *0.01* seconds per packet, which is not ideal enough. Thus, `pcapkit` introduced alternative extraction engines to accelerate this procedure. By now, `pcapkit` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/). Plus, `pcapkit` supports two strategies of multiprocessing (`server` & `pipeline`). For more information, please refer to the document.
+&emsp; Besides, due to complexity of `pcapkit`, its extraction procedure takes around ~0.01~ *0.0009* seconds per packet, which is not ideal enough. Thus, `pcapkit` introduced alternative extraction engines to accelerate this procedure. By now, `pcapkit` supports [`Scapy`](https://scapy.net), [`DPKT`](https://github.com/kbandla/dpkt), and [`PyShark`](https://kiminewt.github.io/pyshark/). Plus, `pcapkit` supports two strategies of multiprocessing (`server` & `pipeline`). For more information, please refer to the document.
+
+> PyPCAPKit finally boosts a bit up thanks to [@59e5aaf4](https://github.com/59e5aaf4) with issue [#29](https://github.com/JarryShaw/PyPCAPKit/issues/29) 🎉
+
+#### Test environment
+
+| Key                   | Value         |
+| :-------------------- | :------------ |
+| Operating System      | macOS Mojave  |
+| Processor Name        | Intel Core i7 |
+| Processor Speed       | 2.6 GHz       |
+| Total Number of Cores | 6             |
+| Memory                | 16 GB         |
+
+#### Test results
 
 | Engine     | Performance (seconds per packet) |
 | :--------- | :------------------------------- |
-| `dpkt`     | `0.0003609057267506917`          |
-| `scapy`    | `0.002443440357844035`           |
-| `default`  | `0.017523006995519`              |
-| `pipeline` | `0.014550424114863079`           |
-| `server`   | `0.04667099356651306`            |
-| `pyshark`  | `0.0792640733718872`             |
-
+| `dpkt`     | `0.00017389218012491862`         |
+| `scapy`    | `0.00036091208457946774`         |
+| `default`  | `0.0009537641207377116`          |
+| `pipeline` | `0.0009694552421569824`          |
+| `server`   | `0.018088217973709107`           |
+| `pyshark`  | `0.04200994372367859`            |
 
 &nbsp;
 

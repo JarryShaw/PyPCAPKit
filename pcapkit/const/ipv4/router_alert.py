@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""IPv4 Router Alert Option Values"""
 
 from aenum import IntEnum, extend_enum
 
@@ -81,7 +83,7 @@ class RouterAlert(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return RouterAlert(key)
-        if key not in RouterAlert._member_map_:
+        if key not in RouterAlert._member_map_:  # pylint: disable=no-member
             extend_enum(RouterAlert, key, default)
         return RouterAlert[key]
 
@@ -97,4 +99,4 @@ class RouterAlert(IntEnum):
             # [RFC 5350]
             extend_enum(cls, 'Reserved for experimental use [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

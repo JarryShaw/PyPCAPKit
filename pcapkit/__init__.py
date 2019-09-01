@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=wrong-import-position, unused-import, unused-wildcard-import, bad-continuation
 """stream pcap file extractor
 
 `pcapkit` is an independent open source library, using only
@@ -53,17 +54,17 @@ different sections.
     dump utilities for `pcapkit` implementation
 
 """
-# pylint: disable=wrong-import-position, unused-import, unused-wildcard-import
 import os
 import warnings
 
 import tbtrim
 
 from pcapkit.utilities.exceptions import DEVMODE, BaseError
+from pcapkit.utilities.warnings import DevModeWarning
 
 # set up sys.excepthook
 if DEVMODE:
-    warnings.showwarning('development mode enabled', RuntimeWarning,
+    warnings.showwarning('development mode enabled', DevModeWarning,
                          filename=__file__, lineno=0,
                          line="PCAPKIT_DEVMODE={}".format(os.environ['PCAPKIT_DEVMODE']))
 else:
@@ -72,7 +73,7 @@ else:
                          exception=BaseError, strict=False)
 
 # All Reference
-import pcapkit.__all__ as all  # pylint: disable=redefined-builtin
+import pcapkit.all
 
 # Interface
 from pcapkit.interface import *
@@ -111,13 +112,13 @@ __all__ = [
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',
-                                                            # Engine Macros  # pylint: disable=bad-continuation
+                                                            # Engine Macros
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
-                                                            # IPv6 Extension Header  # pylint: disable=bad-continuation
+                                                            # IPv6 Extension Header
     'TCP', 'UDP',                                           # Transport Layer
     'FTP', 'HTTP',                                          # Application Layer
 ]

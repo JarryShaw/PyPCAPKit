@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""HIP Transport Modes"""
 
 from aenum import IntEnum, extend_enum
 
@@ -19,7 +21,7 @@ class Transport(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Transport(key)
-        if key not in Transport._member_map_:
+        if key not in Transport._member_map_:  # pylint: disable=no-member
             extend_enum(Transport, key, default)
         return Transport[key]
 
@@ -28,5 +30,4 @@ class Transport(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 3):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        
-        super()._missing_(value)
+        return super()._missing_(value)

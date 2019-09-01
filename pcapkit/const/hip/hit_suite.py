@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""HIT Suite ID"""
 
 from aenum import IntEnum, extend_enum
 
@@ -19,7 +21,7 @@ class HIT_Suite(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return HIT_Suite(key)
-        if key not in HIT_Suite._member_map_:
+        if key not in HIT_Suite._member_map_:  # pylint: disable=no-member
             extend_enum(HIT_Suite, key, default)
         return HIT_Suite[key]
 
@@ -31,4 +33,4 @@ class HIT_Suite(IntEnum):
         if 4 <= value <= 15:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

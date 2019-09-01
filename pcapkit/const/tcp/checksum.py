@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""TCP Checksum [RFC 1146]"""
 
 from aenum import IntEnum, extend_enum
 
@@ -8,7 +10,7 @@ class Checksum(IntEnum):
     _ignore_ = 'Checksum _'
     Checksum = vars()
 
-    # [RFC 1146]
+    # TCP Checksum [RFC 1146]
     Checksum['TCP checksum'] = 0
     Checksum["8-bit Fletcher's algorithm"] = 1
     Checksum["16-bit Fletcher's algorithm"] = 2
@@ -19,7 +21,7 @@ class Checksum(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Checksum(key)
-        if key not in Checksum._member_map_:
+        if key not in Checksum._member_map_:  # pylint: disable=no-member
             extend_enum(Checksum, key, default)
         return Checksum[key]
 
@@ -30,4 +32,3 @@ class Checksum(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned [%d]' % value, value)
         return cls(value)
-        super()._missing_(value)

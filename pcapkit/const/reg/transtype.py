@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""Transport Layer Protocol Numbers"""
 
 from aenum import IntEnum, extend_enum
 
@@ -70,14 +72,14 @@ class TransType(IntEnum):
     TransType['IPv6-ICMP'] = 58                                                 # [RFC 8200] ICMP for IPv6
     TransType['IPv6-NoNxt'] = 59                                                # [RFC 8200] No Next Header for IPv6
     TransType['IPv6-Opts'] = 60                                                 # [RFC 8200] Destination Options for IPv6
-    TransType['any host internal protocol [61]'] = 61                           # [Internet_Assigned_Numbers_Authority]
+    TransType['any host internal protocol'] = 61                                # [Internet_Assigned_Numbers_Authority]
     TransType['CFTP'] = 62                                                      # [Forsdick, H., "CFTP", Network Message, Bolt Beranek and Newman, January 1982.][Harry_Forsdick] CFTP
-    TransType['any local network [63]'] = 63                                    # [Internet_Assigned_Numbers_Authority]
+    TransType['any local network'] = 63                                         # [Internet_Assigned_Numbers_Authority]
     TransType['SAT-EXPAK'] = 64                                                 # [Steven_Blumenthal] SATNET and Backroom EXPAK
     TransType['KRYPTOLAN'] = 65                                                 # [Paul Liu] Kryptolan
     TransType['RVD'] = 66                                                       # [Michael_Greenwald] MIT Remote Virtual Disk Protocol
     TransType['IPPC'] = 67                                                      # [Steven_Blumenthal] Internet Pluribus Packet Core
-    TransType['any distributed file system [68]'] = 68                          # [Internet_Assigned_Numbers_Authority]
+    TransType['any distributed file system'] = 68                               # [Internet_Assigned_Numbers_Authority]
     TransType['SAT-MON'] = 69                                                   # [Steven_Blumenthal] SATNET Monitoring
     TransType['VISA'] = 70                                                      # [Gene_Tsudik] VISA Protocol
     TransType['IPCV'] = 71                                                      # [Steven_Blumenthal] Internet Packet Core Utility
@@ -109,7 +111,7 @@ class TransType(IntEnum):
     TransType['SCC-SP'] = 96                                                    # [Howard_Hart] Semaphore Communications Sec. Pro.
     TransType['ETHERIP'] = 97                                                   # [RFC 3378] Ethernet-within-IP Encapsulation
     TransType['ENCAP'] = 98                                                     # [RFC 1241][Robert_Woodburn] Encapsulation Header
-    TransType['any private encryption scheme [99]'] = 99                        # [Internet_Assigned_Numbers_Authority]
+    TransType['any private encryption scheme'] = 99                             # [Internet_Assigned_Numbers_Authority]
     TransType['GMTP'] = 100                                                     # [RXB5] GMTP
     TransType['IFMP'] = 101                                                     # [Bob_Hinden][November 1995, 1997.] Ipsilon Flow Management Protocol
     TransType['PNNI'] = 102                                                     # [Ross_Callon] PNNI over IP
@@ -124,7 +126,7 @@ class TransType(IntEnum):
     TransType['IPX-in-IP'] = 111                                                # [CJ_Lee] IPX in IP
     TransType['VRRP'] = 112                                                     # [RFC 5798] Virtual Router Redundancy Protocol
     TransType['PGM'] = 113                                                      # [Tony_Speakman] PGM Reliable Transport Protocol
-    TransType['any 0-hop protocol [114]'] = 114                                 # [Internet_Assigned_Numbers_Authority]
+    TransType['any 0-hop protocol'] = 114                                       # [Internet_Assigned_Numbers_Authority]
     TransType['L2TP'] = 115                                                     # [RFC 3931][Bernard_Aboba] Layer Two Tunneling Protocol
     TransType['DDX'] = 116                                                      # [John_Worley] D-II Data Exchange (DDX)
     TransType['IATP'] = 117                                                     # [John_Murphy] Interactive Agent Transfer Protocol
@@ -162,7 +164,7 @@ class TransType(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return TransType(key)
-        if key not in TransType._member_map_:
+        if key not in TransType._member_map_:  # pylint: disable=no-member
             extend_enum(TransType, key, default)
         return TransType[key]
 
@@ -175,4 +177,4 @@ class TransType(IntEnum):
             # [Internet_Assigned_Numbers_Authority]
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

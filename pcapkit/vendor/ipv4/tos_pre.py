@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
+"""IPv4 TOS (DS Field) Precedence"""
 
 import collections
-import contextlib
-import os
 
-###############
-# Macros
-###############
+from pcapkit.vendor.default import Vendor
 
-NAME = 'TOS_PRE'
-DOCS = 'TOS (DS Field) Precedence'
-FLAG = 'isinstance(value, int) and 0b000 <= value <= 0b111'
+__all__ = ['TOS_PRE']
+
 DATA = {
     0b111: 'Network Control',
     0b110: 'Internetwork Control',
@@ -22,73 +18,29 @@ DATA = {
     0b000: 'Routine',
 }
 
-###############
-# Processors
-###############
 
-record = collections.Counter(DATA.values())
+class TOS_PRE(Vendor):
+    """TOS (DS Field) Precedence"""
 
+    FLAG = 'isinstance(value, int) and 0b000 <= value <= 0b111'
 
-def rename(name, code):
-    if record[name] > 1:
-        name = '{} [{}]'.format(name, code)
-    return name
+    def request(self):  # pylint: disable=arguments-differ
+        return DATA
 
+    def count(self, data):
+        return collections.Counter(data.values())
 
-enum = list()
-miss = [
-    "extend_enum(cls, 'Unassigned [%d]' % value, value)",
-    'return cls(value)'
-]
-for code, name in DATA.items():
-    renm = rename(name, code)
-    enum.append("{}[{!r}] = {}".format(NAME, renm, code).ljust(76))
-
-###############
-# Defaults
-###############
-
-temp, FILE = os.path.split(os.path.abspath(__file__))
-ROOT, STEM = os.path.split(temp)
-
-ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
-MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
+    def process(self, data):
+        enum = list()
+        miss = [
+            "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+            'return cls(value)'
+        ]
+        for code, name in DATA.items():
+            renm = self.rename(name, code)
+            enum.append("{}[{!r}] = {}".format(self.NAME, renm, code).ljust(76))
+        return enum, miss
 
 
-def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
-# -*- coding: utf-8 -*-
-
-from aenum import IntEnum, extend_enum
-
-
-class {}(IntEnum):
-    """Enumeration class for {}."""
-    _ignore_ = '{} _'
-    {} = vars()
-
-    # {}
-    {}
-
-    @staticmethod
-    def get(key, default=-1):
-        """Backport support for original codes."""
-        if isinstance(key, int):
-            return {}(key)
-        if key not in {}._member_map_:
-            extend_enum({}, key, default)
-        return {}[key]
-
-    @classmethod
-    def _missing_(cls, value):
-        """Lookup function used when value is not found."""
-        if not ({}):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {}
-        super()._missing_(value)
-'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
-
-
-with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, '../const/{}'.format(STEM)))
-with open(os.path.join(ROOT, '../const/{}/{}'.format(STEM, FILE)), 'w') as file:
-    file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))
+if __name__ == "__main__":
+    TOS_PRE()

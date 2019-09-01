@@ -24,7 +24,7 @@ import textwrap
 
 from pcapkit.const.arp.hardware import Hardware as HRD
 from pcapkit.const.arp.operation import Operation as OPER
-from pcapkit.const.misc.ethertype import EtherType as ETHERTYPE
+from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 

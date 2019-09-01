@@ -24,7 +24,7 @@ from pcapkit.const.ipv6.option import Option as _OPT_TYPE
 from pcapkit.const.ipv6.qs_function import QS_Function as _QS_FUNC
 from pcapkit.const.ipv6.router_alert import RouterAlert as _ROUTER_ALERT
 from pcapkit.const.ipv6.seed_id import SeedID as _HOPOPT_SEED
-from pcapkit.const.ipv6.tagger_id import TaggerId as _TID_TYPE
+from pcapkit.const.ipv6.tagger_id import TaggerID as _TID_TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
@@ -501,7 +501,7 @@ class HOPOPT(Internet):
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                                ...              |0|0|0|  01000  | Opt. Data Len |
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |0|TidTy| TidLen|             TaggerId (optional) ...           |
+                |0|TidTy| TidLen|             TaggerID (optional) ...           |
                 +-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 |                               |            Identifier  ...
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+

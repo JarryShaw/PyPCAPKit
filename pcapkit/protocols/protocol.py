@@ -25,10 +25,8 @@ import chardet
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import (BoolError, BytesError,
-                                          ProtocolNotFound, ProtocolUnbound,
+from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolUnbound,
                                           StructError)
-from pcapkit.utilities.validations import bool_check, int_check
 
 ###############################################################################
 # from pcapkit.protocols.raw import Raw
@@ -89,7 +87,6 @@ class Protocol(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def name(self):
         """Name of current protocol."""
-        pass
 
     # acronym of current protocol
     @property
@@ -108,7 +105,6 @@ class Protocol(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def length(self):
         """Header length of current protocol."""
-        pass
 
     # payload of current instance
     @property

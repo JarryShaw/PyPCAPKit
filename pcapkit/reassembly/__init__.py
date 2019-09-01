@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import
 """reassembly packets and datagrams
 
 `pcapkit.reassembly` bases on algorithms described in

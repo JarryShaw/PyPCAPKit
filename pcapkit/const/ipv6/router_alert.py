@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""IPv6 Router Alert Option Values"""
 
 from aenum import IntEnum, extend_enum
 
@@ -9,7 +11,8 @@ class RouterAlert(IntEnum):
     RouterAlert = vars()
 
     # IPv6 Router Alert Option Values
-    RouterAlert['Datagram contains a Multicast Listener Discovery message'] = 0 # [RFC 2710]
+    RouterAlert['Datagram contains a Multicast Listener Discovery message'] = 0
+                                                                                # [RFC 2710]
     RouterAlert['Datagram contains RSVP message'] = 1                           # [RFC 2711]
     RouterAlert['Datagram contains an Active Networks message'] = 2             # [RFC 2711]
     RouterAlert['Reserved [3]'] = 3                                             # [RFC 5350]
@@ -86,7 +89,7 @@ class RouterAlert(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return RouterAlert(key)
-        if key not in RouterAlert._member_map_:
+        if key not in RouterAlert._member_map_:  # pylint: disable=no-member
             extend_enum(RouterAlert, key, default)
         return RouterAlert[key]
 
@@ -102,4 +105,4 @@ class RouterAlert(IntEnum):
             # [RFC 5350]
             extend_enum(cls, 'Reserved for experimental use [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

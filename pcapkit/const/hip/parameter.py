@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""HIP Parameter Types"""
 
 from aenum import IntEnum, extend_enum
 
@@ -72,7 +74,7 @@ class Parameter(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Parameter(key)
-        if key not in Parameter._member_map_:
+        if key not in Parameter._member_map_:  # pylint: disable=no-member
             extend_enum(Parameter, key, default)
         return Parameter[key]
 
@@ -211,4 +213,4 @@ class Parameter(IntEnum):
         if 65521 <= value <= 65535:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

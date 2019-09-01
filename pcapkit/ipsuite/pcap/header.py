@@ -4,7 +4,7 @@
 """
 import sys
 
-from pcapkit.const.misc.linktype import LinkType as LINKTYPE
+from pcapkit.const.reg.linktype import LinkType as LINKTYPE
 from pcapkit.ipsuite.protocol import Protocol
 from pcapkit.utilities.exceptions import EndianError
 

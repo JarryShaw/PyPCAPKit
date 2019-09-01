@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""Cipher IDs"""
 
 from aenum import IntEnum, extend_enum
 
@@ -20,7 +22,7 @@ class Cipher(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Cipher(key)
-        if key not in Cipher._member_map_:
+        if key not in Cipher._member_map_:  # pylint: disable=no-member
             extend_enum(Cipher, key, default)
         return Cipher[key]
 
@@ -32,4 +34,4 @@ class Cipher(IntEnum):
         if 5 <= value <= 65535:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

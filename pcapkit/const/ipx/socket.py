@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""Socket Types"""
 
 from aenum import IntEnum, extend_enum
 
@@ -12,7 +14,7 @@ class Socket(IntEnum):
     Socket['Routing Information Packet'] = 0x0001
     Socket['Echo Protocol Packet'] = 0x0002
     Socket['Error Handling Packet'] = 0x0003
-    Socket['NetWare Core Protocol'] = 0x0451                                    # NCP - used by Novell NetWare servers
+    Socket['NetWare Core Protocol'] = 0x0451                                    # NCP – used by Novell NetWare servers
     Socket['Service Advertising Protocol'] = 0x0452                             # SAP
     Socket['Routing Information Protocol'] = 0x0453                             # RIP
     Socket['NetBIOS'] = 0x0455
@@ -29,7 +31,7 @@ class Socket(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Socket(key)
-        if key not in Socket._member_map_:
+        if key not in Socket._member_map_:  # pylint: disable=no-member
             extend_enum(Socket, key, default)
         return Socket[key]
 
@@ -53,4 +55,4 @@ class Socket(IntEnum):
         if 0x8000 <= value <= 0xFFFF:
             extend_enum(cls, 'Statically Assigned Socket Numbers [0x%s]' % hex(value)[2:].upper().zfill(4), value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

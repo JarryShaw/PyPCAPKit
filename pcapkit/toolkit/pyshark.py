@@ -9,7 +9,7 @@ usable for its caller.
 """
 import ipaddress
 
-from pcapkit.const.misc.linktype import LinkType as LINKTYPE
+from pcapkit.const.reg.linktype import LinkType as LINKTYPE
 
 __all__ = ['packet2dict', 'tcp_traceflow']
 

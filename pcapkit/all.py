@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import, unused-wildcard-import, bad-continuation
 """index for the library
 
 `pcapkit` has defined various and numerous functions and
@@ -7,6 +8,8 @@ make a simple index for this library, `pcapkit.all`
 contains all things from `pcapkit`.
 
 """
+import pcapkit.const as const
+import pcapkit.vendor as vendor
 from pcapkit.corekit import *
 from pcapkit.dumpkit import *
 from pcapkit.foundation import *
@@ -15,9 +18,15 @@ from pcapkit.ipsuite import *
 from pcapkit.protocols import *
 from pcapkit.reassembly import *
 from pcapkit.toolkit import *
-from pcapkit.utilities import *
+from pcapkit.utilities import *  # pylint: disable=redefined-builtin
 
 __all__ = [
+    # pcapkit.const
+    'const',
+
+    # pcapkit.vendor
+    'vendor',
+
     # pcapkit.corekit
     'Info',                                                 # Info Class
     'ProtoChain',                                           # ProtoChain

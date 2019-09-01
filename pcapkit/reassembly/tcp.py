@@ -318,7 +318,7 @@ class TCP_Reassembly(Reassembly):
             self._dtgram += self.submit(self._buffer[BUFID], bufid=BUFID)
             del self._buffer[BUFID]
 
-    def submit(self, buf, *, bufid):
+    def submit(self, buf, *, bufid):  # pylint: disable=arguments-differ
         """Submit reassembled payload.
 
         Positional arguments:

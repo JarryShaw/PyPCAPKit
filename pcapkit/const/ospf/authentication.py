@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""Authentication Types"""
 
 from aenum import IntEnum, extend_enum
 
@@ -12,14 +14,15 @@ class Authentication(IntEnum):
     Authentication['No Authentication'] = 0                                     # [RFC 1583]
     Authentication['Simple Password Authentication'] = 1                        # [RFC 1583]
     Authentication['Cryptographic authentication'] = 2                          # [RFC 2328][RFC 5709]
-    Authentication['Cryptographic Authentication with Extended Sequence Numbers'] = 3# [RFC 7474]
+    Authentication['Cryptographic Authentication with Extended Sequence Numbers'] = 3
+                                                                                # [RFC 7474]
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Authentication(key)
-        if key not in Authentication._member_map_:
+        if key not in Authentication._member_map_:  # pylint: disable=no-member
             extend_enum(Authentication, key, default)
         return Authentication[key]
 
@@ -35,4 +38,4 @@ class Authentication(IntEnum):
             # [RFC 6549]
             extend_enum(cls, 'Deprecated [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

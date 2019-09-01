@@ -1,119 +1,65 @@
 # -*- coding: utf-8 -*-
+"""IPv4 Option Numbers"""
 
 import collections
-import contextlib
 import csv
-import os
 import re
 
-import requests
+from pcapkit.vendor.default import Vendor
 
-###############
-# Macros
-###############
-
-NAME = 'OptionNumber'
-DOCS = 'IP Option Numbers'
-FLAG = 'isinstance(value, int) and 0 <= value <= 255'
-LINK = 'https://www.iana.org/assignments/ip-parameters/ip-parameters-1.csv'
-
-###############
-# Processors
-###############
-
-page = requests.get(LINK)
-data = page.text.strip().split('\r\n')
-
-reader = csv.reader(data)
-header = next(reader)
-record = collections.Counter(map(lambda item: item[4],
-                                 filter(lambda item: len(item[3].split('-')) != 2, reader)))
+__all__ = ['OptionNumber']
 
 
-def rename(name, code, *, original):
-    if record[original] > 1:
-        return '{} [{}]'.format(name, code)
-    return name
+class OptionNumber(Vendor):
+    """IP Option Numbers"""
+
+    FLAG = 'isinstance(value, int) and 0 <= value <= 255'
+    LINK = 'https://www.iana.org/assignments/ip-parameters/ip-parameters-1.csv'
+
+    def count(self, data):
+        reader = csv.reader(data)
+        next(reader)  # header
+        return collections.Counter(map(lambda item: item[4],  # pylint: disable=map-builtin-not-iterating
+                                       filter(lambda item: len(item[3].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
+
+    def process(self, data):
+        reader = csv.reader(data)
+        next(reader)  # header
+
+        enum = list()
+        miss = [
+            "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+            'return cls(value)'
+        ]
+        for item in reader:
+            code = item[3]
+            dscp = item[4]
+            rfcs = item[5]
+
+            temp = list()
+            for rfc in filter(None, re.split(r'\[|\]', rfcs)):
+                if re.match(r'\d+', rfc):
+                    continue
+                if 'RFC' in rfc:
+                    temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
+                else:
+                    temp.append('[{}]'.format(rfc))
+            desc = " {}".format(''.join(temp)) if rfcs else ''
+
+            abbr, name = re.split(r'\W+-\W+', dscp)
+            temp = re.sub(r'\[\d+\]', '', name)
+            name = ' {}'.format(temp) if temp else ''
+
+            renm = self.rename(abbr or 'Unassigned [{}]'.format(code), code, original=dscp)
+            pres = "{}[{!r}] = {}".format(self.NAME, renm, code)
+            sufs = '#{}{}'.format(desc, name) if desc or name else ''
+
+            if len(pres) > 74:
+                sufs = "\n{}{}".format(' '*80, sufs)
+
+            enum.append('{}{}'.format(pres.ljust(76), sufs))
+        return enum, miss
 
 
-reader = csv.reader(data)
-header = next(reader)
-
-enum = list()
-miss = [
-    "extend_enum(cls, 'Unassigned [%d]' % value, value)",
-    'return cls(value)'
-]
-for item in reader:
-    code = item[3]
-    dscp = item[4]
-    rfcs = item[5]
-
-    temp = list()
-    for rfc in filter(None, re.split(r'\[|\]', rfcs)):
-        if re.match(r'\d+', rfc):
-            continue
-        if 'RFC' in rfc:
-            temp.append('[{} {}]'.format(rfc[:3], rfc[3:]))
-        else:
-            temp.append('[{}]'.format(rfc))
-    desc = " {}".format(''.join(temp)) if rfcs else ''
-
-    abbr, name = re.split(r'\W+-\W+', dscp)
-    temp = re.sub(r'\[\d+\]', '', name)
-    name = ' {}'.format(temp) if temp else ''
-
-    renm = rename(abbr or 'Unassigned [{}]'.format(code), code, original=dscp)
-    pres = "{}[{!r}] = {}".format(NAME, renm, code).ljust(76)
-    sufs = '#{}{}'.format(desc, name) if desc or name else ''
-
-    enum.append('{}{}'.format(pres, sufs))
-
-###############
-# Defaults
-###############
-
-temp, FILE = os.path.split(os.path.abspath(__file__))
-ROOT, STEM = os.path.split(temp)
-
-ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
-MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
-
-
-def LINE(NAME, DOCS, FLAG, ENUM, MISS): return '''\
-# -*- coding: utf-8 -*-
-
-from aenum import IntEnum, extend_enum
-
-
-class {}(IntEnum):
-    """Enumeration class for {}."""
-    _ignore_ = '{} _'
-    {} = vars()
-
-    # {}
-    {}
-
-    @staticmethod
-    def get(key, default=-1):
-        """Backport support for original codes."""
-        if isinstance(key, int):
-            return {}(key)
-        if key not in {}._member_map_:
-            extend_enum({}, key, default)
-        return {}[key]
-
-    @classmethod
-    def _missing_(cls, value):
-        """Lookup function used when value is not found."""
-        if not ({}):
-            raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        {}
-        super()._missing_(value)
-'''.format(NAME, NAME, NAME, NAME, DOCS, ENUM, NAME, NAME, NAME, NAME, FLAG, MISS)
-
-
-with contextlib.suppress(FileExistsError):
-    os.mkdir(os.path.join(ROOT, '../const/{}'.format(STEM)))
-with open(os.path.join(ROOT, '../const/{}/{}'.format(STEM, FILE)), 'w') as file:
-    file.write(LINE(NAME, DOCS, FLAG, ENUM, MISS))
+if __name__ == "__main__":
+    OptionNumber()

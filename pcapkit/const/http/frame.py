@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""HTTP/2 Frame Type"""
 
 from aenum import IntEnum, extend_enum
 
@@ -28,7 +30,7 @@ class Frame(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Frame(key)
-        if key not in Frame._member_map_:
+        if key not in Frame._member_map_:  # pylint: disable=no-member
             extend_enum(Frame, key, default)
         return Frame[key]
 
@@ -44,4 +46,4 @@ class Frame(IntEnum):
             # [RFC 7540]
             extend_enum(cls, 'Reserved for Experimental Use [0x%s]' % hex(value)[2:].upper().zfill(2), value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

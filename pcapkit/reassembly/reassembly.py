@@ -17,7 +17,7 @@ from pcapkit.utilities.validations import frag_check, int_check
 __all__ = ['Reassembly']
 
 
-class Reassembly(object):
+class Reassembly(metaclass=abc.ABCMeta):
     """Base class for reassembly procedure.
 
     Properties:
@@ -41,8 +41,6 @@ class Reassembly(object):
         * _dtgram -- list, reassembled datagram
 
     """
-    __metaclass__ = abc.ABCMeta
-
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -52,7 +50,6 @@ class Reassembly(object):
     @abc.abstractmethod
     def name(self):
         """Protocol of current packet."""
-        pass
 
     # total number of reassembled packets
     @property
@@ -70,7 +67,6 @@ class Reassembly(object):
     @abc.abstractmethod
     def protocol(self):
         """Protocol of current reassembly object."""
-        pass
 
     ##########################################################################
     # Methods.
@@ -88,7 +84,6 @@ class Reassembly(object):
             * NotImplemented
 
         """
-        pass
 
     # submit reassembled payload
     @abc.abstractmethod
@@ -102,7 +97,6 @@ class Reassembly(object):
             * NotImplemented
 
         """
-        pass
 
     # fetch datagram
     def fetch(self):

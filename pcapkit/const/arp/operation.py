@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""Operation Codes [RFC 826][RFC 5494]"""
 
 from aenum import IntEnum, extend_enum
 
@@ -42,7 +44,7 @@ class Operation(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return Operation(key)
-        if key not in Operation._member_map_:
+        if key not in Operation._member_map_:  # pylint: disable=no-member
             extend_enum(Operation, key, default)
         return Operation[key]
 
@@ -54,4 +56,4 @@ class Operation(IntEnum):
         if 26 <= value <= 65534:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)

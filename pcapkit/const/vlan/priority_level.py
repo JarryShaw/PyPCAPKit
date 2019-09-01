@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""Priority levels defined in IEEE 802.1p."""
 
 from aenum import IntEnum, extend_enum
 
@@ -8,7 +10,7 @@ class PriorityLevel(IntEnum):
     _ignore_ = 'PriorityLevel _'
     PriorityLevel = vars()
 
-    # priority levels defined in IEEE 802.1p
+    # Priority levels defined in IEEE 802.1p.
     PriorityLevel['BK'] = 0b001                                                 # 0 - Background (lowest)
     PriorityLevel['BE'] = 0b000                                                 # 1 - Best effort (default)
     PriorityLevel['EE'] = 0b010                                                 # 2 - Excellent effort
@@ -23,7 +25,7 @@ class PriorityLevel(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return PriorityLevel(key)
-        if key not in PriorityLevel._member_map_:
+        if key not in PriorityLevel._member_map_:  # pylint: disable=no-member
             extend_enum(PriorityLevel, key, default)
         return PriorityLevel[key]
 
@@ -34,4 +36,3 @@ class PriorityLevel(IntEnum):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(3), value)
         return cls(value)
-        super()._missing_(value)

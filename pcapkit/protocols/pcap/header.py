@@ -21,7 +21,7 @@ import io
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.version import VersionInfo
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.const.misc.linktype import LinkType as LINKTYPE
+from pcapkit.const.reg.linktype import LinkType as LINKTYPE
 from pcapkit.utilities.exceptions import FileError, UnsupportedCall
 from pcapkit.utilities.validations import int_check
 
@@ -150,7 +150,7 @@ class Header(Protocol):
         _type = self._read_protos(4)
 
         _byte = self._read_packet(24)
-        self._file = io.BytesIO(_byte) 
+        self._file = io.BytesIO(_byte)
 
         header = dict(
             magic_number=dict(

@@ -8,8 +8,8 @@ class for link layer protocols, eg. ARP/InARP, Ethernet,
 L2TP, OSPF, RARP/DRARP and etc.
 
 """
-from pcapkit.const.misc.ethertype import EtherType as ETHERTYPE
-from pcapkit.const.misc.linktype import LinkType as LINKTYPE
+from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
+from pcapkit.const.reg.linktype import LinkType as LINKTYPE
 from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['Link', 'LINKTYPE']

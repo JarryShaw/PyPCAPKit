@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import, unused-wildcard-import
 """capability tools
 
 `pcapkit.toolkit` provides several utility functions for

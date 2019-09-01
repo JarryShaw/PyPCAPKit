@@ -51,7 +51,7 @@ def analyse(file, length=None, *, _termination=False):
 
 
 @seekset_ng
-def _analyse_httpv1(file, length, *, seekset=os.SEEK_SET):
+def _analyse_httpv1(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
     try:
         from pcapkit.protocols.application.httpv1 import HTTPv1
         http = HTTPv1(file, length)
@@ -61,7 +61,7 @@ def _analyse_httpv1(file, length, *, seekset=os.SEEK_SET):
 
 
 @seekset_ng
-def _analyse_httpv2(file, length, *, seekset=os.SEEK_SET):
+def _analyse_httpv2(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
     try:
         from pcapkit.protocols.application.httpv2 import HTTPv2
         http = HTTPv2(file, length)
@@ -71,7 +71,7 @@ def _analyse_httpv2(file, length, *, seekset=os.SEEK_SET):
 
 
 @seekset_ng
-def _analyse_ftp(file, length, *, seekset=os.SEEK_SET):
+def _analyse_ftp(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
     try:
         from pcapkit.protocols.application.ftp import FTP
         ftp = FTP(file, length)

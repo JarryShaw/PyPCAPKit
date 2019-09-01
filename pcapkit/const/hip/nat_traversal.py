@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=line-too-long
+"""HIP NAT Traversal Modes"""
 
 from aenum import IntEnum, extend_enum
 
@@ -18,7 +20,7 @@ class NAT_Traversal(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return NAT_Traversal(key)
-        if key not in NAT_Traversal._member_map_:
+        if key not in NAT_Traversal._member_map_:  # pylint: disable=no-member
             extend_enum(NAT_Traversal, key, default)
         return NAT_Traversal[key]
 
@@ -30,4 +32,4 @@ class NAT_Traversal(IntEnum):
         if 3 <= value <= 65535:
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
-        super()._missing_(value)
+        return super()._missing_(value)
