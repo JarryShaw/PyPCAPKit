@@ -8,7 +8,7 @@ Reference: [Libpcap File Format](https://wiki.wireshark.org/Development/LibpcapF
 
 # PCAP Frame Header
 
-## Description
+## Description
 
 &nbsp;
 
@@ -41,7 +41,7 @@ class Frame(file, *, num, proto, nanosecond, **kwrags)
   2. `pcapkit.protocols.protocol.Protocol`
   3. `pcapkit.protocols.pcap.frame.Frame`
 
-### Data Format
+### Data Format
 
 ```
 (Info) Frame

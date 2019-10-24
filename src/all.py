@@ -9,7 +9,7 @@ contains all things from `pcapkit`.
 
 """
 import pcapkit.const as const
-import pcapkit.vendor as vendor
+# import pcapkit.vendor as vendor
 from pcapkit.corekit import *
 from pcapkit.dumpkit import *
 from pcapkit.foundation import *
@@ -24,8 +24,8 @@ __all__ = [
     # pcapkit.const
     'const',
 
-    # pcapkit.vendor
-    'vendor',
+    # # pcapkit.vendor
+    # 'vendor',
 
     # pcapkit.corekit
     'Info',                                                 # Info Class

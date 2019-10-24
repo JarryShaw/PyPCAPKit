@@ -10,7 +10,7 @@ Reference: [Libpcap File Format](https://wiki.wireshark.org/Development/LibpcapF
 
 # PCAP Global Header
 
-## Description
+## Description
 
 &emsp; This header starts the `libpcap` file and will be followed by the first packet header:
 

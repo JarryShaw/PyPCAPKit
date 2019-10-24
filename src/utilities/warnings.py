@@ -7,10 +7,10 @@ __all__ = [
     # UserWarning
     'BaseWarning',
     # ImportWarning
-    'FormatWarning', 'EngineWarning',
+    'FormatWarning', 'EngineWarning', 'InvalidVendorWarning',
     # RuntimeWarning
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
-    'DevModeWarning', 'VendorRequestWarning',
+    'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning'
 ]
@@ -41,6 +41,10 @@ class EngineWarning(BaseWarning, ImportWarning):
     """Unsupported extraction engine."""
 
 
+class InvalidVendorWarning(BaseWarning, ImportWarning):
+    """Vendor CLI invalid updater."""
+
+
 ##############################################################################
 # RuntimeWarning session.
 ##############################################################################
@@ -68,6 +72,10 @@ class DevModeWarning(BaseWarning, RuntimeWarning):
 
 class VendorRequestWarning(BaseWarning, RuntimeWarning):
     """Vendor request connection failed."""
+
+
+class VendorRuntimeWarning(BaseWarning, RuntimeWarning):
+    """Vendor failed during runtime."""
 
 
 ##############################################################################

@@ -28,6 +28,7 @@
         "emojize",
         "eool",
         "exeng",
+        "exlayer",
         "exlyr",
         "expkg",
         "exptl",
@@ -43,6 +44,8 @@
         "gaocegege",
         "gbhdr",
         "hdrs",
+        "hexbuf",
+        "hexlst",
         "httpv",
         "ifile",
         "ifnm",
@@ -80,7 +83,9 @@
         "sched",
         "splt",
         "srcport",
+        "strbuf",
         "strflg",
+        "strlst",
         "subd",
         "subn",
         "sufs",
@@ -88,5 +93,6 @@
         "tbitem",
         "tbody",
         "vinfo"
-    ]
+    ],
+    "restructuredtext.confPath": "${workspaceFolder}/docs/conf.py"
 }

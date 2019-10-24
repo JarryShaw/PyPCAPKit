@@ -51,9 +51,9 @@ clean-pipenv:
 clean-pypi:
 	cd $(DIR)
 	mkdir -p sdist eggs wheels
-	find dist -iname '*.egg' -exec mv {} eggs \;
-	find dist -iname '*.whl' -exec mv {} wheels \;
-	find dist -iname '*.tar.gz' -exec mv {} sdist \;
+	[ -d dist ] && find dist -iname '*.egg' -exec mv {} eggs \; || true
+	[ -d dist ] && find dist -iname '*.whl' -exec mv {} wheels \; || true
+	[ -d dist ] && find dist -iname '*.tar.gz' -exec mv {} sdist \; || true
 	rm -rf build dist *.egg-info
 
 # update pipenv
@@ -85,7 +85,7 @@ dist-pypi: clean-pypi dist-pypi-new dist-pypi-old
 dist-pypi-new:
 	set -ex
 	cd $(DIR)
-	~/.pyenv/versions/3.8-dev/bin/python3.8 setup.py bdist_egg bdist_wheel --python-tag='cp38'
+	~/.pyenv/versions/3.8.0/bin/python3.8 setup.py bdist_egg bdist_wheel --python-tag='cp38'
 	~/.pyenv/versions/3.7.4/bin/python3.7 setup.py bdist_egg bdist_wheel --python-tag='cp37'
 	~/.pyenv/versions/3.6.9/bin/python3.6 setup.py bdist_egg bdist_wheel --python-tag='cp36'
 	~/.pyenv/versions/pypy3.6-7.1.1/bin/pypy3 setup.py bdist_egg bdist_wheel --python-tag='pp36'
