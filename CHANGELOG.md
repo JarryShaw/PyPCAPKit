@@ -1,5 +1,8 @@
 # Change Log
 
+## [v0.14.5](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.5) (2019-10-24)
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.4...v0.14.5)
+
 ## [v0.14.4](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.4) (2019-09-01)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.3...v0.14.4)
 
