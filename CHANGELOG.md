@@ -1,5 +1,13 @@
 # Change Log
 
+## [Unreleased](https://github.com/JarryShaw/PyPCAPKit/tree/HEAD)
+
+[Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.5...HEAD)
+
+**Fixed bugs:**
+
+- 'bs4' dependency not installed via pip [\#31](https://github.com/JarryShaw/PyPCAPKit/issues/31)
+
 ## [v0.14.5](https://github.com/JarryShaw/PyPCAPKit/tree/v0.14.5) (2019-10-24)
 [Full Changelog](https://github.com/JarryShaw/PyPCAPKit/compare/v0.14.4...v0.14.5)
 
