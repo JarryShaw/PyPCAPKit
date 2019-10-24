@@ -110,9 +110,9 @@ setup(
         'pcapkit.vendor.tcp',
         'pcapkit.vendor.vlan',
     ],
-    package_dir={
-        'pcapkit': 'src',
-    },
+    # package_dir={
+    #     'pcapkit': 'src',
+    # },
     package_data={
         '': [
             'LICENSE',
