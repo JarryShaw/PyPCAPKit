@@ -6,7 +6,7 @@ except ImportError:
     from distutils.core import setup
 
 # version string
-__version__ = '0.14.4'
+__version__ = '0.14.5'
 
 # README
 with open('README.md', encoding='utf-8') as file:
@@ -38,7 +38,7 @@ setup(
         'all': [
             'emoji',
             'dpkt', 'scapy', 'pyshark',
-            'requests[socks]', 'bs4', 'html5lib',
+            'requests[socks]', 'bs4[html5lib]',
         ],
         # for CLI display
         'cli': ['emoji'],
@@ -47,14 +47,15 @@ setup(
         'Scapy': ['scapy'],
         'PyShark': ['pyshark'],
         # for developers
-        'vendor': ['requests[socks]', 'bs4', 'html5lib'],
+        'vendor': ['requests[socks]', 'bs4[html5lib]'],
         # version compatibility
         ':python_version == "3.4"': ['pathlib2>=2.3.2'],
     },
     # py_modules = ['pcapkit'],
     entry_points={
         'console_scripts': [
-            'pcapkit = pcapkit.__main__:main',
+            'pcapkit-cli = pcapkit.__main__:main',
+            'pcapkit-vendor = pcapkit.vendor.__main__:main',
         ]
     },
     # packages=setuptools.find_namespace_packages(
@@ -109,6 +110,9 @@ setup(
         'pcapkit.vendor.tcp',
         'pcapkit.vendor.vlan',
     ],
+    # package_dir={
+    #     'pcapkit': 'src',
+    # },
     package_data={
         '': [
             'LICENSE',

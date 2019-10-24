@@ -29,6 +29,8 @@ class Option(IntEnum):
     Option['MPL'] = 0x6D                                                        # [RFC 7731]
     Option['IP_DFF'] = 0xEE                                                     # [RFC 6971]
     Option['PDM'] = 0x0F                                                        # [RFC 8250]
+    Option['Path MTU Record Option \nTEMPORARY - registered 2019-09-03, expires 2020-09-03'] = 0x30
+                                                                                # [draft-ietf-6man-mtu-option]
     Option['RFC3692-style Experiment [0x1E]'] = 0x1E                            # [RFC 4727]
     Option['RFC3692-style Experiment [0x3E]'] = 0x3E                            # [RFC 4727]
     Option['RFC3692-style Experiment [0x5E]'] = 0x5E                            # [RFC 4727]
