@@ -35,6 +35,7 @@
         "extmp",
         "fdpext",
         "fext",
+        "fileio",
         "fileng",
         "fout",
         "foutio",

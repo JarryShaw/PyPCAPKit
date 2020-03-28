@@ -1,67 +1,28 @@
 # -*- coding: utf-8 -*-
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+import subprocess
+import sys
 
 # version string
-__version__ = '0.14.5'
+__version__ = '0.15.0'
 
 # README
 with open('README.md', encoding='utf-8') as file:
     long_description = file.read()
 
-# set-up script for pip distribution
-setup(
+# setup attributes
+attrs = dict(
     name='pypcapkit',
     version=__version__,
-    author='Jarry Shaw',
-    author_email='jarryshaw@icloud.com',
-    url='https://github.com/JarryShaw/pypcapkit',
-    license='Mozilla Public License 2.0 (MPL 2.0)',
-    keywords='computer-networking pcap-analyser pcap-parser',
     description='Python multi-engine PCAP analyse kit.',
     long_description=long_description,
-    # long_description=pkg_resources.resource_string(__name__, 'README.md').decode(),
-    long_description_content_type='text/markdown',
-    python_requires='>=3.4',
-    include_package_data=True,
-    zip_safe=True,
-    install_requires=[
-        'dictdumper>=0.7.0.post1',  # for formatted output
-        'chardet',                  # for bytes decode
-        'aenum',                    # for const types
-        'tbtrim>=0.2.1',            # for refined exceptions
-    ],
-    extras_require={
-        'all': [
-            'emoji',
-            'dpkt', 'scapy', 'pyshark',
-            'requests[socks]', 'bs4[html5lib]',
-        ],
-        # for CLI display
-        'cli': ['emoji'],
-        # for normal users
-        'DPKT': ['dpkt'],
-        'Scapy': ['scapy'],
-        'PyShark': ['pyshark'],
-        # for developers
-        'vendor': ['requests[socks]', 'bs4[html5lib]'],
-        # version compatibility
-        ':python_version == "3.4"': ['pathlib2>=2.3.2'],
-    },
-    # py_modules = ['pcapkit'],
-    entry_points={
-        'console_scripts': [
-            'pcapkit-cli = pcapkit.__main__:main',
-            'pcapkit-vendor = pcapkit.vendor.__main__:main',
-        ]
-    },
-    # packages=setuptools.find_namespace_packages(
-    #     include=['pcapkit', 'pcapkit.*'],
-    #     exclude=['pcapkit.vendor.*', 'pcapkit.vendor', '*.NotImplemented'],
-    # ),
+    author='Jarry Shaw',
+    author_email='jarryshaw@icloud.com',
+    maintainer='Jarry Shaw',
+    maintainer_email='jarryshaw@icloud.com',
+    url='https://github.com/JarryShaw/PyPCAPKit',
+    download_url='https://github.com/JarryShaw/PyPCAPKit/archive/v%s.tar.gz' % __version__,
+    # py_modules
     packages=[
         'pcapkit',
         'pcapkit.const',
@@ -110,15 +71,8 @@ setup(
         'pcapkit.vendor.tcp',
         'pcapkit.vendor.vlan',
     ],
-    # package_dir={
-    #     'pcapkit': 'src',
-    # },
-    package_data={
-        '': [
-            'LICENSE',
-            'README.md',
-        ],
-    },
+    # scripts
+    # ext_modules
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Environment :: Console',
@@ -141,5 +95,111 @@ setup(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: System :: Networking',
         'Topic :: Utilities',
-    ]
+    ],
+    # distclass
+    # script_name
+    # script_args
+    # options
+    license='Mozilla Public License 2.0 (MPL 2.0)',
+    keywords=[
+        'computer-networking',
+        'pcap-analyser',
+        'pcap-parser',
+    ],
+    platforms=[
+        'any'
+    ],
+    # cmdclass
+    # data_files
+    # package_dir
+    # obsoletes
+    # provides
+    # requires
+    # command_packages
+    # command_options
+    package_data={
+        '': [
+            'LICENSE',
+            'README.md',
+        ],
+    },
+    # include_package_data
+    # libraries
+    # headers
+    # ext_package
+    # include_dirs
+    # password
+    # fullname
+    # long_description_content_type
+    # python_requires
+    # zip_safe
+    install_requires=[
+        'dictdumper~=0.8.0',        # for formatted output
+        'chardet',                  # for bytes decode
+        'aenum',                    # for const types
+        'tbtrim>=0.2.1',            # for refined exceptions
+    ],
+    entry_points={
+        'console_scripts': [
+            'pcapkit-cli = pcapkit.__main__:main',
+            'pcapkit-vendor = pcapkit.vendor.__main__:main',
+        ]
+    },
+    extras_require={
+        'all': [
+            'emoji',
+            'dpkt', 'scapy', 'pyshark',
+            'requests[socks]', 'bs4[html5lib]',
+        ],
+        # for CLI display
+        'cli': ['emoji'],
+        # for normal users
+        'DPKT': ['dpkt'],
+        'Scapy': ['scapy'],
+        'PyShark': ['pyshark'],
+        # for developers
+        'vendor': ['requests[socks]', 'bs4[html5lib]'],
+        # version compatibility
+        ':python_version < "3.6"': ['f2format'],
+        ':python_version == "3.4"': ['pathlib2>=2.3.2'],
+    },
 )
+
+try:
+    from setuptools import setup
+    from setuptools.command.build_py import build_py
+
+    version_info = sys.version_info[:2]
+
+    attrs.update(dict(
+        include_package_data=True,
+        # libraries
+        # headers
+        # ext_package
+        # include_dirs
+        # password
+        # fullname
+        long_description_content_type='text/markdown',
+        python_requires='>=3.4',
+        zip_safe=True,
+    ))
+except ImportError:
+    from distutils.core import setup
+    from distutils.command.build_py import build_py
+
+
+class build(build_py):
+    """Add on-build backport code conversion."""
+
+    def run(self):
+        if version_info < (3, 6):
+            subprocess.check_call(
+                ['f2format', '--no-archive', 'pcapkit']
+            )
+        build_py.run(self)
+
+
+# set-up script for pip distribution
+setup(cmdclass={
+    'build_py': build,
+}, **attrs)

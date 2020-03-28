@@ -16,7 +16,7 @@ verify_ssl = true
 [packages]
 chardet = "*"
 aenum = "*"
-dictdumper = ">=0.7.0.post1"
+dictdumper = "~=0.8.0"
 emoji = "*"
 tbtrim = ">=0.2.1"
 

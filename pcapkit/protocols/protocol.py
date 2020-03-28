@@ -8,7 +8,6 @@ protocols.
 
 """
 import abc
-import ast
 import copy
 import functools
 import io
@@ -138,7 +137,7 @@ class Protocol(metaclass=abc.ABCMeta):
         try:
             return byte.decode(charset or 'utf-8', errors=errors)
         except UnicodeError:
-            return r''.join(chr(char) for char in byte)
+            return byte.decode('unicode_escape')
 
     @staticmethod
     def unquote(url, *, encoding='utf-8', errors='replace'):
@@ -147,7 +146,7 @@ class Protocol(metaclass=abc.ABCMeta):
             return urllib.parse.unquote(url, encoding=encoding, errors=errors)
         except UnicodeError:
             str_ = url.replace('%', r'\x')
-            return ast.literal_eval(f'r{str_!r}')
+            return url.replace('%', r'\x').encode().decode('unicode_escape')
 
     ##########################################################################
     # Data models.
