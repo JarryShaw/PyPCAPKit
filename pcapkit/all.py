@@ -2,10 +2,10 @@
 # pylint: disable=unused-import, unused-wildcard-import, bad-continuation
 """index for the library
 
-`pcapkit` has defined various and numerous functions and
-classes, which have different features and purposes. To
-make a simple index for this library, `pcapkit.all`
-contains all things from `pcapkit`.
+:mod:`pcapkit` has defined various and numerous functions
+and classes, which have different features and purposes.
+To make a simple index for this library, :mod:`pcapkit.all`
+contains all things from :mod:`pcapkit`.
 
 """
 import pcapkit.const as const

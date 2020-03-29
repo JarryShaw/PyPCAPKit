@@ -29,18 +29,18 @@ __all__ = [
     # FTP
     'FTP_Command', 'FTP_ReturnCode',
     # HIP
-    'HIP_Certificate', 'HIP_Cipher', 'HIP_DI', 'HIP_ECDSA_Curve', 'HIP_ECDSA_LOW_Curve',
-    'HIP_ESP_TransformSuite', 'HIP_Group', 'HIP_HI_Algorithm', 'HIP_HIT_Suite', 'HIP_NAT_Traversal',
+    'HIP_Certificate', 'HIP_Cipher', 'HIP_DITypes', 'HIP_ECDSACurve', 'HIP_ECDSA_LOWCurve',
+    'HIP_ESPTransformSuite', 'HIP_Group', 'HIP_HIAlgorithm', 'HIP_HITSuite', 'HIP_NATTraversal',
     'HIP_NotifyMessage', 'HIP_Packet', 'HIP_Parameter', 'HIP_Registration', 'HIP_RegistrationFailure',
     'HIP_Suite', 'HIP_Transport',
     # HTTP
     'HTTP_ErrorCode', 'HTTP_Frame', 'HTTP_Setting',
     # IPv4
     'IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
-    'IPv4_QS_Function', 'IPv4_RouterAlert', 'IPv4_TOS_DEL', 'IPv4_TOS_ECN', 'IPv4_TOS_PRE', 'IPv4_TOS_REL',
-    'IPv4_TOS_THR',
+    'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToS_DEL', 'IPv4_ToS_ECN', 'IPv4_ToS_PRE', 'IPv4_ToS_REL',
+    'IPv4_ToS_THR',
     # IPv6
-    'IPv6_ExtensionHeader', 'IPv6_Option', 'IPv6_QS_Function', 'IPv6_RouterAlert', 'IPv6_Routing',
+    'IPv6_ExtensionHeader', 'IPv6_Option', 'IPv6_QSFunction', 'IPv6_RouterAlert', 'IPv6_Routing',
     'IPv6_SeedID', 'IPv6_TaggerID',
     # IPX
     'IPX_Packet', 'IPX_Socket',

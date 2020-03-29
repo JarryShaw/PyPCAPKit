@@ -4,32 +4,49 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['HIAlgorithm']
 
-class HI_Algorithm(IntEnum):
-    """Enumeration class for HI_Algorithm."""
-    _ignore_ = 'HI_Algorithm _'
-    HI_Algorithm = vars()
 
-    # HI Algorithm
-    HI_Algorithm['RESERVED'] = 0                                                # [RFC 7401]
-    HI_Algorithm['NULL-ENCRYPT'] = 1                                            # [RFC 2410]
-    HI_Algorithm['Unassigned [2]'] = 2
-    HI_Algorithm['DSA'] = 3                                                     # [RFC 7401]
-    HI_Algorithm['Unassigned [4]'] = 4
-    HI_Algorithm['RSA'] = 5                                                     # [RFC 7401]
-    HI_Algorithm['Unassigned [6]'] = 6
-    HI_Algorithm['ECDSA'] = 7                                                   # [RFC 7401]
-    HI_Algorithm['Unassigned [8]'] = 8
-    HI_Algorithm['ECDSA_LOW'] = 9                                               # [RFC 7401]
+class HIAlgorithm(IntEnum):
+    """[HIAlgorithm] HI Algorithm"""
+
+    _ignore_ = 'HIAlgorithm _'
+    HIAlgorithm = vars()
+
+    #: [:rfc:`7401`]
+    HIAlgorithm['RESERVED'] = 0
+
+    #: [:rfc:`2410`]
+    HIAlgorithm['NULL-ENCRYPT'] = 1
+
+    HIAlgorithm['Unassigned [2]'] = 2
+
+    #: [:rfc:`7401`]
+    HIAlgorithm['DSA'] = 3
+
+    HIAlgorithm['Unassigned [4]'] = 4
+
+    #: [:rfc:`7401`]
+    HIAlgorithm['RSA'] = 5
+
+    HIAlgorithm['Unassigned [6]'] = 6
+
+    #: [:rfc:`7401`]
+    HIAlgorithm['ECDSA'] = 7
+
+    HIAlgorithm['Unassigned [8]'] = 8
+
+    #: [:rfc:`7401`]
+    HIAlgorithm['ECDSA_LOW'] = 9
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return HI_Algorithm(key)
-        if key not in HI_Algorithm._member_map_:  # pylint: disable=no-member
-            extend_enum(HI_Algorithm, key, default)
-        return HI_Algorithm[key]
+            return HIAlgorithm(key)
+        if key not in HIAlgorithm._member_map_:  # pylint: disable=no-member
+            extend_enum(HIAlgorithm, key, default)
+        return HIAlgorithm[key]
 
     @classmethod
     def _missing_(cls, value):

@@ -4,20 +4,35 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Suite']
+
 
 class Suite(IntEnum):
-    """Enumeration class for Suite."""
+    """[Suite] Suite IDs"""
+
     _ignore_ = 'Suite _'
     Suite = vars()
 
-    # Suite IDs
-    Suite['Reserved'] = 0                                                       # [RFC 5201]
-    Suite['AES-CBC with HMAC-SHA1'] = 1                                         # [RFC 5201]
-    Suite['3DES-CBC with HMAC-SHA1'] = 2                                        # [RFC 5201]
-    Suite['3DES-CBC with HMAC-MD5'] = 3                                         # [RFC 5201]
-    Suite['BLOWFISH-CBC with HMAC-SHA1'] = 4                                    # [RFC 5201]
-    Suite['NULL-ENCRYPT with HMAC-SHA1'] = 5                                    # [RFC 5201]
-    Suite['NULL-ENCRYPT with HMAC-MD5'] = 6                                     # [RFC 5201]
+    #: [:rfc:`5201`]
+    Suite['Reserved'] = 0
+
+    #: [:rfc:`5201`]
+    Suite['AES-CBC with HMAC-SHA1'] = 1
+
+    #: [:rfc:`5201`]
+    Suite['3DES-CBC with HMAC-SHA1'] = 2
+
+    #: [:rfc:`5201`]
+    Suite['3DES-CBC with HMAC-MD5'] = 3
+
+    #: [:rfc:`5201`]
+    Suite['BLOWFISH-CBC with HMAC-SHA1'] = 4
+
+    #: [:rfc:`5201`]
+    Suite['NULL-ENCRYPT with HMAC-SHA1'] = 5
+
+    #: [:rfc:`5201`]
+    Suite['NULL-ENCRYPT with HMAC-MD5'] = 6
 
     @staticmethod
     def get(key, default=-1):

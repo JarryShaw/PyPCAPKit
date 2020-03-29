@@ -4,25 +4,32 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['DITypes']
 
-class DI(IntEnum):
-    """Enumeration class for DI."""
-    _ignore_ = 'DI _'
-    DI = vars()
 
-    # DI-Types
-    DI['none included'] = 0                                                     # [RFC 7401]
-    DI['FQDN'] = 1                                                              # [RFC 7401]
-    DI['NAI'] = 2                                                               # [RFC 7401]
+class DITypes(IntEnum):
+    """[DITypes] DI-Types"""
+
+    _ignore_ = 'DITypes _'
+    DITypes = vars()
+
+    #: [:rfc:`7401`]
+    DITypes['none included'] = 0
+
+    #: [:rfc:`7401`]
+    DITypes['FQDN'] = 1
+
+    #: [:rfc:`7401`]
+    DITypes['NAI'] = 2
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return DI(key)
-        if key not in DI._member_map_:  # pylint: disable=no-member
-            extend_enum(DI, key, default)
-        return DI[key]
+            return DITypes(key)
+        if key not in DITypes._member_map_:  # pylint: disable=no-member
+            extend_enum(DITypes, key, default)
+        return DITypes[key]
 
     @classmethod
     def _missing_(cls, value):

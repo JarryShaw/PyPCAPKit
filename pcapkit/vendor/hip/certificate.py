@@ -9,7 +9,9 @@ __all__ = ['Certificate']
 class Certificate(Vendor):
     """HIP Certificate Types"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 255'
+    #: Link to registry.
     LINK = 'https://www.iana.org/assignments/hip-parameters/certificate-types.csv'
 
 

@@ -502,27 +502,27 @@ class Extractor:
                 from dictdumper import JSON as output                       # output JSON file
             elif fmt == 'tree':
                 from dictdumper import Tree as output                       # output treeview text file
-            elif fmt == 'html':
-                from dictdumper import JavaScript as output                 # output JavaScript file
-            elif fmt == 'xml':
-                from dictdumper import XML as output                        # output XML file
+            #elif fmt == 'html':
+            #    from dictdumper import VueJS as output                      # output JavaScript file
+            #elif fmt == 'xml':
+            #    from dictdumper import XML as output                        # output XML file
             else:
                 from pcapkit.dumpkit import NotImplementedIO as output      # no output file
                 warnings.warn(f'unsupported output format: {fmt}; disabled file output feature',
                               FormatWarning, stacklevel=stacklevel())
 
             class DictDumper(output):
-                @classmethod
-                def object_hook(cls, obj):
+
+                def object_hook(self, o):
                     import enum
                     import aenum
-                    if isinstance(obj, (enum.IntEnum, aenum.IntEnum)):
-                        return f'No.{obj.value} {obj.name}'
-                    if isinstance(obj, ipaddress._BaseAddress):
-                        return str(obj)
-                    if isinstance(obj, Info):
-                        return dict(obj)
-                    return super().object_hook(obj)
+                    if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
+                        return f'No.{o.value} {o.name}'
+                    if isinstance(o, ipaddress._BaseAddress):
+                        return str(o)
+                    if isinstance(o, Info):
+                        return dict(o)
+                    return super().object_hook(o)
 
             self._ofile = DictDumper if self._flag_f else DictDumper(ofnm)  # output file
 

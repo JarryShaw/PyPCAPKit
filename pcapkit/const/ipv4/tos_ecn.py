@@ -1,29 +1,34 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
-"""TOS ECN FIELD"""
+"""ToS ECN FIELD"""
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['ToS_ECN']
 
-class TOS_ECN(IntEnum):
-    """Enumeration class for TOS_ECN."""
-    _ignore_ = 'TOS_ECN _'
-    TOS_ECN = vars()
 
-    # TOS ECN FIELD
-    TOS_ECN['Not-ECT'] = 0b00
-    TOS_ECN['ECT(1)'] = 0b01
-    TOS_ECN['ECT(0)'] = 0b10
-    TOS_ECN['CE'] = 0b11
+class ToS_ECN(IntEnum):
+    """[ToS_ECN] ToS ECN FIELD"""
+
+    _ignore_ = 'ToS_ECN _'
+    ToS_ECN = vars()
+
+    ToS_ECN['Not-ECT'] = 0b00
+
+    ToS_ECN['ECT(1)'] = 0b01
+
+    ToS_ECN['ECT(0)'] = 0b10
+
+    ToS_ECN['CE'] = 0b11
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return TOS_ECN(key)
-        if key not in TOS_ECN._member_map_:  # pylint: disable=no-member
-            extend_enum(TOS_ECN, key, default)
-        return TOS_ECN[key]
+            return ToS_ECN(key)
+        if key not in ToS_ECN._member_map_:  # pylint: disable=no-member
+            extend_enum(ToS_ECN, key, default)
+        return ToS_ECN[key]
 
     @classmethod
     def _missing_(cls, value):

@@ -9,7 +9,9 @@ __all__ = ['Cipher']
 class Cipher(Vendor):
     """Cipher IDs"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 65535'
+    #: Link to registry.
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-cipher-id.csv'
 
 

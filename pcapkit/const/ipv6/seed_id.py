@@ -4,16 +4,21 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['SeedID']
+
 
 class SeedID(IntEnum):
-    """Enumeration class for SeedID."""
+    """[SeedID] Seed-ID Types"""
+
     _ignore_ = 'SeedID _'
     SeedID = vars()
 
-    # Seed-ID Types
     SeedID['IPV6 SOURCE ADDRESS'] = 0b00
+
     SeedID['16-BIT UNSIGNED INTEGER'] = 0b01
+
     SeedID['64-BIT UNSIGNED INTEGER'] = 0b10
+
     SeedID['128-BIT UNSIGNED INTEGER'] = 0b11
 
     @staticmethod

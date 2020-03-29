@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
-"""TCP Checksum [RFC 1146]"""
+"""TCP Checksum [:rfc:`1146`]"""
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Checksum']
+
 
 class Checksum(IntEnum):
-    """Enumeration class for Checksum."""
+    """[Checksum] TCP Checksum [:rfc:`1146`]"""
+
     _ignore_ = 'Checksum _'
     Checksum = vars()
 
-    # TCP Checksum [RFC 1146]
     Checksum['TCP checksum'] = 0
+
     Checksum["8-bit Fletcher's algorithm"] = 1
+
     Checksum["16-bit Fletcher's algorithm"] = 2
+
     Checksum['Redundant Checksum Avoidance'] = 3
 
     @staticmethod

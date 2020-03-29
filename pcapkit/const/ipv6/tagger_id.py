@@ -4,17 +4,26 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['TaggerID']
+
 
 class TaggerID(IntEnum):
-    """Enumeration class for TaggerID."""
+    """[TaggerID] TaggerID Types"""
+
     _ignore_ = 'TaggerID _'
     TaggerID = vars()
 
-    # TaggerID Types
-    TaggerID['NULL'] = 0                                                        # [RFC 6621]
-    TaggerID['DEFAULT'] = 1                                                     # [RFC 6621]
-    TaggerID['IPv4'] = 2                                                        # [RFC 6621]
-    TaggerID['IPv6'] = 3                                                        # [RFC 6621]
+    #: [:rfc:`6621`]
+    TaggerID['NULL'] = 0
+
+    #: [:rfc:`6621`]
+    TaggerID['DEFAULT'] = 1
+
+    #: [:rfc:`6621`]
+    TaggerID['IPv4'] = 2
+
+    #: [:rfc:`6621`]
+    TaggerID['IPv6'] = 3
 
     @staticmethod
     def get(key, default=-1):

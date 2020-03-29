@@ -7,6 +7,7 @@ from pcapkit.vendor.default import Vendor
 
 __all__ = ['OptionClass']
 
+#: Option class registry.
 DATA = {
     0: 'control',
     1: 'reserved for future use',
@@ -16,21 +17,48 @@ DATA = {
 
 
 def binary(code):
+    """Convert code to binary form."""
     return f'0b{bin(code)[2:].upper().zfill(8)}'
 
 
 class OptionClass(Vendor):
     """Option Classes"""
 
+    #: Value limit checker.s
     FLAG = 'isinstance(value, int) and 0 <= value <= 3'
 
     def request(self):  # pylint: disable=arguments-differ
+        """Fetch registry data.
+
+        Returns:
+            Dict[int, str]: Registry data (:data:`~pcapkit.vendor.ipv4.option_class.DATA`).
+
+        """
         return DATA
 
     def count(self, data):
+        """Count field records.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            Counter: Field recordings.
+
+        """
         return collections.Counter(data.values())  # pylint: disable=dict-values-not-iterating
 
     def process(self, data):
+        """Process registry data.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         enum = list()
         miss = [
             "extend_enum(cls, 'Unassigned [%d]' % value, value)",

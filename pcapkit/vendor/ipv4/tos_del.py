@@ -1,30 +1,57 @@
 # -*- coding: utf-8 -*-
-"""IPv4 TOS (DS Field) Delay"""
+"""IPv4 ToS (DS Field) Delay"""
 
 import collections
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['TOS_DEL']
+__all__ = ['ToS_DEL']
 
+#: ToS registry.
 DATA = {
     0: 'Normal',
     1: 'Low',
 }
 
 
-class TOS_DEL(Vendor):
-    """TOS (DS Field) Delay"""
+class ToS_DEL(Vendor):
+    """ToS (DS Field) Delay"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 1'
 
     def request(self):  # pylint: disable=arguments-differ
+        """Fetch registry data.
+
+        Returns:
+            Dict[int, str]: Registry data (:data:`~pcapkit.vendor.ipv4.tos_del.DATA`).
+
+        """
         return DATA
 
     def count(self, data):
+        """Count field records.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            Counter: Field recordings.
+
+        """
         return collections.Counter(data.values())
 
     def process(self, data):
+        """Process registry data.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         enum = list()
         miss = [
             "extend_enum(cls, 'Unassigned [%d]' % value, value)",
@@ -37,4 +64,4 @@ class TOS_DEL(Vendor):
 
 
 if __name__ == "__main__":
-    TOS_DEL()
+    ToS_DEL()

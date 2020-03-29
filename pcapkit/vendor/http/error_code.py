@@ -10,6 +10,7 @@ __all__ = ['ErrorCode']
 
 
 def hexlify(code):
+    """Convert code to hex form."""
     # temp = hex(code)[2:].upper().zfill(8)
     # return f'0x{temp[:4]}_{temp[4:]}'
     return f'0x{hex(code)[2:].upper().zfill(8)}'
@@ -18,10 +19,22 @@ def hexlify(code):
 class ErrorCode(Vendor):
     """HTTP/2 Error Code"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF'
+    #: Link to registry.
     LINK = 'https://www.iana.org/assignments/http2-parameters/error-code.csv'
 
     def process(self, data):
+        """Process CSV data.
+
+        Args:
+            data (List[str]): CSV data.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         reader = csv.reader(data)
         next(reader)  # header
 
@@ -34,10 +47,11 @@ class ErrorCode(Vendor):
 
             temp = list()
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
-                if 'RFC' in rfc:
-                    temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+                if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
+                    #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+                    temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
-                    temp.append(f'[{rfc}]')
+                    temp.append(f'[{rfc}]'.replace('_', ' '))
             desc = f" {''.join(temp)}" if rfcs else ''
             dscp = f' {dscp}' if dscp else ''
 
@@ -47,12 +61,16 @@ class ErrorCode(Vendor):
                 renm = self.rename(name, code)
 
                 pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = f'#{desc}{dscp}' if desc or dscp else ''
+                sufs = f'#:{desc}{dscp}' if desc or dscp else ''
 
                 if len(pres) > 74:
                     sufs = f"\n{' '*80}{sufs}"
 
-                enum.append(f'{pres.ljust(76)}{sufs}')
+                #if len(pres) > 74:
+                #    sufs = f"\n{' '*80}{sufs}"
+
+                #enum.append(f'{pres.ljust(76)}{sufs}')
+                enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
 

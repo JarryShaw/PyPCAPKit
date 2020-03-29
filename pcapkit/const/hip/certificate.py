@@ -4,22 +4,41 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Certificate']
+
 
 class Certificate(IntEnum):
-    """Enumeration class for Certificate."""
+    """[Certificate] HIP Certificate Types"""
+
     _ignore_ = 'Certificate _'
     Certificate = vars()
 
-    # HIP Certificate Types
-    Certificate['Reserved'] = 0                                                 # [RFC 8002]
-    Certificate['X.509 v3'] = 1                                                 # [RFC 8002]
-    Certificate['Obsoleted [2]'] = 2                                            # [RFC 8002]
-    Certificate['Hash and URL of X.509 v3'] = 3                                 # [RFC 8002]
-    Certificate['Obsoleted [4]'] = 4                                            # [RFC 8002]
-    Certificate['LDAP URL of X.509 v3'] = 5                                     # [RFC 8002]
-    Certificate['Obsoleted [6]'] = 6                                            # [RFC 8002]
-    Certificate['Distinguished Name of X.509 v3'] = 7                           # [RFC 8002]
-    Certificate['Obsoleted [8]'] = 8                                            # [RFC 8002]
+    #: [:rfc:`8002`]
+    Certificate['Reserved'] = 0
+
+    #: [:rfc:`8002`]
+    Certificate['X.509 v3'] = 1
+
+    #: [:rfc:`8002`]
+    Certificate['Obsoleted [2]'] = 2
+
+    #: [:rfc:`8002`]
+    Certificate['Hash and URL of X.509 v3'] = 3
+
+    #: [:rfc:`8002`]
+    Certificate['Obsoleted [4]'] = 4
+
+    #: [:rfc:`8002`]
+    Certificate['LDAP URL of X.509 v3'] = 5
+
+    #: [:rfc:`8002`]
+    Certificate['Obsoleted [6]'] = 6
+
+    #: [:rfc:`8002`]
+    Certificate['Distinguished Name of X.509 v3'] = 7
+
+    #: [:rfc:`8002`]
+    Certificate['Obsoleted [8]'] = 8
 
     @staticmethod
     def get(key, default=-1):

@@ -3,6 +3,7 @@
 
 import abc
 import collections
+import contextlib
 import csv
 import inspect
 import os
@@ -14,12 +15,11 @@ import webbrowser
 import requests
 
 from pcapkit.utilities.exceptions import VendorNotImplemented
-from pcapkit.utilities.validations import str_check
 from pcapkit.utilities.warnings import VendorRequestWarning
 
 __all__ = ['Vendor']
 
-# default const file of enumerate registry from IANA CSV
+#: Default constant template of enumerate registry from IANA CSV.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
@@ -27,13 +27,15 @@ LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['{NAME}']
+
 
 class {NAME}(IntEnum):
-    """Enumeration class for {NAME}."""
+    """[{NAME}] {DOCS}"""
+
     _ignore_ = '{NAME} _'
     {NAME} = vars()
 
-    # {DOCS}
     {ENUM}
 
     @staticmethod
@@ -56,15 +58,25 @@ class {NAME}(IntEnum):
 
 
 def get_proxies():
-    """Get proxy for blocked sites."""
+    """Get proxy for blocked sites.
+
+    The function will read :envvar:`PCAPKIT_HTTP_PROXY`
+    and :envvar:`PCAPKIT_HTTPS_PROXY`, if any, for the
+    proxy settings of |requests|_.
+
+    .. |requests| replace:: ``requests``
+    .. _requests: https://requests.readthedocs.io
+
+    Returns:
+        Dict[str, str]: Proxy settings for |requests|_.
+
+    """
     HTTP_PROXY = os.getenv('PCAPKIT_HTTP_PROXY')
     HTTPS_PROXY = os.getenv('PCAPKIT_HTTPS_PROXY')
     PROXIES = dict()
     if HTTP_PROXY is not None:
-        str_check(HTTP_PROXY)
         PROXIES['http'] = HTTP_PROXY
     if HTTPS_PROXY is not None:
-        str_check(HTTPS_PROXY)
         PROXIES['https'] = HTTPS_PROXY
     return PROXIES
 
@@ -72,19 +84,20 @@ def get_proxies():
 class Vendor(metaclass=abc.ABCMeta):
     """Default vendor generator.
 
-    Inherit this class with `FLAG` & `LINK` attributes,
-    etc. to implement a new vendor generator.
+    Inherit this class with :attr:`~Vendor.FLAG` &
+    :attr:`~Vendor.LINK` attributes, etc. to implement
+    a new vendor generator.
 
-    Macros:
-     - `FLAG` -- `str`, value limit checker
-     - `LINK` -- `str`, link to CSV file
+    Attributes:
+        FLAG (str): Value limit checker.
+        LINK (str): Link to CSV file.
 
-    Processors:
-     - `rename` -- rename duplicated fields
-     - `process` -- process CSV data
-     - `count` -- count field records
-     - `context` -- generate constant context
-     - `request` -- fetch CSV file
+    Methods:
+        rename: Rename duplicated fields.
+        process: Process CSV data.
+        count: Count field records.
+        context: Generate constant context.
+        request: Fetch CSV file.
 
     """
     ###############
@@ -93,7 +106,10 @@ class Vendor(metaclass=abc.ABCMeta):
 
     # NAME = None
     # DOCS = None
+
+    #: str: Value limit checker.
     FLAG = None
+    #: str: Link to registry.
     LINK = None
 
     ###############
@@ -104,11 +120,20 @@ class Vendor(metaclass=abc.ABCMeta):
         """Rename duplicated fields.
 
         Args:
-         - `name` -- str, field name
-         - `code` -- str, field code
+            name (str): Field name.
+            code (int): Field code.
+
+        Keyword Args:
+            original (str): Original field name (extracted from CSV records).
 
         Returns:
-         - `str` -- revised field name
+            str: Revised field name.
+
+        Example:
+            If ``name`` has multiple occurrences in the source registry,
+            the field name will be sanitised as ``${name} [${code}]``.
+
+            Otherwise, the plain ``name`` will be returned.
 
         """
         index = original or name
@@ -120,11 +145,11 @@ class Vendor(metaclass=abc.ABCMeta):
         """Process CSV data.
 
         Args:
-         - `data` -- List[str], CSV data
+            data (List[str]): CSV data.
 
         Returns:
-         - `List[str]` -- enumeration fields
-         - `List[str]` -- missing fields
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
 
         """
         reader = csv.reader(data)
@@ -138,11 +163,12 @@ class Vendor(metaclass=abc.ABCMeta):
 
             temp = list()
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
-                if 'RFC' in rfc:
-                    temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+                if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
+                    #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+                    temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
-                    temp.append(f'[{rfc}]')
-            desc = f"# {''.join(temp)}" if rfcs else ''
+                    temp.append(f'[{rfc}]'.replace('_', ' '))
+            desc = f"#: {''.join(temp)}" if rfcs else ''
 
             try:
                 code, _ = item[0], int(item[0])
@@ -151,10 +177,11 @@ class Vendor(metaclass=abc.ABCMeta):
                 pres = f'{self.NAME}[{renm!r}] = {code}'
                 sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
-                if len(pres) > 74:
-                    sufs = f"\n{' '*80}{sufs}"
+                #if len(pres) > 74:
+                #    sufs = f"\n{' '*80}{sufs}"
 
-                enum.append(f'{pres.ljust(76)}{sufs}')
+                #enum.append(f'{pres.ljust(76)}{sufs}')
+                enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = item[0].split('-')
                 more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
@@ -170,10 +197,10 @@ class Vendor(metaclass=abc.ABCMeta):
         """Count field records.
 
         Args:
-         - `data` -- `List[str]`, CSV data
+            data (List[str]): CSV data.
 
         Returns:
-         - `Counter` -- field recordings
+            Counter: Field recordings.
 
         """
         reader = csv.reader(data)
@@ -185,16 +212,16 @@ class Vendor(metaclass=abc.ABCMeta):
         """Generate constant context.
 
         Args:
-         - `data` -- `List[str]`, CSV data
+            data (List[str]): CSV data.
 
         Returns:
-         - `str` -- constant context
+            str: Constant context.
 
         """
         enum, miss = self.process(data)
 
-        ENUM = '\n    '.join(map(lambda s: s.rstrip(), enum))
-        MISS = '\n        '.join(map(lambda s: s.rstrip(), miss))
+        ENUM = '\n\n    '.join(map(lambda s: s.rstrip(), enum)).strip()
+        MISS = '\n        '.join(map(lambda s: s.rstrip(), miss)).strip()
 
         return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, MISS)
 
@@ -202,12 +229,14 @@ class Vendor(metaclass=abc.ABCMeta):
         """Fetch CSV file.
 
         Args:
-         - `text` -- `str`, context from `LINK`
+            text (str): Context from :attr:`~Vendor.LINK`.
 
         Returns:
-         - `List[str]` -- CSV data
+            List[str]: CSV data.
 
         """
+        if text is None:
+            return list()
         return text.strip().split('\r\n')
 
     ###############
@@ -215,12 +244,21 @@ class Vendor(metaclass=abc.ABCMeta):
     ###############
 
     def __new__(cls):
+        """Subclassing checkpoint.
+
+        Raises:
+            VendorNotImplemented: If ``cls`` is not a subclass of :class:`~pcapkit.vendor.default.Vendor`.
+
+        """
         if cls is Vendor:
             raise VendorNotImplemented('cannot initiate Vendor instance')
         return super().__new__(cls)
 
     def __init__(self):
+        """Generate new constant files."""
+        #: str: Name of constant enumeration.
         self.NAME = type(self).__name__
+        #: str: Docstring of constant enumeration.
         self.DOCS = type(self).__doc__
 
         data = self._request()
@@ -244,6 +282,41 @@ class Vendor(metaclass=abc.ABCMeta):
             print(context, file=file)
 
     def _request(self):
+        """Fetch CSV data from :attr:`~Vendor.LINK`.
+
+        This is the low-level call of :meth:`~Vendor.request`.
+
+        If :attr:`~Vendor.LINK` is ``None``, it will directly
+        call the upper method :meth:`~Vendor.request` with **NO**
+        arguments.
+
+        The method will first try to *GET* the content of :attr:`~Vendor.LINK`.
+        Should any exception raised, it will first try with proxy settings from
+        :func:`~pcapkit.vendor.default.get_proxies`.
+
+        .. note::
+
+           Since some :attr:`~Vendor.LINK` links are from Wikipedia, etc., they
+           might not be available in certain areas, e.g. the amazing PRC :)
+
+        Would proxies failed again, it will prompt for user intervention, i.e.
+        it will use |webbrowser.open|_ to open the page in browser for you, and
+        you can manually load that page and save the HTML source at the location
+        it provides.
+
+        .. |webbrowser.open| replace:: ``webbrowser.open``
+        .. _webbrowser.open: https://docs.python.org/3/library/webbrowser.html#webbrowser.open
+
+        Returns:
+            List[str]: CSV data.
+
+        Warns:
+            VendorRequestWarning: If connection failed with and/or without proxies.
+
+        See Also:
+            :meth:`~Vendor.request`
+
+        """
         if self.LINK is None:
             return self.request()
 
@@ -252,17 +325,37 @@ class Vendor(metaclass=abc.ABCMeta):
         except requests.RequestException:
             warnings.warn('Connection failed; retry with proxies (if any)...', VendorRequestWarning, stacklevel=2)
             try:
-                page = requests.get(self.LINK, proxies=get_proxies() or None)
+                proxies = get_proxies() or None
+                if proxies is None:
+                    raise requests.RequestException
+                page = requests.get(self.LINK, proxies=proxies)
             except requests.RequestException:
                 warnings.warn('Connection failed; retry with manual intervene...', VendorRequestWarning, stacklevel=2)
                 with tempfile.TemporaryDirectory(suffix='-tempdir',
                                                  prefix='pcapkit-',
                                                  dir=os.path.abspath(os.curdir)) as tempdir:
-                    temp_file = os.path.join(tempdir, 'pcapkit-temp.html')
+                    temp_file = os.path.join(tempdir, f'{self.NAME}.html')
 
-                    webbrowser.open(self.LINK)
-                    print(f'Please save the page source at {temp_file}')
-                    input('Press ENTER to continue...')
+                    flag = False
+                    with contextlib.suppress(Exception):
+                        flag = webbrowser.open(self.LINK)
+
+                    if flag:
+                        print(f'Please save the page source at')
+                        print(f'    {temp_file}')
+                    else:
+                        print('Please navigate to the following address')
+                        print(f'    {self.LINK}')
+                        print('and save the page source at')
+                        print(f'    {temp_file}')
+
+                    while True:
+                        with contextlib.suppress(Exception):
+                            input('Press ENTER to continue...')
+                        if os.path.isfile(temp_file):
+                            break
+                        print('File not found; please save the page source at')
+                        print(f'    {temp_file}')
 
                     with open(temp_file) as file:
                         text = file.read()

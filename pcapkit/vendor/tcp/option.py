@@ -9,9 +9,11 @@ from pcapkit.vendor.default import Vendor
 
 __all__ = ['Option']
 
+#: Boolean aliases.
 T, F = True, False
 nm_len, op_len = None, None
 
+#: TCP option registry.
 DATA = {                             # kind  length  type  process  comment            name
     0:  (F, 'eool'),                 #   0      -      -      -                [RFC 793] End of Option List
     1:  (F, 'nop'),                  #   1      -      -      -                [RFC 793] No-Operation
@@ -41,15 +43,36 @@ DATA = {                             # kind  length  type  process  comment     
 class Option(Vendor):
     """TCP Option Kind Numbers"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 255'
+    #: Link to registry.
     LINK = 'https://www.iana.org/assignments/tcp-parameters/tcp-parameters-1.csv'
 
     def count(self, data):
+        """Count field records.
+
+        Args:
+            data (List[str]): CSV data.
+
+        Returns:
+            Counter: Field recordings.
+
+        """
         reader = csv.reader(data)
         next(reader)  # header
         return collections.Counter(map(lambda item: item[2], reader))  # pylint: disable=map-builtin-not-iterating
 
     def process(self, data):
+        """Process CSV data.
+
+        Args:
+            data (List[str]): CSV data.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         reader = csv.reader(data)
         next(reader)  # header
 
@@ -63,11 +86,12 @@ class Option(Vendor):
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if re.match(r'\d+', rfc):
                     continue
-                if 'RFC' in rfc:
-                    temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+                if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
+                    #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
+                    temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
-                    temp.append(f'[{rfc}]')
-            desc = f"# {''.join(temp)}" if rfcs else ''
+                    temp.append(f'[{rfc}]'.replace('_', ' '))
+            desc = f"#: {''.join(temp)}" if rfcs else ''
             name = dscp.split(' (')[0]
 
             try:
@@ -78,10 +102,11 @@ class Option(Vendor):
                 pres = f"{self.NAME}[{renm!r}] = {code}"
                 sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
-                if len(pres) > 74:
-                    sufs = f"\n{' '*80}{sufs}"
+                # if len(pres) > 74:
+                #     sufs = f"\n{' '*80}{sufs}"
 
-                enum.append(f'{pres.ljust(76)}{sufs}')
+                # enum.append(f'{pres.ljust(76)}{sufs}')
+                enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = item[0].split('-')
                 more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)

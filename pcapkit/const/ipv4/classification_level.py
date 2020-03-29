@@ -4,20 +4,29 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['ClassificationLevel']
+
 
 class ClassificationLevel(IntEnum):
-    """Enumeration class for ClassificationLevel."""
+    """[ClassificationLevel] Classification Level Encodings"""
+
     _ignore_ = 'ClassificationLevel _'
     ClassificationLevel = vars()
 
-    # Classification Level Encodings
     ClassificationLevel['Reserved [4]'] = 0b00000001
+
     ClassificationLevel['Top Secret'] = 0b00111101
+
     ClassificationLevel['Secret'] = 0b01011010
+
     ClassificationLevel['Confidential'] = 0b10010110
+
     ClassificationLevel['Reserved [3]'] = 0b01100110
+
     ClassificationLevel['Reserved [2]'] = 0b11001100
+
     ClassificationLevel['Unclassified'] = 0b10101011
+
     ClassificationLevel['Reserved [1]'] = 0b11110001
 
     @staticmethod

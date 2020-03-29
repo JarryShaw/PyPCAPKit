@@ -4,25 +4,50 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Group']
+
 
 class Group(IntEnum):
-    """Enumeration class for Group."""
+    """[Group] Group IDs"""
+
     _ignore_ = 'Group _'
     Group = vars()
 
-    # Group IDs
-    Group['Reserved'] = 0                                                       # [RFC 7401]
-    Group['384-bit group'] = 1                                                  # [RFC 5201] DEPRECATED
-    Group['OAKLEY well known group 1'] = 2                                      # [RFC 5201] DEPRECATED
-    Group['1536-bit MODP group'] = 3                                            # [RFC 7401]
-    Group['3072-bit MODP group'] = 4                                            # [RFC 7401]
-    Group['6144-bit MODP group'] = 5                                            # [RFC 5201] DEPRECATED
-    Group['8192-bit MODP group'] = 6                                            # [RFC 5201] DEPRECATED
-    Group['NIST P-256'] = 7                                                     # [RFC 7401]
-    Group['NIST P-384'] = 8                                                     # [RFC 7401]
-    Group['NIST P-521'] = 9                                                     # [RFC 7401]
-    Group['SECP160R1'] = 10                                                     # [RFC 7401]
-    Group['2048-bit MODP group'] = 11                                           # [RFC 7401]
+    #: [:rfc:`7401`]
+    Group['Reserved'] = 0
+
+    #: [:rfc:`5201`] DEPRECATED
+    Group['384-bit group'] = 1
+
+    #: [:rfc:`5201`] DEPRECATED
+    Group['OAKLEY well known group 1'] = 2
+
+    #: [:rfc:`7401`]
+    Group['1536-bit MODP group'] = 3
+
+    #: [:rfc:`7401`]
+    Group['3072-bit MODP group'] = 4
+
+    #: [:rfc:`5201`] DEPRECATED
+    Group['6144-bit MODP group'] = 5
+
+    #: [:rfc:`5201`] DEPRECATED
+    Group['8192-bit MODP group'] = 6
+
+    #: [:rfc:`7401`]
+    Group['NIST P-256'] = 7
+
+    #: [:rfc:`7401`]
+    Group['NIST P-384'] = 8
+
+    #: [:rfc:`7401`]
+    Group['NIST P-521'] = 9
+
+    #: [:rfc:`7401`]
+    Group['SECP160R1'] = 10
+
+    #: [:rfc:`7401`]
+    Group['2048-bit MODP group'] = 11
 
     @staticmethod
     def get(key, default=-1):

@@ -5,26 +5,53 @@ import collections
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['QS_Function']
+__all__ = ['QSFunction']
 
+#: QS function registry.
 DATA = {
     0:  'Quick-Start Request',
     8:  'Report of Approved Rate',
 }
 
 
-class QS_Function(Vendor):
+class QSFunction(Vendor):
     """QS Functions"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 8'
 
     def request(self):  # pylint: disable=arguments-differ
+        """Fetch registry data.
+
+        Returns:
+            Dict[int, str]: Registry data (:data:`~pcapkit.vendor.ipv6.qs_function.DATA`).
+
+        """
         return DATA
 
     def count(self, data):
+        """Count field records.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            Counter: Field recordings.
+
+        """
         return collections.Counter(data.values())
 
     def process(self, data):
+        """Process registry data.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         enum = list()
         miss = [
             "extend_enum(cls, 'Unassigned [%d]' % value, value)",
@@ -37,4 +64,4 @@ class QS_Function(Vendor):
 
 
 if __name__ == "__main__":
-    QS_Function()
+    QSFunction()

@@ -18,7 +18,7 @@ chardet = "*"
 aenum = "*"
 dictdumper = "~=0.8.0"
 emoji = "*"
-tbtrim = ">=0.2.1"
+tbtrim = "~=0.3.0"
 
 [dev-packages]
 pypcapkit = {editable = true,path = "."}
@@ -33,6 +33,10 @@ ipython = "*"
 autopep8 = "*"
 pylint = "*"
 f2format = "*"
+sphinx = "*"
+sphinxcontrib-napoleon = "*"
+doc8 = "*"
+rstcheck = "*"
 
 [requires]
 python_version = "3.7"

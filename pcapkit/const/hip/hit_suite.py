@@ -4,26 +4,35 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['HITSuite']
 
-class HIT_Suite(IntEnum):
-    """Enumeration class for HIT_Suite."""
-    _ignore_ = 'HIT_Suite _'
-    HIT_Suite = vars()
 
-    # HIT Suite ID
-    HIT_Suite['RESERVED'] = 0                                                   # [RFC 7401]
-    HIT_Suite['RSA,DSA/SHA-256'] = 1                                            # [RFC 7401]
-    HIT_Suite['ECDSA/SHA-384'] = 2                                              # [RFC 7401]
-    HIT_Suite['ECDSA_LOW/SHA-1'] = 3                                            # [RFC 7401]
+class HITSuite(IntEnum):
+    """[HITSuite] HIT Suite ID"""
+
+    _ignore_ = 'HITSuite _'
+    HITSuite = vars()
+
+    #: [:rfc:`7401`]
+    HITSuite['RESERVED'] = 0
+
+    #: [:rfc:`7401`]
+    HITSuite['RSA,DSA/SHA-256'] = 1
+
+    #: [:rfc:`7401`]
+    HITSuite['ECDSA/SHA-384'] = 2
+
+    #: [:rfc:`7401`]
+    HITSuite['ECDSA_LOW/SHA-1'] = 3
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return HIT_Suite(key)
-        if key not in HIT_Suite._member_map_:  # pylint: disable=no-member
-            extend_enum(HIT_Suite, key, default)
-        return HIT_Suite[key]
+            return HITSuite(key)
+        if key not in HITSuite._member_map_:  # pylint: disable=no-member
+            extend_enum(HITSuite, key, default)
+        return HITSuite[key]
 
     @classmethod
     def _missing_(cls, value):

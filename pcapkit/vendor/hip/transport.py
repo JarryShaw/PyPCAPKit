@@ -9,7 +9,9 @@ __all__ = ['Transport']
 class Transport(Vendor):
     """HIP Transport Modes"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 3'
+    #: Link to registry.
     LINK = 'https://www.iana.org/assignments/hip-parameters/transport-modes.csv'
 
 

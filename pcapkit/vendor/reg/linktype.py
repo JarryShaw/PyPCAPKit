@@ -11,17 +11,38 @@ __all__ = ['LinkType']
 class LinkType(Vendor):
     """Link-Layer Header Type Values"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF'
+    #: Link to registry.
     LINK = 'http://www.tcpdump.org/linktypes.html'
 
     def count(self, data):
-        pass
+        """Count field records."""
 
     def request(self, text):  # pylint: disable=signature-differs
+        """Fetch registry table.
+
+        Args:
+            text (str): Context from :attr:`~LinkType.LINK`.
+
+        Returns:
+            List[str]: Rows (``tr``) from registry table (``table``).
+
+        """
         table = re.split(r'\<[/]*table.*\>', text)[1]
         return re.split(r'\<tr valign=top\>', table)[1:]
 
     def process(self, data):
+        """Process registry data.
+
+        Args:
+            data (List[str]): Registry data.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         enum = list()
         miss = [
             "extend_enum(cls, 'Unassigned [%d]' % value, value)",
@@ -37,12 +58,13 @@ class LinkType(Vendor):
                 code, _ = temp, int(temp)
 
                 pres = f"{self.NAME}[{name!r}] = {code}"
-                sufs = f"# {desc}"
+                sufs = f"#: ``{desc}``"
 
-                if len(pres) > 74:
-                    sufs = f"\n{' '*80}{sufs}"
+                # if len(pres) > 74:
+                #     sufs = f"\n{' '*80}{sufs}"
 
-                enum.append(f'{pres.ljust(76)}{sufs}')
+                # enum.append(f'{pres.ljust(76)}{sufs}')
+                enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = map(int, temp.split('-'))
                 for code in range(start, stop+1):
@@ -50,12 +72,13 @@ class LinkType(Vendor):
                     desc = f'DLT_USER{code-start}'
 
                     pres = f"{self.NAME}[{name!r}] = {code}"
-                    sufs = f"# {desc}"
+                    sufs = f"#: ``{desc}``"
 
-                    if len(pres) > 74:
-                        sufs = f"\n{' '*80}{sufs}"
+                    # if len(pres) > 74:
+                    #     sufs = f"\n{' '*80}{sufs}"
 
-                    enum.append(f'{pres.ljust(76)}{sufs}')
+                    # enum.append(f'{pres.ljust(76)}{sufs}')
+                    enum.append(f'{sufs}\n    {pres}')
         return enum, miss
 
 

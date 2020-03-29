@@ -1,43 +1,98 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
-"""Operation Codes [RFC 826][RFC 5494]"""
+"""Operation Codes [:rfc:`826`][:rfc:`5494`]"""
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Operation']
+
 
 class Operation(IntEnum):
-    """Enumeration class for Operation."""
+    """[Operation] Operation Codes [:rfc:`826`][:rfc:`5494`]"""
+
     _ignore_ = 'Operation _'
     Operation = vars()
 
-    # Operation Codes [RFC 826][RFC 5494]
-    Operation['Reserved [0]'] = 0                                               # [RFC 5494]
-    Operation['REQUEST'] = 1                                                    # [RFC 826][RFC 5227]
-    Operation['REPLY'] = 2                                                      # [RFC 826][RFC 5227]
-    Operation['request Reverse'] = 3                                            # [RFC 903]
-    Operation['reply Reverse'] = 4                                              # [RFC 903]
-    Operation['DRARP-Request'] = 5                                              # [RFC 1931]
-    Operation['DRARP-Reply'] = 6                                                # [RFC 1931]
-    Operation['DRARP-Error'] = 7                                                # [RFC 1931]
-    Operation['InARP-Request'] = 8                                              # [RFC 2390]
-    Operation['InARP-Reply'] = 9                                                # [RFC 2390]
-    Operation['ARP-NAK'] = 10                                                   # [RFC 1577]
-    Operation['MARS-Request'] = 11                                              # [Grenville_Armitage]
-    Operation['MARS-Multi'] = 12                                                # [Grenville_Armitage]
-    Operation['MARS-MServ'] = 13                                                # [Grenville_Armitage]
-    Operation['MARS-Join'] = 14                                                 # [Grenville_Armitage]
-    Operation['MARS-Leave'] = 15                                                # [Grenville_Armitage]
-    Operation['MARS-NAK'] = 16                                                  # [Grenville_Armitage]
-    Operation['MARS-Unserv'] = 17                                               # [Grenville_Armitage]
-    Operation['MARS-SJoin'] = 18                                                # [Grenville_Armitage]
-    Operation['MARS-SLeave'] = 19                                               # [Grenville_Armitage]
-    Operation['MARS-Grouplist-Request'] = 20                                    # [Grenville_Armitage]
-    Operation['MARS-Grouplist-Reply'] = 21                                      # [Grenville_Armitage]
-    Operation['MARS-Redirect-Map'] = 22                                         # [Grenville_Armitage]
-    Operation['MAPOS-UNARP'] = 23                                               # [Mitsuru_Maruyama][RFC 2176]
-    Operation['OP_EXP1'] = 24                                                   # [RFC 5494]
-    Operation['OP_EXP2'] = 25                                                   # [RFC 5494]
-    Operation['Reserved [65535]'] = 65535                                       # [RFC 5494]
+    #: [:rfc:`5494`]
+    Operation['Reserved [0]'] = 0
+
+    #: [:rfc:`826`][:rfc:`5227`]
+    Operation['REQUEST'] = 1
+
+    #: [:rfc:`826`][:rfc:`5227`]
+    Operation['REPLY'] = 2
+
+    #: [:rfc:`903`]
+    Operation['request Reverse'] = 3
+
+    #: [:rfc:`903`]
+    Operation['reply Reverse'] = 4
+
+    #: [:rfc:`1931`]
+    Operation['DRARP-Request'] = 5
+
+    #: [:rfc:`1931`]
+    Operation['DRARP-Reply'] = 6
+
+    #: [:rfc:`1931`]
+    Operation['DRARP-Error'] = 7
+
+    #: [:rfc:`2390`]
+    Operation['InARP-Request'] = 8
+
+    #: [:rfc:`2390`]
+    Operation['InARP-Reply'] = 9
+
+    #: [:rfc:`1577`]
+    Operation['ARP-NAK'] = 10
+
+    #: [Grenville Armitage]
+    Operation['MARS-Request'] = 11
+
+    #: [Grenville Armitage]
+    Operation['MARS-Multi'] = 12
+
+    #: [Grenville Armitage]
+    Operation['MARS-MServ'] = 13
+
+    #: [Grenville Armitage]
+    Operation['MARS-Join'] = 14
+
+    #: [Grenville Armitage]
+    Operation['MARS-Leave'] = 15
+
+    #: [Grenville Armitage]
+    Operation['MARS-NAK'] = 16
+
+    #: [Grenville Armitage]
+    Operation['MARS-Unserv'] = 17
+
+    #: [Grenville Armitage]
+    Operation['MARS-SJoin'] = 18
+
+    #: [Grenville Armitage]
+    Operation['MARS-SLeave'] = 19
+
+    #: [Grenville Armitage]
+    Operation['MARS-Grouplist-Request'] = 20
+
+    #: [Grenville Armitage]
+    Operation['MARS-Grouplist-Reply'] = 21
+
+    #: [Grenville Armitage]
+    Operation['MARS-Redirect-Map'] = 22
+
+    #: [Mitsuru Maruyama][:rfc:`2176`]
+    Operation['MAPOS-UNARP'] = 23
+
+    #: [:rfc:`5494`]
+    Operation['OP_EXP1'] = 24
+
+    #: [:rfc:`5494`]
+    Operation['OP_EXP2'] = 25
+
+    #: [:rfc:`5494`]
+    Operation['Reserved [65535]'] = 65535
 
     @staticmethod
     def get(key, default=-1):

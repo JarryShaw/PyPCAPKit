@@ -4,27 +4,56 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['ErrorCode']
+
 
 class ErrorCode(IntEnum):
-    """Enumeration class for ErrorCode."""
+    """[ErrorCode] HTTP/2 Error Code"""
+
     _ignore_ = 'ErrorCode _'
     ErrorCode = vars()
 
-    # HTTP/2 Error Code
-    ErrorCode['NO_ERROR'] = 0x00000000                                          # [RFC 7540, Section 7] Graceful shutdown
-    ErrorCode['PROTOCOL_ERROR'] = 0x00000001                                    # [RFC 7540, Section 7] Protocol error detected
-    ErrorCode['INTERNAL_ERROR'] = 0x00000002                                    # [RFC 7540, Section 7] Implementation fault
-    ErrorCode['FLOW_CONTROL_ERROR'] = 0x00000003                                # [RFC 7540, Section 7] Flow-control limits exceeded
-    ErrorCode['SETTINGS_TIMEOUT'] = 0x00000004                                  # [RFC 7540, Section 7] Settings not acknowledged
-    ErrorCode['STREAM_CLOSED'] = 0x00000005                                     # [RFC 7540, Section 7] Frame received for closed stream
-    ErrorCode['FRAME_SIZE_ERROR'] = 0x00000006                                  # [RFC 7540, Section 7] Frame size incorrect
-    ErrorCode['REFUSED_STREAM'] = 0x00000007                                    # [RFC 7540, Section 7] Stream not processed
-    ErrorCode['CANCEL'] = 0x00000008                                            # [RFC 7540, Section 7] Stream cancelled
-    ErrorCode['COMPRESSION_ERROR'] = 0x00000009                                 # [RFC 7540, Section 7] Compression state not updated
-    ErrorCode['CONNECT_ERROR'] = 0x0000000A                                     # [RFC 7540, Section 7] TCP connection error for CONNECT method
-    ErrorCode['ENHANCE_YOUR_CALM'] = 0x0000000B                                 # [RFC 7540, Section 7] Processing capacity exceeded
-    ErrorCode['INADEQUATE_SECURITY'] = 0x0000000C                               # [RFC 7540, Section 7] Negotiated TLS parameters not acceptable
-    ErrorCode['HTTP_1_1_REQUIRED'] = 0x0000000D                                 # [RFC 7540, Section 7] Use HTTP/1.1 for the request
+    #: [:rfc:`7540, Section 7`] Graceful shutdown
+    ErrorCode['NO_ERROR'] = 0x00000000
+
+    #: [:rfc:`7540, Section 7`] Protocol error detected
+    ErrorCode['PROTOCOL_ERROR'] = 0x00000001
+
+    #: [:rfc:`7540, Section 7`] Implementation fault
+    ErrorCode['INTERNAL_ERROR'] = 0x00000002
+
+    #: [:rfc:`7540, Section 7`] Flow-control limits exceeded
+    ErrorCode['FLOW_CONTROL_ERROR'] = 0x00000003
+
+    #: [:rfc:`7540, Section 7`] Settings not acknowledged
+    ErrorCode['SETTINGS_TIMEOUT'] = 0x00000004
+
+    #: [:rfc:`7540, Section 7`] Frame received for closed stream
+    ErrorCode['STREAM_CLOSED'] = 0x00000005
+
+    #: [:rfc:`7540, Section 7`] Frame size incorrect
+    ErrorCode['FRAME_SIZE_ERROR'] = 0x00000006
+
+    #: [:rfc:`7540, Section 7`] Stream not processed
+    ErrorCode['REFUSED_STREAM'] = 0x00000007
+
+    #: [:rfc:`7540, Section 7`] Stream cancelled
+    ErrorCode['CANCEL'] = 0x00000008
+
+    #: [:rfc:`7540, Section 7`] Compression state not updated
+    ErrorCode['COMPRESSION_ERROR'] = 0x00000009
+
+    #: [:rfc:`7540, Section 7`] TCP connection error for CONNECT method
+    ErrorCode['CONNECT_ERROR'] = 0x0000000A
+
+    #: [:rfc:`7540, Section 7`] Processing capacity exceeded
+    ErrorCode['ENHANCE_YOUR_CALM'] = 0x0000000B
+
+    #: [:rfc:`7540, Section 7`] Negotiated TLS parameters not acceptable
+    ErrorCode['INADEQUATE_SECURITY'] = 0x0000000C
+
+    #: [:rfc:`7540, Section 7`] Use HTTP/1.1 for the request
+    ErrorCode['HTTP_1_1_REQUIRED'] = 0x0000000D
 
     @staticmethod
     def get(key, default=-1):

@@ -4,18 +4,29 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Cipher']
+
 
 class Cipher(IntEnum):
-    """Enumeration class for Cipher."""
+    """[Cipher] Cipher IDs"""
+
     _ignore_ = 'Cipher _'
     Cipher = vars()
 
-    # Cipher IDs
-    Cipher['RESERVED [0]'] = 0                                                  # [RFC 7401]
-    Cipher['NULL-ENCRYPT'] = 1                                                  # [RFC 7401]
-    Cipher['AES-128-CBC'] = 2                                                   # [RFC 7401]
-    Cipher['RESERVED [3]'] = 3                                                  # [RFC 7401]
-    Cipher['AES-256-CBC'] = 4                                                   # [RFC 7401]
+    #: [:rfc:`7401`]
+    Cipher['RESERVED [0]'] = 0
+
+    #: [:rfc:`7401`]
+    Cipher['NULL-ENCRYPT'] = 1
+
+    #: [:rfc:`7401`]
+    Cipher['AES-128-CBC'] = 2
+
+    #: [:rfc:`7401`]
+    Cipher['RESERVED [3]'] = 3
+
+    #: [:rfc:`7401`]
+    Cipher['AES-256-CBC'] = 4
 
     @staticmethod
     def get(key, default=-1):

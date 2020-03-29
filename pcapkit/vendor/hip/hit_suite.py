@@ -3,15 +3,17 @@
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['HIT_Suite']
+__all__ = ['HITSuite']
 
 
-class HIT_Suite(Vendor):
+class HITSuite(Vendor):
     """HIT Suite ID"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 15'
+    #: Link to registry.
     LINK = 'https://www.iana.org/assignments/hip-parameters/hit-suite-id.csv'
 
 
 if __name__ == "__main__":
-    HIT_Suite()
+    HITSuite()

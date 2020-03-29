@@ -4,17 +4,26 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Transport']
+
 
 class Transport(IntEnum):
-    """Enumeration class for Transport."""
+    """[Transport] HIP Transport Modes"""
+
     _ignore_ = 'Transport _'
     Transport = vars()
 
-    # HIP Transport Modes
-    Transport['RESERVED'] = 0                                                   # [RFC 6261]
-    Transport['DEFAULT'] = 1                                                    # [RFC 6261]
-    Transport['ESP'] = 2                                                        # [RFC 6261]
-    Transport['ESP-TCP'] = 3                                                    # [RFC 6261]
+    #: [:rfc:`6261`]
+    Transport['RESERVED'] = 0
+
+    #: [:rfc:`6261`]
+    Transport['DEFAULT'] = 1
+
+    #: [:rfc:`6261`]
+    Transport['ESP'] = 2
+
+    #: [:rfc:`6261`]
+    Transport['ESP-TCP'] = 3
 
     @staticmethod
     def get(key, default=-1):

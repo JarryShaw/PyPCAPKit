@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TCP Checksum [RFC 1146]"""
+"""TCP Checksum [:rfc:`1146`]"""
 
 import collections
 
@@ -7,6 +7,7 @@ from pcapkit.vendor.default import Vendor
 
 __all__ = ['Checksum']
 
+#: TCP checksum options.
 DATA = {
     0:  'TCP checksum',
     1:  "8-bit Fletcher's algorithm",
@@ -16,17 +17,43 @@ DATA = {
 
 
 class Checksum(Vendor):
-    """TCP Checksum [RFC 1146]"""
+    """TCP Checksum [:rfc:`1146`]"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 255'
 
     def request(self):  # pylint: disable=arguments-differ
+        """Fetch registry data.
+
+        Returns:
+            Dict[int, str]: TCP checksum options, i.e. :data:`~pcapkit.vendor.tcp.checksum.DATA`.
+
+        """
         return DATA
 
     def count(self, data):
+        """Count field records.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            Counter: Field recordings.
+
+        """
         return collections.Counter(data.values())
 
     def process(self, data):
+        """Process CSV data.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         enum = list()
         miss = [
             "extend_enum(cls, 'Unassigned [%d]' % value, value)",

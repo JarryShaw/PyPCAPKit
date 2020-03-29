@@ -4,38 +4,71 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['ESPTransformSuite']
 
-class ESP_TransformSuite(IntEnum):
-    """Enumeration class for ESP_TransformSuite."""
-    _ignore_ = 'ESP_TransformSuite _'
-    ESP_TransformSuite = vars()
 
-    # ESP Transform Suite IDs
-    ESP_TransformSuite['RESERVED'] = 0                                          # [RFC 7402]
-    ESP_TransformSuite['AES-128-CBC with HMAC-SHA1'] = 1                        # [RFC 3602][RFC 2404]
-    ESP_TransformSuite['DEPRECATED [2]'] = 2                                    # [RFC 7402]
-    ESP_TransformSuite['DEPRECATED [3]'] = 3                                    # [RFC 7402]
-    ESP_TransformSuite['DEPRECATED [4]'] = 4                                    # [RFC 7402]
-    ESP_TransformSuite['DEPRECATED [5]'] = 5                                    # [RFC 7402]
-    ESP_TransformSuite['DEPRECATED [6]'] = 6                                    # [RFC 7402]
-    ESP_TransformSuite['NULL with HMAC-SHA-256'] = 7                            # [RFC 2410][RFC 4868]
-    ESP_TransformSuite['AES-128-CBC with HMAC-SHA-256'] = 8                     # [RFC 3602][RFC 4868]
-    ESP_TransformSuite['AES-256-CBC with HMAC-SHA-256'] = 9                     # [RFC 3602][RFC 4868]
-    ESP_TransformSuite['AES-CCM-8'] = 10                                        # [RFC 4309]
-    ESP_TransformSuite['AES-CCM-16'] = 11                                       # [RFC 4309]
-    ESP_TransformSuite['AES-GCM with an 8 octet ICV'] = 12                      # [RFC 4106]
-    ESP_TransformSuite['AES-GCM with a 16 octet ICV'] = 13                      # [RFC 4106]
-    ESP_TransformSuite['AES-CMAC-96'] = 14                                      # [RFC 4493][RFC 4494]
-    ESP_TransformSuite['AES-GMAC'] = 15                                         # [RFC 4543]
+class ESPTransformSuite(IntEnum):
+    """[ESPTransformSuite] ESP Transform Suite IDs"""
+
+    _ignore_ = 'ESPTransformSuite _'
+    ESPTransformSuite = vars()
+
+    #: [:rfc:`7402`]
+    ESPTransformSuite['RESERVED'] = 0
+
+    #: [:rfc:`3602`][:rfc:`2404`]
+    ESPTransformSuite['AES-128-CBC with HMAC-SHA1'] = 1
+
+    #: [:rfc:`7402`]
+    ESPTransformSuite['DEPRECATED [2]'] = 2
+
+    #: [:rfc:`7402`]
+    ESPTransformSuite['DEPRECATED [3]'] = 3
+
+    #: [:rfc:`7402`]
+    ESPTransformSuite['DEPRECATED [4]'] = 4
+
+    #: [:rfc:`7402`]
+    ESPTransformSuite['DEPRECATED [5]'] = 5
+
+    #: [:rfc:`7402`]
+    ESPTransformSuite['DEPRECATED [6]'] = 6
+
+    #: [:rfc:`2410`][:rfc:`4868`]
+    ESPTransformSuite['NULL with HMAC-SHA-256'] = 7
+
+    #: [:rfc:`3602`][:rfc:`4868`]
+    ESPTransformSuite['AES-128-CBC with HMAC-SHA-256'] = 8
+
+    #: [:rfc:`3602`][:rfc:`4868`]
+    ESPTransformSuite['AES-256-CBC with HMAC-SHA-256'] = 9
+
+    #: [:rfc:`4309`]
+    ESPTransformSuite['AES-CCM-8'] = 10
+
+    #: [:rfc:`4309`]
+    ESPTransformSuite['AES-CCM-16'] = 11
+
+    #: [:rfc:`4106`]
+    ESPTransformSuite['AES-GCM with an 8 octet ICV'] = 12
+
+    #: [:rfc:`4106`]
+    ESPTransformSuite['AES-GCM with a 16 octet ICV'] = 13
+
+    #: [:rfc:`4493`][:rfc:`4494`]
+    ESPTransformSuite['AES-CMAC-96'] = 14
+
+    #: [:rfc:`4543`]
+    ESPTransformSuite['AES-GMAC'] = 15
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return ESP_TransformSuite(key)
-        if key not in ESP_TransformSuite._member_map_:  # pylint: disable=no-member
-            extend_enum(ESP_TransformSuite, key, default)
-        return ESP_TransformSuite[key]
+            return ESPTransformSuite(key)
+        if key not in ESPTransformSuite._member_map_:  # pylint: disable=no-member
+            extend_enum(ESPTransformSuite, key, default)
+        return ESPTransformSuite[key]
 
     @classmethod
     def _missing_(cls, value):

@@ -3,7 +3,6 @@
 
 import argparse
 import importlib
-import multiprocessing
 import sys
 import warnings
 
@@ -11,11 +10,30 @@ import pcapkit.vendor as vendor_module
 from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning
 from pcapkit.vendor import __all__ as vendor_all
 
-# version string
-__version__ = '0.14.5'
+#: version string
+__version__ = '0.15.0'
 
 
 def get_parser():
+    """CLI argument parser.
+
+    Returns:
+        argparse.ArgumentParser: Argument parser.
+
+    .. code:: text
+
+       usage: pcapkit-vendor [-h] [-V] ...
+
+       update constant enumerations
+
+       positional arguments:
+         target         update targets, supply none to update all
+
+       optional arguments:
+         -h, --help     show this help message and exit
+         -V, --version  show program's version number and exit
+
+    """
     parser = argparse.ArgumentParser(prog='pcapkit-vendor',
                                      description='update constant enumerations')
     parser.add_argument('-V', '--version', action='version', version=__version__)
@@ -25,7 +43,16 @@ def get_parser():
 
 
 def run(vendor):
-    print(vendor.__doc__)
+    """Script runner.
+
+    Args:
+        vendor (Type[Vendor]): Subclass of :class:`~pcapkit.vendor.default.Vendor` from :mod:`pcapkit.vendor`.
+
+    Warns:
+        VendorRuntimeWarning: If failed to initiate the ``vendor`` class.
+
+    """
+    print(f'{vendor.__module__}.{vendor.__name__}: {vendor.__doc__}')
     try:
         vendor()
     except Exception as error:
@@ -33,6 +60,12 @@ def run(vendor):
 
 
 def main():
+    """Entrypoint.
+
+    Warns:
+        InvalidVendorWarning: If vendor target not found in :mod:`pcapkit.vendor` module.
+
+    """
     parser = get_parser()
     args = parser.parse_args()
 
@@ -42,15 +75,17 @@ def main():
             module = importlib.import_module(f'pcapkit.vendor.{target}')
             target_list.extend(getattr(module, name) for name in module.__all__)
         except ImportError:
-            warn = warnings.formatwarning(f'invalid vendor updater: {target}', InvalidVendorWarning,
-                                          __file__, 0, ' '.join(sys.argv))
-            print(warn, file=sys.stderr)
+            warnings.showwarning(f'invalid vendor updater: {target}', InvalidVendorWarning,
+                                 filename=__file__, lineno=0, line=' '.join(sys.argv))
 
     if not target_list:
+        if args.target:
+            parser.error('missing valid targets')
         target_list.extend(getattr(vendor_module, name) for name in vendor_all)
 
-    with multiprocessing.Pool() as pool:
-        pool.map(run, target_list)
+    # with multiprocessing.Pool() as pool:
+    #     pool.map(run, target_list)
+    [run(vendor) for vendor in target_list]  # pylint: disable=expression-not-assigned
 
 
 if __name__ == "__main__":

@@ -4,16 +4,21 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['OptionClass']
+
 
 class OptionClass(IntEnum):
-    """Enumeration class for OptionClass."""
+    """[OptionClass] Option Classes"""
+
     _ignore_ = 'OptionClass _'
     OptionClass = vars()
 
-    # Option Classes
     OptionClass['control'] = 0
+
     OptionClass['reserved for future use [1]'] = 1
+
     OptionClass['debugging and measurement'] = 2
+
     OptionClass['reserved for future use [3]'] = 3
 
     @staticmethod

@@ -4,20 +4,29 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['ProtectionAuthority']
+
 
 class ProtectionAuthority(IntEnum):
-    """Enumeration class for ProtectionAuthority."""
+    """[ProtectionAuthority] Protection Authority Bit Assignments"""
+
     _ignore_ = 'ProtectionAuthority _'
     ProtectionAuthority = vars()
 
-    # Protection Authority Bit Assignments
     ProtectionAuthority['GENSER'] = 0
+
     ProtectionAuthority['SIOP-ESI'] = 1
+
     ProtectionAuthority['SCI'] = 2
+
     ProtectionAuthority['NSA'] = 3
+
     ProtectionAuthority['DOE'] = 4
+
     ProtectionAuthority['Unassigned [5]'] = 5
+
     ProtectionAuthority['Unassigned [6]'] = 6
+
     ProtectionAuthority['Field Termination Indicator'] = 7
 
     @staticmethod

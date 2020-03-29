@@ -7,6 +7,7 @@ from pcapkit.vendor.default import Vendor
 
 __all__ = ['ProtectionAuthority']
 
+#: Protection authority registry.
 DATA = {
     0: 'GENSER',
     1: 'SIOP-ESI',
@@ -22,15 +23,41 @@ DATA = {
 class ProtectionAuthority(Vendor):
     """Protection Authority Bit Assignments"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 7'
 
     def request(self):  # pylint: disable=arguments-differ
+        """Fetch registry data.
+
+        Returns:
+            Dict[int, str]: Registry data (:data:`~pcapkit.vendor.ipv4.protection_authority.DATA`).
+
+        """
         return DATA
 
     def count(self, data):
+        """Count field records.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            Counter: Field recordings.
+
+        """
         return collections.Counter(data.values())
 
     def process(self, data):
+        """Process registry data.
+
+        Args:
+            data (Dict[int, str]): Registry data.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         enum = list()
         miss = [
             "extend_enum(cls, 'Unassigned [%d]' % value, value)",

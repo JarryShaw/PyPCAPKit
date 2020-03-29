@@ -4,20 +4,32 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Packet']
+
 
 class Packet(IntEnum):
-    """Enumeration class for Packet."""
+    """[Packet] IPX Packet Types"""
+
     _ignore_ = 'Packet _'
     Packet = vars()
 
-    # IPX Packet Types
     Packet['Unknown'] = 0
-    Packet['RIP'] = 1                                                           # Routing Information Protocol ([RFC 1582], [RFC 2091])
+
+    #: Routing Information Protocol ([:rfc:`1582`], [:rfc:`2091`])
+    Packet['RIP'] = 1
+
     Packet['Echo Packet'] = 2
+
     Packet['Error Packet'] = 3
-    Packet['PEP'] = 4                                                           # Packet Exchange Protocol, used for SAP (Service Advertising Protocol)
-    Packet['SPX'] = 5                                                           # Sequenced Packet Exchange
-    Packet['NCP'] = 17                                                          # NetWare Core Protocol
+
+    #: Packet Exchange Protocol, used for SAP (Service Advertising Protocol)
+    Packet['PEP'] = 4
+
+    #: Sequenced Packet Exchange
+    Packet['SPX'] = 5
+
+    #: NetWare Core Protocol
+    Packet['NCP'] = 17
 
     @staticmethod
     def get(key, default=-1):

@@ -3,6 +3,7 @@
 """IPX Socket Types"""
 
 ###############################################################################
+# NOTE: fix duplicated name of ``socket```
 import sys
 path = sys.path.pop(0)
 ###############################################################################
@@ -23,16 +24,37 @@ __all__ = ['Socket']
 class Socket(Vendor):
     """Socket Types"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0x0000 <= value <= 0xFFFF'
+    #: Link to registry.
     LINK = 'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'
 
     def count(self, data):
-        pass
+        """Count field records."""
 
     def request(self, text):  # pylint: disable=signature-differs
+        """Fetch HTML source.
+
+        Args:
+            text (str): Context from :attr:`~Vendor.LINK`.
+
+        Returns:
+            bs4.BeautifulSoup: Parsed HTML source.
+
+        """
         return bs4.BeautifulSoup(text, 'html5lib')
 
     def process(self, soup):  # pylint: disable=arguments-differ
+        """Process HTML source.
+
+        Args:
+            data (bs4.BeautifulSoup): Parsed HTML source.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         table = soup.find_all('table', class_='wikitable')[3]
         content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
         next(content)  # header
@@ -55,12 +77,13 @@ class Socket(Vendor):
                 code, _ = pval, int(pval, base=16)
 
                 pres = f"{self.NAME}[{name!r}] = {code}"
-                sufs = f'# {desc}' if desc else ''
+                sufs = f'#: {desc}' if desc else ''
 
-                if len(pres) > 74:
-                    sufs = f"\n{' '*80}{sufs}"
+                # if len(pres) > 74:
+                #     sufs = f"\n{' '*80}{sufs}"
 
-                enum.append(f'{pres.ljust(76)}{sufs}')
+                # enum.append(f'{pres.ljust(76)}{sufs}')
+                enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = pval.split('–')
 

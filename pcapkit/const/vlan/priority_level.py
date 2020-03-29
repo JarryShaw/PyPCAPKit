@@ -4,21 +4,38 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['PriorityLevel']
+
 
 class PriorityLevel(IntEnum):
-    """Enumeration class for PriorityLevel."""
+    """[PriorityLevel] Priority levels defined in IEEE 802.1p."""
+
     _ignore_ = 'PriorityLevel _'
     PriorityLevel = vars()
 
-    # Priority levels defined in IEEE 802.1p.
-    PriorityLevel['BK'] = 0b001                                                 # 0 - Background (lowest)
-    PriorityLevel['BE'] = 0b000                                                 # 1 - Best effort (default)
-    PriorityLevel['EE'] = 0b010                                                 # 2 - Excellent effort
-    PriorityLevel['CA'] = 0b011                                                 # 3 - Critical applications
-    PriorityLevel['VI'] = 0b100                                                 # 4 - Video, < 100 ms latency and jitter
-    PriorityLevel['VO'] = 0b101                                                 # 5 - Voice, < 10 ms latency and jitter
-    PriorityLevel['IC'] = 0b110                                                 # 6 - Internetwork control
-    PriorityLevel['NC'] = 0b111                                                 # 7 - Network control (highest)
+    #: ``0`` - Background (lowest)
+    PriorityLevel['BK'] = 0b001
+
+    #: ``1`` - Best effort (default)
+    PriorityLevel['BE'] = 0b000
+
+    #: ``2`` - Excellent effort
+    PriorityLevel['EE'] = 0b010
+
+    #: ``3`` - Critical applications
+    PriorityLevel['CA'] = 0b011
+
+    #: ``4`` - Video, < 100 ms latency and jitter
+    PriorityLevel['VI'] = 0b100
+
+    #: ``5`` - Voice, < 10 ms latency and jitter
+    PriorityLevel['VO'] = 0b101
+
+    #: ``6`` - Internetwork control
+    PriorityLevel['IC'] = 0b110
+
+    #: ``7`` - Network control (highest)
+    PriorityLevel['NC'] = 0b111
 
     @staticmethod
     def get(key, default=-1):

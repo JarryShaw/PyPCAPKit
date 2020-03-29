@@ -9,7 +9,9 @@ __all__ = ['Authentication']
 class Authentication(Vendor):
     """Authentication Types"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 65535'
+    #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ospf-authentication-codes/authentication-codes.csv'
 
 

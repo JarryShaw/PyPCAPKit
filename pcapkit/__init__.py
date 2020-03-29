@@ -2,56 +2,69 @@
 # pylint: disable=wrong-import-position, unused-import, unused-wildcard-import, bad-continuation
 """stream pcap file extractor
 
-`pcapkit` is an independent open source library, using only
-[`dictdumper`](https://github.com/JarryShaw/dictdumper) as
-its formatted output dumper.
+:mod:s`pcapkit` is an independent open source library, using only
+`DictDumper`_ as its formatted output dumper.
 
-    There is a project called
-    [`jspcapy`](https://github.com/JarryShaw/jspcapy)
-    works on `pcapkit`, which is a command line tool for
-    PCAP extraction.
+.. _DictDumper: https://dictdumper.jarryshaw.me
 
-Unlike popular PCAP file extractors, such as `Scapy`,
-`dpkt`, `pyshark`, and etc, `pcapkit` uses streaming
+    There is a project called |jspcapy|_ works on :mod:`pcapkit`,
+    which is a command line tool for PCAP extraction.
+
+    .. |jspcapy| replace:: ``jspcapy``
+    .. _jspcapy: https://github.com/JarryShaw/jspcapy
+
+Unlike popular PCAP file extractors, such as `Scapy`_,
+`DPKT`_, `PyShark`_, and etc, :mod:`pcapkit` uses streaming
 strategy to read input files. That is to read frame by
 frame, decrease occupation on memory, as well as enhance
 efficiency in some way.
 
-In `pcapkit`, all files can be described as following eight
-different sections.
+.. _Scapy: https://scapy.net
+.. _DPKT: https://dpkt.readthedocs.io
+.. _PyShark: https://kiminewt.github.io/pyshark
 
- - Interface (`pcapkit.interface`)
-    user interface for the `pcapkit` library, which
-    standardise and simplify the usage of this
-    library
+In :mod:`pcapkit`, all files can be described as following eight
+different components.
 
- - Foundation (`pcapkit.foundation`)
+ - Interface (:mod:`pcapkit.interface`)
+
+    user interface for the :mod:`pcapkit` library, which
+    standardise and simplify the usage of this library
+
+ - Foundation (:mod:`pcapkit.foundation`)
+
     synthesise file I/O and protocol analysis, coordinate
     information exchange in all network layers
 
- - Reassembly (`pcapkit.reassembly`)
-    base on algorithms described in
-    [`RFC 815`](https://tools.ietf.org/html/rfc815>),
+ - Reassembly (:mod:`pcapkit.reassembly`)
+
+    base on algorithms described in :rfc:`815`,
     implement datagram reassembly of IP and TCP packets
 
- - IPSuite (`pcapkit.ipsuite`)
+ - IPSuite (:mod:`pcapkit.ipsuite`)
+
     collection of constructors for Internet Protocol Suite
 
- - Protocols (`pcapkit.protocols`)
+ - Protocols (:mod:`pcapkit.protocols`)
+
     collection of all protocol family, with detailed
     implementation and methods
 
- - Utilities (`pcapkit.utilities`)
+ - Utilities (:mod:`pcapkit.utilities`)
+
     collection of utility functions and classes
 
- - CoreKit (`pcapkit.corekit`)
-    core utilities for `pcapkit` implementation
+ - CoreKit (:mod:`pcapkit.corekit`)
 
- - ToolKit (`pcapkit.toolkit`)
-    utility tools for `pcapkit` implementation
+    core utilities for :mod:`pcapkit` implementation
 
- - DumpKit (`pcapkit.dumpkit`)
-    dump utilities for `pcapkit` implementation
+ - ToolKit (:mod:`pcapkit.toolkit`)
+
+    utility tools for :mod:`pcapkit` implementation
+
+ - DumpKit (:mod:`pcapkit.dumpkit`)
+
+    dump utilities for :mod:`pcapkit` implementation
 
 """
 import os

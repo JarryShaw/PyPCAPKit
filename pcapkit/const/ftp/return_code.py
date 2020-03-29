@@ -4,6 +4,9 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['ReturnCode']
+
+#: Response kind; whether the response is good, bad or incomplete.
 KIND = {
     '1': 'Positive Preliminary',
     '2': 'Positive Completion',
@@ -13,6 +16,7 @@ KIND = {
     '6': 'Protected',
 }
 
+#: Grouping information.
 INFO = {
     '0': 'Syntax',
     '1': 'Information',
@@ -24,59 +28,154 @@ INFO = {
 
 
 class ReturnCode(IntEnum):
-    """Enumeration class for ReturnCode."""
+    """[ReturnCode] FTP Server Return Code"""
+
     _ignore_ = 'ReturnCode _'
     ReturnCode = vars()
 
-    # FTP Server Return Code
-    ReturnCode['Restart marker replay.'] = 110
-    ReturnCode['Service ready in nnn minutes.'] = 120
-    ReturnCode['Data connection already open; transfer starting.'] = 125
-    ReturnCode['File status okay; about to open data connection.'] = 150
-    ReturnCode['Command not implemented, superfluous at this site.'] = 202
-    ReturnCode['System status, or system help reply.'] = 211
-    ReturnCode['Directory status.'] = 212
-    ReturnCode['File status.'] = 213
-    ReturnCode['Help message.'] = 214
-    ReturnCode['NAME system type.'] = 215
-    ReturnCode['Service ready for new user.'] = 220
-    ReturnCode['Service closing control connection.'] = 221
-    ReturnCode['Data connection open; no transfer in progress.'] = 225
-    ReturnCode['Closing data connection.'] = 226
-    ReturnCode['Entering Passive Mode (h1,h2,h3,h4,p1,p2).'] = 227
-    ReturnCode['Entering Long Passive Mode (long address, port).'] = 228
-    ReturnCode['Entering Extended Passive Mode (|||port|).'] = 229
-    ReturnCode['User logged in, proceed.'] = 230
-    ReturnCode['User logged out; service terminated.'] = 231
-    ReturnCode['Logout command noted, will complete when transfer done.'] = 232
-    ReturnCode['Specifies that the server accepts the authentication mechanism specified by the client, and the exchange of security data is complete.'] = 234
-    ReturnCode['Requested file action okay, completed.'] = 250
-    ReturnCode['"PATHNAME" created.'] = 257
-    ReturnCode['User name okay, need password.'] = 331
-    ReturnCode['Need account for login.'] = 332
-    ReturnCode['Requested file action pending further information.'] = 350
-    ReturnCode['Service not available, closing control connection.'] = 421
-    ReturnCode["Can't open data connection."] = 425
-    ReturnCode['Connection closed; transfer aborted.'] = 426
-    ReturnCode['Invalid username or password.'] = 430
-    ReturnCode['Requested host unavailable.'] = 434
-    ReturnCode['Requested file action not taken.'] = 450
-    ReturnCode['Requested action aborted. [451]'] = 451
-    ReturnCode['Requested action not taken. [452]'] = 452
-    ReturnCode['Syntax error in parameters or arguments.'] = 501
-    ReturnCode['Command not implemented.'] = 502
-    ReturnCode['Bad sequence of commands.'] = 503
-    ReturnCode['Command not implemented for that parameter.'] = 504
-    ReturnCode['Not logged in.'] = 530
-    ReturnCode['Need account for storing files.'] = 532
-    ReturnCode['Could Not Connect to Server - Policy Requires SSL.'] = 534
-    ReturnCode['Requested action not taken. [550]'] = 550
-    ReturnCode['Requested action aborted. [551]'] = 551
-    ReturnCode['Requested file action aborted.'] = 552
-    ReturnCode['Requested action not taken. [553]'] = 553
-    ReturnCode['Integrity protected reply.'] = 631
-    ReturnCode['Confidentiality and integrity protected reply.'] = 632
-    ReturnCode['Confidentiality protected reply.'] = 633
+    #: Restart marker replay. In this case, the text is exact and not left to the particular implementation; it must read: MARK yyyy = mmmm where yyyy is User-process data stream marker, and mmmm server's equivalent marker (note the spaces between markers and "=").
+    ReturnCode['Code_110'] = 110
+
+    #: Service ready in nnn minutes.
+    ReturnCode['Code_120'] = 120
+
+    #: Data connection already open; transfer starting.
+    ReturnCode['Code_125'] = 125
+
+    #: File status okay; about to open data connection.
+    ReturnCode['Code_150'] = 150
+
+    #: Command not implemented, superfluous at this site.
+    ReturnCode['Code_202'] = 202
+
+    #: System status, or system help reply.
+    ReturnCode['Code_211'] = 211
+
+    #: Directory status.
+    ReturnCode['Code_212'] = 212
+
+    #: File status.
+    ReturnCode['Code_213'] = 213
+
+    #: Help message. Explains how to use the server or the meaning of a particular non-standard command. This reply is useful only to the human user.
+    ReturnCode['Code_214'] = 214
+
+    #: NAME system type. Where NAME is an official system name from the registry kept by IANA.
+    ReturnCode['Code_215'] = 215
+
+    #: Service ready for new user.
+    ReturnCode['Code_220'] = 220
+
+    #: Service closing control connection.
+    ReturnCode['Code_221'] = 221
+
+    #: Data connection open; no transfer in progress.
+    ReturnCode['Code_225'] = 225
+
+    #: Closing data connection. Requested file action successful (for example, file transfer or file abort).
+    ReturnCode['Code_226'] = 226
+
+    #: Entering Passive Mode (h1,h2,h3,h4,p1,p2).
+    ReturnCode['Code_227'] = 227
+
+    #: Entering Long Passive Mode (long address, port).
+    ReturnCode['Code_228'] = 228
+
+    #: Entering Extended Passive Mode (|||port|).
+    ReturnCode['Code_229'] = 229
+
+    #: User logged in, proceed. Logged out if appropriate.
+    ReturnCode['Code_230'] = 230
+
+    #: User logged out; service terminated.
+    ReturnCode['Code_231'] = 231
+
+    #: Logout command noted, will complete when transfer done.
+    ReturnCode['Code_232'] = 232
+
+    #: Specifies that the server accepts the authentication mechanism specified by the client, and the exchange of security data is complete. A higher level nonstandard code created by Microsoft.
+    ReturnCode['Code_234'] = 234
+
+    #: Requested file action okay, completed.
+    ReturnCode['Code_250'] = 250
+
+    #: "PATHNAME" created.
+    ReturnCode['Code_257'] = 257
+
+    #: User name okay, need password.
+    ReturnCode['Code_331'] = 331
+
+    #: Need account for login.
+    ReturnCode['Code_332'] = 332
+
+    #: Requested file action pending further information
+    ReturnCode['Code_350'] = 350
+
+    #: Service not available, closing control connection. This may be a reply to any command if the service knows it must shut down.
+    ReturnCode['Code_421'] = 421
+
+    #: Can't open data connection.
+    ReturnCode['Code_425'] = 425
+
+    #: Connection closed; transfer aborted.
+    ReturnCode['Code_426'] = 426
+
+    #: Invalid username or password
+    ReturnCode['Code_430'] = 430
+
+    #: Requested host unavailable.
+    ReturnCode['Code_434'] = 434
+
+    #: Requested file action not taken.
+    ReturnCode['Code_450'] = 450
+
+    #: Requested action aborted. Local error in processing.
+    ReturnCode['Code_451'] = 451
+
+    #: Requested action not taken. Insufficient storage space in system. File unavailable (e. g. , file busy).
+    ReturnCode['Code_452'] = 452
+
+    #: Syntax error in parameters or arguments.
+    ReturnCode['Code_501'] = 501
+
+    #: Command not implemented.
+    ReturnCode['Code_502'] = 502
+
+    #: Bad sequence of commands.
+    ReturnCode['Code_503'] = 503
+
+    #: Command not implemented for that parameter.
+    ReturnCode['Code_504'] = 504
+
+    #: Not logged in.
+    ReturnCode['Code_530'] = 530
+
+    #: Need account for storing files.
+    ReturnCode['Code_532'] = 532
+
+    #: Could Not Connect to Server - Policy Requires SSL
+    ReturnCode['Code_534'] = 534
+
+    #: Requested action not taken. File unavailable (e. g. , file not found, no access).
+    ReturnCode['Code_550'] = 550
+
+    #: Requested action aborted. Page type unknown.
+    ReturnCode['Code_551'] = 551
+
+    #: Requested file action aborted. Exceeded storage allocation (for current directory or dataset).
+    ReturnCode['Code_552'] = 552
+
+    #: Requested action not taken. File name not allowed.
+    ReturnCode['Code_553'] = 553
+
+    #: Integrity protected reply.
+    ReturnCode['Code_631'] = 631
+
+    #: Confidentiality and integrity protected reply.
+    ReturnCode['Code_632'] = 632
+
+    #: Confidentiality protected reply.
+    ReturnCode['Code_633'] = 633
 
     @staticmethod
     def get(key, default=-1):

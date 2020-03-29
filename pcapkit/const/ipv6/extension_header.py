@@ -4,24 +4,47 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['ExtensionHeader']
+
 
 class ExtensionHeader(IntEnum):
-    """Enumeration class for ExtensionHeader."""
+    """[ExtensionHeader] IPv6 Extension Header Types"""
+
     _ignore_ = 'ExtensionHeader _'
     ExtensionHeader = vars()
 
-    # IPv6 Extension Header Types
-    ExtensionHeader['HOPOPT'] = 0                                               # [RFC 8200] IPv6 Hop-by-Hop Option
-    ExtensionHeader['IPv6-Route'] = 43                                          # [Steve_Deering] Routing Header for IPv6
-    ExtensionHeader['IPv6-Frag'] = 44                                           # [Steve_Deering] Fragment Header for IPv6
-    ExtensionHeader['ESP'] = 50                                                 # [RFC 4303] Encap Security Payload
-    ExtensionHeader['AH'] = 51                                                  # [RFC 4302] Authentication Header
-    ExtensionHeader['IPv6-Opts'] = 60                                           # [RFC 8200] Destination Options for IPv6
-    ExtensionHeader['Mobility Header'] = 135                                    # [RFC 6275]
-    ExtensionHeader['HIP'] = 139                                                # [RFC 7401] Host Identity Protocol
-    ExtensionHeader['Shim6'] = 140                                              # [RFC 5533] Shim6 Protocol
-    ExtensionHeader['Use for experimentation and testing [253]'] = 253          # [RFC 3692]
-    ExtensionHeader['Use for experimentation and testing [254]'] = 254          # [RFC 3692]
+    #: [:rfc:`8200`] IPv6 Hop-by-Hop Option
+    ExtensionHeader['HOPOPT'] = 0
+
+    #: [Steve Deering] Routing Header for IPv6
+    ExtensionHeader['IPv6-Route'] = 43
+
+    #: [Steve Deering] Fragment Header for IPv6
+    ExtensionHeader['IPv6-Frag'] = 44
+
+    #: [:rfc:`4303`] Encap Security Payload
+    ExtensionHeader['ESP'] = 50
+
+    #: [:rfc:`4302`] Authentication Header
+    ExtensionHeader['AH'] = 51
+
+    #: [:rfc:`8200`] Destination Options for IPv6
+    ExtensionHeader['IPv6-Opts'] = 60
+
+    #: [:rfc:`6275`]
+    ExtensionHeader['Mobility Header'] = 135
+
+    #: [:rfc:`7401`] Host Identity Protocol
+    ExtensionHeader['HIP'] = 139
+
+    #: [:rfc:`5533`] Shim6 Protocol
+    ExtensionHeader['Shim6'] = 140
+
+    #: [:rfc:`3692`]
+    ExtensionHeader['Use for experimentation and testing [253]'] = 253
+
+    #: [:rfc:`3692`]
+    ExtensionHeader['Use for experimentation and testing [254]'] = 254
 
     @staticmethod
     def get(key, default=-1):

@@ -1,27 +1,30 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=line-too-long
-"""TOS (DS Field) Throughput"""
+"""ToS (DS Field) Throughput"""
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['ToS_THR']
 
-class TOS_THR(IntEnum):
-    """Enumeration class for TOS_THR."""
-    _ignore_ = 'TOS_THR _'
-    TOS_THR = vars()
 
-    # TOS (DS Field) Throughput
-    TOS_THR['NORMAL'] = 0
-    TOS_THR['HIGH'] = 1
+class ToS_THR(IntEnum):
+    """[ToS_THR] ToS (DS Field) Throughput"""
+
+    _ignore_ = 'ToS_THR _'
+    ToS_THR = vars()
+
+    ToS_THR['NORMAL'] = 0
+
+    ToS_THR['HIGH'] = 1
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return TOS_THR(key)
-        if key not in TOS_THR._member_map_:  # pylint: disable=no-member
-            extend_enum(TOS_THR, key, default)
-        return TOS_THR[key]
+            return ToS_THR(key)
+        if key not in ToS_THR._member_map_:  # pylint: disable=no-member
+            extend_enum(ToS_THR, key, default)
+        return ToS_THR[key]
 
     @classmethod
     def _missing_(cls, value):

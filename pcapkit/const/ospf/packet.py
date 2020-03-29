@@ -4,19 +4,31 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Packet']
+
 
 class Packet(IntEnum):
-    """Enumeration class for Packet."""
+    """[Packet] OSPF Packet Types"""
+
     _ignore_ = 'Packet _'
     Packet = vars()
 
-    # OSPF Packet Types
     Packet['Reserved'] = 0
-    Packet['Hello'] = 1                                                         # [RFC 2328]
-    Packet['Database Description'] = 2                                          # [RFC 2328]
-    Packet['Link State Request'] = 3                                            # [RFC 2328]
-    Packet['Link State Update'] = 4                                             # [RFC 2328]
-    Packet['Link State Ack'] = 5                                                # [RFC 2328]
+
+    #: [:rfc:`2328`]
+    Packet['Hello'] = 1
+
+    #: [:rfc:`2328`]
+    Packet['Database Description'] = 2
+
+    #: [:rfc:`2328`]
+    Packet['Link State Request'] = 3
+
+    #: [:rfc:`2328`]
+    Packet['Link State Update'] = 4
+
+    #: [:rfc:`2328`]
+    Packet['Link State Ack'] = 5
 
     @staticmethod
     def get(key, default=-1):

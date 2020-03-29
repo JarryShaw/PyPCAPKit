@@ -4,25 +4,32 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['NATTraversal']
 
-class NAT_Traversal(IntEnum):
-    """Enumeration class for NAT_Traversal."""
-    _ignore_ = 'NAT_Traversal _'
-    NAT_Traversal = vars()
 
-    # HIP NAT Traversal Modes
-    NAT_Traversal['Reserved'] = 0                                               # [RFC 5770]
-    NAT_Traversal['UDP-ENCAPSULATION'] = 1                                      # [RFC 5770]
-    NAT_Traversal['ICE-STUN-UDP'] = 2                                           # [RFC 5770]
+class NATTraversal(IntEnum):
+    """[NATTraversal] HIP NAT Traversal Modes"""
+
+    _ignore_ = 'NATTraversal _'
+    NATTraversal = vars()
+
+    #: [:rfc:`5770`]
+    NATTraversal['Reserved'] = 0
+
+    #: [:rfc:`5770`]
+    NATTraversal['UDP-ENCAPSULATION'] = 1
+
+    #: [:rfc:`5770`]
+    NATTraversal['ICE-STUN-UDP'] = 2
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return NAT_Traversal(key)
-        if key not in NAT_Traversal._member_map_:  # pylint: disable=no-member
-            extend_enum(NAT_Traversal, key, default)
-        return NAT_Traversal[key]
+            return NATTraversal(key)
+        if key not in NATTraversal._member_map_:  # pylint: disable=no-member
+            extend_enum(NATTraversal, key, default)
+        return NATTraversal[key]
 
     @classmethod
     def _missing_(cls, value):

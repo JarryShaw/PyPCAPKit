@@ -4,27 +4,47 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Socket']
+
 
 class Socket(IntEnum):
-    """Enumeration class for Socket."""
+    """[Socket] Socket Types"""
+
     _ignore_ = 'Socket _'
     Socket = vars()
 
-    # Socket Types
     Socket['Routing Information Packet'] = 0x0001
+
     Socket['Echo Protocol Packet'] = 0x0002
+
     Socket['Error Handling Packet'] = 0x0003
-    Socket['NetWare Core Protocol'] = 0x0451                                    # NCP – used by Novell NetWare servers
-    Socket['Service Advertising Protocol'] = 0x0452                             # SAP
-    Socket['Routing Information Protocol'] = 0x0453                             # RIP
+
+    #: NCP – used by Novell NetWare servers
+    Socket['NetWare Core Protocol'] = 0x0451
+
+    #: SAP
+    Socket['Service Advertising Protocol'] = 0x0452
+
+    #: RIP
+    Socket['Routing Information Protocol'] = 0x0453
+
     Socket['NetBIOS'] = 0x0455
+
     Socket['Diagnostic Packet'] = 0x0456
-    Socket['Serialization Packet'] = 0x0457                                     # used for NCP as well
+
+    #: used for NCP as well
+    Socket['Serialization Packet'] = 0x0457
+
     Socket['Used by Novell NetWare Client'] = 0x4003
+
     Socket['IPX'] = 0x8060
+
     Socket['TCP over IPXF'] = 0x9091
+
     Socket['UDP over IPXF'] = 0x9092
-    Socket['IPXF'] = 0x9093                                                     # IPX Fragmentation Protocol
+
+    #: IPX Fragmentation Protocol
+    Socket['IPXF'] = 0x9093
 
     @staticmethod
     def get(key, default=-1):

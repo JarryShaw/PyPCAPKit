@@ -13,16 +13,37 @@ __all__ = ['PriorityLevel']
 class PriorityLevel(Vendor):
     """Priority levels defined in IEEE 802.1p."""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b000 <= value <= 0b111'
+    #: Link to registry.
     LINK = 'https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels'
 
     def request(self, text):  # pylint: disable=signature-differs
+        """Fetch CSV file.
+
+        Args:
+            text (str): Context from :attr:`~PriorityLevel.LINK`.
+
+        Returns:
+            bs4.BeautifulSoup: Parsed HTML source.
+
+        """
         return bs4.BeautifulSoup(text, 'html5lib')
 
     def count(self, soup):  # pylint: disable=arguments-differ
-        pass
+        """Count field records."""
 
     def process(self, soup):  # pylint: disable=arguments-differ
+        """Process HTML data.
+
+        Args:
+            data (bs4.BeautifulSoup): Parsed HTML source.
+
+        Returns:
+            List[str]: Enumeration fields.
+            List[str]: Missing fields.
+
+        """
         table = soup.find_all('table', class_='wikitable')[0]
         content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
         next(content)  # header
@@ -46,12 +67,13 @@ class PriorityLevel(Vendor):
             code = f'0b{bin(int(pval))[2:].zfill(3)}'
 
             pres = f"{self.NAME}[{abbr!r}] = {code}"
-            sufs = f"# {group[0]} - {desc} {group[1] or ''}"
+            sufs = f"#: ``{group[0]}`` - {desc} {group[1] or ''}"
 
-            if len(pres) > 74:
-                sufs = f"\n{' '*80}{sufs}"
+            # if len(pres) > 74:
+            #     sufs = f"\n{' '*80}{sufs}"
 
-            enum.append(f'{pres.ljust(76)}{sufs}')
+            # enum.append(f'{pres.ljust(76)}{sufs}')
+            enum.append(f'{sufs}\n    {pres}')
         return enum, miss
 
 

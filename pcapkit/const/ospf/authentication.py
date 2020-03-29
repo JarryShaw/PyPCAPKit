@@ -4,18 +4,26 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Authentication']
+
 
 class Authentication(IntEnum):
-    """Enumeration class for Authentication."""
+    """[Authentication] Authentication Types"""
+
     _ignore_ = 'Authentication _'
     Authentication = vars()
 
-    # Authentication Types
-    Authentication['No Authentication'] = 0                                     # [RFC 1583]
-    Authentication['Simple Password Authentication'] = 1                        # [RFC 1583]
-    Authentication['Cryptographic authentication'] = 2                          # [RFC 2328][RFC 5709]
+    #: [:rfc:`1583`]
+    Authentication['No Authentication'] = 0
+
+    #: [:rfc:`1583`]
+    Authentication['Simple Password Authentication'] = 1
+
+    #: [:rfc:`2328`][:rfc:`5709`]
+    Authentication['Cryptographic authentication'] = 2
+
+    #: [:rfc:`7474`]
     Authentication['Cryptographic Authentication with Extended Sequence Numbers'] = 3
-                                                                                # [RFC 7474]
 
     @staticmethod
     def get(key, default=-1):
@@ -35,7 +43,7 @@ class Authentication(IntEnum):
             extend_enum(cls, 'Unassigned [%d]' % value, value)
             return cls(value)
         if 256 <= value <= 65535:
-            # [RFC 6549]
+            #: [:rfc:`6549`]
             extend_enum(cls, 'Deprecated [%d]' % value, value)
             return cls(value)
         return super()._missing_(value)

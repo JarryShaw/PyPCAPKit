@@ -4,24 +4,47 @@
 
 from aenum import IntEnum, extend_enum
 
+__all__ = ['Packet']
+
 
 class Packet(IntEnum):
-    """Enumeration class for Packet."""
+    """[Packet] HIP Packet Types"""
+
     _ignore_ = 'Packet _'
     Packet = vars()
 
-    # HIP Packet Types
-    Packet['Reserved'] = 0                                                      # [RFC 7401]
-    Packet['I1'] = 1                                                            # [RFC 7401] the HIP Initiator Packet
-    Packet['R1'] = 2                                                            # [RFC 7401] the HIP Responder Packet
-    Packet['I2'] = 3                                                            # [RFC 7401] the Second HIP Initiator Packet
-    Packet['R2'] = 4                                                            # [RFC 7401] the Second HIP Responder Packet
-    Packet['UPDATE'] = 16                                                       # [RFC 7401] the HIP Update Packet
-    Packet['NOTIFY'] = 17                                                       # [RFC 7401] the HIP Notify Packet
-    Packet['CLOSE'] = 18                                                        # [RFC 7401] the HIP Association Closing Packet
-    Packet['CLOSE_ACK'] = 19                                                    # [RFC 7401] the HIP Closing Acknowledgment Packet
-    Packet['HDRR'] = 20                                                         # [RFC 6537] HIP Distributed Hash Table Resource Record
-    Packet['HIP_DATA'] = 32                                                     # [RFC 6078]
+    #: [:rfc:`7401`]
+    Packet['Reserved'] = 0
+
+    #: [:rfc:`7401`] the HIP Initiator Packet
+    Packet['I1'] = 1
+
+    #: [:rfc:`7401`] the HIP Responder Packet
+    Packet['R1'] = 2
+
+    #: [:rfc:`7401`] the Second HIP Initiator Packet
+    Packet['I2'] = 3
+
+    #: [:rfc:`7401`] the Second HIP Responder Packet
+    Packet['R2'] = 4
+
+    #: [:rfc:`7401`] the HIP Update Packet
+    Packet['UPDATE'] = 16
+
+    #: [:rfc:`7401`] the HIP Notify Packet
+    Packet['NOTIFY'] = 17
+
+    #: [:rfc:`7401`] the HIP Association Closing Packet
+    Packet['CLOSE'] = 18
+
+    #: [:rfc:`7401`] the HIP Closing Acknowledgment Packet
+    Packet['CLOSE_ACK'] = 19
+
+    #: [:rfc:`6537`] HIP Distributed Hash Table Resource Record
+    Packet['HDRR'] = 20
+
+    #: [:rfc:`6078`]
+    Packet['HIP_DATA'] = 32
 
     @staticmethod
     def get(key, default=-1):
