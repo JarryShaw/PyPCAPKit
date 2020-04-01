@@ -32,7 +32,6 @@ which implements extractor for Internet Protocol version 6
 """
 # TODO: Implements IPv6 extension headers.
 
-import collections
 import ipaddress
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as EXT_HDR

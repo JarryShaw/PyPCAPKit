@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""reassembly fragmented packets
+"""fragmented packets reassembly
 
-`pcapkit.reassembly.reassembly` contains `Reassembly`
-only, which is an abstract base class for all reassembly
-classes, bases on algorithms described in
-[`RFC 815`](https://tools.ietf.org/html/rfc815),
-implements datagram reassembly of IP and TCP packets.
+:mod:`pcapkit.reassembly.reassembly` contains
+class:`~pcapkit.reassembly.reassembly.Reassembly` only,
+which is an abstract base class for all reassembly classes,
+bases on algorithms described in :rfc:`815`, implements
+datagram reassembly of IP and TCP packets.
 
 """
 import abc
@@ -20,25 +20,17 @@ __all__ = ['Reassembly']
 class Reassembly(metaclass=abc.ABCMeta):
     """Base class for reassembly procedure.
 
-    Properties:
-        * name -- str, name of current protocol
-        * count -- int, total number of reassembled packets
-        * datagram -- tuple, reassembled datagram, which structure may vary
-                        according to its protocol
-        * protocol -- str, protocol of current reassembly object
-
-    Methods:
-        * reassembly -- perform the reassembly procedure
-        * submit -- submit reassembled payload
-        * fetch -- fetch datagram
-        * index -- return datagram index
-        * run -- run automatically
-
     Attributes:
-        * _strflg -- bool, strict mode flag
-        * _newflg -- bool, if new packets reassembled flag
-        * _buffer -- dict, buffer field
-        * _dtgram -- list, reassembled datagram
+        name (str): name of current protocol
+        count (int): total number of reassembled packets
+        datagram (tuple): reassembled datagram, which structure may vary
+            according to its protocol
+        protocol (str): protocol of current reassembly object
+
+        _strflg (bool): strict mode flag
+        _newflg (bool): if new packets reassembled flag
+        _buffer (dict): buffer field
+        _dtgram (list): reassembled datagram
 
     """
     ##########################################################################
@@ -49,24 +41,24 @@ class Reassembly(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def name(self):
-        """Protocol of current packet."""
+        """str: Protocol of current packet."""
 
     # total number of reassembled packets
     @property
     def count(self):
-        """Total number of reassembled packets."""
+        """int: Total number of reassembled packets."""
         return len(self.fetch())
 
     # reassembled datagram
     @property
     def datagram(self):
-        """Reassembled datagram."""
+        """tuple: Reassembled datagram."""
         return self.fetch()
 
     @property
     @abc.abstractmethod
     def protocol(self):
-        """Protocol of current reassembly object."""
+        """str: Protocol of current reassembly object."""
 
     ##########################################################################
     # Methods.
@@ -77,11 +69,8 @@ class Reassembly(metaclass=abc.ABCMeta):
     def reassembly(self, info):
         """Reassembly procedure.
 
-        Positional arguments:
-            * info - Info, info dict of packets to be reassembled
-
-        Returns:
-            * NotImplemented
+        Arguments:
+            info (Info): info dict of packets to be reassembled
 
         """
 
@@ -90,17 +79,27 @@ class Reassembly(metaclass=abc.ABCMeta):
     def submit(self, buf, **kwargs):
         """Submit reassembled payload.
 
-        Positional arguments:
-            * buf -- dict, buffer dict of reassembled packets
-
-        Returns:
-            * NotImplemented
+        Arguments:
+            buf (dict): buffer dict of reassembled packets
 
         """
 
     # fetch datagram
     def fetch(self):
-        """Fetch datagram."""
+        """Fetch datagram.
+
+        Fetch reassembled datagrams from
+        :attr:`~pcapkit.reassembly.reassembly.Reassembly._dtgram`
+        and returns a *tuple* of such datagrams.
+
+        If :attr:`~pcapkit.reassembly.reassembly.Reassembly._newflg`
+        set as ``True``, the method will call
+        :meth:`~pcapkit.reassembly.reassembly.Reassembly.submit` to
+        (*force*) obtain newly reassembled payload. Otherwise, the
+        already calculated :attr:`~pcapkit.reassembly.reassembly.Reassembly._dtgram`
+        will be returned.
+
+        """
         if self._newflg:
             self._newflg = False
             temp_dtgram = copy.deepcopy(self._dtgram)
@@ -111,7 +110,16 @@ class Reassembly(metaclass=abc.ABCMeta):
 
     # return datagram index
     def index(self, pkt_num):
-        """Return datagram index."""
+        """Return datagram index.
+
+        Arguments:
+            pkt_num (int): index of packet
+
+        Returns:
+            int: reassembled datagram index which was from No. ``pkt_num`` packet;
+                if not found, returns ``None``
+
+        """
         int_check(pkt_num)
         for counter, datagram in enumerate(self.datagram):
             if pkt_num in datagram.index:
@@ -122,8 +130,8 @@ class Reassembly(metaclass=abc.ABCMeta):
     def run(self, packets):
         """Run automatically.
 
-        Positional arguments:
-            * packets -- list<dict>, list of packet dicts to be reassembled
+        Arguments:
+            packets (List[dict]): list of packet dicts to be reassembled
 
         """
         for packet in packets:
@@ -143,9 +151,8 @@ class Reassembly(metaclass=abc.ABCMeta):
         """Initialise packet reassembly.
 
         Keyword arguments:
-            * strict -- bool, if return all datagrams (including those not
-                        implemented) when submit (default is True)
-                            <keyword> True / False
+            strict (bool): if return all datagrams (including those not
+                implemented) when submit
 
         """
         self._newflg = False    # new packets reassembled
@@ -156,9 +163,9 @@ class Reassembly(metaclass=abc.ABCMeta):
     def __call__(self, packet):
         """Call packet reassembly.
 
-        Positional arguments:
-            * packet -- dict, packet dict to be reassembled
-                        (detailed format described in corresponding protocol)
+        Arguments:
+            packet (dict): packet dict to be reassembled
+                (detailed format described in corresponding protocol)
 
         """
         frag_check(packet, protocol=self.protocol)

@@ -5,7 +5,7 @@ import collections
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['ToS_THR']
+__all__ = ['ToSThroughput']
 
 #: ToS registry.
 DATA = {
@@ -14,7 +14,7 @@ DATA = {
 }
 
 
-class ToS_THR(Vendor):
+class ToSThroughput(Vendor):
     """ToS (DS Field) Throughput"""
 
     FLAG = 'isinstance(value, int) and 0 <= value <= 1'
@@ -63,4 +63,4 @@ class ToS_THR(Vendor):
 
 
 if __name__ == "__main__":
-    ToS_THR()
+    ToSThroughput()

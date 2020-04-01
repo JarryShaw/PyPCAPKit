@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""IPv4 ToS ECN FIELD"""
+"""IPv4 ToS ECN Field"""
 
 import collections
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['ToS_ECN']
+__all__ = ['ToSECN']
 
 #: ToS registry.
 DATA = {
@@ -16,8 +16,8 @@ DATA = {
 }
 
 
-class ToS_ECN(Vendor):
-    """ToS ECN FIELD"""
+class ToSECN(Vendor):
+    """ToS ECN Field"""
 
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b00 <= value <= 0b11'
@@ -81,4 +81,4 @@ class ToS_ECN(Vendor):
 
 
 if __name__ == "__main__":
-    ToS_ECN()
+    ToSECN()

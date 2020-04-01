@@ -12,7 +12,7 @@ __all__ = [
 
 if sys.version_info[:2] < (3, 6):
     class ModuleNotFoundError(ImportError):  # pylint: disable=redefined-builtin
-        pass
+        """Module not found."""
 else:
     ModuleNotFoundError = builtins.ModuleNotFoundError
 

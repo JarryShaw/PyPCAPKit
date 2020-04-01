@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-"""reassembly IP fragments
+"""IP fragments reassembly
 
-`pcapkit.reassembly.ip` contains `IP_Reassembly` only,
-which is the base class for IPv4 and IPv6 reassembly.
-The following algorithm implement is based on IP
-reassembly procedure introduced in RFC 791, using
-`RCVBT` (fragment receivedbit table). Though another
-algorithm is explained in RFC 815, replacing `RCVBT`,
+:mod:`pcapkit.reassembly.ipv4` contains
+:class:`~pcapkit.reassembly.ipv4.IP_Reassembly`
+only, which reconstructs fragmented IP packets back to
+origin. The following algorithm implement is based on IP
+reassembly procedure introduced in :rfc:`791`, using
+``RCVBT`` (fragment receivedbit table). Though another
+algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
 however, this implement still used the elder one.
-And here is the pseudo-code:
 
-Notations:
+Notations::
 
     FO    - Fragment Offset
     IHL   - Internet Header Length
@@ -23,7 +23,7 @@ Notations:
     RCVBT - Fragment Received Bit Table
     TLB   - Timer Lower Bound
 
-Algorithm:
+Algorithm::
 
     DO {
         BUFID <- source|destination|protocol|identification;
@@ -80,24 +80,16 @@ __all__ = ['IP_Reassembly']
 class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
     """Reassembly for IP payload.
 
-    Properties:
-        * name -- str, protocol of current packet
-        * count -- int, total number of reassembled packets
-        * datagram -- tuple, reassembled datagram, which structure may vary
-                        according to its protocol
-        * protocol -- str, protocol of current reassembly object
-
-    Methods:
-        * reassembly -- perform the reassembly procedure
-        * submit -- submit reassembled payload
-        * fetch -- fetch datagram
-        * index -- return datagram index
-        * run -- run automatically
-
     Attributes:
-        * _strflg -- bool, strict mode flag
-        * _buffer -- dict, buffer field
-        * _dtgram -- tuple, reassembled datagram
+        name (str): protocol of current packet
+        count (int): total number of reassembled packets
+        datagram (tuple): reassembled datagram, which structure may vary
+            according to its protocol
+        protocol (str): protocol of current reassembly object
+
+        _strflg (bool): strict mode flag
+        _buffer (dict): buffer field
+        _dtgram (tuple): reassembled datagram
 
     """
     ##########################################################################
@@ -107,8 +99,8 @@ class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
     def reassembly(self, info):
         """Reassembly procedure.
 
-        Positional arguments:
-            * info -- Info, info dict of packets to be reassembled
+        Arguments:
+            info (Info): info dict of packets to be reassembled
 
         """
         BUFID = info.bufid  # Buffer Identifier
@@ -165,14 +157,14 @@ class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
     def submit(self, buf, *, checked=False):  # pylint: disable=arguments-differ
         """Submit reassembled payload.
 
-        Positional arguments:
-            * buf -- dict, buffer dict of reassembled packets
+        Arguments:
+            buf (dict): buffer dict of reassembled packets
 
-        Keyword arguments:
-            * bufid -- tuple, buffer identifier
+        Keyword Arguments:
+            bufid (tuple): buffer identifier
 
         Returns:
-            * list -- reassembled packets
+            list: reassembled packets
 
         """
         TDL = buf['TDL']

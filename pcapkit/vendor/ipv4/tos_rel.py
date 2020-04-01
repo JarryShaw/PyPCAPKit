@@ -5,7 +5,7 @@ import collections
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['ToS_REL']
+__all__ = ['ToSReliability']
 
 #: ToS registry.
 DATA = {
@@ -14,7 +14,7 @@ DATA = {
 }
 
 
-class ToS_REL(Vendor):
+class ToSReliability(Vendor):
     """ToS (DS Field) Reliability"""
 
     #: Value limit checker.
@@ -64,4 +64,4 @@ class ToS_REL(Vendor):
 
 
 if __name__ == "__main__":
-    ToS_REL()
+    ToSReliability()

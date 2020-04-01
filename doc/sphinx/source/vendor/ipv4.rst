@@ -1,102 +1,94 @@
-pcapkit.vendor.ipv4 package
-===========================
+IPv4 Vendor Crawler
+===================
 
-Submodules
-----------
-
-pcapkit.vendor.ipv4.classification\_level module
-------------------------------------------------
+Classification Level Encodings
+------------------------------
 
 .. automodule:: pcapkit.vendor.ipv4.classification_level
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.option\_class module
-----------------------------------------
+Option Classes
+--------------
 
 .. automodule:: pcapkit.vendor.ipv4.option_class
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.option\_number module
------------------------------------------
+IP Option Numbers [*]_
+----------------------
+
+.. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1
 
 .. automodule:: pcapkit.vendor.ipv4.option_number
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.protection\_authority module
-------------------------------------------------
+Protection Authority Bit Assignments
+------------------------------------
 
 .. automodule:: pcapkit.vendor.ipv4.protection_authority
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.qs\_function module
----------------------------------------
+QS Functions
+------------
 
 .. automodule:: pcapkit.vendor.ipv4.qs_function
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.router\_alert module
-----------------------------------------
+IPv4 Router Alert Option Values [*]_
+------------------------------------
+
+.. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ipv4-router-alert-option-values
 
 .. automodule:: pcapkit.vendor.ipv4.router_alert
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.tos\_del module
------------------------------------
+ToS (DS Field) Delay
+--------------------
 
 .. automodule:: pcapkit.vendor.ipv4.tos_del
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.tos\_ecn module
------------------------------------
+ToS ECN Field
+-------------
 
 .. automodule:: pcapkit.vendor.ipv4.tos_ecn
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.tos\_pre module
------------------------------------
+ToS (DS Field) Precedence
+-------------------------
 
 .. automodule:: pcapkit.vendor.ipv4.tos_pre
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.tos\_rel module
------------------------------------
+ToS (DS Field) Reliability
+--------------------------
 
 .. automodule:: pcapkit.vendor.ipv4.tos_rel
    :members:
    :undoc-members:
    :show-inheritance:
 
-pcapkit.vendor.ipv4.tos\_thr module
------------------------------------
+ToS (DS Field) Throughput
+-------------------------
 
 .. automodule:: pcapkit.vendor.ipv4.tos_thr
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: pcapkit.vendor.ipv4
    :members:
    :undoc-members:
    :show-inheritance:

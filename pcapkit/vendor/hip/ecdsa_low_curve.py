@@ -3,10 +3,10 @@
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['ECDSA_LOWCurve']
+__all__ = ['ECDSALowCurve']
 
 
-class ECDSA_LOWCurve(Vendor):
+class ECDSALowCurve(Vendor):
     """ECDSA_LOW Curve Label"""
 
     #: Value limit checker.
@@ -16,4 +16,4 @@ class ECDSA_LOWCurve(Vendor):
 
 
 if __name__ == "__main__":
-    ECDSA_LOWCurve()
+    ECDSALowCurve()

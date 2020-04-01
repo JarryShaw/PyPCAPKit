@@ -4,27 +4,27 @@
 
 from aenum import IntEnum, extend_enum
 
-__all__ = ['ToS_THR']
+__all__ = ['ToSThroughput']
 
 
-class ToS_THR(IntEnum):
-    """[ToS_THR] ToS (DS Field) Throughput"""
+class ToSThroughput(IntEnum):
+    """[ToSThroughput] ToS (DS Field) Throughput"""
 
-    _ignore_ = 'ToS_THR _'
-    ToS_THR = vars()
+    _ignore_ = 'ToSThroughput _'
+    ToSThroughput = vars()
 
-    ToS_THR['NORMAL'] = 0
+    ToSThroughput['NORMAL'] = 0
 
-    ToS_THR['HIGH'] = 1
+    ToSThroughput['HIGH'] = 1
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return ToS_THR(key)
-        if key not in ToS_THR._member_map_:  # pylint: disable=no-member
-            extend_enum(ToS_THR, key, default)
-        return ToS_THR[key]
+            return ToSThroughput(key)
+        if key not in ToSThroughput._member_map_:  # pylint: disable=no-member
+            extend_enum(ToSThroughput, key, default)
+        return ToSThroughput[key]
 
     @classmethod
     def _missing_(cls, value):

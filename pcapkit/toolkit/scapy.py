@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """Scapy tools
 
-`pcapkit.toolkit.scapy` contains all you need for
-`PyPCAPKit` handy usage with `Scapy` engine. All reforming
+:mod:`pcapkit.toolkit.scapy` contains all you need for
+:mod:`pcapkit` handy usage with `Scapy`_ engine. All reforming
 functions returns with a flag to indicate if usable for
 its caller.
+
+.. _Scapy: https://scapy.net
 
 """
 import ipaddress
@@ -34,7 +36,15 @@ __all__ = [
 
 
 def packet2chain(packet):
-    """Fetch Scapy packet protocol chain."""
+    """Fetch Scapy packet protocol chain.
+
+    Args:
+        packet (scapy.packet.Packet): Scapy packet.
+
+    Returns:
+        str: Colon (``:``) seperated list of protocol chain.
+
+    """
     if scapy_all is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
     chain = [packet.name]
@@ -46,7 +56,15 @@ def packet2chain(packet):
 
 
 def packet2dict(packet):
-    """Convert Scapy packet into dict."""
+    """Convert Scapy packet into ``dict``.
+
+    Args:
+        packet (scapy.packet.Packet): Scapy packet.
+
+    Returns:
+        Dict[str, Any]: A ``dict`` mapping of packet data.
+
+    """
     if scapy_all is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
 
@@ -64,7 +82,25 @@ def packet2dict(packet):
 
 
 def ipv4_reassembly(packet, *, count=NotImplemented):
-    """Make data for IPv4 reassembly."""
+    """Make data for IPv4 reassembly.
+
+    Args:
+        packet (scapy.packet.Packet): Scapy packet.
+
+    Keyword Args:
+        count (int): Packet index. If not provided, default to ``NotImplemented``.
+
+    Returns:
+        bool: If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
+            if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) and the **DF**
+            (:attr:`scapy.layers.inet.IP.flags.DF`) flag is ``False``.
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for IPv4 reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.ipv4.IPv4Reassembly`
+
+    """
     if 'IP' in packet:
         ipv4 = packet['IP']
         if ipv4.flags.DF:       # dismiss not fragmented packet
@@ -89,13 +125,30 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
 
 
 def ipv6_reassembly(packet, *, count=NotImplemented):
-    """Make data for IPv6 reassembly."""
+    """Make data for IPv6 reassembly.
+
+    Args:
+        packet (scapy.packet.Packet): Scapy packet.
+
+    Keyword Args:
+        count (int): Packet index. If not provided, default to ``NotImplemented``.
+
+    Returns:
+        bool: If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
+            if it contains IPv6 layer and IPv6 Fragment header (:rfc:`2460#section-4.5`).
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for IPv6 reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.ipv6.IPv6Reassembly`
+
+    """
     if scapy_all is None:
         raise ModuleNotFound("No module named 'scapy'", name='scapy')
     if 'IPv6' in packet:
         ipv6 = packet['IPv6']
         if scapy_all.IPv6ExtHdrFragment not in ipv6:  # pylint: disable=E1101
-            return False, None                      # dismiss not fragmented packet
+            return False, None                        # dismiss not fragmented packet
         ipv6_frag = ipv6['IPv6ExtHdrFragment']
         data = dict(
             bufid=(
@@ -117,7 +170,24 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
 
 
 def tcp_reassembly(packet, *, count=NotImplemented):
-    """Store data for TCP reassembly."""
+    """Store data for TCP reassembly.
+
+    Args:
+        packet (scapy.packet.Packet): Scapy packet.
+
+    Keyword Args:
+        count (int): Packet index. If not provided, default to ``NotImplemented``.
+
+    Returns:
+        bool: If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
+            if it contains TCP layer.
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for TCP reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.tcp.TCPReassembly`
+
+    """
     if 'TCP' in packet:
         ip = packet['IP'] if 'IP' in packet else packet['IPv6']
         tcp = packet['TCP']
@@ -145,7 +215,24 @@ def tcp_reassembly(packet, *, count=NotImplemented):
 
 
 def tcp_traceflow(packet, *, count=NotImplemented):
-    """Trace packet flow for TCP."""
+    """Trace packet flow for TCP.
+
+    Args:
+        packet (scapy.packet.Packet): Scapy packet.
+
+    Keyword Args:
+        count (int): Packet index. If not provided, default to ``NotImplemented``.
+
+    Returns:
+        bool: If the ``packet`` can be used for TCP flow tracing. A packet can be flow-traced
+            if it contains TCP layer.
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for TCP flow tracing will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.foundation.traceflow.TraceFlow`
+
+    """
     if 'TCP' in packet:
         ip = packet['IP'] if 'IP' in packet else packet['IPv6']
         tcp = packet['TCP']

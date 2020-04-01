@@ -4,27 +4,27 @@
 
 from aenum import IntEnum, extend_enum
 
-__all__ = ['ToS_REL']
+__all__ = ['ToSReliability']
 
 
-class ToS_REL(IntEnum):
-    """[ToS_REL] ToS (DS Field) Reliability"""
+class ToSReliability(IntEnum):
+    """[ToSReliability] ToS (DS Field) Reliability"""
 
-    _ignore_ = 'ToS_REL _'
-    ToS_REL = vars()
+    _ignore_ = 'ToSReliability _'
+    ToSReliability = vars()
 
-    ToS_REL['NORMAL'] = 0
+    ToSReliability['NORMAL'] = 0
 
-    ToS_REL['HIGH'] = 1
+    ToSReliability['HIGH'] = 1
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return ToS_REL(key)
-        if key not in ToS_REL._member_map_:  # pylint: disable=no-member
-            extend_enum(ToS_REL, key, default)
-        return ToS_REL[key]
+            return ToSReliability(key)
+        if key not in ToSReliability._member_map_:  # pylint: disable=no-member
+            extend_enum(ToSReliability, key, default)
+        return ToSReliability[key]
 
     @classmethod
     def _missing_(cls, value):

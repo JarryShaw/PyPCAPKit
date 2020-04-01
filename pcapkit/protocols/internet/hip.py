@@ -34,23 +34,19 @@ import ipaddress
 
 from pcapkit.const.hip.certificate import Certificate as _CERT_TYPE
 from pcapkit.const.hip.cipher import Cipher as _CIPHER_ID
-from pcapkit.const.hip.di import DI as _DI_TYPE
-from pcapkit.const.hip.ecdsa_curve import ECDSA_Curve as _ECDSA_CURVE
-from pcapkit.const.hip.ecdsa_low_curve import \
-    ECDSA_LOW_Curve as _ECDSA_LOW_CURVE
-from pcapkit.const.hip.esp_transform_suite import \
-    ESP_TransformSuite as _ESP_SUITE_ID
+from pcapkit.const.hip.di import DITypes as _DI_TYPE
+from pcapkit.const.hip.ecdsa_curve import ECDSACurve as _ECDSA_CURVE
+from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as _ECDSA_LOW_CURVE
+from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as _ESP_SUITE_ID
 from pcapkit.const.hip.group import Group as _GROUP_ID
-from pcapkit.const.hip.hi_algorithm import HI_Algorithm as _HI_ALGORITHM
-from pcapkit.const.hip.hit_suite import HIT_Suite as _HIT_SUITE_ID
-from pcapkit.const.hip.nat_traversal import NAT_Traversal as _MODE_ID
-from pcapkit.const.hip.notify_message import \
-    NotifyMessage as _NOTIFICATION_TYPE
+from pcapkit.const.hip.hi_algorithm import HIAlgorithm as _HI_ALGORITHM
+from pcapkit.const.hip.hit_suite import HITSuite as _HIT_SUITE_ID
+from pcapkit.const.hip.nat_traversal import NATTraversal as _MODE_ID
+from pcapkit.const.hip.notify_message import NotifyMessage as _NOTIFICATION_TYPE
 from pcapkit.const.hip.packet import Packet as _HIP_TYPES
 from pcapkit.const.hip.parameter import Parameter as _HIP_PARA
 from pcapkit.const.hip.registration import Registration as _REG_TYPE
-from pcapkit.const.hip.registration_failure import \
-    RegistrationFailure as _REG_FAILURE_TYPE
+from pcapkit.const.hip.registration_failure import RegistrationFailure as _REG_FAILURE_TYPE
 from pcapkit.const.hip.suite import Suite as _SUITE_ID
 from pcapkit.const.hip.transport import Transport as _TP_MODE_ID
 from pcapkit.const.reg.transtype import TransType as TP_PROTO

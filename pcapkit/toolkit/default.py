@@ -1,16 +1,31 @@
 # -*- coding: utf-8 -*-
 """default tools
 
-`pcapkit.toolkit.default` contains all you need for
-`PyPCAPKit` handy usage. All functions returns with a flag
-to indicate if usable for its caller.
+:mod:`pcapkit.toolkit.default` contains all you need for
+:mod:`pcapkit` handy usage. All functions returns with a
+flag to indicate if usable for its caller.
 
 """
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow']
 
 
 def ipv4_reassembly(frame):
-    """Make data for IPv4 reassembly."""
+    """Make data for IPv4 reassembly.
+
+    Args:
+        frame (pcapkit.protocols.pcap.frame.Frame): PCAP frame.
+
+    Returns:
+        bool: If the ``frame`` can be used for IPv4 reassembly. A packet can be reassembled
+            if it contains IPv4 layer and the **DF** (:attr:`pcapkit.protocols.internet.ipv4.IPv4.flags.df`)
+            flag is ``False``.
+        Optional[Dict[str, Any]]: If the ``frame`` can be reassembled, then the dict mapping
+            of data for IPv4 reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.ipv4.IPv4Reassembly`
+
+    """
     if 'IPv4' in frame:
         ipv4 = frame['IPv4'].info
         if ipv4.flags.df:       # dismiss not fragmented frame
@@ -35,7 +50,21 @@ def ipv4_reassembly(frame):
 
 
 def ipv6_reassembly(frame):
-    """Make data for IPv6 reassembly."""
+    """Make data for IPv6 reassembly.
+
+    Args:
+        frame (pcapkit.protocols.pcap.frame.Frame): PCAP frame.
+
+    Returns:
+        bool: If the ``frame`` can be used for IPv6 reassembly. A packet can be reassembled
+            if it contains IPv6 layer and IPv6 Fragment header (:rfc:`2460#section-4.5`).
+        Optional[Dict[str, Any]]: If the ``frame`` can be reassembled, then the dict mapping
+            of data for IPv6 reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.ipv6.IPv6Reassembly`
+
+    """
     if 'IPv6' in frame:
         ipv6 = frame['IPv6'].info
         if 'frag' not in ipv6:      # dismiss not fragmented frame
@@ -60,7 +89,21 @@ def ipv6_reassembly(frame):
 
 
 def tcp_reassembly(frame):
-    """Make data for TCP reassembly."""
+    """Make data for TCP reassembly.
+
+    Args:
+        frame (pcapkit.protocols.pcap.frame.Frame): PCAP frame.
+
+    Returns:
+        bool: If the ``frame`` can be used for TCP reassembly. A packet can be reassembled
+            if it contains TCP layer.
+        Optional[Dict[str, Any]]: If the ``frame`` can be reassembled, then the dict mapping
+            of data for TCP reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.tcp.TCPReassembly`
+
+    """
     if 'TCP' in frame:
         ip = (frame['IPv4'] if 'IPv4' in frame else frame['IPv6']).info
         tcp = frame['TCP'].info
@@ -88,7 +131,24 @@ def tcp_reassembly(frame):
 
 
 def tcp_traceflow(frame, *, data_link):
-    """Trace packet flow for TCP."""
+    """Trace packet flow for TCP.
+
+    Args:
+        frame (pcapkit.protocols.pcap.frame.Frame): PCAP frame.
+
+    Keyword Args:
+        data_link (str): Data link layer protocol (from global header).
+
+    Returns:
+        bool: If the ``frame`` can be used for TCP flow tracing. A packet can be flow-traced
+            if it contains TCP layer.
+        Optional[Dict[str, Any]]: If the ``frame`` can be reassembled, then the dict mapping
+            of data for TCP flow tracing will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.foundation.traceflow.TraceFlow`
+
+    """
     if 'TCP' in frame:
         ip = (frame['IPv4'] if 'IPv4' in frame else frame['IPv6']).info
         tcp = frame['TCP'].info

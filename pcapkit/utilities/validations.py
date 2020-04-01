@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """validation utilities
 
-`pcapkit.utilities.validations` contains functions to validate
-arguments for functions and classes. It was first used in
-[`ntlib`](https://github.com/JarryShaw/pyntlib) as
-validators.
+:mod:`pcapkit.utilities.validations` contains functions to
+validate arguments for functions and classes. It was first
+used in `PyNTLib`_ as validators.
+
+.. _PyNTLib: https://github.com/JarryShaw/pyntlib
 
 """
 import collections.abc
@@ -30,7 +31,7 @@ __all__ = [
 
 
 def int_check(*args, stacklevel=2):
-    """Check if arguments are integrals."""
+    """Check if arguments are *integrals*."""
     for var in args:
         if not isinstance(var, numbers.Integral):
             name = type(var).__name__
@@ -39,7 +40,7 @@ def int_check(*args, stacklevel=2):
 
 
 def real_check(*args, stacklevel=2):
-    """Check if arguments are real numbers."""
+    """Check if arguments are *real numbers*."""
     for var in args:
         if not isinstance(var, numbers.Real):
             name = type(var).__name__
@@ -48,7 +49,7 @@ def real_check(*args, stacklevel=2):
 
 
 def complex_check(*args, stacklevel=2):
-    """Check if arguments are complex numbers."""
+    """Check if arguments are *complex numbers*."""
     for var in args:
         if not isinstance(var, numbers.Complex):
             name = type(var).__name__
@@ -57,7 +58,7 @@ def complex_check(*args, stacklevel=2):
 
 
 def number_check(*args, stacklevel=2):
-    """Check if arguments are numbers."""
+    """Check if arguments are *numbers*."""
     for var in args:
         if not isinstance(var, numbers.Number):
             name = type(var).__name__
@@ -66,7 +67,7 @@ def number_check(*args, stacklevel=2):
 
 
 def bytes_check(*args, stacklevel=2):
-    """Check if arguments are bytes type."""
+    """Check if arguments are ``bytes`` type."""
     for var in args:
         if not isinstance(var, (bytes, collections.abc.ByteString)):
             name = type(var).__name__
@@ -75,7 +76,7 @@ def bytes_check(*args, stacklevel=2):
 
 
 def bytearray_check(*args, stacklevel=2):
-    """Check if arguments are bytearray type."""
+    """Check if arguments are ``bytearray`` type."""
     for var in args:
         if not isinstance(var, (bytearray, collections.abc.ByteString, collections.abc.MutableSequence)):
             name = type(var).__name__func = inspect.stack()[stacklevel][3]
@@ -84,7 +85,7 @@ def bytearray_check(*args, stacklevel=2):
 
 
 def str_check(*args, stacklevel=2):
-    """Check if arguments are str type."""
+    """Check if arguments are ``str`` type."""
     for var in args:
         if not isinstance(var, (str, collections.UserString, collections.abc.Sequence)):
             name = type(var).__name__
@@ -93,7 +94,7 @@ def str_check(*args, stacklevel=2):
 
 
 def bool_check(*args, stacklevel=2):
-    """Check if arguments are bytes type."""
+    """Check if arguments are ``bool`` type."""
     for var in args:
         if not isinstance(var, bool):
             name = type(var).__name__
@@ -102,7 +103,7 @@ def bool_check(*args, stacklevel=2):
 
 
 def list_check(*args, stacklevel=2):
-    """Check if arguments are list type."""
+    """Check if arguments are ``list`` type."""
     for var in args:
         if not isinstance(var, (list, collections.UserList, collections.abc.MutableSequence)):
             name = type(var).__name__
@@ -111,7 +112,7 @@ def list_check(*args, stacklevel=2):
 
 
 def dict_check(*args, stacklevel=2):
-    """Check if arguments are dict type."""
+    """Check if arguments are ``dict`` type."""
     for var in args:
         if not isinstance(var, (dict, collections.UserDict, collections.abc.MutableMapping)):
             name = type(var).__name__
@@ -120,7 +121,7 @@ def dict_check(*args, stacklevel=2):
 
 
 def tuple_check(*args, stacklevel=2):
-    """Check if arguments are tuple type."""
+    """Check if arguments are ``tuple`` type."""
     for var in args:
         if not isinstance(var, (tuple, collections.abc.Sequence)):
             name = type(var).__name__
@@ -129,7 +130,7 @@ def tuple_check(*args, stacklevel=2):
 
 
 def io_check(*args, stacklevel=2):
-    """Check if arguments are file-like object."""
+    """Check if arguments are *file-like object*."""
     for var in args:
         if not isinstance(var, io.IOBase):
             name = type(var).__name__
@@ -138,7 +139,7 @@ def io_check(*args, stacklevel=2):
 
 
 def info_check(*args, stacklevel=2):
-    """Check if arguments are Info instance."""
+    """Check if arguments are :class:`~pcapkit.corekit.infoclass.Info` instance."""
     from pcapkit.corekit.infoclass import Info
 
     for var in args:
@@ -149,7 +150,7 @@ def info_check(*args, stacklevel=2):
 
 
 def ip_check(*args, stacklevel=2):
-    """Check if arguments are IP addresses."""
+    """Check if arguments are *IP addresses*."""
     for var in args:
         if not isinstance(var, ipaddress._IPAddressBase):  # pylint: disable=protected-access
             name = type(var).__name__
@@ -158,7 +159,7 @@ def ip_check(*args, stacklevel=2):
 
 
 def enum_check(*args, stacklevel=2):
-    """Check if arguments are of protocol type."""
+    """Check if arguments are of *enumeration protocol* type."""
     for var in args:
         if not isinstance(var, (enum.EnumMeta, aenum.EnumMeta)):
             name = type(var).__name__

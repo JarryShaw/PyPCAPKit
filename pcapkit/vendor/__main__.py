@@ -20,19 +20,6 @@ def get_parser():
     Returns:
         argparse.ArgumentParser: Argument parser.
 
-    .. code:: text
-
-       usage: pcapkit-vendor [-h] [-V] ...
-
-       update constant enumerations
-
-       positional arguments:
-         target         update targets, supply none to update all
-
-       optional arguments:
-         -h, --help     show this help message and exit
-         -V, --version  show program's version number and exit
-
     """
     parser = argparse.ArgumentParser(prog='pcapkit-vendor',
                                      description='update constant enumerations')

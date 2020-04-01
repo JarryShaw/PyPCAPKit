@@ -22,25 +22,21 @@ which implements extractor for Internet Protocol version 4
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-import collections
 import datetime
 import ipaddress
 
-from pcapkit.const.ipv4.classification_level import \
-    ClassificationLevel as _CLASSIFICATION_LEVEL
+from pcapkit.const.ipv4.classification_level import ClassificationLevel as _CLASSIFICATION_LEVEL
 from pcapkit.const.ipv4.option_class import OptionClass as opt_class
 from pcapkit.const.ipv4.option_number import OptionNumber as OPT_TYPE
-from pcapkit.const.ipv4.protection_authority import \
-    ProtectionAuthority as _PROTECTION_AUTHORITY
-from pcapkit.const.ipv4.qs_function import QS_Function as QS_FUNC
+from pcapkit.const.ipv4.protection_authority import ProtectionAuthority as _PROTECTION_AUTHORITY
+from pcapkit.const.ipv4.qs_function import QSFunction as QS_FUNC
 from pcapkit.const.ipv4.router_alert import RouterAlert as _ROUTER_ALERT
-from pcapkit.const.ipv4.tos_del import TOS_DEL
-from pcapkit.const.ipv4.tos_ecn import TOS_ECN
-from pcapkit.const.ipv4.tos_pre import TOS_PRE
-from pcapkit.const.ipv4.tos_rel import TOS_REL
-from pcapkit.const.ipv4.tos_thr import TOS_THR
+from pcapkit.const.ipv4.tos_del import ToSDelay as TOS_DEL
+from pcapkit.const.ipv4.tos_ecn import ToSECN as TOS_ECN
+from pcapkit.const.ipv4.tos_pre import ToSPrecedence as TOS_PRE
+from pcapkit.const.ipv4.tos_rel import ToSReliability as TOS_REL
+from pcapkit.const.ipv4.tos_thr import ToSThroughput as TOS_THR
 from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.utilities.exceptions import ProtocolError
 

@@ -2,8 +2,9 @@
 # pylint: disable=protected-access
 """decorator functions
 
-`pcapkit.utilities.decorators` contains several useful
-decorators, including `seekset` and `beholder`.
+:mod:`pcapkit.utilities.decorators` contains several useful
+decorators, including :func:`~pcapkit.utilities.decorators.seekset`
+and :func:`~pcapkit.utilities.decorators.beholder`.
 
 """
 import functools
@@ -20,7 +21,7 @@ __all__ = ['seekset', 'seekset_ng', 'beholder', 'beholder_ng']
 
 
 def seekset(func):
-    """[ClassMethod] Read file from start then set back to original."""
+    """[**ClassMethod**] Read file from start then set back to original."""
     @functools.wraps(func)
     def seekcur(self, *args, **kw):
         seek_cur = self._file.tell()
@@ -44,14 +45,14 @@ def seekset_ng(func):
 
 
 def beholder(func):
-    """[ClassMethod] Behold extraction procedure."""
+    """[**ClassMethod**] Behold extraction procedure."""
     @functools.wraps(func)
     def behold(self, proto, length, *args, **kwargs):
         seek_cur = self._file.tell()
         try:
             return func(proto, length, *args, **kwargs)
         except Exception:
-            from pcapkit.protocols.raw import Raw
+            from pcapkit.protocols.raw import Raw  # pylint: disable=import-outside-toplevel
             error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
             # error = traceback.format_exc()
 
@@ -70,7 +71,7 @@ def beholder_ng(func):
             return func(file, length, *args, **kwargs)
         except Exception:
             # from pcapkit.foundation.analysis import analyse
-            from pcapkit.protocols.raw import Raw
+            from pcapkit.protocols.raw import Raw  # pylint: disable=import-outside-toplevel
             error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
             # error = traceback.format_exc()
 

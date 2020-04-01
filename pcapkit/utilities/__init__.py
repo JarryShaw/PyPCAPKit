@@ -2,10 +2,11 @@
 # pylint: disable=unused-wildcard-import
 """utility functions and classes
 
-`pcapkit.utilities` contains several useful functions and
-classes which are fundations of `pcapkit`, including
-decorater function `seekset` and `beholder`, and several
-user-refined exceptions and validations.
+:mod:`pcapkit.utilities` contains several useful functions
+and classes which are fundations of :mod:`pcapkit`, including
+decorater function :func:`~pcapkit.utilities.decorators.seekset`
+and :func:`~pcapkit.utilities.decorators.beholder`, and
+several user-refined exceptions and validations.
 
 """
 from pcapkit.utilities.compat import *  # pylint: disable=redefined-builtin

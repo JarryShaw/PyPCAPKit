@@ -5,7 +5,7 @@ import collections
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['ToS_PRE']
+__all__ = ['ToSPrecedence']
 
 #: ToS registry.
 DATA = {
@@ -20,7 +20,7 @@ DATA = {
 }
 
 
-class ToS_PRE(Vendor):
+class ToSPrecedence(Vendor):
     """ToS (DS Field) Precedence"""
 
     #: Value limit checker.
@@ -70,4 +70,4 @@ class ToS_PRE(Vendor):
 
 
 if __name__ == "__main__":
-    ToS_PRE()
+    ToSPrecedence()

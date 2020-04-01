@@ -4,39 +4,39 @@
 
 from aenum import IntEnum, extend_enum
 
-__all__ = ['ToS_PRE']
+__all__ = ['ToSPrecedence']
 
 
-class ToS_PRE(IntEnum):
-    """[ToS_PRE] ToS (DS Field) Precedence"""
+class ToSPrecedence(IntEnum):
+    """[ToSPrecedence] ToS (DS Field) Precedence"""
 
-    _ignore_ = 'ToS_PRE _'
-    ToS_PRE = vars()
+    _ignore_ = 'ToSPrecedence _'
+    ToSPrecedence = vars()
 
-    ToS_PRE['Network Control'] = 7
+    ToSPrecedence['Network Control'] = 7
 
-    ToS_PRE['Internetwork Control'] = 6
+    ToSPrecedence['Internetwork Control'] = 6
 
-    ToS_PRE['CRITIC/ECP'] = 5
+    ToSPrecedence['CRITIC/ECP'] = 5
 
-    ToS_PRE['Flash Override'] = 4
+    ToSPrecedence['Flash Override'] = 4
 
-    ToS_PRE['Flash'] = 3
+    ToSPrecedence['Flash'] = 3
 
-    ToS_PRE['Immediate'] = 2
+    ToSPrecedence['Immediate'] = 2
 
-    ToS_PRE['Priority'] = 1
+    ToSPrecedence['Priority'] = 1
 
-    ToS_PRE['Routine'] = 0
+    ToSPrecedence['Routine'] = 0
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return ToS_PRE(key)
-        if key not in ToS_PRE._member_map_:  # pylint: disable=no-member
-            extend_enum(ToS_PRE, key, default)
-        return ToS_PRE[key]
+            return ToSPrecedence(key)
+        if key not in ToSPrecedence._member_map_:  # pylint: disable=no-member
+            extend_enum(ToSPrecedence, key, default)
+        return ToSPrecedence[key]
 
     @classmethod
     def _missing_(cls, value):

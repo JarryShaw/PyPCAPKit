@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 """user defined exceptions
 
-`pcapkit.exceptions` refined built-in exceptions. Make it
-possible to show only user error stack infomation, when
-exception raised on user's operation.
+:mod:`pcapkit.exceptions` refined built-in exceptions.
+Make it possible to show only user error stack infomation [*]_,
+when exception raised on user's operation.
+
+.. [*] See |tbtrim|_ project for Pythonic implementation.
+.. |tbtrim| replace:: ``tbtrim``
+.. _tbtrim: https://github.com/gousaiyang/tbtrim
 
 """
 import os
@@ -39,7 +43,7 @@ BOOLEAN_STATES = {'1': True, '0': False,
                   'true': True, 'false': False,
                   'on': True, 'off': False}
 
-# DEVMODE flag
+#: Development mode (``DEVMODE``) flag.
 DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold(), False)
 
 
@@ -63,11 +67,16 @@ def stacklevel():
 class BaseError(Exception):
     """Base error class of all kinds.
 
-    Cautions:
-        * Turn off system-default traceback function by set `sys.tracebacklimit` to 0.
-        * But bugs appear in Python 3.6, so we have to set `sys.tracebacklimit` to None.
-            > this note is deprecated since Python fixed the problem above
-        * In Python 2.7, `trace.print_stack(limit)` dose not support negative limit.
+    Important:
+
+        * Turn off system-default traceback function by set :data:`sys.tracebacklimit` to 0.
+        * But bugs appear in Python 3.6, so we have to set :data:`sys.tracebacklimit` to ``None``.
+
+          .. note::
+
+            This note is deprecated since Python fixed the problem above.
+
+        * In Python 2.7, :func:`trace.print_stack(limit)` dose not support negative limit.
 
     """
     def __init__(self, *args, quiet=False, **kwargs):
@@ -104,39 +113,39 @@ class ComplexError(BaseError, TypeError):
 
 
 class BytesError(BaseError, TypeError):
-    """The argument(s) must be bytes type."""
+    """The argument(s) must be ``bytes`` type."""
 
 
 class BytearrayError(BaseError, TypeError):
-    """The argument(s) must be bytearray type."""
+    """The argument(s) must be ``bytearray`` type."""
 
 
 class BoolError(BaseError, TypeError):
-    """The argument(s) must be bool type."""
+    """The argument(s) must be ``bool`` type."""
 
 
 class StringError(BaseError, TypeError):
-    """The argument(s) must be str type."""
+    """The argument(s) must be ``str`` type."""
 
 
 class DictError(BaseError, TypeError):
-    """The argument(s) must be dict type."""
+    """The argument(s) must be ``dict`` type."""
 
 
 class ListError(BaseError, TypeError):
-    """The argument(s) must be list type."""
+    """The argument(s) must be ``list`` type."""
 
 
 class TupleError(BaseError, TypeError):
-    """The argument(s) must be tuple type."""
+    """The argument(s) must be ``tuple`` type."""
 
 
 class IterableError(BaseError, TypeError):
-    """The argument(s) must be iterable."""
+    """The argument(s) must be *iterable*."""
 
 
 class CallableError(BaseError, TypeError):
-    """The argument(s) must be callable."""
+    """The argument(s) must be *callable*."""
 
 
 class ProtocolUnbound(BaseError, TypeError):
@@ -144,19 +153,19 @@ class ProtocolUnbound(BaseError, TypeError):
 
 
 class IOObjError(BaseError, TypeError):
-    """The argument(s) must be file-like object."""
+    """The argument(s) must be *file-like object*."""
 
 
 class InfoError(BaseError, TypeError):
-    """The argument(s) must be Info instance."""
+    """The argument(s) must be :class:`~pcapkit.corekit.infoclass.Info` instance."""
 
 
 class IPError(BaseError, TypeError):
-    """The argument(s) must be IP address."""
+    """The argument(s) must be *IP address*."""
 
 
 class EnumError(BaseError, TypeError):
-    """The argument(s) must be enumeration protocol type."""
+    """The argument(s) must be *enumeration protocol* type."""
 
 
 class ComparisonError(BaseError, TypeError):

@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """PyShark tools
 
-`pcapkit.toolkit.pyshark` contains all you need for
-`PyPCAPKit` handy usage with `PyShark` engine. All
+:mod:`pcapkit.toolkit.pyshark` contains all you need for
+:mod:`pcapkit` handy usage with `PyShark`_ engine. All
 reforming functions returns with a flag to indicate if
 usable for its caller.
+
+.. _PyShark: https://kiminewt.github.io/pyshark
 
 """
 import ipaddress
@@ -15,7 +17,15 @@ __all__ = ['packet2dict', 'tcp_traceflow']
 
 
 def packet2dict(packet):
-    """Convert PyShark packet into dict."""
+    """Convert PyShark packet into ``dict``.
+
+    Args:
+        packet (pyshark.packet.packet.Packet): Scapy packet.
+
+    Returns:
+        Dict[str, Any]: A ``dict`` mapping of packet data.
+
+    """
     dict_ = dict()
     frame = packet.frame_info
     for field in frame.field_names:
@@ -32,7 +42,21 @@ def packet2dict(packet):
 
 
 def tcp_traceflow(packet):
-    """Trace packet flow for TCP."""
+    """Trace packet flow for TCP.
+
+    Args:
+        packet (pyshark.packet.packet.Packet): Scapy packet.
+
+    Returns:
+        bool: If the ``packet`` can be used for TCP flow tracing. A packet can be flow-traced
+            if it contains TCP layer.
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for TCP flow tracing will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.foundation.traceflow.TraceFlow`
+
+    """
     if 'TCP' in packet:
         ip = packet.ip if 'IP' in packet else packet.ipv6
         tcp = packet.tcp

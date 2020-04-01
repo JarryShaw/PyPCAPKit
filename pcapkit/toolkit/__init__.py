@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import, unused-wildcard-import
-"""capability tools
+"""compatibility tools
 
-`pcapkit.toolkit` provides several utility functions for
-capability of multiple engine support.
+:mod:`pcapkit.toolkit` provides several utility functions for
+compatibility of multiple engine support.
 
 """
 # tools for default engine

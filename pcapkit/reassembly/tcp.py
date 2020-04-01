@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""reassembly TCP datagram
+"""TCP datagram reassembly
 
-`pcapkit.reassembly.tcp` contains `TCP_Reassembly` only,
+:mod:`pcapkit.reassembly.tcp` contains
+:class:`~pcapkit.reassembly.tcp.TCP_Reassembly` only,
 which reconstructs fragmented TCP packets back to origin.
 The algorithm for TCP reassembly is described as below.
 
-Notations:
+Notations::
 
     DSN     - Data Sequence Number
     ACK     - TCP Acknowledgement
@@ -20,7 +21,7 @@ Notations:
     srcport - source TCP port
     dstport - destination TCP port
 
-Algorithm:
+Algorithm::
 
     DO {
         BUFID <- src|dst|srcport|dstport|ACK;
@@ -71,24 +72,25 @@ Algorithm:
         } give up until (no entry from HDL)
     }
 
-The following algorithm implement is based on `IP Datagram
-Reassembly Algorithm` introduced in RFC 815. It described an
-algorithm dealing with `RCVBT` (fragment received bit table)
-appeared in RFC 791. And here is the process:
+The following algorithm implement is based on **IP Datagram
+Reassembly Algorithm** introduced in :rfc:`815`. It described an
+algorithm dealing with ``RCVBT`` (fragment received bit table)
+appeared in :rfc:`791`. And here is the process:
 
 1. Select the next hole descriptor from the hole descriptor
    list. If there are no more entries, go to step eight.
-2. If fragment.first is greater than hole.last, go to step one.
-3. If fragment.last is less than hole.first, go to step one.
+2. If ``fragment.first`` is greater than ``hole.last``, go to step one.
+3. If ``fragment.last`` is less than ``hole.first``, go to step one.
 4. Delete the current entry from the hole descriptor list.
-5. If fragment.first is greater than hole.first, then create a
-   new hole descriptor "new_hole" with new_hole.first equal to
-   hole.first, and new_hole.last equal to fragment.first minus
-   one.
-6. If fragment.last is less than hole.last and
-   fragment.more_fragments is true, then create a new hole
-   descriptor "new_hole", with new_hole.first equal to
-   fragment.last plus one and new_hole.last equal to hole.last.
+5. If ``fragment.first`` is greater than ``hole.first``, then create a
+   new hole descriptor ``new_hole`` with ``new_hole.first`` equal to
+   ``hole.first``, and ``new_hole.last`` equal to ``fragment.first``
+   minus one (``-1``).
+6. If ``fragment.last`` is less than ``hole.last`` and
+   ``fragment.more_fragments`` is ``true``, then create a new hole
+   descriptor ``new_hole``, with ``new_hole.first`` equal to
+   ``fragment.last`` plus one (``+1``) and ``new_hole.last`` equal to
+   ``hole.last``.
 7. Go to step one.
 8. If the hole descriptor list is now empty, the datagram is now
    complete. Pass it on to the higher level protocol processor
@@ -108,7 +110,7 @@ __all__ = ['TCP_Reassembly']
 class TCP_Reassembly(Reassembly):
     """Reassembly for TCP payload.
 
-    Usage:
+    Example:
         >>> from pcapkit.reassembly import TCP_Reassembly
         # Initialise instance:
         >>> tcp_reassembly = TCP_Reassembly()
@@ -117,94 +119,107 @@ class TCP_Reassembly(Reassembly):
         # Fetch result:
         >>> result = tcp_reassembly.datagram
 
-    Properties:
-        * name -- str, protocol of current packet
-        * count -- int, total number of reassembled packets
-        * datagram -- tuple, reassembled datagram, which structure may vary
-                        according to its protocol
-        * protocol -- str, protocol of current reassembly object
-
-    Methods:
-        * reassembly -- perform the reassembly procedure
-        * submit -- submit reassembled payload
-        * fetch -- fetch datagram
-        * index -- return datagram index
-        * run -- run automatically
-
     Attributes:
-        * _strflg -- bool, strict mode flag
-        * _buffer -- dict, buffer field
-        * _dtgram -- tuple, reassembled datagram
+        name (str): protocol of current packet
+        count (int): total number of reassembled packets
+        datagram (tuple): reassembled datagram, which structure may vary
+            according to its protocol
+        protocol (str): protocol of current reassembly object
 
-    Terminology:
-        - packet_dict = Info(
-            bufid = tuple(
-                ip.src,                     # source IP address
-                ip.dst,                     # destination IP address
-                tcp.srcport,                # source port
-                tcp.dstport,                # destination port
-            ),
-            num = frame.number,             # original packet range number
-            syn = tcp.flags.syn,            # synchronise flag
-            fin = tcp.flags.fin,            # finish flag
-            rst = tcp.flags.rst,            # reset connection flag
-            len = tcp.raw_len,              # payload length, header excludes
-            first = tcp.seq,                # this sequence number
-            last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
-            payload = tcp.raw,              # raw bytearray type payload
-         )
-        - (tuple) datagram
-           |--> (Info) data
-           |       |--> 'NotImplemented' : (bool) True --> implemented
-           |       |--> 'id' : (Info) original packet identifier
-           |       |                |--> 'src' --> (tuple)
-           |       |                |                |--> (str) ip.src
-           |       |                |                |--> (int) tcp.srcport
-           |       |                |--> 'dst' --> (tuple)
-           |       |                |                |--> (str) ip.dst
-           |       |                |                |--> (int) tcp.dstport
-           |       |                |--> 'ack' --> (int) original packet ACK number
-           |       |--> 'index' : (tuple) packet numbers
-           |       |                |--> (int) original packet range number
-           |       |--> 'payload' : (bytes/None) reassembled application layer data
-           |       |--> 'packets' : (tuple<Analysis>) analysed payload
-           |--> (Info) data
-           |       |--> 'NotImplemented' : (bool) False --> not implemented
-           |       |--> 'id' : (Info) original packet identifier
-           |       |                |--> 'src' --> (tuple)
-           |       |                |                |--> (str) ip.src
-           |       |                |                |--> (int) tcp.srcport
-           |       |                |--> 'dst' --> (tuple)
-           |       |                |                |--> (str) ip.dst
-           |       |                |                |--> (int) tcp.dstport
-           |       |                |--> 'ack' --> (int) original packet ACK number
-           |       |--> 'ack' : (int) original packet ACK number
-           |       |--> 'index' : (tuple) packet numbers
-           |       |                |--> (int) original packet range number
-           |       |--> 'payload' : (tuple/None) partially reassembled payload
-           |       |                |--> (bytes/None) payload fragment
-           |       |--> 'packets' : (tuple<Analysis>) analysed payloads
-           |--> (Info) data ...
-        - (dict) buffer --> memory buffer for reassembly
-           |--> (tuple) BUFID : (dict)
-           |       |--> ip.src      |
-           |       |--> ip.dst      |
-           |       |--> tcp.srcport |
-           |       |--> tcp.dstport |
-           |                        |--> 'hdl' : (list) hole descriptor list
-           |                        |               |--> (Info) hole --> hole descriptor
-           |                        |                       |--> "first" --> (int) start of hole
-           |                        |                       |--> "last" --> (int) stop of hole
-           |                        |--> (int) ACK : (dict)
-           |                        |               |--> 'ind' : (list) list of reassembled packets
-           |                        |               |               |--> (int) packet range number
-           |                        |               |--> 'isn' : (int) ISN of payload buffer
-           |                        |               |--> 'len' : (int) length of payload buffer
-           |                        |               |--> 'raw' : (bytearray) reassembled payload,
-           |                        |                               holes set to b'\x00'
-           |                        |--> (int) ACK ...
-           |                        |--> ...
-           |--> (tuple) BUFID ...
+        _strflg (bool): strict mode flag
+        _buffer (dict): buffer field
+        _dtgram (tuple): reassembled datagram
+
+    .. glossary::
+
+        packet
+            Data structure for **TCP datagram reassembly**
+            (:meth:`~pcapkit.reassembly.tcp.TCP_Reassembly.reassembly`) is as following:
+
+            .. productionlist:: tcp.packet
+
+               packet_dict = Info(
+                 bufid = tuple(
+                     ip.src,                     # source IP address
+                     ip.dst,                     # destination IP address
+                     tcp.srcport,                # source port
+                     tcp.dstport,                # destination port
+                 ),
+                 num = frame.number,             # original packet range number
+                 syn = tcp.flags.syn,            # synchronise flag
+                 fin = tcp.flags.fin,            # finish flag
+                 rst = tcp.flags.rst,            # reset connection flag
+                 len = tcp.raw_len,              # payload length, header excludes
+                 first = tcp.seq,                # this sequence number
+                 last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
+                 payload = tcp.raw,              # raw bytearray type payload
+               )
+
+        datagram
+            Data structure for **reassembled TCP datagram** (element from
+            :attr:`~pcapkit.reassembly.tcp.TCP_Reassembly.datagram` *tuple*)
+            is as following:
+
+            .. productionlist:: tcp.datagram
+
+               (tuple) datagram
+                |--> (Info) data
+                |     |--> 'NotImplemented' : (bool) True --> implemented
+                |     |--> 'id' : (Info) original packet identifier
+                |     |            |--> 'src' --> (tuple)
+                |     |            |               |--> (str) ip.src
+                |     |            |               |--> (int) tcp.srcport
+                |     |            |--> 'dst' --> (tuple)
+                |     |            |               |--> (str) ip.dst
+                |     |            |               |--> (int) tcp.dstport
+                |     |            |--> 'ack' --> (int) original packet ACK number
+                |     |--> 'index' : (tuple) packet numbers
+                |     |               |--> (int) original packet range number
+                |     |--> 'payload' : (Optional[bytes]) reassembled application layer data
+                |     |--> 'packets' : (Tuple[Analysis]) analysed payload
+                |--> (Info) data
+                |     |--> 'NotImplemented' : (bool) False --> not implemented
+                |     |--> 'id' : (Info) original packet identifier
+                |     |            |--> 'src' --> (tuple)
+                |     |            |               |--> (str) ip.src
+                |     |            |               |--> (int) tcp.srcport
+                |     |            |--> 'dst' --> (tuple)
+                |     |            |               |--> (str) ip.dst
+                |     |            |               |--> (int) tcp.dstport
+                |     |            |--> 'ack' --> (int) original packet ACK number
+                |     |--> 'ack' : (int) original packet ACK number
+                |     |--> 'index' : (tuple) packet numbers
+                |     |               |--> (int) original packet range number
+                |     |--> 'payload' : (Optional[tuple]) partially reassembled payload
+                |     |                 |--> (Optional[bytes]) payload fragment
+                |     |--> 'packets' : (Tuple[Analysis]) analysed payloads
+                |--> (Info) data ...
+
+        buffer
+            Data structure for internal buffering when performing reassembly algorithms
+            (:attr:`~pcapkit.reassembly.tcp.TCP_Reassembly._buffer`) is as following:
+
+            .. productionlist:: tcp.buffer
+
+               (dict) buffer --> memory buffer for reassembly
+                |--> (tuple) BUFID : (dict)
+                |       |--> ip.src      |
+                |       |--> ip.dst      |
+                |       |--> tcp.srcport |
+                |       |--> tcp.dstport |
+                |                        |--> 'hdl' : (list) hole descriptor list
+                |                        |             |--> (Info) hole --> hole descriptor
+                |                        |                   |--> "first" --> (int) start of hole
+                |                        |                   |--> "last" --> (int) stop of hole
+                |                        |--> (int) ACK : (dict)
+                |                        |                 |--> 'ind' : (list) list of reassembled packets
+                |                        |                 |             |--> (int) packet range number
+                |                        |                 |--> 'isn' : (int) ISN of payload buffer
+                |                        |                 |--> 'len' : (int) length of payload buffer
+                |                        |                 |--> 'raw' : (bytearray) reassembled payload, holes set to b'\x00'
+                |                        |--> (int) ACK ...
+                |                        |--> ...
+                |--> (tuple) BUFID ...
 
     """
     ##########################################################################
@@ -228,8 +243,8 @@ class TCP_Reassembly(Reassembly):
     def reassembly(self, info):
         """Reassembly procedure.
 
-        Positional arguments:
-            * info -- Info, info dict of packets to be reassembled
+        Arguments:
+            info (Info): :term:`info <tcp.packet>` dict of packets to be reassembled
 
         """
         BUFID = info.bufid  # Buffer Identifier
@@ -321,14 +336,14 @@ class TCP_Reassembly(Reassembly):
     def submit(self, buf, *, bufid):  # pylint: disable=arguments-differ
         """Submit reassembled payload.
 
-        Positional arguments:
-            * buf -- dict, buffer dict of reassembled packets
+        Arguments:
+            buf (dict): :term:`buffer <tcp.buffer>` dict of reassembled packets
 
-        Keyword arguments:
-            * bufid -- tuple, buffer identifier
+        Keyword Arguments:
+            bufid (tuple): buffer identifier
 
         Returns:
-            * list -- reassembled packets
+            list: reassembled :term:`packets <tcp.datagram>`
 
         """
         datagram = []           # reassembled datagram

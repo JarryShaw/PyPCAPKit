@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """DPKT tools
 
-`pcapkit.toolkit.dpkt` contains all you need for
-`PyPCAPKit` handy usage with `DPKT` engine. All reforming
+:mod:`pcapkit.toolkit.dpkt` contains all you need for
+:mod:`pcapkit` handy usage with `DPKT`_ engine. All reforming
 functions returns with a flag to indicate if usable for
 its caller.
+
+.. _DPKT: https://dpkt.readthedocs.io
 
 """
 import ipaddress
@@ -18,8 +20,23 @@ __all__ = [
 
 
 def ipv6_hdr_len(ipv6):
-    """Calculate length of headers before IPv6-Frag"""
+    """Calculate length of headers before IPv6 Fragment header.
+
+    Args:
+        ipv6 (dpkt.ip6.IP6): DPKT IPv6 packet.
+
+    Returns:
+        int: Length of headers before IPv6 Fragment header :class:`dpkt.ip6.IP6FragmentHeader`
+            (:rfc:`2460#section-4.5`).
+
+    As specified in :rfc:`2460#section-4.1`, such headers (before the IPv6 Fragment Header)
+    includes Hop-by-Hop Options header :class:`dpkt.ip6.IP6HopOptsHeader` (:rfc:`2460#section-4.3`),
+    Destination Options header :class:`dpkt.ip6.IP6DstOptHeader` (:rfc:`2460#section-4.6`) and
+    Routing header :class:`dpkt.ip6.IP6RoutingHeader` (:rfc:`2460#section-4.4`).
+
+    """
     hdr_len = ipv6.__hdr_len__
+    # IP6HopOptsHeader / IP6DstOptHeader / IP6RoutingHeader
     for code in (0, 60, 43):
         ext_hdr = ipv6.extension_hdrs.get(code)
         if ext_hdr is not None:
@@ -28,7 +45,15 @@ def ipv6_hdr_len(ipv6):
 
 
 def packet2chain(packet):
-    """Fetch DPKT packet protocol chain."""
+    """Fetch DPKT packet protocol chain.
+
+    Args:
+        packet (dpkt.dpkt.Packet): DPKT packet.
+
+    Returns:
+        str: Colon (``:``) seperated list of protocol chain.
+
+    """
     chain = [type(packet).__name__]
     payload = packet.data
     while not isinstance(payload, bytes):
@@ -38,7 +63,15 @@ def packet2chain(packet):
 
 
 def packet2dict(packet, timestamp, *, data_link):
-    """Convert DPKT packet into dict."""
+    """Convert DPKT packet into ``dict``.
+
+    Args:
+        packet (c): Scapy packet.
+
+    Returns:
+        Dict[str, Any]: A ``dict`` mapping of packet data.
+
+    """
     def wrapper(packet):
         dict_ = dict()
         for field in packet.__hdr_fields__:
@@ -55,7 +88,25 @@ def packet2dict(packet, timestamp, *, data_link):
 
 
 def ipv4_reassembly(packet, *, count=NotImplemented):
-    """Make data for IPv4 reassembly."""
+    """Make data for IPv4 reassembly.
+
+    Args:
+        packet (dpkt.dpkt.Packet): DPKT packet.
+
+    Keyword Args:
+        count (int): Packet index. If not provided, default to ``NotImplemented``.
+
+    Returns:
+        bool: If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
+            if it contains IPv4 layer and the **DF** (:attr:`scapy.all.IP.flags.DF`) flag is
+            ``False``.
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for IPv4 reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.ipv4.IPv4Reassembly`
+
+    """
     ipv4 = getattr(packet, 'ip', None)
     if ipv4 is not None:
         if ipv4.df:     # dismiss not fragmented packet
@@ -80,7 +131,24 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
 
 
 def ipv6_reassembly(packet, *, count=NotImplemented):
-    """Make data for IPv6 reassembly."""
+    """Make data for IPv6 reassembly.
+
+    Args:
+        packet (dpkt.dpkt.Packet): DPKT packet.
+
+    Keyword Args:
+        count (int): Packet index. If not provided, default to ``NotImplemented``.
+
+    Returns:
+        bool: If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
+            if it contains IPv6 layer and IPv6 Fragment header (:rfc:`2460#section-4.5`).
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for IPv6 reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.ipv6.IPv6Reassembly`
+
+    """
     ipv6 = getattr(packet, 'ip6', None)
     if ipv6 is not None:
         ipv6_frag = ipv6.extension_hdrs.get(44)
@@ -107,7 +175,24 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
 
 
 def tcp_reassembly(packet, *, count=NotImplemented):
-    """Make data for TCP reassembly."""
+    """Make data for TCP reassembly.
+
+    Args:
+        packet (dpkt.dpkt.Packet): DPKT packet.
+
+    Keyword Args:
+        count (int): Packet index. If not provided, default to ``NotImplemented``.
+
+    Returns:
+        bool: If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
+            if it contains TCP layer.
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for TCP reassembly will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.reassembly.tcp.TCPReassembly`
+
+    """
     if getattr(packet, 'ip', None):
         ip = packet['ip']
     elif getattr(packet, 'ip6', None):
@@ -141,7 +226,26 @@ def tcp_reassembly(packet, *, count=NotImplemented):
 
 
 def tcp_traceflow(packet, timestamp, *, data_link, count=NotImplemented):
-    """Trace packet flow for TCP."""
+    """Trace packet flow for TCP.
+
+    Args:
+        packet (dpkt.dpkt.Packet): DPKT packet.
+        timestamp (float): Timestamp of the packet.
+
+    Keyword Args:
+        data_link (str): Data link layer protocol (from global header).
+        count (int): Packet index. If not provided, default to ``NotImplemented``.
+
+    Returns:
+        bool: If the ``packet`` can be used for TCP flow tracing. A packet can be flow-traced
+            if it contains TCP layer.
+        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
+            of data for TCP flow tracing will be returned; otherwise, ``None`` will be returned.
+
+    See Also:
+        :class:`~pcapkit.foundation.traceflow.TraceFlow`
+
+    """
     if getattr(packet, 'ip', None):
         ip = packet['ip']
     elif getattr(packet, 'ip6', None):

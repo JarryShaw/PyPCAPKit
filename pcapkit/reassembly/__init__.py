@@ -2,9 +2,9 @@
 # pylint: disable=unused-import
 """reassembly packets and datagrams
 
-`pcapkit.reassembly` bases on algorithms described in
-[`RFC 815`](https://tools.ietf.org/html/rfc815),
-implements datagram reassembly of IP and TCP packets.
+:mod:`pcapkit.reassembly` bases on algorithms described
+in :rfc:`815`, implements datagram reassembly of IP and
+TCP packets.
 
 """
 # Base Class for Reassembly

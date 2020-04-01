@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """user defined warnings
 
+:mod:`pcapkit.warnings` refined built-in warnings.
+
 """
 
 __all__ = [

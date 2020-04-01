@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-"""reassembly IPv4 fragments
+"""IPv4 fragments reassembly
 
-`pcapkit.reassembly.ipv4` contains `IPv4_Reassembly`
+:mod:`pcapkit.reassembly.ipv4` contains
+:class:`~pcapkit.reassembly.ipv4.IPv4_Reassembly`
 only, which reconstructs fragmented IPv4 packets back to
 origin. The following algorithm implement is based on IP
-reassembly procedure introduced in RFC 791, using
-`RCVBT` (fragment receivedbit table). Though another
-algorithm is explained in RFC 815, replacing `RCVBT`,
+reassembly procedure introduced in :rfc:`791`, using
+``RCVBT`` (fragment receivedbit table). Though another
+algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
 however, this implement still used the elder one.
-And here is the pseudo-code:
 
-Notations:
+Notations::
 
     FO    - Fragment Offset
     IHL   - Internet Header Length
@@ -23,7 +23,7 @@ Notations:
     RCVBT - Fragment Received Bit Table
     TLB   - Timer Lower Bound
 
-Algorithm:
+Algorithm::
 
     DO {
         BUFID <- source|destination|protocol|identification;
@@ -78,7 +78,7 @@ __all__ = ['IPv4_Reassembly']
 class IPv4_Reassembly(IP_Reassembly):
     """Reassembly for IPv4 payload.
 
-    Usage:
+    Example:
         >>> from pcapkit.reassembly import IPv4_Reassembly
         # Initialise instance:
         >>> ipv4_reassembly = IPv4_Reassembly()
@@ -87,71 +87,85 @@ class IPv4_Reassembly(IP_Reassembly):
         # Fetch result:
         >>> result = ipv4_reassembly.datagram
 
-    Properties:
-        * name -- str, protocol of current packet
-        * count -- int, total number of reassembled packets
-        * datagram -- tuple, reassembled datagram, which structure may vary
-                        according to its protocol
-        * protocol -- str, protocol of current reassembly object
-
-    Methods:
-        * reassembly -- perform the reassembly procedure
-        * submit -- submit reassembled payload
-        * fetch -- fetch datagram
-        * index -- return datagram index
-        * run -- run automatically
-
     Attributes:
-        * _strflg -- bool, strict mode flag
-        * _buffer -- dict, buffer field
-        * _dtgram -- tuple, reassembled datagram
+        name (str): protocol of current packet
+        count (int): total number of reassembled packets
+        datagram (tuple): reassembled datagram, which structure may vary
+            according to its protocol
+        protocol (str): protocol of current reassembly object
 
-    Terminology:
-        * packet_dict = dict(
-            bufid = tuple(
-                ipv4.src,                   # source IP address
-                ipv4.dst,                   # destination IP address
-                ipv4.id,                    # identification
-                ipv4.proto,                 # payload protocol type
-            ),
-            num = frame.number,             # original packet range number
-            fo = ipv4.frag_offset,          # fragment offset
-            ihl = ipv4.hdr_len,             # internet header length
-            mf = ipv4.flags.mf,             # more fragment flag
-            tl = ipv4.len,                  # total length, header includes
-            header = ipv4.header,           # raw bytearray type header
-            payload = ipv4.payload,         # raw bytearray type payload
-          )
-        * (tuple) datagram
-            |--> (dict) data
-            |       |--> 'NotImplemented' : (bool) True --> implemented
-            |       |--> 'index' : (tuple) packet numbers
-            |       |                |--> (int) original packet range number
-            |       |--> 'packet' : (bytes/None) reassembled IPv4 packet
-            |--> (dict) data
-            |       |--> 'NotImplemented' : (bool) False --> not implemented
-            |       |--> 'index' : (tuple) packet numbers
-            |       |                |--> (int) original packet range number
-            |       |--> 'header' : (bytes/None) IPv4 header
-            |       |--> 'payload' : (tuple/None) partially reassembled IPv4 payload
-            |                        |--> (bytes/None) IPv4 payload fragment
-            |--> (dict) data ...
-        * (dict) buffer --> memory buffer for reassembly
-            |--> (tuple) BUFID : (dict)
-            |       |--> ipv4.src    |
-            |       |--> ipc4.dst    |
-            |       |--> ipv4.id     |
-            |       |--> ipv4.proto  |
-            |                        |--> 'TDL' : (int) total data length
-            |                        |--> RCVBT : (bytearray) fragment received bit table
-            |                        |               |--> (bytes) b\x00' not received
-            |                        |               |--> (bytes) b\x01' received
-            |                        |               |--> (bytes) ...
-            |                        |--> 'index' : (list) list of reassembled packets
-            |                        |               |--> (int) packet range number
-            |                        |--> 'header' : (bytearray) header buffer
-            |                        |--> 'datagram' : (bytearray) data buffer, holes set to b'\x00'
-            |--> (tuple) BUFID ...
+        _strflg (bool): strict mode flag
+        _buffer (dict): buffer field
+        _dtgram (tuple): reassembled datagram
+
+    .. glossary::
+
+        packet
+            Data structure for **IPv4 datagram reassembly**
+            (:meth:`~pcapkit.reassembly.ipv4.IPv4_Reassembly.reassembly`) is as following:
+
+            .. productionlist:: ipv4.packet
+
+               packet_dict = dict(
+                 bufid = tuple(
+                     ipv4.src,                   # source IP address
+                     ipv4.dst,                   # destination IP address
+                     ipv4.id,                    # identification
+                     ipv4.proto,                 # payload protocol type
+                 ),
+                 num = frame.number,             # original packet range number
+                 fo = ipv4.frag_offset,          # fragment offset
+                 ihl = ipv4.hdr_len,             # internet header length
+                 mf = ipv4.flags.mf,             # more fragment flag
+                 tl = ipv4.len,                  # total length, header includes
+                 header = ipv4.header,           # raw bytearray type header
+                 payload = ipv4.payload,         # raw bytearray type payload
+               )
+
+        datagram
+            Data structure for **reassembled IPv4 datagram** (element from
+            :attr:`~pcapkit.reassembly.ipv4.IPv4_Reassembly.datagram` *tuple*)
+            is as following:
+
+            .. productionlist:: ipv4.datagram
+
+               (tuple) datagram
+                |--> (dict) data
+                |     |--> 'NotImplemented' : (bool) True --> implemented
+                |     |--> 'index' : (tuple) packet numbers
+                |     |               |--> (int) original packet range number
+                |     |--> 'packet' : (Optional[bytes]) reassembled IPv4 packet
+                |--> (dict) data
+                |     |--> 'NotImplemented' : (bool) False --> not implemented
+                |     |--> 'index' : (tuple) packet numbers
+                |     |               |--> (int) original packet range number
+                |     |--> 'header' : (Optional[bytes]) IPv4 header
+                |     |--> 'payload' : (Optional[tuple]) partially reassembled IPv4 payload
+                |                       |--> (Optional[bytes]) IPv4 payload fragment
+                |--> (dict) data ...
+
+        buffer
+            Data structure for internal buffering when performing reassembly algorithms
+            (:attr:`~pcapkit.reassembly.ipv4.IPv4_Reassembly._buffer`) is as following:
+
+            .. productionlist:: ipv4.buffer
+
+               (dict) buffer --> memory buffer for reassembly
+                |--> (tuple) BUFID : (dict)
+                |     |--> ipv4.src       |
+                |     |--> ipc6.dst       |
+                |     |--> ipv4.label     |
+                |     |--> ipv4_frag.next |
+                |                         |--> 'TDL' : (int) total data length
+                |                         |--> RCVBT : (bytearray) fragment received bit table
+                |                         |             |--> (bytes) b\x00' not received
+                |                         |             |--> (bytes) b\x01' received
+                |                         |             |--> (bytes) ...
+                |                         |--> 'index' : (list) list of reassembled packets
+                |                         |               |--> (int) packet range number
+                |                         |--> 'header' : (bytearray) header buffer
+                |                         |--> 'datagram' : (bytearray) data buffer, holes set to b'\x00'
+                |--> (tuple) BUFID ...
 
     """
     ##########################################################################

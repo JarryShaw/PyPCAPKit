@@ -21,7 +21,7 @@ import datetime
 import ipaddress
 
 from pcapkit.const.ipv6.option import Option as _OPT_TYPE
-from pcapkit.const.ipv6.qs_function import QS_Function as _QS_FUNC
+from pcapkit.const.ipv6.qs_function import QSFunction as _QS_FUNC
 from pcapkit.const.ipv6.router_alert import RouterAlert as _ROUTER_ALERT
 from pcapkit.const.ipv6.seed_id import SeedID as _IPv6_Opts_SEED
 from pcapkit.const.ipv6.tagger_id import TaggerID as _TID_TYPE

@@ -5,7 +5,7 @@ import collections
 
 from pcapkit.vendor.default import Vendor
 
-__all__ = ['ToS_DEL']
+__all__ = ['ToSDelay']
 
 #: ToS registry.
 DATA = {
@@ -14,7 +14,7 @@ DATA = {
 }
 
 
-class ToS_DEL(Vendor):
+class ToSDelay(Vendor):
     """ToS (DS Field) Delay"""
 
     #: Value limit checker.
@@ -64,4 +64,4 @@ class ToS_DEL(Vendor):
 
 
 if __name__ == "__main__":
-    ToS_DEL()
+    ToSDelay()

@@ -2,7 +2,7 @@
 # pylint: disable=wrong-import-position, unused-import, unused-wildcard-import, bad-continuation
 """stream pcap file extractor
 
-:mod:s`pcapkit` is an independent open source library, using only
+:mod:`pcapkit` is an independent open source library, using only
 `DictDumper`_ as its formatted output dumper.
 
 .. _DictDumper: https://dictdumper.jarryshaw.me
@@ -26,45 +26,45 @@ efficiency in some way.
 In :mod:`pcapkit`, all files can be described as following eight
 different components.
 
- - Interface (:mod:`pcapkit.interface`)
+- Interface (:mod:`pcapkit.interface`)
 
-    user interface for the :mod:`pcapkit` library, which
-    standardise and simplify the usage of this library
+  user interface for the :mod:`pcapkit` library, which
+  standardise and simplify the usage of this library
 
- - Foundation (:mod:`pcapkit.foundation`)
+- Foundation (:mod:`pcapkit.foundation`)
 
-    synthesise file I/O and protocol analysis, coordinate
-    information exchange in all network layers
+  synthesise file I/O and protocol analysis, coordinate
+  information exchange in all network layers
 
- - Reassembly (:mod:`pcapkit.reassembly`)
+- Reassembly (:mod:`pcapkit.reassembly`)
 
-    base on algorithms described in :rfc:`815`,
-    implement datagram reassembly of IP and TCP packets
+  base on algorithms described in :rfc:`815`,
+  implement datagram reassembly of IP and TCP packets
 
- - IPSuite (:mod:`pcapkit.ipsuite`)
+- IPSuite (:mod:`pcapkit.ipsuite`)
 
-    collection of constructors for Internet Protocol Suite
+  collection of constructors for Internet Protocol Suite
 
- - Protocols (:mod:`pcapkit.protocols`)
+- Protocols (:mod:`pcapkit.protocols`)
 
-    collection of all protocol family, with detailed
-    implementation and methods
+  collection of all protocol family, with detailed
+  implementation and methods
 
- - Utilities (:mod:`pcapkit.utilities`)
+- Utilities (:mod:`pcapkit.utilities`)
 
-    collection of utility functions and classes
+  collection of utility functions and classes
 
- - CoreKit (:mod:`pcapkit.corekit`)
+- CoreKit (:mod:`pcapkit.corekit`)
 
-    core utilities for :mod:`pcapkit` implementation
+  core utilities for :mod:`pcapkit` implementation
 
- - ToolKit (:mod:`pcapkit.toolkit`)
+- ToolKit (:mod:`pcapkit.toolkit`)
 
-    utility tools for :mod:`pcapkit` implementation
+  utility tools for :mod:`pcapkit` implementation
 
- - DumpKit (:mod:`pcapkit.dumpkit`)
+- DumpKit (:mod:`pcapkit.dumpkit`)
 
-    dump utilities for :mod:`pcapkit` implementation
+  dump utilities for :mod:`pcapkit` implementation
 
 """
 import os

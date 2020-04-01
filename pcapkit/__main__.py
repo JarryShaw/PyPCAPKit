@@ -17,11 +17,17 @@ import emoji
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.interface import JSON, PLIST, TREE
 
-# version number
+#: version number
 __version__ = '0.6.1'
 
 
 def get_parser():
+    """CLI argument parser.
+
+    Returns:
+        argparse.ArgumentParser: Argument parser.
+
+    """
     parser = argparse.ArgumentParser(prog='pcapkit-cli',
                                      description='PCAP file extractor and formatted dumper')
     parser.add_argument('-V', '--version', action='version', version=__version__)
@@ -66,6 +72,7 @@ def get_parser():
 
 
 def main():
+    """Entrypoint."""
     parser = get_parser()
     args = parser.parse_args()
     warnings.simplefilter('ignore')

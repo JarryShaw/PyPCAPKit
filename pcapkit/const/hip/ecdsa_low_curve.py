@@ -4,29 +4,29 @@
 
 from aenum import IntEnum, extend_enum
 
-__all__ = ['ECDSA_LOWCurve']
+__all__ = ['ECDSALowCurve']
 
 
-class ECDSA_LOWCurve(IntEnum):
-    """[ECDSA_LOWCurve] ECDSA_LOW Curve Label"""
+class ECDSALowCurve(IntEnum):
+    """[ECDSALowCurve] ECDSA_LOW Curve Label"""
 
-    _ignore_ = 'ECDSA_LOWCurve _'
-    ECDSA_LOWCurve = vars()
-
-    #: [:rfc:`7401`]
-    ECDSA_LOWCurve['RESERVED'] = 0
+    _ignore_ = 'ECDSALowCurve _'
+    ECDSALowCurve = vars()
 
     #: [:rfc:`7401`]
-    ECDSA_LOWCurve['SECP160R1'] = 1
+    ECDSALowCurve['RESERVED'] = 0
+
+    #: [:rfc:`7401`]
+    ECDSALowCurve['SECP160R1'] = 1
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return ECDSA_LOWCurve(key)
-        if key not in ECDSA_LOWCurve._member_map_:  # pylint: disable=no-member
-            extend_enum(ECDSA_LOWCurve, key, default)
-        return ECDSA_LOWCurve[key]
+            return ECDSALowCurve(key)
+        if key not in ECDSALowCurve._member_map_:  # pylint: disable=no-member
+            extend_enum(ECDSALowCurve, key, default)
+        return ECDSALowCurve[key]
 
     @classmethod
     def _missing_(cls, value):

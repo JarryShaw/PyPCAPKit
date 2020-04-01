@@ -4,27 +4,27 @@
 
 from aenum import IntEnum, extend_enum
 
-__all__ = ['ToS_DEL']
+__all__ = ['ToSDelay']
 
 
-class ToS_DEL(IntEnum):
-    """[ToS_DEL] ToS (DS Field) Delay"""
+class ToSDelay(IntEnum):
+    """[ToSDelay] ToS (DS Field) Delay"""
 
-    _ignore_ = 'ToS_DEL _'
-    ToS_DEL = vars()
+    _ignore_ = 'ToSDelay _'
+    ToSDelay = vars()
 
-    ToS_DEL['NORMAL'] = 0
+    ToSDelay['NORMAL'] = 0
 
-    ToS_DEL['LOW'] = 1
+    ToSDelay['LOW'] = 1
 
     @staticmethod
     def get(key, default=-1):
         """Backport support for original codes."""
         if isinstance(key, int):
-            return ToS_DEL(key)
-        if key not in ToS_DEL._member_map_:  # pylint: disable=no-member
-            extend_enum(ToS_DEL, key, default)
-        return ToS_DEL[key]
+            return ToSDelay(key)
+        if key not in ToSDelay._member_map_:  # pylint: disable=no-member
+            extend_enum(ToSDelay, key, default)
+        return ToSDelay[key]
 
     @classmethod
     def _missing_(cls, value):
