@@ -1,19 +1,24 @@
 # -*- coding: utf-8 -*-
 """frame header
 
-`pcapkit.protocols.pcap.frame` contains `Frame` only,
+:mod:`pcapkit.protocols.pcap.frame` contains
+:class:`~pcapkit.protocols.pcap.frame.Frame` only,
 which implements extractor for frame headers of PCAP,
-whose structure is described as below.
+whose structure is described as below:
 
-typedef struct pcaprec_hdr_s {
-    guint32 ts_sec;     /* timestamp seconds */
-    guint32 ts_usec;    /* timestamp microseconds */
-    guint32 incl_len;   /* number of octets of packet saved in file */
-    guint32 orig_len;   /* actual length of packet */
-} pcaprec_hdr_t;
+.. code:: c
+
+    typedef struct pcaprec_hdr_s {
+        guint32 ts_sec;     /* timestamp seconds */
+        guint32 ts_usec;    /* timestamp microseconds */
+        guint32 incl_len;   /* number of octets of packet saved in file */
+        guint32 orig_len;   /* actual length of packet */
+    } pcaprec_hdr_t;
 
 """
+import collections
 import datetime
+import importlib
 import io
 import os
 import traceback
@@ -31,39 +36,53 @@ from pcapkit.utilities.decorators import beholder
 
 __all__ = ['Frame']
 
+#: Protocol mapping
+
 
 class Frame(Protocol):
     """Per packet frame header extractor.
 
     Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current frame
+        name (str: name of corresponding protocol
+        info (Info: info dict of current instance
+        alias (str: acronym of corresponding protocol
+        length (int: header length of corresponding protocol
+        protocol (str: name of next layer protocol
+        protochain (ProtoChain: protocol chain of current frame
+
+        _file (io.BytesIO): source data stream
+        _info (Info): info dict of current instance
+        _protos (ProtoChain): protocol chain of current instance
 
     Methods:
-        * decode_bytes -- try to decode bytes into str
-        * decode_url -- decode URLs into Unicode
-        * index -- call `ProtoChain.index`
-        * read_frame -- read each block after global header
+        decode_bytes: try to decode ``bytes`` into ``str``
+        decode_url: decode URLs into Unicode
+        index: call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`
+        read_frame: read each block after global header
 
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
+        _read_protos: read next layer protocol type
+        _read_fileng: read file buffer
+        _read_unpack: read bytes and unpack to integers
+        _read_binary: read bytes and convert into binaries
+        _read_packet: read raw packet data
+        _decode_next_layer: decode next layer protocol type
+        _import_next_layer: import next layer protocol extractor
 
     """
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: The values should be a tuple representing the module name and class name.
+    __proto__ = collections.defaultdict(lambda: ('pcapkit.protocols.raw', 'Raw'), {
+        1:   ('pcapkit.protocols.link', 'Ethernet'),
+        228: ('pcapkit.protocols.internet', 'IPv4'),
+        229: ('pcapkit.protocols.internet', 'IPv6'),
+    })
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -83,18 +102,76 @@ class Frame(Protocol):
     ##########################################################################
 
     def index(self, name):
+        """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.
+
+        Args:
+            name (Union[str, Protocol, Type[Protocol]]): ``name`` to be searched
+
+        Returns:
+            int: first index of ``name``
+
+        Raises:
+            IndexNotFound: if ``name`` is not present
+
+        """
         return self._protos.index(name)
 
     def read_frame(self):
         """Read each block after global header.
 
         Structure of record/package header (C):
+
+        .. code:: c
+
             typedef struct pcaprec_hdr_s {
                 guint32 ts_sec;     /* timestamp seconds */
                 guint32 ts_usec;    /* timestamp microseconds */
                 guint32 incl_len;   /* number of octets of packet saved in file */
                 guint32 orig_len;   /* actual length of packet */
             } pcaprec_hdr_t;
+
+        Returns:
+            dict: Parsed packet data, as following structure::
+
+                class FrameInfo(TypedDict):
+                    \"\"\"Frame information.\"\"\"
+
+                    #: timestamp seconds
+                    ts_sec: int
+                    #: timestamp microseconds/nanoseconds
+                    ts_usec: int
+                    #: number of octets of packet saved in file
+                    incl_len: int
+                    #: actual length of packet
+                    orig_len: int
+
+                class Frame(TypedDict):
+                    \"\"\"PCAP frame header.\"\"\"
+
+                    #: PCAP frame information
+                    frame_info: FrameInfo
+                    #: timestamp
+                    time: datetime.datetime
+                    #: frame index number
+                    number: int
+                    #: EPOCH timestamp
+                    time_epoch: float
+                    #: captured packet length
+                    len: int
+                    #: actual packet length
+                    cap_len: int
+                    #: packet bytes data
+                    packet: bytes
+                    #: protocol chain
+                    protocols: ProtoChain
+
+                    #: error message (optional)
+                    error: Optional[str]
+                    #: next layer protocol data
+                    ...: Info
+
+        Raises:
+            EOFError: If :attr:`self._file <pcapkit.protocols.pcap.frame.Frame._file>` reaches EOF.
 
         """
         # _scur = self._file.tell()
@@ -148,20 +225,69 @@ class Frame(Protocol):
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, *, num, proto, nanosecond, **kwargs):
+    def __init__(self, file, *args, num, proto, nanosecond, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            *args: Arbitrary positional arguments.
+
+        Keyword Args:
+            num (int): Frame index number
+                (:attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`).
+            proto (LinkType): Next layer protocol index
+                (:attr:`self._prot <pcapkit.protocols.pcap.frame.Frame._prot>`).
+            nanosecond (bool): Nanosecond-timestamp PCAP flag
+                (:attr:`self._nsec <pcapkit.protocols.pcap.frame.Frame._nsec>`).
+            mpfdp (multiprocessing.Queue): Multiprocessing file descriptor queue
+                (:attr:`self._mpfp <pcapkit.protocols.pcap.frame.Frame._mpfp>`).
+            mpkit (multiprocessing.Namespace): Multiprocessing auxiliaries
+                (:attr:`self._mpkt <pcapkit.protocols.pcap.frame.Frame._mpkt>`).
+            **kwargs: Arbitrary keyword arguments.
+
+        For *multiprocessing* related parameters, please refer to
+        :class:`pcapkit.foundation.extration.Extrator` for more information.
+
+        """
+        #: int: frame index number
         self._fnum = num
+        #: io.BytesIO: source packet stream
         self._file = file
+        #: LinkType: next layer protocol index
         self._prot = proto
+        #: bool: nanosecond-timestamp PCAP flag
         self._nsec = nanosecond
+        #: multiprocessing.Queue: multiprocessing file descriptor queue (*not available after initialisation*)
         self._mpfp = kwargs.pop('mpfdp', None)
+        #: multiprocessing.Namespace: multiprocessing auxiliaries (*not available after initialisation*)
         self._mpkt = kwargs.pop('mpkit', None)
+        #: Info: info dict of current instance
         self._info = Info(self.read_frame())
-        [delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self))]
+
+        # remove temporary multiprocessing support attributes
+        [delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self))]  # pylint: disable=expression-not-assigned
 
     def __length_hint__(self):
+        """Return an estimated length for the object."""
         return 16
 
     def __getitem__(self, key):
+        """Subscription (``getitem``) support.
+
+        This method fist checks if ``key`` exists in
+        :attr:`self._info <pcapkit.protocols.pcap.frame.Frame._info>`.
+        If so, returns the corresponding value, else calls the original
+        :meth:`~pcapkit.protocols.protocol.Protocol.__getitem__` method.
+
+        Args:
+            key (Union[str, Protocol, Type[Protocol]]): Indexing key.
+
+        Returns:
+            * If ``key`` exists in :attr:`self._info <pcapkit.protocols.pcap.frame.Frame._info>`,
+              returns the value of the ``key``;
+            * else returns the sub-packet from the current packet of indexed protocol.
+
+        """
         # if requests attributes in info dict,
         # else call the original function
         try:
@@ -206,6 +332,14 @@ class Frame(Protocol):
         # return Info(dict_)
 
     def __index__(self=None):
+        """Index of the protocol.
+
+        Returns:
+            * If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`
+              exists, returns the frame index number itself;
+            * else returns name of the protocol, i.e. ``'Frame'``.
+
+        """
         if self is None:
             return 'Frame'
         if getattr(self, '_fnum', None) is None:
@@ -213,6 +347,16 @@ class Frame(Protocol):
         return self._fnum
 
     def __contains__(self, name):
+        """Returns if ``name`` is in :attr:`self._info <pcapkit.protocols.protocol.Protocol._info>`
+        or in the frame packet :attr:`self._protos <pcapkit.protocols.protocol.Protocol._protos>.
+
+        Args:
+            name (Any): name to search
+
+        Returns:
+            bool: if ``name`` exists
+
+        """
         if isinstance(name, type) and issubclass(name, Protocol):
             name = name.__index__()
         if isinstance(name, tuple):
@@ -220,22 +364,21 @@ class Frame(Protocol):
                 if item in self._protos:
                     return True
             return False
-        return ((name in self._info) or (name in self._protos))
+        return (name in self._info) or (name in self._protos)
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, dict_, length=None):
+    def _decode_next_layer(self, dict_, length=None):  # pylint: disable=arguments-differ
         """Decode next layer protocol.
 
         Positional arguments:
-            dict_ -- dict, info buffer
-            proto -- str, next layer protocol name
-            length -- int, valid (not padding) length
+            dict_ (dict): info buffer
+            length (int): valid (*non-padding*) length
 
         Returns:
-            * dict -- current protocol with packet extracted
+            dict: current protocol with packet extracted
 
         """
         seek_cur = self._file.tell()
@@ -252,42 +395,49 @@ class Frame(Protocol):
         # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
-        self._next = next_
-        self._protos = chain
+        self._next = next_  # pylint: disable=attribute-defined-outside-init
+        self._protos = chain  # pylint: disable=attribute-defined-outside-init
         dict_[layer] = info
         dict_['protocols'] = self._protos.chain
         return dict_
 
-    def _import_next_layer(self, proto, length, error=False):
+    def _import_next_layer(self, proto, length, error=False):  # pylint: disable=arguments-differ
         """Import next layer extractor.
 
-        Positional arguments:
-            * proto -- str, next layer protocol name
-            * length -- int, valid (not padding) length
+        Arguments:
+            proto (LinkType): next layer protocol index
+            length (int): valid (*non-padding*) length
 
         Keyword arguments:
-            * error -- bool, if function call on error
+            error (bool): if function called on error
 
         Returns:
-            * bool -- flag if extraction of next layer succeeded
-            * Info -- info of next layer
-            * ProtoChain -- protocol chain of next layer
-            * str -- alias of next layer
+            Protocol: instance of next layer
 
-        Protocols:
-            * Ethernet (data link layer)
-            * IPv4 (internet layer)
-            * IPv6 (internet layer)
+        This method supports *currently* following protocols:
+
+        +-----------+----------------------------------------------------------------------+
+        | ``proto`` | Protocol                                                             |
+        +-----------+----------------------------------------------------------------------+
+        | 1         | :class:`~pcapkit.protocols.link.ethernet.Ethernet` (data link layer) |
+        +-----------+----------------------------------------------------------------------+
+        | 228       | :class:`~pcapkit.protocols.internet.ipv4.IPv4` (internet layer)      |
+        +-----------+----------------------------------------------------------------------+
+        | 229       | :class:`~pcapkit.protocols.internet.ipv6.IPv6` (internet layer)      |
+        +-----------+----------------------------------------------------------------------+
 
         """
-        if proto == 1:
-            from pcapkit.protocols.link import Ethernet as Protocol
-        elif proto == 228:
-            from pcapkit.protocols.internet import IPv4 as Protocol
-        elif proto == 229:
-            from pcapkit.protocols.internet import IPv6 as Protocol
-        else:
-            from pcapkit.protocols.raw import Raw as Protocol
-        next_ = Protocol(self._file, length, error=error,
+        # if proto == 1:
+        #     from pcapkit.protocols.link import Ethernet as Protocol
+        # elif proto == 228:
+        #     from pcapkit.protocols.internet import IPv4 as Protocol
+        # elif proto == 229:
+        #     from pcapkit.protocols.internet import IPv6 as Protocol
+        # else:
+        #     from pcapkit.protocols.raw import Raw as Protocol
+
+        module, name = self.__proto__[proto]
+        protocol = getattr(importlib.import_module(module), name)
+        next_ = protocol(self._file, length, error=error,
                          layer=self._exlayer, protocol=self._exproto)
         return next_

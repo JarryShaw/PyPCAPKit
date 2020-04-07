@@ -10,6 +10,7 @@ pcapkit.protocols.application.application module
 .. automodule:: pcapkit.protocols.application.application
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 pcapkit.protocols.application.ftp module
@@ -18,6 +19,7 @@ pcapkit.protocols.application.ftp module
 .. automodule:: pcapkit.protocols.application.ftp
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 pcapkit.protocols.application.http module
@@ -26,6 +28,7 @@ pcapkit.protocols.application.http module
 .. automodule:: pcapkit.protocols.application.http
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 pcapkit.protocols.application.httpv1 module
@@ -34,6 +37,7 @@ pcapkit.protocols.application.httpv1 module
 .. automodule:: pcapkit.protocols.application.httpv1
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 pcapkit.protocols.application.httpv2 module
@@ -42,6 +46,7 @@ pcapkit.protocols.application.httpv2 module
 .. automodule:: pcapkit.protocols.application.httpv2
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 
@@ -51,4 +56,5 @@ Module contents
 .. automodule:: pcapkit.protocols.application
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

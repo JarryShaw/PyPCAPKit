@@ -13,4 +13,5 @@ when exception raised on user's operation.
 .. automodule:: pcapkit.utilities.exceptions
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

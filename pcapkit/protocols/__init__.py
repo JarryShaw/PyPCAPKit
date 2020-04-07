@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import,unused-wildcard-import,fixme
 """protocol family
 
-`pcapkit.protocols` is collection of all protocol families,
+:mod:`pcapkit.protocols` is collection of all protocol families,
 with detailed implementation and methods.
 
 """
@@ -27,15 +28,32 @@ from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.protocols.application.http import HTTP
 
 __all__ = [
-    'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                # Protocol Numbers
-    'Header', 'Frame',                                  # PCAP Headers
-    'NoPayload',                                        # No Payload
-    'Raw',                                              # Raw Packet
-    'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP', 'OSPF', 'RARP', 'VLAN',
-                                                        # Link Layer
-    'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',         # Internet Layer
-    'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
-                                                        # IPv6 Extension Header
-    'TCP', 'UDP',                                       # Transport Layer
-    'FTP', 'HTTP',                                      # Application Layer
+    # Protocol Numbers
+    'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',
+
+    # PCAP Headers
+    'Header', 'Frame',
+
+    # No Payload
+    'NoPayload',
+
+    # Raw Packet
+    'Raw',
+
+    # Link Layer
+    'ARP', 'DRARP', 'Ethernet', 'InARP', 'L2TP',
+    'OSPF', 'RARP', 'VLAN',
+
+    # Internet Layer
+    'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',
+
+    # IPv6 Extension Header
+    'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts',
+    'IPv6_Route', 'MH',
+
+    # Transport Layer
+    'TCP', 'UDP',
+
+    # Application Layer
+    'FTP', 'HTTP',
 ]

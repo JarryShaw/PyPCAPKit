@@ -6,4 +6,5 @@ User Defined Warnings
 .. automodule:: pcapkit.utilities.warnings
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

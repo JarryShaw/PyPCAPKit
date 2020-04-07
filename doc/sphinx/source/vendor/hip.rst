@@ -9,6 +9,7 @@ HIP Certificate Types [*]_
 .. automodule:: pcapkit.vendor.hip.certificate
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 HIP Cipher IDs [*]_
@@ -19,6 +20,7 @@ HIP Cipher IDs [*]_
 .. automodule:: pcapkit.vendor.hip.cipher
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 DI-Types [*]_
@@ -29,6 +31,7 @@ DI-Types [*]_
 .. automodule:: pcapkit.vendor.hip.di
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 ECDSA Curve Label [*]_
@@ -39,6 +42,7 @@ ECDSA Curve Label [*]_
 .. automodule:: pcapkit.vendor.hip.ecdsa_curve
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 ECDSA_LOW Curve Label [*]_
@@ -49,6 +53,7 @@ ECDSA_LOW Curve Label [*]_
 .. automodule:: pcapkit.vendor.hip.ecdsa_low_curve
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 ESP Transform Suite IDs [*]_
@@ -59,6 +64,7 @@ ESP Transform Suite IDs [*]_
 .. automodule:: pcapkit.vendor.hip.esp_transform_suite
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Group IDs [*]_
@@ -69,6 +75,7 @@ Group IDs [*]_
 .. automodule:: pcapkit.vendor.hip.group
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 HI Algorithm [*]_
@@ -79,6 +86,7 @@ HI Algorithm [*]_
 .. automodule:: pcapkit.vendor.hip.hi_algorithm
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 HIT Suite ID [*]_
@@ -89,6 +97,7 @@ HIT Suite ID [*]_
 .. automodule:: pcapkit.vendor.hip.hit_suite
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 HIP NAT Traversal Modes [*]_
@@ -99,6 +108,7 @@ HIP NAT Traversal Modes [*]_
 .. automodule:: pcapkit.vendor.hip.nat_traversal
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Notify Message Types [*]_
@@ -109,6 +119,7 @@ Notify Message Types [*]_
 .. automodule:: pcapkit.vendor.hip.notify_message
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Packet Types [*]_
@@ -119,6 +130,7 @@ Packet Types [*]_
 .. automodule:: pcapkit.vendor.hip.packet
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Parameter Types [*]_
@@ -129,6 +141,7 @@ Parameter Types [*]_
 .. automodule:: pcapkit.vendor.hip.parameter
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Registration Types [*]_
@@ -139,6 +152,7 @@ Registration Types [*]_
 .. automodule:: pcapkit.vendor.hip.registration
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Registration Failure Types [*]_
@@ -149,6 +163,7 @@ Registration Failure Types [*]_
 .. automodule:: pcapkit.vendor.hip.registration_failure
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Suite IDs [*]_
@@ -159,6 +174,7 @@ Suite IDs [*]_
 .. automodule:: pcapkit.vendor.hip.suite
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 HIP Transport Modes [*]_
@@ -169,4 +185,5 @@ HIP Transport Modes [*]_
 .. automodule:: pcapkit.vendor.hip.transport
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

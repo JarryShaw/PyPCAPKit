@@ -130,6 +130,13 @@ class TCP_Reassembly(Reassembly):
         _buffer (dict): buffer field
         _dtgram (tuple): reassembled datagram
 
+    Methods:
+        reassembly: perform the reassembly procedure
+        submit: submit reassembled payload
+        fetch: fetch datagram
+        index: return datagram index
+        run: run automatically
+
     .. glossary::
 
         packet
@@ -343,7 +350,7 @@ class TCP_Reassembly(Reassembly):
             bufid (tuple): buffer identifier
 
         Returns:
-            list: reassembled :term:`packets <tcp.datagram>`
+            List[dict]: reassembled :term:`packets <tcp.datagram>`
 
         """
         datagram = []           # reassembled datagram

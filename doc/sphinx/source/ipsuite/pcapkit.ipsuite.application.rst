@@ -7,4 +7,5 @@ Module contents
 .. automodule:: pcapkit.ipsuite.application
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

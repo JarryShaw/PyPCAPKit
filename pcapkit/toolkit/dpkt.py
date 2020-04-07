@@ -26,8 +26,8 @@ def ipv6_hdr_len(ipv6):
         ipv6 (dpkt.ip6.IP6): DPKT IPv6 packet.
 
     Returns:
-        int: Length of headers before IPv6 Fragment header :class:`dpkt.ip6.IP6FragmentHeader`
-            (:rfc:`2460#section-4.5`).
+        int: Length of headers before IPv6 Fragment header
+        :class:`dpkt.ip6.IP6FragmentHeader` (:rfc:`2460#section-4.5`).
 
     As specified in :rfc:`2460#section-4.1`, such headers (before the IPv6 Fragment Header)
     includes Hop-by-Hop Options header :class:`dpkt.ip6.IP6HopOptsHeader` (:rfc:`2460#section-4.3`),
@@ -97,11 +97,13 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
         count (int): Packet index. If not provided, default to ``NotImplemented``.
 
     Returns:
-        bool: If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
-            if it contains IPv4 layer and the **DF** (:attr:`scapy.all.IP.flags.DF`) flag is
-            ``False``.
-        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
-            of data for IPv4 reassembly will be returned; otherwise, ``None`` will be returned.
+        Tuple[bool, Dict[str, Any]]: A tuple of data for IPv4 reassembly.
+
+        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
+          if it contains IPv4 layer (:class:`dpkt.ip.IP`) and the **DF** (:attr:`dpkt.ip.IP.df`)
+          flag is ``False``.
+        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for IPv4
+          reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns ``None``.
 
     See Also:
         :class:`~pcapkit.reassembly.ipv4.IPv4Reassembly`
@@ -140,10 +142,13 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
         count (int): Packet index. If not provided, default to ``NotImplemented``.
 
     Returns:
-        bool: If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
-            if it contains IPv6 layer and IPv6 Fragment header (:rfc:`2460#section-4.5`).
-        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
-            of data for IPv6 reassembly will be returned; otherwise, ``None`` will be returned.
+        Tuple[bool, Dict[str, Any]]: A tuple of data for IPv6 reassembly.
+
+        * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
+          if it contains IPv6 layer (:class:`dpkt.ip6.IP6`) and IPv6 Fragment header
+          (:rfc:`2460#section-4.5`, :class:`dpkt.ip6.IP6FragmentHeader`).
+        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for IPv6
+          reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns ``None``.
 
     See Also:
         :class:`~pcapkit.reassembly.ipv6.IPv6Reassembly`
@@ -184,10 +189,12 @@ def tcp_reassembly(packet, *, count=NotImplemented):
         count (int): Packet index. If not provided, default to ``NotImplemented``.
 
     Returns:
-        bool: If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
-            if it contains TCP layer.
-        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
-            of data for TCP reassembly will be returned; otherwise, ``None`` will be returned.
+        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
+
+        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
+          if it contains TCP layer (:class:`dpkt.tcp.TCP`).
+        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for TCP
+          reassembly (:term:`tcp.packet`) will be returned; otherwise, returns ``None``.
 
     See Also:
         :class:`~pcapkit.reassembly.tcp.TCPReassembly`
@@ -237,10 +244,12 @@ def tcp_traceflow(packet, timestamp, *, data_link, count=NotImplemented):
         count (int): Packet index. If not provided, default to ``NotImplemented``.
 
     Returns:
-        bool: If the ``packet`` can be used for TCP flow tracing. A packet can be flow-traced
-            if it contains TCP layer.
-        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
-            of data for TCP flow tracing will be returned; otherwise, ``None`` will be returned.
+        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
+
+        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
+          if it contains TCP layer (:class:`dpkt.tcp.TCP`).
+        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for TCP
+          flow tracing (:term:`tcp.trace`) will be returned; otherwise, returns ``None``.
 
     See Also:
         :class:`~pcapkit.foundation.traceflow.TraceFlow`

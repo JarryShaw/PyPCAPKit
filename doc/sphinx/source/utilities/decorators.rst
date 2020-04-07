@@ -8,6 +8,7 @@ and :func:`~pcapkit.utilities.decorators.beholder`.
 .. .. automodule:: pcapkit.utilities.decorators
 ..    :members:
 ..    :undoc-members:
+   :private-members:
 ..    :show-inheritance:
 
 .. autodecorator:: pcapkit.utilities.decorators.seekset

@@ -10,4 +10,5 @@ flag to indicate if usable for its caller.
 .. automodule:: pcapkit.toolkit.default
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

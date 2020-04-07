@@ -48,10 +48,12 @@ def tcp_traceflow(packet):
         packet (pyshark.packet.packet.Packet): Scapy packet.
 
     Returns:
-        bool: If the ``packet`` can be used for TCP flow tracing. A packet can be flow-traced
-            if it contains TCP layer.
-        Optional[Dict[str, Any]]: If the ``packet`` can be reassembled, then the dict mapping
-            of data for TCP flow tracing will be returned; otherwise, ``None`` will be returned.
+        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
+
+        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
+          if it contains TCP layer.
+        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for TCP
+          flow tracing (:term:`tcp.trace`) will be returned; otherwise, returns ``None``.
 
     See Also:
         :class:`~pcapkit.foundation.traceflow.TraceFlow`

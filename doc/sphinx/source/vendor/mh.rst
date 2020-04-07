@@ -9,4 +9,5 @@ Mobility Header Types [*]_
 .. automodule:: pcapkit.vendor.mh.packet
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

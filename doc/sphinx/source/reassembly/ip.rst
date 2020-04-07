@@ -90,4 +90,5 @@ APIs
 .. automodule:: pcapkit.reassembly.ip
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

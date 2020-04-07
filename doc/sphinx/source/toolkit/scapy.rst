@@ -11,4 +11,5 @@ its caller.
 .. automodule:: pcapkit.toolkit.scapy
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

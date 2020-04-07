@@ -10,4 +10,5 @@ datagram reassembly of IP and TCP packets.
 .. automodule:: pcapkit.reassembly.reassembly
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

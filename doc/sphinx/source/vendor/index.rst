@@ -7,18 +7,18 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   vendor/arp
-   vendor/ftp
-   vendor/hip
-   vendor/http
-   vendor/ipv4
-   vendor/ipv6
-   vendor/ipx
-   vendor/mh
-   vendor/ospf
-   vendor/reg
-   vendor/tcp
-   vendor/vlan
+   arp
+   ftp
+   hip
+   http
+   ipv4
+   ipv6
+   ipx
+   mh
+   ospf
+   reg
+   tcp
+   vlan
 
 Base Generator
 --------------
@@ -26,6 +26,7 @@ Base Generator
 .. automodule:: pcapkit.vendor.default
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Command Line Tool
@@ -47,4 +48,5 @@ Command Line Tool
 .. automodule:: pcapkit.vendor.__main__
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

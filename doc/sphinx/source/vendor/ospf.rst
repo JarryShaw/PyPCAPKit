@@ -9,6 +9,7 @@ Authentication Codes [*]_
 .. automodule:: pcapkit.vendor.ospf.authentication
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 OSPF Packet Type [*]_
@@ -19,4 +20,5 @@ OSPF Packet Type [*]_
 .. automodule:: pcapkit.vendor.ospf.packet
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

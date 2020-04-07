@@ -13,10 +13,10 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   utilities/decorators
-   utilities/exceptions
-   utilities/validations
-   utilities/warnings
+   decorators
+   exceptions
+   validations
+   warnings
 
 Module contents
 ---------------
@@ -24,5 +24,6 @@ Module contents
 .. automodule:: pcapkit.utilities
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
    :noindex:

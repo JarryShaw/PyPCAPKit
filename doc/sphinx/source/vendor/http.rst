@@ -9,6 +9,7 @@ HTTP/2 Error Code [*]_
 .. automodule:: pcapkit.vendor.http.error_code
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 HTTP/2 Frame Type [*]_
@@ -19,6 +20,7 @@ HTTP/2 Frame Type [*]_
 .. automodule:: pcapkit.vendor.http.frame
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 HTTP/2 Settings [*]_
@@ -29,4 +31,5 @@ HTTP/2 Settings [*]_
 .. automodule:: pcapkit.vendor.http.setting
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

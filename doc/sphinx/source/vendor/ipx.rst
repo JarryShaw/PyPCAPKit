@@ -9,6 +9,7 @@ IPX Packet Types [*]_
 .. automodule:: pcapkit.vendor.ipx.packet
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 IPX Socket Types [*]_
@@ -19,4 +20,5 @@ IPX Socket Types [*]_
 .. automodule:: pcapkit.vendor.ipx.socket
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

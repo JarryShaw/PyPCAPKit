@@ -32,6 +32,13 @@ class Reassembly(metaclass=abc.ABCMeta):
         _buffer (dict): buffer field
         _dtgram (list): reassembled datagram
 
+    Methods:
+        reassembly: perform the reassembly procedure
+        submit: submit reassembled payload
+        fetch: fetch datagram
+        index: return datagram index
+        run: run automatically
+
     """
     ##########################################################################
     # Properties.
@@ -88,6 +95,9 @@ class Reassembly(metaclass=abc.ABCMeta):
     def fetch(self):
         """Fetch datagram.
 
+        Returns:
+            Tuple[dict]: Tuple of reassembled datagrams.
+
         Fetch reassembled datagrams from
         :attr:`~pcapkit.reassembly.reassembly.Reassembly._dtgram`
         and returns a *tuple* of such datagrams.
@@ -116,8 +126,8 @@ class Reassembly(metaclass=abc.ABCMeta):
             pkt_num (int): index of packet
 
         Returns:
-            int: reassembled datagram index which was from No. ``pkt_num`` packet;
-                if not found, returns ``None``
+            Optional[int]: reassembled datagram index which was from No. ``pkt_num`` packet;
+            if not found, returns ``None``
 
         """
         int_check(pkt_num)
@@ -144,7 +154,7 @@ class Reassembly(metaclass=abc.ABCMeta):
     # Data models.
     ##########################################################################
 
-    # Not hashable
+    #: Not hashable.
     __hash__ = None
 
     def __init__(self, *, strict=True):

@@ -73,15 +73,15 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   pcapkit.const
-   pcapkit.corekit
-   pcapkit.dumpkit
-   pcapkit.foundation
-   pcapkit.interface
-   pcapkit.ipsuite
-   pcapkit.protocols
-   pcapkit.reassembly
-   pcapkit.toolkit
+   const/index
+   corekit/index
+   dumpkit/index
+   foundation/index
+   interface/index
+   ipsuite/index
+   protocols/index
+   reassembly/index
+   toolkit/index
    utilities/index
    vendor/index
 
@@ -148,4 +148,5 @@ Command Line Interface
 .. automodule:: pcapkit.__main__
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

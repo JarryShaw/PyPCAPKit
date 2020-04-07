@@ -9,6 +9,7 @@ IPv6 Extension Header Types [*]_
 .. automodule:: pcapkit.vendor.ipv6.extension_header
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Destination Options and Hop-by-Hop Options [*]_
@@ -19,6 +20,7 @@ Destination Options and Hop-by-Hop Options [*]_
 .. automodule:: pcapkit.vendor.ipv6.option
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 IPv6 QS Functions
@@ -27,6 +29,7 @@ IPv6 QS Functions
 .. automodule:: pcapkit.vendor.ipv6.qs_function
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 IPv6 Router Alert Option Values [*]_
@@ -37,6 +40,7 @@ IPv6 Router Alert Option Values [*]_
 .. automodule:: pcapkit.vendor.ipv6.router_alert
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Routing Types [*]_
@@ -47,6 +51,7 @@ Routing Types [*]_
 .. automodule:: pcapkit.vendor.ipv6.routing
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Seed-ID Types
@@ -55,6 +60,7 @@ Seed-ID Types
 .. automodule:: pcapkit.vendor.ipv6.seed_id
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 TaggerId Types [*]_
@@ -65,4 +71,5 @@ TaggerId Types [*]_
 .. automodule:: pcapkit.vendor.ipv6.tagger_id
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

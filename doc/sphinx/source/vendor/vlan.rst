@@ -9,4 +9,5 @@ Priority Levels [*]_
 .. automodule:: pcapkit.vendor.vlan.priority_level
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

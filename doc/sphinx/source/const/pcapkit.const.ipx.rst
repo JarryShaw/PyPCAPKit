@@ -10,6 +10,7 @@ pcapkit.const.ipx.packet module
 .. automodule:: pcapkit.const.ipx.packet
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 pcapkit.const.ipx.socket module
@@ -18,6 +19,7 @@ pcapkit.const.ipx.socket module
 .. automodule:: pcapkit.const.ipx.socket
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 
@@ -27,4 +29,5 @@ Module contents
 .. automodule:: pcapkit.const.ipx
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

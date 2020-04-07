@@ -26,4 +26,5 @@ Module contents
 .. automodule:: pcapkit.const
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

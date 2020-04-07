@@ -9,6 +9,7 @@ FTP Commands [*]_
 .. automodule:: pcapkit.vendor.ftp.command
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 FTP Return Codes [*]_
@@ -19,4 +20,5 @@ FTP Return Codes [*]_
 .. automodule:: pcapkit.vendor.ftp.return_code
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

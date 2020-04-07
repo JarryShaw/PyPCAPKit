@@ -98,6 +98,13 @@ class IPv4_Reassembly(IP_Reassembly):
         _buffer (dict): buffer field
         _dtgram (tuple): reassembled datagram
 
+    Methods:
+        reassembly: perform the reassembly procedure
+        submit: submit reassembled payload
+        fetch: fetch datagram
+        index: return datagram index
+        run: run automatically
+
     .. glossary::
 
         packet

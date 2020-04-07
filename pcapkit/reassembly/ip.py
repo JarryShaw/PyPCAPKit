@@ -91,6 +91,13 @@ class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
         _buffer (dict): buffer field
         _dtgram (tuple): reassembled datagram
 
+    Methods:
+        reassembly: perform the reassembly procedure
+        submit: submit reassembled payload
+        fetch: fetch datagram
+        index: return datagram index
+        run: run automatically
+
     """
     ##########################################################################
     # Methods.

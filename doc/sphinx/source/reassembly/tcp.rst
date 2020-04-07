@@ -119,4 +119,5 @@ APIs
 .. automodule:: pcapkit.reassembly.tcp
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

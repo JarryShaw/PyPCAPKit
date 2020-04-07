@@ -9,6 +9,7 @@ ARP Hardware Types [*]_
 .. automodule:: pcapkit.vendor.arp.hardware
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Operation Codes [*]_
@@ -19,4 +20,5 @@ Operation Codes [*]_
 .. automodule:: pcapkit.vendor.arp.operation
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

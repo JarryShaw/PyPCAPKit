@@ -48,7 +48,16 @@ DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold
 
 
 def stacklevel():
-    """Fetch current stack level."""
+    """Fetch current stack level.
+
+    The function will walk through the straceback stack (:func:`traceback.extract_stack`),
+    and fetch the stack level where the path contains ``/pcapkit/``. So that it won't
+    display any disturbing internal traceback information when raising errors.
+
+    Returns:
+        int: Stack level until internal stacks, i.e. contains ``/pcapkit/``.
+
+    """
     pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
     tb = traceback.extract_stack()
     for index, tbitem in enumerate(tb):
@@ -69,7 +78,7 @@ class BaseError(Exception):
 
     Important:
 
-        * Turn off system-default traceback function by set :data:`sys.tracebacklimit` to 0.
+        * Turn off system-default traceback function by set :data:`sys.tracebacklimit` to ``0``.
         * But bugs appear in Python 3.6, so we have to set :data:`sys.tracebacklimit` to ``None``.
 
           .. note::
@@ -77,6 +86,9 @@ class BaseError(Exception):
             This note is deprecated since Python fixed the problem above.
 
         * In Python 2.7, :func:`trace.print_stack(limit)` dose not support negative limit.
+
+    See Also:
+        :func:`pcapkit.utilities.exceptions.stacklevel`
 
     """
     def __init__(self, *args, quiet=False, **kwargs):

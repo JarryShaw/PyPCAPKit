@@ -11,4 +11,5 @@ usable for its caller.
 .. automodule:: pcapkit.toolkit.pyshark
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

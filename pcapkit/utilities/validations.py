@@ -31,7 +31,16 @@ __all__ = [
 
 
 def int_check(*args, stacklevel=2):
-    """Check if arguments are *integrals*."""
+    """Check if arguments are *integrals* (``int``).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        IntError: If any of the arguments is **NOT** *integral* (``int``).
+
+    """
     for var in args:
         if not isinstance(var, numbers.Integral):
             name = type(var).__name__
@@ -40,7 +49,16 @@ def int_check(*args, stacklevel=2):
 
 
 def real_check(*args, stacklevel=2):
-    """Check if arguments are *real numbers*."""
+    """Check if arguments are *real numbers* (``int`` and/or ``float``).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        RealError: If any of the arguments is **NOT** *real number* (``int`` and/or ``float``).
+
+    """
     for var in args:
         if not isinstance(var, numbers.Real):
             name = type(var).__name__
@@ -49,7 +67,16 @@ def real_check(*args, stacklevel=2):
 
 
 def complex_check(*args, stacklevel=2):
-    """Check if arguments are *complex numbers*."""
+    """Check if arguments are *complex numbers* (``complex``).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        ComplexError: If any of the arguments is **NOT** *complex number* (``complex``).
+
+    """
     for var in args:
         if not isinstance(var, numbers.Complex):
             name = type(var).__name__
@@ -58,7 +85,16 @@ def complex_check(*args, stacklevel=2):
 
 
 def number_check(*args, stacklevel=2):
-    """Check if arguments are *numbers*."""
+    """Check if arguments are *numbers*.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        DigitError: If any of the arguments is **NOT** *number* (``int``, ``float`` and/or ``complex``).
+
+    """
     for var in args:
         if not isinstance(var, numbers.Number):
             name = type(var).__name__
@@ -67,7 +103,16 @@ def number_check(*args, stacklevel=2):
 
 
 def bytes_check(*args, stacklevel=2):
-    """Check if arguments are ``bytes`` type."""
+    """Check if arguments are ``bytes`` type.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        BytesError: If any of the arguments is **NOT** ``bytes`` type.
+
+    """
     for var in args:
         if not isinstance(var, (bytes, collections.abc.ByteString)):
             name = type(var).__name__
@@ -76,7 +121,16 @@ def bytes_check(*args, stacklevel=2):
 
 
 def bytearray_check(*args, stacklevel=2):
-    """Check if arguments are ``bytearray`` type."""
+    """Check if arguments are ``bytearray`` type.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        BytearrayError: If any of the arguments is **NOT** ``bytearray`` type.
+
+    """
     for var in args:
         if not isinstance(var, (bytearray, collections.abc.ByteString, collections.abc.MutableSequence)):
             name = type(var).__name__func = inspect.stack()[stacklevel][3]
@@ -85,7 +139,16 @@ def bytearray_check(*args, stacklevel=2):
 
 
 def str_check(*args, stacklevel=2):
-    """Check if arguments are ``str`` type."""
+    """Check if arguments are ``str`` type.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        StringError: If any of the arguments is **NOT** ``str`` type.
+
+    """
     for var in args:
         if not isinstance(var, (str, collections.UserString, collections.abc.Sequence)):
             name = type(var).__name__
@@ -94,7 +157,16 @@ def str_check(*args, stacklevel=2):
 
 
 def bool_check(*args, stacklevel=2):
-    """Check if arguments are ``bool`` type."""
+    """Check if arguments are ``bool`` type.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        BoolError: If any of the arguments is **NOT** ``bool`` type.
+
+    """
     for var in args:
         if not isinstance(var, bool):
             name = type(var).__name__
@@ -103,7 +175,16 @@ def bool_check(*args, stacklevel=2):
 
 
 def list_check(*args, stacklevel=2):
-    """Check if arguments are ``list`` type."""
+    """Check if arguments are ``list`` type.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        ListError: If any of the arguments is **NOT** ``list`` type.
+
+    """
     for var in args:
         if not isinstance(var, (list, collections.UserList, collections.abc.MutableSequence)):
             name = type(var).__name__
@@ -112,7 +193,16 @@ def list_check(*args, stacklevel=2):
 
 
 def dict_check(*args, stacklevel=2):
-    """Check if arguments are ``dict`` type."""
+    """Check if arguments are ``dict`` type.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        DictError: If any of the arguments is **NOT** ``dict`` type.
+
+    """
     for var in args:
         if not isinstance(var, (dict, collections.UserDict, collections.abc.MutableMapping)):
             name = type(var).__name__
@@ -121,7 +211,16 @@ def dict_check(*args, stacklevel=2):
 
 
 def tuple_check(*args, stacklevel=2):
-    """Check if arguments are ``tuple`` type."""
+    """Check if arguments are ``tuple`` type.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        TupleError: If any of the arguments is **NOT** ``tuple`` type.
+
+    """
     for var in args:
         if not isinstance(var, (tuple, collections.abc.Sequence)):
             name = type(var).__name__
@@ -130,7 +229,16 @@ def tuple_check(*args, stacklevel=2):
 
 
 def io_check(*args, stacklevel=2):
-    """Check if arguments are *file-like object*."""
+    """Check if arguments are *file-like object* (``io.IOBase``).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        IOObjError: If any of the arguments is **NOT** *file-like object* (``io.IOBase``).
+
+    """
     for var in args:
         if not isinstance(var, io.IOBase):
             name = type(var).__name__
@@ -139,8 +247,17 @@ def io_check(*args, stacklevel=2):
 
 
 def info_check(*args, stacklevel=2):
-    """Check if arguments are :class:`~pcapkit.corekit.infoclass.Info` instance."""
-    from pcapkit.corekit.infoclass import Info
+    """Check if arguments are :class:`~pcapkit.corekit.infoclass.Info` instances.
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        InfoError: If any of the arguments is **NOT** :class:`~pcapkit.corekit.infoclass.Info` instance.
+
+    """
+    from pcapkit.corekit.infoclass import Info  # pylint: disable=import-outside-toplevel
 
     for var in args:
         if not isinstance(var, Info):
@@ -150,16 +267,36 @@ def info_check(*args, stacklevel=2):
 
 
 def ip_check(*args, stacklevel=2):
-    """Check if arguments are *IP addresses*."""
+    """Check if arguments are *IP addresses* (``ipaddress.IPv4Address`` and/or ``ipaddress.IPv6Address``).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        IPError: If any of the arguments is **NOT** *IP address*
+            (``ipaddress.IPv4Address`` and/or ``ipaddress.IPv6Address``).
+
+    """
     for var in args:
-        if not isinstance(var, ipaddress._IPAddressBase):  # pylint: disable=protected-access
+        if not isinstance(var, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             name = type(var).__name__
             func = inspect.stack()[stacklevel][3]
             raise IPError(f'Function {func} expected IP address, {name} got instead.')
 
 
 def enum_check(*args, stacklevel=2):
-    """Check if arguments are of *enumeration protocol* type."""
+    """Check if arguments are of *enumeration protocol* type (``enum.EnumMeta`` and/or ``aenum.EnumMeta``).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        EnumError: If any of the arguments is **NOT** *enumeration protocol* type
+            (``enum.EnumMeta`` and/or ``aenum.EnumMeta``).
+
+    """
     for var in args:
         if not isinstance(var, (enum.EnumMeta, aenum.EnumMeta)):
             name = type(var).__name__
@@ -168,7 +305,25 @@ def enum_check(*args, stacklevel=2):
 
 
 def frag_check(*args, protocol, stacklevel=3):
-    """Check if arguments are valid fragments."""
+    """Check if arguments are valid fragments.
+
+    Args:
+        *args: Arguments to check.
+        protocol (str): Originated fragmentation protocol (IPv4, IPv6 or TCP).
+        stacklevel (int): Stack level to fetch originated function name.
+
+    - If the protocol is IPv4, the fragment should be as an IPv4 :term:`fragmentation <ipv4.packet>`.
+    - If the protocol is IPv6, the fragment should be as an IPv6 :term:`fragmentation <ipv6.packet>`.
+    - If the protocol is TCP, the fragment should be as an TCP :term:`fragmentation <tcp.packet>`.
+
+    Raises:
+        FragmentError: If any of the arguments is **NOT** valid fragment.
+
+    See Also:
+        * :func:`pcapkit.utilities.validations._ip_frag_check`
+        * :func:`pcapkit.utilities.validations._tcp_frag_check`
+
+    """
     if 'IP' in protocol:
         try:
             _ip_frag_check(*args, stacklevel=stacklevel)
@@ -188,7 +343,17 @@ def frag_check(*args, protocol, stacklevel=3):
 
 
 def _ip_frag_check(*args, stacklevel=3):
-    """Check if arguments are valid IP fragments."""
+    """Check if arguments are valid IP fragments (:term:`IPv4 <ipv4.packet>` and/or :term:`IPv6 <ipv6.packet>` packet).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    See Also:
+        * :func:`pcapkit.toolkit.default.ipv4_reassembly`
+        * :func:`pcapkit.toolkit.default.ipv6_reassembly`
+
+    """
     for var in args:
         dict_check(var, stacklevel=stacklevel)
         bufid = var['bufid']
@@ -201,7 +366,16 @@ def _ip_frag_check(*args, stacklevel=3):
 
 
 def _tcp_frag_check(*args, stacklevel=3):
-    """Check if arguments are valid TCP fragments."""
+    """Check if arguments are valid TCP fragments (:term:`TCP packet <tcp.packet>`).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    See Also:
+        :func:`pcapkit.toolkit.default.tcp_reassembly`
+
+    """
     for var in args:
         dict_check(var, stacklevel=stacklevel)
         bufid = var['bufid']
@@ -213,7 +387,19 @@ def _tcp_frag_check(*args, stacklevel=3):
 
 
 def pkt_check(*args, stacklevel=3):
-    """Check if arguments are valid packets."""
+    """Check if arguments are valid packets (:term:`TCP packet <traceflow.packet>`).
+
+    Args:
+        *args: Arguments to check.
+        stacklevel (int): Stack level to fetch originated function name.
+
+    Raises:
+        PacketError: If any of the arguments is **NOT** valid packet.
+
+    See Also:
+        :func:`pcapkit.toolkit.default.tcp_traceflow`
+
+    """
     try:
         for var in args:
             dict_check(var, stacklevel=stacklevel)

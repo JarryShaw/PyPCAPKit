@@ -24,5 +24,6 @@ Module contents
 .. automodule:: pcapkit.reassembly
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
    :noindex:

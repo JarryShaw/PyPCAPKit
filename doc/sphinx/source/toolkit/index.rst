@@ -11,10 +11,10 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   toolkit/default
-   toolkit/dpkt
-   toolkit/pyshark
-   toolkit/scapy
+   default
+   dpkt
+   pyshark
+   scapy
 
 Module contents
 ---------------
@@ -22,5 +22,6 @@ Module contents
 .. automodule:: pcapkit.toolkit
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
    :noindex:

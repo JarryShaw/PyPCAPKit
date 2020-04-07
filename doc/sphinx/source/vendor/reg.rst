@@ -9,6 +9,7 @@ ETHER TYPES [*]_
 .. automodule:: pcapkit.vendor.reg.ethertype
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 LINK-LAYER HEADER TYPES [*]_
@@ -19,6 +20,7 @@ LINK-LAYER HEADER TYPES [*]_
 .. automodule:: pcapkit.vendor.reg.linktype
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 Assigned Internet Protocol Numbers [*]_
@@ -29,4 +31,5 @@ Assigned Internet Protocol Numbers [*]_
 .. automodule:: pcapkit.vendor.reg.transtype
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:

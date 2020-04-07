@@ -9,6 +9,7 @@ TCP Checksum [*]_
 .. automodule:: pcapkit.vendor.tcp.checksum
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
 
 TCP Option Kind Numbers [*]_
@@ -19,4 +20,5 @@ TCP Option Kind Numbers [*]_
 .. automodule:: pcapkit.vendor.tcp.option
    :members:
    :undoc-members:
+   :private-members:
    :show-inheritance:
