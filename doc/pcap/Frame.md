@@ -27,7 +27,7 @@ typedef struct pcaprec_hdr_s {
 
 ## Extraction
 
- > described in [`src/protocols/pcap/frame.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/pcap/frame.py)
+ > described in [`src/protocols/pcap/frame.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap/frame.py)
 
 ```python
 class Frame(file, *, num, proto, nanosecond, **kwrags)
@@ -89,7 +89,7 @@ class Frame(file, *, num, proto, nanosecond, **kwrags)
 @staticmethod Frame.decode(byte, *, encoding=None, errors='strict')
 ```
 
- > cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol)
+ > cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols#protocol)
 
  - Positional arguments:
     * `byte` -- `bytes`, byte string to be decoded
@@ -107,7 +107,7 @@ class Frame(file, *, num, proto, nanosecond, **kwrags)
 @staticmethod Frame.unquote(url, *, encoding='utf-8', errors='replace')
 ```
 
- > cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol)
+ > cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols#protocol)
 
  - Positional arguments:
     * `url` -- `str`, URL to be unquoted
@@ -123,7 +123,7 @@ class Frame(file, *, num, proto, nanosecond, **kwrags)
 
 ## Construction
 
- > described in [`src/ipsuite/pcap/frame.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/ipsuite/pcap/frame.py)
+ > described in [`src/ipsuite/pcap/frame.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/ipsuite/pcap/frame.py)
 
 ```python
 class Frame(args, **kwargs)

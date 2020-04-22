@@ -41,7 +41,7 @@ typedef struct pcap_hdr_s {
 
 ## Extraction
 
- > described in [`src/protocols/pcap/header.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/pcap/header.py)
+ > described in [`src/protocols/pcap/header.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap/header.py)
 
 ```python
 class Header(file=None, *args, **kwargs)
@@ -97,7 +97,7 @@ class Header(file=None, *args, **kwargs)
 @staticmethod Header.decode(byte, *, encoding=None, errors='strict')
 ```
 
- > cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol)
+ > cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols#protocol)
 
  - Positional arguments:
     * `byte` -- `bytes`, byte string to be decoded
@@ -115,7 +115,7 @@ class Header(file=None, *args, **kwargs)
 @staticmethod Header.unquote(url, *, encoding='utf-8', errors='replace')
 ```
 
- > cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol)
+ > cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols#protocol)
 
  - Positional arguments:
     * `url` -- `str`, URL to be unquoted
@@ -131,7 +131,7 @@ class Header(file=None, *args, **kwargs)
 
 ## Construction
 
- > described in [`src/ipsuite/pcap/header.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/ipsuite/pcap/header.py)
+ > described in [`src/ipsuite/pcap/header.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/ipsuite/pcap/header.py)
 
 ```python
 class Header(args={}, **kwargs)

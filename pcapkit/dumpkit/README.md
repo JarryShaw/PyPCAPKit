@@ -9,7 +9,7 @@
 
 ## `PCAP`
 
- > decribed in [`src/dumpkit/__init.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/dumpkit/__init__.py)
+ > decribed in [`src/dumpkit/__init.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/dumpkit/__init__.py)
 
 ```python
 class PCAP(builtins.object)
@@ -37,7 +37,7 @@ class PCAP(builtins.object)
 
 ## `NotImplementedIO`
 
- > decribed in [`src/dumpkit/__init.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/dumpkit/__init__.py)
+ > decribed in [`src/dumpkit/__init.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/dumpkit/__init__.py)
 
 ```python
 class NotImplementedIO(builtins.object)
