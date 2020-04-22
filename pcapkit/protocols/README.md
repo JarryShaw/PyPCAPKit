@@ -7,17 +7,17 @@
  - [Utility Protocols](#utility-protocols)
     * [`Raw`](#raw)
     * [`NoPayload`](#nopayload)
-    * [PCAP](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/pcap#pcap-headers-manual)
- - [Link Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#link-layer-protocols-manual)
+    * [PCAP](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#pcap-headers-manual)
+ - [Link Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#link-layer-protocols-manual)
     * [Macros](#link-macros)
     * [Protocols](#link-protocols)
- - [Internet Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#internet-layer-protocols-manual)
+ - [Internet Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#internet-layer-protocols-manual)
     * [Macros](#internet-macros)
     * [Protocols](#internet-protocols)
- - [Transport Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#transport-layer-protocols-manual)
+ - [Transport Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/transport#transport-layer-protocols-manual)
     * [Macros](#transport-macros)
     * [Protocols](#transport-protocols)
- - [Application Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/application#application-layer-protocols-manual)
+ - [Application Layer Protocols](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/application#application-layer-protocols-manual)
     * [Protocols](#application-protocols)
  - [TODO](#todo)
 
@@ -25,7 +25,7 @@
 
 ## Base Protocol
 
- > described in [src/protocols/protocol.py](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/protocol.py)
+ > described in [src/protocols/protocol.py](https://gihub.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/protocol.py)
 
 &emsp; `pcapkit.protocols.protocol` contains [`Protocol`](#protocol) only, which is an abstract base clss for all protocol family, with pre-defined utility arguments and methods of specified protocols.
 
@@ -160,7 +160,7 @@ class Protocol(builtins.object)
 
 ### `Raw`
 
-> described in [`src/protocols/raw.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/raw.py)
+> described in [`src/protocols/raw.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/raw.py)
 
 &emsp; `pcapkit.protocols.raw` contains `Raw` only, which implements extractor for unknown protocol, and constructs a [`Protocol`](#protocol) like object.
 
@@ -182,8 +182,8 @@ class Raw(pcapkit.protocols.protocol.Protocol)
     * `protochain` -- `ProtoChain`, protocol chain of current instance
 
  - Methods:
-    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol))
-    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol))
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols#protocol))
     * `read_raw` -- read raw packet data
 
  - Data modules:
@@ -200,7 +200,7 @@ class Raw(pcapkit.protocols.protocol.Protocol)
 
 ### `NoPayload`
 
-> described in [`src/protocols/null.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/null.py)
+> described in [`src/protocols/null.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/null.py)
 
 &emsp; `pcapkit.protocols.null` contains `NoPayload` only, which implements a [`Protocol`](#protocol) like object whose payload is recursively `NoPayload` itself.
 
@@ -217,23 +217,23 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
     * `protochain` -- `NotImplemented`, protocol chain (not implemented)
 
  - Methods:
-    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol))
-    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols#protocol))
+    * `decode_bytes` -- try to decode `bytes` into `str` (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols#protocol))
+    * `decode_url` -- decode URLs into Unicode (cf. [`pcapkit.protocols.protocol.Protocol`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols#protocol))
 
  - Data modules:
     * all data modules inherited from [`Protocol`](#protocol)
 
 ### PCAP
 
- > described in [`src/protocols/pcap`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/pcap#pcap-headers-manual)
+ > described in [`src/protocols/pcap`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#pcap-headers-manual)
 
-&emsp; `pcapkit.protocols.pcap` contains header descriptions for PCAP files, including global header [`Header`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/pcap#header) and frame header [`Frame`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/pcap#frame).
+&emsp; `pcapkit.protocols.pcap` contains header descriptions for PCAP files, including global header [`Header`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#header) and frame header [`Frame`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#frame).
 
 &emsp;
 
 ## Link Layer Protocols
 
- > described in [`src/protocols/link`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#link-layer-protocols-manual)
+ > described in [`src/protocols/link`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#link-layer-protocols-manual)
 
 &emsp; `pcapkit.protocols.link` is collection of all protocols in link layer, with detailed implementation and methods.
 
@@ -241,7 +241,7 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
 
 ### Macros
 
- - [`LINKTYPE`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#linktype) -- Link-Layer Header Type Values
+ - [`LINKTYPE`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#linktype) -- Link-Layer Header Type Values
 
 <a name="link-protocols"> </a>
 
@@ -249,16 +249,16 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
 
 | NAME                                                                                         | DESCRIPTION                         |
 | :------------------------------------------------------------------------------------------- | :---------------------------------- |
-| [`ARP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#arp)           | Address Resolution Protocol         |
-| [`Ethernet`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#ethernet) | Ethernet Protocol                   |
-| [`L2TP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#l2tp)         | Layer Two Tunneling Protocol        |
-| [`OSPF`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#ospf)         | Open Shortest Path First            |
-| [`RARP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#rarp)         | Reverse Address Resolution Protocol |
-| [`VLAN`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/link#vlan)         | 802.1Q Customer VLAN Tag Type       |
+| [`ARP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#arp)           | Address Resolution Protocol         |
+| [`Ethernet`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#ethernet) | Ethernet Protocol                   |
+| [`L2TP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#l2tp)         | Layer Two Tunneling Protocol        |
+| [`OSPF`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#ospf)         | Open Shortest Path First            |
+| [`RARP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#rarp)         | Reverse Address Resolution Protocol |
+| [`VLAN`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/link#vlan)         | 802.1Q Customer VLAN Tag Type       |
 
 ## Internet Layer Protocols
 
- > described in [`src/protocols/internet`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#internet-layer-protocols-manual)
+ > described in [`src/protocols/internet`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#internet-layer-protocols-manual)
 
 &emsp; `pcapkit.protocols.internet` is collection of all protocols in internet layer, with detailed implementation and methods.
 
@@ -266,7 +266,7 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
 
 ### Macros
 
- - [`ETHERTYPE`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ethertype) -- Ethertype IEEE 802 Numbers
+ - [`ETHERTYPE`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ethertype) -- Ethertype IEEE 802 Numbers
 
 <a name="internet-protocols"> </a>
 
@@ -274,22 +274,22 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
 
 | NAME                                                                                                 | DESCRIPTION                  |
 | :--------------------------------------------------------------------------------------------------- | :--------------------------- |
-| [`AH`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ah)                 | Athentication Header         |
-| [`HIP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#hip)               | Host Identity Protocol       |
-| [`HOPOPT`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#hopopt)         | IPv6 Hop-by-Hop Options      |
-| [`IP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ip)                 | Internet Protocol            |
-| [`IPsec`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipsec)           | Internet Protocol Security   |
-| [`IPv4`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv4)             | Internet Protocol version 4  |
-| [`IPv6`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6)             | Internet Protocol version 6  |
-| [`IPv6_Frag`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_frag)   | Fragment Header for IPv6     |
-| [`IPv6_Opts`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_opts)   | Destination Options for IPv6 |
-| [`IPv6_Route`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipv6_route) | Routing Header for IPv6      |
-| [`IPX`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#ipx)               | Internetwork Packet Exchange |
-| [`MH`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/internet#mh)                 | Mobility Header              |
+| [`AH`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ah)                 | Athentication Header         |
+| [`HIP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#hip)               | Host Identity Protocol       |
+| [`HOPOPT`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#hopopt)         | IPv6 Hop-by-Hop Options      |
+| [`IP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ip)                 | Internet Protocol            |
+| [`IPsec`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ipsec)           | Internet Protocol Security   |
+| [`IPv4`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ipv4)             | Internet Protocol version 4  |
+| [`IPv6`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ipv6)             | Internet Protocol version 6  |
+| [`IPv6_Frag`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ipv6_frag)   | Fragment Header for IPv6     |
+| [`IPv6_Opts`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ipv6_opts)   | Destination Options for IPv6 |
+| [`IPv6_Route`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ipv6_route) | Routing Header for IPv6      |
+| [`IPX`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#ipx)               | Internetwork Packet Exchange |
+| [`MH`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/internet#mh)                 | Mobility Header              |
 
 ## Transport Layer Protocols
 
- > described in [`src/protocols/transport`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#transport-layer-protocols-manual)
+ > described in [`src/protocols/transport`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/transport#transport-layer-protocols-manual)
 
 &emsp; `pcapkit.protocols.transport` is collection of all protocols in transport layer, with detailed implementation and methods.
 
@@ -297,7 +297,7 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
 
 ### Macros
 
- - [`TP_PROTO`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#tp_proto) -- Transport Layer Protocol Numbers
+ - [`TP_PROTO`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/transport#tp_proto) -- Transport Layer Protocol Numbers
 
 <a name="transport-protocols"> </a>
 
@@ -305,13 +305,13 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
 
 | NAME                                                                                    | DESCRIPTION                   |
 | :-------------------------------------------------------------------------------------- | :---------------------------- |
-| [`TCP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#tcp) | Transmission Control Protocol |
-| [`UDP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/transport#udp) | User Datagram Protocol        |
+| [`TCP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/transport#tcp) | Transmission Control Protocol |
+| [`UDP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/transport#udp) | User Datagram Protocol        |
 
 
 ## Application Layer Protocols
 
- > described in [`src/protocols/application`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/application#application-layer-protocols-manual)
+ > described in [`src/protocols/application`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/application#application-layer-protocols-manual)
 
 &emsp; `pcapkit.protocols.application` is collection of all protocols in application layer, with detailed implementation and methods.
 
@@ -321,7 +321,7 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
 
 | NAME                                                                                        | DESCRIPTION                 |
 | :------------------------------------------------------------------------------------------ | :-------------------------- |
-| [`HTTP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/src/protocols/application#http) | Hypertext Transfer Protocol |
+| [`HTTP`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/application#http) | Hypertext Transfer Protocol |
 
 ## TODO
 
