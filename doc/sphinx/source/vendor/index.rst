@@ -1,11 +1,13 @@
 Web Crawlers for Constant Enumerations
 ======================================
 
+.. module:: pcapkit.vendor
+
 Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 2
 
    arp
    ftp

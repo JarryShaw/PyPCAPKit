@@ -1,6 +1,8 @@
 OSPF Vendor Crawler
 ===================
 
+.. module:: pcapkit.vendor.ospf
+
 Authentication Codes [*]_
 -------------------------
 

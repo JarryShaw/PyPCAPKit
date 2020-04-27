@@ -1,6 +1,8 @@
 ARP Vendor Crawlers
 ===================
 
+.. module:: pcapkit.vendor.arp
+
 ARP Hardware Types [*]_
 -----------------------
 

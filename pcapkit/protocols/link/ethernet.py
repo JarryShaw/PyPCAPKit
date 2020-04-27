@@ -1,14 +1,23 @@
 # -*- coding: utf-8 -*-
 """ethernet protocol
 
-`pcapkit.protocols.link.ethernet` contains `Ethernet`
-only, which implements extractor for Ethernet Protocol,
-whose structure is described as below.
+:mod:`pcapkit.protocols.link.ethernet` contains
+:class:`~pcapkit.protocols.link.ethernet.Ethernet`
+only, which implements extractor for Ethernet
+Protocol [*]_, whose structure is described as
+below:
 
-Octets      Bits        Name                    Description
-  0           0     eth.dst                 Destination MAC Address
-  1           8     eth.src                 Source MAC Address
-  2          16     eth.type                Protocol (Internet Layer)
++========+=======+==============+===========================+
+| Octets | Bits  | Name         | Description               |
++========+=======+==============+===========================+
+| 0      |     0 | ``eth.dst``  | Destination MAC Address   |
++--------+-------+--------------+---------------------------+
+| 1      |     8 | ``eth.src``  | Source MAC Address        |
++--------+-------+--------------+---------------------------+
+| 2      |    16 | ``eth.type`` | Protocol (Internet Layer) |
++--------+-------+--------------+---------------------------+
+
+.. [*] https://en.wikipedia.org/wiki/Ethernet
 
 """
 import textwrap
@@ -22,36 +31,34 @@ __all__ = ['Ethernet']
 class Ethernet(Link):
     """This class implements Ethernet Protocol.
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Link`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-        * src -- str, source mac address
-        * dst -- str, destination mac address
+    Attributes:
+        name (str): name of corresponding protocol
+        info (Info): info dict of current instance
+        alias (str): acronym of corresponding protocol
+        layer (str): ``'Link'``
+        length (int): header length of corresponding protocol
+        protocol (EtherType): enumeration of next layer protocol
+        protochain (ProtoChain): protocol chain of current instance
+        src (str): source MAC address
+        dst (str): destination MAC address
+
+        _file: (io.BytesIO): source data stream
+        _info: (Info): info dict of current instance
+        _protos: (ProtoChain): protocol chain of current instance
 
     Methods:
-        * decode_bytes -- try to decode bytes into str
-        * decode_url -- decode URLs into Unicode
-        * read_ethernet -- read Ethernet Protocol
+        decode_bytes: try to decode bytes into str
+        decode_url: decode URLs into Unicode
+        read_ethernet: read Ethernet Protocol
 
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-        * _read_mac_addr -- read MAC address
+        _read_protos: read next layer protocol type
+        _read_fileng: read file buffer
+        _read_unpack: read bytes and unpack to integers
+        _read_binary: read bytes and convert into binaries
+        _read_packet: read raw packet data
+        _decode_next_layer: decode next layer protocol type
+        _import_next_layer: import next layer protocol extractor
+        _read_mac_addr: read MAC address
 
     """
     ##########################################################################
@@ -92,11 +99,33 @@ class Ethernet(Link):
     def read_ethernet(self, length):
         """Read Ethernet Protocol.
 
-        Structure of Ethernet Protocol header [RFC 7042]:
-            Octets      Bits        Name                    Description
-              0           0     eth.dst                 Destination MAC Address
-              1           8     eth.src                 Source MAC Address
-              2          16     eth.type                Protocol (Internet Layer)
+        Structure of Ethernet Protocol header [:rfc:`7042`]:
+
+        +========+=======+==============+===========================+
+        | Octets | Bits  | Name         | Description               |
+        +========+=======+==============+===========================+
+        | 0      |     0 | ``eth.dst``  | Destination MAC Address   |
+        +--------+-------+--------------+---------------------------+
+        | 1      |     8 | ``eth.src``  | Source MAC Address        |
+        +--------+-------+--------------+---------------------------+
+        | 2      |    16 | ``eth.type`` | Protocol (Internet Layer) |
+        +--------+-------+--------------+---------------------------+
+
+        Args:
+            length (int): packet length
+
+        Returns:
+            dict: Parsed packet data, as following structure::
+
+                class Ethernet(TypedDict):
+                    \"\"\"Ethernet header.\"\"\"
+
+                    #: destination MAC address
+                    dst: str
+                    #: source MAC address
+                    src: str
+                    #: protocol (Internet layer)
+                    type: EtherType
 
         """
         if length is None:
@@ -121,11 +150,22 @@ class Ethernet(Link):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, **kwargs):
-        self._file = _file
+    def __init__(self, file, length=None, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (int): Packet length.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        """
+        self._file = file
         self._info = Info(self.read_ethernet(length))
 
     def __length_hint__(self):
+        """Return an estimated length (14) for the object."""
         return 14
 
     ##########################################################################
@@ -133,7 +173,12 @@ class Ethernet(Link):
     ##########################################################################
 
     def _read_mac_addr(self):
-        """Read MAC address."""
+        """Read MAC address.
+
+        Returns:
+            str: Colon (``:``) seperated *hex* encoded MAC address.
+
+        """
         _byte = self._read_fileng(6)
-        _addr = '-'.join(textwrap.wrap(_byte.hex(), 2))
+        _addr = ':'.join(textwrap.wrap(_byte.hex(), 2))
         return _addr

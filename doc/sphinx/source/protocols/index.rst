@@ -1,3 +1,5 @@
+.. module:: pcapkit.protocols
+
 ===============
 Protocol Family
 ===============
@@ -9,7 +11,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    pcap/index
    link/index
@@ -21,7 +23,7 @@ Subpackages
 Base Protocol
 -------------
 
-.. automodule:: pcapkit.protocols.protocol
+.. autoclass:: pcapkit.protocols.protocol.Protocol
    :members:
    :undoc-members:
    :private-members:

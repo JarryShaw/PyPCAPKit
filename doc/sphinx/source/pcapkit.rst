@@ -1,7 +1,7 @@
-.. module:: pcapkit
-
 Stream PCAP File Extractor
 ==========================
+
+.. module:: pcapkit
 
 :mod:`pcapkit` is an independent open source library, using only
 `DictDumper`_ as its formatted output dumper.
@@ -10,9 +10,6 @@ Stream PCAP File Extractor
 
     There is a project called |jspcapy|_ works on :mod:`pcapkit`,
     which is a command line tool for PCAP extraction.
-
-    .. |jspcapy| replace:: ``jspcapy``
-    .. _jspcapy: https://github.com/JarryShaw/jspcapy
 
 Unlike popular PCAP file extractors, such as `Scapy`_,
 `DPKT`_, `PyShark`_, and etc, :mod:`pcapkit` uses streaming
@@ -71,7 +68,7 @@ Subpackages
 -----------
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    const/index
    corekit/index
@@ -98,9 +95,6 @@ Command Line Interface
 
 :mod:`pcapkit.__main__` was originally the module file of
 |jspcapy|_, which is now deprecated and merged with :mod:`pcapkit`.
-
-.. |jspcapy| replace:: ``jspcapy``
-.. _jspcapy: https://github.com/JarryShaw/jspcapy
 
 .. code:: text
 
@@ -150,3 +144,6 @@ Command Line Interface
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+.. |jspcapy| replace:: ``jspcapy``
+.. _jspcapy: https://github.com/JarryShaw/jspcapy

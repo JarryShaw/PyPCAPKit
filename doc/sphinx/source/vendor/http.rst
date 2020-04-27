@@ -1,6 +1,8 @@
 HTTP Vendor Crawler
 ===================
 
+.. module:: pcapkit.vendor.http
+
 HTTP/2 Error Code [*]_
 ----------------------
 

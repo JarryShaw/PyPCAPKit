@@ -1,27 +1,33 @@
 # -*- coding: utf-8 -*-
 """open shortest path first
 
-`pcapkit.protocols.link.ospf` contains `OSPF` only,
-which implements extractor for Open Shortest Path First
-(OSPF), whose structure is described as below.
+:mod:`pcapkit.protocols.link.ospf` contains
+:class:`~pcapkit.protocols.link.ospf.OSPF` only,
+which implements extractor for Open Shortest Path
+First (OSPF) [*]_, whose structure is described
+as below::
 
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Version #   |     Type      |         Packet length         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                          Router ID                            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                           Area ID                             |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|           Checksum            |             AuType            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                       Authentication                          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                       Authentication                          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |   Version #   |     Type      |         Packet length         |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          Router ID                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           Area ID                             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |           Checksum            |             AuType            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                       Authentication                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                       Authentication                          |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+.. [*] https://en.wikipedia.org/wiki/Open_Shortest_Path_First
 
 """
+import ipaddress
+
 from pcapkit.const.ospf.authentication import Authentication as AUTH
 from pcapkit.const.ospf.packet import Packet as TYPE
 from pcapkit.corekit.infoclass import Info
@@ -33,35 +39,34 @@ __all__ = ['OSPF']
 class OSPF(Link):
     """This class implements Open Shortest Path First.
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Link`
-        * length -- int, header length of corresponding protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-        * type -- str, OSPF packet type
+    Attributes:
+        name (str): name of corresponding protocol
+        info (Info): info dict of current instance
+        alias (str): acronym of corresponding protocol
+        layer (str): ``'Link'``
+        length (int): header length of corresponding protocol
+        protocol (EtherType): enumeration of next layer protocol
+        protochain (ProtoChain): protocol chain of current instance
+        type (Packet): OSPF packet type
+
+        _file: (io.BytesIO): source data stream
+        _info: (Info): info dict of current instance
+        _protos: (ProtoChain): protocol chain of current instance
 
     Methods:
-        * decode_bytes -- try to decode bytes into str
-        * decode_url -- decode URLs into Unicode
-        * read_ospf -- read Open Shortest Path First
+        decode_bytes: try to decode bytes into str
+        decode_url: decode URLs into Unicode
+        read_ethernet: read Ethernet Protocol
 
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-        * _read_id_numbers -- read router and area IDs
-        * _read_encrypt_auth -- read Authentication field when CA employed
+        _read_protos: read next layer protocol type
+        _read_fileng: read file buffer
+        _read_unpack: read bytes and unpack to integers
+        _read_binary: read bytes and convert into binaries
+        _read_packet: read raw packet data
+        _decode_next_layer: decode next layer protocol type
+        _import_next_layer: import next layer protocol extractor
+        _read_id_numbers: read router and area IDs
+        _read_encrypt_auth: read Authentication field when CA employed
 
     """
     ##########################################################################
@@ -95,7 +100,8 @@ class OSPF(Link):
     def read_ospf(self, length):
         """Read Open Shortest Path First.
 
-        Structure of OSPF header [RFC 2328]:
+        Structure of OSPF header [:rfc:`2328`]::
+
             0                   1                   2                   3
             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -112,15 +118,51 @@ class OSPF(Link):
            |                       Authentication                          |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     ospf.version            Version #
-              1           8     ospf.type               Type (0/1)
-              2          16     ospf.len                Packet Length (header includes)
-              4          32     ospf.router_id          Router ID
-              8          64     ospf.area_id            Area ID
-              12         96     ospf.chksum             Checksum
-              14        112     ospf.autype             AuType
-              16        128     ospf.auth               Authentication
+        +========+=======+====================+=================================+
+        | Octets | Bits  | Name               | Description                     |
+        +========+=======+====================+=================================+
+        | 0      |     0 | ``ospf.version``   | Version Number                  |
+        +--------+-------+--------------------+---------------------------------+
+        | 0      |     0 | ``ospf.type``      | Type                            |
+        +--------+-------+--------------------+---------------------------------+
+        | 0      |     1 | ``ospf.len``       | Packet Length (header included) |
+        +--------+-------+--------------------+---------------------------------+
+        | 0      |     2 | ``ospf.router_id`` | Router ID                       |
+        +--------+-------+--------------------+---------------------------------+
+        | 0      |     4 | ``ospf.area_id``   | Area ID                         |
+        +--------+-------+--------------------+---------------------------------+
+        | 0      |     6 | ``ospf.chksum``    | Checksum                        |
+        +--------+-------+--------------------+---------------------------------+
+        | 0      |     7 | ``ospf.autype``    | Authentication Type             |
+        +--------+-------+--------------------+---------------------------------+
+        | 1      |     8 | ``ospf.auth``      | Authentication                  |
+        +--------+-------+--------------------+---------------------------------+
+
+        Args:
+            length (int): packet length
+
+        Returns:
+            dict: Parsed packet data, as following structure::
+
+                class OSPF(TypedDict):
+                    \"\"\"OSPF header.\"\"\"
+
+                    #: version number
+                    version: int
+                    #: type
+                    type: Packet
+                    #: packet length (header included)
+                    len: int
+                    #: router ID
+                    router_id: IPv4Address
+                    #: area ID
+                    area_id: IPv4Address
+                    #: checksum
+                    chksum: bytes
+                    #: authentication type
+                    autype: Authentication
+                    #: authentication
+                    auth: Union[bytes, Auth]
 
         """
         if length is None:
@@ -158,11 +200,22 @@ class OSPF(Link):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, **kwargs):
-        self._file = _file
+    def __init__(self, file, length=None, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (int): Packet length.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        """
+        self._file = file
         self._info = Info(self.read_ospf(length))
 
     def __length_hint__(self):
+        """Return an estimated length (24) for the object."""
         return 24
 
     ##########################################################################
@@ -170,15 +223,23 @@ class OSPF(Link):
     ##########################################################################
 
     def _read_id_numbers(self):
-        """Read router and area IDs."""
-        _byte = self._read_fileng(4)
-        _addr = '.'.join([str(_) for _ in _byte])
-        return _addr
+        """Read router and area IDs.
+
+        Returns:
+            IPv4Address: Parsed IDs as an IPv4 address.
+
+        """
+        #_byte = self._read_fileng(4)
+        #_addr = '.'.join(str(_) for _ in _byte)
+        return ipaddress.ip_address(self._read_fileng(4))
 
     def _read_encrypt_auth(self):
-        """Read Authentication field when Cryptographic Authentication is employed.
+        """Read Authentication field when Cryptographic Authentication is employed,
+        i.e. :attr:`~OSPF.autype` is ``2``.
 
-        Structure of Cryptographic Authentication [RFC 2328]:
+        Structure of Cryptographic Authentication [:rfc:`2328`]:
+
+        .. code:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -188,11 +249,33 @@ class OSPF(Link):
             |                 Cryptographic sequence number                 |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     -                       Reserved (must be zero)
-              2          16     ospf.auth.key_id        Key ID
-              3          24     ospf.auth.len           Auth Data Length
-              4          32     ospf.auth.seq           Cryptographic Sequence Number
+        +========+=======+======================+===================================+
+        | Octets | Bits  | Name                 | Description                       |
+        +========+=======+======================+===================================+
+        | 0      |     0 |                      | Reserved (must be zero ``\\x00``) |
+        +--------+-------+----------------------+-----------------------------------+
+        | 0      |     0 | ``ospf.auth.key_id`` | Key ID                            |
+        +--------+-------+----------------------+-----------------------------------+
+        | 0      |     1 | ``ospf.auth.len``    | Authentication Data Length        |
+        +--------+-------+----------------------+-----------------------------------+
+        | 0      |     2 | ``ospf.auth.seq``    | Cryptographic Sequence Number     |
+        +--------+-------+----------------------+-----------------------------------+
+
+        Args:
+            length (int): packet length
+
+        Returns:
+            dict: Parsed packet data, as following structure::
+
+                class Auth(TypedDict):
+                    \"\"\"Cryptographic  authentication.\"\"\"
+
+                    #: key ID
+                    key_id: int
+                    #: authentication data length
+                    len: int
+                    #: cryptographic sequence number
+                    seq: int
 
         """
         _resv = self._read_fileng(2)

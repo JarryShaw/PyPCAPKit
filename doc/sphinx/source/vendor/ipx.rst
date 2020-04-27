@@ -1,6 +1,8 @@
 IPX Vendor Crawler
 ==================
 
+.. module:: pcapkit.vendor.ipx
+
 IPX Packet Types [*]_
 ---------------------
 

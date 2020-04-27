@@ -1,6 +1,8 @@
 IPv6 Vendor Crawler
 ===================
 
+.. module:: pcapkit.vendor.ipv6
+
 IPv6 Extension Header Types [*]_
 --------------------------------
 

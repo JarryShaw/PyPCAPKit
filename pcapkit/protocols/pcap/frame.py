@@ -27,16 +27,7 @@ from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder
 
-###############################################################################
-# from pcapkit.protocols.link import Ethernet
-# from pcapkit.protocols.internet import IPv4
-# from pcapkit.protocols.internet import IPv6
-# from pcapkit.protocols.raw import Raw
-###############################################################################
-
 __all__ = ['Frame']
-
-#: Protocol mapping
 
 
 class Frame(Protocol):
@@ -131,44 +122,7 @@ class Frame(Protocol):
             } pcaprec_hdr_t;
 
         Returns:
-            dict: Parsed packet data, as following structure::
-
-                class FrameInfo(TypedDict):
-                    \"\"\"Frame information.\"\"\"
-
-                    #: timestamp seconds
-                    ts_sec: int
-                    #: timestamp microseconds/nanoseconds
-                    ts_usec: int
-                    #: number of octets of packet saved in file
-                    incl_len: int
-                    #: actual length of packet
-                    orig_len: int
-
-                class Frame(TypedDict):
-                    \"\"\"PCAP frame header.\"\"\"
-
-                    #: PCAP frame information
-                    frame_info: FrameInfo
-                    #: timestamp
-                    time: datetime.datetime
-                    #: frame index number
-                    number: int
-                    #: EPOCH timestamp
-                    time_epoch: float
-                    #: captured packet length
-                    len: int
-                    #: actual packet length
-                    cap_len: int
-                    #: packet bytes data
-                    packet: bytes
-                    #: protocol chain
-                    protocols: ProtoChain
-
-                    #: error message (optional)
-                    error: Optional[str]
-                    #: next layer protocol data
-                    ...: Info
+            DataType_pcap_frame_Frame: Parsed packet data.
 
         Raises:
             EOFError: If :attr:`self._file <pcapkit.protocols.pcap.frame.Frame._file>` reaches EOF.
@@ -268,7 +222,7 @@ class Frame(Protocol):
         [delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self))]  # pylint: disable=expression-not-assigned
 
     def __length_hint__(self):
-        """Return an estimated length for the object."""
+        """Return an estimated length (16) for the object."""
         return 16
 
     def __getitem__(self, key):
@@ -288,48 +242,12 @@ class Frame(Protocol):
             * else returns the sub-packet from the current packet of indexed protocol.
 
         """
-        # if requests attributes in info dict,
+        # if requested attributes in info dict,
         # else call the original function
         try:
             return self._info[key]
         except KeyError:
             return super().__getitem__(key)
-
-        # def _getitem_from_ProtoChain(key):
-        #     proto = self._protos[key]
-        #     if not proto:
-        #         raise ProtocolNotFound('ProtoChain index out of range')
-        #     elif isinstance(proto, tuple):
-        #         if len(proto) > 1:  # if it's a slice with step & stop
-        #             raise ProtocolUnbound('frame slice unbound')
-        #         else:
-        #             start = proto[0]
-        #     else:
-        #         start = self._protos.index(proto)
-        #     return start
-        #
-        # # fetch slice start point from ProtoChain
-        # if not isinstance(key, tuple):
-        #     key = (key,)
-        # start = None
-        # for item in key:
-        #     try:
-        #         start = _getitem_from_ProtoChain(item)
-        #     except ProtocolNotFound:
-        #         continue
-        #     else:
-        #         break
-        # if start is None:
-        #     raise IndexNotFound(f"'{key}' not in Frame")
-        #
-        # # make return Info item
-        # dict_ = self._info.info2dict()
-        # for (level, proto) in enumerate(self._protos):
-        #     proto = proto or 'raw'
-        #     dict_ = dict_[proto.lower()]
-        #     if level >= start:
-        #         return Info(dict_)
-        # return Info(dict_)
 
     def __index__(self=None):
         """Index of the protocol.
@@ -427,15 +345,6 @@ class Frame(Protocol):
         +-----------+----------------------------------------------------------------------+
 
         """
-        # if proto == 1:
-        #     from pcapkit.protocols.link import Ethernet as Protocol
-        # elif proto == 228:
-        #     from pcapkit.protocols.internet import IPv4 as Protocol
-        # elif proto == 229:
-        #     from pcapkit.protocols.internet import IPv6 as Protocol
-        # else:
-        #     from pcapkit.protocols.raw import Raw as Protocol
-
         module, name = self.__proto__[proto]
         protocol = getattr(importlib.import_module(module), name)
         next_ = protocol(self._file, length, error=error,

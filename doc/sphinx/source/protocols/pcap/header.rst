@@ -1,11 +1,13 @@
-Global Header [*]_
-------------------
+Global Header
+-------------
+
+.. module:: pcapkit.protocols.pcap.header
 
 :mod:`pcapkit.protocols.pcap.header` contains
 :class:`~pcapkit.protocols.pcap.Header` only,
 which implements extractor for global headers
-of PCAP, whose structure is described as
-below.
+[*]_ of PCAP, whose structure is described as
+below:
 
 .. code:: c
 
@@ -19,10 +21,79 @@ below.
        guint32 network;        /* data link type */
    } pcap_hdr_t;
 
-.. automodule:: pcapkit.protocols.pcap.header
+.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Global_Header
+
+Protocol Class
+~~~~~~~~~~~~~~
+
+.. autoclass:: pcapkit.protocols.pcap.header.Header
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
 
-.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Global_Header
+Data Structure
+~~~~~~~~~~~~~~
+
+.. class:: DataType_Header
+
+   :bases: :class:`typing.TypedDict`
+
+   PCAP global header.
+
+   .. attribute:: magic_number
+      :type: DataType_MagicNumber
+
+      magic number
+
+   .. attribute:: version_major
+      :type: int
+
+      major version number
+
+   .. attribute:: version_minor
+      :type: int
+
+      minor version number
+
+   .. attribute:: thiszone
+      :type: int
+
+      GMT to local correction
+
+   .. attribute:: sigfigs
+      :type: int
+
+      accuracy of timestamps
+
+   .. attribute:: snaplen
+      :type: int
+
+      max length of captured packets, in octets
+
+   .. attribute:: network
+      :type: pcapkit.const.reg.linktype.LinkType
+
+      data link type
+
+
+.. class:: DataType_MagicNumber
+
+   :bases: :class:`typing.TypedDict`
+
+   PCAP magic number.
+
+   .. attribute:: data
+      :type: bytes
+
+      original magic number
+
+   .. attribute:: byteorder
+      :type: str
+
+      byte order (``big`` / ``little``)
+
+   .. attribute:: nanosecond
+      :type: bool
+
+      nanosecond-timestamp support

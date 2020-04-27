@@ -1,6 +1,8 @@
 FTP Vendor Crawlers
 ===================
 
+.. module:: pcapkit.vendor.ftp
+
 FTP Commands [*]_
 -----------------
 

@@ -1,6 +1,8 @@
 VLAN Vendor Crawler
 ===================
 
+.. module:: pcapkit.vendor.vlan
+
 Priority Levels [*]_
 --------------------
 

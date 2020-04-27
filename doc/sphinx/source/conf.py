@@ -31,9 +31,22 @@ release = '0.15.0'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.viewcode',
+    'sphinx.ext.intersphinx',
     'sphinx.ext.autodoc', 'sphinx.ext.autodoc.typehints',
     'sphinxcontrib.napoleon'
 ]
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'dictdumper': ('https://dictdumper.jarryshaw.me/en/latest/', None),
+    'chardet': ('https://chardet.readthedocs.io/en/latest/', None),
+    'dpkt': ('https://dpkt.readthedocs.io/en/latest/', None),
+    'scapy': ('https://scapy.readthedocs.io/en/latest/', None),
+    'scapy': ('https://scapy.readthedocs.io/en/latest/', None),
+    'requests': ('https://requests.readthedocs.io/en/latest/', None),
+    'bs4': ('https://www.crummy.com/software/BeautifulSoup/bs4/doc/', None),
+}
 
 autodoc_typehints = 'description'
 # autodoc_member_order = 'bysource'
@@ -76,11 +89,10 @@ html_theme = 'alabaster'
 html_static_path = ['_static']
 
 
-def maybe_skip_member(app, what, name, obj, skip, options):
-    if what == 'module':
-        return True
-    return skip
+def remove_module_docstring(app, what, name, obj, options, lines):
+    if what == "module" and name == "pcapkit":
+        del lines[:]
 
 
 def setup(app):
-    app.connect('autodoc-skip-member', maybe_skip_member)
+    app.connect("autodoc-process-docstring", remove_module_docstring)

@@ -1,6 +1,8 @@
 HIP Vendor Crawler
 ==================
 
+.. module:: pcapkit.vendor.hip
+
 HIP Certificate Types [*]_
 --------------------------
 

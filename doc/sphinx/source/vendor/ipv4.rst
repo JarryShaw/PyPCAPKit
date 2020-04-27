@@ -1,6 +1,8 @@
 IPv4 Vendor Crawler
 ===================
 
+.. module:: pcapkit.vendor.ipv4
+
 Classification Level Encodings
 ------------------------------
 

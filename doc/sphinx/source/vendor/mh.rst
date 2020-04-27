@@ -1,6 +1,8 @@
 MH Vendor Crawler
 =================
 
+.. module:: pcapkit.vendor.mh
+
 Mobility Header Types [*]_
 --------------------------
 

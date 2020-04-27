@@ -142,35 +142,7 @@ class Header(Protocol):
             * ``a1 b2 3c 4d`` -- Big-endian nano-timestamp PCAP file.
 
         Returns:
-            dict: Parsed packet data, as following structure::
-
-                class MagicNumber(TypedDict):
-                    \"\"\"PCAP magic number.\"\"\"
-
-                    #: original magic number
-                    data: bytes
-                    #: byte order (``big`` / ``little``)
-                    byteorder: str
-                    #: nanosecond-timestamp support
-                    nanosecond: bool
-
-                class Header(TypedDict):
-                    \"\"\"PCAP global header.\"\"\"
-
-                    #: magic number
-                    magic_number: MagicNumber
-                    #: major version number
-                    version_major: int
-                    #: minor version number
-                    version_minor: int
-                    #: GMT to local correction
-                    thiszone: int
-                    #: accuracy of timestamps
-                    sigfigs: int
-                    #: max length of captured packets, in octets
-                    snaplen: int
-                    #: data link type
-                    network: pcapkit.const.reg.linktype.LinkType
+            DataType_Header: Parsed packet data.
 
         Raises:
             FileError: If the magic number is invalid.
@@ -246,7 +218,7 @@ class Header(Protocol):
         return 24
 
     def __length_hint__(self):
-        """Return an estimated length for the object."""
+        """Return an estimated length (24) for the object."""
         return 24
 
     ##########################################################################

@@ -18,6 +18,9 @@ pipenv: update-pipenv
 # update: update-const update-date
 update: update-const
 
+docs:
+	pipenv run $(MAKE) -C doc/sphinx html
+
 pypi:
 	DIR=release $(MAKE) dist-prep dist
 

@@ -28,10 +28,6 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import ProtocolNotFound, ProtocolUnbound, StructError
 
-###############################################################################
-# from pcapkit.protocols.raw import Raw
-###############################################################################
-
 __all__ = ['Protocol']
 
 # readable characters' order list
@@ -457,6 +453,7 @@ class Protocol(metaclass=abc.ABCMeta):
         #                       f"and {type(other).__name__!r}")
 
     def __hash__(self):
+        """Return the hash value for :attr:`self._info <pcapkit.protocols.protocol.Protocol._info>`."""
         return hash(self._info)
 
     ##########################################################################
@@ -627,10 +624,14 @@ class Protocol(metaclass=abc.ABCMeta):
             Protocol: instance of next layer
 
         """
-        # from pcapkit.protocols.raw import Raw  # pylint: disable=import-outside-toplevel
+        if length is not None and length == 0:
+            from pcapkit.protocols.null import NoPayload as protocol  # pylint: disable=import-outside-toplevel
+        elif self._sigterm:
+            from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
+        else:
+            module, name = self.__proto__[proto]
+            protocol = getattr(importlib.import_module(module), name)
 
-        module, name = self.__proto__[proto]
-        protocol = getattr(importlib.import_module(module), name)
         next_ = protocol(io.BytesIO(self._read_fileng(length)), length,
                          layer=self._exlayer, protocol=self._exproto)
 

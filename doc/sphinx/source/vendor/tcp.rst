@@ -1,6 +1,8 @@
 TCP Vendor Crawler
 ==================
 
+.. module:: pcapkit.vendor.tcp
+
 TCP Checksum [*]_
 -----------------
 
