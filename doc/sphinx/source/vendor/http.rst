@@ -6,8 +6,6 @@ HTTP Vendor Crawler
 HTTP/2 Error Code [*]_
 ----------------------
 
-.. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#error-code
-
 .. automodule:: pcapkit.vendor.http.error_code
    :members:
    :undoc-members:
@@ -16,8 +14,6 @@ HTTP/2 Error Code [*]_
 
 HTTP/2 Frame Type [*]_
 ----------------------
-
-.. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#frame-type
 
 .. automodule:: pcapkit.vendor.http.frame
    :members:
@@ -28,10 +24,16 @@ HTTP/2 Frame Type [*]_
 HTTP/2 Settings [*]_
 --------------------
 
-.. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#settings
-
 .. automodule:: pcapkit.vendor.http.setting
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+.. raw:: html
+
+   <hr />
+
+.. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#error-code
+.. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#frame-type
+.. [*] https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#settings

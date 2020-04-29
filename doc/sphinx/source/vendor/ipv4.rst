@@ -24,8 +24,6 @@ Option Classes
 IP Option Numbers [*]_
 ----------------------
 
-.. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1
-
 .. automodule:: pcapkit.vendor.ipv4.option_number
    :members:
    :undoc-members:
@@ -52,8 +50,6 @@ QS Functions
 
 IPv4 Router Alert Option Values [*]_
 ------------------------------------
-
-.. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ipv4-router-alert-option-values
 
 .. automodule:: pcapkit.vendor.ipv4.router_alert
    :members:
@@ -105,3 +101,10 @@ ToS (DS Field) Throughput
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+.. raw:: html
+
+   <hr />
+
+.. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1
+.. [*] https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ipv4-router-alert-option-values

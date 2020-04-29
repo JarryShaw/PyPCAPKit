@@ -22,34 +22,8 @@ __all__ = ['Link', 'LINKTYPE']
 
 
 class Link(Protocol):  # pylint: disable=abstract-method
-    """Abstract base class for link layer protocol family.
+    """Abstract base class for link layer protocol family."""
 
-    Attributes:
-        name (str): name of corresponding protocol
-        info (Info): info dict of current instance
-        alias (str): acronym of corresponding protocol
-        layer (str): ``'Link'``
-        length (int): header length of corresponding protocol
-        protocol (EtherType): enumeration of next layer protocol
-        protochain (ProtoChain): protocol chain of current instance
-
-        _file (io.BytesIO): source data stream
-        _info (Info): info dict of current instance
-        _protos (ProtoChain): protocol chain of current instance
-
-    Methods:
-        decode_bytes: try to decode bytes into str
-        decode_url: decode URLs into Unicode
-
-        _read_protos: read next layer protocol type
-        _read_fileng: read file buffer
-        _read_unpack: read bytes and unpack to integers
-        _read_binary: read bytes and convert into binaries
-        _read_packet: read raw packet data
-        _decode_next_layer: decode next layer protocol type
-        _import_next_layer: import next layer protocol extractor
-
-    """
     ##########################################################################
     # Defaults.
     ##########################################################################
@@ -103,12 +77,24 @@ class Link(Protocol):  # pylint: disable=abstract-method
         This method currently supports following protocols as registered in
         :data:`~pcapkit.const.reg.linktype.LinkType`:
 
-        * :class:`~pcapkit.protocols.link.arp.ARP`
-        * :class:`~pcapkit.protocols.link.rarp.RARP`
-        * :class:`~pcapkit.protocols.link.vlan.VLAN`
-        * :class:`~pcapkit.protocols.internet.ipv4.IPv4`
-        * :class:`~pcapkit.protocols.internet.ipv6.IPv6`
-        * :class:`~pcapkit.protocols.internet.ipx.IPX`
+        .. list-table::
+           :header-rows: 1
+
+           * - ``proto``
+             - Protocol
+           * - 0x0806
+             - :class:`~pcapkit.protocols.link.arp.ARP`
+           * - 0x8035
+             - :class:`~pcapkit.protocols.link.rarp.RARP`
+           * - 0x8100
+             - :class:`~pcapkit.protocols.link.vlan.VLAN`
+           * - 0x0800
+             - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
+           * - 0x86DD
+             - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+           * - 0x8137
+             - :class:`~pcapkit.protocols.internet.ipx.IPX`
+
 
         Arguments:
             proto (int): next layer protocol index

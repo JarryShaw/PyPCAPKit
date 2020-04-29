@@ -6,8 +6,6 @@ HIP Vendor Crawler
 HIP Certificate Types [*]_
 --------------------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#certificate-types
-
 .. automodule:: pcapkit.vendor.hip.certificate
    :members:
    :undoc-members:
@@ -16,8 +14,6 @@ HIP Certificate Types [*]_
 
 HIP Cipher IDs [*]_
 -------------------
-
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-cipher-id
 
 .. automodule:: pcapkit.vendor.hip.cipher
    :members:
@@ -28,8 +24,6 @@ HIP Cipher IDs [*]_
 DI-Types [*]_
 -------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-7
-
 .. automodule:: pcapkit.vendor.hip.di
    :members:
    :undoc-members:
@@ -38,8 +32,6 @@ DI-Types [*]_
 
 ECDSA Curve Label [*]_
 ----------------------
-
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-curve-label
 
 .. automodule:: pcapkit.vendor.hip.ecdsa_curve
    :members:
@@ -50,8 +42,6 @@ ECDSA Curve Label [*]_
 ECDSA_LOW Curve Label [*]_
 --------------------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-low-curve-label
-
 .. automodule:: pcapkit.vendor.hip.ecdsa_low_curve
    :members:
    :undoc-members:
@@ -60,8 +50,6 @@ ECDSA_LOW Curve Label [*]_
 
 ESP Transform Suite IDs [*]_
 ----------------------------
-
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#esp-transform-suite-ids
 
 .. automodule:: pcapkit.vendor.hip.esp_transform_suite
    :members:
@@ -72,8 +60,6 @@ ESP Transform Suite IDs [*]_
 Group IDs [*]_
 --------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-5
-
 .. automodule:: pcapkit.vendor.hip.group
    :members:
    :undoc-members:
@@ -82,8 +68,6 @@ Group IDs [*]_
 
 HI Algorithm [*]_
 -----------------
-
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hi-algorithm
 
 .. automodule:: pcapkit.vendor.hip.hi_algorithm
    :members:
@@ -94,8 +78,6 @@ HI Algorithm [*]_
 HIT Suite ID [*]_
 -----------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hit-suite-id
-
 .. automodule:: pcapkit.vendor.hip.hit_suite
    :members:
    :undoc-members:
@@ -104,8 +86,6 @@ HIT Suite ID [*]_
 
 HIP NAT Traversal Modes [*]_
 ----------------------------
-
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#nat-traversal
 
 .. automodule:: pcapkit.vendor.hip.nat_traversal
    :members:
@@ -116,8 +96,6 @@ HIP NAT Traversal Modes [*]_
 Notify Message Types [*]_
 -------------------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-9
-
 .. automodule:: pcapkit.vendor.hip.notify_message
    :members:
    :undoc-members:
@@ -126,8 +104,6 @@ Notify Message Types [*]_
 
 Packet Types [*]_
 -----------------
-
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-1
 
 .. automodule:: pcapkit.vendor.hip.packet
    :members:
@@ -138,8 +114,6 @@ Packet Types [*]_
 Parameter Types [*]_
 --------------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-4
-
 .. automodule:: pcapkit.vendor.hip.parameter
    :members:
    :undoc-members:
@@ -148,8 +122,6 @@ Parameter Types [*]_
 
 Registration Types [*]_
 -----------------------
-
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-11
 
 .. automodule:: pcapkit.vendor.hip.registration
    :members:
@@ -160,8 +132,6 @@ Registration Types [*]_
 Registration Failure Types [*]_
 -------------------------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-13
-
 .. automodule:: pcapkit.vendor.hip.registration_failure
    :members:
    :undoc-members:
@@ -170,8 +140,6 @@ Registration Failure Types [*]_
 
 Suite IDs [*]_
 --------------
-
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-6
 
 .. automodule:: pcapkit.vendor.hip.suite
    :members:
@@ -182,10 +150,30 @@ Suite IDs [*]_
 HIP Transport Modes [*]_
 ------------------------
 
-.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#transport-modes
-
 .. automodule:: pcapkit.vendor.hip.transport
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+.. raw:: html
+
+   <hr />
+
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#certificate-types
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-cipher-id
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-7
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-curve-label
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-low-curve-label
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#esp-transform-suite-ids
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-5
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hi-algorithm
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hit-suite-id
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#nat-traversal
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-9
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-1
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-4
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-11
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-13
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-6
+.. [*] https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#transport-modes

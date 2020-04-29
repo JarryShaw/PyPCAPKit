@@ -29,38 +29,8 @@ __all__ = ['Ethernet']
 
 
 class Ethernet(Link):
-    """This class implements Ethernet Protocol.
+    """This class implements Ethernet Protocol."""
 
-    Attributes:
-        name (str): name of corresponding protocol
-        info (Info): info dict of current instance
-        alias (str): acronym of corresponding protocol
-        layer (str): ``'Link'``
-        length (int): header length of corresponding protocol
-        protocol (EtherType): enumeration of next layer protocol
-        protochain (ProtoChain): protocol chain of current instance
-        src (str): source MAC address
-        dst (str): destination MAC address
-
-        _file: (io.BytesIO): source data stream
-        _info: (Info): info dict of current instance
-        _protos: (ProtoChain): protocol chain of current instance
-
-    Methods:
-        decode_bytes: try to decode bytes into str
-        decode_url: decode URLs into Unicode
-        read_ethernet: read Ethernet Protocol
-
-        _read_protos: read next layer protocol type
-        _read_fileng: read file buffer
-        _read_unpack: read bytes and unpack to integers
-        _read_binary: read bytes and convert into binaries
-        _read_packet: read raw packet data
-        _decode_next_layer: decode next layer protocol type
-        _import_next_layer: import next layer protocol extractor
-        _read_mac_addr: read MAC address
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -97,35 +67,13 @@ class Ethernet(Link):
     ##########################################################################
 
     def read_ethernet(self, length):
-        """Read Ethernet Protocol.
-
-        Structure of Ethernet Protocol header [:rfc:`7042`]:
-
-        +========+=======+==============+===========================+
-        | Octets | Bits  | Name         | Description               |
-        +========+=======+==============+===========================+
-        | 0      |     0 | ``eth.dst``  | Destination MAC Address   |
-        +--------+-------+--------------+---------------------------+
-        | 1      |     8 | ``eth.src``  | Source MAC Address        |
-        +--------+-------+--------------+---------------------------+
-        | 2      |    16 | ``eth.type`` | Protocol (Internet Layer) |
-        +--------+-------+--------------+---------------------------+
+        """Read Ethernet Protocol [:rfc:`7042`].
 
         Args:
             length (int): packet length
 
         Returns:
-            dict: Parsed packet data, as following structure::
-
-                class Ethernet(TypedDict):
-                    \"\"\"Ethernet header.\"\"\"
-
-                    #: destination MAC address
-                    dst: str
-                    #: source MAC address
-                    src: str
-                    #: protocol (Internet layer)
-                    type: EtherType
+            DataType_Ethernet: Parsed packet data.
 
         """
         if length is None:

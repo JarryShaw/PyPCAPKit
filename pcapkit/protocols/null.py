@@ -19,29 +19,8 @@ __all__ = ['NoPayload']
 
 
 class NoPayload(Protocol):
-    """This class implements no-payload protocol.
+    """This class implements no-payload protocol."""
 
-    Attributes:
-        name (str): name of corresponding protocol
-        info (Info): info dict of current instance
-        alias (str): acronym of corresponding protocol
-
-        _file (io.BytesIO): source data stream
-        _info (Info): info dict of current instance
-        _protos (ProtoChain): protocol chain of current instance
-
-    Methods:
-        decode_bytes: try to decode bytes into str
-        decode_url: decode URLs into Unicode
-        read_raw: read raw packet data
-
-        _read_protos: read next layer protocol type
-        _read_fileng: read file buffer
-        _read_unpack: read bytes and unpack to integers
-        _read_binary: read bytes and convert into binaries
-        _read_packet: read raw packet data
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################

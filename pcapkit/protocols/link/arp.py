@@ -53,39 +53,6 @@ class ARP(Link):
     - Dynamic Reverse Address Resolution Protocol (DRARP) [:rfc:`1931`]
     - Inverse Address Resolution Protocol (InARP) [:rfc:`2390`]
 
-    Attributes:
-        name (str): name of corresponding protocol
-        info (Info): info dict of current instance
-        alias (str): acronym of corresponding protocol
-        layer (str): ``'Link'``
-        length (int): header length of corresponding protocol
-        protocol (EtherType): enumeration of next layer protocol
-        protochain (ProtoChain): protocol chain of current instance
-        src (Tuple[str, str]): sender hardware & protocol address
-        dst (Tuple[str, str]): target hardware & protocol address
-        type (Tuple[str, str]): hardware & protocol type
-
-        _file: (io.BytesIO): source data stream
-        _info: (Info): info dict of current instance
-        _protos: (ProtoChain): protocol chain of current instance
-        _acnm: (str): acronym of corresponding protocol
-        _name: (str): name of corresponding protocol
-
-    Methods:
-        decode_bytes: try to decode bytes into str
-        decode_url: decode URLs into Unicode
-        read_arp: read Address Resolution Protocol
-
-        _read_protos: read next layer protocol type
-        _read_fileng: read file buffer
-        _read_unpack: read bytes and unpack to integers
-        _read_binary: read bytes and convert into binaries
-        _read_packet: read raw packet data
-        _decode_next_layer: decode next layer protocol type
-        _import_next_layer: import next layer protocol extractor
-        _read_addr_resolve: resolve MAC address according to protocol
-        _read_proto_resolve: solve IP address according to protocol
-
     """
     ##########################################################################
     # Properties.
@@ -126,64 +93,13 @@ class ARP(Link):
     ##########################################################################
 
     def read_arp(self, length):
-        """Read Address Resolution Protocol.
-
-        Structure of ARP header [:rfc:`826`]:
-
-        +========+=======+===============+=========================+
-        | Octets | Bits  | Name          | Description             |
-        +========+=======+===============+=========================+
-        | 0      |     0 | ``arp.htype`` | Hardware Type           |
-        +--------+-------+---------------+-------------------------+
-        | 2      |    16 | ``arp.ptype`` | Protocol Type           |
-        +--------+-------+---------------+-------------------------+
-        | 4      |    32 | ``arp.hlen``  | Hardware Address Length |
-        +--------+-------+---------------+-------------------------+
-        | 5      |    40 | ``arp.plen``  | Protocol Address Length |
-        +--------+-------+---------------+-------------------------+
-        | 6      |    48 | ``arp.oper``  | Operation               |
-        +--------+-------+---------------+-------------------------+
-        | 8      |    64 | ``arp.sha``   | Sender Hardware Address |
-        +--------+-------+---------------+-------------------------+
-        | 14     |   112 | ``arp.spa``   | Sender Protocol Address |
-        +--------+-------+---------------+-------------------------+
-        | 18     |   144 | ``arp.tha``   | Target Hardware Address |
-        +--------+-------+---------------+-------------------------+
-        | 24     |   192 | ``arp.tpa``   | Target Protocol Address |
-        +--------+-------+---------------+-------------------------+
+        """Read Address Resolution Protocol [:rfc:`826`].
 
         Args:
             length (int): packet length
 
         Returns:
-            dict: Parsed packet data, as following structure::
-
-                class ARP(TypedDict):
-                    \"\"\"ARP header.\"\"\"
-
-                    #: hardware type
-                    htype: Hardware
-                    #: protocol type
-                    ptype: Union[EtherType, str]
-                    #: hardware address length
-                    hlen: int
-                    #: protocol address length
-                    plen: int
-                    #: operation
-                    oper: Operation
-                    #: sender hardware address
-                    sha: str
-                    #: sender protocol address
-                    spa: Union[IPv4Address, IPv6Address, str]
-                    #: target hardware address
-                    tha: str
-                    #: target protocol address
-                    tpa: Union[IPv4Address, IPv6Address, str]
-
-                    #: protocol header length
-                    len: int
-                    #: protocol packet data
-                    packet: bytes
+            DataType_ARP: Parsed packet data.
 
         """
         if length is None:
@@ -259,7 +175,7 @@ class ARP(Link):
         return 28
 
     @classmethod
-    def __index__(cls):
+    def __index__(cls):  # pylint: disable=invalid-index-returned
         """Index of the protocol.
 
         Returns:
@@ -302,10 +218,10 @@ class ARP(Link):
             ptype (int): Protocol type.
 
         Returns:
-            Union[IPv4Address, IPv6Address, str]: Protocol address. If ``ptype`` is ``0x0800``,
-            i.e. IPv4 adddress, returns an :class:`~ipaddress.IPv4Address` object; if ``ptype``
-            is ``0x86dd``, i.e. IPv6 address, returns an :class:`~ipaddress.IPv6Address` object;
-            otherwise, returns a raw :data:`str` representing the protocol address.
+            Union[ipaddress.IPv4Address, ipaddress.IPv6Address, str]: Protocol address. If ``ptype``
+            is ``0x0800``, i.e. IPv4 adddress, returns an :class:`~ipaddress.IPv4Address` object; if
+            ``ptype`` is ``0x86dd``, i.e. IPv6 address, returns an :class:`~ipaddress.IPv6Address`
+            object; otherwise, returns a raw :data:`str` representing the protocol address.
 
         """
         if ptype == 0x0800:  # IPv4

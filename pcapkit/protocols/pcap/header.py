@@ -32,32 +32,8 @@ __all__ = ['Header']
 
 
 class Header(Protocol):
-    """PCAP file global header extractor.
+    """PCAP file global header extractor."""
 
-    Attributes:
-        name (str): name of corresponding protocol
-        info (Info): info dict of current instance
-        alias (str): acronym of corresponding protocol
-        length (int): header length of global header, i.e. 24
-        version (VersionInfo): version infomation of input PCAP file
-        protocol (str): data link type
-        nanosecond (bool): nanosecond-resolution flag
-
-        _file (io.BytesIO): bytes to be extracted
-        _info (Info): info dict of current instance
-
-    Methods:
-        decode_bytes: try to decode ``bytes`` into ``str``
-        decode_url: decode URLs into Unicode
-        read_header: read global header of PCAP file
-
-        _read_protos: read next layer protocol type
-        _read_fileng: read file buffer
-        _read_unpack: read bytes and unpack to integers
-        _read_binary: read bytes and convert into binaries
-        _read_packet: read raw packet data
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -118,20 +94,6 @@ class Header(Protocol):
 
     def read_header(self):
         """Read global header of PCAP file.
-
-        Structure of global header (C):
-
-        .. code:: c
-
-            typedef struct pcap_hdr_s {
-                guint32 magic_number;   /* magic number */
-                guint16 version_major;  /* major version number */
-                guint16 version_minor;  /* minor version number */
-                gint32  thiszone;       /* GMT to local correction */
-                guint32 sigfigs;        /* accuracy of timestamps */
-                guint32 snaplen;        /* max length of captured packets, in octets */
-                guint32 network;        /* data link type */
-            } pcap_hdr_t;
 
         Notes:
             PCAP file has **four** different valid magic numbers.

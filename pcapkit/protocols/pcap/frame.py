@@ -31,35 +31,8 @@ __all__ = ['Frame']
 
 
 class Frame(Protocol):
-    """Per packet frame header extractor.
+    """Per packet frame header extractor."""
 
-    Properties:
-        name (str: name of corresponding protocol
-        info (Info: info dict of current instance
-        alias (str: acronym of corresponding protocol
-        length (int: header length of corresponding protocol
-        protocol (str: name of next layer protocol
-        protochain (ProtoChain: protocol chain of current frame
-
-        _file (io.BytesIO): source data stream
-        _info (Info): info dict of current instance
-        _protos (ProtoChain): protocol chain of current instance
-
-    Methods:
-        decode_bytes: try to decode ``bytes`` into ``str``
-        decode_url: decode URLs into Unicode
-        index: call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`
-        read_frame: read each block after global header
-
-        _read_protos: read next layer protocol type
-        _read_fileng: read file buffer
-        _read_unpack: read bytes and unpack to integers
-        _read_binary: read bytes and convert into binaries
-        _read_packet: read raw packet data
-        _decode_next_layer: decode next layer protocol type
-        _import_next_layer: import next layer protocol extractor
-
-    """
     ##########################################################################
     # Defaults.
     ##########################################################################
@@ -110,19 +83,8 @@ class Frame(Protocol):
     def read_frame(self):
         """Read each block after global header.
 
-        Structure of record/package header (C):
-
-        .. code:: c
-
-            typedef struct pcaprec_hdr_s {
-                guint32 ts_sec;     /* timestamp seconds */
-                guint32 ts_usec;    /* timestamp microseconds */
-                guint32 incl_len;   /* number of octets of packet saved in file */
-                guint32 orig_len;   /* actual length of packet */
-            } pcaprec_hdr_t;
-
         Returns:
-            DataType_pcap_frame_Frame: Parsed packet data.
+            DataType_Frame: Parsed packet data.
 
         Raises:
             EOFError: If :attr:`self._file <pcapkit.protocols.pcap.frame.Frame._file>` reaches EOF.
@@ -266,7 +228,7 @@ class Frame(Protocol):
 
     def __contains__(self, name):
         """Returns if ``name`` is in :attr:`self._info <pcapkit.protocols.protocol.Protocol._info>`
-        or in the frame packet :attr:`self._protos <pcapkit.protocols.protocol.Protocol._protos>.
+        or in the frame packet :attr:`self._protos <pcapkit.protocols.protocol.Protocol._protos>`.
 
         Args:
             name (Any): name to search
@@ -288,11 +250,11 @@ class Frame(Protocol):
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, dict_, length=None):  # pylint: disable=arguments-differ
+    def _decode_next_layer(self, data, length=None):  # pylint: disable=arguments-differ
         """Decode next layer protocol.
 
         Positional arguments:
-            dict_ (dict): info buffer
+            data (dict): info buffer
             length (int): valid (*non-padding*) length
 
         Returns:
@@ -303,7 +265,7 @@ class Frame(Protocol):
         try:
             next_ = self._import_next_layer(self._prot, length)
         except Exception:
-            dict_['error'] = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
+            data['error'] = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = beholder(self._import_next_layer)(self, self._prot, length, error=True)
         info, chain = next_.info, next_.protochain
@@ -315,9 +277,9 @@ class Frame(Protocol):
         # write info and protocol chain into dict
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = chain  # pylint: disable=attribute-defined-outside-init
-        dict_[layer] = info
-        dict_['protocols'] = self._protos.chain
-        return dict_
+        data[layer] = info
+        data['protocols'] = self._protos.chain
+        return data
 
     def _import_next_layer(self, proto, length, error=False):  # pylint: disable=arguments-differ
         """Import next layer extractor.

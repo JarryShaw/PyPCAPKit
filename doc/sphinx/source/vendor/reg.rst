@@ -6,8 +6,6 @@ Protocol Type Registry Vendor Crawlers
 LINK-LAYER HEADER TYPES [*]_
 ----------------------------
 
-.. [*] http://www.tcpdump.org/linktypes.html
-
 .. automodule:: pcapkit.vendor.reg.linktype
    :members:
    :undoc-members:
@@ -16,8 +14,6 @@ LINK-LAYER HEADER TYPES [*]_
 
 ETHER TYPES [*]_
 ----------------
-
-.. [*] https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1
 
 .. automodule:: pcapkit.vendor.reg.ethertype
    :members:
@@ -28,10 +24,16 @@ ETHER TYPES [*]_
 Assigned Internet Protocol Numbers [*]_
 ---------------------------------------
 
-.. [*] https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1
-
 .. automodule:: pcapkit.vendor.reg.transtype
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+.. raw:: html
+
+   <hr />
+
+.. [*] http://www.tcpdump.org/linktypes.html
+.. [*] https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1
+.. [*] https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1

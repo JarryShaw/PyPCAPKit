@@ -4,70 +4,78 @@
 :mod:`pcapkit.reassembly.ipv4` contains
 :class:`~pcapkit.reassembly.ipv4.IPv4_Reassembly`
 only, which reconstructs fragmented IPv4 packets back to
-origin. The following algorithm implement is based on IP
-reassembly procedure introduced in :rfc:`791`, using
-``RCVBT`` (fragment receivedbit table). Though another
-algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
-however, this implement still used the elder one.
+origin.
 
-Notations::
+Glossary
+--------
 
-    FO    - Fragment Offset
-    IHL   - Internet Header Length
-    MF    - More Fragments flag
-    TTL   - Time To Live
-    NFB   - Number of Fragment Blocks
-    TL    - Total Length
-    TDL   - Total Data Length
-    BUFID - Buffer Identifier
-    RCVBT - Fragment Received Bit Table
-    TLB   - Timer Lower Bound
+ipv4.packet
+    Data structure for **IPv4 datagram reassembly**
+    (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`)
+    is as following:
 
-Algorithm::
+.. code:: python
 
-    DO {
-        BUFID <- source|destination|protocol|identification;
+   packet_dict = dict(
+     bufid = tuple(
+         ipv4.src,                   # source IP address
+         ipv4.dst,                   # destination IP address
+         ipv4.id,                    # identification
+         ipv4.proto,                 # payload protocol type
+     ),
+     num = frame.number,             # original packet range number
+     fo = ipv4.frag_offset,          # fragment offset
+     ihl = ipv4.hdr_len,             # internet header length
+     mf = ipv4.flags.mf,             # more fragment flag
+     tl = ipv4.len,                  # total length, header includes
+     header = ipv4.header,           # raw bytearray type header
+     payload = ipv4.payload,         # raw bytearray type payload
+   )
 
-        IF (FO = 0 AND MF = 0) {
-            IF (buffer with BUFID is allocated) {
-                flush all reassembly for this BUFID;
-                Submit datagram to next step;
-                DONE.
-            }
-        }
+ipv4.datagram
+    Data structure for **reassembled IPv4 datagram** (element from
+    :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
+    is as following:
 
-        IF (no buffer with BUFID is allocated) {
-            allocate reassembly resources with BUFID;
-            TIMER <- TLB;
-            TDL <- 0;
-            put data from fragment into data buffer with BUFID
-                [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
-            set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
-        }
+.. code:: python
 
-        IF (MF = 0) {
-            TDL <- TL-(IHL*4)+(FO*8)
-        }
+   (tuple) datagram
+    |--> (dict) data
+    |     |--> 'NotImplemented' : (bool) True --> implemented
+    |     |--> 'index' : (tuple) packet numbers
+    |     |               |--> (int) original packet range number
+    |     |--> 'packet' : (Optional[bytes]) reassembled IPv4 packet
+    |--> (dict) data
+    |     |--> 'NotImplemented' : (bool) False --> not implemented
+    |     |--> 'index' : (tuple) packet numbers
+    |     |               |--> (int) original packet range number
+    |     |--> 'header' : (Optional[bytes]) IPv4 header
+    |     |--> 'payload' : (Optional[tuple]) partially reassembled IPv4 payload
+    |                       |--> (Optional[bytes]) IPv4 payload fragment
+    |--> (dict) data ...
 
-        IF (FO = 0) {
-            put header in header buffer
-        }
+ipv4.buffer
+    Data structure for internal buffering when performing reassembly algorithms
+    (:attr:`~pcapkit.reassembly.reassembly.Reassembly._buffer`) is as following:
 
-        IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {
-            TL <- TDL+(IHL*4)
-            Submit datagram to next step;
-            free all reassembly resources for this BUFID;
-            DONE.
-        }
+    .. code:: python
 
-        TIMER <- MAX(TIMER,TTL);
-
-    } give up until (next fragment or timer expires);
-
-    timer expires: {
-        flush all reassembly with this BUFID;
-        DONE.
-    }
+       (dict) buffer --> memory buffer for reassembly
+        |--> (tuple) BUFID : (dict)
+        |     |--> ipv4.src       |
+        |     |--> ipc6.dst       |
+        |     |--> ipv4.label     |
+        |     |--> ipv4_frag.next |
+        |                         |--> 'TDL' : (int) total data length
+        |                         |--> RCVBT : (bytearray) fragment received bit table
+        |                         |             |--> (bytes) b'\\x00' -> not received
+        |                         |             |--> (bytes) b'\\x01' -> received
+        |                         |             |--> (bytes) ...
+        |                         |--> 'index' : (list) list of reassembled packets
+        |                         |               |--> (int) packet range number
+        |                         |--> 'header' : (bytearray) header buffer
+        |                         |--> 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
+        |--> (tuple) BUFID ...
 
 """
 from pcapkit.reassembly.ip import IP_Reassembly
@@ -86,93 +94,6 @@ class IPv4_Reassembly(IP_Reassembly):
         >>> ipv4_reassembly(packet_dict)
         # Fetch result:
         >>> result = ipv4_reassembly.datagram
-
-    Attributes:
-        name (str): protocol of current packet
-        count (int): total number of reassembled packets
-        datagram (tuple): reassembled datagram, which structure may vary
-            according to its protocol
-        protocol (str): protocol of current reassembly object
-
-        _strflg (bool): strict mode flag
-        _buffer (dict): buffer field
-        _dtgram (tuple): reassembled datagram
-
-    Methods:
-        reassembly: perform the reassembly procedure
-        submit: submit reassembled payload
-        fetch: fetch datagram
-        index: return datagram index
-        run: run automatically
-
-    .. glossary::
-
-        packet
-            Data structure for **IPv4 datagram reassembly**
-            (:meth:`~pcapkit.reassembly.ipv4.IPv4_Reassembly.reassembly`) is as following:
-
-            .. productionlist:: ipv4.packet
-
-               packet_dict = dict(
-                 bufid = tuple(
-                     ipv4.src,                   # source IP address
-                     ipv4.dst,                   # destination IP address
-                     ipv4.id,                    # identification
-                     ipv4.proto,                 # payload protocol type
-                 ),
-                 num = frame.number,             # original packet range number
-                 fo = ipv4.frag_offset,          # fragment offset
-                 ihl = ipv4.hdr_len,             # internet header length
-                 mf = ipv4.flags.mf,             # more fragment flag
-                 tl = ipv4.len,                  # total length, header includes
-                 header = ipv4.header,           # raw bytearray type header
-                 payload = ipv4.payload,         # raw bytearray type payload
-               )
-
-        datagram
-            Data structure for **reassembled IPv4 datagram** (element from
-            :attr:`~pcapkit.reassembly.ipv4.IPv4_Reassembly.datagram` *tuple*)
-            is as following:
-
-            .. productionlist:: ipv4.datagram
-
-               (tuple) datagram
-                |--> (dict) data
-                |     |--> 'NotImplemented' : (bool) True --> implemented
-                |     |--> 'index' : (tuple) packet numbers
-                |     |               |--> (int) original packet range number
-                |     |--> 'packet' : (Optional[bytes]) reassembled IPv4 packet
-                |--> (dict) data
-                |     |--> 'NotImplemented' : (bool) False --> not implemented
-                |     |--> 'index' : (tuple) packet numbers
-                |     |               |--> (int) original packet range number
-                |     |--> 'header' : (Optional[bytes]) IPv4 header
-                |     |--> 'payload' : (Optional[tuple]) partially reassembled IPv4 payload
-                |                       |--> (Optional[bytes]) IPv4 payload fragment
-                |--> (dict) data ...
-
-        buffer
-            Data structure for internal buffering when performing reassembly algorithms
-            (:attr:`~pcapkit.reassembly.ipv4.IPv4_Reassembly._buffer`) is as following:
-
-            .. productionlist:: ipv4.buffer
-
-               (dict) buffer --> memory buffer for reassembly
-                |--> (tuple) BUFID : (dict)
-                |     |--> ipv4.src       |
-                |     |--> ipc6.dst       |
-                |     |--> ipv4.label     |
-                |     |--> ipv4_frag.next |
-                |                         |--> 'TDL' : (int) total data length
-                |                         |--> RCVBT : (bytearray) fragment received bit table
-                |                         |             |--> (bytes) b\x00' not received
-                |                         |             |--> (bytes) b\x01' received
-                |                         |             |--> (bytes) ...
-                |                         |--> 'index' : (list) list of reassembled packets
-                |                         |               |--> (int) packet range number
-                |                         |--> 'header' : (bytearray) header buffer
-                |                         |--> 'datagram' : (bytearray) data buffer, holes set to b'\x00'
-                |--> (tuple) BUFID ...
 
     """
     ##########################################################################

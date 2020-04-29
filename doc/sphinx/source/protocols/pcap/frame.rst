@@ -17,21 +17,45 @@ whose structure is described as below:
        guint32 orig_len;   /* actual length of packet */
    } pcaprec_hdr_t;
 
-.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Record_.28Packet.29_Header
-
-Protocol Class
-~~~~~~~~~~~~~~
-
 .. autoclass:: pcapkit.protocols.pcap.frame.Frame
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
 
+   .. attribute:: Frame.__proto__
+      :type: DefaultDict[int, Tuple[str, str]]
+
+      Protocol index mapping for decoding next layer,
+      c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+      & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+      The values should be a tuple representing the module name and class name.
+
+      .. list-table::
+         :header-rows: 1
+
+         * - Code
+           - Module
+           - Class
+         * - 1
+           - :mod:`pcapkit.protocols.link.ethernet`
+           - :class:`~pcapkit.protocols.link.ethernet.Ethernet`
+         * - 228
+           - :mod:`pcapkit.protocols.link.internet.ipv4`
+           - :class:`~pcapkit.protocols.link.internet.ipv4.IPv4`
+         * - 229
+           - :mod:`pcapkit.protocols.link.internet.ipv6`
+           - :class:`~pcapkit.protocols.link.internet.ipv6.IPv6`
+
 Data Structure
 ~~~~~~~~~~~~~~
 
-.. class:: DataType_pcap_frame_Frame
+.. important::
+
+   Following classes are only for *documentation* purpose.
+   They do **NOT** exist in the :mod:`pcapkit` module.
+
+.. class:: DataType_Frame
 
    :bases: typing.TypedDict
 
@@ -107,3 +131,9 @@ Data Structure
       :type: int
 
       actual length of packet
+
+.. raw:: html
+
+   <hr />
+
+.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Record_.28Packet.29_Header

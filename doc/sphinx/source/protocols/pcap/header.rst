@@ -1,8 +1,6 @@
 Global Header
 -------------
 
-.. module:: pcapkit.protocols.pcap.header
-
 :mod:`pcapkit.protocols.pcap.header` contains
 :class:`~pcapkit.protocols.pcap.Header` only,
 which implements extractor for global headers
@@ -21,12 +19,7 @@ below:
        guint32 network;        /* data link type */
    } pcap_hdr_t;
 
-.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Global_Header
-
-Protocol Class
-~~~~~~~~~~~~~~
-
-.. autoclass:: pcapkit.protocols.pcap.header.Header
+.. automodule:: pcapkit.protocols.pcap.header
    :members:
    :undoc-members:
    :private-members:
@@ -34,6 +27,11 @@ Protocol Class
 
 Data Structure
 ~~~~~~~~~~~~~~
+
+.. important::
+
+   Following classes are only for *documentation* purpose.
+   They do **NOT** exist in the :mod:`pcapkit` module.
 
 .. class:: DataType_Header
 
@@ -97,3 +95,9 @@ Data Structure
       :type: bool
 
       nanosecond-timestamp support
+
+.. raw:: html
+
+   <hr />
+
+.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Global_Header

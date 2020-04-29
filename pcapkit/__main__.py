@@ -4,9 +4,6 @@
 :mod:`pcapkit.__main__` was originally the module file of
 |jspcapy|_, which is now deprecated and merged with :mod:`pcapkit`.
 
-.. |jspcapy| replace:: ``jspcapy``
-.. _jspcapy: https://github.com/JarryShaw/jspcapy
-
 """
 import argparse
 import sys

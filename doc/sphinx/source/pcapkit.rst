@@ -70,12 +70,6 @@ Subpackages
 .. toctree::
    :maxdepth: 3
 
-   const/index
-   corekit/index
-   dumpkit/index
-   foundation/index
-   interface/index
-   ipsuite/index
    protocols/index
    reassembly/index
    toolkit/index

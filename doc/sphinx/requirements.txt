@@ -1,0 +1,70 @@
+-i https://pypi.tuna.tsinghua.edu.cn/simple
+--extra-index-url https://mirrors.sjtug.sjtu.edu.cn/pypi/web/simple
+--extra-index-url https://pypi.org/simple
+-e .
+aenum==2.2.3
+alabaster==0.7.12
+appnope==0.1.0 ; sys_platform == 'darwin'
+astroid==2.4.0
+autopep8==1.5.2
+babel==2.8.0
+backcall==0.1.0
+beautifulsoup4[html5lib]==4.9.0
+certifi==2020.4.5.1
+chardet==3.0.4
+decorator==4.4.2
+dictdumper==0.8.2
+doc8==0.8.0
+docutils==0.16
+dpkt==1.9.2
+html5lib==1.0.1
+idna==2.9
+imagesize==1.2.0
+ipython-genutils==0.2.0
+ipython==7.13.0
+isort==4.3.21
+jedi==0.17.0
+jinja2==3.0.0a1
+lazy-object-proxy==1.4.3
+lxml==4.5.0
+markupsafe==2.0.0a1
+mccabe==0.6.1
+packaging==20.3
+parso==0.7.0
+pbr==5.4.5
+pexpect==4.8.0 ; sys_platform != 'win32'
+pickleshare==0.7.5
+pockets==0.9.1
+prompt-toolkit==3.0.5
+ptyprocess==0.6.0
+py==1.8.1
+pycodestyle==2.6.0a1
+pygments==2.6.1
+pylint==2.5.0
+pyparsing==3.0.0a1
+pyshark==0.4.2.9
+pysocks==1.7.1
+pytz==2020.1
+requests[socks]==2.23.0
+restructuredtext-lint==1.3.0
+rstcheck==3.3.1
+scapy==2.4.3
+six==1.14.0
+snowballstemmer==2.0.0
+soupsieve==2.0
+sphinx==3.0.3
+sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-devhelp==1.0.2
+sphinxcontrib-htmlhelp==1.0.3
+sphinxcontrib-jsmath==1.0.1
+sphinxcontrib-napoleon==0.7
+sphinxcontrib-qthelp==1.0.3
+sphinxcontrib-serializinghtml==1.1.4
+stevedore==1.32.0
+tbtrim==0.3.1
+toml==0.10.0
+traitlets==4.3.3
+urllib3==1.25.9
+wcwidth==0.1.9
+webencodings==0.5.1
+wrapt==1.12.1

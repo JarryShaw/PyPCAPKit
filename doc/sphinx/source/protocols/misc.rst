@@ -15,6 +15,30 @@ extractor for unknown protocol, and constructs a
    :private-members:
    :show-inheritance:
 
+Data Structure
+~~~~~~~~~~~~~~
+
+.. important::
+
+   Following classes are only for *documentation* purpose.
+   They do **NOT** exist in the :mod:`pcapkit` module.
+
+.. class:: DataType_Raw
+
+   :bases: typing.TypedDict
+
+   Raw packet data.
+
+   .. attribute:: packet
+      :type: bytes
+
+      raw packet data
+
+   .. attribute:: error
+      :type: Optional[str]
+
+      optional error message
+
 No-Payload Packet
 -----------------
 

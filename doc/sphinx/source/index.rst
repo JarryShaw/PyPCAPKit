@@ -10,6 +10,7 @@ Welcome to PyPCAPKit's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   pcapkit
 
 
 Indices and tables

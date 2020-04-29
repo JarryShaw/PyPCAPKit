@@ -6,10 +6,10 @@
 functions returns with a flag to indicate if usable for
 its caller.
 
-.. _DPKT: https://dpkt.readthedocs.io
-
 .. automodule:: pcapkit.toolkit.dpkt
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+.. _DPKT: https://dpkt.readthedocs.io

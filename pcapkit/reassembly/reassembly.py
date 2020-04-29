@@ -18,28 +18,8 @@ __all__ = ['Reassembly']
 
 
 class Reassembly(metaclass=abc.ABCMeta):
-    """Base class for reassembly procedure.
+    """Base class for reassembly procedure."""
 
-    Attributes:
-        name (str): name of current protocol
-        count (int): total number of reassembled packets
-        datagram (tuple): reassembled datagram, which structure may vary
-            according to its protocol
-        protocol (str): protocol of current reassembly object
-
-        _strflg (bool): strict mode flag
-        _newflg (bool): if new packets reassembled flag
-        _buffer (dict): buffer field
-        _dtgram (list): reassembled datagram
-
-    Methods:
-        reassembly: perform the reassembly procedure
-        submit: submit reassembled payload
-        fetch: fetch datagram
-        index: return datagram index
-        run: run automatically
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -48,24 +28,36 @@ class Reassembly(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def name(self):
-        """str: Protocol of current packet."""
+        """Protocol of current packet.
+
+        :rtype: str
+        """
 
     # total number of reassembled packets
     @property
     def count(self):
-        """int: Total number of reassembled packets."""
+        """Total number of reassembled packets.
+
+        :rtype: int
+        """
         return len(self.fetch())
 
     # reassembled datagram
     @property
     def datagram(self):
-        """tuple: Reassembled datagram."""
+        """Reassembled datagram.
+
+        :rtype: tuple
+        """
         return self.fetch()
 
     @property
     @abc.abstractmethod
     def protocol(self):
-        """str: Protocol of current reassembly object."""
+        """Protocol of current reassembly object.
+
+        :rtype: str
+        """
 
     ##########################################################################
     # Methods.
@@ -165,10 +157,14 @@ class Reassembly(metaclass=abc.ABCMeta):
                 implemented) when submit
 
         """
-        self._newflg = False    # new packets reassembled
-        self._strflg = strict   # strict mode flag
-        self._buffer = dict()   # buffer field
-        self._dtgram = list()   # reassembled datagram
+        #: bool: if new packets reassembled flag
+        self._newflg = False
+        #: bool: strict mode flag
+        self._strflg = strict
+        #: dict buffer field
+        self._buffer = dict()
+        #: list reassembled datagram
+        self._dtgram = list()
 
     def __call__(self, packet):
         """Call packet reassembly.

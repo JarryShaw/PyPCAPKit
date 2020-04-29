@@ -14,8 +14,8 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [packages]
-chardet = "*"
 aenum = "*"
+chardet = "*"
 dictdumper = "~=0.8.0"
 emoji = "*"
 tbtrim = "~=0.3.0"
@@ -25,21 +25,18 @@ pypcapkit = {editable = true,path = "."}
 pyshark = "*"
 dpkt = "*"
 scapy = "*"
-pathlib2 = "*"
-bs4 = "*"
-html5lib = "*"
+beautifulsoup4 = {extras = ["html5lib"],version = "*"}
 requests = {extras = ["socks"],version = "*"}
 ipython = "*"
 autopep8 = "*"
 pylint = "*"
-f2format = "*"
 sphinx = "*"
 sphinxcontrib-napoleon = "*"
 doc8 = "*"
 rstcheck = "*"
 
 [requires]
-python_version = "3.7"
+python_version = "3.8"
 
 [pipenv]
 allow_prereleases = true

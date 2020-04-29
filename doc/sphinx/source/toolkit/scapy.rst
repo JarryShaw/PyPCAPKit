@@ -6,10 +6,10 @@
 functions returns with a flag to indicate if usable for
 its caller.
 
-.. _Scapy: https://scapy.net
-
 .. automodule:: pcapkit.toolkit.scapy
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+.. _Scapy: https://scapy.net

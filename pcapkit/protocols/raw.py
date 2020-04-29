@@ -17,32 +17,8 @@ __all__ = ['Raw']
 
 
 class Raw(Protocol):
-    """This class implements universal unknown protocol.
+    """This class implements universal unknown protocol."""
 
-    Attributes:
-        name (str): name of corresponding protocol
-        info (Info): info dict of current instance
-        alias (str): acronym of corresponding protocol
-        protochain (ProtoChain): protocol chain of current instance
-
-        _file (BytesIO): bytes to be extracted
-        _info (Info): info dict of current instance
-        _protos (ProtoChain): protocol chain of current instance
-
-    Methods:
-        decode_bytes: try to decode bytes into str
-        decode_url: decode URLs into Unicode
-        read_raw: read raw packet data
-
-        _read_protos: read next layer protocol type
-        _read_fileng: read file buffer
-        _read_unpack: read bytes and unpack to integers
-        _read_binary: read bytes and convert into binaries
-        _read_packet: read raw packet data
-        _decode_next_layer: decode next layer protocol type
-        _import_next_layer: import next layer protocol extractor
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -89,15 +65,7 @@ class Raw(Protocol):
             error (Optional[str]): Parsing errors if any.
 
         Returns:
-            dict: The parsed packet data as in following structure::
-
-                class RawPacket(TypedDict):
-                    \"\"\"Packet data of Raw protocol.\"\"\"
-
-                    #: raw packet data
-                    packet: bytes
-                    #: optional error message
-                    error: Optional[str]
+            DataType_Raw: The parsed packet data.
 
         """
         if length is None:

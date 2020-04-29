@@ -84,8 +84,8 @@ Algorithm
       DONE.
    }
 
-APIs
-----
+Implementation
+--------------
 
 .. automodule:: pcapkit.reassembly.ip
    :members:

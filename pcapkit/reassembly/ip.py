@@ -78,27 +78,8 @@ __all__ = ['IP_Reassembly']
 
 
 class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
-    """Reassembly for IP payload.
+    """Reassembly for IP payload."""
 
-    Attributes:
-        name (str): protocol of current packet
-        count (int): total number of reassembled packets
-        datagram (tuple): reassembled datagram, which structure may vary
-            according to its protocol
-        protocol (str): protocol of current reassembly object
-
-        _strflg (bool): strict mode flag
-        _buffer (dict): buffer field
-        _dtgram (tuple): reassembled datagram
-
-    Methods:
-        reassembly: perform the reassembly procedure
-        submit: submit reassembled payload
-        fetch: fetch datagram
-        index: return datagram index
-        run: run automatically
-
-    """
     ##########################################################################
     # Methods.
     ##########################################################################

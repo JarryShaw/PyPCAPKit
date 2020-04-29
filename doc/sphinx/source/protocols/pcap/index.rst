@@ -9,7 +9,7 @@ PCAP files, including global header
 (:class:`~pcapkit.protocols.pcap.frame.Frame`).
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 3
 
    header
    frame

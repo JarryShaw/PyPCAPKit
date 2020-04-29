@@ -19,6 +19,8 @@ out
 *.dat
 *~orig*
 
+!requirements.txt
+
 sample/test
 test/pcapkit
 test/dictdumper

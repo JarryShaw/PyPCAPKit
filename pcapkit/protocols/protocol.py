@@ -36,42 +36,14 @@ readable = [ord(char) for char in filter(lambda char: not char.isspace(), string
 
 @functools.total_ordering
 class Protocol(metaclass=abc.ABCMeta):
-    """Abstract base class for all protocol family.
+    """Abstract base class for all protocol family."""
 
-    Attributes:
-        name (str): name of corresponding protocol
-        info (Info): info dict of current instance
-        alias (str): acronym of corresponding protocol
-        length (int): header length of corresponding protocol
-        payload (Protocol): payload of current instance
-        protocol (str): name of next layer protocol
-        protochain (ProtoChain): protocol chain of current instance
-
-        _file (io.BytesIO): source data stream
-        _info (Info): info dict of current instance
-        _next (Protocol): payload of current instance
-        _protos (ProtoChain): protocol chain of current instance
-
-    Methods:
-        decode: decode bytes into str
-        unquote: unquote URLs into readable format
-
-        _read_protos: read next layer protocol type
-        _read_fileng: read file buffer
-        _read_unpack: read bytes and unpack to integers
-        _read_binary: read bytes and convert into binaries
-        _read_packet: read raw packet data
-        _decode_next_layer: decode next layer protocol type
-        _import_next_layer: import next layer protocol extractor
-        _check_term_threshold: check if reached termination threshold
-
-    """
     ##########################################################################
     # Defaults.
     ##########################################################################
 
-    #: str: Layer of protocol. Can be one of ``Link``, ``Internet``,
-    #: ``Transport`` and ``Application``.
+    #: Literal['Link', 'Internet', 'Transport', 'Application']: Layer of protocol.
+    #: Can be one of ``Link``, ``Internet``, ``Transport`` and ``Application``.
     __layer__ = None
 
     #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,

@@ -149,7 +149,7 @@ attrs = dict(
         'all': [
             'emoji',
             'dpkt', 'scapy', 'pyshark',
-            'requests[socks]', 'bs4[html5lib]',
+            'requests[socks]', 'beautifulsoup4[html5lib]',
         ],
         # for CLI display
         'cli': ['emoji'],
@@ -158,7 +158,7 @@ attrs = dict(
         'Scapy': ['scapy'],
         'PyShark': ['pyshark'],
         # for developers
-        'vendor': ['requests[socks]', 'bs4[html5lib]'],
+        'vendor': ['requests[socks]', 'beautifulsoup4[html5lib]'],
         # version compatibility
         ':python_version < "3.6"': ['f2format'],
         ':python_version == "3.4"': ['pathlib2>=2.3.2'],

@@ -113,8 +113,102 @@ appeared in :rfc:`791`. And here is the process:
    complete. Pass it on to the higher level protocol processor
    for further handling. Otherwise, return.
 
-APIs
-----
+Data Structure
+--------------
+
+.. glossary::
+
+   tcp.packet
+      Data structure for **TCP datagram reassembly**
+      (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`) is as following:
+
+      .. code:: python
+
+         packet_dict = Info(
+           bufid = tuple(
+               ip.src,                     # source IP address
+               ip.dst,                     # destination IP address
+               tcp.srcport,                # source port
+               tcp.dstport,                # destination port
+           ),
+           num = frame.number,             # original packet range number
+           syn = tcp.flags.syn,            # synchronise flag
+           fin = tcp.flags.fin,            # finish flag
+           rst = tcp.flags.rst,            # reset connection flag
+           len = tcp.raw_len,              # payload length, header excludes
+           first = tcp.seq,                # this sequence number
+           last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
+           payload = tcp.raw,              # raw bytearray type payload
+         )
+
+   tcp.datagram
+      Data structure for **reassembled TCP datagram** (element from
+      :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
+      is as following:
+
+      .. code:: python
+
+         (tuple) datagram
+          |--> (Info) data
+          |     |--> 'NotImplemented' : (bool) True --> implemented
+          |     |--> 'id' : (Info) original packet identifier
+          |     |            |--> 'src' --> (tuple)
+          |     |            |               |--> (str) ip.src
+          |     |            |               |--> (int) tcp.srcport
+          |     |            |--> 'dst' --> (tuple)
+          |     |            |               |--> (str) ip.dst
+          |     |            |               |--> (int) tcp.dstport
+          |     |            |--> 'ack' --> (int) original packet ACK number
+          |     |--> 'index' : (tuple) packet numbers
+          |     |               |--> (int) original packet range number
+          |     |--> 'payload' : (Optional[bytes]) reassembled application layer data
+          |     |--> 'packets' : (Tuple[Analysis]) analysed payload
+          |--> (Info) data
+          |     |--> 'NotImplemented' : (bool) False --> not implemented
+          |     |--> 'id' : (Info) original packet identifier
+          |     |            |--> 'src' --> (tuple)
+          |     |            |               |--> (str) ip.src
+          |     |            |               |--> (int) tcp.srcport
+          |     |            |--> 'dst' --> (tuple)
+          |     |            |               |--> (str) ip.dst
+          |     |            |               |--> (int) tcp.dstport
+          |     |            |--> 'ack' --> (int) original packet ACK number
+          |     |--> 'ack' : (int) original packet ACK number
+          |     |--> 'index' : (tuple) packet numbers
+          |     |               |--> (int) original packet range number
+          |     |--> 'payload' : (Optional[tuple]) partially reassembled payload
+          |     |                 |--> (Optional[bytes]) payload fragment
+          |     |--> 'packets' : (Tuple[Analysis]) analysed payloads
+          |--> (Info) data ...
+
+   tcp.buffer
+      Data structure for internal buffering when performing reassembly algorithms
+      (:attr:`~pcapkit.reassembly.reassembly.Reassembly._buffer`) is as following:
+
+      .. code:: python
+
+         (dict) buffer --> memory buffer for reassembly
+          |--> (tuple) BUFID : (dict)
+          |       |--> ip.src      |
+          |       |--> ip.dst      |
+          |       |--> tcp.srcport |
+          |       |--> tcp.dstport |
+          |                        |--> 'hdl' : (list) hole descriptor list
+          |                        |             |--> (Info) hole --> hole descriptor
+          |                        |                   |--> "first" --> (int) start of hole
+          |                        |                   |--> "last" --> (int) stop of hole
+          |                        |--> (int) ACK : (dict)
+          |                        |                 |--> 'ind' : (list) list of reassembled packets
+          |                        |                 |             |--> (int) packet range number
+          |                        |                 |--> 'isn' : (int) ISN of payload buffer
+          |                        |                 |--> 'len' : (int) length of payload buffer
+          |                        |                 |--> 'raw' : (bytearray) reassembled payload, holes set to b'\x00'
+          |                        |--> (int) ACK ...
+          |                        |--> ...
+          |--> (tuple) BUFID ...
+
+Implementation
+--------------
 
 .. automodule:: pcapkit.reassembly.tcp
    :members:

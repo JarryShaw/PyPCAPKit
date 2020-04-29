@@ -88,17 +88,6 @@ class Vendor(metaclass=abc.ABCMeta):
     :attr:`~Vendor.LINK` attributes, etc. to implement
     a new vendor generator.
 
-    Attributes:
-        FLAG (str): Value limit checker.
-        LINK (str): Link to CSV file.
-
-    Methods:
-        rename: Rename duplicated fields.
-        process: Process CSV data.
-        count: Count field records.
-        context: Generate constant context.
-        request: Fetch CSV file.
-
     """
     ###############
     # Macros

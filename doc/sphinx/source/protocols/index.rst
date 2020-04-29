@@ -1,23 +1,17 @@
-.. module:: pcapkit.protocols
-
 ===============
 Protocol Family
 ===============
 
+.. module:: pcapkit.protocols
+
 :mod:`pcapkit.protocols` is collection of all protocol families,
 with detailed implementation and methods.
 
-Subpackages
------------
-
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    pcap/index
    link/index
-   internet/index
-   transport/index
-   application/index
    misc
 
 Base Protocol
@@ -28,3 +22,6 @@ Base Protocol
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+   .. autoattribute:: __layer__
+   .. autoattribute:: __proto__
