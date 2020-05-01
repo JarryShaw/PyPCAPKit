@@ -44,7 +44,7 @@ Data Structure
 
 .. class:: DataType_OSPF
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    OSPF header.
 
@@ -112,7 +112,7 @@ as below:
 
 .. class:: DataType_Auth
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    Cryptographic authentication.
 

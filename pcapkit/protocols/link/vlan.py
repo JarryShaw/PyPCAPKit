@@ -36,22 +36,34 @@ class VLAN(Link):
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['802.1Q Customer VLAN Tag Type']
+        """
         return '802.1Q Customer VLAN Tag Type'
 
     @property
     def alias(self):
-        """Acronym of corresponding protocol."""
+        """Acronym of corresponding protocol.
+
+        :rtype: Literal['802.1Q']
+        """
         return '802.1Q'
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: Literal[4]
+        """
         return 4
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.ethertype.EtherType
+        """
         return self._info.type  # pylint: disable=E1101
 
     ##########################################################################

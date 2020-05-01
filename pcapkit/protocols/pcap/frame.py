@@ -53,12 +53,18 @@ class Frame(Protocol):
 
     @property
     def name(self):
-        """Name of corresponding protocol."""
+        """Name of corresponding protocol.
+
+        :rtype: str
+        """
         return f'Frame {self._fnum}'
 
     @property
     def length(self):
-        """Header length of corresponding protocol."""
+        """Header length of corresponding protocol.
+
+        :rtype: Literal[16]
+        """
         return 16
 
     ##########################################################################
@@ -151,7 +157,7 @@ class Frame(Protocol):
         Keyword Args:
             num (int): Frame index number
                 (:attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`).
-            proto (LinkType): Next layer protocol index
+            proto (pcapkit.const.reg.linktype.LinkType): Next layer protocol index
                 (:attr:`self._prot <pcapkit.protocols.pcap.frame.Frame._prot>`).
             nanosecond (bool): Nanosecond-timestamp PCAP flag
                 (:attr:`self._nsec <pcapkit.protocols.pcap.frame.Frame._nsec>`).
@@ -169,7 +175,7 @@ class Frame(Protocol):
         self._fnum = num
         #: io.BytesIO: source packet stream
         self._file = file
-        #: LinkType: next layer protocol index
+        #: pcapkit.const.reg.linktype.LinkType: next layer protocol index
         self._prot = proto
         #: bool: nanosecond-timestamp PCAP flag
         self._nsec = nanosecond
@@ -177,7 +183,7 @@ class Frame(Protocol):
         self._mpfp = kwargs.pop('mpfdp', None)
         #: multiprocessing.Namespace: multiprocessing auxiliaries (*not available after initialisation*)
         self._mpkt = kwargs.pop('mpkit', None)
-        #: Info: info dict of current instance
+        #: pcapkit.corekit.infoclass.Info: info dict of current instance
         self._info = Info(self.read_frame())
 
         # remove temporary multiprocessing support attributes
@@ -284,30 +290,33 @@ class Frame(Protocol):
     def _import_next_layer(self, proto, length, error=False):  # pylint: disable=arguments-differ
         """Import next layer extractor.
 
+        This method currently supports following protocols as registered in
+        :data:`~pcapkit.const.reg.linktype.LinkType`:
+
+        .. list-table::
+           :header-rows: 1
+
+           * - ``proto``
+             - Protocol
+           * - 1
+             - :class:`~pcapkit.protocols.link.ethernet.Ethernet`
+           * - 228
+             - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
+           * - 229
+             - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+
         Arguments:
-            proto (LinkType): next layer protocol index
+            proto (pcapkit.const.reg.linktype.LinkType): next layer protocol index
             length (int): valid (*non-padding*) length
 
         Keyword arguments:
             error (bool): if function called on error
 
         Returns:
-            Protocol: instance of next layer
-
-        This method supports *currently* following protocols:
-
-        +-----------+----------------------------------------------------------------------+
-        | ``proto`` | Protocol                                                             |
-        +-----------+----------------------------------------------------------------------+
-        | 1         | :class:`~pcapkit.protocols.link.ethernet.Ethernet` (data link layer) |
-        +-----------+----------------------------------------------------------------------+
-        | 228       | :class:`~pcapkit.protocols.internet.ipv4.IPv4` (internet layer)      |
-        +-----------+----------------------------------------------------------------------+
-        | 229       | :class:`~pcapkit.protocols.internet.ipv6.IPv6` (internet layer)      |
-        +-----------+----------------------------------------------------------------------+
+            pcapkit.protocols.protocol.Protocol: instance of next layer
 
         """
-        module, name = self.__proto__[proto]
+        module, name = self.__proto__[int(proto)]
         protocol = getattr(importlib.import_module(module), name)
         next_ = protocol(self._file, length, error=error,
                          layer=self._exlayer, protocol=self._exproto)

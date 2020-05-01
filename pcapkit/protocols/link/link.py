@@ -2,13 +2,10 @@
 # pylint: disable=bad-whitespace
 """root link layer protocol
 
-:mod:`pcapkit.protocols.link.link` contains both
-:data:`~pcapkit.protocols.link.link.LINKTYPE` and
-:class:`~pcapkit.protocols.link.link.Link`. The former is
-a dictionary of link layer header  type values, registered
-in IANA. And the latter is a base class for link layer
-protocols, eg. ARP/InARP, Ethernet, L2TP, OSPF, RARP/DRARP
-and etc.
+:mod:`pcapkit.protocols.link.link` contains :class:`~pcapkit.protocols.link.link.Link`,
+which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.link.link.arp.ARP`/InARP,
+:class:`~pcapkit.protocols.link.link.ethernet.Ethernet`, :class:`~pcapkit.protocols.link.link.l2tp.L2TP`,
+:class:`~pcapkit.protocols.link.link.ospf.OSPF`, :class:`~pcapkit.protocols.link.link.rarp.RARP`/DRARP and etc.
 
 """
 import collections
@@ -50,7 +47,10 @@ class Link(Protocol):  # pylint: disable=abstract-method
     # protocol layer
     @property
     def layer(self):
-        """Protocol layer."""
+        """Protocol layer.
+
+        :rtype: Literal['Link']
+        """
         return self.__layer__
 
     ##########################################################################
@@ -64,7 +64,7 @@ class Link(Protocol):  # pylint: disable=abstract-method
             size (int): buffer size
 
         Returns:
-            EtherType: next layer's protocol enumeration
+            pcapkit.const.reg.ethertype.EtherType: next layer's protocol enumeration
 
         """
         _byte = self._read_unpack(size)
@@ -75,7 +75,7 @@ class Link(Protocol):  # pylint: disable=abstract-method
         """Import next layer extractor.
 
         This method currently supports following protocols as registered in
-        :data:`~pcapkit.const.reg.linktype.LinkType`:
+        :data:`~pcapkit.const.reg.ethertype.EtherType`:
 
         .. list-table::
            :header-rows: 1
@@ -101,7 +101,7 @@ class Link(Protocol):  # pylint: disable=abstract-method
             length (int): valid (*non-padding*) length
 
         Returns:
-            Protocol: instance of next layer
+            pcapkit.protocols.protocol.Protocol: instance of next layer
 
         """
         if length == 0:

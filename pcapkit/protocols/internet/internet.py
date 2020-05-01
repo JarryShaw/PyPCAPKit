@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=bad-whitespace
 """root internet layer protocol
 
-`pcapkit.protocols.internet.internet` contains both
-`ETHERTYPE` and `Internet`. The former is a dictionary
-of ethertype IEEE 802 numbers, registered in IANA. And the
-latter is a base class for internet layer protocols, eg.
-AH, IP, IPsec, IPv4, IPv6, IPX, and etc.
+:mod:`pcapkit.protocols.internet.internet` contains :class:`~pcapkit.protocols.internet.internet.Internet`,
+which is a base class for internet layer protocols, eg. :class:`~pcapkit.protocols.internet.ah.AH`,
+:class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
+:class:`~pcapkit.protocols.internet.ipv6.IPv6`, :class:`~pcapkit.protocols.internet.ipx.IPX`, and etc.
 
 """
+import collections
+import importlib
+
 from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
 from pcapkit.const.reg.transtype import TransType as TP_PROTO
 from pcapkit.corekit.protochain import ProtoChain
@@ -17,34 +20,32 @@ from pcapkit.utilities.decorators import beholder
 __all__ = ['Internet', 'ETHERTYPE']
 
 
-class Internet(Protocol):
-    """Abstract base class for internet layer protocol family.
+class Internet(Protocol):  # pylint: disable=abstract-method
+    """Abstract base class for internet layer protocol family."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
 
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
+    #: Layer of protocol.
     __layer__ = 'Internet'
+
+    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.link.Link._import_next_layer>`.
+    __proto__ = collections.defaultdict(lambda: ('pcapkit.protocols.raw', 'Raw'), {
+        0:   ('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
+        4:   ('pcapkit.protocols.internet.ipv4',       'IPv4'),
+        6:   ('pcapkit.protocols.internet.tpc',        'TCP'),
+        17:  ('pcapkit.protocols.internet.tpc',        'UDP'),
+        41:  ('pcapkit.protocols.internet.ipv6',       'IPv6'),
+        43:  ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
+        44:  ('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
+        51:  ('pcapkit.protocols.internet.ah',         'AH'),
+        60:  ('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
+        135: ('pcapkit.protocols.internet.mh',         'MH'),
+        139: ('pcapkit.protocols.internet.hip',        'HIP'),
+    })
 
     ##########################################################################
     # Properties.
@@ -53,7 +54,10 @@ class Internet(Protocol):
     # protocol layer
     @property
     def layer(self):
-        """Protocol layer."""
+        """Protocol layer.
+
+        :rtype: Literal['Internet']
+        """
         return self.__layer__
 
     ##########################################################################
@@ -63,32 +67,31 @@ class Internet(Protocol):
     def _read_protos(self, size):
         """Read next layer protocol type.
 
-        Positional arguments:
-            * size  -- int, buffer size
+        Arguments:
+            size (int): buffer size
 
         Returns:
-            * str -- next layer's protocol name
+            pcapkit.const.reg.transtype.TransTypes: next layer's protocol enumeration
 
         """
         _byte = self._read_unpack(size)
         _prot = TP_PROTO.get(_byte)
         return _prot
 
-    def _decode_next_layer(self, dict_, proto=None, length=None, *, version=4, ipv6_exthdr=None):
+    def _decode_next_layer(self, dict_, proto=None, length=None, *, version=4, ipv6_exthdr=None):  # pylint: disable=arguments-differ
         """Decode next layer extractor.
 
-        Positional arguments:
-            * dict_ -- dict, info buffer
-            * proto -- str, next layer protocol name
-            * length -- int, valid (not padding) length
+        Arguments:
+            dict_ (dict): info buffer
+            proto (int): next layer protocol index
+            length (int): valid (*non-padding*) length
 
         Keyword Arguments:
-            * version -- int, IP version (4 in default)
-                            <keyword> 4 / 6
-            * ext_proto -- ProtoChain, ProtoChain of IPv6 extension headers
+            version (Literal[4, 6]): IP version
+            ipv6_exthdr (pcapkit.corekit.protochain.ProtoChain): protocol chain of IPv6 extension headers
 
         Returns:
-            * dict -- current protocol with next layer extracted
+            dict: current protocol with next layer extracted
 
         """
         if self._onerror:
@@ -103,68 +106,67 @@ class Internet(Protocol):
 
         # write info and protocol chain into dict
         dict_[layer] = info
-        self._next = next_
+        self._next = next_  # pylint: disable=attribute-defined-outside-init
         if ipv6_exthdr is not None:
-            for proto in reversed(ipv6_exthdr):
-                chain = ProtoChain(proto.__class__, proto.alias, basis=chain)
-        self._protos = ProtoChain(self.__class__, self.alias, basis=chain)
+            for proto_cls in reversed(ipv6_exthdr):
+                chain = ProtoChain(proto_cls.__class__, proto_cls.alias, basis=chain)
+        self._protos = ProtoChain(self.__class__, self.alias, basis=chain)  # pylint: disable=attribute-defined-outside-init
         return dict_
 
-    def _import_next_layer(self, proto, length=None, *, version=4, extension=False):
+    def _import_next_layer(self, proto, length=None, *, version=4, extension=False):  # pylint: disable=arguments-differ
         """Import next layer extractor.
 
-        Positional arguments:
-            * proto -- str, next layer protocol name
-            * length -- int, valid (not padding) length
+        This method currently supports following protocols as registered in
+        :data:`~pcapkit.const.reg.transtype.TransType`:
+
+        .. list-table::
+           :header-rows: 1
+
+           * - ``proto``
+             - Class
+           * - 0
+             - :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
+           * - 4
+             - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
+           * - 6
+             - :class:`~pcapkit.protocols.transport.tcp.TCP`
+           * - 17
+             - :class:`~pcapkit.protocols.transport.udp.UDP`
+           * - 41
+             - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+           * - 43
+             - :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`
+           * - 44
+             - :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
+           * - 51
+             - :class:`~pcapkit.protocols.internet.ah.AH`
+           * - 60
+             - :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
+           * - 135
+             - :class:`~pcapkit.protocols.internet.mh.MH`
+           * - 139
+             - :class:`~pcapkit.protocols.internet.hip.HIP`
+
+        Arguments:
+            proto (int): next layer protocol index
+            length (int): valid (*non-padding*) length
 
         Keyword Arguments:
-            * version -- int, IP version (4 in default)
-                            <keyword> 4 / 6
-            * extension -- bool, if is extension header (False in default)
-                            <keyword> True / False
+            version (Literal[4, 6]): IP protocol version
+            extension (bool): if is extension header
 
         Returns:
-            * bool -- flag if extraction of next layer succeeded
-            * Info -- info of next layer
-            * ProtoChain -- protocol chain of next layer
-            * str -- alias of next layer
-
-        Protocols:
-            * IPv4 -- internet layer
-            * IPv6 -- internet layer
-            * AH -- internet layer
-            * TCP -- transport layer
-            * UDP -- transport layer
+            pcapkit.protocols.protocol.Protocol: instance of next layer
 
         """
         if length == 0:
-            from pcapkit.protocols.null import NoPayload as Protocol
-        elif self._sigterm or proto == 59:
-            from pcapkit.protocols.raw import Raw as Protocol
-        elif proto == 51:
-            from pcapkit.protocols.internet.ah import AH as Protocol
-        elif proto == 139:
-            from pcapkit.protocols.internet.hip import HIP as Protocol
-        elif proto == 0:
-            from pcapkit.protocols.internet.hopopt import HOPOPT as Protocol
-        elif proto == 44:
-            from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag as Protocol
-        elif proto == 60:
-            from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts as Protocol
-        elif proto == 43:
-            from pcapkit.protocols.internet.ipv6_route import IPv6_Route as Protocol
-        elif proto == 135:
-            from pcapkit.protocols.internet.mh import MH as Protocol
-        elif proto == 4:
-            from pcapkit.protocols.internet.ipv4 import IPv4 as Protocol
-        elif proto == 41:
-            from pcapkit.protocols.internet.ipv6 import IPv6 as Protocol
-        elif proto == 6:
-            from pcapkit.protocols.transport.tcp import TCP as Protocol
-        elif proto == 17:
-            from pcapkit.protocols.transport.udp import UDP as Protocol
+            from pcapkit.protocols.null import NoPayload as protocol  # pylint: disable=import-outside-toplevel
+        elif self._sigterm or proto == 59:  # No Next Header for IPv6
+            from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
         else:
-            from pcapkit.protocols.raw import Raw as Protocol
-        next_ = Protocol(self._file, length, version=version, extension=extension,
+            module, name = self.__proto__[proto]
+            protocol = getattr(importlib.import_module(module), name)
+
+        next_ = protocol(self._file, length, version=version, extension=extension,
                          error=self._onerror, layer=self._exlayer, protocol=self._exproto)
         return next_

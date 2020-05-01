@@ -103,10 +103,16 @@ class IPv6_Reassembly(IP_Reassembly):
 
     @property
     def name(self):
-        """Protocol of current packet."""
+        """Protocol of current packet.
+
+        :rtype: Literal['Internet Protocol version 6']
+        """
         return 'Internet Protocol version 6'
 
     @property
     def protocol(self):
-        """Protocol of current reassembly object."""
+        """Protocol of current reassembly object.
+
+        :rtype: Literal['IPv6']
+        """
         return 'IPv6'

@@ -39,7 +39,7 @@ Data Structure
 
 .. class:: DataType_Header
 
-   :bases: :class:`typing.TypedDict`
+   :bases: :class:`TypedDict`
 
    PCAP global header.
 
@@ -81,7 +81,7 @@ Data Structure
 
 .. class:: DataType_MagicNumber
 
-   :bases: :class:`typing.TypedDict`
+   :bases: :class:`TypedDict`
 
    PCAP magic number.
 

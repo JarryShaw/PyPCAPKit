@@ -88,7 +88,7 @@ class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
         """Reassembly procedure.
 
         Arguments:
-            info (Info): info dict of packets to be reassembled
+            info (pcapkit.corekit.infoclass.Info): info dict of packets to be reassembled
 
         """
         BUFID = info.bufid  # Buffer Identifier

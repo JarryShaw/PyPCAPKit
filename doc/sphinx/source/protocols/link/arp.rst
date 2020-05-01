@@ -67,7 +67,7 @@ Data Structure
 
 .. class:: DataType_ARP
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    ARP header [:rfc:`826`].
 

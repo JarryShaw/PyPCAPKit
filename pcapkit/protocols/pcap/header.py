@@ -40,17 +40,26 @@ class Header(Protocol):
 
     @property
     def name(self):
-        """Name of corresponding protocol."""
+        """Name of corresponding protocol.
+
+        :rtype: Literal['Global Header']
+        """
         return 'Global Header'
 
     @property
     def length(self):
-        """Header length of corresponding protocol."""
+        """Header length of corresponding protocol.
+
+        :rtype: Literal[24]
+        """
         return 24
 
     @property
     def version(self):
-        """Version infomation of input PCAP file."""
+        """Version infomation of input PCAP file.
+
+        :rtype: pcapkit.corekit.version.VersionInfo
+        """
         return VersionInfo(self._info.version_major, self._info.version_minor)  # pylint: disable=E1101
 
     @property
@@ -65,7 +74,10 @@ class Header(Protocol):
 
     @property
     def protocol(self):
-        """Data link type."""
+        """Data link type.
+
+        :rtype: pcapkit.const.reg.linktype.LinkType
+        """
         return self._info.network  # pylint: disable=E1101
 
     @property
@@ -80,12 +92,18 @@ class Header(Protocol):
 
     @property
     def byteorder(self):
-        """Header byte order."""
+        """Header byte order.
+
+        :rtype: Literal['big', 'little']
+        """
         return self._byte
 
     @property
     def nanosecond(self):
-        """Nanosecond-resolution flag."""
+        """Nanosecond-resolution flag.
+
+        :rtype: bool
+        """
         return self._nsec
 
     ##########################################################################
@@ -194,14 +212,14 @@ class Header(Protocol):
             size (int) buffer size
 
         Returns:
-            LinkType: link layer protocol enumeration
+            pcapkit.const.reg.linktype.LinkType: link layer protocol enumeration
 
         """
         _byte = self._read_unpack(4, lilendian=True)
         _prot = LINKTYPE.get(_byte)
         return _prot
 
-    def _decode_next_layer(self, *args, **kwargs):  # pylint: disable=arguments-differ
+    def _decode_next_layer(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Decode next layer protocol.
 
         Args:
@@ -216,7 +234,7 @@ class Header(Protocol):
         """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
 
-    def _import_next_layer(self, *args, **kwargs):  # pylint: disable=arguments-differ
+    def _import_next_layer(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Import next layer extractor.
 
         Args:

@@ -28,7 +28,10 @@ class NoPayload(Protocol):
     # name of current protocol
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['Null']
+        """
         return 'Null'
 
     # header length of current protocol
@@ -62,13 +65,13 @@ class NoPayload(Protocol):
         return self
 
     def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called
-        #: NoPayload: Payload of current instance.
+        #: pcapkit.protocols.null.NoPayload: Payload of current instance.
         self._next = self
-        #: Info: Info dict of current instance.
+        #: pcapkit.corekit.infoclass.Info: Info dict of current instance.
         self._info = Info()
         #: io.BytesIO: Source data stream.
         self._file = io.BytesIO()
-        #: ProtoChain: Protocol chain of current instance.
+        #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
         self._protos = ProtoChain()
 
     def __length_hint__(self):
@@ -78,7 +81,7 @@ class NoPayload(Protocol):
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, *args, **kwargs):  # pylint: disable=arguments-differ
+    def _decode_next_layer(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Decode next layer protocol.
 
         Args:
@@ -93,7 +96,7 @@ class NoPayload(Protocol):
         """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
 
-    def _import_next_layer(self, *args, **kwargs):  # pylint: disable=arguments-differ
+    def _import_next_layer(self, *args, **kwargs):  # pylint: disable=signature-differs
         """Import next layer extractor.
 
         Args:

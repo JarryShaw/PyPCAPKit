@@ -37,7 +37,7 @@ Data Structure
 
 .. class:: DataType_VLAN
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    IEEE 802.1Q customer VLAN tag type [:rfc:`7042`].
 
@@ -53,7 +53,7 @@ Data Structure
 
 .. class:: DataType_TCI
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    Tag control information.
 

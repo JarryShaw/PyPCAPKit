@@ -39,7 +39,7 @@ Data Structure
 
 .. class:: DataType_Ethernet
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    Ethernet header.
 

@@ -102,10 +102,16 @@ class IPv4_Reassembly(IP_Reassembly):
 
     @property
     def name(self):
-        """Protocol of current packet."""
+        """Protocol of current packet.
+
+        :rtype: Literal['Internet Protocol version 4']
+        """
         return 'Internet Protocol version 4'
 
     @property
     def protocol(self):
-        """Protocol of current reassembly object."""
+        """Protocol of current reassembly object.
+
+        :rtype: Literal['IPv4']
+        """
         return 'IPv4'

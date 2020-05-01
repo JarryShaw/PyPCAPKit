@@ -60,7 +60,7 @@ Data Structure
 
 .. class:: DataType_L2TP
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    L2TP header.
 
@@ -106,7 +106,7 @@ Data Structure
 
 .. class:: DataType_Flags
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    Flags and version info.
 

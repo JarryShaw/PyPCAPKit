@@ -26,7 +26,10 @@ class Raw(Protocol):
     # name of current protocol
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['Unknown']
+        """
         return 'Unknown'
 
     # header length of current protocol
@@ -99,12 +102,12 @@ class Raw(Protocol):
         """
         #: io.BytesIO: Source packet stream.
         self._file = file
-        #: Info: Parsed packet data.
+        #: pcapkit.corekit.infoclass.Info: Parsed packet data.
         self._info = Info(self.read_raw(length, error=error))
 
-        #: NoPayload: Next layer (no payload).
+        #: pcapkit.protocols.null.NoPayload: Next layer (no payload).
         self._next = NoPayload()
-        #: ProtoChain: Protocol chain from current layer.
+        #: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.
         self._protos = ProtoChain(self.__class__, self.alias)
 
     def __length_hint__(self):

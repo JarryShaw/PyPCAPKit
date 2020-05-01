@@ -60,36 +60,54 @@ class Protocol(metaclass=abc.ABCMeta):
     @property
     @abc.abstractmethod
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: str
+        """
 
     # acronym of current protocol
     @property
     def alias(self):
-        """Acronym of current protocol."""
+        """Acronym of current protocol.
+
+        :rtype: str
+        """
         return self.__class__.__name__
 
     # info dict of current instance
     @property
     def info(self):
-        """Info dict of current instance."""
+        """Info dict of current instance.
+
+        :rtype: pcapkit.corekit.infoclass.Info
+        """
         return self._info
 
     # header length of current protocol
     @property
     @abc.abstractmethod
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: int
+        """
 
     # payload of current instance
     @property
     def payload(self):
-        """Payload of current instance."""
+        """Payload of current instance.
+
+        :rtype: pcapkit.protocols.protocol.Protocol
+        """
         return self._next
 
     # name of next layer protocol
     @property
     def protocol(self):
-        """Name of next layer protocol (if any)."""
+        """Name of next layer protocol (if any).
+
+        :rtype: Optional[str]
+        """
         try:
             return self._protos[1]
         except IndexError:
@@ -98,7 +116,10 @@ class Protocol(metaclass=abc.ABCMeta):
     # protocol chain of current instance
     @property
     def protochain(self):
-        """Protocol chain of current instance."""
+        """Protocol chain of current instance.
+
+        :rtype: pcapkit.corekit.protochain.ProtoChain
+        """
         return self._protos
 
     ##########################################################################
@@ -189,7 +210,7 @@ class Protocol(metaclass=abc.ABCMeta):
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Protocol: The new object.
+            pcapkit.protocols.protocol.Protocol: The new object.
 
         """
         self = super().__new__(cls)
@@ -240,7 +261,7 @@ class Protocol(metaclass=abc.ABCMeta):
 
         #: io.BytesIO: Source packet stream.
         self._file = file
-        #: Info: Parsed packet data.
+        #: pcapkit.corekit.infoclass.Info: Parsed packet data.
         self._info = Info()
 
     def __repr__(self):
@@ -326,7 +347,7 @@ class Protocol(metaclass=abc.ABCMeta):
             key (Union[str, Protocol, Type[Protocol]]): Indexing key.
 
         Returns:
-            Protocol: The sub-packet from the current packet of indexed protocol.
+            pcapkit.protocols.protocol.Protocol: The sub-packet from the current packet of indexed protocol.
 
         Raises:
             ProtocolUnbound: If ``key`` is a ``slice`` object.
@@ -376,13 +397,13 @@ class Protocol(metaclass=abc.ABCMeta):
         return name in self._info
 
     @classmethod
-    def __index__(cls):
+    def __index__(cls):  # pylint: disable=invalid-index-returned
         """Index of the protocol.
 
         By default, it returns the name of the protocol.
 
         Returns:
-            Union[str, List[str]]: Index of the protocol.
+            Union[str, Tuple[str]]: Index of the protocol.
 
         See Also:
             :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
@@ -593,7 +614,7 @@ class Protocol(metaclass=abc.ABCMeta):
             length (int): valid (*non-padding*) length
 
         Returns:
-            Protocol: instance of next layer
+            pcapkit.protocols.protocol.Protocol: instance of next layer
 
         """
         if length is not None and length == 0:

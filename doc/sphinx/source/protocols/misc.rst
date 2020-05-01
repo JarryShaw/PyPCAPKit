@@ -25,7 +25,7 @@ Data Structure
 
 .. class:: DataType_Raw
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    Raw packet data.
 

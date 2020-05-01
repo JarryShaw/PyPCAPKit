@@ -61,7 +61,7 @@ Data Structure
 
 .. class:: DataType_Frame
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    PCAP frame header.
 
@@ -112,7 +112,7 @@ Data Structure
 
 .. class:: DataType_FrameInfo
 
-   :bases: typing.TypedDict
+   :bases: TypedDict
 
    Frame information.
 

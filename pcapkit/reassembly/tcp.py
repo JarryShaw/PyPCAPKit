@@ -218,12 +218,18 @@ class TCP_Reassembly(Reassembly):
 
     @property
     def name(self):
-        """Protocol of current packet."""
+        """Protocol of current packet.
+
+        :rtype: Literal['Transmission Control Protocol']
+        """
         return 'Transmission Control Protocol'
 
     @property
     def protocol(self):
-        """Protocol of current reassembly object."""
+        """Protocol of current reassembly object.
+
+        :rtype: Literal['TCP']
+        """
         return 'TCP'
 
     ##########################################################################
@@ -234,7 +240,7 @@ class TCP_Reassembly(Reassembly):
         """Reassembly procedure.
 
         Arguments:
-            info (Info): :term:`info <tcp.packet>` dict of packets to be reassembled
+            info (pcapkit.corekit.infoclass.Info): :term:`info <tcp.packet>` dict of packets to be reassembled
 
         """
         BUFID = info.bufid  # Buffer Identifier

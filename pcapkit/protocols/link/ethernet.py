@@ -37,29 +37,44 @@ class Ethernet(Link):
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['Ethernet Protocol']
+        """
         return 'Ethernet Protocol'
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: Literal[14]
+        """
         return 14
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.ethertype.EtherType
+        """
         return self._info.type  # pylint: disable=E1101
 
     # source mac address
     @property
     def src(self):
-        """Source mac address."""
+        """Source mac address.
+
+        :rtype: str
+        """
         return self._info.src  # pylint: disable=E1101
 
     # destination mac address
     @property
     def dst(self):
-        """Destination mac address."""
+        """Destination mac address.
+
+        :rtype: str
+        """
         return self._info.dst  # pylint: disable=E1101
 
     ##########################################################################

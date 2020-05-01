@@ -60,32 +60,51 @@ class ARP(Link):
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['Dynamic Reverse Address Resolution Protocol', 'Inverse Address Resolution Protocol',
+                        'Reverse Address Resolution Protocol', 'Address Resolution Protocol']
+        """
         return self._name
 
     @property
     def alias(self):
-        """Acronym of corresponding protocol."""
+        """Acronym of corresponding protocol.
+
+        :rtype: Literal['ARP', 'InARP', 'RARP', 'DRARP']
+        """
         return self._acnm
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: int
+        """
         return self._info.len  # pylint: disable=E1101
 
     @property
     def src(self):
-        """Sender hardware & protocol address."""
+        """Sender hardware & protocol address.
+
+        :rtype: Tuple[str, Union[ipaddress.IPv4Address, ipaddress.IPv6Address, str]]
+        """
         return (self._info.sha, self._info.spa)  # pylint: disable=E1101
 
     @property
     def dst(self):
-        """Target hardware & protocol address."""
+        """Target hardware & protocol address.
+
+        :rtype: Tuple[str, Union[ipaddress.IPv4Address, ipaddress.IPv6Address, str]]
+        """
         return (self._info.tha, self._info.tpa)  # pylint: disable=E1101
 
     @property
     def type(self):
-        """Hardware & protocol type."""
+        """Hardware & protocol type.
+
+        :rtype: Tuple[pcapkit.const.arp.hardware.Hardware, pcapkit.const.reg.ethertype.EtherType]
+        """
         return (self._info.htype, self._info.ptype)  # pylint: disable=E1101
 
     ##########################################################################

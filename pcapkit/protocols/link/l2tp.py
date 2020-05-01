@@ -61,17 +61,26 @@ class L2TP(Link):
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['Layer 2 Tunnelling Protocol']
+        """
         return 'Layer 2 Tunnelling Protocol'
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: int
+        """
         return self._info.hdr_len  # pylint: disable=E1101
 
     @property
     def type(self):
-        """L2TP type."""
+        """L2TP type.
+
+        :rtype: Literal['Control', 'Data']
+        """
         return self._info.flags.type  # pylint: disable=E1101
 
     ##########################################################################

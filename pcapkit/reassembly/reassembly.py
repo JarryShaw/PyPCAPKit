@@ -69,7 +69,7 @@ class Reassembly(metaclass=abc.ABCMeta):
         """Reassembly procedure.
 
         Arguments:
-            info (Info): info dict of packets to be reassembled
+            info (pcapkit.corekit.infoclass.Info): info dict of packets to be reassembled
 
         """
 

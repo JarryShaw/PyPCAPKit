@@ -49,22 +49,34 @@ class OSPF(Link):
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: str
+        """
         return f'Open Shortest Path First version {self._info.version}'  # pylint: disable=E1101
 
     @property
     def alias(self):
-        """Acronym of current protocol."""
+        """Acronym of current protocol.
+
+        :rtype: str
+        """
         return f'OSPFv{self._info.version}'  # pylint: disable=E1101
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: Literal[24]
+        """
         return 24
 
     @property
     def type(self):
-        """OSPF packet type."""
+        """OSPF packet type.
+
+        :rtype: pcapkit.const.ospf.packet.Packet
+        """
         return self._info.type  # pylint: disable=E1101
 
     ##########################################################################

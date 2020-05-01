@@ -12,6 +12,7 @@ with detailed implementation and methods.
 
    pcap/index
    link/index
+   internet/index
    misc
 
 Base Protocol
