@@ -1,8 +1,6 @@
 Frame Header [*]_
 -----------------
 
-.. module:: pcapkit.protocols.pcap.frame
-
 :mod:`pcapkit.protocols.pcap.frame` contains
 :class:`~pcapkit.protocols.pcap.frame.Frame` only,
 which implements extractor for frame headers of PCAP,
@@ -16,6 +14,12 @@ whose structure is described as below:
        guint32 incl_len;   /* number of octets of packet saved in file */
        guint32 orig_len;   /* actual length of packet */
    } pcaprec_hdr_t;
+
+.. raw:: html
+
+   <br />
+
+.. module:: pcapkit.protocols.pcap.frame
 
 .. autoclass:: pcapkit.protocols.pcap.frame.Frame
    :members:

@@ -35,11 +35,27 @@ below:
 
    <br />
 
-.. automodule:: pcapkit.protocols.link.arp
+.. module:: pcapkit.protocols.link.arp
+
+.. autoclass:: pcapkit.protocols.link.arp.ARP
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
+
+   .. attribute:: _acnm
+      :type: Literal['ARP', 'InARP', 'RARP', 'DRARP']
+
+      Acronym of corresponding protocol.
+
+      The value is based on operation type (:attr:`~DataType_ARP.oper`).
+
+   .. attribute:: _name
+      :type: Literal['Dynamic Reverse Address Resolution Protocol', 'Inverse Address Resolution Protocol', 'Reverse Address Resolution Protocol', 'Address Resolution Protocol']
+
+      Name of current protocol.
+
+      The value is based on operation type (:attr:`~DataType_ARP.oper`).
 
 Data Structure
 ~~~~~~~~~~~~~~

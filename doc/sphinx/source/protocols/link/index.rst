@@ -13,6 +13,8 @@ link layer, with detailed implementation and methods.
    ethernet
    l2tp
    ospf
+   rarp
+   vlan
 
 Base Protocol
 -------------

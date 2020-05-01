@@ -19,6 +19,10 @@ below:
        guint32 network;        /* data link type */
    } pcap_hdr_t;
 
+.. raw:: html
+
+   <br />
+
 .. automodule:: pcapkit.protocols.pcap.header
    :members:
    :undoc-members:

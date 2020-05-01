@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-"""(dynamic) reverse address resolution protocol
+RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol
+==========================================================
 
 :mod:`pcapkit.protocols.link.rarp` contains
 :class:`~pcapkit.protocols.link.rarp.RARP` only,
@@ -21,35 +21,18 @@ Octets      Bits        Name                    Description
   24        192   ``rarp.tpa``              Target Protocol Address
 ====== ========= ========================= =========================
 
+.. raw:: html
+
+   <br />
+
+.. automodule:: pcapkit.protocols.link.rarp
+   :members:
+   :undoc-members:
+   :private-members:
+   :show-inheritance:
+
+.. raw:: html
+
+   <hr />
+
 .. [*] http://en.wikipedia.org/wiki/Address_Resolution_Protocol
-
-"""
-from pcapkit.protocols.link.arp import ARP
-
-__all__ = ['RARP']
-
-
-class RARP(ARP):
-    """This class implements Reverse Address Resolution Protocol."""
-
-    #: Acronym of corresponding protocol.
-    _acnm = 'RARP'
-    #: Name of corresponding protocol.
-    _name = 'Reverse Address Resolution Protocol'
-
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
-        """Index of the protocol.
-
-        Returns:
-            Tuple[Literal['RARP'], Literal['DRARP']]: Index of the protocol.
-
-        See Also:
-            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
-
-        """
-        return ('RARP', 'DRARP')
