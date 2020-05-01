@@ -23,3 +23,7 @@ python:
     - requirements: doc/sphinx/requirements.txt
     - method: pip
       path: .
+
+submodules:
+  exclude: all
+  recursive: false
