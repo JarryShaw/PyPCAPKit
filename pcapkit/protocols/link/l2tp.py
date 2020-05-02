@@ -48,6 +48,7 @@ as below:
 """
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['L2TP']
 
@@ -169,5 +170,18 @@ class L2TP(Link):
         self._info = Info(self.read_l2tp(length))
 
     def __length_hint__(self):
-        """Return an estimated length (16) for the object."""
+        """Return an estimated length for the object.
+
+        :rtype: Literal[16]
+        """
         return 16
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')

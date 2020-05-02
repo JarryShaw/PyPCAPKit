@@ -8,10 +8,9 @@ Welcome to PyPCAPKit's documentation!
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
 
    pcapkit
-
+   cli
 
 Indices and tables
 ==================

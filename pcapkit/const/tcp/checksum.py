@@ -13,13 +13,13 @@ class Checksum(IntEnum):
     _ignore_ = 'Checksum _'
     Checksum = vars()
 
-    Checksum['TCP checksum'] = 0
+    Checksum['TCP_Checksum'] = 0
 
-    Checksum["8-bit Fletcher's algorithm"] = 1
+    Checksum['8_bit_Fletcher_s_Algorithm'] = 1
 
-    Checksum["16-bit Fletcher's algorithm"] = 2
+    Checksum['16_bit_Fletcher_s_Algorithm'] = 2
 
-    Checksum['Redundant Checksum Avoidance'] = 3
+    Checksum['Redundant_Checksum_Avoidance'] = 3
 
     @staticmethod
     def get(key, default=-1):

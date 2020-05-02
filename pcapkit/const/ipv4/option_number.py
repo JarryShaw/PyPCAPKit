@@ -29,7 +29,7 @@ class OptionNumber(IntEnum):
     OptionNumber['TS'] = 68
 
     #: [:rfc:`1108`] Extended Security
-    OptionNumber['E-SEC'] = 133
+    OptionNumber['E_SEC'] = 133
 
     #: [draft-ietf-cipso-ipsecurity-01] Commercial Security
     OptionNumber['CIPSO'] = 134
@@ -80,7 +80,7 @@ class OptionNumber(IntEnum):
     OptionNumber['SDB'] = 149
 
     #: Unassigned (Released 18 October 2005)
-    OptionNumber['Unassigned [150]'] = 150
+    OptionNumber['Unassigned_150'] = 150
 
     #: [Andy Malis][:rfc:`6814`] Dynamic Packet State
     OptionNumber['DPS'] = 151
@@ -92,16 +92,16 @@ class OptionNumber(IntEnum):
     OptionNumber['QS'] = 25
 
     #: [:rfc:`4727`] RFC3692-style Experiment
-    OptionNumber['EXP [30]'] = 30
+    OptionNumber['EXP_30'] = 30
 
     #: [:rfc:`4727`] RFC3692-style Experiment
-    OptionNumber['EXP [94]'] = 94
+    OptionNumber['EXP_94'] = 94
 
     #: [:rfc:`4727`] RFC3692-style Experiment
-    OptionNumber['EXP [158]'] = 158
+    OptionNumber['EXP_158'] = 158
 
     #: [:rfc:`4727`] RFC3692-style Experiment
-    OptionNumber['EXP [222]'] = 222
+    OptionNumber['EXP_222'] = 222
 
     @staticmethod
     def get(key, default=-1):

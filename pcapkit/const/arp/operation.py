@@ -14,7 +14,7 @@ class Operation(IntEnum):
     Operation = vars()
 
     #: [:rfc:`5494`]
-    Operation['Reserved [0]'] = 0
+    Operation['Reserved_0'] = 0
 
     #: [:rfc:`826`][:rfc:`5227`]
     Operation['REQUEST'] = 1
@@ -23,67 +23,67 @@ class Operation(IntEnum):
     Operation['REPLY'] = 2
 
     #: [:rfc:`903`]
-    Operation['request Reverse'] = 3
+    Operation['Request_Reverse'] = 3
 
     #: [:rfc:`903`]
-    Operation['reply Reverse'] = 4
+    Operation['Reply_Reverse'] = 4
 
     #: [:rfc:`1931`]
-    Operation['DRARP-Request'] = 5
+    Operation['DRARP_Request'] = 5
 
     #: [:rfc:`1931`]
-    Operation['DRARP-Reply'] = 6
+    Operation['DRARP_Reply'] = 6
 
     #: [:rfc:`1931`]
-    Operation['DRARP-Error'] = 7
+    Operation['DRARP_Error'] = 7
 
     #: [:rfc:`2390`]
-    Operation['InARP-Request'] = 8
+    Operation['InARP_Request'] = 8
 
     #: [:rfc:`2390`]
-    Operation['InARP-Reply'] = 9
+    Operation['InARP_Reply'] = 9
 
     #: [:rfc:`1577`]
-    Operation['ARP-NAK'] = 10
+    Operation['ARP_NAK'] = 10
 
     #: [Grenville Armitage]
-    Operation['MARS-Request'] = 11
+    Operation['MARS_Request'] = 11
 
     #: [Grenville Armitage]
-    Operation['MARS-Multi'] = 12
+    Operation['MARS_Multi'] = 12
 
     #: [Grenville Armitage]
-    Operation['MARS-MServ'] = 13
+    Operation['MARS_MServ'] = 13
 
     #: [Grenville Armitage]
-    Operation['MARS-Join'] = 14
+    Operation['MARS_Join'] = 14
 
     #: [Grenville Armitage]
-    Operation['MARS-Leave'] = 15
+    Operation['MARS_Leave'] = 15
 
     #: [Grenville Armitage]
-    Operation['MARS-NAK'] = 16
+    Operation['MARS_NAK'] = 16
 
     #: [Grenville Armitage]
-    Operation['MARS-Unserv'] = 17
+    Operation['MARS_Unserv'] = 17
 
     #: [Grenville Armitage]
-    Operation['MARS-SJoin'] = 18
+    Operation['MARS_SJoin'] = 18
 
     #: [Grenville Armitage]
-    Operation['MARS-SLeave'] = 19
+    Operation['MARS_SLeave'] = 19
 
     #: [Grenville Armitage]
-    Operation['MARS-Grouplist-Request'] = 20
+    Operation['MARS_Grouplist_Request'] = 20
 
     #: [Grenville Armitage]
-    Operation['MARS-Grouplist-Reply'] = 21
+    Operation['MARS_Grouplist_Reply'] = 21
 
     #: [Grenville Armitage]
-    Operation['MARS-Redirect-Map'] = 22
+    Operation['MARS_Redirect_Map'] = 22
 
     #: [Mitsuru Maruyama][:rfc:`2176`]
-    Operation['MAPOS-UNARP'] = 23
+    Operation['MAPOS_UNARP'] = 23
 
     #: [:rfc:`5494`]
     Operation['OP_EXP1'] = 24
@@ -92,7 +92,7 @@ class Operation(IntEnum):
     Operation['OP_EXP2'] = 25
 
     #: [:rfc:`5494`]
-    Operation['Reserved [65535]'] = 65535
+    Operation['Reserved_65535'] = 65535
 
     @staticmethod
     def get(key, default=-1):

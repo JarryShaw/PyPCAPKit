@@ -14,76 +14,76 @@ class Packet(IntEnum):
     Packet = vars()
 
     #:  [:rfc:`6275`]
-    Packet['Binding Refresh Request'] = 0
+    Packet['Binding_Refresh_Request'] = 0
 
     #:  [:rfc:`6275`]
-    Packet['Home Test Init'] = 1
+    Packet['Home_Test_Init'] = 1
 
     #:  [:rfc:`6275`]
-    Packet['Care-of Test Init'] = 2
+    Packet['Care_of_Test_Init'] = 2
 
     #:  [:rfc:`6275`]
-    Packet['Home Test'] = 3
+    Packet['Home_Test'] = 3
 
     #:  [:rfc:`6275`]
-    Packet['Care-of Test'] = 4
+    Packet['Care_of_Test'] = 4
 
     #:  [:rfc:`6275`]
-    Packet['Binding Update'] = 5
+    Packet['Binding_Update'] = 5
 
     #:  [:rfc:`6275`]
-    Packet['Binding Acknowledgement'] = 6
+    Packet['Binding_Acknowledgement'] = 6
 
     #:  [:rfc:`6275`]
-    Packet['Binding Error'] = 7
+    Packet['Binding_Error'] = 7
 
     #:  [:rfc:`5568`]
-    Packet['Fast Binding Update'] = 8
+    Packet['Fast_Binding_Update'] = 8
 
     #:  [:rfc:`5568`]
-    Packet['Fast Binding Acknowledgment'] = 9
+    Packet['Fast_Binding_Acknowledgment'] = 9
 
     #:  [:rfc:`5568`] (Deprecated)
-    Packet['Fast Neighbor Advertisement'] = 10
+    Packet['Fast_Neighbor_Advertisement'] = 10
 
     #:  [:rfc:`5096`]
-    Packet['Experimental Mobility Header'] = 11
+    Packet['Experimental_Mobility_Header'] = 11
 
     #:  [:rfc:`5142`]
-    Packet['Home Agent Switch Message'] = 12
+    Packet['Home_Agent_Switch_Message'] = 12
 
     #:  [:rfc:`5847`]
-    Packet['Heartbeat Message'] = 13
+    Packet['Heartbeat_Message'] = 13
 
     #:  [:rfc:`5568`]
-    Packet['Handover Initiate Message'] = 14
+    Packet['Handover_Initiate_Message'] = 14
 
     #:  [:rfc:`5568`]
-    Packet['Handover Acknowledge Message'] = 15
+    Packet['Handover_Acknowledge_Message'] = 15
 
     #:  [:rfc:`5846`]
-    Packet['Binding Revocation Message'] = 16
+    Packet['Binding_Revocation_Message'] = 16
 
     #:  [:rfc:`6705`]
-    Packet['Localized Routing Initiation'] = 17
+    Packet['Localized_Routing_Initiation'] = 17
 
     #:  [:rfc:`6705`]
-    Packet['Localized Routing Acknowledgment'] = 18
+    Packet['Localized_Routing_Acknowledgment'] = 18
 
     #:  [:rfc:`7077`]
-    Packet['Update Notification'] = 19
+    Packet['Update_Notification'] = 19
 
     #:  [:rfc:`7077`]
-    Packet['Update Notification Acknowledgement'] = 20
+    Packet['Update_Notification_Acknowledgement'] = 20
 
     #:  [:rfc:`7109`]
-    Packet['Flow Binding Message'] = 21
+    Packet['Flow_Binding_Message'] = 21
 
     #:  [:rfc:`7161`]
-    Packet['Subscription Query'] = 22
+    Packet['Subscription_Query'] = 22
 
     #:  [:rfc:`7161`]
-    Packet['Subscription Response'] = 23
+    Packet['Subscription_Response'] = 23
 
     @staticmethod
     def get(key, default=-1):

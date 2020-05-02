@@ -26,6 +26,7 @@ import traceback
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['Frame']
 
@@ -190,7 +191,10 @@ class Frame(Protocol):
         [delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self))]  # pylint: disable=expression-not-assigned
 
     def __length_hint__(self):
-        """Return an estimated length (16) for the object."""
+        """Return an estimated length for the object.
+
+        :rtype: Literal[16]
+        """
         return 16
 
     def __getitem__(self, key):
@@ -221,15 +225,17 @@ class Frame(Protocol):
         """Index of the protocol.
 
         Returns:
-            * If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`
-              exists, returns the frame index number itself;
-            * else returns name of the protocol, i.e. ``'Frame'``.
+            int: If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`
+            exists, returns the frame index number of itself; else raises :exc:`UnsupportedCall`.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
 
         """
         if self is None:
             return 'Frame'
         if getattr(self, '_fnum', None) is None:
-            return self.__class__.__name__
+            raise UnsupportedCall("'Frame' object cannot be interpreted as an integer")
         return self._fnum
 
     def __contains__(self, name):
@@ -244,7 +250,7 @@ class Frame(Protocol):
 
         """
         if isinstance(name, type) and issubclass(name, Protocol):
-            name = name.__index__()
+            name = name.id()
         if isinstance(name, tuple):
             for item in name:
                 if item in self._protos:

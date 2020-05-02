@@ -65,6 +65,15 @@ class NoPayload(Protocol):
         return self
 
     def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            *args: Arbitrary positional arguments.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         #: pcapkit.protocols.null.NoPayload: Payload of current instance.
         self._next = self
         #: pcapkit.corekit.infoclass.Info: Info dict of current instance.
@@ -74,8 +83,15 @@ class NoPayload(Protocol):
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
         self._protos = ProtoChain()
 
-    def __length_hint__(self):
-        """Return an estimated length for the object."""
+    @classmethod
+    def __index__(cls):
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
     ##########################################################################
     # Utilities.

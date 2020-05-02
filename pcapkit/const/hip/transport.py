@@ -23,7 +23,7 @@ class Transport(IntEnum):
     Transport['ESP'] = 2
 
     #: [:rfc:`6261`]
-    Transport['ESP-TCP'] = 3
+    Transport['ESP_TCP'] = 3
 
     @staticmethod
     def get(key, default=-1):

@@ -3,18 +3,6 @@ Web Crawlers for Constant Enumerations
 
 .. module:: pcapkit.vendor
 
-Base Generator
---------------
-
-.. automodule:: pcapkit.vendor.default
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
-
-Inherited Crawlers
-------------------
-
 .. toctree::
    :maxdepth: 2
 
@@ -30,6 +18,15 @@ Inherited Crawlers
    reg
    tcp
    vlan
+
+Base Generator
+--------------
+
+.. automodule:: pcapkit.vendor.default
+   :members:
+   :undoc-members:
+   :private-members:
+   :show-inheritance:
 
 Command Line Tool
 -----------------

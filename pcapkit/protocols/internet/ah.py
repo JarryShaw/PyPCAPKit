@@ -21,6 +21,7 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/IPsec
 
 """
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.utilities.exceptions import (ProtocolError, UnsupportedCall,
@@ -169,5 +170,21 @@ class AH(IPsec):
         self._info = Info(self.read_ah(length, version, extension))
 
     def __length_hint__(self):
-        """Return an estimated length (20) for the object."""
+        """Return an estimated length for the object.
+
+        :rtype: Literal[20]
+        """
         return 20
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(51)

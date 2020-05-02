@@ -125,31 +125,31 @@ class ComplexError(BaseError, TypeError):
 
 
 class BytesError(BaseError, TypeError):
-    """The argument(s) must be ``bytes`` type."""
+    """The argument(s) must be :obj:`bytes` type."""
 
 
 class BytearrayError(BaseError, TypeError):
-    """The argument(s) must be ``bytearray`` type."""
+    """The argument(s) must be :obj:`bytearray` type."""
 
 
 class BoolError(BaseError, TypeError):
-    """The argument(s) must be ``bool`` type."""
+    """The argument(s) must be :obj:`bool` type."""
 
 
 class StringError(BaseError, TypeError):
-    """The argument(s) must be ``str`` type."""
+    """The argument(s) must be :obj:`str` type."""
 
 
 class DictError(BaseError, TypeError):
-    """The argument(s) must be ``dict`` type."""
+    """The argument(s) must be :obj:`dict` type."""
 
 
 class ListError(BaseError, TypeError):
-    """The argument(s) must be ``list`` type."""
+    """The argument(s) must be :obj:`list` type."""
 
 
 class TupleError(BaseError, TypeError):
-    """The argument(s) must be ``tuple`` type."""
+    """The argument(s) must be :obj:`tuple` type."""
 
 
 class IterableError(BaseError, TypeError):

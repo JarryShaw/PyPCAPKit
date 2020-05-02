@@ -30,7 +30,7 @@ class EtherType(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: item[4],  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self._safe_name(item[4]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[1].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def rename(self, name, code):  # pylint: disable=arguments-differ
@@ -47,9 +47,9 @@ class EtherType(Vendor):
             str: Revised field name.
 
         """
-        if self.record[name] > 1:
+        if self.record[self._safe_name(name)] > 1:
             name = f'{name} [0x{code}]'
-        return name
+        return self._safe_name(name)
 
     def process(self, data):
         """Process CSV data.

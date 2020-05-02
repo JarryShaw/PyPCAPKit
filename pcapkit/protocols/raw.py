@@ -93,7 +93,7 @@ class Raw(Protocol):
             length (Optional[int]): Length of packet data.
 
         Keyword Args:
-            error: Parsing errors if any.
+            error (Optional[str]): Parsing errors if any.
             **kwargs: Arbitrary keyword arguments.
 
         Would :mod:`pcapkit` encounter malformed packets, the original parsing
@@ -110,5 +110,12 @@ class Raw(Protocol):
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.
         self._protos = ProtoChain(self.__class__, self.alias)
 
-    def __length_hint__(self):
-        """Return an estimated length for the object."""
+    @classmethod
+    def __index__(cls):
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')

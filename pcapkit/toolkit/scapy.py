@@ -62,13 +62,13 @@ def packet2chain(packet):
 
 
 def packet2dict(packet):
-    """Convert Scapy packet into ``dict``.
+    """Convert Scapy packet into :obj:`dict`.
 
     Args:
         packet (scapy.packet.Packet): Scapy packet.
 
     Returns:
-        Dict[str, Any]: A ``dict`` mapping of packet data.
+        Dict[str, Any]: A :obj:`dict` mapping of packet data.
 
     Raises:
         ModuleNotFound: If `Scapy`_ is not installed.
@@ -105,7 +105,7 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
         * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
           if it contains IPv4 layer (:class:`scapy.layers.inet.IP`) and the **DF**
           (:attr:`scapy.layers.inet.IP.flags.DF`) flag is ``False``.
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for IPv4
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns ``None``.
 
     See Also:
@@ -150,7 +150,7 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
         * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
           if it contains IPv6 layer (:class:`scapy.layers.inet6.IPv6`) and IPv6 Fragment
           header (:rfc:`2460#section-4.5`, :class:`scapy.layers.inet6.IPv6ExtHdrFragment`).
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for IPv6
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
           reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns ``None``.
 
     Raises:
@@ -200,7 +200,7 @@ def tcp_reassembly(packet, *, count=NotImplemented):
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains TCP layer (:class:`scapy.layers.inet.TCP`).
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for TCP
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns ``None``.
 
     See Also:
@@ -247,7 +247,7 @@ def tcp_traceflow(packet, *, count=NotImplemented):
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer (:class:`scapy.layers.inet.TCP`).
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for TCP
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`tcp.trace`) will be returned; otherwise, returns ``None``.
 
     See Also:

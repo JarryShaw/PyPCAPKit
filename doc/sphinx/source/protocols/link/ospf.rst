@@ -88,6 +88,9 @@ Data Structure
 
       authentication
 
+Cryptographic Authentication Information
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 For cryptographic authentication information as
 described in :rfc:`2328`, its structure is described
 as below:

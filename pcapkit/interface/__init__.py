@@ -115,7 +115,7 @@ def extract(fin=None, fout=None, format=None,                           # basic 
     if isinstance(layer, type) and issubclass(layer, Protocol):
         layer = layer.__layer__
     if isinstance(protocol, type) and issubclass(protocol, Protocol):
-        protocol = protocol.__index__()
+        protocol = protocol.id()
 
     str_check(fin or '', fout or '', format or '',
               trace_fout or '', trace_format or '',
@@ -167,7 +167,7 @@ def reassemble(protocol, strict=False):
 
     """
     if isinstance(protocol, type) and issubclass(protocol, Protocol):
-        protocol = protocol.__index__()
+        protocol = protocol.id()
 
     str_check(protocol)
     bool_check(strict)

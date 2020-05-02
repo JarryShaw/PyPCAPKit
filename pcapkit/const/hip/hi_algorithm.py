@@ -17,24 +17,24 @@ class HIAlgorithm(IntEnum):
     HIAlgorithm['RESERVED'] = 0
 
     #: [:rfc:`2410`]
-    HIAlgorithm['NULL-ENCRYPT'] = 1
+    HIAlgorithm['NULL_ENCRYPT'] = 1
 
-    HIAlgorithm['Unassigned [2]'] = 2
+    HIAlgorithm['Unassigned_2'] = 2
 
     #: [:rfc:`7401`]
     HIAlgorithm['DSA'] = 3
 
-    HIAlgorithm['Unassigned [4]'] = 4
+    HIAlgorithm['Unassigned_4'] = 4
 
     #: [:rfc:`7401`]
     HIAlgorithm['RSA'] = 5
 
-    HIAlgorithm['Unassigned [6]'] = 6
+    HIAlgorithm['Unassigned_6'] = 6
 
     #: [:rfc:`7401`]
     HIAlgorithm['ECDSA'] = 7
 
-    HIAlgorithm['Unassigned [8]'] = 8
+    HIAlgorithm['Unassigned_8'] = 8
 
     #: [:rfc:`7401`]
     HIAlgorithm['ECDSA_LOW'] = 9

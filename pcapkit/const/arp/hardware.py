@@ -14,25 +14,25 @@ class Hardware(IntEnum):
     Hardware = vars()
 
     #: [:rfc:`5494`]
-    Hardware['Reserved [0]'] = 0
+    Hardware['Reserved_0'] = 0
 
     #: [Jon Postel]
-    Hardware['Ethernet (10Mb)'] = 1
+    Hardware['Ethernet'] = 1
 
     #: [Jon Postel]
-    Hardware['Experimental Ethernet (3Mb)'] = 2
+    Hardware['Experimental_Ethernet'] = 2
 
     #: [Philip Koch]
-    Hardware['Amateur Radio AX.25'] = 3
+    Hardware['Amateur_Radio_AX_25'] = 3
 
     #: [Avri Doria]
-    Hardware['Proteon ProNET Token Ring'] = 4
+    Hardware['Proteon_ProNET_Token_Ring'] = 4
 
     #: [Gill Pratt]
     Hardware['Chaos'] = 5
 
     #: [Jon Postel]
-    Hardware['IEEE 802 Networks'] = 6
+    Hardware['IEEE_802_Networks'] = 6
 
     #: [:rfc:`1201`]
     Hardware['ARCNET'] = 7
@@ -44,49 +44,49 @@ class Hardware(IntEnum):
     Hardware['Lanstar'] = 9
 
     #: [Mike Burrows]
-    Hardware['Autonet Short Address'] = 10
+    Hardware['Autonet_Short_Address'] = 10
 
     #: [Joyce K Reynolds]
     Hardware['LocalTalk'] = 11
 
     #: [Joseph Murdock]
-    Hardware['LocalNet (IBM PCNet or SYTEK LocalNET)'] = 12
+    Hardware['LocalNet'] = 12
 
     #: [Rajiv Dhingra]
-    Hardware['Ultra link'] = 13
+    Hardware['Ultra_Link'] = 13
 
     #: [George Clapp]
     Hardware['SMDS'] = 14
 
     #: [Andy Malis]
-    Hardware['Frame Relay'] = 15
+    Hardware['Frame_Relay'] = 15
 
     #: [JXB2]
-    Hardware['Asynchronous Transmission Mode (ATM) [16]'] = 16
+    Hardware['Asynchronous_Transmission_Mode_16'] = 16
 
     #: [Jon Postel]
     Hardware['HDLC'] = 17
 
     #: [:rfc:`4338`]
-    Hardware['Fibre Channel'] = 18
+    Hardware['Fibre_Channel'] = 18
 
     #: [:rfc:`2225`]
-    Hardware['Asynchronous Transmission Mode (ATM) [19]'] = 19
+    Hardware['Asynchronous_Transmission_Mode_19'] = 19
 
     #: [Jon Postel]
-    Hardware['Serial Line'] = 20
+    Hardware['Serial_Line'] = 20
 
     #: [Mike Burrows]
-    Hardware['Asynchronous Transmission Mode (ATM) [21]'] = 21
+    Hardware['Asynchronous_Transmission_Mode_21'] = 21
 
     #: [Herb Jensen]
-    Hardware['MIL-STD-188-220'] = 22
+    Hardware['MIL_STD_188_220'] = 22
 
     #: [Jonathan Stone]
     Hardware['Metricom'] = 23
 
     #: [Myron Hattig]
-    Hardware['IEEE 1394.1995'] = 24
+    Hardware['IEEE_1394_1995'] = 24
 
     #: [Mitsuru Maruyama][:rfc:`2176`]
     Hardware['MAPOS'] = 25
@@ -95,31 +95,31 @@ class Hardware(IntEnum):
     Hardware['Twinaxial'] = 26
 
     #: [Kenji Fujisawa]
-    Hardware['EUI-64'] = 27
+    Hardware['EUI_64'] = 27
 
     #: [Jean Michel Pittet]
     Hardware['HIPARP'] = 28
 
     #: [Scott Guthery]
-    Hardware['IP and ARP over ISO 7816-3'] = 29
+    Hardware['IP_And_ARP_Over_ISO_7816_3'] = 29
 
     #: [Jerome Etienne]
     Hardware['ARPSec'] = 30
 
     #: [:rfc:`3456`]
-    Hardware['IPsec tunnel'] = 31
+    Hardware['IPsec_Tunnel'] = 31
 
     #: [:rfc:`4391`]
-    Hardware['InfiniBand (TM)'] = 32
+    Hardware['InfiniBand'] = 32
 
     #: [Jeff Anderson, Telecommunications Industry of America (TIA) TR-8.5 Formulating Group, <cja015&motorola.com>, June 2004]
-    Hardware['TIA-102 Project 25 Common Air Interface (CAI)'] = 33
+    Hardware['TIA_102_Project_25_Common_Air_Interface'] = 33
 
     #: [Scott Guthery 2]
-    Hardware['Wiegand Interface'] = 34
+    Hardware['Wiegand_Interface'] = 34
 
     #: [Inaky Perez-Gonzalez]
-    Hardware['Pure IP'] = 35
+    Hardware['Pure_IP'] = 35
 
     #: [:rfc:`5494`]
     Hardware['HW_EXP1'] = 36
@@ -134,7 +134,7 @@ class Hardware(IntEnum):
     Hardware['AEthernet'] = 257
 
     #: [:rfc:`5494`]
-    Hardware['Reserved [65535]'] = 65535
+    Hardware['Reserved_65535'] = 65535
 
     @staticmethod
     def get(key, default=-1):

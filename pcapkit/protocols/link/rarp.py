@@ -24,6 +24,7 @@ Octets      Bits        Name                    Description
 .. [*] http://en.wikipedia.org/wiki/Address_Resolution_Protocol
 
 """
+from pcapkit.const.reg.ethertype import EtherType
 from pcapkit.protocols.link.arp import ARP
 
 __all__ = ['RARP']
@@ -38,18 +39,35 @@ class RARP(ARP):
     _name = 'Reverse Address Resolution Protocol'
 
     ##########################################################################
-    # Data models.
+    # Methods.
     ##########################################################################
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
-        """Index of the protocol.
+    def id(cls):  # pylint: disable=invalid-index-returned
+        """Index ID of the protocol.
 
         Returns:
-            Tuple[Literal['RARP'], Literal['DRARP']]: Index of the protocol.
+            Tuple[Literal['RARP'], Literal['DRARP']]: Index ID of the protocol.
 
         See Also:
             :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
 
         """
         return ('RARP', 'DRARP')
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.ethertype.EtherType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
+
+        """
+        return EtherType(0x8035)

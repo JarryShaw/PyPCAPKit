@@ -14,25 +14,25 @@ class Routing(IntEnum):
     Routing = vars()
 
     #: [IPV6][:rfc:`5095`] DEPRECATED
-    Routing['Source Route'] = 0
+    Routing['Source_Route'] = 0
 
     #: DEPRECATED 2009-05-06
     Routing['Nimrod'] = 1
 
     #: [:rfc:`6275`]
-    Routing['Type 2 Routing Header'] = 2
+    Routing['Type_2_Routing_Header'] = 2
 
     #: [:rfc:`6554`]
-    Routing['RPL Source Route Header'] = 3
+    Routing['RPL_Source_Route_Header'] = 3
 
     #: [:rfc:`8754`] SRH
-    Routing['Segment Routing Header'] = 4
+    Routing['Segment_Routing_Header'] = 4
 
     #: [:rfc:`4727`]
-    Routing['RFC3692-style Experiment 1'] = 253
+    Routing['RFC3692_style_Experiment_1'] = 253
 
     #: [:rfc:`4727`]
-    Routing['RFC3692-style Experiment 2'] = 254
+    Routing['RFC3692_style_Experiment_2'] = 254
 
     Routing['Reserved'] = 255
 

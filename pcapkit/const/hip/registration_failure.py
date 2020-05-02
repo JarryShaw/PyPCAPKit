@@ -14,31 +14,31 @@ class RegistrationFailure(IntEnum):
     RegistrationFailure = vars()
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Registration requires additional credentials'] = 0
+    RegistrationFailure['Registration_Requires_Additional_Credentials'] = 0
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Registration type unavailable'] = 1
+    RegistrationFailure['Registration_Type_Unavailable'] = 1
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Insufficient resources'] = 2
+    RegistrationFailure['Insufficient_Resources'] = 2
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Invalid certificate'] = 3
+    RegistrationFailure['Invalid_Certificate'] = 3
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Bad certificate'] = 4
+    RegistrationFailure['Bad_Certificate'] = 4
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Unsupported certificate'] = 5
+    RegistrationFailure['Unsupported_Certificate'] = 5
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Certificate expired'] = 6
+    RegistrationFailure['Certificate_Expired'] = 6
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Certificate other'] = 7
+    RegistrationFailure['Certificate_Other'] = 7
 
     #: [:rfc:`8003`]
-    RegistrationFailure['Unknown CA'] = 8
+    RegistrationFailure['Unknown_CA'] = 8
 
     @staticmethod
     def get(key, default=-1):

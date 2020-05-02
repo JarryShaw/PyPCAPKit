@@ -13,13 +13,13 @@ class ToSPrecedence(IntEnum):
     _ignore_ = 'ToSPrecedence _'
     ToSPrecedence = vars()
 
-    ToSPrecedence['Network Control'] = 7
+    ToSPrecedence['Network_Control'] = 7
 
-    ToSPrecedence['Internetwork Control'] = 6
+    ToSPrecedence['Internetwork_Control'] = 6
 
-    ToSPrecedence['CRITIC/ECP'] = 5
+    ToSPrecedence['CRITIC_ECP'] = 5
 
-    ToSPrecedence['Flash Override'] = 4
+    ToSPrecedence['Flash_Override'] = 4
 
     ToSPrecedence['Flash'] = 3
 

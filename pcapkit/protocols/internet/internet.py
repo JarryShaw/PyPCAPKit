@@ -71,7 +71,7 @@ class Internet(Protocol):  # pylint: disable=abstract-method
             size (int): buffer size
 
         Returns:
-            pcapkit.const.reg.transtype.TransTypes: next layer's protocol enumeration
+            pcapkit.const.reg.transtype.TransType: next layer's protocol enumeration
 
         """
         _byte = self._read_unpack(size)

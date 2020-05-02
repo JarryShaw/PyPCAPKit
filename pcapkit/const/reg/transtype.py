@@ -44,10 +44,10 @@ class TransType(IntEnum):
     TransType['IGP'] = 9
 
     #: [Steve Chipman] BBN RCC Monitoring
-    TransType['BBN-RCC-MON'] = 10
+    TransType['BBN_RCC_MON'] = 10
 
     #: [:rfc:`741`][Steve Casner] Network Voice Protocol
-    TransType['NVP-II'] = 11
+    TransType['NVP_II'] = 11
 
     #: [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, "PUP: An Internetwork Architecture", XEROX Palo Alto Research Center, CSL-79-10, July 1979; also in IEEE Transactions on Communication, Volume COM-28, Number 4, April 1980.][XEROX] PUP
     TransType['PUP'] = 12
@@ -71,7 +71,7 @@ class TransType(IntEnum):
     TransType['MUX'] = 18
 
     #: [David Mills] DCN Measurement Subsystems
-    TransType['DCN-MEAS'] = 19
+    TransType['DCN_MEAS'] = 19
 
     #: [:rfc:`869`][Bob Hinden] Host Monitoring
     TransType['HMP'] = 20
@@ -80,19 +80,19 @@ class TransType(IntEnum):
     TransType['PRM'] = 21
 
     #: ["The Ethernet, A Local Area Network: Data Link Layer and Physical Layer Specification", AA-K759B-TK, Digital Equipment Corporation, Maynard, MA. Also as: "The Ethernet - A Local Area Network", Version 1.0, Digital Equipment Corporation, Intel Corporation, Xerox Corporation, September 1980. And: "The Ethernet, A Local Area Network: Data Link Layer and Physical Layer Specifications", Digital, Intel and Xerox, November 1982. And: XEROX, "The Ethernet, A Local Area Network: Data Link Layer and Physical Layer Specification", X3T51/80-50, Xerox Corporation, Stamford, CT., October 1980.][XEROX] XEROX NS IDP
-    TransType['XNS-IDP'] = 22
+    TransType['XNS_IDP'] = 22
 
     #: [Barry Boehm] Trunk-1
-    TransType['TRUNK-1'] = 23
+    TransType['TRUNK_1'] = 23
 
     #: [Barry Boehm] Trunk-2
-    TransType['TRUNK-2'] = 24
+    TransType['TRUNK_2'] = 24
 
     #: [Barry Boehm] Leaf-1
-    TransType['LEAF-1'] = 25
+    TransType['LEAF_1'] = 25
 
     #: [Barry Boehm] Leaf-2
-    TransType['LEAF-2'] = 26
+    TransType['LEAF_2'] = 26
 
     #: [:rfc:`908`][Bob Hinden] Reliable Data Protocol
     TransType['RDP'] = 27
@@ -101,16 +101,16 @@ class TransType(IntEnum):
     TransType['IRTP'] = 28
 
     #: [:rfc:`905`][<mystery contact>] ISO Transport Protocol Class 4
-    TransType['ISO-TP4'] = 29
+    TransType['ISO_TP4'] = 29
 
     #: [:rfc:`969`][David Clark] Bulk Data Transfer Protocol
     TransType['NETBLT'] = 30
 
     #: [Shuttleworth, B., "A Documentary of MFENet, a National Computer Network", UCRL-52317, Lawrence Livermore Labs, Livermore, California, June 1977.][Barry Howard] MFE Network Services Protocol
-    TransType['MFE-NSP'] = 31
+    TransType['MFE_NSP'] = 31
 
     #: [Hans Werner Braun] MERIT Internodal Protocol
-    TransType['MERIT-INP'] = 32
+    TransType['MERIT_INP'] = 32
 
     #: [:rfc:`4340`] Datagram Congestion Control Protocol
     TransType['DCCP'] = 33
@@ -128,10 +128,10 @@ class TransType(IntEnum):
     TransType['DDP'] = 37
 
     #: [Martha Steenstrup] IDPR Control Message Transport Proto
-    TransType['IDPR-CMTP'] = 38
+    TransType['IDPR_CMTP'] = 38
 
     #: [Dirk Fromhein] TP++ Transport Protocol
-    TransType['TP++'] = 39
+    TransType['TP'] = 39
 
     #: [Dave Presotto] IL Transport Protocol
     TransType['IL'] = 40
@@ -143,10 +143,10 @@ class TransType(IntEnum):
     TransType['SDRP'] = 42
 
     #: [Steve Deering] Routing Header for IPv6
-    TransType['IPv6-Route'] = 43
+    TransType['IPv6_Route'] = 43
 
     #: [Steve Deering] Fragment Header for IPv6
-    TransType['IPv6-Frag'] = 44
+    TransType['IPv6_Frag'] = 44
 
     #: [Sue Hares] Inter-Domain Routing Protocol
     TransType['IDRP'] = 45
@@ -170,7 +170,7 @@ class TransType(IntEnum):
     TransType['AH'] = 51
 
     #: [K Robert Glenn] Integrated Net Layer Security TUBA
-    TransType['I-NLSP'] = 52
+    TransType['I_NLSP'] = 52
 
     #: [John Ioannidis] IP with Encryption (deprecated)
     TransType['SWIPE'] = 53
@@ -188,25 +188,25 @@ class TransType(IntEnum):
     TransType['SKIP'] = 57
 
     #: [:rfc:`8200`] ICMP for IPv6
-    TransType['IPv6-ICMP'] = 58
+    TransType['IPv6_ICMP'] = 58
 
     #: [:rfc:`8200`] No Next Header for IPv6
-    TransType['IPv6-NoNxt'] = 59
+    TransType['IPv6_NoNxt'] = 59
 
     #: [:rfc:`8200`] Destination Options for IPv6
-    TransType['IPv6-Opts'] = 60
+    TransType['IPv6_Opts'] = 60
 
     #: [Internet Assigned Numbers Authority]
-    TransType['any host internal protocol'] = 61
+    TransType['Any_Host_Internal_Protocol'] = 61
 
     #: [Forsdick, H., "CFTP", Network Message, Bolt Beranek and Newman, January 1982.][Harry Forsdick] CFTP
     TransType['CFTP'] = 62
 
     #: [Internet Assigned Numbers Authority]
-    TransType['any local network'] = 63
+    TransType['Any_Local_Network'] = 63
 
     #: [Steven Blumenthal] SATNET and Backroom EXPAK
-    TransType['SAT-EXPAK'] = 64
+    TransType['SAT_EXPAK'] = 64
 
     #: [Paul Liu] Kryptolan
     TransType['KRYPTOLAN'] = 65
@@ -218,10 +218,10 @@ class TransType(IntEnum):
     TransType['IPPC'] = 67
 
     #: [Internet Assigned Numbers Authority]
-    TransType['any distributed file system'] = 68
+    TransType['Any_Distributed_File_System'] = 68
 
     #: [Steven Blumenthal] SATNET Monitoring
-    TransType['SAT-MON'] = 69
+    TransType['SAT_MON'] = 69
 
     #: [Gene Tsudik] VISA Protocol
     TransType['VISA'] = 70
@@ -242,25 +242,25 @@ class TransType(IntEnum):
     TransType['PVP'] = 75
 
     #: [Steven Blumenthal] Backroom SATNET Monitoring
-    TransType['BR-SAT-MON'] = 76
+    TransType['BR_SAT_MON'] = 76
 
     #: [William Melohn] SUN ND PROTOCOL-Temporary
-    TransType['SUN-ND'] = 77
+    TransType['SUN_ND'] = 77
 
     #: [Steven Blumenthal] WIDEBAND Monitoring
-    TransType['WB-MON'] = 78
+    TransType['WB_MON'] = 78
 
     #: [Steven Blumenthal] WIDEBAND EXPAK
-    TransType['WB-EXPAK'] = 79
+    TransType['WB_EXPAK'] = 79
 
     #: [Marshall T Rose] ISO Internet Protocol
-    TransType['ISO-IP'] = 80
+    TransType['ISO_IP'] = 80
 
     #: [Dave Cheriton] VMTP
     TransType['VMTP'] = 81
 
     #: [Dave Cheriton] SECURE-VMTP
-    TransType['SECURE-VMTP'] = 82
+    TransType['SECURE_VMTP'] = 82
 
     #: [Brian Horn] VINES
     TransType['VINES'] = 83
@@ -272,7 +272,7 @@ class TransType(IntEnum):
     TransType['IPTM'] = 84
 
     #: [Hans Werner Braun] NSFNET-IGP
-    TransType['NSFNET-IGP'] = 85
+    TransType['NSFNET_IGP'] = 85
 
     #: [M/A-COM Government Systems, "Dissimilar Gateway Protocol Specification, Draft Version", Contract no. CS901145, November 16, 1987.][Mike Little] Dissimilar Gateway Protocol
     TransType['DGP'] = 86
@@ -287,7 +287,7 @@ class TransType(IntEnum):
     TransType['OSPFIGP'] = 89
 
     #: [Welch, B., "The Sprite Remote Procedure Call System", Technical Report, UCB/Computer Science Dept., 86/302, University of California at Berkeley, June 1986.][Bruce Willins] Sprite RPC Protocol
-    TransType['Sprite-RPC'] = 90
+    TransType['Sprite_RPC'] = 90
 
     #: [Brian Horn] Locus Address Resolution Protocol
     TransType['LARP'] = 91
@@ -296,7 +296,7 @@ class TransType(IntEnum):
     TransType['MTP'] = 92
 
     #: [Brian Kantor] AX.25 Frames
-    TransType['AX.25'] = 93
+    TransType['AX_25'] = 93
 
     #: [John Ioannidis] IP-within-IP Encapsulation Protocol
     TransType['IPIP'] = 94
@@ -305,7 +305,7 @@ class TransType(IntEnum):
     TransType['MICP'] = 95
 
     #: [Howard Hart] Semaphore Communications Sec. Pro.
-    TransType['SCC-SP'] = 96
+    TransType['SCC_SP'] = 96
 
     #: [:rfc:`3378`] Ethernet-within-IP Encapsulation
     TransType['ETHERIP'] = 97
@@ -314,7 +314,7 @@ class TransType(IntEnum):
     TransType['ENCAP'] = 98
 
     #: [Internet Assigned Numbers Authority]
-    TransType['any private encryption scheme'] = 99
+    TransType['Any_Private_Encryption_Scheme'] = 99
 
     #: [RXB5] GMTP
     TransType['GMTP'] = 100
@@ -338,7 +338,7 @@ class TransType(IntEnum):
     TransType['QNX'] = 106
 
     #: [Bob Braden] Active Networks
-    TransType['A/N'] = 107
+    TransType['A_N'] = 107
 
     #: [:rfc:`2393`] IP Payload Compression Protocol
     TransType['IPComp'] = 108
@@ -347,10 +347,10 @@ class TransType(IntEnum):
     TransType['SNP'] = 109
 
     #: [Victor Volpe] Compaq Peer Protocol
-    TransType['Compaq-Peer'] = 110
+    TransType['Compaq_Peer'] = 110
 
     #: [CJ Lee] IPX in IP
-    TransType['IPX-in-IP'] = 111
+    TransType['IPX_in_IP'] = 111
 
     #: [:rfc:`5798`] Virtual Router Redundancy Protocol
     TransType['VRRP'] = 112
@@ -359,7 +359,7 @@ class TransType(IntEnum):
     TransType['PGM'] = 113
 
     #: [Internet Assigned Numbers Authority]
-    TransType['any 0-hop protocol'] = 114
+    TransType['Any_0_hop_Protocol'] = 114
 
     #: [:rfc:`3931`][Bernard Aboba] Layer Two Tunneling Protocol
     TransType['L2TP'] = 115
@@ -389,7 +389,7 @@ class TransType(IntEnum):
     TransType['PTP'] = 123
 
     #: [Tony Przygienda]
-    TransType['ISIS over IPv4'] = 124
+    TransType['ISIS_Over_IPv4'] = 124
 
     #: [Criag Partridge]
     TransType['FIRE'] = 125
@@ -419,19 +419,19 @@ class TransType(IntEnum):
     TransType['FC'] = 133
 
     #: [:rfc:`3175`]
-    TransType['RSVP-E2E-IGNORE'] = 134
+    TransType['RSVP_E2E_IGNORE'] = 134
 
     #: [:rfc:`6275`]
-    TransType['Mobility Header'] = 135
+    TransType['Mobility_Header'] = 135
 
     #: [:rfc:`3828`]
     TransType['UDPLite'] = 136
 
     #: [:rfc:`4023`]
-    TransType['MPLS-in-IP'] = 137
+    TransType['MPLS_in_IP'] = 137
 
     #: [:rfc:`5498`] MANET Protocols
-    TransType['manet'] = 138
+    TransType['Manet'] = 138
 
     #: [:rfc:`7401`] Host Identity Protocol
     TransType['HIP'] = 139
@@ -449,10 +449,10 @@ class TransType(IntEnum):
     TransType['Ethernet'] = 143
 
     #: [:rfc:`3692`]
-    TransType['Use for experimentation and testing [253]'] = 253
+    TransType['Use_For_Experimentation_And_Testing_253'] = 253
 
     #: [:rfc:`3692`]
-    TransType['Use for experimentation and testing [254]'] = 254
+    TransType['Use_For_Experimentation_And_Testing_254'] = 254
 
     #: [Internet Assigned Numbers Authority]
     TransType['Reserved'] = 255

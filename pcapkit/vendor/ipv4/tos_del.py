@@ -39,7 +39,7 @@ class ToSDelay(Vendor):
             Counter: Field recordings.
 
         """
-        return collections.Counter(data.values())
+        return collections.Counter(map(self._safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
     def process(self, data):
         """Process registry data.

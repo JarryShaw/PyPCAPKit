@@ -40,7 +40,7 @@ class Parameter(IntEnum):
     #: [:rfc:`7401`]
     Parameter['DH_GROUP_LIST'] = 511
 
-    Parameter['Unassigned [512]'] = 512
+    Parameter['Unassigned_512'] = 512
 
     #: [:rfc:`7401`]
     Parameter['DIFFIE_HELLMAN'] = 513
@@ -48,7 +48,7 @@ class Parameter(IntEnum):
     #: [:rfc:`5201`] (v1 only)
     Parameter['HIP_TRANSFORM'] = 577
 
-    Parameter['Unassigned [578]'] = 578
+    Parameter['Unassigned_578'] = 578
 
     #: [:rfc:`7401`]
     Parameter['HIP_CIPHER'] = 579
@@ -56,7 +56,7 @@ class Parameter(IntEnum):
     #: [:rfc:`5770`]
     Parameter['NAT_TRAVERSAL_MODE'] = 608
 
-    Parameter['Unassigned [609]'] = 609
+    Parameter['Unassigned_609'] = 609
 
     #: [:rfc:`5770`] 4
     Parameter['TRANSACTION_PACING'] = 610
@@ -82,17 +82,17 @@ class Parameter(IntEnum):
     #: [:rfc:`8003`]
     Parameter['REG_INFO'] = 930
 
-    Parameter['Unassigned [931]'] = 931
+    Parameter['Unassigned_931'] = 931
 
     #: [:rfc:`8003`]
     Parameter['REG_REQUEST'] = 932
 
-    Parameter['Unassigned [933]'] = 933
+    Parameter['Unassigned_933'] = 933
 
     #: [:rfc:`8003`]
     Parameter['REG_RESPONSE'] = 934
 
-    Parameter['Unassigned [935]'] = 935
+    Parameter['Unassigned_935'] = 935
 
     #: [:rfc:`8003`]
     Parameter['REG_FAILED'] = 936
@@ -163,12 +163,12 @@ class Parameter(IntEnum):
     #: [:rfc:`8004`] 16
     Parameter['FROM'] = 65498
 
-    Parameter['Unassigned [65499]'] = 65499
+    Parameter['Unassigned_65499'] = 65499
 
     #: [:rfc:`8004`]
     Parameter['RVS_HMAC'] = 65500
 
-    Parameter['Unassigned [65501]'] = 65501
+    Parameter['Unassigned_65501'] = 65501
 
     #: [:rfc:`8004`]
     Parameter['VIA_RVS'] = 65502

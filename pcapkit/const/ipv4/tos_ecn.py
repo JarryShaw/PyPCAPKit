@@ -13,11 +13,11 @@ class ToSECN(IntEnum):
     _ignore_ = 'ToSECN _'
     ToSECN = vars()
 
-    ToSECN['Not-ECT'] = 0b00
+    ToSECN['Not_ECT'] = 0b00
 
-    ToSECN['ECT(1)'] = 0b01
+    ToSECN['ECT_0b01'] = 0b01
 
-    ToSECN['ECT(0)'] = 0b10
+    ToSECN['ECT_0b10'] = 0b10
 
     ToSECN['CE'] = 0b11
 

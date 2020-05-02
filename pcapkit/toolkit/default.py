@@ -22,7 +22,7 @@ def ipv4_reassembly(frame):
           if it contains IPv4 layer (:class:`pcapkit.protocols.internet.ipv4.IPv4`) and
           the **DF** (:attr:`pcapkit.protocols.internet.ipv4.IPv4.info.flags.df`) flag is
           ``False``.
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for IPv4
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
           reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns ``None``.
 
     See Also:
@@ -65,7 +65,7 @@ def ipv6_reassembly(frame):
           if it contains IPv6 layer (:class:`pcapkit.protocols.internet.ipv6.IPv6`) and
           IPv6 Fragment header (:rfc:`2460#section-4.5`,
           :class:`pcapkit.protocols.internet.ipv6.ipv6_frag.IPv6_Frag`).
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for IPv6
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6
           reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns ``None``.
 
     See Also:
@@ -106,7 +106,7 @@ def tcp_reassembly(frame):
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for TCP
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns ``None``.
 
     See Also:
@@ -153,7 +153,7 @@ def tcp_traceflow(frame, *, data_link):
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for TCP
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`tcp.trace`) will be returned; otherwise, returns ``None``.
 
     See Also:

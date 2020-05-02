@@ -194,12 +194,28 @@ class Header(Protocol):
         self._info = Info(self.read_header())
 
     def __len__(self):
-        """Total length of corresponding protocol."""
+        """Total length of corresponding protocol.
+
+        :rtype: Literal[24]
+        """
         return 24
 
     def __length_hint__(self):
-        """Return an estimated length (24) for the object."""
+        """Return an estimated length for the object.
+
+        :rtype: Literal[24]
+        """
         return 24
+
+    @classmethod
+    def __index__(cls):
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
     ##########################################################################
     # Utilities.

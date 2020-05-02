@@ -60,7 +60,7 @@ class Option(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: item[2], reader))  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self._safe_name(item[2]), reader))  # pylint: disable=map-builtin-not-iterating
 
     def process(self, data):
         """Process CSV data.

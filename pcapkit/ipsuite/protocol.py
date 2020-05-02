@@ -164,6 +164,10 @@ class Protocol(metaclass=abc.ABCMeta):
                 raise StructError(f'{cls.__name__}: pack failed') from None
         return buf
 
+    @classmethod
+    def id(cls):
+        return cls.__name__
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -191,8 +195,9 @@ class Protocol(metaclass=abc.ABCMeta):
         return iter(self.__data__)
 
     @classmethod
+    @abc.abstractmethod
     def __index__(cls):
-        return cls.__name__
+        pass
 
     # def __truediv__(self, other):
     #     from pcapkit.ipsuite.packet import Packet
@@ -223,10 +228,10 @@ class Protocol(metaclass=abc.ABCMeta):
             flag = issubclass(type(other), Protocol)
 
         if isinstance(other, Protocol) or flag:
-            return (other.__index__ == cls.__index__)
+            return (other.id() == cls.id())
 
         try:
-            index = cls.__index__()
+            index = cls.id()
             if isinstance(index, tuple):
                 return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
             return bool(re.fullmatch(other, index, re.IGNORECASE))

@@ -56,7 +56,7 @@ class _ProtoList(Collection):
 
         with contextlib.suppress(Exception):
             for data in self.__data__:
-                index = data.__index__()
+                index = data.index()
                 if isinstance(index, tuple):
                     index = r'|'.join(index)
                 if re.fullmatch(index, x, re.IGNORECASE):
@@ -101,7 +101,7 @@ class _AliasList(collections.abc.Sequence):
         except TypeError:
             flag = issubclass(type(x), Protocol)
         if flag or isinstance(x, Protocol):
-            x = x.__index__()
+            x = x.index()
             if isinstance(x, tuple):
                 x = r'|'.join(x)
 
@@ -119,7 +119,7 @@ class _AliasList(collections.abc.Sequence):
         except TypeError:
             flag = issubclass(type(value), Protocol)
         if flag or isinstance(value, Protocol):
-            value = value.__index__()
+            value = value.index()
             if isinstance(value, tuple):
                 value = r'|'.join(value)
 
@@ -154,7 +154,7 @@ class _AliasList(collections.abc.Sequence):
         except TypeError:
             flag = issubclass(type(value), Protocol)
         if flag or isinstance(value, Protocol):
-            value = value.__index__()
+            value = value.index()
             if isinstance(value, tuple):
                 value = r'|'.join(value)
 

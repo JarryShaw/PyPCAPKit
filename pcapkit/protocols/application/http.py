@@ -72,10 +72,6 @@ class HTTP(Application):
         self._next = NoPayload()
         self._protos = ProtoChain(self.__class__, self.alias)
 
-    @classmethod
-    def __index__(cls):
-        return ('HTTPv1', 'HTTPv2')
-
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -83,3 +79,7 @@ class HTTP(Application):
     @abc.abstractmethod
     def read_http(self, length):
         pass
+
+    @classmethod
+    def id(cls):
+        return ('HTTPv1', 'HTTPv2')

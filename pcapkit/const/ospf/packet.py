@@ -19,16 +19,16 @@ class Packet(IntEnum):
     Packet['Hello'] = 1
 
     #: [:rfc:`2328`]
-    Packet['Database Description'] = 2
+    Packet['Database_Description'] = 2
 
     #: [:rfc:`2328`]
-    Packet['Link State Request'] = 3
+    Packet['Link_State_Request'] = 3
 
     #: [:rfc:`2328`]
-    Packet['Link State Update'] = 4
+    Packet['Link_State_Update'] = 4
 
     #: [:rfc:`2328`]
-    Packet['Link State Ack'] = 5
+    Packet['Link_State_Ack'] = 5
 
     @staticmethod
     def get(key, default=-1):

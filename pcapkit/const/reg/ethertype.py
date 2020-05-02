@@ -14,124 +14,124 @@ class EtherType(IntEnum):
     EtherType = vars()
 
     #: [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, "PUP: An Internetwork Architecture", XEROX Palo Alto Research Center, CSL-79-10, July 1979; also in IEEE Transactions on Communication, Volume COM-28, Number 4, April 1980.][Neil Sembower]
-    EtherType['XEROX PUP (see 0A00)'] = 0x0200
+    EtherType['XEROX_PUP'] = 0x0200
 
     #: [Neil Sembower]
-    EtherType['PUP Addr Trans (see 0A01)'] = 0x0201
+    EtherType['PUP_Addr_Trans_0x0201'] = 0x0201
 
     #: [Neil Sembower]
     EtherType['Nixdorf'] = 0x0400
 
     #: ["The Ethernet, A Local Area Network: Data Link Layer and Physical Layer Specification", AA-K759B-TK, Digital Equipment Corporation, Maynard, MA. Also as: "The Ethernet - A Local Area Network", Version 1.0, Digital Equipment Corporation, Intel Corporation, Xerox Corporation, September 1980. And: "The Ethernet, A Local Area Network: Data Link Layer and Physical Layer Specifications", Digital, Intel and Xerox, November 1982. And: XEROX, "The Ethernet, A Local Area Network: Data Link Layer and Physical Layer Specification", X3T51/80-50, Xerox Corporation, Stamford, CT., October 1980.][Neil Sembower]
-    EtherType['XEROX NS IDP'] = 0x0600
+    EtherType['XEROX_NS_IDP'] = 0x0600
 
     #: [Neil Sembower]
-    EtherType['DLOG [0x0660]'] = 0x0660
+    EtherType['DLOG_0x0660'] = 0x0660
 
     #: [Neil Sembower]
-    EtherType['DLOG [0x0661]'] = 0x0661
+    EtherType['DLOG_0x0661'] = 0x0661
 
     #: [:rfc:`7042`]
-    EtherType['Internet Protocol version 4 (IPv4)'] = 0x0800
+    EtherType['Internet_Protocol_Version_4'] = 0x0800
 
     #: [Neil Sembower]
-    EtherType['X.75 Internet'] = 0x0801
+    EtherType['X_75_Internet'] = 0x0801
 
     #: [Neil Sembower]
-    EtherType['NBS Internet'] = 0x0802
+    EtherType['NBS_Internet'] = 0x0802
 
     #: [Neil Sembower]
-    EtherType['ECMA Internet'] = 0x0803
+    EtherType['ECMA_Internet'] = 0x0803
 
     #: [Neil Sembower]
     EtherType['Chaosnet'] = 0x0804
 
     #: [Neil Sembower]
-    EtherType['X.25 Level 3'] = 0x0805
+    EtherType['X_25_Level_3'] = 0x0805
 
     #: [:rfc:`7042`]
-    EtherType['Address Resolution Protocol (ARP)'] = 0x0806
+    EtherType['Address_Resolution_Protocol'] = 0x0806
 
     #: [Neil Sembower]
-    EtherType['XNS Compatability'] = 0x0807
+    EtherType['XNS_Compatability'] = 0x0807
 
     #: [:rfc:`1701`]
-    EtherType['Frame Relay ARP'] = 0x0808
+    EtherType['Frame_Relay_ARP'] = 0x0808
 
     #: [David Plummer]
-    EtherType['Symbolics Private'] = 0x081C
+    EtherType['Symbolics_Private'] = 0x081C
 
     #: [Neil Sembower]
-    EtherType['Ungermann-Bass net debugr'] = 0x0900
+    EtherType['Ungermann_Bass_Net_Debugr'] = 0x0900
 
     #: [Neil Sembower]
-    EtherType['Xerox IEEE802.3 PUP'] = 0x0A00
+    EtherType['Xerox_IEEE802_3_PUP'] = 0x0A00
 
     #: [Neil Sembower]
-    EtherType['PUP Addr Trans'] = 0x0A01
+    EtherType['PUP_Addr_Trans_0x0A01'] = 0x0A01
 
     #: [Neil Sembower]
-    EtherType['Banyan VINES'] = 0x0BAD
+    EtherType['Banyan_VINES'] = 0x0BAD
 
     #: [:rfc:`1701`]
-    EtherType['VINES Loopback'] = 0x0BAE
+    EtherType['VINES_Loopback'] = 0x0BAE
 
     #: [:rfc:`1701`]
-    EtherType['VINES Echo'] = 0x0BAF
+    EtherType['VINES_Echo'] = 0x0BAF
 
     #: [Neil Sembower]
-    EtherType['Berkeley Trailer nego'] = 0x1000
+    EtherType['Berkeley_Trailer_Nego'] = 0x1000
 
     #: [Neil Sembower]
-    EtherType['Valid Systems'] = 0x1600
+    EtherType['Valid_Systems'] = 0x1600
 
     #: [:rfc:`6325`]
     EtherType['TRILL'] = 0x22F3
 
     #: [:rfc:`6325`]
-    EtherType['L2-IS-IS'] = 0x22F4
+    EtherType['L2_IS_IS'] = 0x22F4
 
     #: [Neil Sembower]
-    EtherType['PCS Basic Block Protocol'] = 0x4242
+    EtherType['PCS_Basic_Block_Protocol'] = 0x4242
 
     #: [Neil Sembower]
-    EtherType['BBN Simnet'] = 0x5208
+    EtherType['BBN_Simnet'] = 0x5208
 
     #: [Neil Sembower]
-    EtherType['DEC Unassigned (Exp.)'] = 0x6000
+    EtherType['DEC_Unassigned_0x6000'] = 0x6000
 
     #: [Neil Sembower]
-    EtherType['DEC MOP Dump/Load'] = 0x6001
+    EtherType['DEC_MOP_Dump_Load'] = 0x6001
 
     #: [Neil Sembower]
-    EtherType['DEC MOP Remote Console'] = 0x6002
+    EtherType['DEC_MOP_Remote_Console'] = 0x6002
 
     #: [Neil Sembower]
-    EtherType['DEC DECNET Phase IV Route'] = 0x6003
+    EtherType['DEC_DECNET_Phase_IV_Route'] = 0x6003
 
     #: [Neil Sembower]
-    EtherType['DEC LAT'] = 0x6004
+    EtherType['DEC_LAT'] = 0x6004
 
     #: [Neil Sembower]
-    EtherType['DEC Diagnostic Protocol'] = 0x6005
+    EtherType['DEC_Diagnostic_Protocol'] = 0x6005
 
     #: [Neil Sembower]
-    EtherType['DEC Customer Protocol'] = 0x6006
+    EtherType['DEC_Customer_Protocol'] = 0x6006
 
     #: [Neil Sembower]
-    EtherType['DEC LAVC, SCA'] = 0x6007
+    EtherType['DEC_LAVC_SCA'] = 0x6007
 
     #: [:rfc:`1701`]
-    EtherType['Trans Ether Bridging'] = 0x6558
+    EtherType['Trans_Ether_Bridging'] = 0x6558
 
     #: [:rfc:`1701`]
-    EtherType['Raw Frame Relay'] = 0x6559
+    EtherType['Raw_Frame_Relay'] = 0x6559
 
     #: [Neil Sembower]
-    EtherType['Ungermann-Bass download'] = 0x7000
+    EtherType['Ungermann_Bass_Download'] = 0x7000
 
     #: [Neil Sembower]
-    EtherType['Ungermann-Bass dia/loop'] = 0x7002
+    EtherType['Ungermann_Bass_Dia_loop'] = 0x7002
 
     #: [Neil Sembower]
     EtherType['Proteon'] = 0x7030
@@ -140,103 +140,103 @@ class EtherType(IntEnum):
     EtherType['Cabletron'] = 0x7034
 
     #: [:rfc:`824`][Daniel Tappan]
-    EtherType['Cronus VLN'] = 0x8003
+    EtherType['Cronus_VLN'] = 0x8003
 
     #: [:rfc:`824`][Daniel Tappan]
-    EtherType['Cronus Direct'] = 0x8004
+    EtherType['Cronus_Direct'] = 0x8004
 
     #: [Neil Sembower]
-    EtherType['HP Probe'] = 0x8005
+    EtherType['HP_Probe'] = 0x8005
 
     #: [Neil Sembower]
     EtherType['Nestar'] = 0x8006
 
     #: [Neil Sembower]
-    EtherType['AT&T [0x8008]'] = 0x8008
+    EtherType['AT_T_0x8008'] = 0x8008
 
     #: [Neil Sembower]
     EtherType['Excelan'] = 0x8010
 
     #: [Andrew Cherenson]
-    EtherType['SGI diagnostics'] = 0x8013
+    EtherType['SGI_Diagnostics'] = 0x8013
 
     #: [Andrew Cherenson]
-    EtherType['SGI network games'] = 0x8014
+    EtherType['SGI_Network_Games'] = 0x8014
 
     #: [Andrew Cherenson]
-    EtherType['SGI reserved'] = 0x8015
+    EtherType['SGI_Reserved'] = 0x8015
 
     #: [Andrew Cherenson]
-    EtherType['SGI bounce server'] = 0x8016
+    EtherType['SGI_Bounce_Server'] = 0x8016
 
     #: [Neil Sembower]
-    EtherType['Apollo Domain'] = 0x8019
+    EtherType['Apollo_Domain'] = 0x8019
 
     #: [Neil Sembower]
     EtherType['Tymshare'] = 0x802E
 
     #: [Neil Sembower]
-    EtherType['Tigan, Inc.'] = 0x802F
+    EtherType['Tigan_Inc'] = 0x802F
 
     #: [:rfc:`903`][Joseph Murdock]
-    EtherType['Reverse Address Resolution Protocol (RARP)'] = 0x8035
+    EtherType['Reverse_Address_Resolution_Protocol'] = 0x8035
 
     #: [Neil Sembower]
-    EtherType['Aeonic Systems'] = 0x8036
+    EtherType['Aeonic_Systems'] = 0x8036
 
     #: [Neil Sembower]
-    EtherType['DEC LANBridge'] = 0x8038
+    EtherType['DEC_LANBridge'] = 0x8038
 
     #: [Neil Sembower]
-    EtherType['DEC Ethernet Encryption'] = 0x803D
+    EtherType['DEC_Ethernet_Encryption'] = 0x803D
 
     #: [Neil Sembower]
-    EtherType['DEC Unassigned'] = 0x803E
+    EtherType['DEC_Unassigned_0x803E'] = 0x803E
 
     #: [Neil Sembower]
-    EtherType['DEC LAN Traffic Monitor'] = 0x803F
+    EtherType['DEC_LAN_Traffic_Monitor'] = 0x803F
 
     #: [Neil Sembower]
-    EtherType['Planning Research Corp.'] = 0x8044
+    EtherType['Planning_Research_Corp'] = 0x8044
 
     #: [Neil Sembower]
-    EtherType['AT&T [0x8046]'] = 0x8046
+    EtherType['AT_T_0x8046'] = 0x8046
 
     #: [Neil Sembower]
-    EtherType['AT&T [0x8047]'] = 0x8047
+    EtherType['AT_T_0x8047'] = 0x8047
 
     #: [Neil Sembower]
     EtherType['ExperData'] = 0x8049
 
     #: [Neil Sembower]
-    EtherType['Stanford V Kernel exp.'] = 0x805B
+    EtherType['Stanford_V_Kernel_Exp'] = 0x805B
 
     #: [Neil Sembower]
-    EtherType['Stanford V Kernel prod.'] = 0x805C
+    EtherType['Stanford_V_Kernel_Prod'] = 0x805C
 
     #: [Neil Sembower]
-    EtherType['Evans & Sutherland'] = 0x805D
+    EtherType['Evans_Sutherland'] = 0x805D
 
     #: [Neil Sembower]
-    EtherType['Little Machines'] = 0x8060
+    EtherType['Little_Machines'] = 0x8060
 
     #: [Neil Sembower]
-    EtherType['Counterpoint Computers'] = 0x8062
+    EtherType['Counterpoint_Computers'] = 0x8062
 
     #: [Neil Sembower]
-    EtherType['Univ. of Mass. @ Amherst [0x8065]'] = 0x8065
+    EtherType['Univ_Of_Mass_Amherst_0x8065'] = 0x8065
 
     #: [Neil Sembower]
-    EtherType['Univ. of Mass. @ Amherst [0x8066]'] = 0x8066
+    EtherType['Univ_Of_Mass_Amherst_0x8066'] = 0x8066
 
     #: [Neil Sembower]
-    EtherType['Veeco Integrated Auto.'] = 0x8067
+    EtherType['Veeco_Integrated_Auto'] = 0x8067
 
     #: [Neil Sembower]
-    EtherType['General Dynamics'] = 0x8068
+    EtherType['General_Dynamics'] = 0x8068
 
     #: [Neil Sembower]
-    EtherType['AT&T [0x8069]'] = 0x8069
+    EtherType['AT_T_0x8069'] = 0x8069
 
     #: [Neil Sembower]
     EtherType['Autophon'] = 0x806A
@@ -245,241 +245,241 @@ class EtherType(IntEnum):
     EtherType['ComDesign'] = 0x806C
 
     #: [Neil Sembower]
-    EtherType['Computgraphic Corp.'] = 0x806D
+    EtherType['Computgraphic_Corp'] = 0x806D
 
     #: [Neil Sembower]
     EtherType['Matra'] = 0x807A
 
     #: [Neil Sembower]
-    EtherType['Dansk Data Elektronik'] = 0x807B
+    EtherType['Dansk_Data_Elektronik'] = 0x807B
 
     #: [Hans Werner Braun]
-    EtherType['Merit Internodal'] = 0x807C
+    EtherType['Merit_Internodal'] = 0x807C
 
     #: [Neil Sembower]
-    EtherType['Vitalink TransLAN III'] = 0x8080
+    EtherType['Vitalink_TransLAN_III'] = 0x8080
 
     #: [Neil Sembower]
     EtherType['Appletalk'] = 0x809B
 
     #: [Neil Sembower]
-    EtherType['Spider Systems Ltd.'] = 0x809F
+    EtherType['Spider_Systems_Ltd'] = 0x809F
 
     #: [Neil Sembower]
-    EtherType['Nixdorf Computers'] = 0x80A3
+    EtherType['Nixdorf_Computers'] = 0x80A3
 
     #: [Neil Sembower]
-    EtherType['Banyan Systems [0x80C4]'] = 0x80C4
+    EtherType['Banyan_Systems_0x80C4'] = 0x80C4
 
     #: [Neil Sembower]
-    EtherType['Banyan Systems [0x80C5]'] = 0x80C5
+    EtherType['Banyan_Systems_0x80C5'] = 0x80C5
 
     #: [Neil Sembower]
-    EtherType['Pacer Software'] = 0x80C6
+    EtherType['Pacer_Software'] = 0x80C6
 
     #: [Neil Sembower]
-    EtherType['Applitek Corporation'] = 0x80C7
+    EtherType['Applitek_Corporation'] = 0x80C7
 
     #: [Neil Sembower]
-    EtherType['IBM SNA Service on Ether'] = 0x80D5
+    EtherType['IBM_SNA_Service_On_Ether'] = 0x80D5
 
     #: [Neil Sembower]
-    EtherType['Varian Associates'] = 0x80DD
+    EtherType['Varian_Associates'] = 0x80DD
 
     #: [Neil Sembower]
     EtherType['Retix'] = 0x80F2
 
     #: [Neil Sembower]
-    EtherType['AppleTalk AARP (Kinetics)'] = 0x80F3
+    EtherType['AppleTalk_AARP'] = 0x80F3
 
     #: [Neil Sembower]
-    EtherType['Apollo Computer'] = 0x80F7
+    EtherType['Apollo_Computer'] = 0x80F7
 
     #: [Neil Sembower]
-    EtherType['Wellfleet Communications'] = 0x80FF
+    EtherType['Wellfleet_Communications'] = 0x80FF
 
     #: [:rfc:`7042`]
-    EtherType['Customer VLAN Tag Type (C-Tag, formerly called the Q-Tag) (initially Wellfleet)'] = 0x8100
+    EtherType['Customer_VLAN_Tag_Type'] = 0x8100
 
     #: [Neil Sembower]
-    EtherType['Hayes Microcomputers'] = 0x8130
+    EtherType['Hayes_Microcomputers'] = 0x8130
 
     #: [Neil Sembower]
-    EtherType['VG Laboratory Systems'] = 0x8131
+    EtherType['VG_Laboratory_Systems'] = 0x8131
 
     #: [Neil Sembower]
     EtherType['Logicraft'] = 0x8148
 
     #: [Neil Sembower]
-    EtherType['Network Computing Devices'] = 0x8149
+    EtherType['Network_Computing_Devices'] = 0x8149
 
     #: [Neil Sembower]
-    EtherType['Alpha Micro'] = 0x814A
+    EtherType['Alpha_Micro'] = 0x814A
 
     #: [Joyce K Reynolds]
     EtherType['SNMP'] = 0x814C
 
     #: [Neil Sembower]
-    EtherType['BIIN [0x814D]'] = 0x814D
+    EtherType['BIIN_0x814D'] = 0x814D
 
     #: [Neil Sembower]
-    EtherType['BIIN [0x814E]'] = 0x814E
+    EtherType['BIIN_0x814E'] = 0x814E
 
     #: [Neil Sembower]
-    EtherType['Technically Elite Concept'] = 0x814F
+    EtherType['Technically_Elite_Concept'] = 0x814F
 
     #: [Neil Sembower]
-    EtherType['Rational Corp'] = 0x8150
+    EtherType['Rational_Corp'] = 0x8150
 
     #: [Neil Sembower]
     EtherType['XTP'] = 0x817D
 
     #: [Neil Sembower]
-    EtherType['SGI/Time Warner prop.'] = 0x817E
+    EtherType['SGI_Time_Warner_Prop'] = 0x817E
 
     #: [Neil Sembower]
-    EtherType['HIPPI-FP encapsulation'] = 0x8180
+    EtherType['HIPPI_FP_Encapsulation'] = 0x8180
 
     #: [Neil Sembower]
-    EtherType['STP, HIPPI-ST'] = 0x8181
+    EtherType['STP_HIPPI_ST'] = 0x8181
 
     #: [Neil Sembower]
-    EtherType['Reserved for HIPPI-6400 [0x8182]'] = 0x8182
+    EtherType['Reserved_For_HIPPI_6400_0x8182'] = 0x8182
 
     #: [Neil Sembower]
-    EtherType['Reserved for HIPPI-6400 [0x8183]'] = 0x8183
+    EtherType['Reserved_For_HIPPI_6400_0x8183'] = 0x8183
 
     #: [Neil Sembower]
-    EtherType['Motorola Computer'] = 0x818D
+    EtherType['Motorola_Computer'] = 0x818D
 
     #: [Neil Sembower]
-    EtherType['ARAI Bunkichi'] = 0x81A4
+    EtherType['ARAI_Bunkichi'] = 0x81A4
 
     #: [Neil Sembower]
     EtherType['SECTRA'] = 0x86DB
 
     #: [Neil Sembower]
-    EtherType['Delta Controls'] = 0x86DE
+    EtherType['Delta_Controls'] = 0x86DE
 
     #: [:rfc:`7042`]
-    EtherType['Internet Protocol version 6 (IPv6)'] = 0x86DD
+    EtherType['Internet_Protocol_Version_6'] = 0x86DD
 
     #: [Joe Touch]
     EtherType['ATOMIC'] = 0x86DF
 
     #: [:rfc:`1144`][:rfc:`1701`]
-    EtherType['TCP/IP Compression'] = 0x876B
+    EtherType['TCP_IP_Compression'] = 0x876B
 
     #: [:rfc:`1701`]
-    EtherType['IP Autonomous Systems'] = 0x876C
+    EtherType['IP_Autonomous_Systems'] = 0x876C
 
     #: [:rfc:`1701`]
-    EtherType['Secure Data'] = 0x876D
+    EtherType['Secure_Data'] = 0x876D
 
     #: [EPON][:rfc:`7042`]
-    EtherType['IEEE Std 802.3 - Ethernet Passive Optical Network (EPON)'] = 0x8808
+    EtherType['IEEE_Std_802_3_Ethernet_Passive_Optical_Network'] = 0x8808
 
     #: [:rfc:`7042`]
-    EtherType['Point-to-Point Protocol (PPP)'] = 0x880B
+    EtherType['Point_to_Point_Protocol'] = 0x880B
 
     #: [:rfc:`7042`]
-    EtherType['General Switch Management Protocol (GSMP)'] = 0x880C
+    EtherType['General_Switch_Management_Protocol'] = 0x880C
 
     #: [:rfc:`5332`]
     EtherType['MPLS'] = 0x8847
 
     #: [:rfc:`5332`]
-    EtherType['MPLS with upstream-assigned label'] = 0x8848
+    EtherType['MPLS_With_Upstream_assigned_Label'] = 0x8848
 
     #: [:rfc:`7042`]
-    EtherType['Multicast Channel Allocation Protocol (MCAP)'] = 0x8861
+    EtherType['Multicast_Channel_Allocation_Protocol'] = 0x8861
 
     #: [:rfc:`2516`]
-    EtherType['PPP over Ethernet (PPPoE) Discovery Stage'] = 0x8863
+    EtherType['PPP_Over_Ethernet_Discovery_Stage'] = 0x8863
 
     #: [:rfc:`2516`]
-    EtherType['PPP over Ethernet (PPPoE) Session Stage'] = 0x8864
+    EtherType['PPP_Over_Ethernet_Session_Stage'] = 0x8864
 
     #: [IEEE]
-    EtherType['IEEE Std 802.1X - Port-based network access control'] = 0x888E
+    EtherType['IEEE_Std_802_1X_Port_based_Network_Access_Control'] = 0x888E
 
     #: [IEEE]
-    EtherType['IEEE Std 802.1Q - Service VLAN tag identifier (S-Tag)'] = 0x88A8
+    EtherType['IEEE_Std_802_1Q_Service_VLAN_Tag_Identifier'] = 0x88A8
 
     #: [IEEE]
-    EtherType['IEEE Std 802 - Local Experimental Ethertype [0x88B5]'] = 0x88B5
+    EtherType['IEEE_Std_802_Local_Experimental_Ethertype_0x88B5'] = 0x88B5
 
     #: [IEEE]
-    EtherType['IEEE Std 802 - Local Experimental Ethertype [0x88B6]'] = 0x88B6
+    EtherType['IEEE_Std_802_Local_Experimental_Ethertype_0x88B6'] = 0x88B6
 
     #: [IEEE]
-    EtherType['IEEE Std 802 - OUI Extended Ethertype'] = 0x88B7
+    EtherType['IEEE_Std_802_OUI_Extended_Ethertype'] = 0x88B7
 
     #: [IEEE]
-    EtherType['IEEE Std 802.11 - Pre-Authentication (802.11i)'] = 0x88C7
+    EtherType['IEEE_Std_802_11_Pre_Authentication'] = 0x88C7
 
     #: [IEEE]
-    EtherType['IEEE Std 802.1AB - Link Layer Discovery Protocol (LLDP)'] = 0x88CC
+    EtherType['IEEE_Std_802_1AB_Link_Layer_Discovery_Protocol'] = 0x88CC
 
     #: [IEEE]
-    EtherType['IEEE Std 802.1AE - Media Access Control Security'] = 0x88E5
+    EtherType['IEEE_Std_802_1AE_Media_Access_Control_Security'] = 0x88E5
 
     #: [IEEE Std 802.1Q-2014]
-    EtherType['Provider Backbone Bridging Instance tag'] = 0x88E7
+    EtherType['Provider_Backbone_Bridging_Instance_Tag'] = 0x88E7
 
     #: [IEEE]
-    EtherType['IEEE Std 802.1Q - Multiple VLAN Registration Protocol (MVRP)'] = 0x88F5
+    EtherType['IEEE_Std_802_1Q_Multiple_VLAN_Registration_Protocol'] = 0x88F5
 
     #: [IEEE]
-    EtherType['IEEE Std 802.1Q - Multiple Multicast Registration Protocol (MMRP)'] = 0x88F6
+    EtherType['IEEE_Std_802_1Q_Multiple_Multicast_Registration_Protocol'] = 0x88F6
 
     #: [IEEE]
-    EtherType['IEEE Std 802.11 - Fast Roaming Remote Request (802.11r)'] = 0x890D
+    EtherType['IEEE_Std_802_11_Fast_Roaming_Remote_Request'] = 0x890D
 
     #: [IEEE]
-    EtherType['IEEE Std 802.21 - Media Independent Handover Protocol'] = 0x8917
+    EtherType['IEEE_Std_802_21_Media_Independent_Handover_Protocol'] = 0x8917
 
     #: [IEEE]
-    EtherType['IEEE Std 802.1Qbe - Multiple I-SID Registration Protocol'] = 0x8929
+    EtherType['IEEE_Std_802_1Qbe_Multiple_I_SID_Registration_Protocol'] = 0x8929
 
     #: [:rfc:`7172`]
-    EtherType['TRILL Fine Grained Labeling (FGL)'] = 0x893B
+    EtherType['TRILL_Fine_Grained_Labeling'] = 0x893B
 
     #: [IEEE]
-    EtherType['IEEE Std 802.1Qbg - ECP Protocol (also used in 802.1BR)'] = 0x8940
+    EtherType['IEEE_Std_802_1Qbg_ECP_Protocol'] = 0x8940
 
     #: [:rfc:`7178`]
-    EtherType['TRILL RBridge Channel'] = 0x8946
+    EtherType['TRILL_RBridge_Channel'] = 0x8946
 
     #: [IEEE]
-    EtherType['GeoNetworking as defined in ETSI EN 302 636-4-1'] = 0x8947
+    EtherType['GeoNetworking_As_Defined_In_ETSI_EN_302_636_4_1'] = 0x8947
 
     #: [:rfc:`8300`]
-    EtherType['NSH (Network Service Header)'] = 0x894F
+    EtherType['NSH'] = 0x894F
 
     #: [Neil Sembower]
     EtherType['Loopback'] = 0x9000
 
     #: [Neil Sembower]
-    EtherType['3Com(Bridge) XNS Sys Mgmt'] = 0x9001
+    EtherType['3Com_XNS_Sys_Mgmt'] = 0x9001
 
     #: [Neil Sembower]
-    EtherType['3Com(Bridge) TCP-IP Sys'] = 0x9002
+    EtherType['3Com_TCP_IP_Sys'] = 0x9002
 
     #: [Neil Sembower]
-    EtherType['3Com(Bridge) loop detect'] = 0x9003
+    EtherType['3Com_Loop_Detect'] = 0x9003
 
     #: [:rfc:`8377`]
-    EtherType['Multi-Topology'] = 0x9A22
+    EtherType['Multi_Topology'] = 0x9A22
 
     #: [:rfc:`7973`]
-    EtherType['LoWPAN encapsulation'] = 0xA0ED
+    EtherType['LoWPAN_Encapsulation'] = 0xA0ED
 
     #: [:rfc:`8157`]
-    EtherType['The Ethertype will be used to identify a "Channel" in which control messages are encapsulated as payload of GRE packets. When a GRE packet tagged with the Ethertype is received, the payload will be handed to the network processor for processing.'] = 0xB7EA
+    EtherType['The_Ethertype_Will_Be_Used_To_Identify_A_Channel_In_Which_Control_Messages_Are_Encapsulated_As_Payload_Of_GRE_Packets_When_A_GRE_Packet_Tagged_With_The_Ethertype_Is_Received_The_Payload_Will_Be_Handed_To_The_Network_Processor_For_Processing'] = 0xB7EA
 
     #: [Neil Sembower]
-    EtherType['BBN VITAL-LanBridge cache'] = 0xFF00
+    EtherType['BBN_VITAL_LanBridge_Cache'] = 0xFF00
 
     #: [:rfc:`1701`]
     EtherType['Reserved'] = 0xFFFF

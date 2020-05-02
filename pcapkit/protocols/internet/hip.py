@@ -1,32 +1,30 @@
 # -*- coding: utf-8 -*-
 """host identity protocol
 
-`pcapkit.protocols.internet.hip` contains `HIP`
-only, which implements extractor for Host Identity
-Protocol (HIP), whose structure is described as below.
+:mod:`pcapkit.protocols.internet.hip` contains
+:class:`~pcapkit.protocols.internet.hip.HIP` only,
+which implements extractor for Host Identity
+Protocol (HIP) [*]_, whose structure is described
+as below:
 
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Next Header   | Header Length |0| Packet Type |Version| RES.|1|
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|          Checksum             |           Controls            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                Sender's Host Identity Tag (HIT)               |
-|                                                               |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|               Receiver's Host Identity Tag (HIT)              |
-|                                                               |
-|                                                               |
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-/                        HIP Parameters                         /
-/                                                               /
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+======= ========= ====================== ==================================
+Octets      Bits        Name                    Description
+======= ========= ====================== ==================================
+  0           0   ``hip.next``              Next Header
+  1           8   ``hip.length``            Header Length
+  2          16                             Reserved (\\x00)
+  2          17   ``hip.type``              Packet Type
+  3          24   ``hip.version``           Version
+  3          28                             Reserved
+  3          31                             Reserved (\\x01)
+  4          32   ``hip.chksum``            Checksum
+  6          48   ``hip.control``           Controls
+  8          64   ``hip.shit``              Sender's Host Identity Tag
+  24        192   ``hip.rhit``              Receiver's Host Identity Tag
+  40        320   ``hip.parameters``        HIP Parameters
+======= ========= ====================== ==================================
+
+.. [*] https://en.wikipedia.org/wiki/Host_Identity_Protocol
 
 """
 import collections
@@ -57,74 +55,58 @@ from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 __all__ = ['HIP']
 
 
-def _HIP_PROC(dscp):
-    """HIP parameter process functions."""
-    return eval('lambda self, code, cbit, clen, *, desc, length, version: '
-                f'self._read_para_{dscp.name.split(" [")[0].lower()}(code, cbit, clen, '
-                'desc=desc, length=length, version=version)')
-
-
 class HIP(Internet):
-    """This class implements Host Identity Protocol.
+    """This class implements Host Identity Protocol."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Methods:
-        * read_hip -- read Host Identity Protocol (HIP)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['Host Identity Protocol', 'Host Identity Protocol Version 2']
+        """
         if self._info.version == 2:  # pylint: disable=E1101
             return 'Host Identity Protocol Version 2'
         return 'Host Identity Protocol'
 
     @property
     def alias(self):
-        """Acronym of corresponding protocol."""
+        """Acronym of corresponding protocol.
+
+        :rtype: str
+        """
         return f'HIPv{self._info.version}'  # pylint: disable=E1101
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: int
+        """
         return self._info.length  # pylint: disable=E1101
 
     @property
     def payload(self):
-        """Payload of current instance."""
+        """Payload of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        :rtype: pcapkit.protocols.protocol.Protocol
+        """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.transtype.TransType
+        """
         return self._info.next  # pylint: disable=E1101
 
     ##########################################################################
@@ -134,7 +116,10 @@ class HIP(Internet):
     def read_hip(self, length, extension):
         """Read Host Identity Protocol.
 
-        Structure of HIP header [RFC 5201][RFC 7401]:
+        Structure of HIP header [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -158,19 +143,14 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     hip.next                Next Header
-              1           8     hip.length              Header Length
-              2          16     -                       Reserved (0)
-              2          17     hip.type                Packet Type
-              3          24     hip.version             Version
-              3          28     -                       Reserved
-              3          31     -                       Reserved (1)
-              4          32     hip.chksum              Checksum
-              6          48     hip.control             Controls
-              8          64     hip.shit                Sender's Host Identity Tag
-              24        192     hip.rhit                Receiver's Host Identity Tag
-              40        320     hip.parameters          HIP Parameters
+        Args:
+            length (int): packet length
+
+        Returns:
+            DataType_HIP: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if length is None:
@@ -196,7 +176,7 @@ class HIP(Internet):
             version=int(_vers[:4], base=2),
             chksum=_csum,
             control=dict(
-                anonymous=True if int(_ctrl[15], base=2) else False,
+                anonymous=bool(int(_ctrl[15], base=2)),
             ),
             shit=_shit,
             rhit=_rhit,
@@ -220,13 +200,41 @@ class HIP(Internet):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):
+    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the protocol is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._extf = extension
         self._info = Info(self.read_hip(length, extension))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[40]
+        """
         return 40
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TP_PROTO(139)
 
     ##########################################################################
     # Utilities.
@@ -235,14 +243,17 @@ class HIP(Internet):
     def _read_hip_para(self, length, *, version):
         """Read HIP parameters.
 
-        Positional arguments:
-            * length -- int, length of parameters
+        Arguments:
+            length (int): length of parameters
 
         Keyword arguments:
-            * version -- int, HIP version
+            version (Litreal[1, 2]): HIP version
 
         Returns:
-            * dict -- extracted HIP parameters
+            Tuple[Tuple[pcapkit.const.hip.parameter.Parameter], DataType_Parameter]: extracted HIP parameters
+
+        Raises:
+            ProtocolError: if packet length threshold check failed
 
         """
         counter = 0         # length of read parameters
@@ -257,7 +268,7 @@ class HIP(Internet):
 
             # get parameter type & C-bit
             code = int(kind, base=2)
-            cbit = True if int(kind[15], base=2) else False
+            cbit = bool(int(kind[15], base=2))
 
             # get parameter length
             clen = self._read_unpack(2)
@@ -265,15 +276,9 @@ class HIP(Internet):
 
             # extract parameter
             dscp = _HIP_PARA.get(code, 'Unassigned')
-            # if 0 <= code <= 1023 or 61440 <= code <= 65535:
-            #     desc = f'{dscp} (IETF Review)'
-            # elif 1024 <= code <= 32767 or 49152 <= code <= 61439:
-            #     desc = f'{dscp} (Specification Required)'
-            # elif 32768 <= code <= 49151:
-            #     desc = f'{dscp} (Reserved for Private Use)'
-            # else:
-            #     raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
-            data = _HIP_PROC(dscp)(self, code, cbit, clen, desc=dscp, length=plen, version=version)
+            meth_name = f'_read_para_{dscp.name.split(" [")[0].lower()}'
+            meth = getattr(self, meth_name, '_read_para_unassigned')
+            data = meth(self, code, cbit, clen, desc=dscp, length=plen, version=version)
 
             # record parameter data
             counter += plen
@@ -292,10 +297,13 @@ class HIP(Internet):
 
         return tuple(optkind), options
 
-    def _read_para_unassigned(self, code, cbit, clen, *, desc, length, version):
+    def _read_para_unassigned(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
         """Read HIP unassigned parameters.
 
-        Structure of HIP unassigned parameters [RFC 5201][RFC 7401]:
+        Structure of HIP unassigned parameters [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -307,12 +315,18 @@ class HIP(Internet):
             |                                               |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     para.type               Parameter Type
-              1          15     para.critical           Critical Bit
-              2          16     para.length             Length of Contents
-              4          32     para.contents           Contents
-              -           -     -                       Padding
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Unassigned: Parsed parameter data.
 
         """
         unassigned = dict(
@@ -328,10 +342,13 @@ class HIP(Internet):
 
         return unassigned
 
-    def _read_para_esp_info(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP ESP_INFO parameter.
+    def _read_para_esp_info(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``ESP_INFO`` parameter.
 
-        Structure of HIP ESP_INFO parameter [RFC 7402]:
+        Structure of HIP ``ESP_INFO`` parameter [:rfc:`7402`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -344,18 +361,25 @@ class HIP(Internet):
             |                            NEW SPI                            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     esp_info.type           Parameter Type
-              1          15     esp_info.critical       Critical Bit
-              2          16     esp_info.length         Length of Contents
-              4          32     -                       Reserved
-              6          48     esp_info.index          KEYMAT Index
-              8          64     esp_info.old_spi        OLD SPI
-              12         96     esp_info.new_spi        NEW SPI
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_ESP_Info: Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``clen`` is **NOT** ``12``.
 
         """
         if clen != 12:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _resv = self._read_fileng(2)
         _kind = self._read_unpack(2)
@@ -373,10 +397,13 @@ class HIP(Internet):
 
         return esp_info
 
-    def _read_para_r1_counter(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP R1_COUNTER parameter.
+    def _read_para_r1_counter(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``R1_COUNTER`` parameter.
 
-        Structure of HIP R1_COUNTER parameter [RFC 5201][RFC 7401]:
+        Structure of HIP ``R1_COUNTER`` parameter [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -388,18 +415,27 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     ri_counter.type         Parameter Type
-              1          15     ri_counter.critical     Critical Bit
-              2          16     ri_counter.length       Length of Contents
-              4          32     -                       Reserved
-              8          64     ri_counter.count        Generation of Valid Puzzles
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_R1_Counter: Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``clen`` is **NOT** ``12`` or the parameter is **NOT** used in HIPv1.
 
         """
         if clen != 12:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
         if code == 128 and version != 1:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
 
         _resv = self._read_fileng(4)
         _genc = self._read_unpack(8)
@@ -413,10 +449,13 @@ class HIP(Internet):
 
         return r1_counter
 
-    def _read_para_locator_set(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP LOCATOR_SET parameter.
+    def _read_para_locator_set(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``LOCATOR_SET`` parameter.
 
-        Structure of HIP LOCATOR_SET parameter [RFC 8046]:
+        Structure of HIP ``LOCATOR_SET`` parameter [:rfc:`8046`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -444,30 +483,48 @@ class HIP(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     locator_set.type        Parameter Type
-              1          15     locator_set.critical    Critical Bit
-              2          16     locator_set.length      Length of Contents
-              4          32     locator.traffic         Traffic Type
-              5          40     locator.type            Locator Type
-              6          48     locator.length          Locator Length
-              7          56     -                       Reserved
-              7          63     locator.preferred       Preferred Locator
-              8          64     locator.lifetime        Locator Lifetime
-              12         96     locator.object          Locator
-                                ............
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Locator_Set: Parsed parameter data.
+
+        Raises:
+            ProtocolError: If locator data is malformed.
 
         """
         def _read_locator(kind, size):
+            """Parse locator data.
+
+            Args:
+                kind (int): locator type
+                size (int): locator length
+
+            Returns:
+                * If ``kind`` is ``0`` and ``size`` is ``16``,
+                  returns an :class:`~ipaddress.IPv4Address` object.
+                * If ``kind`` is ``1`` and ``size`` is ``20``,
+                  returns a :class:`locator <DataType_Locator_Dict>` object.
+
+            Raises:
+                ProtocolError: in other cases
+
+            """
             if kind == 0 and size == 16:
                 return ipaddress.ip_address(self._read_fileng(16))
-            elif kind == 1 and size == 20:
+            if kind == 1 and size == 20:
                 return dict(
                     spi=self._read_unpack(4),
                     ip=ipaddress.ip_address(self._read_fileng(16)),
                 )
-            else:
-                raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _size = 0           # length of read locators
         _locs = list()      # list of locators
@@ -499,9 +556,12 @@ class HIP(Internet):
         return locator_set
 
     def _read_para_puzzle(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP PUZZLE parameter.
+        """Read HIP ``PUZZLE`` parameter.
 
-        Structure of HIP PUZZLE parameter [RFC 5201][RFC 7401]:
+        Structure of HIP ``PUZZLE`` parameter [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -513,19 +573,25 @@ class HIP(Internet):
             /                                                               /
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
 
-            Octets      Bits        Name                    Description
-              0           0     puzzle.type             Parameter Type
-              1          15     puzzle.critical         Critical Bit
-              2          16     puzzle.length           Length of Contents
-              4          32     puzzle.number           Number of Verified Bits
-              5          40     puzzle.lifetime         Lifetime
-              6          48     puzzle.opaque           Opaque
-              8          64     puzzle.random           Random Number
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Puzzle: Parsed parameter data.
+
+        Raises:
+            ProtocolError: The parameter is **ONLY** supported in HIPv1.
 
         """
         if version == 1 and clen != 12:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _numk = self._read_unpack(1)
         _time = self._read_unpack(1)
@@ -549,9 +615,12 @@ class HIP(Internet):
         return puzzle
 
     def _read_para_solution(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP SOLUTION parameter.
+        """Read HIP ``SOLUTION`` parameter.
 
-        Structure of HIP SOLUTION parameter [RFC 5201][RFC 7401]:
+        Structure of HIP ``SOLUTION`` parameter [:rfc:`5201`][:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -579,9 +648,9 @@ class HIP(Internet):
 
         """
         if version == 1 and clen != 20:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
         if (clen - 4) % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _numk = self._read_unpack(1)
         _time = self._read_unpack(1)
@@ -626,7 +695,7 @@ class HIP(Internet):
 
         """
         if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _upid = self._read_unpack(4)
 
@@ -661,7 +730,7 @@ class HIP(Internet):
 
         """
         if clen % 4 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _upid = list()
         for _ in range(clen // 4):
@@ -783,9 +852,9 @@ class HIP(Internet):
 
         """
         if version != 1:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid parameter')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid parameter')
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _stid = list()
         for _ in range(clen // 2):
@@ -828,7 +897,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _cpid = list()
         for _ in range(clen // 2):
@@ -874,7 +943,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _resv = self._read_fileng(2)
         _mdid = list()
@@ -914,7 +983,7 @@ class HIP(Internet):
 
         """
         if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _data = self._read_unpack(4)
 
@@ -1188,7 +1257,7 @@ class HIP(Internet):
             elif 40960 <= _code <= 65535:
                 _type = 'Unassigned (Reserved for Private Use; Status Message)'
             else:
-                raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         notification = dict(
             type=desc,
@@ -1279,7 +1348,7 @@ class HIP(Internet):
                 elif 201 <= _code <= 255:
                     _kind = 'Unassigned (Reserved for Private Use)'
                 else:
-                    raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
             _type.append(_kind)
 
         reg_info = dict(
@@ -1337,7 +1406,7 @@ class HIP(Internet):
                 elif 201 <= _code <= 255:
                     _kind = 'Unassigned (Reserved for Private Use)'
                 else:
-                    raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
             _type.append(_kind)
 
         reg_request = dict(
@@ -1395,7 +1464,7 @@ class HIP(Internet):
                 elif 201 <= _code <= 255:
                     _kind = 'Unassigned (Reserved for Private Use)'
                 else:
-                    raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
             _type.append(_kind)
 
         reg_response = dict(
@@ -1453,7 +1522,7 @@ class HIP(Internet):
                 elif 201 <= _code <= 255:
                     _kind = 'Unassigned (Reserved for Private Use)'
                 else:
-                    raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
             _type.append(_kind)
 
         reg_failed = dict(
@@ -1498,7 +1567,7 @@ class HIP(Internet):
 
         """
         if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _port = self._read_unpack(2)
         _ptcl = self._read_unpack(1)
@@ -1574,7 +1643,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _tfid = list()
         for _ in range(clen // 2):
@@ -1620,7 +1689,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _resv = self._read_fileng(2)
         _stid = list()
@@ -1660,7 +1729,7 @@ class HIP(Internet):
 
         """
         if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _seqn = self._read_unpack(4)
 
@@ -1694,7 +1763,7 @@ class HIP(Internet):
 
         """
         if clen % 4 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _ackn = list()
         for _ in range(clen // 4):
@@ -1869,7 +1938,7 @@ class HIP(Internet):
 
         """
         if (clen - 4) % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _flag = self._read_binary(2)
         _resv = self._read_fileng(2)
@@ -1917,7 +1986,7 @@ class HIP(Internet):
 
         """
         if clen % 2 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _port = self._read_unpack(2)
         _mdid = list()
@@ -2192,7 +2261,7 @@ class HIP(Internet):
 
         """
         if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _port = self._read_unpack(2)
         _ptcl = self._read_unpack(1)
@@ -2238,7 +2307,7 @@ class HIP(Internet):
 
         """
         if clen != 20:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _port = self._read_unpack(2)
         _ptcl = self._read_unpack(1)
@@ -2277,7 +2346,7 @@ class HIP(Internet):
 
         """
         if clen != 4:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _ttln = self._read_unpack(2)
 
@@ -2328,7 +2397,7 @@ class HIP(Internet):
 
         """
         if (clen - 4) % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _flag = self._read_binary(2)
         _resv = self._read_fileng(2)
@@ -2372,7 +2441,7 @@ class HIP(Internet):
 
         """
         if clen != 16:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _addr = self._read_fileng(16)
 
@@ -2454,7 +2523,7 @@ class HIP(Internet):
 
         """
         if clen % 16 != 0:
-            raise ProtocolError(f'HIPv{version}: [Parano {code}] invalid format')
+            raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _addr = list()
         for _ in range(clen // 16):

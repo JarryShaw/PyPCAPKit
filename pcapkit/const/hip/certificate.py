@@ -17,28 +17,28 @@ class Certificate(IntEnum):
     Certificate['Reserved'] = 0
 
     #: [:rfc:`8002`]
-    Certificate['X.509 v3'] = 1
+    Certificate['X_509_V3'] = 1
 
     #: [:rfc:`8002`]
-    Certificate['Obsoleted [2]'] = 2
+    Certificate['Obsoleted_2'] = 2
 
     #: [:rfc:`8002`]
-    Certificate['Hash and URL of X.509 v3'] = 3
+    Certificate['Hash_And_URL_Of_X_509_V3'] = 3
 
     #: [:rfc:`8002`]
-    Certificate['Obsoleted [4]'] = 4
+    Certificate['Obsoleted_4'] = 4
 
     #: [:rfc:`8002`]
-    Certificate['LDAP URL of X.509 v3'] = 5
+    Certificate['LDAP_URL_Of_X_509_V3'] = 5
 
     #: [:rfc:`8002`]
-    Certificate['Obsoleted [6]'] = 6
+    Certificate['Obsoleted_6'] = 6
 
     #: [:rfc:`8002`]
-    Certificate['Distinguished Name of X.509 v3'] = 7
+    Certificate['Distinguished_Name_Of_X_509_V3'] = 7
 
     #: [:rfc:`8002`]
-    Certificate['Obsoleted [8]'] = 8
+    Certificate['Obsoleted_8'] = 8
 
     @staticmethod
     def get(key, default=-1):

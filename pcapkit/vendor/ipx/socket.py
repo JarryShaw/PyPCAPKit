@@ -72,11 +72,12 @@ class Socket(Vendor):
                 name, desc = data
             else:
                 name, desc = dscp, ''
+            renm = self._safe_name(name)
 
             try:
                 code, _ = pval, int(pval, base=16)
 
-                pres = f"{self.NAME}[{name!r}] = {code}"
+                pres = f"{self.NAME}[{renm!r}] = {code}"
                 sufs = f'#: {desc}' if desc else ''
 
                 # if len(pres) > 74:

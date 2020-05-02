@@ -17,13 +17,13 @@ __all__ = ['packet2dict', 'tcp_traceflow']
 
 
 def packet2dict(packet):
-    """Convert PyShark packet into ``dict``.
+    """Convert PyShark packet into :obj:`dict`.
 
     Args:
         packet (pyshark.packet.packet.Packet): Scapy packet.
 
     Returns:
-        Dict[str, Any]: A ``dict`` mapping of packet data.
+        Dict[str, Any]: A :obj:`dict` mapping of packet data.
 
     """
     dict_ = dict()
@@ -52,7 +52,7 @@ def tcp_traceflow(packet):
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer.
-        * If the ``packet`` can be reassembled, then the ``dict`` mapping of data for TCP
+        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
           flow tracing (:term:`tcp.trace`) will be returned; otherwise, returns ``None``.
 
     See Also:

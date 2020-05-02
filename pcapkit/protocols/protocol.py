@@ -128,13 +128,13 @@ class Protocol(metaclass=abc.ABCMeta):
 
     @staticmethod
     def decode(byte, *, encoding=None, errors='strict'):
-        """Decode ``bytes`` into ``str``.
+        """Decode :obj:`bytes` into :obj:`str`.
 
         Args:
             byte (bytes): Source bytestring.
 
         Keyword Args:
-            encoding (Optional[str]): The encoding with which to decode the ``bytes``.
+            encoding (Optional[str]): The encoding with which to decode the :obj:`bytes`.
                 If not provided, :mod:`pcapkit` will first try detecting its encoding
                 using |chardet|_. The fallback encoding would is **UTF-8**.
             errors (str): The error handling scheme to use for the handling of decoding errors.
@@ -147,7 +147,7 @@ class Protocol(metaclass=abc.ABCMeta):
             str: Decoede string.
 
         Should decoding failed using ``encoding``, the method will try again decoding
-        the ``bytes`` as ``'unicode_escape'``.
+        the :obj:`bytes` as ``'unicode_escape'``.
 
         .. |chardet| replace:: ``chardet``
         .. _chardet: https://chardet.readthedocs.io
@@ -167,7 +167,7 @@ class Protocol(metaclass=abc.ABCMeta):
             url (str): URL string.
 
         Keyword Args:
-            encoding (str): The encoding with which to decode the ``bytes``.
+            encoding (str): The encoding with which to decode the :obj:`bytes`.
             errors (str): The error handling scheme to use for the handling of decoding errors.
                 The default is ``'strict'`` meaning that decoding errors raise a
                 ``UnicodeDecodeError``. Other possible values are ``'ignore'`` and ``'replace'``
@@ -188,6 +188,21 @@ class Protocol(metaclass=abc.ABCMeta):
             return urllib.parse.unquote(url, encoding=encoding, errors=errors)
         except UnicodeError:
             return url.replace('%', r'\x').encode().decode('unicode_escape')
+
+    @classmethod
+    def id(cls):
+        """Index ID of the protocol.
+
+        By default, it returns the name of the protocol.
+
+        Returns:
+            Union[str, Tuple[str]]: Index ID of the protocol.
+
+        See Also:
+            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
+
+        """
+        return cls.__name__
 
     ##########################################################################
     # Data models.
@@ -305,7 +320,7 @@ class Protocol(metaclass=abc.ABCMeta):
 
     @seekset
     def __bytes__(self):
-        """Returns source data stream in ``bytes``."""
+        """Returns source data stream in :obj:`bytes`."""
         bytes_ = self._read_fileng()
         return bytes_
 
@@ -337,8 +352,7 @@ class Protocol(metaclass=abc.ABCMeta):
         * If ``key`` is a ``slice`` object, :exc:`ProtocolUnbound` will be
           raised.
         * If ``key`` is a :class`~pcapkit.protocols.protocol.Protocol` object,
-          the method will fetch its indexes
-          (:meth`~pcapkit.protocols.protocol.Protocol.__index__`).
+          the method will fetch its indexes (:meth`~pcapkit.protocols.protocol.Protocol.id`).
         * Later, search the packet's chain of protocols with the calculated
           ``key``.
         * If no matches, then raises :exc:`ProtocolNotFound`.
@@ -364,7 +378,7 @@ class Protocol(metaclass=abc.ABCMeta):
         except TypeError:
             flag = issubclass(type(key), Protocol)
         if flag or isinstance(key, Protocol):
-            key = key.__index__()
+            key = key.id()
 
         # make regex for tuple indexes
         if isinstance(key, tuple):
@@ -397,19 +411,14 @@ class Protocol(metaclass=abc.ABCMeta):
         return name in self._info
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
-        """Index of the protocol.
-
-        By default, it returns the name of the protocol.
+    @abc.abstractmethod
+    def __index__(cls):
+        """Numeral registry index of the protocol.
 
         Returns:
-            Union[str, Tuple[str]]: Index of the protocol.
-
-        See Also:
-            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
+            enum.IntEnum: Numeral registry index of the protocol.
 
         """
-        return cls.__name__
 
     @classmethod
     def __eq__(cls, other):
@@ -428,10 +437,10 @@ class Protocol(metaclass=abc.ABCMeta):
             flag = issubclass(type(other), Protocol)
 
         if isinstance(other, Protocol) or flag:
-            return other.__index__() == cls.__index__()
+            return other.id() == cls.id()
 
         try:
-            index = cls.__index__()
+            index = cls.id()
             if isinstance(index, tuple):
                 return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
             return bool(re.fullmatch(other, index, re.IGNORECASE))
@@ -460,7 +469,7 @@ class Protocol(metaclass=abc.ABCMeta):
             size (int): buffer size
 
         Returns:
-            * If *succeed*, returns the name of next layer protocol (``str``).
+            * If *succeed*, returns the name of next layer protocol (:obj:`str`).
             * If *fail*, returns ``None``.
 
         """
@@ -557,9 +566,9 @@ class Protocol(metaclass=abc.ABCMeta):
             discard (bool): flag if discard header data
 
         Returns:
-            * If ``header`` omits, returns the whole packet data in ``bytes``.
-            * If ``discard`` is set as ``True``, returns the packet body (in ``bytes``) only.
-            * Otherwise, returns the header and payload data as a ``dict``::
+            * If ``header`` omits, returns the whole packet data in :obj:`bytes`.
+            * If ``discard`` is set as ``True``, returns the packet body (in :obj:`bytes`) only.
+            * Otherwise, returns the header and payload data as a :obj:`dict`::
 
                 class Packet(TypedDict):
                     \"\"\"Header and payload data.\"\"\"
@@ -637,7 +646,7 @@ class Protocol(metaclass=abc.ABCMeta):
             bool: if reached termination threshold
 
         """
-        index = self.__index__()
+        index = self.id()
         layer = self.__layer__ or ''
 
         pattern = r'|'.join(index) if isinstance(index, tuple) else index

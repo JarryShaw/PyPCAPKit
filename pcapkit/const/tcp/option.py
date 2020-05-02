@@ -68,22 +68,22 @@ class Option(IntEnum):
     Option['Bubba'] = 17
 
     #: [Subbu Subramaniam][Monroe Bridges]
-    Option['Trailer Checksum Option'] = 18
+    Option['Trailer_Checksum_Option'] = 18
 
     #: [:rfc:`2385`]
     Option['SIG'] = 19
 
     #: [Keith Scott]
-    Option['SCPS Capabilities'] = 20
+    Option['SCPS_Capabilities'] = 20
 
     #: [Keith Scott]
-    Option['Selective Negative Acknowledgements'] = 21
+    Option['Selective_Negative_Acknowledgements'] = 21
 
     #: [Keith Scott]
-    Option['Record Boundaries'] = 22
+    Option['Record_Boundaries'] = 22
 
     #: [Keith Scott]
-    Option['Corruption experienced'] = 23
+    Option['Corruption_Experienced'] = 23
 
     #: [Vladimir Sukonnik]
     Option['SNAP'] = 24
@@ -91,7 +91,7 @@ class Option(IntEnum):
     Option['Unassigned'] = 25
 
     #: [Steve Bellovin]
-    Option['TCP Compression Filter'] = 26
+    Option['TCP_Compression_Filter'] = 26
 
     #: [:rfc:`4782`]
     Option['QS'] = 27
@@ -102,34 +102,34 @@ class Option(IntEnum):
     #: [:rfc:`5925`]
     Option['AO'] = 29
 
-    #: [RFC-ietf-mptcp-rfc6824bis-18]
+    #: [:rfc:`8684`]
     Option['MP'] = 30
 
-    Option['Reserved [31]'] = 31
+    Option['Reserved_31'] = 31
 
-    Option['Reserved [32]'] = 32
+    Option['Reserved_32'] = 32
 
-    Option['Reserved [33]'] = 33
+    Option['Reserved_33'] = 33
 
     #: [:rfc:`7413`]
     Option['FASTOPEN'] = 34
 
     #: [:rfc:`8547`]
-    Option['Encryption Negotiation'] = 69
+    Option['Encryption_Negotiation'] = 69
 
-    Option['Reserved [70]'] = 70
+    Option['Reserved_70'] = 70
 
-    Option['Reserved [76]'] = 76
+    Option['Reserved_76'] = 76
 
-    Option['Reserved [77]'] = 77
+    Option['Reserved_77'] = 77
 
-    Option['Reserved [78]'] = 78
-
-    #: [:rfc:`4727`]
-    Option['RFC3692-style Experiment 1'] = 253
+    Option['Reserved_78'] = 78
 
     #: [:rfc:`4727`]
-    Option['RFC3692-style Experiment 2'] = 254
+    Option['RFC3692_style_Experiment_1'] = 253
+
+    #: [:rfc:`4727`]
+    Option['RFC3692_style_Experiment_2'] = 254
 
     @staticmethod
     def get(key, default=-1):

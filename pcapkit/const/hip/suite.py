@@ -17,22 +17,22 @@ class Suite(IntEnum):
     Suite['Reserved'] = 0
 
     #: [:rfc:`5201`]
-    Suite['AES-CBC with HMAC-SHA1'] = 1
+    Suite['AES_CBC_With_HMAC_SHA1'] = 1
 
     #: [:rfc:`5201`]
-    Suite['3DES-CBC with HMAC-SHA1'] = 2
+    Suite['3DES_CBC_With_HMAC_SHA1'] = 2
 
     #: [:rfc:`5201`]
-    Suite['3DES-CBC with HMAC-MD5'] = 3
+    Suite['3DES_CBC_With_HMAC_MD5'] = 3
 
     #: [:rfc:`5201`]
-    Suite['BLOWFISH-CBC with HMAC-SHA1'] = 4
+    Suite['BLOWFISH_CBC_With_HMAC_SHA1'] = 4
 
     #: [:rfc:`5201`]
-    Suite['NULL-ENCRYPT with HMAC-SHA1'] = 5
+    Suite['NULL_ENCRYPT_With_HMAC_SHA1'] = 5
 
     #: [:rfc:`5201`]
-    Suite['NULL-ENCRYPT with HMAC-MD5'] = 6
+    Suite['NULL_ENCRYPT_With_HMAC_MD5'] = 6
 
     @staticmethod
     def get(key, default=-1):

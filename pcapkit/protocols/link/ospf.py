@@ -36,6 +36,7 @@ from pcapkit.const.ospf.authentication import Authentication as AUTH
 from pcapkit.const.ospf.packet import Packet as TYPE
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['OSPF']
 
@@ -161,8 +162,21 @@ class OSPF(Link):
         self._info = Info(self.read_ospf(length))
 
     def __length_hint__(self):
-        """Return an estimated length (24) for the object."""
+        """Return an estimated length for the object.
+
+        :rtype: Literal[24]
+        """
         return 24
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
     ##########################################################################
     # Utilities.

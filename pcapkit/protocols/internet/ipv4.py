@@ -264,7 +264,7 @@ class IPv4(IP):
         return 20
 
     @classmethod
-    def __index__(cls):
+    def id(cls):
         return cls.__name__
 
     ##########################################################################

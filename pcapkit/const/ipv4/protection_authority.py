@@ -15,7 +15,7 @@ class ProtectionAuthority(IntEnum):
 
     ProtectionAuthority['GENSER'] = 0
 
-    ProtectionAuthority['SIOP-ESI'] = 1
+    ProtectionAuthority['SIOP_ESI'] = 1
 
     ProtectionAuthority['SCI'] = 2
 
@@ -23,11 +23,11 @@ class ProtectionAuthority(IntEnum):
 
     ProtectionAuthority['DOE'] = 4
 
-    ProtectionAuthority['Unassigned [5]'] = 5
+    ProtectionAuthority['Unassigned_5'] = 5
 
-    ProtectionAuthority['Unassigned [6]'] = 6
+    ProtectionAuthority['Unassigned_6'] = 6
 
-    ProtectionAuthority['Field Termination Indicator'] = 7
+    ProtectionAuthority['Field_Termination_Indicator'] = 7
 
     @staticmethod
     def get(key, default=-1):

@@ -17,10 +17,10 @@ class NATTraversal(IntEnum):
     NATTraversal['Reserved'] = 0
 
     #: [:rfc:`5770`]
-    NATTraversal['UDP-ENCAPSULATION'] = 1
+    NATTraversal['UDP_ENCAPSULATION'] = 1
 
     #: [:rfc:`5770`]
-    NATTraversal['ICE-STUN-UDP'] = 2
+    NATTraversal['ICE_STUN_UDP'] = 2
 
     @staticmethod
     def get(key, default=-1):

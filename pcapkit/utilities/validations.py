@@ -103,14 +103,14 @@ def number_check(*args, stacklevel=2):
 
 
 def bytes_check(*args, stacklevel=2):
-    """Check if arguments are ``bytes`` type.
+    """Check if arguments are :obj:`bytes` type.
 
     Args:
         *args: Arguments to check.
         stacklevel (int): Stack level to fetch originated function name.
 
     Raises:
-        BytesError: If any of the arguments is **NOT** ``bytes`` type.
+        BytesError: If any of the arguments is **NOT** :obj:`bytes` type.
 
     """
     for var in args:
@@ -139,14 +139,14 @@ def bytearray_check(*args, stacklevel=2):
 
 
 def str_check(*args, stacklevel=2):
-    """Check if arguments are ``str`` type.
+    """Check if arguments are :obj:`str` type.
 
     Args:
         *args: Arguments to check.
         stacklevel (int): Stack level to fetch originated function name.
 
     Raises:
-        StringError: If any of the arguments is **NOT** ``str`` type.
+        StringError: If any of the arguments is **NOT** :obj:`str` type.
 
     """
     for var in args:
@@ -193,14 +193,14 @@ def list_check(*args, stacklevel=2):
 
 
 def dict_check(*args, stacklevel=2):
-    """Check if arguments are ``dict`` type.
+    """Check if arguments are :obj:`dict` type.
 
     Args:
         *args: Arguments to check.
         stacklevel (int): Stack level to fetch originated function name.
 
     Raises:
-        DictError: If any of the arguments is **NOT** ``dict`` type.
+        DictError: If any of the arguments is **NOT** :obj:`dict` type.
 
     """
     for var in args:
@@ -211,14 +211,14 @@ def dict_check(*args, stacklevel=2):
 
 
 def tuple_check(*args, stacklevel=2):
-    """Check if arguments are ``tuple`` type.
+    """Check if arguments are :obj:`tuple` type.
 
     Args:
         *args: Arguments to check.
         stacklevel (int): Stack level to fetch originated function name.
 
     Raises:
-        TupleError: If any of the arguments is **NOT** ``tuple`` type.
+        TupleError: If any of the arguments is **NOT** :obj:`tuple` type.
 
     """
     for var in args:

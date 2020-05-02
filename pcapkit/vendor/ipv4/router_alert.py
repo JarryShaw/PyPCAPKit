@@ -65,7 +65,7 @@ class RouterAlert(Vendor):
                 if 'Level' in name:
                     base = name.rstrip('s 0-31')
                     for code in range(start, stop+1):
-                        renm = f'{base} {code-start}'
+                        renm = self._safe_name(f'{base} {code-start}')
                         pres = f"{self.NAME}[{renm!r}] = {code}"
 
                         #if len(pres) > 74:

@@ -17,49 +17,49 @@ class ESPTransformSuite(IntEnum):
     ESPTransformSuite['RESERVED'] = 0
 
     #: [:rfc:`3602`][:rfc:`2404`]
-    ESPTransformSuite['AES-128-CBC with HMAC-SHA1'] = 1
+    ESPTransformSuite['AES_128_CBC_With_HMAC_SHA1'] = 1
 
     #: [:rfc:`7402`]
-    ESPTransformSuite['DEPRECATED [2]'] = 2
+    ESPTransformSuite['DEPRECATED_2'] = 2
 
     #: [:rfc:`7402`]
-    ESPTransformSuite['DEPRECATED [3]'] = 3
+    ESPTransformSuite['DEPRECATED_3'] = 3
 
     #: [:rfc:`7402`]
-    ESPTransformSuite['DEPRECATED [4]'] = 4
+    ESPTransformSuite['DEPRECATED_4'] = 4
 
     #: [:rfc:`7402`]
-    ESPTransformSuite['DEPRECATED [5]'] = 5
+    ESPTransformSuite['DEPRECATED_5'] = 5
 
     #: [:rfc:`7402`]
-    ESPTransformSuite['DEPRECATED [6]'] = 6
+    ESPTransformSuite['DEPRECATED_6'] = 6
 
     #: [:rfc:`2410`][:rfc:`4868`]
-    ESPTransformSuite['NULL with HMAC-SHA-256'] = 7
+    ESPTransformSuite['NULL_With_HMAC_SHA_256'] = 7
 
     #: [:rfc:`3602`][:rfc:`4868`]
-    ESPTransformSuite['AES-128-CBC with HMAC-SHA-256'] = 8
+    ESPTransformSuite['AES_128_CBC_With_HMAC_SHA_256'] = 8
 
     #: [:rfc:`3602`][:rfc:`4868`]
-    ESPTransformSuite['AES-256-CBC with HMAC-SHA-256'] = 9
+    ESPTransformSuite['AES_256_CBC_With_HMAC_SHA_256'] = 9
 
     #: [:rfc:`4309`]
-    ESPTransformSuite['AES-CCM-8'] = 10
+    ESPTransformSuite['AES_CCM_8'] = 10
 
     #: [:rfc:`4309`]
-    ESPTransformSuite['AES-CCM-16'] = 11
+    ESPTransformSuite['AES_CCM_16'] = 11
 
     #: [:rfc:`4106`]
-    ESPTransformSuite['AES-GCM with an 8 octet ICV'] = 12
+    ESPTransformSuite['AES_GCM_With_An_8_Octet_ICV'] = 12
 
     #: [:rfc:`4106`]
-    ESPTransformSuite['AES-GCM with a 16 octet ICV'] = 13
+    ESPTransformSuite['AES_GCM_With_A_16_Octet_ICV'] = 13
 
     #: [:rfc:`4493`][:rfc:`4494`]
-    ESPTransformSuite['AES-CMAC-96'] = 14
+    ESPTransformSuite['AES_CMAC_96'] = 14
 
     #: [:rfc:`4543`]
-    ESPTransformSuite['AES-GMAC'] = 15
+    ESPTransformSuite['AES_GMAC'] = 15
 
     @staticmethod
     def get(key, default=-1):

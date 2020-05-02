@@ -17,10 +17,10 @@ class ExtensionHeader(IntEnum):
     ExtensionHeader['HOPOPT'] = 0
 
     #: [Steve Deering] Routing Header for IPv6
-    ExtensionHeader['IPv6-Route'] = 43
+    ExtensionHeader['IPv6_Route'] = 43
 
     #: [Steve Deering] Fragment Header for IPv6
-    ExtensionHeader['IPv6-Frag'] = 44
+    ExtensionHeader['IPv6_Frag'] = 44
 
     #: [:rfc:`4303`] Encap Security Payload
     ExtensionHeader['ESP'] = 50
@@ -29,10 +29,10 @@ class ExtensionHeader(IntEnum):
     ExtensionHeader['AH'] = 51
 
     #: [:rfc:`8200`] Destination Options for IPv6
-    ExtensionHeader['IPv6-Opts'] = 60
+    ExtensionHeader['IPv6_Opts'] = 60
 
     #: [:rfc:`6275`]
-    ExtensionHeader['Mobility Header'] = 135
+    ExtensionHeader['Mobility_Header'] = 135
 
     #: [:rfc:`7401`] Host Identity Protocol
     ExtensionHeader['HIP'] = 139
@@ -41,10 +41,10 @@ class ExtensionHeader(IntEnum):
     ExtensionHeader['Shim6'] = 140
 
     #: [:rfc:`3692`]
-    ExtensionHeader['Use for experimentation and testing [253]'] = 253
+    ExtensionHeader['Use_For_Experimentation_And_Testing_253'] = 253
 
     #: [:rfc:`3692`]
-    ExtensionHeader['Use for experimentation and testing [254]'] = 254
+    ExtensionHeader['Use_For_Experimentation_And_Testing_254'] = 254
 
     @staticmethod
     def get(key, default=-1):

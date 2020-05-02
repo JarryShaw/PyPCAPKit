@@ -56,7 +56,7 @@ class ExtensionHeader(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: item[1] or item[2],  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self._safe_name(item[1] or item[2]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def process(self, data):

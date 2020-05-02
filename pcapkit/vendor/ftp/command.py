@@ -106,7 +106,7 @@ class Command(Vendor):
             cmmt = f"{cmmd} {''.join(temp)}"
 
             if cmmd == '-N/A-':
-                MISS = '\n'.ljust(25).join((f"Info(name='%s' % key,",
+                MISS = '\n'.ljust(25).join(("Info(name='%s' % key,",
                                             f'feat={feat!r},',
                                             f'desc={desc!r},',
                                             f'type={kind!r},',

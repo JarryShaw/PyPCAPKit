@@ -111,6 +111,19 @@ class ARP(Link):
     # Methods.
     ##########################################################################
 
+    @classmethod
+    def id(cls):  # pylint: disable=invalid-index-returned
+        """Index ID of the protocol.
+
+        Returns:
+            Tuple[Literal['ARP'], Literal['InARP']]: Index ID of the protocol.
+
+        See Also:
+            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
+
+        """
+        return ('ARP', 'InARP')
+
     def read_arp(self, length):
         """Read Address Resolution Protocol [:rfc:`826`].
 
@@ -190,21 +203,24 @@ class ARP(Link):
         self._info = Info(self.read_arp(length))
 
     def __length_hint__(self):
-        """Return an estimated length (28) for the object."""
+        """Return an estimated length for the object.
+
+        :rtype: Literal[28]
+        """
         return 28
 
     @classmethod
     def __index__(cls):  # pylint: disable=invalid-index-returned
-        """Index of the protocol.
+        """Numeral registry index of the protocol.
 
         Returns:
-            Tuple[Literal['ARP'], Literal['InARP']]: Index of the protocol.
+            pcapkit.const.reg.ethertype.EtherType: Numeral registry index of the
+            protocol in `IANA`_.
 
-        See Also:
-            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
+        .. _IANA: https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
 
         """
-        return ('ARP', 'InARP')
+        return ETHERTYPE(0x0806)
 
     ##########################################################################
     # Utilities.

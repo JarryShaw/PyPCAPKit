@@ -13,13 +13,13 @@ class OptionClass(IntEnum):
     _ignore_ = 'OptionClass _'
     OptionClass = vars()
 
-    OptionClass['control'] = 0
+    OptionClass['Control'] = 0
 
-    OptionClass['reserved for future use [1]'] = 1
+    OptionClass['Reserved_For_Future_Use_1'] = 1
 
-    OptionClass['debugging and measurement'] = 2
+    OptionClass['Debugging_And_Measurement'] = 2
 
-    OptionClass['reserved for future use [3]'] = 3
+    OptionClass['Reserved_For_Future_Use_3'] = 3
 
     @staticmethod
     def get(key, default=-1):

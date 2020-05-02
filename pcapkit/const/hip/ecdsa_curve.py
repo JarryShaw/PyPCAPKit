@@ -17,10 +17,10 @@ class ECDSACurve(IntEnum):
     ECDSACurve['RESERVED'] = 0
 
     #: [:rfc:`7401`]
-    ECDSACurve['NIST P-256'] = 1
+    ECDSACurve['NIST_P_256'] = 1
 
     #: [:rfc:`7401`]
-    ECDSACurve['NIST P-384'] = 2
+    ECDSACurve['NIST_P_384'] = 2
 
     @staticmethod
     def get(key, default=-1):

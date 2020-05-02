@@ -23,6 +23,7 @@ Octets      Bits        Name                    Description
 from pcapkit.const.vlan.priority_level import PriorityLevel as _PCP
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['VLAN']
 
@@ -119,5 +120,18 @@ class VLAN(Link):
         self._info = Info(self.read_vlan(length))
 
     def __length_hint__(self):
-        """Return an estimated length (4) for the object."""
+        """Return an estimated length for the object.
+
+        :rtype: Literal[4]
+        """
         return 4
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')

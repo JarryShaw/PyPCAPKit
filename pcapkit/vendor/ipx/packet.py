@@ -76,8 +76,9 @@ class Packet(Vendor):
                 cmmt = re.sub(r'RFC (\d+)', r'[:rfc:`\1`]', re.sub(r',([^ ])', r', \1', split[1].replace(')', '', 1)))
             else:
                 name, cmmt = desc, ''
+            renm = self._safe_name(name)
 
-            pres = f"{self.NAME}[{name!r}] = {pval}"
+            pres = f"{self.NAME}[{renm!r}] = {pval}"
             sufs = f'#: {cmmt}' if cmmt else ''
 
             # if len(pres) > 74:

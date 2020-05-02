@@ -13,21 +13,21 @@ class ClassificationLevel(IntEnum):
     _ignore_ = 'ClassificationLevel _'
     ClassificationLevel = vars()
 
-    ClassificationLevel['Reserved [4]'] = 0b00000001
+    ClassificationLevel['Reserved_4'] = 0b00000001
 
-    ClassificationLevel['Top Secret'] = 0b00111101
+    ClassificationLevel['Top_Secret'] = 0b00111101
 
     ClassificationLevel['Secret'] = 0b01011010
 
     ClassificationLevel['Confidential'] = 0b10010110
 
-    ClassificationLevel['Reserved [3]'] = 0b01100110
+    ClassificationLevel['Reserved_3'] = 0b01100110
 
-    ClassificationLevel['Reserved [2]'] = 0b11001100
+    ClassificationLevel['Reserved_2'] = 0b11001100
 
     ClassificationLevel['Unclassified'] = 0b10101011
 
-    ClassificationLevel['Reserved [1]'] = 0b11110001
+    ClassificationLevel['Reserved_1'] = 0b11110001
 
     @staticmethod
     def get(key, default=-1):

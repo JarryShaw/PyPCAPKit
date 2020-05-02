@@ -41,7 +41,7 @@ class ToSECN(Vendor):
             Counter: Field recordings.
 
         """
-        return collections.Counter(data.values())
+        return collections.Counter(map(self._safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
     def rename(self, name, code):  # pylint: disable=arguments-differ
         """Rename duplicated fields.
@@ -54,9 +54,9 @@ class ToSECN(Vendor):
             str: Revised field name.
 
         """
-        if self.record[name] > 1:
+        if self.record[self._safe_name(name)] > 1:
             name = f'{name} [0b{bin(code)[2:].zfill(2)}]'
-        return name
+        return self._safe_name(name)
 
     def process(self, data):
         """Process registry data.

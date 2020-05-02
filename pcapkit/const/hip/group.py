@@ -17,37 +17,37 @@ class Group(IntEnum):
     Group['Reserved'] = 0
 
     #: [:rfc:`5201`] DEPRECATED
-    Group['384-bit group'] = 1
+    Group['384_bit_Group'] = 1
 
     #: [:rfc:`5201`] DEPRECATED
-    Group['OAKLEY well known group 1'] = 2
+    Group['OAKLEY_Well_Known_Group_1'] = 2
 
     #: [:rfc:`7401`]
-    Group['1536-bit MODP group'] = 3
+    Group['1536_bit_MODP_Group'] = 3
 
     #: [:rfc:`7401`]
-    Group['3072-bit MODP group'] = 4
+    Group['3072_bit_MODP_Group'] = 4
 
     #: [:rfc:`5201`] DEPRECATED
-    Group['6144-bit MODP group'] = 5
+    Group['6144_bit_MODP_Group'] = 5
 
     #: [:rfc:`5201`] DEPRECATED
-    Group['8192-bit MODP group'] = 6
+    Group['8192_bit_MODP_Group'] = 6
 
     #: [:rfc:`7401`]
-    Group['NIST P-256'] = 7
+    Group['NIST_P_256'] = 7
 
     #: [:rfc:`7401`]
-    Group['NIST P-384'] = 8
+    Group['NIST_P_384'] = 8
 
     #: [:rfc:`7401`]
-    Group['NIST P-521'] = 9
+    Group['NIST_P_521'] = 9
 
     #: [:rfc:`7401`]
     Group['SECP160R1'] = 10
 
     #: [:rfc:`7401`]
-    Group['2048-bit MODP group'] = 11
+    Group['2048_bit_MODP_Group'] = 11
 
     @staticmethod
     def get(key, default=-1):

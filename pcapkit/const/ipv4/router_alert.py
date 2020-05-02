@@ -14,199 +14,199 @@ class RouterAlert(IntEnum):
     RouterAlert = vars()
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 0'] = 1
+    RouterAlert['Aggregated_Reservation_Nesting_Level_0'] = 1
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 1'] = 2
+    RouterAlert['Aggregated_Reservation_Nesting_Level_1'] = 2
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 2'] = 3
+    RouterAlert['Aggregated_Reservation_Nesting_Level_2'] = 3
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 3'] = 4
+    RouterAlert['Aggregated_Reservation_Nesting_Level_3'] = 4
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 4'] = 5
+    RouterAlert['Aggregated_Reservation_Nesting_Level_4'] = 5
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 5'] = 6
+    RouterAlert['Aggregated_Reservation_Nesting_Level_5'] = 6
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 6'] = 7
+    RouterAlert['Aggregated_Reservation_Nesting_Level_6'] = 7
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 7'] = 8
+    RouterAlert['Aggregated_Reservation_Nesting_Level_7'] = 8
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 8'] = 9
+    RouterAlert['Aggregated_Reservation_Nesting_Level_8'] = 9
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 9'] = 10
+    RouterAlert['Aggregated_Reservation_Nesting_Level_9'] = 10
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 10'] = 11
+    RouterAlert['Aggregated_Reservation_Nesting_Level_10'] = 11
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 11'] = 12
+    RouterAlert['Aggregated_Reservation_Nesting_Level_11'] = 12
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 12'] = 13
+    RouterAlert['Aggregated_Reservation_Nesting_Level_12'] = 13
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 13'] = 14
+    RouterAlert['Aggregated_Reservation_Nesting_Level_13'] = 14
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 14'] = 15
+    RouterAlert['Aggregated_Reservation_Nesting_Level_14'] = 15
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 15'] = 16
+    RouterAlert['Aggregated_Reservation_Nesting_Level_15'] = 16
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 16'] = 17
+    RouterAlert['Aggregated_Reservation_Nesting_Level_16'] = 17
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 17'] = 18
+    RouterAlert['Aggregated_Reservation_Nesting_Level_17'] = 18
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 18'] = 19
+    RouterAlert['Aggregated_Reservation_Nesting_Level_18'] = 19
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 19'] = 20
+    RouterAlert['Aggregated_Reservation_Nesting_Level_19'] = 20
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 20'] = 21
+    RouterAlert['Aggregated_Reservation_Nesting_Level_20'] = 21
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 21'] = 22
+    RouterAlert['Aggregated_Reservation_Nesting_Level_21'] = 22
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 22'] = 23
+    RouterAlert['Aggregated_Reservation_Nesting_Level_22'] = 23
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 23'] = 24
+    RouterAlert['Aggregated_Reservation_Nesting_Level_23'] = 24
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 24'] = 25
+    RouterAlert['Aggregated_Reservation_Nesting_Level_24'] = 25
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 25'] = 26
+    RouterAlert['Aggregated_Reservation_Nesting_Level_25'] = 26
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 26'] = 27
+    RouterAlert['Aggregated_Reservation_Nesting_Level_26'] = 27
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 27'] = 28
+    RouterAlert['Aggregated_Reservation_Nesting_Level_27'] = 28
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 28'] = 29
+    RouterAlert['Aggregated_Reservation_Nesting_Level_28'] = 29
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 29'] = 30
+    RouterAlert['Aggregated_Reservation_Nesting_Level_29'] = 30
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 30'] = 31
+    RouterAlert['Aggregated_Reservation_Nesting_Level_30'] = 31
 
     #: [:rfc:`3175`]
-    RouterAlert['Aggregated Reservation Nesting Level 31'] = 32
+    RouterAlert['Aggregated_Reservation_Nesting_Level_31'] = 32
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 0'] = 33
+    RouterAlert['QoS_NSLP_Aggregation_Level_0'] = 33
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 1'] = 34
+    RouterAlert['QoS_NSLP_Aggregation_Level_1'] = 34
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 2'] = 35
+    RouterAlert['QoS_NSLP_Aggregation_Level_2'] = 35
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 3'] = 36
+    RouterAlert['QoS_NSLP_Aggregation_Level_3'] = 36
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 4'] = 37
+    RouterAlert['QoS_NSLP_Aggregation_Level_4'] = 37
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 5'] = 38
+    RouterAlert['QoS_NSLP_Aggregation_Level_5'] = 38
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 6'] = 39
+    RouterAlert['QoS_NSLP_Aggregation_Level_6'] = 39
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 7'] = 40
+    RouterAlert['QoS_NSLP_Aggregation_Level_7'] = 40
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 8'] = 41
+    RouterAlert['QoS_NSLP_Aggregation_Level_8'] = 41
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 9'] = 42
+    RouterAlert['QoS_NSLP_Aggregation_Level_9'] = 42
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 10'] = 43
+    RouterAlert['QoS_NSLP_Aggregation_Level_10'] = 43
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 11'] = 44
+    RouterAlert['QoS_NSLP_Aggregation_Level_11'] = 44
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 12'] = 45
+    RouterAlert['QoS_NSLP_Aggregation_Level_12'] = 45
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 13'] = 46
+    RouterAlert['QoS_NSLP_Aggregation_Level_13'] = 46
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 14'] = 47
+    RouterAlert['QoS_NSLP_Aggregation_Level_14'] = 47
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 15'] = 48
+    RouterAlert['QoS_NSLP_Aggregation_Level_15'] = 48
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 16'] = 49
+    RouterAlert['QoS_NSLP_Aggregation_Level_16'] = 49
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 17'] = 50
+    RouterAlert['QoS_NSLP_Aggregation_Level_17'] = 50
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 18'] = 51
+    RouterAlert['QoS_NSLP_Aggregation_Level_18'] = 51
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 19'] = 52
+    RouterAlert['QoS_NSLP_Aggregation_Level_19'] = 52
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 20'] = 53
+    RouterAlert['QoS_NSLP_Aggregation_Level_20'] = 53
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 21'] = 54
+    RouterAlert['QoS_NSLP_Aggregation_Level_21'] = 54
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 22'] = 55
+    RouterAlert['QoS_NSLP_Aggregation_Level_22'] = 55
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 23'] = 56
+    RouterAlert['QoS_NSLP_Aggregation_Level_23'] = 56
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 24'] = 57
+    RouterAlert['QoS_NSLP_Aggregation_Level_24'] = 57
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 25'] = 58
+    RouterAlert['QoS_NSLP_Aggregation_Level_25'] = 58
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 26'] = 59
+    RouterAlert['QoS_NSLP_Aggregation_Level_26'] = 59
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 27'] = 60
+    RouterAlert['QoS_NSLP_Aggregation_Level_27'] = 60
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 28'] = 61
+    RouterAlert['QoS_NSLP_Aggregation_Level_28'] = 61
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 29'] = 62
+    RouterAlert['QoS_NSLP_Aggregation_Level_29'] = 62
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 30'] = 63
+    RouterAlert['QoS_NSLP_Aggregation_Level_30'] = 63
 
     #: [:rfc:`5974`]
-    RouterAlert['QoS NSLP Aggregation Level 31'] = 64
+    RouterAlert['QoS_NSLP_Aggregation_Level_31'] = 64
 
     #: [:rfc:`5973`]
-    RouterAlert['NSIS NATFW NSLP'] = 65
+    RouterAlert['NSIS_NATFW_NSLP'] = 65
 
     #: [:rfc:`5350`]
     RouterAlert['Reserved'] = 65535

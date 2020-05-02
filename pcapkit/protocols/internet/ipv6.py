@@ -177,7 +177,7 @@ class IPv6(IP):
         return 40
 
     @classmethod
-    def __index__(cls):
+    def id(cls):
         return cls.__name__
 
     ##########################################################################

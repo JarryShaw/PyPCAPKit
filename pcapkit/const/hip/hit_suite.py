@@ -17,13 +17,13 @@ class HITSuite(IntEnum):
     HITSuite['RESERVED'] = 0
 
     #: [:rfc:`7401`]
-    HITSuite['RSA,DSA/SHA-256'] = 1
+    HITSuite['RSA_DSA_SHA_256'] = 1
 
     #: [:rfc:`7401`]
-    HITSuite['ECDSA/SHA-384'] = 2
+    HITSuite['ECDSA_SHA_384'] = 2
 
     #: [:rfc:`7401`]
-    HITSuite['ECDSA_LOW/SHA-1'] = 3
+    HITSuite['ECDSA_LOW_SHA_1'] = 3
 
     @staticmethod
     def get(key, default=-1):

@@ -14,16 +14,16 @@ class Authentication(IntEnum):
     Authentication = vars()
 
     #: [:rfc:`1583`]
-    Authentication['No Authentication'] = 0
+    Authentication['No_Authentication'] = 0
 
     #: [:rfc:`1583`]
-    Authentication['Simple Password Authentication'] = 1
+    Authentication['Simple_Password_Authentication'] = 1
 
     #: [:rfc:`2328`][:rfc:`5709`]
-    Authentication['Cryptographic authentication'] = 2
+    Authentication['Cryptographic_Authentication'] = 2
 
     #: [:rfc:`7474`]
-    Authentication['Cryptographic Authentication with Extended Sequence Numbers'] = 3
+    Authentication['Cryptographic_Authentication_With_Extended_Sequence_Numbers'] = 3
 
     @staticmethod
     def get(key, default=-1):

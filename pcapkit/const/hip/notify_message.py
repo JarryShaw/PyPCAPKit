@@ -46,12 +46,12 @@ class NotifyMessage(IntEnum):
     #: [:rfc:`7401`]
     NotifyMessage['AUTHENTICATION_FAILED'] = 24
 
-    NotifyMessage['Unassigned [25]'] = 25
+    NotifyMessage['Unassigned_25'] = 25
 
     #: [:rfc:`7401`]
     NotifyMessage['CHECKSUM_FAILED'] = 26
 
-    NotifyMessage['Unassigned [27]'] = 27
+    NotifyMessage['Unassigned_27'] = 27
 
     #: [:rfc:`7401`]
     NotifyMessage['HIP_MAC_FAILED'] = 28
@@ -62,27 +62,27 @@ class NotifyMessage(IntEnum):
     #: [:rfc:`7401`]
     NotifyMessage['INVALID_HIT'] = 40
 
-    NotifyMessage['Unassigned [41]'] = 41
+    NotifyMessage['Unassigned_41'] = 41
 
     #: [:rfc:`7401`]
     NotifyMessage['BLOCKED_BY_POLICY'] = 42
 
-    NotifyMessage['Unassigned [43]'] = 43
+    NotifyMessage['Unassigned_43'] = 43
 
     #: [:rfc:`7401`]
     NotifyMessage['RESPONDER_BUSY_PLEASE_RETRY'] = 44
 
-    NotifyMessage['Unassigned [45]'] = 45
+    NotifyMessage['Unassigned_45'] = 45
 
     #: [:rfc:`8046`]
     NotifyMessage['LOCATOR_TYPE_UNSUPPORTED'] = 46
 
-    NotifyMessage['Unassigned [47]'] = 47
+    NotifyMessage['Unassigned_47'] = 47
 
     #: [:rfc:`8002`]
     NotifyMessage['CREDENTIALS_REQUIRED'] = 48
 
-    NotifyMessage['Unassigned [49]'] = 49
+    NotifyMessage['Unassigned_49'] = 49
 
     #: [:rfc:`8002`]
     NotifyMessage['INVALID_CERTIFICATE'] = 50

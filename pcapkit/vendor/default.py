@@ -126,9 +126,9 @@ class Vendor(metaclass=abc.ABCMeta):
 
         """
         index = original or name
-        if self.record[index] > 1:
-            return f'{name} [{code}]'
-        return name
+        if self.record[self._safe_name(index)] > 1:
+            name = f'{name} [{code}]'
+        return self._safe_name(name)
 
     def process(self, data):
         """Process CSV data.
@@ -194,7 +194,7 @@ class Vendor(metaclass=abc.ABCMeta):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: item[1],  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self._safe_name(item[1]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def context(self, data):
@@ -289,12 +289,9 @@ class Vendor(metaclass=abc.ABCMeta):
            might not be available in certain areas, e.g. the amazing PRC :)
 
         Would proxies failed again, it will prompt for user intervention, i.e.
-        it will use |webbrowser.open|_ to open the page in browser for you, and
+        it will use :func:`webbrowser.open` to open the page in browser for you, and
         you can manually load that page and save the HTML source at the location
         it provides.
-
-        .. |webbrowser.open| replace:: ``webbrowser.open``
-        .. _webbrowser.open: https://docs.python.org/3/library/webbrowser.html#webbrowser.open
 
         Returns:
             List[str]: CSV data.
@@ -330,7 +327,7 @@ class Vendor(metaclass=abc.ABCMeta):
                         flag = webbrowser.open(self.LINK)
 
                     if flag:
-                        print(f'Please save the page source at')
+                        print('Please save the page source at')
                         print(f'    {temp_file}')
                     else:
                         print('Please navigate to the following address')
@@ -353,3 +350,34 @@ class Vendor(metaclass=abc.ABCMeta):
         else:
             text = page.text
         return self.request(text)
+
+    @staticmethod
+    def _safe_name(name):
+        """Convert enumeration name to :class:`enum.Enum` friendly.
+
+        Args:
+            name (str): original enumeration name
+
+        Returns:
+            str: Converted enumeration name.
+
+        """
+        return '_'.join(
+            filter(
+                None,
+                re.sub(
+                    r'\W',
+                    '_',
+                    '_'.join(
+                        map(
+                            lambda s: f'{s[0].upper()}{s[1:]}',
+                            re.sub(
+                                r'\(.*\)',
+                                '',
+                                name
+                            ).split()
+                        )
+                    )
+                ).split('_')
+            )
+        )

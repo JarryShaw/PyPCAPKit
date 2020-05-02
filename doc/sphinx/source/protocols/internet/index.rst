@@ -10,6 +10,7 @@ internet layer, with detailed implementation and methods.
    :maxdepth: 4
 
    ah
+   hip
 
 Base Protocol
 -------------

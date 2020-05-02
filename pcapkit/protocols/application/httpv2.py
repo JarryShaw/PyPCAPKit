@@ -154,16 +154,16 @@ class HTTPv2(HTTP):
 
         return http
 
+    @classmethod
+    def id(cls):
+        return cls.__name__
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
     def __length_hint__(self):
         return 9
-
-    @classmethod
-    def __index__(cls):
-        return cls.__name__
 
     ##########################################################################
     # Utilities.

@@ -13,13 +13,13 @@ class SeedID(IntEnum):
     _ignore_ = 'SeedID _'
     SeedID = vars()
 
-    SeedID['IPV6 SOURCE ADDRESS'] = 0b00
+    SeedID['IPV6_SOURCE_ADDRESS'] = 0b00
 
-    SeedID['16-BIT UNSIGNED INTEGER'] = 0b01
+    SeedID['16_BIT_UNSIGNED_INTEGER'] = 0b01
 
-    SeedID['64-BIT UNSIGNED INTEGER'] = 0b10
+    SeedID['64_BIT_UNSIGNED_INTEGER'] = 0b10
 
-    SeedID['128-BIT UNSIGNED INTEGER'] = 0b11
+    SeedID['128_BIT_UNSIGNED_INTEGER'] = 0b11
 
     @staticmethod
     def get(key, default=-1):

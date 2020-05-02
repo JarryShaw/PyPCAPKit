@@ -62,5 +62,5 @@ class IPsec(IP):
     ##########################################################################
 
     @classmethod
-    def __index__(cls):
+    def id(cls):
         return ('AH', 'ESP')

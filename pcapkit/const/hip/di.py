@@ -14,7 +14,7 @@ class DITypes(IntEnum):
     DITypes = vars()
 
     #: [:rfc:`7401`]
-    DITypes['none included'] = 0
+    DITypes['None_Included'] = 0
 
     #: [:rfc:`7401`]
     DITypes['FQDN'] = 1

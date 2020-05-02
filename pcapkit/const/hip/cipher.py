@@ -14,19 +14,19 @@ class Cipher(IntEnum):
     Cipher = vars()
 
     #: [:rfc:`7401`]
-    Cipher['RESERVED [0]'] = 0
+    Cipher['RESERVED_0'] = 0
 
     #: [:rfc:`7401`]
-    Cipher['NULL-ENCRYPT'] = 1
+    Cipher['NULL_ENCRYPT'] = 1
 
     #: [:rfc:`7401`]
-    Cipher['AES-128-CBC'] = 2
+    Cipher['AES_128_CBC'] = 2
 
     #: [:rfc:`7401`]
-    Cipher['RESERVED [3]'] = 3
+    Cipher['RESERVED_3'] = 3
 
     #: [:rfc:`7401`]
-    Cipher['AES-256-CBC'] = 4
+    Cipher['AES_256_CBC'] = 4
 
     @staticmethod
     def get(key, default=-1):

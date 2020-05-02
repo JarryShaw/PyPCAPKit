@@ -64,9 +64,9 @@ class IP(Internet):
         return self._info.dst  # pylint: disable=E1101
 
     ##########################################################################
-    # Data models.
+    # Methods.
     ##########################################################################
 
     @classmethod
-    def __index__(cls):
+    def id(cls):
         return ('IPv4', 'IPv6')

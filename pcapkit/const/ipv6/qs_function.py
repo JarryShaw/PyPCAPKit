@@ -13,9 +13,9 @@ class QSFunction(IntEnum):
     _ignore_ = 'QSFunction _'
     QSFunction = vars()
 
-    QSFunction['Quick-Start Request'] = 0
+    QSFunction['Quick_Start_Request'] = 0
 
-    QSFunction['Report of Approved Rate'] = 8
+    QSFunction['Report_Of_Approved_Rate'] = 8
 
     @staticmethod
     def get(key, default=-1):
