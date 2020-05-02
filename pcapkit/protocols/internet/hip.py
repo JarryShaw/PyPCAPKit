@@ -635,16 +635,21 @@ class HIP(Internet):
             /                                                               /
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
 
-            Octets      Bits        Name                    Description
-              0           0     solution.type           Parameter Type
-              1          15     solution.critical       Critical Bit
-              2          16     solution.length         Length of Contents
-              4          32     solution.number         Number of Verified Bits
-              5          40     solution.lifetime       Lifetime
-              6          48     solution.opaque         Opaque
-              8          64     solution.random         Random Number
-              ?           ?     solution.solution       Puzzle Solution
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Solution: Parsed parameter data.
+
+        Raises:
+            ProtocolError: The parameter is **ONLY** supported in HIPv1.
 
         """
         if version == 1 and clen != 20:
@@ -675,10 +680,13 @@ class HIP(Internet):
 
         return solution
 
-    def _read_para_seq(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP SEQ parameter.
+    def _read_para_seq(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``SEQ`` parameter.
 
-        Structure of HIP SEQ parameter [RFC 7401]:
+        Structure of HIP ``SEQ`` parameter [:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -687,11 +695,21 @@ class HIP(Internet):
             |                            Update ID                          |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     seq.type                Parameter Type
-              1          15     seq.critical            Critical Bit
-              2          16     seq.length              Length of Contents
-              4          32     seq.id                  Update ID
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_SEQ: Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``clen`` is **NOT** ``4``.
 
         """
         if clen != 4:
@@ -708,10 +726,13 @@ class HIP(Internet):
 
         return seq
 
-    def _read_para_ack(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP ACK parameter.
+    def _read_para_ack(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``ACK`` parameter.
 
-        Structure of HIP ACK parameter [RFC 7401]:
+        Structure of HIP ``ACK`` parameter [:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -722,11 +743,21 @@ class HIP(Internet):
             /                       peer Update ID n                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     ack.type                Parameter Type
-              1          15     ack.critical            Critical Bit
-              2          16     ack.length              Length of Contents
-              4          32     ack.id                  Peer Update ID
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_ACK: Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``clen`` is **NOT** ``4`` modulo.
 
         """
         if clen % 4 != 0:
@@ -745,10 +776,13 @@ class HIP(Internet):
 
         return ack
 
-    def _read_para_dh_group_list(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP DH_GROUP_LIST parameter.
+    def _read_para_dh_group_list(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``DH_GROUP_LIST`` parameter.
 
-        Structure of HIP DH_GROUP_LIST parameter [RFC 7401]:
+        Structure of HIP ``DH_GROUP_LIST`` parameter [:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -759,11 +793,18 @@ class HIP(Internet):
             | DH GROUP ID #n|                Padding                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     dh_group_list.type      Parameter Type
-              1          15     dh_group_list.critical  Critical Bit
-              2          16     dh_group_list.length    Length of Contents
-              4          32     dh_group_list.id        DH GROUP ID
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_DH_Group_List: Parsed parameter data.
 
         """
         _dhid = list()
@@ -783,10 +824,13 @@ class HIP(Internet):
 
         return dh_group_list
 
-    def _read_para_diffie_hellman(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP DIFFIE_HELLMAN parameter.
+    def _read_para_diffie_hellman(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``DIFFIE_HELLMAN`` parameter.
 
-        Structure of HIP DIFFIE_HELLMAN parameter [RFC 7401]:
+        Structure of HIP ``DIFFIE_HELLMAN`` parameter [:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -799,14 +843,18 @@ class HIP(Internet):
             /                               |            Padding            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     diffie_hellman.type     Parameter Type
-              1          15     diffie_hellman.critical Critical Bit
-              2          16     diffie_hellman.length   Length of Contents
-              4          32     diffie_hellman.id       Group ID
-              5          40     diffie_hellman.pub_len  Public Value Length
-              6          48     diffie_hellman.pub_val  Public Value
-              ?           ?     -                       Padding
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Diffie_Hellman: Parsed parameter data.
 
         """
         _gpid = self._read_unpack(1)
@@ -829,9 +877,12 @@ class HIP(Internet):
         return diffie_hellman
 
     def _read_para_hip_transform(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP HIP_TRANSFORM parameter.
+        """Read HIP ``HIP_TRANSFORM`` parameter.
 
-        Structure of HIP HIP_TRANSFORM parameter [RFC 5201]:
+        Structure of HIP ``HIP_TRANSFORM`` parameter [:rfc:`5201`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -842,13 +893,21 @@ class HIP(Internet):
             |            Suite ID #n        |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     hip_transform.type      Parameter Type
-              1          15     hip_transform.critical  Critical Bit
-              2          16     hip_transform.length    Length of Contents
-              4          32     hip_transform.id        Group ID
-                                ............
-              ?           ?     -                       Padding
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Transform: Parsed parameter data.
+
+        Raises:
+            ProtocolError: The parameter is **ONLY** supported in HIPv1.
 
         """
         if version != 1:
@@ -864,7 +923,7 @@ class HIP(Internet):
             type=desc,
             critical=cbit,
             length=clen,
-            id=_stid,
+            id=tuple(_stid),
         )
 
         _plen = length - clen
@@ -874,9 +933,12 @@ class HIP(Internet):
         return hip_transform
 
     def _read_para_hip_cipher(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP HIP_CIPHER parameter.
+        """Read HIP ``HIP_CIPHER`` parameter.
 
-        Structure of HIP HIP_CIPHER parameter [RFC 7401]:
+        Structure of HIP ``HIP_CIPHER`` parameter [:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -887,13 +949,21 @@ class HIP(Internet):
             |          Cipher ID #n         |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     hip_cipher.type         Parameter Type
-              1          15     hip_cipher.critical     Critical Bit
-              2          16     hip_cipher.length       Length of Contents
-              4          32     hip_cipher.id           Cipher ID
-                                ............
-              ?           ?     -                       Padding
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Cipher: Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``clen`` is **NOT** a ``2`` modulo.
 
         """
         if clen % 2 != 0:
@@ -917,9 +987,12 @@ class HIP(Internet):
         return hip_cipher
 
     def _read_para_nat_traversal_mode(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP NAT_TRAVERSAL_MODE parameter.
+        """Read HIP ``NAT_TRAVERSAL_MODE`` parameter.
 
-        Structure of HIP NAT_TRAVERSAL_MODE parameter [RFC 5770]:
+        Structure of HIP ``NAT_TRAVERSAL_MODE`` parameter [:rfc:`5770`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -932,14 +1005,21 @@ class HIP(Internet):
             |           Mode ID #n          |             Padding           |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     nat_traversal_mode.type     Parameter Type
-              1          15     nat_traversal_mode.critical Critical Bit
-              2          16     nat_traversal_mode.length   Length of Contents
-              4          32     -                           Reserved
-              6          48     nat_traversal_mode.id       Mode ID
-                                ............
-              ?           ?     -                           Padding
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_NET_Traversal_Mode: Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``clen`` is **NOT** a ``2`` modulo.
 
         """
         if clen % 2 != 0:
@@ -954,7 +1034,7 @@ class HIP(Internet):
             type=desc,
             critical=cbit,
             length=clen,
-            id=_mdid,
+            id=tuple(_mdid),
         )
 
         _plen = length - clen
@@ -963,10 +1043,13 @@ class HIP(Internet):
 
         return nat_traversal_mode
 
-    def _read_para_transaction_pacing(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP TRANSACTION_PACING parameter.
+    def _read_para_transaction_pacing(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``TRANSACTION_PACING`` parameter.
 
-        Structure of HIP TRANSACTION_PACING parameter [RFC 5770]:
+        Structure of HIP ``TRANSACTION_PACING`` parameter [:rfc:`5770`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -975,11 +1058,21 @@ class HIP(Internet):
             |                            Min Ta                             |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     transaction_pacing.type     Parameter Type
-              1          15     transaction_pacing.critical Critical Bit
-              2          16     transaction_pacing.length   Length of Contents
-              4          32     transaction_pacing.min_ta   Min Ta
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
+
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Transaction_Pacing: Parsed parameter data.
+
+        Raises:
+            ProtocolError: If ``clen`` is **NOT** ``4``.
 
         """
         if clen != 4:
@@ -996,10 +1089,13 @@ class HIP(Internet):
 
         return transaction_pacing
 
-    def _read_para_encrypted(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP ENCRYPTED parameter.
+    def _read_para_encrypted(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``ENCRYPTED`` parameter.
 
-        Structure of HIP ENCRYPTED parameter [RFC 7401]:
+        Structure of HIP ``ENCRYPTED`` parameter [:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1017,15 +1113,18 @@ class HIP(Internet):
             /                               |            Padding            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                Description
-              0           0     encrypted.type      Parameter Type
-              1          15     encrypted.critical  Critical Bit
-              2          16     encrypted.length    Length of Contents
-              4          32     -                   Reserved
-              8          48     encrypted.iv        Initialization Vector
-              ?           ?     encrypted.data      Encrypted data
-              ?           ?     -                   Padding
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
 
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Encrypted: Parsed parameter data.
 
         """
         _resv = self._read_fileng(4)
@@ -1044,10 +1143,13 @@ class HIP(Internet):
 
         return encrypted
 
-    def _read_para_host_id(self, code, cbit, clen, *, desc, length, version):
-        """Read HIP HOST_ID parameter.
+    def _read_para_host_id(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+        """Read HIP ``HOST_ID`` parameter.
 
-        Structure of HIP HOST_ID parameter [RFC 7401]:
+        Structure of HIP ``HOST_ID`` parameter [:rfc:`7401`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1062,28 +1164,39 @@ class HIP(Internet):
             /                                               |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                Description
-              0           0     host_id.type        Parameter Type
-              1          15     host_id.critical    Critical Bit
-              2          16     host_id.length      Length of Contents
-              4          32     host_id.id_len      Host Identity Length
-              6          48     host_id.di_type     Domain Identifier Type
-              6          52     host_id.di_len      Domain Identifier Length
-              8          64     host_id.algorithm   Algorithm
-              10         80     host_id.host_id     Host Identity
-              ?           ?     host_id.domain_id   Domain Identifier
-              ?           ?     -                   Padding
+        Args:
+            code (int): parameter code
+            cbit (bool): critical bit
+            clen (int): length of contents
 
+        Keyward args:
+            desc (pcapkit.const.hip.parameter.Parameter): parameter type
+            length (int): remaining packet length
+            version (Literal[1, 2]): HIP protocol version
+
+        Returns:
+            DataType_Param_Host_ID: Parsed parameter data.
 
         """
         def _read_host_identifier(length, code):
+            """Read host identity.
+
+            Args:
+                length (int): length of host identity
+                code (int): host identity type
+
+            Returns:
+                Tuple[pcapkit.const.hip.hi_algorithm.HIAlgorithm, Union[bytes, DataType_Host_ID_ECDSA_Curve,
+                DataType_Host_ID_ECDSA_LOW_Curve]]: Parsed host identity data.
+
+            """
             algorithm = _HI_ALGORITHM.get(code, 'Unassigned')
-            if algorithm == 'ECDSA':
+            if algorithm == _HI_ALGORITHM.ECDSA:
                 host_id = dict(
                     curve=_ECDSA_CURVE.get(self._read_unpack(2)),
                     pubkey=self._read_fileng(length-2),
                 )
-            elif algorithm == 'ECDSA_LOW':
+            elif algorithm == _HI_ALGORITHM.ECDSA_LOW:
                 host_id = dict(
                     curve=_ECDSA_LOW_CURVE.get(self._read_unpack(2)),
                     pubkey=self._read_fileng(length-2),
@@ -1093,6 +1206,16 @@ class HIP(Internet):
             return algorithm, host_id
 
         def _read_domain_identifier(di_data):
+            """Read domain identifier.
+
+            Args:
+                di_data (str): bit string of DI information byte
+
+            Returns:
+                Tuple[pcapkit.const.hip.di_type.DIType, int, bytes]: A :data:`tuple` of
+                DI type enumeration, DI content length and DI data.
+
+            """
             di_type = _DI_TYPE.get(int(di_data[:4], base=2), 'Unassigned')
             di_len = int(di_data[4:], base=2)
             domain_id = self._read_fileng(di_len)
