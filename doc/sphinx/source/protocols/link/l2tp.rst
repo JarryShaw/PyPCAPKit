@@ -58,6 +58,11 @@ as below:
 Data Structure
 --------------
 
+.. important::
+
+   Following classes are only for *documentation* purpose.
+   They do **NOT** exist in the :mod:`pcapkit` module.
+
 .. class:: DataType_L2TP
 
    :bases: TypedDict

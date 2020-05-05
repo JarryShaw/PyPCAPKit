@@ -31,6 +31,11 @@ Octets      Bits        Name                    Description
 Data Structure
 --------------
 
+.. important::
+
+   Following classes are only for *documentation* purpose.
+   They do **NOT** exist in the :mod:`pcapkit` module.
+
 .. class:: DataType_AH
 
    :bases: TypedDict
