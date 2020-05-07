@@ -11,6 +11,7 @@ internet layer, with detailed implementation and methods.
 
    ah
    hip
+   hopopt
 
 Base Protocol
 -------------
@@ -19,6 +20,8 @@ Base Protocol
 which is a base class for internet layer protocols, eg. :class:`~pcapkit.protocols.internet.ah.AH`,
 :class:`~pcapkit.protocols.internet.ipsec.IPsec`, :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
 :class:`~pcapkit.protocols.internet.ipv6.IPv6`, :class:`~pcapkit.protocols.internet.ipx.IPX`, and etc.
+
+.. module:: pcapkit.protocols.internet.internet
 
 .. autoclass:: pcapkit.protocols.internet.internet.Internet
    :members:

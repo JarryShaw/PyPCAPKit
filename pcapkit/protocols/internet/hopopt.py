@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 """IPv6 hop-by-hop options
 
-`pcapkit.protocols.internet.hopopt` contains `HOPOPT`
+:mod:`pcapkit.protocols.internet.hopopt` contains
+:class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
 only, which implements extractor for IPv6 Hop-by-Hop
-Options header (HOPOPT), whose structure is described
-as below.
+Options header (HOPOPT) [*]_, whose structure is
+described as below:
 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Next Header  |  Hdr Ext Len  |                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
-|                                                               |
-.                                                               .
-.                            Options                            .
-.                                                               .
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+======= ========= =================== =================================
+Octets      Bits        Name                    Description
+======= ========= =================== =================================
+  0           0   ``hopopt.next``             Next Header
+  1           8   ``hopopt.length``           Header Extensive Length
+  2          16   ``hopopt.options``          Options
+======= ========= =================== =================================
+
+.. [*] https://en.wikipedia.org/wiki/IPv6_packet#Hop-by-hop_options_and_destination_options
 
 """
 import datetime
@@ -25,27 +26,28 @@ from pcapkit.const.ipv6.qs_function import QSFunction as _QS_FUNC
 from pcapkit.const.ipv6.router_alert import RouterAlert as _ROUTER_ALERT
 from pcapkit.const.ipv6.seed_id import SeedID as _HOPOPT_SEED
 from pcapkit.const.ipv6.tagger_id import TaggerID as _TID_TYPE
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 __all__ = ['HOPOPT']
 
-# HOPOPT Unknown Option Actions
+#: HOPOPT unknown option actions.
 _HOPOPT_ACT = {
     '00': 'skip over this option and continue processing the header',
     '01': 'discard the packet',
-    '10': 'discard the packet and, regardless of whether or not the'
-          "packet's Destination Address was a multicast address, send an"
-          "ICMP Parameter Problem, Code 2, message to the packet's"
+    '10': "discard the packet and, regardless of whether or not the "
+          "packet's Destination Address was a multicast address, send an "
+          "ICMP Parameter Problem, Code 2, message to the packet's "
           'Source Address, pointing to the unrecognized Option Type',
-    '11': "discard the packet and, only if the packet's Destination"
-          'Address was not a multicast address, send an ICMP Parameter'
-          "Problem, Code 2, message to the packet's Source Address,"
-          'pointing to the unrecognized Option Type',
+    '11': "discard the packet and, only if the packet's Destination "
+          "Address was not a multicast address, send an ICMP Parameter "
+          "Problem, Code 2, message to the packet's Source Address, "
+          "pointing to the unrecognized Option Type",
 }
 
-# HOPOPT Options
+#: HOPOPT options.
 _HOPOPT_OPT = {
     0x00: ('pad', 'Pad1'),                                                  # [RFC 8200] 0
     0x01: ('pad', 'PadN'),                                                  # [RFC 8200]
@@ -64,7 +66,7 @@ _HOPOPT_OPT = {
     0xEE: ('ip_dff', 'Depth-First Forwarding'),                             # [RFC 6971]
 }
 
-# HOPOPT Unknown Option Descriptions
+#: HOPOPT unknown option descriptions.
 _HOPOPT_NULL = {
     0x1E: 'RFC3692-style Experiment [0x1E]',                                # [RFC 4727]
     0x3E: 'RFC3692-style Experiment [0x3E]',                                # [RFC 4727]
@@ -79,65 +81,48 @@ _HOPOPT_NULL = {
 }
 
 
-def _HOPOPT_PROC(abbr):
-    """HOPOPT option process functions."""
-    return eval(f'lambda self, code, *, desc: self._read_opt_{abbr}(code, desc=desc)')
-
-
 class HOPOPT(Internet):
-    """This class implements IPv6 Hop-by-Hop Options.
+    """This class implements IPv6 Hop-by-Hop Options."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Methods:
-        * read_hopopt -- read IPv6 Hop-by-Hop Options (HOPOPT)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['IPv6 Hop-by-Hop Options']
+        """
         return 'IPv6 Hop-by-Hop Options'
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: int
+        """
         return self._info.length  # pylint: disable=E1101
 
     @property
     def payload(self):
-        """Payload of current instance."""
+        """Payload of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        :rtype: pcapkit.protocols.protocol.Protocol
+        """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.transtype.TransType
+        """
         return self._info.next  # pylint: disable=E1101
 
     ##########################################################################
@@ -147,7 +132,10 @@ class HOPOPT(Internet):
     def read_hopopt(self, length, extension):
         """Read IPv6 Hop-by-Hop Options.
 
-        Structure of HOPOPT header [RFC 8200]:
+        Structure of HOPOPT header [:rfc:`8200`]:
+
+        .. code:: text
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |  Hdr Ext Len  |                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
@@ -158,10 +146,12 @@ class HOPOPT(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     hopopt.next             Next Header
-              1           8     hopopt.length           Header Extensive Length
-              2          16     hopopt.options          Options
+        Args:
+            length (int): packet length
+            extension (bool): if the packet is used as an IPv6 extension header
+
+        Returns:
+            DataType_HOPOPT: Parsed packet data.
 
         """
         if length is None:
@@ -192,33 +182,54 @@ class HOPOPT(Internet):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):
+    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the protocol is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._extf = extension
         self._info = Info(self.read_hopopt(length, extension))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[2]
+        """
         return 2
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(0)
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_opt_type(self, kind):
+    def _read_opt_type(self, kind):  # pylint: disable=no-self-use
         """Read option type field.
 
-        Positional arguments:
-            * kind -- int, option kind value
+        Arguments:
+            kind (int): option kind value
 
         Returns:
-            * dict -- extracted HOPOPT option
-
-        Structure of option type field [RFC 791]:
-
-            Octets      Bits        Name                    Descriptions
-              0           0     hopopt.opt.type.value   Option Number
-              0           0     hopopt.opt.type.action  Action (00-11)
-              0           2     hopopt.opt.type.change  Change Flag (0/1)
+            DataType_Option_Type: extracted HOPOPT option type field
 
         """
         bin_ = bin(kind)[2:].zfill(8)
@@ -226,7 +237,7 @@ class HOPOPT(Internet):
         type_ = dict(
             value=kind,
             action=_HOPOPT_ACT.get(bin_[:2]),
-            change=True if int(bin_[2], base=2) else False,
+            change=bool(int(bin_[2], base=2)),
         )
 
         return type_
@@ -235,10 +246,14 @@ class HOPOPT(Internet):
         """Read HOPOPT options.
 
         Positional arguments:
-            * length -- int, length of options
+            length (int): length of options
 
         Returns:
-            * dict -- extracted HOPOPT options
+            Tuple[Tuple[pcapkit.const.hopopt.option.Option],
+            Dict[str, DataType_Option]]: extracted HOPOPT options
+
+        Raises:
+            ProtocolError: If the threshold is **NOT** matching.
 
         """
         counter = 0         # length of read options
@@ -253,7 +268,9 @@ class HOPOPT(Internet):
 
             # extract parameter
             abbr, desc = _HOPOPT_OPT.get(code, ('none', 'Unassigned'))
-            data = _HOPOPT_PROC(abbr)(self, code, desc=desc)
+            meth_name = f'_read_opt_{abbr}'
+            meth = getattr(self, meth_name, '_read_opt_none')
+            data = meth(self, code, desc=desc)
             enum = _OPT_TYPE.get(code)
 
             # record parameter data
@@ -276,18 +293,22 @@ class HOPOPT(Internet):
     def _read_opt_none(self, code, *, desc):
         """Read HOPOPT unassigned options.
 
-        Structure of HOPOPT unassigned options [RFC 8200]:
+        Structure of HOPOPT unassigned options [:rfc:`8200`]:
+
+        .. code:: text
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
             |  Option Type  |  Opt Data Len |  Option Data
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
 
-            Octets      Bits        Name                    Description
-              0           0     hopopt.opt.type         Option Type
-              0           0     hopopt.opt.type.value   Option Number
-              0           0     hopopt.opt.type.action  Action (00-11)
-              0           2     hopopt.opt.type.change  Change Flag (0/1)
-              1           8     hopopt.opt.length       Length of Option Data
-              2          16     hopopt.opt.data         Option Data
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_None: parsed option data
 
         """
         _type = self._read_opt_type(code)
@@ -306,30 +327,35 @@ class HOPOPT(Internet):
     def _read_opt_pad(self, code, *, desc):
         """Read HOPOPT padding options.
 
-        Structure of HOPOPT padding options [RFC 8200]:
-            * Pad1 Option:
-                +-+-+-+-+-+-+-+-+
-                |       0       |
-                +-+-+-+-+-+-+-+-+
+        Structure of HOPOPT padding options [:rfc:`8200`]:
 
-                Octets      Bits        Name                    Description
-                  0           0     hopopt.pad.type         Option Type
-                  0           0     hopopt.pad.type.value   Option Number
-                  0           0     hopopt.pad.type.action  Action (00)
-                  0           2     hopopt.pad.type.change  Change Flag (0)
+        * ``Pad1`` option:
 
-            * PadN Option:
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
-                |       1       |  Opt Data Len |  Option Data
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+          .. code:: text
 
-                Octets      Bits        Name                    Description
-                  0           0     hopopt.pad.type         Option Type
-                  0           0     hopopt.pad.type.value   Option Number
-                  0           0     hopopt.pad.type.action  Action (00)
-                  0           2     hopopt.pad.type.change  Change Flag (0)
-                  1           8     hopopt.opt.length       Length of Option Data
-                  2          16     hopopt.pad.padding      Padding
+             +-+-+-+-+-+-+-+-+
+             |       0       |
+             +-+-+-+-+-+-+-+-+
+
+        * ``PadN`` option:
+
+          .. code:: text
+
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+             |       1       |  Opt Data Len |  Option Data
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            Union[DataType_Opt_Pad1, DataType_Opt_PadN]: parsed option data
+
+        Raises:
+            ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.
 
         """
         _type = self._read_opt_type(code)
@@ -351,33 +377,40 @@ class HOPOPT(Internet):
                 padding=_padn,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         return opt
 
     def _read_opt_tun(self, code, *, desc):
         """Read HOPOPT Tunnel Encapsulation Limit option.
 
-        Structure of HOPOPT Tunnel Encapsulation Limit option [RFC 2473]:
+        Structure of HOPOPT Tunnel Encapsulation Limit option [:rfc:`2473`]:
+
+        .. code:: text
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |Hdr Ext Len = 0| Opt Type = 4  |Opt Data Len=1 |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             | Tun Encap Lim |PadN Opt Type=1|Opt Data Len=1 |       0       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     hopopt.tun.type         Option Type
-              0           0     hopopt.tun.type.value   Option Number
-              0           0     hopopt.tun.type.action  Action (00)
-              0           2     hopopt.tun.type.change  Change Flag (0)
-              1           8     hopopt.tun.length       Length of Option Data
-              2          16     hopopt.tun.limit        Tunnel Encapsulation Limit
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_TUN: parsed option data
+
+        Raises:
+            ProtocolError: If ``hopopt.tun.length`` is **NOT** ``1``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 1:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _limt = self._read_unpack(1)
 
         opt = dict(
@@ -392,35 +425,34 @@ class HOPOPT(Internet):
     def _read_opt_ra(self, code, *, desc):
         """Read HOPOPT Router Alert option.
 
-        Structure of HOPOPT Router Alert option [RFC 2711]:
+        Structure of HOPOPT Router Alert option [:rfc:`2711`]:
+
+        .. code:: text
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |0 0 0|0 0 1 0 1|0 0 0 0 0 0 1 0|        Value (2 octets)       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     hopopt.ra.type          Option Type
-              0           0     hopopt.ra.type.value    Option Number
-              0           0     hopopt.ra.type.action   Action (00)
-              0           2     hopopt.ra.type.change   Change Flag (0)
-              1           8     hopopt.opt.length       Length of Option Data
-              2          16     hopopt.ra.value         Value
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_RA: parsed option data
+
+        Raises:
+            ProtocolError: If ``hopopt.tun.length`` is **NOT** ``2``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _rval = self._read_unpack(2)
 
-        if 4 <= _rval <= 35:
-            _dscp = f'Aggregated Reservation Nesting Level {_rval-4}'   # [RFC 3175]
-        elif 36 <= _rval <= 67:
-            _dscp = f'QoS NSLP Aggregation Level {_rval-36}'            # [RFC 5974]
-        elif 65503 <= _rval <= 65534:
-            _dscp = 'Reserved for experimental use'                     # [RFC 5350]
-        else:
-            _dscp = _ROUTER_ALERT.get(_rval, 'Unassigned')
-
+        _dscp = _ROUTER_ALERT.get(_rval)
         opt = dict(
             desc=desc,
             type=_type,
@@ -432,9 +464,12 @@ class HOPOPT(Internet):
         return opt
 
     def _read_opt_calipso(self, code, *, desc):
-        """Read HOPOPT CALIPSO option.
+        """Read HOPOPT ``CALIPSO`` option.
 
-        Structure of HOPOPT CALIPSO option [RFC 5570]:
+        Structure of HOPOPT ``CALIPSO`` option [:rfc:`5570`]:
+
+        .. code:: text
+
             ------------------------------------------------------------
             | Next Header | Hdr Ext Len   | Option Type | Option Length|
             +-------------+---------------+-------------+--------------+
@@ -445,27 +480,27 @@ class HOPOPT(Internet):
             |      Compartment Bitmap (Optional; variable length)      |
             +-------------+---------------+-------------+--------------+
 
-            Octets      Bits        Name                        Description
-              0           0     hopopt.calipso.type         Option Type
-              0           0     hopopt.calipso.type.value   Option Number
-              0           0     hopopt.calipso.type.action  Action (00)
-              0           2     hopopt.calipso.type.change  Change Flag (0)
-              1           8     hopopt.calipso.length       Length of Option Data
-              2          16     hopopt.calipso.domain       CALIPSO Domain of Interpretation
-              6          48     hopopt.calipso.cmpt_len     Cmpt Length
-              7          56     hopopt.calipso.level        Sens Level
-              8          64     hopopt.calipso.chksum       Checksum (CRC-16)
-              9          72     hopopt.calipso.bitmap       Compartment Bitmap
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_CALIPSO: parsed option data
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 8 and _size % 8 != 0:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _cmpt = self._read_unpack(4)
         _clen = self._read_unpack(1)
         if _clen % 2 != 0:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _sens = self._read_unpack(1)
         _csum = self._read_fileng(2)
 
@@ -492,49 +527,37 @@ class HOPOPT(Internet):
         return opt
 
     def _read_opt_smf_dpd(self, code, *, desc):
-        """Read HOPOPT SMF_DPD option.
+        """Read HOPOPT ``SMF_DPD`` option.
 
-        Structure of HOPOPT SMF_DPD option [RFC 5570]:
-            * IPv6 SMF_DPD Option Header in I-DPD mode
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                               ...              |0|0|0|  01000  | Opt. Data Len |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |0|TidTy| TidLen|             TaggerID (optional) ...           |
-                +-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |                               |            Identifier  ...
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        Structure of HOPOPT ``SMF_DPD`` option [:rfc:`5570`]:
 
-                Octets      Bits        Name                        Description
-                  0           0     hopopt.smf_dpd.type         Option Type
-                  0           0     hopopt.smf_dpd.type.value   Option Number
-                  0           0     hopopt.smf_dpd.type.action  Action (00)
-                  0           2     hopopt.smf_dpd.type.change  Change Flag (0)
-                  1           8     hopopt.smf_dpd.length       Length of Option Data
-                  2          16     hopopt.smf_dpd.dpd_type     DPD Type (0)
-                  2          17     hopopt.smf_dpd.tid_type     TaggerID Type
-                  2          20     hopopt.smf_dpd.tid_len      TaggerID Length
-                  3          24     hopopt.smf_dpd.tid          TaggerID
-                  ?           ?     hopopt.smf_dpd.id           Identifier
+        * IPv6 ``SMF_DPD`` option header in I-DPD mode
 
-            * IPv6 SMF_DPD Option Header in H-DPD Mode
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                               ...              |0|0|0| OptType | Opt. Data Len |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |1|    Hash Assist Value (HAV) ...
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+          .. code:: text
 
-                Octets      Bits        Name                        Description
-                  0           0     hopopt.smf_dpd.type         Option Type
-                  0           0     hopopt.smf_dpd.type.value   Option Number
-                  0           0     hopopt.smf_dpd.type.action  Action (00)
-                  0           2     hopopt.smf_dpd.type.change  Change Flag (0)
-                  1           8     hopopt.smf_dpd.length       Length of Option Data
-                  2          16     hopopt.smf_dpd.dpd_type     DPD Type (1)
-                  2          17     hopopt.smf_dpd.hav          Hash Assist Value
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                            ...              |0|0|0|  01000  | Opt. Data Len |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |0|TidTy| TidLen|             TaggerID (optional) ...           |
+             +-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                               |            Identifier  ...
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        * IPv6 ``SMF_DPD`` option header in H-DPD mode
+
+          .. code:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                            ...              |0|0|0| OptType | Opt. Data Len |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |1|    Hash Assist Value (HAV) ...
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
 
         """
         _type = self._read_opt_type(code)
@@ -543,11 +566,12 @@ class HOPOPT(Internet):
 
         if _tidd[0] == '0':
             _mode = 'I-DPD'
-            _tidt = _TID_TYPE.get(_tidd[1:4], 'Unassigned')
+            _tidt = _TID_TYPE.get(_tidd[1:4])
             _tidl = int(_tidd[4:], base=2)
-            if _tidt == 'NULL':
+
+            if _tidt == _TID_TYPE.NULL:
                 if _tidl != 0:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
                 _iden = self._read_fileng(_size-1)
 
                 opt = dict(
@@ -559,9 +583,9 @@ class HOPOPT(Internet):
                     tid_len=_tidl,
                     id=_iden,
                 )
-            elif _tidt == 'IPv4':
+            elif _tidt == _TID_TYPE.IPv4:
                 if _tidl != 3:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
                 _tidf = self._read_fileng(4)
                 _iden = self._read_fileng(_size-4)
 
@@ -575,9 +599,9 @@ class HOPOPT(Internet):
                     tid=ipaddress.ip_address(_tidf),
                     id=_iden,
                 )
-            elif _tidt == 'IPv6':
+            elif _tidt == _TID_TYPE.IPv6:
                 if _tidl != 15:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
                 _tidf = self._read_fileng(15)
                 _iden = self._read_fileng(_size-15)
 
@@ -606,6 +630,8 @@ class HOPOPT(Internet):
                     id=_iden,
                 )
         elif _tidd[0] == '1':
+            _mode = 'H-DPD'
+            _tidt = _TID_TYPE.get(_tidd[1:4])
             _data = self._read_binary(_size-1)
 
             opt = dict(
@@ -617,7 +643,7 @@ class HOPOPT(Internet):
                 hav=_tidd[1:] + _data,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         return opt
 
@@ -652,7 +678,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 10:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _stlr = self._read_unpack(1)
         _stls = self._read_unpack(1)
         _psnt = self._read_unpack(2)
@@ -713,7 +739,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 6:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         _fcrr = self._read_binary(1)
         _func = int(_fcrr[:4], base=2)
@@ -723,7 +749,7 @@ class HOPOPT(Internet):
         _qsnn = int(_nonr[:30], base=2)
 
         if _func != 0 and _func != 8:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         data = dict(
             type=_type,
@@ -768,7 +794,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 4:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _flag = self._read_binary(1)
         _rpld = self._read_unpack(1)
         _rank = self._read_unpack(2)
@@ -821,7 +847,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _smvr = self._read_binary(1)
         _seqn = self._read_unpack(1)
 
@@ -840,18 +866,18 @@ class HOPOPT(Internet):
         _kind = _smvr[:2]
         if _kind == '00':
             if _size != 2:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         elif _kind == '01':
             if _size != 4:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             opt['seed_id'] = self._read_unpack(2)
         elif _kind == '10':
             if _size != 10:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             opt['seed_id'] = self._read_unpack(8)
         elif _kind == '11':
             if _size != 18:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             opt['seed_id'] = self._read_unpack(16)
         else:
             opt['seed_id'] = self._read_unpack(_size-2)
@@ -959,7 +985,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 4:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _jlen = self._read_unpack(4)
 
         opt = dict(
@@ -1001,7 +1027,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 16:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _addr = self._read_fileng(16)
 
         opt = dict(
@@ -1042,7 +1068,7 @@ class HOPOPT(Internet):
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _verf = self._read_binary(1)
         _seqn = self._read_unpack(2)
 

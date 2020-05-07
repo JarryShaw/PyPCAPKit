@@ -145,6 +145,7 @@ class HIP(Internet):
 
         Args:
             length (int): packet length
+            extension (bool): if the packet is used as an IPv6 extension header
 
         Returns:
             DataType_HIP: Parsed packet data.
@@ -172,7 +173,7 @@ class HIP(Internet):
         hip = dict(
             next=_next,
             length=(_hlen + 1) * 8,
-            type=_HIP_TYPES.get(int(_type[1:], base=2), 'Unassigned'),
+            type=_HIP_TYPES.get(int(_type[1:], base=2)),
             version=int(_vers[:4], base=2),
             chksum=_csum,
             control=dict(
@@ -275,7 +276,7 @@ class HIP(Internet):
             plen = 11 + clen - (clen + 3) % 8
 
             # extract parameter
-            dscp = _HIP_PARA.get(code, 'Unassigned')
+            dscp = _HIP_PARA.get(code)
             meth_name = f'_read_para_{dscp.name.split(" [")[0].lower()}'
             meth = getattr(self, meth_name, '_read_para_unassigned')
             data = meth(self, code, cbit, clen, desc=dscp, length=plen, version=version)
@@ -809,7 +810,7 @@ class HIP(Internet):
         """
         _dhid = list()
         for _ in range(clen):
-            _dhid.append(_GROUP_ID.get(self._read_unpack(1), 'Unassigned'))
+            _dhid.append(_GROUP_ID.get(self._read_unpack(1)))
 
         dh_group_list = dict(
             type=desc,
@@ -865,7 +866,7 @@ class HIP(Internet):
             type=desc,
             critical=cbit,
             length=clen,
-            id=_GROUP_ID.get(_gpid, 'Unassigned'),
+            id=_GROUP_ID.get(_gpid),
             pub_len=_vlen,
             pub_val=_pval,
         )
@@ -917,7 +918,7 @@ class HIP(Internet):
 
         _stid = list()
         for _ in range(clen // 2):
-            _stid.append(_SUITE_ID.get(self._read_unpack(2), 'Unassigned'))
+            _stid.append(_SUITE_ID.get(self._read_unpack(2)))
 
         hip_transform = dict(
             type=desc,
@@ -971,7 +972,7 @@ class HIP(Internet):
 
         _cpid = list()
         for _ in range(clen // 2):
-            _cpid.append(_CIPHER_ID.get(self._read_unpack(2), 'Unassigned'))
+            _cpid.append(_CIPHER_ID.get(self._read_unpack(2)))
 
         hip_cipher = dict(
             type=desc,
@@ -1028,7 +1029,7 @@ class HIP(Internet):
         _resv = self._read_fileng(2)
         _mdid = list()
         for _ in range((clen - 2) // 2):
-            _mdid.append(_MODE_ID.get(self._read_unpack(2), 'Unassigned'))
+            _mdid.append(_MODE_ID.get(self._read_unpack(2)))
 
         nat_traversal_mode = dict(
             type=desc,
@@ -1190,7 +1191,7 @@ class HIP(Internet):
                 DataType_Host_ID_ECDSA_LOW_Curve]]: Parsed host identity data.
 
             """
-            algorithm = _HI_ALGORITHM.get(code, 'Unassigned')
+            algorithm = _HI_ALGORITHM.get(code)
             if algorithm == _HI_ALGORITHM.ECDSA:
                 host_id = dict(
                     curve=_ECDSA_CURVE.get(self._read_unpack(2)),
@@ -1216,7 +1217,7 @@ class HIP(Internet):
                 DI type enumeration, DI content length and DI data.
 
             """
-            di_type = _DI_TYPE.get(int(di_data[:4], base=2), 'Unassigned')
+            di_type = _DI_TYPE.get(int(di_data[:4], base=2))
             di_len = int(di_data[4:], base=2)
             domain_id = self._read_fileng(di_len)
             return di_type, di_len, domain_id
@@ -1278,7 +1279,7 @@ class HIP(Internet):
         """
         _hsid = list()
         for _ in range(clen):
-            _hsid.append(_HIT_SUITE_ID.get(self._read_unpack(1), 'Unassigned'))
+            _hsid.append(_HIT_SUITE_ID.get(self._read_unpack(1)))
 
         hit_suite_list = dict(
             type=desc,
@@ -1336,10 +1337,10 @@ class HIP(Internet):
             type=desc,
             critical=cbit,
             length=clen,
-            group=_GROUP_ID.get(_ctgp, 'Unassigned'),
+            group=_GROUP_ID.get(_ctgp),
             count=_ctct,
             id=_ctid,
-            cert_type=_CERT_TYPE.get(_cttp, 'Unassigned'),
+            cert_type=_CERT_TYPE.get(_cttp),
             certificate=_ctdt,
         )
 
@@ -1923,7 +1924,7 @@ class HIP(Internet):
         _resv = self._read_fileng(2)
         _stid = list()
         for _ in range((clen - 2) // 2):
-            _stid.append(_ESP_SUITE_ID.get(self._read_unpack(2), 'Unassigned'))
+            _stid.append(_ESP_SUITE_ID.get(self._read_unpack(2)))
 
         esp_transform = dict(
             type=desc,
@@ -2290,7 +2291,7 @@ class HIP(Internet):
         _port = self._read_unpack(2)
         _mdid = list()
         for _ in range((clen - 2) // 2):
-            _mdid.append(_TP_MODE_ID.get(self._read_unpack(2), 'Unassigned'))
+            _mdid.append(_TP_MODE_ID.get(self._read_unpack(2)))
 
         hip_transport_mode = dict(
             type=desc,
@@ -2440,7 +2441,7 @@ class HIP(Internet):
             type=desc,
             critical=cbit,
             length=clen,
-            algorithm=_HI_ALGORITHM.get(_algo, 'Unassigned'),
+            algorithm=_HI_ALGORITHM.get(_algo),
             signature=_sign,
         )
 
@@ -2488,7 +2489,7 @@ class HIP(Internet):
             type=desc,
             critical=cbit,
             length=clen,
-            algorithm=_HI_ALGORITHM.get(_algo, 'Unassigned'),
+            algorithm=_HI_ALGORITHM.get(_algo),
             signature=_sign,
         )
 
