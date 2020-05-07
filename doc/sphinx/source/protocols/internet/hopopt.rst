@@ -648,7 +648,6 @@ Octets      Bits        Name                      Description
       :type: datetime.timedelta
 
       Delta time last sent.
-c
 
 ======= ========= =============================== ======================================
 Octets      Bits        Name                      Description
