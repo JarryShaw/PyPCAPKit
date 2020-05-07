@@ -522,7 +522,7 @@ Octets      Bits        Name                        Description
 
    :bases: DataType_Option
 
-   Structure of HOPOPT ``SMF_DPD`` option [:rfc:`5570`] in I-DPD mode.
+   Structure of HOPOPT ``SMF_DPD`` option in **I-DPD** mode [:rfc:`5570`].
 
    .. attribute:: dpd_type
       :type: Literal['I-DPD']
@@ -575,16 +575,158 @@ Octets      Bits        Name                        Description
 
    :bases: DataType_Option
 
-   Structure of HOPOPT ``SMF_DPD`` option [:rfc:`5570`] in H-DPD mode.
+   Structure of HOPOPT ``SMF_DPD`` option in **H-DPD** mode [:rfc:`5570`].
 
-   
+   .. attribute:: dpd_type
+      :type: Literal['H-DPD']
 
+      DPD type.
 
+   .. attribute:: hav
+      :type: str
 
+      Hash assist value (as *binary* string).
 
+HOPOPT ``PDM`` Option
+~~~~~~~~~~~~~~~~~~~~~
 
+For HOPOPT ``PDM`` option as described in :rfc:`8250`,
+its structure is described as below:
 
+======= ========= =============================== ======================================
+Octets      Bits        Name                      Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.pdm.type``             Option Type
+  0           0   ``hopopt.pdm.type.value``       Option Number
+  0           0   ``hopopt.pdm.type.action``      Action (``00``)
+  0           2   ``hopopt.pdm.type.change``      Change Flag (``0``)
+  1           8   ``hopopt.pdm.length``           Length of Option Data
+  2          16   ``hopopt.pdm.scaledtlr``        Scale Delta Time Last Received
+  3          24   ``hopopt.pdm.scaledtls``        Scale Delta Time Last Sent
+  4          32   ``hopopt.pdm.psntp``            Packet Sequence Number This Packet
+  6          48   ``hopopt.pdm.psnlr``            Packet Sequence Number Last Received
+  8          64   ``hopopt.pdm.deltatlr``         Delta Time Last Received
+  10         80   ``hopopt.pdm.deltatls``         Delta Time Last Sent
+======= ========= =============================== ======================================
 
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_PDM
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT ``PDM`` option [:rfc:`8250`].
+
+   .. attribute:: scaledtlr
+      :type: datetime.timedelta
+
+      Scale delta time last received.
+
+   .. attribute:: scaledtls
+      :type: datetime.timedelta
+
+      Scale delta time last sent.
+
+   .. attribute:: psntp
+      :type: int
+
+      Packet sequence number this packet.
+
+   .. attribute:: psnlr
+      :type: int
+
+      Packet sequence number last received.
+
+   .. attribute:: deltatlr
+      :type: datetime.timedelta
+
+      Delta time last received.
+
+   .. attribute:: deltatls
+      :type: datetime.timedelta
+
+      Delta time last sent.
+c
+
+======= ========= =============================== ======================================
+Octets      Bits        Name                      Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.qs.type``              Option Type
+  0           0   ``hopopt.qs.type.value``        Option Number
+  0           0   ``hopopt.qs.type.action``       Action (``00``)
+  0           2   ``hopopt.qs.type.change``       Change Flag (``1``)
+  1           8   ``hopopt.qs.length``            Length of Option Data
+  2          16   ``hopopt.qs.func``              Function (``0``/``8``)
+  2          20   ``hopopt.qs.rate``              Rate Request / Report (in Kbps)
+  3          24   ``hopopt.qs.ttl``               QS TTL / :data:`None`
+  4          32   ``hopopt.qs.nounce``            QS Nounce
+  7          62                                   Reserved
+======= ========= =============================== ======================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_QS
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT ``PDM`` option [:rfc:`8250`].
+
+   .. attribute:: func
+      :type: pcapkit.const.ipv6.qs_function.QSFunction
+
+      Function.
+
+   .. attribute:: rate
+      :type: float
+
+      Rate request and/or report (in *Kbps*).
+
+   .. attribute:: ttl
+      :type: Optional[int]
+
+      QS TTL.
+
+   .. attribute:: nounce
+      :type: int
+
+      QS nounce.
+
+HOPOPT ``RPL`` Option
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For HOPOPT ``RPL`` option as described in :rfc:`6553`,
+its structure is described as below:
+
+======= ========= =============================== ======================================
+Octets      Bits        Name                        Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.rpl.type``             Option Type
+  0           0   ``hopopt.rpl.type.value``       Option Number
+  0           0   ``hopopt.rpl.type.action``      Action (``01``)
+  0           2   ``hopopt.rpl.type.change``      Change Flag (``1``)
+  1           8   ``hopopt.rpl.length``           Length of Option Data
+  2          16   ``hopopt.rpl.flags``            RPL Option Flags
+  2          16   ``hopopt.rpl.flags.down``       Down Flag
+  2          17   ``hopopt.rpl.flags.rank_error`` Rank-Error Flag
+  2          18   ``hopopt.rpl.flags.fwd_error``  Forwarding-Error Flag
+  3          24   ``hopopt.rpl.id``               RPLInstanceID
+  4          32   ``hopopt.rpl.rank``             SenderRank
+  6          48   ``hopopt.rpl.data``             Sub-TLVs
+======= ========= =============================== ======================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_RPL
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT ``RPL`` option [:rfc:`6553`].
 
 
 

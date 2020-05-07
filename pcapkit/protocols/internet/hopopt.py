@@ -531,7 +531,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT ``SMF_DPD`` option [:rfc:`5570`]:
 
-        * IPv6 ``SMF_DPD`` option header in I-DPD mode
+        * IPv6 ``SMF_DPD`` option header in **I-DPD** mode
 
           .. code:: text
 
@@ -545,7 +545,7 @@ class HOPOPT(Internet):
              |                               |            Identifier  ...
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-        * IPv6 ``SMF_DPD`` option header in H-DPD mode
+        * IPv6 ``SMF_DPD`` option header in **H-DPD** mode
 
           .. code:: text
 
@@ -557,7 +557,17 @@ class HOPOPT(Internet):
              |1|    Hash Assist Value (HAV) ...
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+        Args:
+            code (int): option type value
 
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            Union[DataType_Opt_SMF_I_PDP, DataType_Opt_SMF_H_PDP]: parsed option data
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         _type = self._read_opt_type(code)
@@ -648,9 +658,12 @@ class HOPOPT(Internet):
         return opt
 
     def _read_opt_pdm(self, code, *, desc):
-        """Read HOPOPT PDM option.
+        """Read HOPOPT ``PDM`` option.
 
-        Structure of HOPOPT PDM option [RFC 8250]:
+        Structure of HOPOPT ``PDM`` option [:rfc:`8250`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -661,18 +674,17 @@ class HOPOPT(Internet):
             |   Delta Time Last Received    |  Delta Time Last Sent         |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     hopopt.pdm.type         Option Type
-              0           0     hopopt.pdm.type.value   Option Number
-              0           0     hopopt.pdm.type.action  Action (00)
-              0           2     hopopt.pdm.type.change  Change Flag (0)
-              1           8     hopopt.pdm.length       Length of Option Data
-              2          16     hopopt.pdm.scaledtlr    Scale Delta Time Last Received
-              3          24     hopopt.pdm.scaledtls    Scale Delta Time Last Sent
-              4          32     hopopt.pdm.psntp        Packet Sequence Number This Packet
-              6          48     hopopt.pdm.psnlr        Packet Sequence Number Last Received
-              8          64     hopopt.pdm.deltatlr     Delta Time Last Received
-              10         80     hopopt.pdm.deltatls     Delta Time Last Sent
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_PDM: parsed option data
+
+        Raises:
+            ProtocolError: If ``hopopt.pdm.length`` is **NOT** ``10``.
 
         """
         _type = self._read_opt_type(code)
@@ -700,40 +712,48 @@ class HOPOPT(Internet):
 
         return opt
 
-    def _read_opt_qs(self, code, *, desc):
+    def _read_opt_qs(self, code, *, desc):  # pylint: disable=unused-argument
         """Read HOPOPT Quick Start option.
 
-        Structure of HOPOPT Quick-Start option [RFC 4782]:
-            * A Quick-Start Request.
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |   Option      |  Length=6     | Func. | Rate  |   QS TTL      |
-                |               |               | 0000  |Request|               |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |                        QS Nonce                           | R |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            * Report of Approved Rate.
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |   Option      |  Length=6     | Func. | Rate  |   Not Used    |
-                |               |               | 1000  | Report|               |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |                        QS Nonce                           | R |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        Structure of HOPOPT Quick-Start option [:rfc:`4782`]:
 
-            Octets      Bits        Name                    Description
-              0           0     hopopt.qs.type          Option Type
-              0           0     hopopt.qs.type.value    Option Number
-              0           0     hopopt.qs.type.action   Action (00)
-              0           2     hopopt.qs.type.change   Change Flag (1)
-              1           8     hopopt.qs.length        Length of Option Data
-              2          16     hopopt.qs.func          Function (0/8)
-              2          20     hopopt.qs.rate          Rate Request / Report (in Kbps)
-              3          24     hopopt.qs.ttl           QS TTL / None
-              4          32     hopopt.qs.nounce        QS Nounce
-              7          62     -                       Reserved
+        * A Quick-Start Request:
+
+          .. code:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |   Option      |  Length=6     | Func. | Rate  |   QS TTL      |
+             |               |               | 0000  |Request|               |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                        QS Nonce                           | R |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        * Report of Approved Rate:
+
+          .. code:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |   Option      |  Length=6     | Func. | Rate  |   Not Used    |
+             |               |               | 1000  | Report|               |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                        QS Nonce                           | R |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_QS: parsed option data
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         _type = self._read_opt_type(code)
@@ -748,7 +768,7 @@ class HOPOPT(Internet):
         _nonr = self._read_binary(4)
         _qsnn = int(_nonr[:30], base=2)
 
-        if _func != 0 and _func != 8:
+        if _func not in (0, 8):
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         data = dict(
@@ -763,9 +783,12 @@ class HOPOPT(Internet):
         return data
 
     def _read_opt_rpl(self, code, *, desc):
-        """Read HOPOPT RPL option.
+        """Read HOPOPT ``RPL`` option.
 
-        Structure of HOPOPT RPL option [RFC 6553]:
+        Structure of HOPOPT ``RPL`` option [:rfc:`6553`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -776,19 +799,17 @@ class HOPOPT(Internet):
             |                         (sub-TLVs)                            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     hopopt.rpl.type             Option Type
-              0           0     hopopt.rpl.type.value       Option Number
-              0           0     hopopt.rpl.type.action      Action (01)
-              0           2     hopopt.rpl.type.change      Change Flag (1)
-              1           8     hopopt.rpl.length           Length of Option Data
-              2          16     hopopt.rpl.flags            RPL Option Flags
-              2          16     hopopt.rpl.flags.down       Down Flag
-              2          17     hopopt.rpl.flags.rank_error Rank-Error Flag
-              2          18     hopopt.rpl.flags.fwd_error  Forwarding-Error Flag
-              3          24     hopopt.rpl.id               RPLInstanceID
-              4          32     hopopt.rpl.rank             SenderRank
-              6          48     hopopt.rpl.data             Sub-TLVs
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_RPL: parsed option data
+
+        Raises:
+            ProtocolError: If ``hopopt.rpl.length`` is **NOT** ``4``.
 
         """
         _type = self._read_opt_type(code)
@@ -804,9 +825,9 @@ class HOPOPT(Internet):
             type=_type,
             length=_size + 2,
             flags=dict(
-                down=True if int(_flag[0], base=2) else False,
-                rank_error=True if int(_flag[1], base=2) else False,
-                fwd_error=True if int(_flag[2], base=2) else False,
+                down=bool(int(_flag[0], base=2)),
+                rank_error=bool(int(_flag[1], base=2)),
+                fwd_error=bool(int(_flag[2], base=2)),
             ),
             id=_rpld,
             rank=_rank,
