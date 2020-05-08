@@ -249,7 +249,7 @@ class HOPOPT(Internet):
             length (int): length of options
 
         Returns:
-            Tuple[Tuple[pcapkit.const.hopopt.option.Option],
+            Tuple[Tuple[pcapkit.const.ipv6.option.Option],
             Dict[str, DataType_Option]]: extracted HOPOPT options
 
         Raises:
@@ -809,7 +809,7 @@ class HOPOPT(Internet):
             DataType_Opt_RPL: parsed option data
 
         Raises:
-            ProtocolError: If ``hopopt.rpl.length`` is **NOT** ``4``.
+            ProtocolError: If ``hopopt.rpl.length`` is **LESS THAN** ``4``.
 
         """
         _type = self._read_opt_type(code)
@@ -839,9 +839,12 @@ class HOPOPT(Internet):
         return opt
 
     def _read_opt_mpl(self, code, *, desc):
-        """Read HOPOPT MPL option.
+        """Read HOPOPT ``MPL`` option.
 
-        Structure of HOPOPT MPL option [RFC 7731]:
+        Structure of HOPOPT ``MPL`` option [:rfc:`7731`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -850,19 +853,17 @@ class HOPOPT(Internet):
             | S |M|V|  rsv  |   sequence    |      seed-id (optional)       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     hopopt.mpl.type             Option Type
-              0           0     hopopt.mpl.type.value       Option Number
-              0           0     hopopt.mpl.type.action      Action (01)
-              0           2     hopopt.mpl.type.change      Change Flag (1)
-              1           8     hopopt.mpl.length           Length of Option Data
-              2          16     hopopt.mpl.seed_len         Seed-ID Length
-              2          18     hopopt.mpl.flags            MPL Option Flags
-              2          18     hopopt.mpl.max              Maximum SEQ Flag
-              2          19     hopopt.mpl.verification     Verification Flag
-              2          20     -                           Reserved
-              3          24     hopopt.mpl.seq              Sequence
-              4          32     hopopt.mpl.seed_id          Seed-ID
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_MPL: parsed option data
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         _type = self._read_opt_type(code)
@@ -878,8 +879,8 @@ class HOPOPT(Internet):
             length=_size + 2,
             seed_len=_HOPOPT_SEED.get(int(_smvr[:2], base=2)),
             flags=dict(
-                max=True if int(_smvr[2], base=2) else False,
-                verification=True if int(_smvr[3], base=2) else False,
+                max=bool(int(_smvr[2], base=2)),
+                verification=bool(int(_smvr[3], base=2)),
             ),
             seq=_seqn,
         )
@@ -910,9 +911,12 @@ class HOPOPT(Internet):
         return opt
 
     def _read_opt_ilnp(self, code, *, desc):
-        """Read HOPOPT ILNP Nonce option.
+        """Read HOPOPT ``ILNP`` Nonce option.
 
-        Structure of HOPOPT ILNP Nonce option [RFC 6744]:
+        Structure of HOPOPT ``ILNP`` Nonce option [:rfc:`6744`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -921,13 +925,14 @@ class HOPOPT(Internet):
             /                         Nonce Value                           /
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     hopopt.ilnp.type            Option Type
-              0           0     hopopt.ilnp.type.value      Option Number
-              0           0     hopopt.ilnp.type.action     Action (10)
-              0           2     hopopt.ilnp.type.change     Change Flag (0)
-              1           8     hopopt.ilnp.length          Length of Option Data
-              2          16     hopopt.ilnp.value           Nonce Value
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_ILNP: parsed option data
 
         """
         _type = self._read_opt_type(code)
@@ -946,7 +951,10 @@ class HOPOPT(Internet):
     def _read_opt_lio(self, code, *, desc):
         """Read HOPOPT Line-Identification option.
 
-        Structure of HOPOPT Line-Identification option [RFC 6788]:
+        Structure of HOPOPT Line-Identification option [:rfc:`6788`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -955,14 +963,14 @@ class HOPOPT(Internet):
             | LineIDLen     |     Line ID...
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     hopopt.lio.type             Option Type
-              0           0     hopopt.lio.type.value       Option Number
-              0           0     hopopt.lio.type.action      Action (10)
-              0           2     hopopt.lio.type.change      Change Flag (0)
-              1           8     hopopt.lio.length           Length of Option Data
-              2          16     hopopt.lio.lid_len          Line ID Length
-              3          24     hopopt.lio.lid              Line ID
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_LIO: parsed option data
 
         """
         _type = self._read_opt_type(code)
@@ -987,20 +995,27 @@ class HOPOPT(Internet):
     def _read_opt_jumbo(self, code, *, desc):
         """Read HOPOPT Jumbo Payload option.
 
-        Structure of HOPOPT Jumbo Payload option [RFC 2675]:
+        Structure of HOPOPT Jumbo Payload option [:rfc:`2675`]:
+
+        .. code:: text
+
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                                             |  Option Type  |  Opt Data Len |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |                     Jumbo Payload Length                      |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     hopopt.jumbo.type           Option Type
-              0           0     hopopt.jumbo.type.value     Option Number
-              0           0     hopopt.jumbo.type.action    Action (11)
-              0           2     hopopt.jumbo.type.change    Change Flag (0)
-              1           8     hopopt.jumbo.length         Length of Option Data
-              2          16     hopopt.jumbo.payload_len    Jumbo Payload Length
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_Jumbo: parsed option data
+
+        Raises:
+            ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``4``.
 
         """
         _type = self._read_opt_type(code)
@@ -1021,7 +1036,10 @@ class HOPOPT(Internet):
     def _read_opt_home(self, code, *, desc):
         """Read HOPOPT Home Address option.
 
-        Structure of HOPOPT Home Address option [RFC 6275]:
+        Structure of HOPOPT Home Address option [:rfc:`6275`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1036,13 +1054,17 @@ class HOPOPT(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     hopopt.home.type            Option Type
-              0           0     hopopt.home.type.value      Option Number
-              0           0     hopopt.home.type.action     Action (11)
-              0           2     hopopt.home.type.change     Change Flag (0)
-              1           8     hopopt.home.length          Length of Option Data
-              2          16     hopopt.home.ip              Home Address
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_Home: parsed option data
+
+        Raises:
+            ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``16``.
 
         """
         _type = self._read_opt_type(code)
@@ -1061,9 +1083,12 @@ class HOPOPT(Internet):
         return opt
 
     def _read_opt_ip_dff(self, code, *, desc):
-        """Read HOPOPT IP_DFF option.
+        """Read HOPOPT ``IP_DFF`` option.
 
-        Structure of HOPOPT IP_DFF option [RFC 6971]:
+        Structure of HOPOPT ``IP_DFF`` option [:rfc:`6971`]:
+
+        .. code:: text
+
                                  1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1072,18 +1097,17 @@ class HOPOPT(Internet):
             |VER|D|R|0|0|0|0|        Sequence Number        |      Pad1     |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     hopopt.ip_dff.type          Option Type
-              0           0     hopopt.ip_dff.type.value    Option Number
-              0           0     hopopt.ip_dff.type.action   Action (11)
-              0           2     hopopt.ip_dff.type.change   Change Flag (1)
-              1           8     hopopt.ip_dff.length        Length of Option Data
-              2          16     hopopt.ip_dff.version       Version
-              2          18     hopopt.ip_dff.flags         Flags
-              2          18     hopopt.ip_dff.flags.dup     DUP Flag
-              2          19     hopopt.ip_dff.flags.ret     RET Flag
-              2          20     -                           Reserved
-              3          24     hopopt.ip_dff.seq           Sequence Number
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Opt_IP_DFF: parsed option data
+
+        Raises:
+            ProtocolError: If ``hopopt.ip_dff.length`` is **NOT** ``2``.
 
         """
         _type = self._read_opt_type(code)
@@ -1097,10 +1121,10 @@ class HOPOPT(Internet):
             desc=desc,
             type=_type,
             length=_size + 2,
-            version=_verf[:2],
+            version=int(_verf[:2], base=2),
             flags=dict(
-                dup=True if int(_verf[2], base=2) else False,
-                ret=True if int(_verf[3], base=2) else False,
+                dup=bool(int(_verf[2], base=2)),
+                ret=bool(int(_verf[3], base=2)),
             ),
             seq=_seqn,
         )

@@ -12,6 +12,8 @@ internet layer, with detailed implementation and methods.
    ah
    hip
    hopopt
+   ip
+   ipsec
 
 Base Protocol
 -------------

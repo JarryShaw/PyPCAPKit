@@ -21,11 +21,11 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. .. autoclass:: pcapkit.protocols.internet.hopopt.HOPOPT
-..    :members:
-..    :undoc-members:
-..    :private-members:
-..    :show-inheritance:
+.. autoclass:: pcapkit.protocols.internet.hopopt.HOPOPT
+   :members:
+   :undoc-members:
+   :private-members:
+   :show-inheritance:
 
 .. data:: pcapkit.protocols.internet.hopopt._HOPOPT_ACT
    :type: Dict[str, str]
@@ -695,7 +695,7 @@ Octets      Bits        Name                      Description
       QS nounce.
 
 HOPOPT ``RPL`` Option
-~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
 
 For HOPOPT ``RPL`` option as described in :rfc:`6553`,
 its structure is described as below:
@@ -712,7 +712,7 @@ Octets      Bits        Name                        Description
   2          16   ``hopopt.rpl.flags.down``       Down Flag
   2          17   ``hopopt.rpl.flags.rank_error`` Rank-Error Flag
   2          18   ``hopopt.rpl.flags.fwd_error``  Forwarding-Error Flag
-  3          24   ``hopopt.rpl.id``               RPLInstanceID
+  3          24   ``hopopt.rpl.id``               RPL Instance ID
   4          32   ``hopopt.rpl.rank``             SenderRank
   6          48   ``hopopt.rpl.data``             Sub-TLVs
 ======= ========= =============================== ======================================
@@ -727,7 +727,312 @@ Octets      Bits        Name                        Description
 
    Structure of HOPOPT ``RPL`` option [:rfc:`6553`].
 
+   .. attribute:: flags
+      :type: DataType_RPL_Flags
 
+      RPL option flags.
+
+   .. attribute:: id
+      :type: int
+
+      RPL instance ID.
+
+   .. attribute:: rank
+      :type: int
+
+      Sender rank.
+
+   .. attribute:: data
+      :type: Optional[bytes]
+
+      Sub-TLVs (if ``hopopt.rpl.length`` is **GREATER THAN** ``4``).
+
+.. class:: DataType_RPL_Flags
+
+   :bases: TypedDict
+
+   RPL option flags.
+
+   .. attribute:: down
+      :type: bool
+
+      Down flag.
+
+   .. attribute:: rank_error
+      :type: bool
+
+      Rank-Error flag.
+
+   .. attribute:: fwd_error
+      :type: bool
+
+      Forwarding-Error flag.
+
+HOPOPT ``MPL`` Option
+~~~~~~~~~~~~~~~~~~~~~
+
+For HOPOPT ``MPL`` option as described in :rfc:`7731`,
+its structure is described as below:
+
+======= ========= =============================== ======================================
+Octets      Bits        Name                        Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.mpl.type``             Option Type
+  0           0   ``hopopt.mpl.type.value``       Option Number
+  0           0   ``hopopt.mpl.type.action``      Action (``01``)
+  0           2   ``hopopt.mpl.type.change``      Change Flag (``1``)
+  1           8   ``hopopt.mpl.length``           Length of Option Data
+  2          16   ``hopopt.mpl.seed_len``         Seed-ID Length
+  2          18   ``hopopt.mpl.flags``            MPL Option Flags
+  2          18   ``hopopt.mpl.max``              Maximum SEQ Flag
+  2          19   ``hopopt.mpl.verification``     Verification Flag
+  2          20                                   Reserved
+  3          24   ``hopopt.mpl.seq``              Sequence
+  4          32   ``hopopt.mpl.seed_id``          Seed-ID
+======= ========= =============================== ======================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_MPL
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT ``MPL`` option [:rfc:`7731`].
+
+   .. attribute:: seed_len
+      :type: pcapkit.const.ipv6.seed_id.SeedID
+
+      Seed-ID length.
+
+   .. attribute:: flags
+      :type: DataType_MPL_Flags
+
+      MPL option flags.
+
+   .. attribute:: seq
+      :type: int
+
+      Sequence.
+
+   .. attribute:: seed_id
+      :type: Optional[int]
+
+      Seed-ID.
+
+.. class:: DataType_MPL_Flags
+
+   :bases: TypedDict
+
+   MPL option flags.
+
+   .. attribute:: max
+      :type: bool
+
+      Maximum sequence flag.
+
+   .. attribute:: verification
+      :type: bool
+
+      Verification flag.
+
+HOPOPT ``ILNP`` Nounce Option
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For HOPOPT ``ILNP`` Nounce option as described in :rfc:`6744`,
+its structure is described as below:
+
+======= ========= =============================== ======================================
+Octets      Bits        Name                        Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.ilnp.type``            Option Type
+  0           0   ``hopopt.ilnp.type.value``      Option Number
+  0           0   ``hopopt.ilnp.type.action``     Action (``10``)
+  0           2   ``hopopt.ilnp.type.change``     Change Flag (``0``)
+  1           8   ``hopopt.ilnp.length``          Length of Option Data
+  2          16   ``hopopt.ilnp.value``           Nonce Value
+======= ========= =============================== ======================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_ILNP
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT ``ILNP`` Nonce option [:rfc:`6744`].
+
+   .. attribute:: value
+      :type: bytes
+
+      Nonce value.
+
+HOPOPT Line-Identification Option
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For HOPOPT Line-Identification option as described in :rfc:`6788`,
+its structure is described as below:
+
+======= ========= =============================== ======================================
+Octets      Bits        Name                        Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.lio.type``             Option Type
+  0           0   ``hopopt.lio.type.value``       Option Number
+  0           0   ``hopopt.lio.type.action``      Action (``10``)
+  0           2   ``hopopt.lio.type.change``      Change Flag (``0``)
+  1           8   ``hopopt.lio.length``           Length of Option Data
+  2          16   ``hopopt.lio.lid_len``          Line ID Length
+  3          24   ``hopopt.lio.lid``              Line ID
+======= ========= =============================== ======================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_LIO
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT Line-Identification option [:rfc:`6788`].
+
+   .. attribute:: lid_len
+      :type: int
+
+      Line ID length.
+
+   .. attribute:: lid
+      :type: bytes
+
+      Line ID.
+
+HOPOPT Jumbo Payload Option
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For HOPOPT Jumbo Payload option as described in :rfc:`2675`,
+its structure is described as below:
+
+======= ========= =============================== ======================================
+Octets      Bits        Name                        Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.jumbo.type``           Option Type
+  0           0   ``hopopt.jumbo.type.value``     Option Number
+  0           0   ``hopopt.jumbo.type.action``    Action (``11``)
+  0           2   ``hopopt.jumbo.type.change``    Change Flag (``0``)
+  1           8   ``hopopt.jumbo.length``         Length of Option Data
+  2          16   ``hopopt.jumbo.payload_len``    Jumbo Payload Length
+======= ========= =============================== ======================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_Jumbo
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT Jumbo Payload option [:rfc:`2675`].
+
+   .. attribute:: payload_len
+      :type: int
+
+      Jumbo payload length.
+
+HOPOPT Home Address Option
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For HOPOPT Home Address option as described in :rfc:`6275`,
+its structure is described as below:
+
+======= ========= =============================== ======================================
+Octets      Bits        Name                        Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.home.type``            Option Type
+  0           0   ``hopopt.home.type.value``      Option Number
+  0           0   ``hopopt.home.type.action``     Action (``11``)
+  0           2   ``hopopt.home.type.change``     Change Flag (``0``)
+  1           8   ``hopopt.home.length``          Length of Option Data
+  2          16   ``hopopt.home.ip``              Home Address
+======= ========= =============================== ======================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_Home
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT Home Address option [:rfc:`6275`].
+
+   .. attribute:: ip
+      :type: ipaddress.IPv6Address
+
+      Home address.
+
+HOPOPT ``IP_DFF`` Option
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+For HOPOPT ``IP_DFF`` option as described in :rfc:`6971`,
+its structure is described as below:
+
+======= ========= =============================== ======================================
+Octets      Bits        Name                        Description
+======= ========= =============================== ======================================
+  0           0   ``hopopt.ip_dff.type``          Option Type
+  0           0   ``hopopt.ip_dff.type.value``    Option Number
+  0           0   ``hopopt.ip_dff.type.action``   Action (``11``)
+  0           2   ``hopopt.ip_dff.type.change``   Change Flag (``1``)
+  1           8   ``hopopt.ip_dff.length``        Length of Option Data
+  2          16   ``hopopt.ip_dff.version``       Version
+  2          18   ``hopopt.ip_dff.flags``         Flags
+  2          18   ``hopopt.ip_dff.flags.dup``     ``DUP`` Flag
+  2          19   ``hopopt.ip_dff.flags.ret``     ``RET`` Flag
+  2          20                                   Reserved
+  3          24   ``hopopt.ip_dff.seq``           Sequence Number
+======= ========= =============================== ======================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_IP_DFF
+
+   :bases: DataType_Option
+
+   Structure of HOPOPT ``IP_DFF`` option [:rfc:`6971`].
+
+   .. attribute:: version
+      :type: int
+
+      Version.
+
+   .. attribute:: flags
+      :type: DataType_IP_DFF_Flags
+
+      Flags.
+
+   .. attribute:: seq
+      :type: int
+
+      Sequence number.
+
+.. class:: DataType_IP_DFF_Flags
+
+   :bases: TypedDict
+
+   Flags.
+
+   .. attribute:: dup
+      :type: bool
+
+      ``DUP`` flag.
+
+   .. attribute:: ret
+      :type: bool
+
+      ``RET`` flag.
 
 .. raw:: html
 

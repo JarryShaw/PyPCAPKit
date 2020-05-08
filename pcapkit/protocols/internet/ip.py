@@ -1,50 +1,29 @@
 # -*- coding: utf-8 -*-
 """internet protocol
 
-`pcapkit.protocols.internet.ipsec` contains `IP` only,
-which is a base class for Internet Protocol (IP) protocol
-family, eg. IPv4, IPv6, and IPsec.
+:mod:`pcapkit.protocols.internet.ip` contains
+:class:`~pcapkit.protocols.internet.ip.IP` only,
+which is a base class for Internet Protocol (IP)
+protocol family [*]_, eg.
+:class:`~pcapkit.protocols.internet.ipv4.IPv4`,
+:class:`~pcapkit.protocols.internet.ipv6.IPv6`, and
+:class:`~pcapkit.protocols.internet.ipsec.IPsec`.
+
+.. [*] https://en.wikipedia.org/wiki/Internet_Protocol
 
 """
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.utilities.decorators import seekset
 
 __all__ = ['IP']
 
 
-class IP(Internet):
+class IP(Internet):  # pylint: disable=abstract-method
     """This class implements all protocols in IP family.
 
-    - Internet Protocol version 4 (IPv4) [RFC 791]
-    - Internet Protocol version 6 (IPv6) [RFC 2460]
-    - Authentication Header (AH) [RFC 4302]
-    - Encapsulating Security Payload (ESP) [RFC 4303]
-
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-        * src -- str, source IP address
-        * dst -- str, destination IP address
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
+    - Internet Protocol version 4 (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) [:rfc:`791`]
+    - Internet Protocol version 6 (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) [:rfc:`2460`]
+    - Authentication Header (:class:`~pcapkit.protocols.internet.ah.AH`) [:rfc:`4302`]
+    - Encapsulating Security Payload (:class:`~pcapkit.protocols.internet.esp.ESP`) [:rfc:`4303`]
 
     """
     ##########################################################################
@@ -54,13 +33,19 @@ class IP(Internet):
     # source IP address
     @property
     def src(self):
-        """Source IP address."""
+        """Source IP address.
+
+        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
+        """
         return self._info.src  # pylint: disable=E1101
 
     # destination IP address
     @property
     def dst(self):
-        """Destination IP address."""
+        """Destination IP address.
+
+        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
+        """
         return self._info.dst  # pylint: disable=E1101
 
     ##########################################################################
@@ -69,4 +54,10 @@ class IP(Internet):
 
     @classmethod
     def id(cls):
+        """Index ID of the protocol.
+
+        Returns:
+            Tuple[Literal['IPv4'], Literal['IPv6']]: Index ID of the protocol.
+
+        """
         return ('IPv4', 'IPv6')

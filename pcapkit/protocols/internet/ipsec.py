@@ -1,46 +1,28 @@
 # -*- coding: utf-8 -*-
 """internet protocol security
 
-`pcapkit.protocols.internet.ipsec` contains `IPsec`
-only, which is a base class for Internet Protocol Security
-(IPsec) protocol family, eg. AH and ESP (NotImplemented).
+:mod:`pcapkit.protocols.internet.ipsec` contains
+:class:`~pcapkit.protocols.internet.ipsec.IPsec`
+only, which is a base class for Internet Protocol
+Security (IPsec) protocol family [*]_, eg.
+:class:`~pcapkit.protocols.internet.ah.AH` and
+:class:`~pcapkit.protocols.internet.esp.ESP`
+(**NOT IMPLEMENTED**).
+
+.. [*] https://en.wikipedia.org/wiki/IPsec
 
 """
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = 'IPsec'
 
 
-class IPsec(IP):
+class IPsec(IP):  # pylint: disable=abstract-method
     """Abstract base class for IPsec protocol family.
 
-    - Authentication Header (AH) [RFC 4302]
-    - Encapsulating Security Payload (ESP) [RFC 4303]
-
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
+    - Authentication Header (:class:`~pcapkit.protocols.internet.ah.AH`) [:rfc:`4302`]
+    - Encapsulating Security Payload (:class:`~pcapkit.protocols.internet.esp.ESP`) [:rfc:`4303`]
 
     """
     ##########################################################################
@@ -49,12 +31,22 @@ class IPsec(IP):
 
     @property
     def src(self):
-        """NotImplemented"""
+        """Source IP address.
+
+        Raises:
+            UnsupportedCall: This protocol doesn't support :attr:`src`.
+
+        """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'src'")
 
     @property
     def dst(self):
-        """NotImplemented"""
+        """Destination IP address.
+
+        Raises:
+            UnsupportedCall: This protocol doesn't support :attr:`dst`.
+
+        """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'dst'")
 
     ##########################################################################
@@ -63,4 +55,10 @@ class IPsec(IP):
 
     @classmethod
     def id(cls):
+        """Index ID of the protocol.
+
+        Returns:
+            Tuple[Literal['AH'], Literal['ESP']]: Index ID of the protocol.
+
+        """
         return ('AH', 'ESP')
