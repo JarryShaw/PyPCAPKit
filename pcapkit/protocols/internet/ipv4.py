@@ -1,25 +1,34 @@
 # -*- coding: utf-8 -*-
 """internet protocol version 4
 
-`pcapkit.protocols.internet.ipv4` contains `IPv4` only,
-which implements extractor for Internet Protocol version 4
-(IPv4), whose structure is described as below.
+:mod:`pcapkit.protocols.internet.ipv4` contains
+:class:`~pcapkit.protocols.internet.ipv4.IPv4` only,
+which implements extractor for Internet Protocol
+version 4 (IPv4) [*]_, whose structure is described
+as below:
 
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|Version|  IHL  |Type of Service|          Total Length         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|         Identification        |Flags|      Fragment Offset    |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Time to Live |    Protocol   |         Header Checksum       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                       Source Address                          |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Destination Address                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                    Options                    |    Padding    |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+======= ========= ====================== =============================================
+Octets      Bits        Name                    Description
+======= ========= ====================== =============================================
+  0           0   ``ip.version``              Version (``4``)
+  0           4   ``ip.hdr_len``              Internal Header Length (IHL)
+  1           8   ``ip.dsfield.dscp``         Differentiated Services Code Point (DSCP)
+  1          14   ``ip.dsfield.ecn``          Explicit Congestion Notification (ECN)
+  2          16   ``ip.len``                  Total Length
+  4          32   ``ip.id``                   Identification
+  6          48                               Reserved Bit (must be ``\\x00``)
+  6          49   ``ip.flags.df``             Don't Fragment (DF)
+  6          50   ``ip.flags.mf``             More Fragments (MF)
+  6          51   ``ip.frag_offset``          Fragment Offset
+  8          64   ``ip.ttl``                  Time To Live (TTL)
+  9          72   ``ip.proto``                Protocol (Transport Layer)
+  10         80   ``ip.checksum``             Header Checksum
+  12         96   ``ip.src``                  Source IP Address
+  16        128   ``ip.dst``                  Destination IP Address
+  20        160   ``ip.options``              IP Options (if IHL > ``5``)
+======= ========= ====================== =============================================
+
+.. [*] https://en.wikipedia.org/wiki/IPv4
 
 """
 import datetime
@@ -31,6 +40,7 @@ from pcapkit.const.ipv4.option_number import OptionNumber as OPT_TYPE
 from pcapkit.const.ipv4.protection_authority import ProtectionAuthority as _PROTECTION_AUTHORITY
 from pcapkit.const.ipv4.qs_function import QSFunction as QS_FUNC
 from pcapkit.const.ipv4.router_alert import RouterAlert as _ROUTER_ALERT
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.ipv4.tos_del import ToSDelay as TOS_DEL
 from pcapkit.const.ipv4.tos_ecn import ToSECN as TOS_ECN
 from pcapkit.const.ipv4.tos_pre import ToSPrecedence as TOS_PRE
@@ -42,36 +52,10 @@ from pcapkit.utilities.exceptions import ProtocolError
 
 __all__ = ['IPv4']
 
-"""IPv4 Option Utility Table
-
-T | F
-    bool, short of True / False
-
-opt_class
-    dict, option classes
-
-IPv4_OPT
-    dict, IPv4 option dict.
-    Value is a tuple which contains:
-        |--> bool, if length greater than 1
-        |       |--> T - True
-        |       |--> F - False
-        |--> str, description string, also attribute name
-        |--> (optional) int, process that data bytes need (when length greater than 2)
-                |--> 0: do nothing
-                |--> 1: unpack according to size
-                |--> 2: unpack route data options then add to dict
-                |--> 3: unpack Quick-Start then add to dict
-                |--> 4: unpack Time Stamp then add to dict
-                |--> 5: unpack Traceroute then add to dict
-                |--> 6: unpack (Extended) Security then add tot dict
-                |--> 7: unpack Router Alert then add to dict
-
-"""
-
 T = True
 F = False
 
+# pylint: disable=protected-access
 process_opt = {
     0: lambda self, size, kind: self._read_mode_donone(size, kind),    # do nothing
     1: lambda self, size, kind: self._read_mode_unpack(size, kind),    # unpack according to size
@@ -100,59 +84,60 @@ IPv4_OPT = {                 # # copy  class  number  kind  length  process     
     145:  (T, 'eip', 0),     # #   1     0      17    145      N       0     [RFC 1385][RFC 6814] Ext. Inet. Protocol
     148:  (T, 'rtralt', 7),  # #   1     0      20    148      4       7     [RFC 2113] Router Alert
 }
+"""IPv4 Option Utility Table
+
+T | F
+    bool, short of True / False
+
+IPv4_OPT
+    dict, IPv4 option dict.
+    Value is a tuple which contains:
+        |--> bool, if length greater than 1
+        |       |--> T - True
+        |       |--> F - False
+        |--> str, description string, also attribute name
+        |--> (optional) int, process that data bytes need (when length greater than 2)
+                |--> 0: do nothing
+                |--> 1: unpack according to size
+                |--> 2: unpack route data options then add to dict
+                |--> 3: unpack Quick-Start then add to dict
+                |--> 4: unpack Time Stamp then add to dict
+                |--> 5: unpack Traceroute then add to dict
+                |--> 6: unpack (Extended) Security then add tot dict
+                |--> 7: unpack Router Alert then add to dict
+
+"""
 
 
 class IPv4(IP):
-    """This class implements Internet Protocol version 4.
+    """This class implements Internet Protocol version 4."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-        * src -- str, source IP address
-        * dst -- str, destination IP address
-
-    Methods:
-        * read_ipv4 -- read Internet Protocol version 4 (IPv4)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-        * _read_ipv4_addr -- read IPv4 address
-        * _read_ipv4_options -- read IPv4 option list
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of corresponding protocol."""
+        """Name of corresponding protocol.
+
+        :rtype: Literal['Internet Protocol version 4']
+        """
         return 'Internet Protocol version 4'
 
     @property
     def length(self):
-        """Header length of corresponding protocol."""
+        """Header length of corresponding protocol.
+
+        :rtype: int
+        """
         return self._info.hdr_len  # pylint: disable=E1101
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.transtype.TransType
+        """
         return self._info.proto  # pylint: disable=E1101
 
     ##########################################################################
@@ -162,7 +147,7 @@ class IPv4(IP):
     def read_ipv4(self, length):
         """Read Internet Protocol version 4 (IPv4).
 
-        Structure of IPv4 header [RFC 791]:
+        Structure of IPv4 header [:rfc:`791`]::
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -180,23 +165,11 @@ class IPv4(IP):
             |                    Options                    |    Padding    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     ip.version              Version (4)
-              0           4     ip.hdr_len              Internal Header Length (IHL)
-              1           8     ip.dsfield.dscp         Differentiated Services Code Point (DSCP)
-              1          14     ip.dsfield.ecn          Explicit Congestion Notification (ECN)
-              2          16     ip.len                  Total Length
-              4          32     ip.id                   Identification
-              6          48     -                       Reserved Bit (must be zero)
-              6          49     ip.flags.df             Don't Fragment (DF)
-              6          50     ip.flags.mf             More Fragments (MF)
-              6          51     ip.frag_offset          Fragment Offset
-              8          64     ip.ttl                  Time To Live (TTL)
-              9          72     ip.proto                Protocol (Transport Layer)
-              10         80     ip.checksum             Header Checksum
-              12         96     ip.src                  Source IP Address
-              16        128     ip.dst                  Destination IP Address
-              20        160     ip.options              IP Options (if IHL > 5)
+        Args:
+            length (int): packet length
+
+        Returns:
+            DataType_IPv4: Parsed packet data.
 
         """
         if length is None:
@@ -214,22 +187,22 @@ class IPv4(IP):
         _dsta = self._read_ipv4_addr()
 
         ipv4 = dict(
-            version=_vihl[0],
+            version=int(_vihl[0]),
             hdr_len=int(_vihl[1], base=16) * 4,
             dsfield=dict(
-                dscp=(
-                    TOS_PRE.get(int(_dscp[:3], base=2)),
-                    TOS_DEL.get(int(_dscp[3], base=2)),
-                    TOS_THR.get(int(_dscp[4], base=2)),
-                    TOS_REL.get(int(_dscp[5], base=2)),
-                ),
+                dscp={
+                    'pre': TOS_PRE.get(int(_dscp[:3], base=2)),
+                    'del': TOS_DEL.get(int(_dscp[3], base=2)),
+                    'thr': TOS_THR.get(int(_dscp[4], base=2)),
+                    'rel': TOS_REL.get(int(_dscp[5], base=2)),
+                },
                 ecn=TOS_ECN.get(int(_dscp[-2:], base=2)),
             ),
             len=_tlen,
             id=_iden,
             flags=dict(
-                df=True if int(_frag[1]) else False,
-                mf=True if int(_frag[2]) else False,
+                df=bool(int(_frag[1])),
+                mf=bool(int(_frag[2])),
             ),
             frag_offset=int(_frag[3:], base=2) * 8,
             ttl=_ttol,
@@ -256,43 +229,64 @@ class IPv4(IP):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, **kwargs):
+    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._info = Info(self.read_ipv4(length))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[20]
+        """
         return 20
 
     @classmethod
-    def id(cls):
-        return cls.__name__
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(4)
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
     def _read_ipv4_addr(self):
-        """Read IP address."""
+        """Read IP address.
+
+        Returns:
+            ipaddress.IPv4Address: Parsed IP address.
+
+        """
         # _byte = self._read_fileng(4)
         # _addr = '.'.join([str(_) for _ in _byte])
         # return _addr
         return ipaddress.ip_address(self._read_fileng(4))
 
-    def _read_opt_type(self, kind):
+    def _read_opt_type(self, kind):  # pylint: disable=no-self-use
         """Read option type field.
 
-        Positional arguments:
-            * kind -- int, option kind value
+        Arguments:
+            kind (int): option kind value
 
         Returns:
-            * dict -- extracted IPv4 option
-
-        Structure of option type field [RFC 791]:
-
-            Octets      Bits        Name                    Descriptions
-              0           0     ip.opt.type.copy        Copied Flag (0/1)
-              0           1     ip.opt.type.class       Option Class (0-3)
-              0           3     ip.opt.type.number      Option Number
+            DataType_IPv4_Option_Type: extracted IPv4 option
 
         """
         bin_ = bin(kind)[2:].zfill(8)
@@ -308,12 +302,13 @@ class IPv4(IP):
     def _read_ipv4_options(self, size=None):
         """Read IPv4 option list.
 
-        Positional arguments:
-            * size -- int, buffer size
+        Arguments:
+            size (Optional[int]): buffer size
 
         Returns:
-            * tuple -- IPv4 option list
-            * dict -- extracted IPv4 option
+            Tuple[Tuple[pcapkit.const.ipv4.option_number.OptionNumber],
+            Dict[str, Union[DataType_Opt, Tuple[DataType_Opt]]]]: IPv4
+            option list and extracted IPv4 options
 
         """
         counter = 0         # length of read option list
@@ -346,7 +341,7 @@ class IPv4(IP):
                         length=2,                           # option length
                         flag=True,                          # permission flag
                     )
-            else:           # 1-bytes options
+            else:           # 1-byte options
                 byte = 1
 
                 data = dict(
@@ -378,27 +373,21 @@ class IPv4(IP):
         return tuple(optkind), options
 
     def _read_mode_donone(self, size, kind):
-        """Read options request no process.
+        """Read options require no process.
 
-        Positional arguments:
-            * size - int, length of option
-            * kind - int, option kind value
+        Arguments:
+            size (int): length of option
+            kind (int): option kind value
 
         Returns:
-            * dict -- extracted option
+            DataType_Opt_Do_None: extracted option
 
-        Structure of IPv4 options:
-            Octets      Bits        Name                    Description
-              0           0     ip.opt.kind             Kind
-              0           0     ip.opt.type.copy        Copied Flag
-              0           1     ip.opt.type.class       Option Class
-              0           3     ip.opt.type.number      Option Number
-              1           8     ip.opt.length           Length
-              2          16     ip.opt.data             Kind-specific Data
+        Raises:
+            ProtocolError: If ``size`` is **LESS THAN** ``3``.
 
         """
         if size < 3:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         data = dict(
             kind=kind,
@@ -410,27 +399,21 @@ class IPv4(IP):
         return data
 
     def _read_mode_unpack(self, size, kind):
-        """Read options request unpack process.
+        """Read options require unpack process.
 
-        Positional arguments:
-            * size - int, length of option
-            * kind - int, option kind value
+        Arguments:
+            size (int): length of option
+            kind (int): option kind value
 
         Returns:
-            * dict -- extracted option
+            DataType_Opt_Unpack: extracted option
 
-        Structure of IPv4 options:
-            Octets      Bits        Name                    Description
-              0           0     ip.opt.kind             Kind
-              0           0     ip.opt.type.copy        Copied Flag
-              0           1     ip.opt.type.class       Option Class
-              0           3     ip.opt.type.number      Option Number
-              1           8     ip.opt.length           Length
-              2          16     ip.opt.data             Kind-specific Data
+        Raises:
+            ProtocolError: If ``size`` is **LESS THAN** ``3``.
 
         """
         if size < 3:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         data = dict(
             kind=kind,
@@ -444,44 +427,49 @@ class IPv4(IP):
     def _read_mode_route(self, size, kind):
         """Read options with route data.
 
-        Positional arguments:
-            * size - int, length of option
-            * kind - int, 7/131/137 (RR/LSR/SSR)
+        Structure of these options [:rfc:`791`]:
+
+        * Loose Source Route
+
+          .. code:: text
+
+             +--------+--------+--------+---------//--------+
+             |10000011| length | pointer|     route data    |
+             +--------+--------+--------+---------//--------+
+
+        * Strict Source Route
+
+          .. code:: text
+
+             +--------+--------+--------+---------//--------+
+             |10001001| length | pointer|     route data    |
+             +--------+--------+--------+---------//--------+
+
+        * Record Route
+
+          .. code:: text
+
+             +--------+--------+--------+---------//--------+
+             |00000111| length | pointer|     route data    |
+             +--------+--------+--------+---------//--------+
+
+        Arguments:
+            size (int): length of option
+            kind (Literal[7, 131, 137]): option kind value (RR/LSR/SSR)
 
         Returns:
-            * dict -- extracted option with route data
+            DataType_Opt_Route_Data: extracted option with route data
 
-        Structure of these options:
-            * [RFC 791] Loose Source Route
-                +--------+--------+--------+---------//--------+
-                |10000011| length | pointer|     route data    |
-                +--------+--------+--------+---------//--------+
-            * [RFC 791] Strict Source Route
-                +--------+--------+--------+---------//--------+
-                |10001001| length | pointer|     route data    |
-                +--------+--------+--------+---------//--------+
-            * [RFC 791] Record Route
-                +--------+--------+--------+---------//--------+
-                |00000111| length | pointer|     route data    |
-                +--------+--------+--------+---------//--------+
-
-            Octets      Bits        Name                    Description
-              0           0     ip.opt.kind             Kind (7/131/137)
-              0           0     ip.opt.type.copy        Copied Flag (0)
-              0           1     ip.opt.type.class       Option Class (0/1)
-              0           3     ip.opt.type.number      Option Number (3/7/9)
-              1           8     ip.opt.length           Length
-              2          16     ip.opt.pointer          Pointer (≥4)
-              3          24     ip.opt.data             Route Data
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         if size < 3 or (size - 3) % 4 != 0:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         _rptr = self._read_unpack(1)
-
         if _rptr < 4:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         data = dict(
             kind=kind,
@@ -496,7 +484,7 @@ class IPv4(IP):
         while counter < endpoint:
             counter += 4
             address.append(self._read_ipv4_addr())
-        data['ip'] = address or None
+        data['data'] = tuple(address) or None
 
         return data
 
@@ -544,7 +532,7 @@ class IPv4(IP):
 
         """
         if size != 8:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         _type = self._read_opt_type(kind)
         _fcrr = self._read_binary(1)
@@ -555,7 +543,7 @@ class IPv4(IP):
         _qsnn = int(_nonr[:30], base=2)
 
         if _func != 0 and _func != 8:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         data = dict(
             kind=kind,
@@ -605,7 +593,7 @@ class IPv4(IP):
 
         """
         if size > 40 or size < 4:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         _tptr = self._read_unpack(1)
         _oflg = self._read_binary(1)
@@ -613,7 +601,7 @@ class IPv4(IP):
         _flag = int(_oflg[4:], base=2)
 
         if _tptr < 5:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         data = dict(
             kind=kind,
@@ -627,7 +615,7 @@ class IPv4(IP):
         endpoint = min(_tptr, size)
         if _flag == 0:
             if (size - 4) % 4 != 0:
-                raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
             counter = 5
             timestamp = list()
             while counter < endpoint:
@@ -637,7 +625,7 @@ class IPv4(IP):
             data['timestamp'] = timestamp or None
         elif _flag == 1 or _flag == 3:
             if (size - 4) % 8 != 0:
-                raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
             counter = 5
             ipaddress = list()
             timestamp = list()
@@ -686,7 +674,7 @@ class IPv4(IP):
 
         """
         if size != 12:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         _idnm = self._read_unpack(2)
         _ohcn = self._read_unpack(2)
@@ -743,7 +731,7 @@ class IPv4(IP):
 
         """
         if size < 3:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         _clvl = self._read_unpack(1)
 
@@ -760,7 +748,7 @@ class IPv4(IP):
                 _flag = self._read_binary(1)
                 if (counter < size - 1 and not int(_flag[7], base=2)) \
                         or (counter == size - 1 and int(_flag[7], base=2)):
-                    raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+                    raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
                 _dict = dict()
                 for (index, bit) in enumerate(_flag[:5]):
@@ -797,7 +785,7 @@ class IPv4(IP):
 
         """
         if size != 4:
-            raise ProtocolError(f'{self.alias}: [Optno {kind}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         _code = self._read_unpack(2)
 

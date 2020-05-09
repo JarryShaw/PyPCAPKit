@@ -70,7 +70,7 @@ class AH(IPsec):
     def protocol(self):
         """Name of next layer protocol.
 
-        :rtype: str
+        :rtype: pcapkit.const.reg.transtype.TransType
         """
         return self._info.next  # pylint: disable=E1101
 

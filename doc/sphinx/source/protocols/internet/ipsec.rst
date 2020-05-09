@@ -19,4 +19,4 @@ Security (IPsec) protocol family [*]_, eg.
    <hr />
 
 .. [*] https://en.wikipedia.org/wiki/IPsec
-.. [*] Not implemented.
+.. [*] :class:`~pcapkit.protocols.internet.esp.ESP` is currently **NOT** implemented.
