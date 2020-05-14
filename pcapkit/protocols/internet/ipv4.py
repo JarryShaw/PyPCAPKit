@@ -491,44 +491,43 @@ class IPv4(IP):
     def _read_mode_qs(self, size, kind):
         """Read Quick Start option.
 
-        Positional arguments:
-            * size - int, length of option
-            * kind - int, 25 (QS)
+        Structure of Quick-Start (QS) option [:rfc:`4782`]:
+
+        * A Quick-Start Request
+
+          .. code:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |   Option      |  Length=8     | Func. | Rate  |   QS TTL      |
+             |               |               | 0000  |Request|               |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                        QS Nonce                           | R |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        * Report of Approved Rate
+
+          .. code:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |   Option      |  Length=8     | Func. | Rate  |   Not Used    |
+             |               |               | 1000  | Report|               |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                        QS Nonce                           | R |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            size (int): length of option
+            kind (Literal[25]): option kind value (QS)
 
         Returns:
-            * dict -- extracted Quick Start (QS) option
+            DataType_Opt_QuickStart: extracted Quick Start option
 
-        Structure of Quick-Start (QS) option [RFC 4782]:
-            * A Quick-Start Request.
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |   Option      |  Length=8     | Func. | Rate  |   QS TTL      |
-                |               |               | 0000  |Request|               |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |                        QS Nonce                           | R |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            * Report of Approved Rate.
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |   Option      |  Length=8     | Func. | Rate  |   Not Used    |
-                |               |               | 1000  | Report|               |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |                        QS Nonce                           | R |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-
-            Octets      Bits        Name                    Description
-              0           0     ip.qs.kind              Kind (25)
-              0           0     ip.qs.type.copy         Copied Flag (0)
-              0           1     ip.qs.type.class        Option Class (0)
-              0           3     ip.qs.type.number       Option Number (25)
-              1           8     ip.qs.length            Length (8)
-              2          16     ip.qs.func              Function (0/8)
-              2          20     ip.qs.rate              Rate Request / Report (in Kbps)
-              3          24     ip.qs.ttl               QS TTL / None
-              4          32     ip.qs.nounce            QS Nounce
-              7          62     -                       Reserved (\x00\x00)
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         if size != 8:
@@ -542,7 +541,7 @@ class IPv4(IP):
         _nonr = self._read_binary(4)
         _qsnn = int(_nonr[:30], base=2)
 
-        if _func != 0 and _func != 8:
+        if _func not in (0, 8):
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
         data = dict(
@@ -560,14 +559,8 @@ class IPv4(IP):
     def _read_mode_ts(self, size, kind):
         """Read Time Stamp option.
 
-        Positional arguments:
-            * size - int, length of option
-            * kind - int, 68 (TS)
+        Structure of Timestamp (TS) option [:rfc:`791`]::
 
-        Returns:
-            * dict -- extracted Time Stamp (TS) option
-
-        Structure of Timestamp (TS) option [RFC 791]:
             +--------+--------+--------+--------+
             |01000100| length | pointer|oflw|flg|
             +--------+--------+--------+--------+
@@ -579,17 +572,15 @@ class IPv4(IP):
                               .
                               .
 
-            Octets      Bits        Name                    Description
-              0           0     ip.ts.kind              Kind (25)
-              0           0     ip.ts.type.copy         Copied Flag (0)
-              0           1     ip.ts.type.class        Option Class (0)
-              0           3     ip.ts.type.number       Option Number (25)
-              1           8     ip.ts.length            Length (≤40)
-              2          16     ip.ts.pointer           Pointer (≥5)
-              3          24     ip.ts.overflow          Overflow Octets
-              3          28     ip.ts.flag              Flag
-              4          32     ip.ts.ip                Internet Address
-              8          64     ip.ts.timestamp         Timestamp
+        Arguments:
+            size (int): length of option
+            kind (Literal[68]): option kind value (TS)
+
+        Returns:
+            DataType_Opt_TimeStamp: extracted Time Stamp option
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         if size > 40 or size < 4:
@@ -623,19 +614,19 @@ class IPv4(IP):
                 time = self._read_unpack(4, lilendian=True)
                 timestamp.append(datetime.datetime.fromtimestamp(time))
             data['timestamp'] = timestamp or None
-        elif _flag == 1 or _flag == 3:
+        elif _flag in (1, 3):
             if (size - 4) % 8 != 0:
                 raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
             counter = 5
-            ipaddress = list()
+            ipaddress = list()  # pylint: disable=redefined-outer-name
             timestamp = list()
             while counter < endpoint:
                 counter += 8
                 ipaddress.append(self._read_ipv4_addr())
                 time = self._read_unpack(4, lilendian=True)
                 timestamp.append(datetime.datetime.fromtimestamp(time))
-            data['ip'] = ipaddress or None
-            data['timestamp'] = timestamp or None
+            data['ip'] = tuple(ipaddress) or None
+            data['timestamp'] = tuple(timestamp) or None
         else:
             data['data'] = self._read_fileng(size - 4) or None
 
@@ -644,14 +635,8 @@ class IPv4(IP):
     def _read_mode_tr(self, size, kind):
         """Read Traceroute option.
 
-        Positional arguments:
-            size - int, length of option
-            kind - int, 82 (TR)
+        Structure of Traceroute (TR) option [:rfc:`6814`]::
 
-        Returns:
-            * dict -- extracted Traceroute (TR) option
-
-        Structure of Traceroute (TR) option [RFC 1393][RFC 6814]:
              0               8              16              24
             +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
             |F| C |  Number |    Length     |          ID Number            |
@@ -661,16 +646,15 @@ class IPv4(IP):
             |                     Originator IP Address                     |
             +---------------+---------------+---------------+---------------+
 
-            Octets      Bits        Name                    Description
-              0           0     ip.tr.kind              Kind (82)
-              0           0     ip.tr.type.copy         Copied Flag (0)
-              0           1     ip.tr.type.class        Option Class (0)
-              0           3     ip.tr.type.number       Option Number (18)
-              1           8     ip.tr.length            Length (12)
-              2          16     ip.tr.id                ID Number
-              4          32     ip.tr.ohc               Outbound Hop Count
-              6          48     ip.tr.rhc               Return Hop Count
-              8          64     ip.tr.ip                Originator IP Address
+        Arguments:
+            size (int): length of option
+            kind (Literal[82]): option kind value (TR)
+
+        Returns:
+            DataType_Opt_Traceroute: extracted Traceroute option
+
+        Raises:
+            ProtocolError: If ``size`` is **NOT** ``12``.
 
         """
         if size != 12:
@@ -696,38 +680,31 @@ class IPv4(IP):
     def _read_mode_sec(self, size, kind):
         """Read options with security info.
 
-        Positional arguments:
-            size - int, length of option
-            kind - int, 130 (SEC )/ 133 (ESEC)
+        Structure of these options [:rfc:`1108`]:
 
-        Returns:
-            * dict -- extracted option with security info (E/SEC)
+        * Security (SEC)
 
-        Structure of these options:
-            * [RFC 1108] Security (SEC)
-                +------------+------------+------------+-------------//----------+
-                |  10000010  |  XXXXXXXX  |  SSSSSSSS  |  AAAAAAA[1]    AAAAAAA0 |
-                |            |            |            |         [0]             |
-                +------------+------------+------------+-------------//----------+
-                  TYPE = 130     LENGTH   CLASSIFICATION         PROTECTION
-                                               LEVEL              AUTHORITY
-                                                                    FLAGS
-            * [RFC 1108] Extended Security (ESEC):
-                +------------+------------+------------+-------//-------+
-                |  10000101  |  000LLLLL  |  AAAAAAAA  |  add sec info  |
-                +------------+------------+------------+-------//-------+
-                 TYPE = 133      LENGTH     ADDITIONAL      ADDITIONAL
-                                           SECURITY INFO     SECURITY
-                                            FORMAT CODE        INFO
+          .. code:: text
 
-            Octets      Bits        Name                    Description
-              0           0     ip.sec.kind             Kind (130)
-              0           0     ip.sec.type.copy        Copied Flag (1)
-              0           1     ip.sec.type.class       Option Class (0)
-              0           3     ip.sec.type.number      Option Number (2)
-              1           8     ip.sec.length           Length (≥3)
-              2          16     ip.sec.level            Classification Level
-              3          24     ip.sec.flags            Protection Authority Flags
+             +------------+------------+------------+-------------//----------+
+             |  10000010  |  XXXXXXXX  |  SSSSSSSS  |  AAAAAAA[1]    AAAAAAA0 |
+             |            |            |            |         [0]             |
+             +------------+------------+------------+-------------//----------+
+               TYPE = 130     LENGTH   CLASSIFICATION         PROTECTION
+                                            LEVEL              AUTHORITY
+                                                                 FLAGS
+        * Extended Security (ESEC)
+
+          .. code:: text
+
+             +------------+------------+------------+-------//-------+
+             |  10000101  |  000LLLLL  |  AAAAAAAA  |  add sec info  |
+             +------------+------------+------------+-------//-------+
+              TYPE = 133      LENGTH     ADDITIONAL      ADDITIONAL
+                                        SECURITY INFO     SECURITY
+                                         FORMAT CODE        INFO
+
+        c
 
         """
         if size < 3:
@@ -753,7 +730,7 @@ class IPv4(IP):
                 _dict = dict()
                 for (index, bit) in enumerate(_flag[:5]):
                     _auth = _PROTECTION_AUTHORITY.get(index)
-                    _dict[_auth] = True if int(bit, base=2) else False
+                    _dict[_auth] = bool(int(bit, base=2))
                 _list.append(Info(_dict))
             data['flags'] = tuple(_list)
 
@@ -762,26 +739,21 @@ class IPv4(IP):
     def _read_mode_rsralt(self, size, kind):
         """Read Router Alert option.
 
-        Positional arguments:
-            size - int, length of option
-            kind - int, 148 (RTRALT)
+        Structure of Router Alert (RTRALT) option [:rfc:`2113`]::
 
-        Returns:
-            * dict -- extracted Router Alert (RTRALT) option
-
-        Structure of Router Alert (RTRALT) option [RFC 2113]:
             +--------+--------+--------+--------+
             |10010100|00000100|  2 octet value  |
             +--------+--------+--------+--------+
 
-            Octets      Bits        Name                    Description
-              0           0     ip.rsralt.kind          Kind (148)
-              0           0     ip.rsralt.type.copy     Copied Flag (1)
-              0           1     ip.rsralt.type.class    Option Class (0)
-              0           3     ip.rsralt.type.number   Option Number (20)
-              1           8     ip.rsralt.length        Length (4)
-              2          16     ip.rsralt.alert         Alert
-              2          16     ip.rsralt.code          Alert Code
+        Arguments:
+            size (int): length of option
+            kind (Literal[140]): option kind value (RTRALT)
+
+        Returns:
+            DataType_Opt_RouterAlert: extracted option with security info
+
+        Raises:
+            ProtocolError: If ``size`` is **NOT** ``4``.
 
         """
         if size != 4:
@@ -793,7 +765,7 @@ class IPv4(IP):
             kind=kind,
             type=self._read_opt_type(kind),
             length=size,
-            alert=_ROUTER_ALERT.get(_code, 'Reserved'),
+            alert=_ROUTER_ALERT.get(_code),
             code=_code,
         )
 

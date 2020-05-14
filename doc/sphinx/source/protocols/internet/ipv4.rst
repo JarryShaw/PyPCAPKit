@@ -34,11 +34,11 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. .. autoclass:: pcapkit.protocols.internet.ipv4.IPv4
-..    :members:
-..    :undoc-members:
-..    :private-members:
-..    :show-inheritance:
+.. autoclass:: pcapkit.protocols.internet.ipv4.IPv4
+   :members:
+   :undoc-members:
+   :private-members:
+   :show-inheritance:
 
 .. data:: pcapkit.protocols.internet.ipv4.IPv4_OPT
    :type: DataType_IPv4_OPT
@@ -470,7 +470,251 @@ Octets      Bits        Name                    Description
 
       Route data.
 
+IPv4 Quick Start Options
+~~~~~~~~~~~~~~~~~~~~~~~~
 
+For IPv4 Quick Start options as described in :rfc:`4782`,
+its structure is described as below:
+
+======= ========= ======================== =====================================
+Octets      Bits        Name                    Description
+======= ========= ======================== =====================================
+  0           0   ``ip.qs.kind``              Kind (``25``)
+  0           0   ``ip.qs.type.copy``         Copied Flag (``0``)
+  0           1   ``ip.qs.type.class``        Option Class (``0``)
+  0           3   ``ip.qs.type.number``       Option Number (``25``)
+  1           8   ``ip.qs.length``            Length (``8``)
+  2          16   ``ip.qs.func``              Function (``0``/``8``)
+  2          20   ``ip.qs.rate``              Rate Request / Report (in Kbps)
+  3          24   ``ip.qs.ttl``               QS TTL / :data:`None`
+  4          32   ``ip.qs.nounce``            QS Nounce
+  7          62                               Reserved (``\x00\x00``)
+======= ========= ======================== =====================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_QuickStart
+
+   :bases: DataType_Opt
+
+   Structure of Quick-Start (QS) option [:rfc:`4782`].
+
+   .. attribute:: func
+      :type: pcapkit.const.ipv4.qs_function.QSFunction
+
+      Function.
+
+   .. attribute:: rate
+      :type: int
+
+      Rate request / report (in Kbps).
+
+   .. attribute:: ttl
+      :type: Optional[int]
+
+      QS TTL.
+
+   .. attribute:: nounce
+      :type: int
+
+      QS nounce.
+
+IPv4 Time Stamp Option
+~~~~~~~~~~~~~~~~~~~~~~
+
+For IPv4 Time Stamp option as described in :rfc:`791`,
+its structure is described as below:
+
+======= ========= ======================== =====================================
+Octets      Bits        Name                    Description
+======= ========= ======================== =====================================
+  0           0   ``ip.ts.kind``              Kind (``25``)
+  0           0   ``ip.ts.type.copy``         Copied Flag (``0``)
+  0           1   ``ip.ts.type.class``        Option Class (``0``)
+  0           3   ``ip.ts.type.number``       Option Number (``25``)
+  1           8   ``ip.ts.length``            Length (``≤40``)
+  2          16   ``ip.ts.pointer``           Pointer (``≥5``)
+  3          24   ``ip.ts.overflow``          Overflow Octets
+  3          28   ``ip.ts.flag``              Flag
+  4          32   ``ip.ts.ip``                Internet Address
+  8          64   ``ip.ts.timestamp``         Timestamp
+======= ========= ======================== =====================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_TimeStamp
+
+   :bases: DataType_Opt
+
+   Structure of Timestamp (TS) option [:rfc:`791`].
+
+   .. attribute:: pointer
+      :type: int
+
+      Pointer.
+
+   .. attribute:: overflow
+      :type: int
+
+      Overflow octets.
+
+   .. attribute:: flag
+      :type: int
+
+      Flag.
+
+   .. attribute:: ip
+      :type: Optional[Tuple[ipaddress.IPv4Address]]
+
+      Array of Internet addresses (if :attr:`flag` is ``1``/``3``).
+
+   .. attribute:: timestamp
+      :type: Optional[Tuple[datetime.datetime]]
+
+      Array of timestamps (if :attr:`flag` is ``0``/``1``/``3``).
+
+   .. attribute:: data
+      :type: Optional[bytes]
+
+      Timestamp data (if :attr:`flag` is unknown).
+
+IPv4 Traceroute Option
+~~~~~~~~~~~~~~~~~~~~~~
+
+For IPv4 Traceroute option as described in :rfc:`6814`,
+its structure is described as below:
+
+======= ========= ======================== =====================================
+Octets      Bits        Name                    Description
+======= ========= ======================== =====================================
+  0           0     ip.tr.kind              Kind (82)
+  0           0     ip.tr.type.copy         Copied Flag (0)
+  0           1     ip.tr.type.class        Option Class (0)
+  0           3     ip.tr.type.number       Option Number (18)
+  1           8     ip.tr.length            Length (12)
+  2          16     ip.tr.id                ID Number
+  4          32     ip.tr.ohc               Outbound Hop Count
+  6          48     ip.tr.rhc               Return Hop Count
+  8          64     ip.tr.ip                Originator IP Address
+======= ========= ======================== =====================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_Traceroute
+
+   :bases: DataType_Opt
+
+   Structure of Traceroute (TR) option [:rfc:`6814`].
+
+   .. attribute:: id
+      :type: int
+
+      ID number.
+
+   .. attribute:: ohc
+      :type: int
+
+      Outbound hop count.
+
+   .. attribute:: rhc
+      :type: int
+
+      Return hop count.
+
+   .. attribute:: ip
+      :type: ipaddress.IPv4Address
+
+      Originator IP address.
+
+IPv4 Options with Security Info
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For IPv4 options with security info as described in :rfc:`1108`,
+its structure is described as below:
+
+======= ========= ======================== =====================================
+Octets      Bits        Name                    Description
+======= ========= ======================== =====================================
+  0           0   ``ip.sec.kind``             Kind (``130``/``133``)
+  0           0   ``ip.sec.type.copy``        Copied Flag (``1``)
+  0           1   ``ip.sec.type.class``       Option Class (``0``)
+  0           3   ``ip.sec.type.number``      Option Number (``2``)
+  1           8   ``ip.sec.length``           Length (``≥3``)
+  2          16   ``ip.sec.level``            Classification Level
+  3          24   ``ip.sec.flags``            Protection Authority Flags
+======= ========= ======================== =====================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_Security_Info
+
+   :bases: DataType_Opt
+
+   Structure of IPv4 options with security info [:rfc:`791`].
+
+   .. attribute:: level
+      :type: pcapkit.const.ipv4.classification_level.ClassificationLevel
+
+      Classification level.
+
+   .. attribute:: flags
+      :type: Tuple[DataType_SEC_Flags]
+
+      Array of protection authority flags.
+
+.. class:: DataType_SEC_Flags
+
+   :bases: pcapkit.corekit.infoclass.Info
+
+   Protection authority flags, as mapping of protection authority bit assignments
+   :class:`enumeration <pcapkit.const.ipv4.protection_authority.ProtectionAuthority>`
+   and :data:`bool` flags.
+
+IPv4 Traceroute Option
+~~~~~~~~~~~~~~~~~~~~~~
+
+For IPv4 Router Alert option as described in :rfc:`2113`,
+its structure is described as below:
+
+======= ========= ========================= =====================================
+Octets      Bits        Name                    Description
+======= ========= ========================= =====================================
+  0           0   ``ip.rsralt.kind``          Kind (``148``)
+  0           0   ``ip.rsralt.type.copy``     Copied Flag (``1``)
+  0           1   ``ip.rsralt.type.class``    Option Class (``0``)
+  0           3   ``ip.rsralt.type.number``   Option Number (``20``)
+  1           8   ``ip.rsralt.length``        Length (``4``)
+  2          16   ``ip.rsralt.alert``         Alert
+  2          16   ``ip.rsralt.code``          Alert Code
+======= ========= ========================= =====================================
+
+.. raw:: html
+
+   <br />
+
+.. class:: DataType_Opt_RouterAlert
+
+   :bases: DataType_Opt
+
+   Structure of Router Alert (RTRALT) option [:rfc:`2113`].
+
+   .. attribute:: alert
+      :type: pcapkit.const.ipv4.router_alert.RouterAlert
+
+      Alert.
+
+   .. attribute:: code
+      :type: int
+
+      Alert code.
 
 .. raw:: html
 
