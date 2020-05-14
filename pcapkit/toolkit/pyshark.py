@@ -53,7 +53,7 @@ def tcp_traceflow(packet):
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP
-          flow tracing (:term:`tcp.trace`) will be returned; otherwise, returns ``None``.
+          flow tracing (:term:`tcp.trace`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`~pcapkit.foundation.traceflow.TraceFlow`
