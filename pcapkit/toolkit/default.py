@@ -20,10 +20,10 @@ def ipv4_reassembly(frame):
 
         * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
           if it contains IPv4 layer (:class:`pcapkit.protocols.internet.ipv4.IPv4`) and
-          the **DF** (:attr:`pcapkit.protocols.internet.ipv4.IPv4.info.flags.df`) flag is
-          ``False``.
+          the **DF** (:attr:`IPv4.flags.df <pcapkit.protocols.internet.ipv4.DataType_IPv4_Flags.df>`)
+          flag is :data:`False`.
         * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4
-          reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns ``None``.
+          reassembly (c.f. :term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
         :class:`~pcapkit.reassembly.ipv4.IPv4Reassembly`

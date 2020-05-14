@@ -8,7 +8,7 @@ Protocol Family
 with detailed implementation and methods.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    pcap/index
    link/index

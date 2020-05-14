@@ -22,7 +22,7 @@ efficiency in some way.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 2
 
    protocols/index
    reassembly/index

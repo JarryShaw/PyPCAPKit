@@ -1,83 +1,84 @@
 # -*- coding: utf-8 -*-
 """fragment header for IPv6
 
-`pcapkit.protocols.internet.ipv6_frag` contains `IPv6_Frag`
+:mod:`pcapkit.protocols.internet.ipv6_frag` contains
+:class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
 only, which implements extractor for Fragment Header for
-IPv6 (IPv6-Frag), whose structure is described as below.
+IPv6 (IPv6-Frag) [*]_, whose structure is described as
+below:
 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Next Header  |   Reserved    |      Fragment Offset    |Res|M|
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                         Identification                        |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+======= ========= ==================== =======================
+Octets      Bits        Name                    Description
+======= ========= ==================== =======================
+  0           0   ``frag.next``               Next Header
+  1           8                               Reserved
+  2          16   ``frag.offset``             Fragment Offset
+  3          29                               Reserved
+  3          31   ``frag.mf``                 More Flag
+  4          32   ``frag.id``                 Identification
+======= ========= ==================== =======================
+
+.. [*] https://en.wikipedia.org/wiki/IPv6_packet#Fragment
 
 """
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['IPv6_Frag']
 
 
 class IPv6_Frag(Internet):
-    """This class implements Fragment Header for IPv6.
+    """This class implements Fragment Header for IPv6."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Methods:
-        * read_ipv6_frag -- read Fragment Header for IPv6 (IPv6-Frag)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['Fragment Header for IPv6']
+        """
         return 'Fragment Header for IPv6'
 
     @property
     def alias(self):
-        """Acronym of corresponding protocol."""
+        """Acronym of corresponding protocol.
+
+        :rtype: Literal['IPv6-Frag']
+        """
         return 'IPv6-Frag'
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: int
+        """
         return self._info.length  # pylint: disable=E1101
 
     @property
     def payload(self):
-        """Payload of current instance."""
+        """Payload of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        :rtype: pcapkit.protocols.protocol.Protocol
+        """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.transtype.TransType
+        """
         return self._info.next  # pylint: disable=E1101
 
     ##########################################################################
@@ -87,20 +88,20 @@ class IPv6_Frag(Internet):
     def read_ipv6_frag(self, length, extension):
         """Read Fragment Header for IPv6.
 
-        Structure of IPv6-Frag header [RFC 8200]:
+        Structure of IPv6-Frag header [:rfc:`8200`]::
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |   Reserved    |      Fragment Offset    |Res|M|
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |                         Identification                        |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     frag.next               Next Header
-              1           8     -                       Reserved
-              2          16     frag.offset             Fragment Offset
-              3          29     -                       Reserved
-              3          31     frag.mf                 More Flag
-              4          32     frag.id                 Identification
+        Args:
+            length (int): packet length
+            extension (bool): if the packet is used as an IPv6 extension header
+
+        Returns:
+            DataType_IPv6_Frag: Parsed packet data.
 
         """
         if length is None:
@@ -115,7 +116,7 @@ class IPv6_Frag(Internet):
             next=_next,
             length=8,
             offset=int(_offm[:13], base=2),
-            mf=True if int(_offm[15], base=2) else False,
+            mf=bool(int(_offm[15], base=2)),
             id=_ipid,
         )
 
@@ -131,10 +132,38 @@ class IPv6_Frag(Internet):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):
+    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the protocol is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._extf = extension
         self._info = Info(self.read_ipv6_frag(length, extension))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[8]
+        """
         return 8
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(44)
