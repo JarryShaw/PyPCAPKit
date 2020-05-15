@@ -16,6 +16,7 @@ internet layer, with detailed implementation and methods.
    ipsec
    ipv4
    ipv6_frag
+   ipv6_opts
 
 Base Protocol
 -------------

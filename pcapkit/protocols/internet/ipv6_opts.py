@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 """destination options for IPv6
 
-`pcapkit.protocols.internet.ipv6_opts` contains
-`IPv6_Opts` only, which implements extractor for
-Destination Options for IPv6 (IPv6-Opts), whose structure
-is described as below.
+:mod:`pcapkit.protocols.internet.ipv6_opts` contains
+:class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
+only, which implements extractor for Destination Options
+for IPv6 (IPv6-Opts) [*]_, whose structure is described
+as below:
 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Next Header  |  Hdr Ext Len  |                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
-|                                                               |
-.                                                               .
-.                            Options                            .
-.                                                               .
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+======= ========= =================== =================================
+Octets      Bits        Name                    Description
+======= ========= =================== =================================
+  0           0   ``opt.next``              Next Header
+  1           8   ``opt.length``            Header Extensive Length
+  2          16   ``opt.options``           Options
+======= ========= =================== =================================
+
+.. [*] https://en.wikipedia.org/wiki/IPv6_packet#Hop-by-hop_options_and_destination_options
 
 """
 import datetime
@@ -25,13 +26,14 @@ from pcapkit.const.ipv6.qs_function import QSFunction as _QS_FUNC
 from pcapkit.const.ipv6.router_alert import RouterAlert as _ROUTER_ALERT
 from pcapkit.const.ipv6.seed_id import SeedID as _IPv6_Opts_SEED
 from pcapkit.const.ipv6.tagger_id import TaggerID as _TID_TYPE
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 __all__ = ['IPv6_Opts']
 
-# IPv6_Opts Unknown Option Actions
+#: IPv6_Opts Unknown Option Actions
 _IPv6_Opts_ACT = {
     '00': 'skip over this option and continue processing the header',
     '01': 'discard the packet',
@@ -45,7 +47,7 @@ _IPv6_Opts_ACT = {
           'pointing to the unrecognized Option Type',
 }
 
-# IPv6_Opts Options
+# :IPv6_Opts Options
 _IPv6_Opts_OPT = {
     0x00: ('pad', 'Pad1'),                                                  # [RFC 8200] 0
     0x01: ('pad', 'PadN'),                                                  # [RFC 8200]
@@ -64,7 +66,7 @@ _IPv6_Opts_OPT = {
     0xEE: ('ip_dff', 'Depth-First Forwarding'),                             # [RFC 6971]
 }
 
-# IPv6_Opts Unknown Option Descriptions
+#: IPv6_Opts Unknown Option Descriptions
 _IPv6_Opts_NULL = {
     0x1E: 'RFC3692-style Experiment',                               # [RFC 4727]
     0x3E: 'RFC3692-style Experiment',                               # [RFC 4727]
@@ -79,70 +81,56 @@ _IPv6_Opts_NULL = {
 }
 
 
-def _IPv6_Opts_PROC(abbr):
-    """IPv6_Opts option process functions."""
-    return eval(f'lambda self, code, *, desc: self._read_opt_{abbr}(code, desc=desc)')
-
-
 class IPv6_Opts(Internet):
-    """This class implements Destination Options for IPv6.
+    """This class implements Destination Options for IPv6."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Methods:
-        * read_ipv6_opts -- read Destination Options for IPv6 (IPv6-Opts)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of current protocol."""
-        return 'IPv6 Hop-by-Hop Options'
+        """Name of current protocol.
+
+        :rtype: Literal['Destination Options for IPv6']
+        """
+        return 'Destination Options for IPv6'
 
     @property
     def alias(self):
-        """Acronym of corresponding protocol."""
+        """Acronym of corresponding protocol.
+
+        :rtype: Literal['IPv6-Opts']
+        """
         return 'IPv6-Opts'
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: int
+        """
         return self._info.length  # pylint: disable=E1101
 
     @property
     def payload(self):
-        """Payload of current instance."""
+        """Payload of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        :rtype: pcapkit.protocols.protocol.Protocol
+        """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.transtype.TransType
+        """
         return self._info.next  # pylint: disable=E1101
 
     ##########################################################################
@@ -152,7 +140,8 @@ class IPv6_Opts(Internet):
     def read_ipv6_opts(self, length, extension):
         """Read Destination Options for IPv6.
 
-        Structure of IPv6-Opts header [RFC 8200]:
+        Structure of IPv6-Opts header [:rfc:`8200`]::
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |  Hdr Ext Len  |                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
@@ -163,10 +152,12 @@ class IPv6_Opts(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     opt.next                Next Header
-              1           8     opt.length              Header Extensive Length
-              2          16     opt.options             Options
+        Args:
+            length (int): packet length
+            extension (bool): if the packet is used as an IPv6 extension header
+
+        Returns:
+            DataType_IPv6_Opts: Parsed packet data.
 
         """
         if length is None:
@@ -197,51 +188,78 @@ class IPv6_Opts(Internet):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):
+    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the protocol is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._extf = extension
         self._info = Info(self.read_ipv6_opts(length, extension))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[2]
+        """
         return 2
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(60)
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_opt_type(self, kind):
+    def _read_opt_type(self, kind):  # pylint: disable=no-self-use
         """Read option type field.
 
-        Positional arguments:
-            * kind -- int, option kind value
+        Arguments:
+            kind (int): option kind value
 
         Returns:
-            * dict -- extracted IPv6_Opts option
-
-        Structure of option type field [RFC 791]:
-
-            Octets      Bits        Name                        Descriptions
-              0           0     ipv6_opts.opt.type.value    Option Number
-              0           0     ipv6_opts.opt.type.action   Action (00-11)
-              0           2     ipv6_opts.opt.type.change   Change Flag (0/1)
+            DataType_IPv6_Opts_Option_Type: extracted IPv6-Opts option type field
 
         """
         bin_ = bin(kind)[2:].zfill(8)
+
         type_ = dict(
             value=kind,
             action=_IPv6_Opts_ACT.get(bin_[:2]),
-            change=True if int(bin_[2], base=2) else False,
+            change=bool(int(bin_[2], base=2)),
         )
+
         return type_
 
     def _read_ipv6_opts_options(self, length):
-        """Read IPv6_Opts options.
+        """Read IPv6-Opts options.
 
         Positional arguments:
-            * length -- int, length of options
+            length (int): length of options
 
         Returns:
-            * dict -- extracted IPv6_Opts options
+            Tuple[Tuple[pcapkit.const.ipv6.option.Option],
+            Dict[str, DataType_Option]]: extracted IPv6-Opts options
+
+        Raises:
+            ProtocolError: If the threshold is **NOT** matching.
 
         """
         counter = 0         # length of read options
@@ -256,7 +274,9 @@ class IPv6_Opts(Internet):
 
             # extract parameter
             abbr, desc = _IPv6_Opts_OPT.get(code, ('None', 'Unassigned'))
-            data = _IPv6_Opts_PROC(abbr)(self, code, desc=desc)
+            meth_name = f'_read_opt_{abbr}'
+            meth = getattr(self, meth_name, '_read_opt_none')
+            data = meth(self, code, desc=desc)
             enum = _OPT_TYPE.get(code)
 
             # record parameter data
@@ -277,20 +297,24 @@ class IPv6_Opts(Internet):
         return tuple(optkind), options
 
     def _read_opt_none(self, code, *, desc):
-        """Read IPv6_Opts unassigned options.
+        """Read IPv6-Opts unassigned options.
 
-        Structure of IPv6_Opts unassigned options [RFC 8200]:
+        Structure of IPv6-Opts unassigned options [:rfc:`8200`]:
+
+        .. code:: text
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
             |  Option Type  |  Opt Data Len |  Option Data
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
 
-            Octets      Bits        Name                        Description
-              0           0     ipv6_opts.opt.type          Option Type
-              0           0     ipv6_opts.opt.type.value    Option Number
-              0           0     ipv6_opts.opt.type.action   Action (00-11)
-              0           2     ipv6_opts.opt.type.change   Change Flag (0/1)
-              1           8     ipv6_opts.opt.length        Length of Option Data
-              2          16     ipv6_opts.opt.data          Option Data
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_None: parsed option data
 
         """
         _type = self._read_opt_type(code)
@@ -307,32 +331,37 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_pad(self, code, *, desc):
-        """Read IPv6_Opts padding options.
+        """Read IPv6-Opts padding options.
 
-        Structure of IPv6_Opts padding options [RFC 8200]:
-            * Pad1 Option:
-                +-+-+-+-+-+-+-+-+
-                |       0       |
-                +-+-+-+-+-+-+-+-+
+        Structure of IPv6-Opts padding options [:rfc:`8200`]:
 
-                Octets      Bits        Name                        Description
-                  0           0     ipv6_opts.pad.type          Option Type
-                  0           0     ipv6_opts.pad.type.value    Option Number
-                  0           0     ipv6_opts.pad.type.action   Action (00)
-                  0           2     ipv6_opts.pad.type.change   Change Flag (0)
+        * ``Pad1`` option:
 
-            * PadN Option:
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
-                |       1       |  Opt Data Len |  Option Data
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+          .. code:: text
 
-                Octets      Bits        Name                        Description
-                  0           0     ipv6_opts.pad.type          Option Type
-                  0           0     ipv6_opts.pad.type.value    Option Number
-                  0           0     ipv6_opts.pad.type.action   Action (00)
-                  0           2     ipv6_opts.pad.type.change   Change Flag (0)
-                  1           8     ipv6_opts.opt.length        Length of Option Data
-                  2          16     ipv6_opts.pad.padding       Padding
+             +-+-+-+-+-+-+-+-+
+             |       0       |
+             +-+-+-+-+-+-+-+-+
+
+        * ``PadN`` option:
+
+          .. code:: text
+
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+             |       1       |  Opt Data Len |  Option Data
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
+
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            Union[DataType_Dest_Opt_Pad1, DataType_Dest_Opt_PadN]: parsed option data
+
+        Raises:
+            ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.
 
         """
         _type = self._read_opt_type(code)
@@ -354,33 +383,40 @@ class IPv6_Opts(Internet):
                 padding=_padn,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         return opt
 
     def _read_opt_tun(self, code, *, desc):
-        """Read IPv6_Opts Tunnel Encapsulation Limit option.
+        """Read IPv6-Opts Tunnel Encapsulation Limit option.
 
-        Structure of IPv6_Opts Tunnel Encapsulation Limit option [RFC 2473]:
+        Structure of IPv6-Opts Tunnel Encapsulation Limit option [:rfc:`2473`]:
+
+        .. code:: text
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |Hdr Ext Len = 0| Opt Type = 4  |Opt Data Len=1 |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             | Tun Encap Lim |PadN Opt Type=1|Opt Data Len=1 |       0       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     ipv6_opts.tun.type          Option Type
-              0           0     ipv6_opts.tun.type.value    Option Number
-              0           0     ipv6_opts.tun.type.action   Action (00)
-              0           2     ipv6_opts.tun.type.change   Change Flag (0)
-              1           8     ipv6_opts.tun.length        Length of Option Data
-              2          16     ipv6_opts.tun.limit         Tunnel Encapsulation Limit
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_TUN: parsed option data
+
+        Raises:
+            ProtocolError: If ``ipv6_opts.tun.length`` is **NOT** ``1``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 1:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _limt = self._read_unpack(1)
 
         opt = dict(
@@ -393,37 +429,36 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_ra(self, code, *, desc):
-        """Read IPv6_Opts Router Alert option.
+        """Read IPv6-Opts Router Alert option.
 
-        Structure of IPv6_Opts Router Alert option [RFC 2711]:
+        Structure of IPv6-Opts Router Alert option [:rfc:`2711`]:
+
+        .. code:: text
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |0 0 0|0 0 1 0 1|0 0 0 0 0 0 1 0|        Value (2 octets)       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     ipv6_opts.ra.type           Option Type
-              0           0     ipv6_opts.ra.type.value     Option Number
-              0           0     ipv6_opts.ra.type.action    Action (00)
-              0           2     ipv6_opts.ra.type.change    Change Flag (0)
-              1           8     ipv6_opts.opt.length        Length of Option Data
-              2          16     ipv6_opts.ra.value          Value
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_RA: parsed option data
+
+        Raises:
+            ProtocolError: If ``ipv6_opts.tun.length`` is **NOT** ``2``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _rval = self._read_unpack(2)
 
-        if 4 <= _rval <= 35:
-            _dscp = f'Aggregated Reservation Nesting Level {_rval-4}'   # [RFC 3175]
-        elif 36 <= _rval <= 67:
-            _dscp = f'QoS NSLP Aggregation Level {_rval-36}'            # [RFC 5974]
-        elif 65503 <= _rval <= 65534:
-            _dscp = 'Reserved for experimental use'                     # [RFC 5350]
-        else:
-            _dscp = _ROUTER_ALERT.get(_rval, 'Unassigned')
-
+        _dscp = _ROUTER_ALERT.get(_rval)
         opt = dict(
             desc=desc,
             type=_type,
@@ -435,9 +470,12 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_calipso(self, code, *, desc):
-        """Read IPv6_Opts CALIPSO option.
+        """Read IPv6-Opts ``CALIPSO`` option.
 
-        Structure of IPv6_Opts CALIPSO option [RFC 5570]:
+        Structure of IPv6-Opts ``CALIPSO`` option [:rfc:`5570`]:
+
+        .. code:: text
+
             ------------------------------------------------------------
             | Next Header | Hdr Ext Len   | Option Type | Option Length|
             +-------------+---------------+-------------+--------------+
@@ -448,27 +486,27 @@ class IPv6_Opts(Internet):
             |      Compartment Bitmap (Optional; variable length)      |
             +-------------+---------------+-------------+--------------+
 
-            Octets      Bits        Name                            Description
-              0           0     ipv6_opts.calipso.type          Option Type
-              0           0     ipv6_opts.calipso.type.value    Option Number
-              0           0     ipv6_opts.calipso.type.action   Action (00)
-              0           2     ipv6_opts.calipso.type.change   Change Flag (0)
-              1           8     ipv6_opts.calipso.length        Length of Option Data
-              2          16     ipv6_opts.calipso.domain        CALIPSO Domain of Interpretation
-              6          48     ipv6_opts.calipso.cmpt_len      Cmpt Length
-              7          56     ipv6_opts.calipso.level         Sens Level
-              8          64     ipv6_opts.calipso.chksum        Checksum (CRC-16)
-              9          72     ipv6_opts.calipso.bitmap        Compartment Bitmap
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_CALIPSO: parsed option data
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 8 and _size % 8 != 0:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _cmpt = self._read_unpack(4)
         _clen = self._read_unpack(1)
         if _clen % 2 != 0:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _sens = self._read_unpack(1)
         _csum = self._read_fileng(2)
 
@@ -495,49 +533,47 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_smf_dpd(self, code, *, desc):
-        """Read IPv6_Opts SMF_DPD option.
+        """Read IPv6-Opts ``SMF_DPD`` option.
 
-        Structure of IPv6_Opts SMF_DPD option [RFC 5570]:
-            * IPv6 SMF_DPD Option Header in I-DPD mode
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                               ...              |0|0|0|  01000  | Opt. Data Len |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |0|TidTy| TidLen|             TaggerID (optional) ...           |
-                +-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |                               |            Identifier  ...
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        Structure of IPv6-Opts ``SMF_DPD`` option [:rfc:`5570`]:
 
-                Octets      Bits        Name                            Description
-                  0           0     ipv6_opts.smf_dpd.type          Option Type
-                  0           0     ipv6_opts.smf_dpd.type.value    Option Number
-                  0           0     ipv6_opts.smf_dpd.type.action   Action (00)
-                  0           2     ipv6_opts.smf_dpd.type.change   Change Flag (0)
-                  1           8     ipv6_opts.smf_dpd.length        Length of Option Data
-                  2          16     ipv6_opts.smf_dpd.dpd_type      DPD Type (0)
-                  2          17     ipv6_opts.smf_dpd.tid_type      TaggerID Type
-                  2          20     ipv6_opts.smf_dpd.tid_len       TaggerID Length
-                  3          24     ipv6_opts.smf_dpd.tid           TaggerID
-                  ?           ?     ipv6_opts.smf_dpd.id            Identifier
+        * IPv6 ``SMF_DPD`` option header in **I-DPD** mode
 
-            * IPv6 SMF_DPD Option Header in H-DPD Mode
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                               ...              |0|0|0| OptType | Opt. Data Len |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |1|    Hash Assist Value (HAV) ...
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+          .. code:: text
 
-                Octets      Bits        Name                        Description
-                  0           0     ipv6_opts.smf_dpd.type         Option Type
-                  0           0     ipv6_opts.smf_dpd.type.value   Option Number
-                  0           0     ipv6_opts.smf_dpd.type.action  Action (00)
-                  0           2     ipv6_opts.smf_dpd.type.change  Change Flag (0)
-                  1           8     ipv6_opts.smf_dpd.length       Length of Option Data
-                  2          16     ipv6_opts.smf_dpd.dpd_type     DPD Type (1)
-                  2          17     ipv6_opts.smf_dpd.hav          Hash Assist Value
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                            ...              |0|0|0|  01000  | Opt. Data Len |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |0|TidTy| TidLen|             TaggerID (optional) ...           |
+             +-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                               |            Identifier  ...
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        * IPv6 ``SMF_DPD`` option header in **H-DPD** mode
+
+          .. code:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                            ...              |0|0|0| OptType | Opt. Data Len |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |1|    Hash Assist Value (HAV) ...
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            Union[DataType_Dest_Opt_SMF_I_PDP, DataType_Dest_Opt_SMF_H_PDP]: parsed option data
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         _type = self._read_opt_type(code)
@@ -548,9 +584,10 @@ class IPv6_Opts(Internet):
             _mode = 'I-DPD'
             _tidt = _TID_TYPE.get(_tidd[1:4], 'Unassigned')
             _tidl = int(_tidd[4:], base=2)
-            if _tidt == 'NULL':
+
+            if _tidt == _TID_TYPE.NULL:
                 if _tidl != 0:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
                 _iden = self._read_fileng(_size-1)
 
                 opt = dict(
@@ -562,9 +599,9 @@ class IPv6_Opts(Internet):
                     tid_len=_tidl,
                     id=_iden,
                 )
-            elif _tidt == 'IPv4':
+            elif _tidt == _TID_TYPE.IPv4:
                 if _tidl != 3:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
                 _tidf = self._read_fileng(4)
                 _iden = self._read_fileng(_size-4)
 
@@ -578,9 +615,9 @@ class IPv6_Opts(Internet):
                     tid=ipaddress.ip_address(_tidf),
                     id=_iden,
                 )
-            elif _tidt == 'IPv6':
+            elif _tidt == _TID_TYPE.IPv6:
                 if _tidl != 15:
-                    raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                    raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
                 _tidf = self._read_fileng(15)
                 _iden = self._read_fileng(_size-15)
 
@@ -609,6 +646,8 @@ class IPv6_Opts(Internet):
                     id=_iden,
                 )
         elif _tidd[0] == '1':
+            _mode = 'H-DPD'
+            _tidt = _TID_TYPE.get(_tidd[1:4])
             _data = self._read_binary(_size-1)
 
             opt = dict(
@@ -620,14 +659,17 @@ class IPv6_Opts(Internet):
                 hav=_tidd[1:] + _data,
             )
         else:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         return opt
 
     def _read_opt_pdm(self, code, *, desc):
-        """Read IPv6_Opts PDM option.
+        """Read IPv6-Opts ``PDM`` option.
 
-        Structure of IPv6_Opts PDM option [RFC 8250]:
+        Structure of IPv6-Opts ``PDM`` option [:rfc:`8250`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -638,24 +680,23 @@ class IPv6_Opts(Internet):
             |   Delta Time Last Received    |  Delta Time Last Sent         |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                        Description
-              0           0     ipv6_opts.pdm.type          Option Type
-              0           0     ipv6_opts.pdm.type.value    Option Number
-              0           0     ipv6_opts.pdm.type.action   Action (00)
-              0           2     ipv6_opts.pdm.type.change   Change Flag (0)
-              1           8     ipv6_opts.pdm.length        Length of Option Data
-              2          16     ipv6_opts.pdm.scaledtlr     Scale Delta Time Last Received
-              3          24     ipv6_opts.pdm.scaledtls     Scale Delta Time Last Sent
-              4          32     ipv6_opts.pdm.psntp         Packet Sequence Number This Packet
-              6          48     ipv6_opts.pdm.psnlr         Packet Sequence Number Last Received
-              8          64     ipv6_opts.pdm.deltatlr      Delta Time Last Received
-              10         80     ipv6_opts.pdm.deltatls      Delta Time Last Sent
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_PDM: parsed option data
+
+        Raises:
+            ProtocolError: If ``ipv6_opts.pdm.length`` is **NOT** ``10``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 10:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _stlr = self._read_unpack(1)
         _stls = self._read_unpack(1)
         _psnt = self._read_unpack(2)
@@ -677,46 +718,54 @@ class IPv6_Opts(Internet):
 
         return opt
 
-    def _read_opt_qs(self, code, *, desc):
-        """Read IPv6_Opts Quick Start option.
+    def _read_opt_qs(self, code, *, desc):  # pylint: disable=unused-argument
+        """Read IPv6-Opts Quick Start option.
 
-        Structure of IPv6_Opts Quick-Start option [RFC 4782]:
-            * A Quick-Start Request.
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |   Option      |  Length=6     | Func. | Rate  |   QS TTL      |
-                |               |               | 0000  |Request|               |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |                        QS Nonce                           | R |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            * Report of Approved Rate.
-                 0                   1                   2                   3
-                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |   Option      |  Length=6     | Func. | Rate  |   Not Used    |
-                |               |               | 1000  | Report|               |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                |                        QS Nonce                           | R |
-                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        Structure of IPv6-Opts Quick-Start option [:rfc:`4782`]:
 
-            Octets      Bits        Name                        Description
-              0           0     ipv6_opts.qs.type           Option Type
-              0           0     ipv6_opts.qs.type.value     Option Number
-              0           0     ipv6_opts.qs.type.action    Action (00)
-              0           2     ipv6_opts.qs.type.change    Change Flag (1)
-              1           8     ipv6_opts.qs.length         Length of Option Data
-              2          16     ipv6_opts.qs.func           Function (0/8)
-              2          20     ipv6_opts.qs.rate           Rate Request / Report (in Kbps)
-              3          24     ipv6_opts.qs.ttl            QS TTL / None
-              4          32     ipv6_opts.qs.nounce         QS Nounce
-              7          62     -                           Reserved
+        * A Quick-Start Request:
+
+          .. code:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |   Option      |  Length=6     | Func. | Rate  |   QS TTL      |
+             |               |               | 0000  |Request|               |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                        QS Nonce                           | R |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        * Report of Approved Rate:
+
+          .. code:: text
+
+              0                   1                   2                   3
+              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |   Option      |  Length=6     | Func. | Rate  |   Not Used    |
+             |               |               | 1000  | Report|               |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+             |                        QS Nonce                           | R |
+             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_QS: parsed option data
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 6:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         _fcrr = self._read_binary(1)
         _func = int(_fcrr[:4], base=2)
@@ -726,7 +775,7 @@ class IPv6_Opts(Internet):
         _qsnn = int(_nonr[:30], base=2)
 
         if _func != 0 and _func != 8:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         data = dict(
             type=_type,
@@ -740,9 +789,12 @@ class IPv6_Opts(Internet):
         return data
 
     def _read_opt_rpl(self, code, *, desc):
-        """Read IPv6_Opts RPL option.
+        """Read IPv6-Opts ``RPL`` option.
 
-        Structure of IPv6_Opts RPL option [RFC 6553]:
+        Structure of IPv6-Opts ``RPL`` option [:rfc:`6553`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -753,25 +805,23 @@ class IPv6_Opts(Internet):
             |                         (sub-TLVs)                            |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Description
-              0           0     ipv6_opts.rpl.type              Option Type
-              0           0     ipv6_opts.rpl.type.value        Option Number
-              0           0     ipv6_opts.rpl.type.action       Action (01)
-              0           2     ipv6_opts.rpl.type.change       Change Flag (1)
-              1           8     ipv6_opts.rpl.length            Length of Option Data
-              2          16     ipv6_opts.rpl.flags             RPL Option Flags
-              2          16     ipv6_opts.rpl.flags.down        Down Flag
-              2          17     ipv6_opts.rpl.flags.rank_error  Rank-Error Flag
-              2          18     ipv6_opts.rpl.flags.fwd_error   Forwarding-Error Flag
-              3          24     ipv6_opts.rpl.id                RPLInstanceID
-              4          32     ipv6_opts.rpl.rank              SenderRank
-              6          48     ipv6_opts.rpl.data              Sub-TLVs
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_RPL: parsed option data
+
+        Raises:
+            ProtocolError: If ``ipv6_opts.rpl.length`` is **LESS THAN** ``4``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 4:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _flag = self._read_binary(1)
         _rpld = self._read_unpack(1)
         _rank = self._read_unpack(2)
@@ -781,9 +831,9 @@ class IPv6_Opts(Internet):
             type=_type,
             length=_size + 2,
             flags=dict(
-                down=True if int(_flag[0], base=2) else False,
-                rank_error=True if int(_flag[1], base=2) else False,
-                fwd_error=True if int(_flag[2], base=2) else False,
+                down=bool(int(_flag[0], base=2)),
+                rank_error=bool(int(_flag[1], base=2)),
+                fwd_error=bool(int(_flag[2], base=2)),
             ),
             id=_rpld,
             rank=_rank,
@@ -795,9 +845,12 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_mpl(self, code, *, desc):
-        """Read IPv6_Opts MPL option.
+        """Read IPv6-Opts ``MPL`` option.
 
-        Structure of IPv6_Opts MPL option [RFC 7731]:
+        Structure of IPv6-Opts ``MPL`` option [:rfc:`7731`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -806,28 +859,23 @@ class IPv6_Opts(Internet):
             | S |M|V|  rsv  |   sequence    |      seed-id (optional)       |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Description
-              0           0     ipv6_opts.mpl.type              Option Type
-              0           0     ipv6_opts.mpl.type.value        Option Number
-              0           0     ipv6_opts.mpl.type.action       Action (01)
-              0           2     ipv6_opts.mpl.type.change       Change Flag (1)
-              1           8     ipv6_opts.mpl.length            Length of Option Data
-              2          16     ipv6_opts.mpl.seed_len          Seed-ID Length
-              2          18     ipv6_opts.mpl.flags             MPL Option Flags
-              2          18     ipv6_opts.mpl.max               Maximum SEQ Flag
-              2          19     ipv6_opts.mpl.verification      Verification Flag
-              2          20     -                               Reserved
-              3          24     ipv6_opts.mpl.seq               Sequence
-              4          32     ipv6_opts.mpl.seed_id           Seed-ID
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_MPL: parsed option data
+
+        Raises:
+            ProtocolError: If the option is malformed.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size < 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
-
-        _type = self._read_opt_type(code)
-        _size = self._read_unpack(1)
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _smvr = self._read_binary(1)
         _seqn = self._read_unpack(1)
 
@@ -837,8 +885,8 @@ class IPv6_Opts(Internet):
             length=_size + 2,
             seed_len=_IPv6_Opts_SEED.get(int(_smvr[:2], base=2)),
             flags=dict(
-                max=True if int(_smvr[2], base=2) else False,
-                verification=True if int(_smvr[3], base=2) else False,
+                max=bool(int(_smvr[2], base=2)),
+                verification=bool(int(_smvr[3], base=2)),
             ),
             seq=_seqn,
         )
@@ -846,18 +894,18 @@ class IPv6_Opts(Internet):
         _kind = _smvr[:2]
         if _kind == '00':
             if _size != 2:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         elif _kind == '01':
             if _size != 4:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             opt['seed_id'] = self._read_unpack(2)
         elif _kind == '10':
             if _size != 10:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             opt['seed_id'] = self._read_unpack(8)
         elif _kind == '11':
             if _size != 18:
-                raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+                raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
             opt['seed_id'] = self._read_unpack(16)
         else:
             opt['seed_id'] = self._read_unpack(_size-2)
@@ -869,9 +917,12 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_ilnp(self, code, *, desc):
-        """Read IPv6_Opts ILNP Nonce option.
+        """Read IPv6-Opts ``ILNP`` Nonce option.
 
-        Structure of IPv6_Opts ILNP Nonce option [RFC 6744]:
+        Structure of IPv6-Opts ``ILNP`` Nonce option [:rfc:`6744`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -880,13 +931,14 @@ class IPv6_Opts(Internet):
             /                         Nonce Value                           /
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Description
-              0           0     ipv6_opts.ilnp.type             Option Type
-              0           0     ipv6_opts.ilnp.type.value       Option Number
-              0           0     ipv6_opts.ilnp.type.action      Action (10)
-              0           2     ipv6_opts.ilnp.type.change      Change Flag (0)
-              1           8     ipv6_opts.ilnp.length           Length of Option Data
-              2          16     ipv6_opts.ilnp.value            Nonce Value
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_ILNP: parsed option data
 
         """
         _type = self._read_opt_type(code)
@@ -903,9 +955,12 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_lio(self, code, *, desc):
-        """Read IPv6_Opts Line-Identification option.
+        """Read IPv6-Opts Line-Identification option.
 
-        Structure of IPv6_Opts Line-Identification option [RFC 6788]:
+        Structure of IPv6-Opts Line-Identification option [:rfc:`6788`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -914,14 +969,14 @@ class IPv6_Opts(Internet):
             | LineIDLen     |     Line ID...
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Description
-              0           0     ipv6_opts.lio.type              Option Type
-              0           0     ipv6_opts.lio.type.value        Option Number
-              0           0     ipv6_opts.lio.type.action       Action (10)
-              0           2     ipv6_opts.lio.type.change       Change Flag (0)
-              1           8     ipv6_opts.lio.length            Length of Option Data
-              2          16     ipv6_opts.lio.lid_len           Line ID Length
-              3          24     ipv6_opts.lio.lid               Line ID
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_LIO: parsed option data
 
         """
         _type = self._read_opt_type(code)
@@ -944,28 +999,35 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_jumbo(self, code, *, desc):
-        """Read IPv6_Opts Jumbo Payload option.
+        """Read IPv6-Opts Jumbo Payload option.
 
-        Structure of IPv6_Opts Jumbo Payload option [RFC 2675]:
+        Structure of IPv6-Opts Jumbo Payload option [:rfc:`2675`]:
+
+        .. code:: text
+
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                                             |  Option Type  |  Opt Data Len |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |                     Jumbo Payload Length                      |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Description
-              0           0     ipv6_opts.jumbo.type            Option Type
-              0           0     ipv6_opts.jumbo.type.value      Option Number
-              0           0     ipv6_opts.jumbo.type.action     Action (11)
-              0           2     ipv6_opts.jumbo.type.change     Change Flag (0)
-              1           8     ipv6_opts.jumbo.length          Length of Option Data
-              2          16     ipv6_opts.jumbo.payload_len     Jumbo Payload Length
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_Jumbo: parsed option data
+
+        Raises:
+            ProtocolError: If ``ipv6_opts.jumbo.length`` is **NOT** ``4``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 4:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _jlen = self._read_unpack(4)
 
         opt = dict(
@@ -978,9 +1040,12 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_home(self, code, *, desc):
-        """Read IPv6_Opts Home Address option.
+        """Read IPv6-Opts Home Address option.
 
-        Structure of IPv6_Opts Home Address option [RFC 6275]:
+        Structure of IPv6-Opts Home Address option [:rfc:`6275`]:
+
+        .. code:: text
+
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -995,19 +1060,23 @@ class IPv6_Opts(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Description
-              0           0     ipv6_opts.home.type             Option Type
-              0           0     ipv6_opts.home.type.value       Option Number
-              0           0     ipv6_opts.home.type.action      Action (11)
-              0           2     ipv6_opts.home.type.change      Change Flag (0)
-              1           8     ipv6_opts.home.length           Length of Option Data
-              2          16     ipv6_opts.home.ip               Home Address
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_Home: parsed option data
+
+        Raises:
+            ProtocolError: If ``ipv6_opts.jumbo.length`` is **NOT** ``16``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 16:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _addr = self._read_fileng(16)
 
         opt = dict(
@@ -1020,9 +1089,12 @@ class IPv6_Opts(Internet):
         return opt
 
     def _read_opt_ip_dff(self, code, *, desc):
-        """Read IPv6_Opts IP_DFF option.
+        """Read IPv6-Opts ``IP_DFF`` option.
 
-        Structure of IPv6_Opts IP_DFF option [RFC 6971]:
+        Structure of IPv6-Opts ``IP_DFF`` option [:rfc:`6971`]:
+
+        .. code:: text
+
                                  1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -1031,24 +1103,23 @@ class IPv6_Opts(Internet):
             |VER|D|R|0|0|0|0|        Sequence Number        |      Pad1     |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                            Description
-              0           0     ipv6_opts.ip_dff.type           Option Type
-              0           0     ipv6_opts.ip_dff.type.value     Option Number
-              0           0     ipv6_opts.ip_dff.type.action    Action (11)
-              0           2     ipv6_opts.ip_dff.type.change    Change Flag (1)
-              1           8     ipv6_opts.ip_dff.length         Length of Option Data
-              2          16     ipv6_opts.ip_dff.version        Version
-              2          18     ipv6_opts.ip_dff.flags          Flags
-              2          18     ipv6_opts.ip_dff.flags.dup      DUP Flag
-              2          19     ipv6_opts.ip_dff.flags.ret      RET Flag
-              2          20     -                               Reserved
-              3          24     ipv6_opts.ip_dff.seq            Sequence Number
+        Args:
+            code (int): option type value
+
+        Keyword Args:
+            desc (str): option description
+
+        Returns:
+            DataType_Dest_Opt_IP_DFF: parsed option data
+
+        Raises:
+            ProtocolError: If ``ipv6_opts.ip_dff.length`` is **NOT** ``2``.
 
         """
         _type = self._read_opt_type(code)
         _size = self._read_unpack(1)
         if _size != 2:
-            raise ProtocolError(f'{self.alias}: [Optno {code}] invalid format')
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
         _verf = self._read_binary(1)
         _seqn = self._read_unpack(2)
 
@@ -1056,10 +1127,10 @@ class IPv6_Opts(Internet):
             desc=desc,
             type=_type,
             length=_size + 2,
-            version=_verf[:2],
+            version=int(_verf[:2], base=2),
             flags=dict(
-                dup=True if int(_verf[2], base=2) else False,
-                ret=True if int(_verf[3], base=2) else False,
+                dup=bool(int(_verf[2], base=2)),
+                ret=bool(int(_verf[3], base=2)),
             ),
             seq=_seqn,
         )

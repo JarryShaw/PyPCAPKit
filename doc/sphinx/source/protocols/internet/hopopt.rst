@@ -649,6 +649,12 @@ Octets      Bits        Name                      Description
 
       Delta time last sent.
 
+HOPOPT Quick Start Option
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For HOPOPT Quick Start option as described in :rfc:`4782`,
+its structure is described as below:
+
 ======= ========= =============================== ======================================
 Octets      Bits        Name                      Description
 ======= ========= =============================== ======================================
@@ -672,7 +678,7 @@ Octets      Bits        Name                      Description
 
    :bases: DataType_Option
 
-   Structure of HOPOPT ``PDM`` option [:rfc:`8250`].
+   Structure of HOPOPT Quick Start option [:rfc:`8250`].
 
    .. attribute:: func
       :type: pcapkit.const.ipv6.qs_function.QSFunction
