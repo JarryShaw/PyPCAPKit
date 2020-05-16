@@ -17,6 +17,7 @@ internet layer, with detailed implementation and methods.
    ipv4
    ipv6_frag
    ipv6_opts
+   ipv6_route
 
 Base Protocol
 -------------
