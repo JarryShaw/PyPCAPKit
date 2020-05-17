@@ -774,7 +774,7 @@ class IPv6_Opts(Internet):
         _nonr = self._read_binary(4)
         _qsnn = int(_nonr[:30], base=2)
 
-        if _func != 0 and _func != 8:
+        if _func not in (0, 8):
             raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
 
         data = dict(

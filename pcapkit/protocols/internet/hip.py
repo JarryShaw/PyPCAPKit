@@ -251,7 +251,8 @@ class HIP(Internet):
             version (Litreal[1, 2]): HIP version
 
         Returns:
-            Tuple[Tuple[pcapkit.const.hip.parameter.Parameter], DataType_Parameter]: extracted HIP parameters
+            Tuple[Tuple[pcapkit.const.hip.parameter.Parameter], DataType_Parameter]:
+            extracted HIP parameters
 
         Raises:
             ProtocolError: if packet length threshold check failed

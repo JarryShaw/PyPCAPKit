@@ -1,23 +1,24 @@
 # -*- coding: utf-8 -*-
 """user datagram protocol
 
-`pcapkit.protocols.transport.udp` contains `UDP` only,
+:mod:`pcapkit.protocols.transport.udp` contains
+:class:`~pcapkit.protocols.transport.udp.UDP` only,
 which implements extractor for User Datagram Protocol
-(UDP), whose structure is described as below.
+(UDP) [*]_, whose structure is described as below:
 
- 0      7 8     15 16    23 24    31
-+--------+--------+--------+--------+
-|     Source      |   Destination   |
-|      Port       |      Port       |
-+--------+--------+--------+--------+
-|                 |                 |
-|     Length      |    Checksum     |
-+--------+--------+--------+--------+
-|
-|          data octets ...
-+---------------- ...
+======= ========= ===================== ===============================
+Octets      Bits        Name                    Description
+======= ========= ===================== ===============================
+  0           0   ``udp.srcport``             Source Port
+  2          16   ``udp.dstport``             Destination Port
+  4          32   ``udp.len``                 Length (header includes)
+  6          48   ``udp.checksum``            Checksum
+======= ========= ===================== ===============================
+
+.. [*] https://en.wikipedia.org/wiki/User_Datagram_Protocol
 
 """
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.transport.transport import Transport
 
@@ -25,59 +26,42 @@ __all__ = ['UDP']
 
 
 class UDP(Transport):
-    """This class implements User Datagram Protocol.
+    """This class implements User Datagram Protocol."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Transport`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-        * src -- int, source port
-        * dst -- int, destination port
-
-    Methods:
-        * read_udp -- read User Datagram Protocol (UDP)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['User Datagram Protocol']
+        """
         return 'User Datagram Protocol'
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: Literal[8]
+        """
         return 8
 
     @property
     def src(self):
-        """Source port."""
+        """Source port.
+
+        :rtype: int
+        """
         return self._info.src  # pylint: disable=E1101
 
     @property
     def dst(self):
-        """Destination port."""
+        """Destination port.
+
+        :rtype: int
+        """
         return self._info.dst  # pylint: disable=E1101
 
     ##########################################################################
@@ -87,7 +71,8 @@ class UDP(Transport):
     def read_udp(self, length):
         """Read User Datagram Protocol (UDP).
 
-        Structure of UDP header [RFC 768]:
+        Structure of UDP header [:rfc:`768`]::
+
              0      7 8     15 16    23 24    31
             +--------+--------+--------+--------+
             |     Source      |   Destination   |
@@ -100,11 +85,11 @@ class UDP(Transport):
             |          data octets ...
             +---------------- ...
 
-            Octets      Bits        Name                    Description
-              0           0     udp.srcport             Source Port
-              2          16     udp.dstport             Destination Port
-              4          32     udp.len                 Length (header includes)
-              6          48     udp.checksum            Checksum
+        Args:
+            length (int): packet length
+
+        Returns:
+            DataType_UDP: Parsed packet data.
 
         """
         if length is None:
@@ -131,9 +116,36 @@ class UDP(Transport):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, **kwargs):
+    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._info = Info(self.read_udp(length))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[8]
+        """
         return 8
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(17)
