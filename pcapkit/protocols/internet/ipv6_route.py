@@ -16,7 +16,7 @@ Octets      Bits        Name                    Description
   4          32   ``route.data``            Type-Specific Data
 ======= ========= ==================== ===============================
 
-.. [*]
+.. [*] https://en.wikipedia.org/wiki/IPv6_packet#Routing
 
 """
 import ipaddress

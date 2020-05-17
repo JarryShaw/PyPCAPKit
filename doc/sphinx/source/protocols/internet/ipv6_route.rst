@@ -227,4 +227,4 @@ Octets      Bits        Name                    Description
 
    <hr />
 
-.. [*]
+.. [*] https://en.wikipedia.org/wiki/IPv6_packet#Routing

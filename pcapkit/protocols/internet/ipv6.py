@@ -1,40 +1,32 @@
 # -*- coding: utf-8 -*-
 """internet protocol version 6
 
-`pcapkit.protocols.internet.ipv6` contains `IPv6` only,
-which implements extractor for Internet Protocol version 6
-(IPv6), whose structure is described as below.
+:mod:`pcapkit.protocols.internet.ipv6` contains
+:class:`~pcapkit.protocols.internet.ipv6.IPv6` only,
+which implements extractor for Internet Protocol
+version 6 (IPv6) [*]_, whose structure is described
+as below:
 
- 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|Version| Traffic Class |           Flow Label                  |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|         Payload Length        |  Next Header  |   Hop Limit   |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-+                                                               +
-|                                                               |
-+                         Source Address                        +
-|                                                               |
-+                                                               +
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-+                                                               +
-|                                                               |
-+                      Destination Address                      +
-|                                                               |
-+                                                               +
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+======= ========= ===================== =======================================
+Octets      Bits        Name                    Description
+======= ========= ===================== =======================================
+  0           0   ``ip.version``              Version (``6``)
+  0           4   ``ip.class``                Traffic Class
+  1          12   ``ip.label``                Flow Label
+  4          32   ``ip.payload``              Payload Length (header excludes)
+  6          48   ``ip.next``                 Next Header
+  7          56   ``ip.limit``                Hop Limit
+  8          64   ``ip.src``                  Source Address
+  24        192   ``ip.dst``                  Destination Address
+======= ========= ===================== =======================================
+
+.. [*] https://en.wikipedia.org/wiki/IPv6_packet
 
 """
-# TODO: Implements IPv6 extension headers.
-
 import ipaddress
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as EXT_HDR
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ip import IP
 
@@ -42,56 +34,34 @@ __all__ = ['IPv6']
 
 
 class IPv6(IP):
-    """This class implements Internet Protocol version 6.
+    """This class implements Internet Protocol version 6."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-        * src -- str, source IP address
-        * dst -- str, destination IP address
-
-    Methods:
-        * read_ipv6 -- read Internet Protocol version 6 (IPv6)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-        * _read_ip_hextet -- read first four hextets of IPv6
-        * _read_ip_addr -- read IP address
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of corresponding protocol."""
+        """Name of corresponding protocol.
+
+        :rtype: Literal['Internet Protocol version 6']
+        """
         return 'Internet Protocol version 6'
 
     @property
     def length(self):
-        """Header length of corresponding protocol."""
+        """Header length of corresponding protocol.
+
+        :rtype: int
+        """
         return self._info.hdr_len  # pylint: disable=E1101
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.transtype.TransType
+        """
         return self._info.protocol  # pylint: disable=E1101
 
     ##########################################################################
@@ -101,7 +71,7 @@ class IPv6(IP):
     def read_ipv6(self, length):
         """Read Internet Protocol version 6 (IPv6).
 
-        Structure of IPv6 header [RFC 2460]:
+        Structure of IPv6 header [:rfc:`2460`]::
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -127,15 +97,11 @@ class IPv6(IP):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     ip.version              Version (6)
-              0           4     ip.class                Traffic Class
-              1          12     ip.label                Flow Label
-              4          32     ip.payload              Payload Length (header excludes)
-              6          48     ip.next                 Next Header
-              7          56     ip.limit                Hop Limit
-              8          64     ip.src                  Source Address
-              24        192     ip.dst                  Destination Address
+        Args:
+            length (int): packet length
+
+        Returns:
+            DataType_IPv6_Route: Parsed packet data.
 
         """
         if length is None:
@@ -148,16 +114,16 @@ class IPv6(IP):
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
 
-        ipv6 = dict(
-            version=_htet[0],
-            tclass=_htet[1],
-            label=_htet[2],
-            payload=_plen,
-            next=_next,
-            limit=_hlmt,
-            src=_srca,
-            dst=_dsta,
-        )
+        ipv6 = {
+            'version': _htet[0],
+            'class': _htet[1],
+            'label': _htet[2],
+            'payload': _plen,
+            'next': _next,
+            'limit': _hlmt,
+            'src': _srca,
+            'dst': _dsta,
+        }
 
         hdr_len = 40
         raw_len = ipv6['payload']
@@ -169,81 +135,78 @@ class IPv6(IP):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, **kwargs):
+    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._info = Info(self.read_ipv6(length))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[40]
+        """
         return 40
 
     @classmethod
-    def id(cls):
-        return cls.__name__
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(41)
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
     def _read_ip_hextet(self):
-        """Read first four hextets of IPv6."""
+        """Read first four hextets of IPv6.
+
+        Returns:
+            Tuple[int, int, int]: Parsed hextets data, including version number,
+            traffic class and flow label.
+
+        """
         _htet = self._read_fileng(4).hex()
-        _vers = _htet[0]                    # version number (6)
+        _vers = int(_htet[0], base=16)      # version number (6)
         _tcls = int(_htet[0:2], base=16)    # traffic class
         _flow = int(_htet[2:], base=16)     # flow label
 
         return (_vers, _tcls, _flow)
 
     def _read_ip_addr(self):
-        """Read IP address."""
-        # adlt = []       # list of IPv6 hexadecimal address
-        # ctr_ = collections.defaultdict(int)
-        #                 # counter for consecutive groups of zero value
-        # ptr_ = 0        # start pointer of consecutive groups of zero value
-        # last = False    # if last hextet/group is zero value
-        # omit = False    # omitted flag, since IPv6 address can omit to `::` only once
-
-        # for _ in range(8):
-        #     hex_ = self._read_fileng(2).hex().lstrip('0')
-
-        #     if hex_:    # if hextet is not '', directly append
-        #         adlt.append(hex_)
-        #         last = False
-        #     else:       # if hextet is '', append '0'
-        #         adlt.append('0')
-        #         if last:    # if last hextet is '', ascend counter
-        #             ctr_[ptr_] += 1
-        #         else:       # if last hextet is not '', record pointer
-        #             ptr_ = _
-        #             last = True
-        #             ctr_[ptr_] = 1
-
-        # ptr_ = max(ctr_, key=ctr_.get) if ctr_ else 0   # fetch start pointer with longest zero values
-        # end_ = ptr_ + ctr_[ptr_]                        # calculate end pointer
-
-        # if ctr_[ptr_] > 1:      # only omit if zero values are in a consecutive group
-        #     del adlt[ptr_:end_] # remove zero values
-
-        #     if ptr_ == 0 and end_ == 8:     # insert `::` if IPv6 unspecified address (::)
-        #         adlt.insert(ptr_, '::')
-        #     elif ptr_ == 0 or end_ == 8:    # insert `:` if zero values are from start or at end
-        #         adlt.insert(ptr_, ':')
-        #     else:                           # insert '' otherwise
-        #         adlt.insert(ptr_, '')
-
-        # addr = ':'.join(adlt)
-        # return addr
-        return ipaddress.ip_address(self._read_fileng(16))
-
-    def _decode_next_layer(self, ipv6, proto=None, length=None):
-        """Decode next layer extractor.
-
-        Positional arguments:
-            * ipv6 -- dict, info buffer
-            * proto -- str, next layer protocol name
-            * length -- int, valid (not padding) length
+        """Read IP address.
 
         Returns:
-            * dict -- current protocol with next layer extracted
+            ipaddress.IPv6Address: Parsed IP address.
+
+        """
+        return ipaddress.ip_address(self._read_fileng(16))
+
+    def _decode_next_layer(self, ipv6, proto=None, length=None):  # pylint: disable=arguments-differ
+        """Decode next layer extractor.
+
+        Arguments:
+            ipv6 (DataType_IPv6): info buffer
+            proto (str): next layer protocol name
+            length (int): valid (*not padding*) length
+
+        Returns:
+            DataType_IPv6: current protocol with next layer extracted
 
         """
         hdr_len = 40                # header length
