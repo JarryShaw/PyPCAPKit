@@ -1,23 +1,31 @@
 # -*- coding: utf-8 -*-
 """internetwork packet exchange
 
-`pcapkit.protocols.internet.ipx` contains `IPX` only,
+:mod:`pcapkit.protocols.internet.ipx` contains
+:class:`~pcapkit.protocols.internet.ipx.IPX` only,
 which implements extractor for Internetwork Packet
-Exchange (IPX), whose structure is described as below.
+Exchange (IPX) [*]_, whose structure is described
+as below:
 
+======= ========= ====================== =====================================
 Octets      Bits        Name                    Description
-  0           0     ipx.cksum               Checksum
-  2          16     ipx.len                 Packet Length (header includes)
-  4          32     ipx.count               Transport Control (hop count)
-  5          40     ipx.type                Packet Type
-  6          48     ipx.dst                 Destination Address
-  18        144     ipx.src                 Source Address
+======= ========= ====================== =====================================
+  0           0   ``ipx.cksum``             Checksum
+  2          16   ``ipx.len``               Packet Length (header includes)
+  4          32   ``ipx.count``             Transport Control (hop count)
+  5          40   ``ipx.type``              Packet Type
+  6          48   ``ipx.dst``               Destination Address
+  18        144   ``ipx.src``               Source Address
+======= ========= ====================== =====================================
+
+.. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange
 
 """
 import textwrap
 
 from pcapkit.const.ipx.packet import Packet as TYPE
 from pcapkit.const.ipx.socket import Socket as SOCK
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 
@@ -25,65 +33,50 @@ __all__ = ['IPX']
 
 
 class IPX(Internet):
-    """This class implements Internetwork Packet Exchange.
+    """This class implements Internetwork Packet Exchange."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-        * src -- Info, source IPX address
-        * dst -- Info, destination IPX address
-
-    Methods:
-        * read_ipx -- read Internetwork Packet Exchange
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-        * _read_ipx_address -- read IPX address field
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of corresponding protocol."""
+        """Name of corresponding protocol.
+
+        :rtype: Literal['Internetwork Packet Exchange']
+        """
         return 'Internetwork Packet Exchange'
 
     @property
     def length(self):
-        """Header length of corresponding protocol."""
+        """Header length of corresponding protocol.
+
+        :rtype: Literal[30]
+        """
         return 30
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.transtype.TransType
+        """
         return self._info.type  # pylint: disable=E1101
 
     @property
     def src(self):
-        """Source IPX address."""
+        """Source IPX address.
+
+        :rtype: str
+        """
         return self._info.src.addr  # pylint: disable=E1101
 
     @property
     def dst(self):
-        """Destination IPX address."""
+        """Destination IPX address.
+
+        :rtype: str
+        """
         return self._info.dst.addr  # pylint: disable=E1101
 
     ##########################################################################
@@ -93,14 +86,11 @@ class IPX(Internet):
     def read_ipx(self, length):
         """Read Internetwork Packet Exchange.
 
-        Structure of IPX header [RFC 1132]:
-            Octets      Bits        Name                    Description
-              0           0     ipx.cksum               Checksum
-              2          16     ipx.len                 Packet Length (header includes)
-              4          32     ipx.count               Transport Control (hop count)
-              5          40     ipx.type                Packet Type
-              6          48     ipx.dst                 Destination Address
-              18        144     ipx.src                 Source Address
+        Args:
+            length (int): packet length
+
+        Returns:
+            DataType_IPX: Parsed packet data.
 
         """
         if length is None:
@@ -132,12 +122,39 @@ class IPX(Internet):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, **kwargs):
+    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._info = Info(self.read_ipx(length))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[30]
+        """
         return 30
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(111)
 
     ##########################################################################
     # Utilities.
@@ -146,11 +163,8 @@ class IPX(Internet):
     def _read_ipx_address(self):
         """Read IPX address field.
 
-        Structure of IPX address:
-            Octets      Bits        Name                    Description
-              0           0     ipx.addr.network        Network Number
-              4          32     ipx.addr.node           Node Number
-              10         80     ipx.addr.socket         Socket Number
+        Returns:
+            DataType_IPX_Address: Parsed IPX address field.
 
         """
         # Address Number

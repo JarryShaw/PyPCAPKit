@@ -1,87 +1,79 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=fixme
 """mobility header
 
-`pcapkit.protocols.internet.mh` contains `MH` only,
-which implements extractor for Mobility Header (MH),
-whose structure is described as below.
+:mod:`pcapkit.protocols.internet.mh` contains
+:class:`~pcapkit.protocols.internet.mh.MH` only,
+which implements extractor for Mobility Header
+(MH) [*]_, whose structure is described as below:
 
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Payload Proto |  Header Len   |   MH Type     |   Reserved    |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|           Checksum            |                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               |
-|                                                               |
-.                                                               .
-.                       Message Data                            .
-.                                                               .
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+======= ========= ================== ===============================
+Octets      Bits        Name                    Description
+======= ========= ================== ===============================
+  0           0   ``mh.next``                 Next Header
+  1           8   ``mh.length``               Header Length
+  2          16   ``mh.type``                 Mobility Header Type
+  3          24                               Reserved
+  4          32   ``mh.chksum``               Checksum
+  6          48   ``mh.data``                 Message Data
+======= ========= ================== ===============================
+
+.. [*] https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6
 
 """
 # TODO: Implements extractor for message data of all MH types.
 
 from pcapkit.const.mh.packet import Packet as _MOBILITY_TYPE
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['MH']
 
 
 class MH(Internet):
-    """This class implements Mobility Header.
+    """This class implements Mobility Header."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Methods:
-        * read_mh -- read Mobility Header (MH)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of current protocol."""
+        """Name of current protocol.
+
+        :rtype: Literal['Mobility Header']
+        """
         return 'Mobility Header'
 
     @property
     def length(self):
-        """Header length of current protocol."""
+        """Header length of current protocol.
+
+        :rtype: int
+        """
         return self._info.length  # pylint: disable=E1101
 
     @property
     def payload(self):
-        """Payload of current instance."""
+        """Payload of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        :rtype: pcapkit.protocols.protocol.Protocol
+        """
         if self.extension:  # pylint: disable=E1101
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
     @property
     def protocol(self):
-        """Name of next layer protocol."""
+        """Name of next layer protocol.
+
+        :rtype: pcapkit.const.reg.transtype.TransType
+        """
         return self._info.next  # pylint: disable=E1101
 
     ##########################################################################
@@ -91,7 +83,8 @@ class MH(Internet):
     def read_mh(self, length, extension):
         """Read Mobility Header.
 
-        Structure of MH header [RFC 6275]:
+        Structure of MH header [:rfc:`6275`]::
+
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             | Payload Proto |  Header Len   |   MH Type     |   Reserved    |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -104,13 +97,12 @@ class MH(Internet):
             |                                                               |
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-            Octets      Bits        Name                    Description
-              0           0     mh.next                 Next Header
-              1           8     mh.length               Header Length
-              2          16     mh.type                 Mobility Header Type
-              3          24     -                       Reserved
-              4          32     mh.chksum               Checksum
-              6          48     mh.data                 Message Data
+        Args:
+            length (int): packet length
+            extension (bool): if the packet is used as an IPv6 extension header
+
+        Returns:
+            DataType_MH: Parsed packet data.
 
         """
         if length is None:
@@ -121,13 +113,14 @@ class MH(Internet):
         _type = self._read_unpack(1)
         _temp = self._read_fileng(1)
         _csum = self._read_fileng(2)
-        # _data = self._read_fileng((_hlen+1)*8)
+        _data = self._read_fileng((_hlen+1)*8)
 
         mh = dict(
             next=_next,
             length=(_hlen + 1) * 8,
-            type=_MOBILITY_TYPE.get(_type, 'Unassigned'),
+            type=_MOBILITY_TYPE.get(_type),
             chksum=_csum,
+            data=_data,
         )
 
         length -= mh['length']
@@ -142,9 +135,37 @@ class MH(Internet):
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):
+    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
+        """Initialisation.
+
+        Args:
+            file (io.BytesIO): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the protocol is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         self._file = _file
         self._info = Info(self.read_mh(length, extension))
 
     def __length_hint__(self):
+        """Return an estimated length for the object.
+
+        :rtype: Literal[6]
+        """
         return 6
+
+    @classmethod
+    def __index__(cls):  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
+            protocol in `IANA`_.
+
+        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
+
+        """
+        return TransType(135)

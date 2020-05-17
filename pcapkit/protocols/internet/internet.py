@@ -43,6 +43,7 @@ class Internet(Protocol):  # pylint: disable=abstract-method
         44:  ('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
         51:  ('pcapkit.protocols.internet.ah',         'AH'),
         60:  ('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
+        111: ('pcapkit.protocols.internet.ipx',        'IPX'),
         135: ('pcapkit.protocols.internet.mh',         'MH'),
         139: ('pcapkit.protocols.internet.hip',        'HIP'),
     })
@@ -142,6 +143,8 @@ class Internet(Protocol):  # pylint: disable=abstract-method
              - :class:`~pcapkit.protocols.internet.ah.AH`
            * - 60
              - :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
+           * - 111
+             - :class:`~pcapkit.protocols.internet.ipx.IPX`
            * - 135
              - :class:`~pcapkit.protocols.internet.mh.MH`
            * - 139

@@ -19,6 +19,8 @@ internet layer, with detailed implementation and methods.
    ipv6_opts
    ipv6_route
    ipv6
+   ipx
+   mh
 
 Base Protocol
 -------------
@@ -79,6 +81,9 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
          * - 60
            - :mod:`pcapkit.protocols.internet.ipv6_opts`
            - :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
+         * - 111
+           - :mod:`pcapkit.protocols.internet.ipx`
+           - :class:`~pcapkit.protocols.internet.ipx.IPX`
          * - 135
            - :mod:`pcapkit.protocols.internet.mh`
            - :class:`~pcapkit.protocols.internet.mh.MH`

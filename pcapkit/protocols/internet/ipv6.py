@@ -101,7 +101,7 @@ class IPv6(IP):
             length (int): packet length
 
         Returns:
-            DataType_IPv6_Route: Parsed packet data.
+            DataType_IPv6: Parsed packet data.
 
         """
         if length is None:
