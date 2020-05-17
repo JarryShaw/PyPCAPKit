@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=bad-whitespace
 """root transport layer protocol
 
-`pcapkit.protocols.transport.transport` contains both
-`TP_PROTO` and `Transport`. The former is a dictionary
-of transport layer protocol numbers, registered in IANA.
-And the latter is a base class for transport layer
-protocols, eg. TCP and UDP.
+:mod:`pcapkit.protocols.transport.transport` contains
+:class:`~pcapkit.protocols.transport.transport.Transport`,
+which is a base class for transport layer protocols, eg.
+:class:`~pcapkit.protocols.transport.transport.tcp.TCP` and
+:class:`~pcapkit.protocols.transport.transport.udp.UDP`.
 
 """
 from pcapkit.const.reg.transtype import TransType as TP_PROTO
@@ -20,32 +21,14 @@ from pcapkit.utilities.decorators import beholder_ng
 __all__ = ['Transport', 'TP_PROTO']
 
 
-class Transport(Protocol):
-    """Abstract base class for transport layer protocol family.
+class Transport(Protocol):  # pylint: disable=abstract-method
+    """Abstract base class for transport layer protocol family."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * layer -- str, `Transport`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
 
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
+    #: Layer of protocol.
     __layer__ = 'Transport'
 
     ##########################################################################
@@ -55,36 +38,36 @@ class Transport(Protocol):
     # protocol layer
     @property
     def layer(self):
-        """Protocol layer."""
+        """Protocol layer.
+
+        :rtype: Literal['Transport']
+        """
         return self.__layer__
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _import_next_layer(self, proto, length):
+    def _import_next_layer(self, proto, length):  # pylint: disable=signature-differs
         """Import next layer extractor.
 
-        Positional arguments:
-            * proto -- str, next layer protocol name
-            * length -- int, valid (not padding) length
+        Arguments:
+            proto (str): next layer protocol name
+            length (int): valid (*non-padding*) length
 
         Returns:
-            * bool -- flag if extraction of next layer succeeded
-            * Info -- info of next layer
-            * ProtoChain -- protocol chain of next layer
-            * str -- alias of next layer
+            pcapkit.protocols.protocol.Protocol: instance of next layer
 
         """
         if self._exproto == 'null' and self._exlayer == 'None':
-            from pcapkit.protocols.raw import Raw as NextLayer
+            from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
         else:
-            from pcapkit.foundation.analysis import analyse as NextLayer
-        # from pcapkit.foundation.analysis import analyse as NextLayer
+            from pcapkit.foundation.analysis import analyse as protocol  # pylint: disable=import-outside-toplevel
+
         if length == 0:
             next_ = NoPayload()
         elif self._onerror:
-            next_ = beholder_ng(NextLayer)(self._file, length, _termination=self._sigterm)
+            next_ = beholder_ng(protocol)(self._file, length, _termination=self._sigterm)
         else:
-            next_ = NextLayer(self._file, length, _termination=self._sigterm)
+            next_ = protocol(self._file, length, _termination=self._sigterm)
         return next_

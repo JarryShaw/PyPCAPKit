@@ -130,6 +130,9 @@ class Protocol(metaclass=abc.ABCMeta):
     def decode(byte, *, encoding=None, errors='strict'):
         """Decode :obj:`bytes` into :obj:`str`.
 
+        Should decoding failed using ``encoding``, the method will try again decoding
+        the :obj:`bytes` as ``'unicode_escape'``.
+
         Args:
             byte (bytes): Source bytestring.
 
@@ -139,15 +142,15 @@ class Protocol(metaclass=abc.ABCMeta):
                 using |chardet|_. The fallback encoding would is **UTF-8**.
             errors (str): The error handling scheme to use for the handling of decoding errors.
                 The default is ``'strict'`` meaning that decoding errors raise a
-                ``UnicodeDecodeError``. Other possible values are ``'ignore'`` and ``'replace'``
+                :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
                 as well as any other name registered with :func:`codecs.register_error` that
-                can handle ``UnicodeDecodeError``.
+                can handle :exc:`UnicodeDecodeError`.
 
         Returns:
             str: Decoede string.
 
-        Should decoding failed using ``encoding``, the method will try again decoding
-        the :obj:`bytes` as ``'unicode_escape'``.
+        See Also:
+            :meth:`bytes.decode`
 
         .. |chardet| replace:: ``chardet``
         .. _chardet: https://chardet.readthedocs.io
@@ -163,6 +166,9 @@ class Protocol(metaclass=abc.ABCMeta):
     def unquote(url, *, encoding='utf-8', errors='replace'):
         """Unquote URLs into readable format.
 
+        Should decoding failed , the method will try again replacing ``'%'`` with ``'\\x'`` then
+        decoding the ``url`` as ``'unicode_escape'``.
+
         Args:
             url (str): URL string.
 
@@ -170,15 +176,12 @@ class Protocol(metaclass=abc.ABCMeta):
             encoding (str): The encoding with which to decode the :obj:`bytes`.
             errors (str): The error handling scheme to use for the handling of decoding errors.
                 The default is ``'strict'`` meaning that decoding errors raise a
-                ``UnicodeDecodeError``. Other possible values are ``'ignore'`` and ``'replace'``
+                :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
                 as well as any other name registered with :func:`codecs.register_error` that
-                can handle ``UnicodeDecodeError``.
+                can handle :exc:`UnicodeDecodeError`.
 
         Returns:
             str: Unquoted string.
-
-        Should decoding failed , the method will try again replacing ``'%'`` with ``'\\x'`` then
-        decoding the ``url`` as ``'unicode_escape'``.
 
         See Also:
             :func:`urllib.parse.unquote`
@@ -349,13 +352,13 @@ class Protocol(metaclass=abc.ABCMeta):
     def __getitem__(self, key):
         """Subscription (``getitem``) support.
 
-        * If ``key`` is a ``slice`` object, :exc:`ProtocolUnbound` will be
-          raised.
-        * If ``key`` is a :class`~pcapkit.protocols.protocol.Protocol` object,
-          the method will fetch its indexes (:meth`~pcapkit.protocols.protocol.Protocol.id`).
+        * If ``key`` is a ``slice`` object, :exc:`~pcapkit.utilities.exceptions.ProtocolUnbound`
+          will be raised.
+        * If ``key`` is a :class:`~pcapkit.protocols.protocol.Protocol` object,
+          the method will fetch its indexes (:meth:`~pcapkit.protocols.protocol.Protocol.id`).
         * Later, search the packet's chain of protocols with the calculated
           ``key``.
-        * If no matches, then raises :exc:`ProtocolNotFound`.
+        * If no matches, then raises :exc:`~pcapkit.utilities.exceptions.ProtocolNotFound`.
 
         Args:
             key (Union[str, Protocol, Type[Protocol]]): Indexing key.
