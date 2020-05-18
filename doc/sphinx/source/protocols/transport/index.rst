@@ -7,9 +7,10 @@ Transport Layer Protocols
 transport layer, with detailed implementation and methods.
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 5
 
    udp
+   tcp
 
 Base Protocol
 -------------

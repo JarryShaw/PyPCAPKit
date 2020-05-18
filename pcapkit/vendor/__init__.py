@@ -49,7 +49,7 @@ __all__ = [
     # OSPF
     'OSPF_Authentication', 'OSPF_Packet',
     # TCP
-    'TCP_Checksum', 'TCP_Option',
+    'TCP_Checksum', 'TCP_Option', 'TCP_MPTCPOption',
     # VLAN
     'VLAN_PriorityLevel',
 ]

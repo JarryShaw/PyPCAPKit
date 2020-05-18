@@ -43,7 +43,7 @@ Octets      Bits        Name                    Description
 .. data:: pcapkit.protocols.internet.ipv4.IPv4_OPT
    :type: DataType_IPv4_OPT
 
-   IPv4 option :data:`dict` parsing mapping.
+   IPv4 option :obj:`dict` parsing mapping.
 
    ===== ====== ======= ===== ======= ======== ===============================================
    copy  class  number  kind  length  process          name
@@ -272,7 +272,7 @@ Data Structure
 
    :bases: TypedDict
 
-   IPv4 option :data:`dict` parsing mapping.
+   IPv4 option :obj:`dict` parsing mapping.
 
    .. attribute:: flag
       :type: bool

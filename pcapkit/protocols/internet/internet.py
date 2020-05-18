@@ -36,8 +36,8 @@ class Internet(Protocol):  # pylint: disable=abstract-method
     __proto__ = collections.defaultdict(lambda: ('pcapkit.protocols.raw', 'Raw'), {
         0:   ('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
         4:   ('pcapkit.protocols.internet.ipv4',       'IPv4'),
-        6:   ('pcapkit.protocols.internet.tpc',        'TCP'),
-        17:  ('pcapkit.protocols.internet.tpc',        'UDP'),
+        6:   ('pcapkit.protocols.internet.tcp',        'TCP'),
+        17:  ('pcapkit.protocols.internet.udp',        'UDP'),
         41:  ('pcapkit.protocols.internet.ipv6',       'IPv6'),
         43:  ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
         44:  ('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
