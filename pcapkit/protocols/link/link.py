@@ -71,7 +71,7 @@ class Link(Protocol):  # pylint: disable=abstract-method
         _prot = ETHERTYPE.get(_byte)
         return _prot
 
-    def _import_next_layer(self, proto, length):  # pylint: disable=signature-differs
+    def _import_next_layer(self, proto, length=None):
         """Import next layer extractor.
 
         This method currently supports following protocols as registered in

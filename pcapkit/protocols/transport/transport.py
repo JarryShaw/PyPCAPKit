@@ -48,7 +48,7 @@ class Transport(Protocol):  # pylint: disable=abstract-method
     # Utilities.
     ##########################################################################
 
-    def _import_next_layer(self, proto, length):  # pylint: disable=signature-differs
+    def _import_next_layer(self, proto, length=None):
         """Import next layer extractor.
 
         Arguments:

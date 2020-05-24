@@ -1,34 +1,38 @@
+# -*- coding: utf-8 -*-
 """hypertext transfer protocol (HTTP/2)
 
-`pcapkit.protocols.application.httpv2` contains `HTTPv2`
+:mod:`pcapkit.protocols.application.httpv2` contains
+:class:`~pcapkit.protocols.application.httpv2.HTTPv2`
 only, which implements extractor for Hypertext Transfer
-Protocol (HTTP/2), whose structure is described as below.
+Protocol (HTTP/2) [*]_, whose structure is described as
+below:
 
-+-----------------------------------------------+
-|                 Length (24)                   |
-+---------------+---------------+---------------+
-|   Type (8)    |   Flags (8)   |
-+-+-------------+---------------+-------------------------------+
-|R|                 Stream Identifier (31)                      |
-+=+=============================================================+
-|                   Frame Payload (0...)                      ...
-+---------------------------------------------------------------+
+======= ========= ===================== ==========================
+Octets      Bits        Name                    Description
+======= ========= ===================== ==========================
+  0           0     http.length             Length
+  3          24     http.type               Type
+  4          32     http.flags              Flags
+  5          40     -                       Reserved
+  5          41     http.sid                Stream Identifier
+  9          72     http.payload            Frame Payload
+======= ========= ===================== ==========================
+
+.. [*] https://en.wikipedia.org/wiki/HTTP/2
 
 """
-# TODO: Considering replacing flags with `aenum.IntFlag`.
-
+# pylint: disable=protected-access
 import collections
 
 from pcapkit.const.http.error_code import ErrorCode as _ERROR_CODE
 from pcapkit.const.http.frame import Frame as _HTTP_TYPE
 from pcapkit.const.http.setting import Setting as _PARA_NAME
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.http import HTTP
 from pcapkit.utilities.exceptions import ProtocolError
 
 __all__ = ['HTTPv2']
 
-# HTTP/2 Functions
+#: HTTP/2 functions.
 _HTTP_FUNC = collections.defaultdict(
     lambda self, size, kind, flag: self._read_http_none(size, kind, flag),                      # Unsigned
     {
@@ -47,49 +51,18 @@ _HTTP_FUNC = collections.defaultdict(
 
 
 class HTTPv2(HTTP):
-    """This class implements Hypertext Transfer Protocol (HTTP/2).
+    """This class implements Hypertext Transfer Protocol (HTTP/2)."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Application`
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Methods:
-        * read_http -- read Hypertext Transfer Protocol (HTTP/2)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_packet -- read raw packet data
-        * _read_http_data -- read HTTP/2 DATA frames
-        * _read_http_headers -- read HTTP/2 HEADERS frames
-        * _read_http_priority -- read HTTP/2 PRIORITY frames
-        * _read_http_rst_stream -- read HTTP/2 RST_STREAM frames
-        * _read_http_settings -- read HTTP/2 SETTINGS frames
-        * _read_http_push_promise -- read HTTP/2 PUSH_PROMISE frames
-        * _read_http_ping -- read HTTP/2 PING frames
-        * _read_http_goaway -- read HTTP/2 GOAWAY frames
-        * _read_http_window_update -- read HTTP/2 WINDOW_UPDATE frames
-        * _read_http_continuation -- read HTTP/2 CONTINUATION frames
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def alias(self):
-        """Acronym of current protocol."""
+        """Acronym of current protocol.
+
+        :rtype: Literal['HTTP/2']
+        """
         return 'HTTP/2'
 
     ##########################################################################
@@ -99,7 +72,8 @@ class HTTPv2(HTTP):
     def read_http(self, length):
         """Read Hypertext Transfer Protocol (HTTP/2).
 
-        Structure of HTTP/2 packet [RFC 7540]:
+        Structure of HTTP/2 packet [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -110,20 +84,21 @@ class HTTPv2(HTTP):
             |                   Frame Payload (0...)                      ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     http.payload            Frame Payload
+        Args:
+            length (int): packet length
+
+        Returns:
+            DataType_HTTPv2: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if length is None:
             length = len(self)
 
         if length < 9:
-            raise ProtocolError(f'HTTP/2: invalid format', quiet=True)
+            raise ProtocolError('HTTP/2: invalid format', quiet=True)
 
         _tlen = self._read_unpack(3)
         _type = self._read_unpack(1)
@@ -156,6 +131,12 @@ class HTTPv2(HTTP):
 
     @classmethod
     def id(cls):
+        """Index ID of the protocol.
+
+        Returns:
+            Literal['HTTPv2']: Index ID of the protocol.
+
+        """
         return cls.__name__
 
     ##########################################################################
@@ -163,6 +144,10 @@ class HTTPv2(HTTP):
     ##########################################################################
 
     def __length_hint__(self):
+        """Total length of corresponding protocol.
+
+        :rtype: Literal[9]
+        """
         return 9
 
     ##########################################################################
@@ -170,7 +155,20 @@ class HTTPv2(HTTP):
     ##########################################################################
 
     def _read_http_none(self, size, kind, flag):
-        """Read HTTP packet with unsigned type."""
+        """Read HTTP packet with unassigned type.
+
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_Unassigned: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
+
+        """
         if any((int(bit, base=2) for bit in flag)):
             raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
 

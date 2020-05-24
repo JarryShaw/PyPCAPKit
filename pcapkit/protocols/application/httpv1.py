@@ -1,72 +1,62 @@
+# -*- coding: utf-8 -*-
 """hypertext transfer protocol (HTTP/1.*)
 
-`pcapkit.protocols.application.httpv1` contains `HTTPv1`
+:mod:`pcapkit.protocols.application.httpv1` contains
+:class:`~pcapkit.protocols.application.httpv1.HTTPv1`
 only, which implements extractor for Hypertext Transfer
-Protocol (HTTP/1.*), whose structure is described as
-below.
+Protocol (HTTP/1.*) [*]_, whose structure is described
+as below::
 
-METHOD URL HTTP/VERSION\r\n :==: REQUEST LINE
-<key> : <value>\r\n         :==: REQUEST HEADER
-............  (Ellipsis)    :==: REQUEST HEADER
-\r\n                        :==: REQUEST SEPARATOR
-<body>                      :==: REQUEST BODY (optional)
+    METHOD URL HTTP/VERSION\\r\\n :==: REQUEST LINE
+    <key> : <value>\\r\\n         :==: REQUEST HEADER
+    ............  (Ellipsis)      :==: REQUEST HEADER
+    \\r\\n                        :==: REQUEST SEPARATOR
+    <body>                        :==: REQUEST BODY (optional)
 
-HTTP/VERSION CODE DESP \r\n :==: RESPONSE LINE
-<key> : <value>\r\n         :==: RESPONSE HEADER
-............  (Ellipsis)    :==: RESPONSE HEADER
-\r\n                        :==: RESPONSE SEPARATOR
-<body>                      :==: RESPONSE BODY (optional)
+    HTTP/VERSION CODE DESP \\r\\n :==: RESPONSE LINE
+    <key> : <value>\\r\\n         :==: RESPONSE HEADER
+    ............  (Ellipsis)      :==: RESPONSE HEADER
+    \\r\\n                        :==: RESPONSE SEPARATOR
+    <body>                        :==: RESPONSE BODY (optional)
+
+.. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
 
 """
 import re
 
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.application.http import HTTP
 from pcapkit.utilities.exceptions import ProtocolError
 
 __all__ = ['HTTPv1']
 
-# utility regular expressions
-_RE_METHOD = re.compile(rb'GET|HEAD|POST|PUT|DELETE|CONNECT|OPTIONS|TRACE')
-_RE_VERSION = re.compile(rb'HTTP/(?P<version>\d\.\d)')
+#: Supported HTTP method.
+HTTP_METHODS = [
+    'GET', 'HEAD', 'POST', 'PUT',
+    'DELETE', 'TRACE', 'OPTIONS',
+    'CONNECT', 'PATCH',
+]
+
+#: Regular expression to match HTTP methods.
+_RE_METHOD = re.compile(r'|'.join(HTTP_METHODS).encode())
+#: Regular expression to match HTTP version string.
+_RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
+#: Regular expression to match HTTP status code.
 _RE_STATUS = re.compile(rb'\d{3}')
 
 
 class HTTPv1(HTTP):
-    """This class implements Hypertext Transfer Protocol (HTTP/1.*).
+    """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
 
-    Properties:
-        * name -- str, name of corresponding protocol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding protocol
-        * layer -- str, `Application`
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Methods:
-        * read_http -- read Hypertext Transfer Protocol (HTTP/1.*)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _read_http_header -- read HTTP/1.* header
-        * _read_http_body -- read HTTP/1.* body
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def alias(self):
-        """Acronym of current protocol."""
+        """Acronym of current protocol.
+
+        :rtype: Literal['HTTP/0.9', 'HTTP/1.0', 'HTTP/1.1']
+        """
         return f'HTTP/{self._info.header[self.__receipt__].version}'  # pylint: disable=E1101
 
     ##########################################################################
@@ -76,11 +66,22 @@ class HTTPv1(HTTP):
     def read_http(self, length):
         """Read Hypertext Transfer Protocol (HTTP/1.*).
 
-        Structure of HTTP/1.* packet [RFC 7230]:
+        Structure of HTTP/1.* packet [:rfc:`7230`]::
+
             HTTP-message    :==:    start-line
                                     *( header-field CRLF )
                                     CRLF
                                     [ message-body ]
+
+
+        Args:
+            length (int): packet length
+
+        Returns:
+            DataType_HTTP: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if length is None:
@@ -88,7 +89,7 @@ class HTTPv1(HTTP):
 
         packet = self._file.read(length)
         try:
-            header, body = packet.split(b'\r\n\r\n', 1)
+            header, body = packet.split(b'\r\n\r\n', maxsplit=1)
         except ValueError:
             raise ProtocolError('HTTP: invalid format', quiet=True)
 
@@ -111,6 +112,12 @@ class HTTPv1(HTTP):
 
     @classmethod
     def id(cls):
+        """Index ID of the protocol.
+
+        Returns:
+            Literal['HTTPv1']: Index ID of the protocol.
+
+        """
         return cls.__name__
 
     ##########################################################################
@@ -120,11 +127,21 @@ class HTTPv1(HTTP):
     def _read_http_header(self, header):
         """Read HTTP/1.* header.
 
-        Structure of HTTP/1.* header [RFC 7230]:
+        Structure of HTTP/1.* header [:rfc:`7230`]::
+
             start-line      :==:    request-line / status-line
             request-line    :==:    method SP request-target SP HTTP-version CRLF
             status-line     :==:    HTTP-version SP status-code SP reason-phrase CRLF
             header-field    :==:    field-name ":" OWS field-value OWS
+
+        Args:
+            header (bytes): HTTP header data.
+
+        Returns:
+            Union[DataType_HTTP_Request_Header, DataType_HTTP_Response_Header]: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         try:
@@ -176,6 +193,14 @@ class HTTPv1(HTTP):
 
         return header, receipt
 
-    def _read_http_body(self, body):
-        """Read HTTP/1.* body."""
-        return self.decode(body)
+    def _read_http_body(self, body):  # pylint: disable=no-self-use
+        """Read HTTP/1.* body.
+
+        Args:
+            body (bytes): HTTP body data.
+
+        Returns:
+            str: Raw HTTP body.
+
+        """
+        return body
