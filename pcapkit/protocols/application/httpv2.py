@@ -10,12 +10,12 @@ below:
 ======= ========= ===================== ==========================
 Octets      Bits        Name                    Description
 ======= ========= ===================== ==========================
-  0           0     http.length             Length
-  3          24     http.type               Type
-  4          32     http.flags              Flags
-  5          40     -                       Reserved
-  5          41     http.sid                Stream Identifier
-  9          72     http.payload            Frame Payload
+  0           0   ``http.length``             Length
+  3          24   ``http.type``               Type
+  4          32   ``http.flags``              Flags
+  5          40                               Reserved
+  5          41   ``http.sid``                Stream Identifier
+  9          72   ``http.payload``            Frame Payload
 ======= ========= ===================== ==========================
 
 .. [*] https://en.wikipedia.org/wiki/HTTP/2
@@ -180,9 +180,10 @@ class HTTPv2(HTTP):
         return data
 
     def _read_http_data(self, size, kind, flag):
-        """Read HTTP/2 DATA frames.
+        """Read HTTP/2 ``DATA`` frames.
 
-        Structure of HTTP/2 DATA frame [RFC 7540]:
+        Structure of HTTP/2 ``DATA`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -197,15 +198,16 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (0)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     http.pad_len            Pad Length (Optional)
-              10         80     http.data               Data
-              ?           ?     -                       Padding (Optional)
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_DATA: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         _plen = 0
