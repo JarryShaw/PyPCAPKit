@@ -252,9 +252,10 @@ class HTTPv2(HTTP):
         return data
 
     def _read_http_headers(self, size, kind, flag):
-        """Read HTTP/2 HEADERS frames.
+        """Read HTTP/2 ``HEADERS`` frames.
 
-        Structure of HTTP/2 HEADERS frame [RFC 7540]:
+        Structure of HTTP/2 ``HEADERS`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -273,18 +274,16 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (1)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     http.pad_len            Pad Length (Optional)
-              10         80     http.exclusive          Exclusive Flag
-              10         81     http.deps               Stream Dependency (Optional)
-              14        112     http.weight             Weight (Optional)
-              15        120     http.frag               Header Block Fragment
-              ?           ?     -                       Padding (Optional)
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_HEADERS: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         _plen = 0
@@ -331,18 +330,19 @@ class HTTPv2(HTTP):
             frag=_frag,
         )
         if _flag['PADDED']:
-            data['ped_len'] = _plen
+            data['pad_len'] = _plen
         if _flag['PRIORITY']:
-            data['exclusive'] = True if int(_edep[0], base=2) else False
+            data['exclusive'] = bool(int(_edep[0], base=2))
             data['deps'] = int(_edep[1:], base=2)
             data['weight'] = _wght + 1
 
         return data
 
     def _read_http_priority(self, size, kind, flag):
-        """Read HTTP/2 PRIORITY frames.
+        """Read HTTP/2 ``PRIORITY`` frames.
 
-        Structure of HTTP/2 PRIORITY frame [RFC 7540]:
+        Structure of HTTP/2 ``PRIORITY`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -355,15 +355,16 @@ class HTTPv2(HTTP):
             |   Weight (8)  |
             +-+-------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (2)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     http.exclusive          Exclusive Flag
-              9          73     http.deps               Stream Dependency
-              13        104     http.weight             Weight
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_PRIORITY: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if size != 9:
@@ -376,7 +377,7 @@ class HTTPv2(HTTP):
 
         data = dict(
             flags=None,
-            exclusive=True if int(_edep[0], base=2) else False,
+            exclusive=bool(int(_edep[0], base=2)),
             deps=int(_edep[1:], base=2),
             weight=_wght + 1,
         )
@@ -384,9 +385,10 @@ class HTTPv2(HTTP):
         return data
 
     def _read_http_rst_stream(self, size, kind, flag):
-        """Read HTTP/2 RST_STREAM frames.
+        """Read HTTP/2 ``RST_STREAM`` frames.
 
-        Structure of HTTP/2 RST_STREAM frame [RFC 7540]:
+        Structure of HTTP/2 ``RST_STREAM`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -397,13 +399,16 @@ class HTTPv2(HTTP):
             |                        Error Code (32)                        |
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (2)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     http.error              Error Code
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_RST_STREAM: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if size != 8:
@@ -421,9 +426,10 @@ class HTTPv2(HTTP):
         return data
 
     def _read_http_settings(self, size, kind, flag):
-        """Read HTTP/2 SETTINGS frames.
+        """Read HTTP/2 ``SETTINGS`` frames.
 
-        Structure of HTTP/2 SETTINGS frame [RFC 7540]:
+        Structure of HTTP/2 ``SETTINGS`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -437,15 +443,16 @@ class HTTPv2(HTTP):
             +---------------------------------------------------------------+
             |                          ......                               |
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (2)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     http.settings           Settings
-              9          72     http.settings.id        Identifier
-              10         80     http.settings.value     Value
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_SETTINGS: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if size % 5 != 0:
@@ -465,31 +472,37 @@ class HTTPv2(HTTP):
         if _flag['ACK'] and size:
             raise ProtocolError(f'HTTP/2: [Type {kind}] invalid format', quiet=True)
 
+        _list = list()
         _para = dict()
         counter = 0
         while counter < size:
             _stid = self._read_unpack(1)
             _pval = self._read_unpack(4)
             _pkey = _PARA_NAME.get(_stid, 'Unsigned')
+
+            _name = _pkey.name
             if _pkey in _para:
-                if isinstance(_para[_pkey], tuple):
-                    _para[_pkey] += (_pval,)
+                if isinstance(_para[_name], tuple):
+                    _para[_name] += (_pval,)
                 else:
-                    _para[_pkey] = (_para[_pkey], _pval)
+                    _para[_name] = (_para[_name], _pval)
             else:
-                _para[_pkey] = _pval
+                _para[_name] = _pval
+                _list.append(_pkey)
 
         data = dict(
             flags=_flag,
+            settings=tuple(_pkey),
         )
         data.update(_para)
 
         return data
 
     def _read_http_push_promise(self, size, kind, flag):
-        """Read HTTP/2 PUSH_PROMISE frames.
+        """Read HTTP/2 ``PUSH_PROMISE`` frames.
 
-        Structure of HTTP/2 PUSH_PROMISE frame [RFC 7540]:
+        Structure of HTTP/2 ``PUSH_PROMISE`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -506,17 +519,16 @@ class HTTPv2(HTTP):
             |                           Padding (*)                       ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (1)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     http.pad_len            Pad Length (Optional)
-              10         80     -                       Reserved
-              10         81     http.pid                Promised Stream ID
-              14        112     http.frag               Header Block Fragment
-              ?           ?     -                       Padding (Optional)
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_PUSH_PROMISE: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if size < 4:
@@ -561,14 +573,15 @@ class HTTPv2(HTTP):
             frag=_frag,
         )
         if _flag['PADDED']:
-            data['ped_len'] = _plen
+            data['pad_len'] = _plen
 
         return data
 
     def _read_http_ping(self, size, kind, flag):
-        """Read HTTP/2 PING frames.
+        """Read HTTP/2 ``PING`` frames.
 
-        Structure of HTTP/2 PING frame [RFC 7540]:
+        Structure of HTTP/2 ``PING`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -581,13 +594,16 @@ class HTTPv2(HTTP):
             |                                                               |
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (2)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     http.data               Opaque Data
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_PING: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if size != 8:
@@ -614,9 +630,10 @@ class HTTPv2(HTTP):
         return data
 
     def _read_http_goaway(self, size, kind, flag):
-        """Read HTTP/2 GOAWAY frames.
+        """Read HTTP/2 ``GOAWAY`` frames.
 
-        Structure of HTTP/2 GOAWAY frame [RFC 7540]:
+        Structure of HTTP/2 ``GOAWAY`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -631,16 +648,16 @@ class HTTPv2(HTTP):
             |                  Additional Debug Data (*)                    |
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (2)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     -                       Reserved
-              9          73     http.last_sid           Last Stream ID
-              13        104     http.error              Error Code
-              17        136     http.data               Additional Debug Data (Optional)
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_GOAWAY: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         _dlen = size - 8
@@ -666,9 +683,10 @@ class HTTPv2(HTTP):
         return data
 
     def _read_http_window_update(self, size, kind, flag):
-        """Read HTTP/2 WINDOW_UPDATE frames.
+        """Read HTTP/2 ``WINDOW_UPDATE`` frames.
 
-        Structure of HTTP/2 WINDOW_UPDATE frame [RFC 7540]:
+        Structure of HTTP/2 ``WINDOW_UPDATE`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -679,14 +697,16 @@ class HTTPv2(HTTP):
             |R|              Window Size Increment (31)                     |
             +-+-------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (2)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          72     -                       Reserved
-              9          73     http.window             Window Size Increment
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_WINDOW_UPDATE: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         if size != 4:
@@ -707,9 +727,10 @@ class HTTPv2(HTTP):
         return data
 
     def _read_http_continuation(self, size, kind, flag):
-        """Read HTTP/2 WINDOW_UPDATE frames.
+        """Read HTTP/2 ``CONTINUATION`` frames.
 
-        Structure of HTTP/2 WINDOW_UPDATE frame [RFC 7540]:
+        Structure of HTTP/2 ``CONTINUATION`` frame [:rfc:`7540`]::
+
             +-----------------------------------------------+
             |                 Length (24)                   |
             +---------------+---------------+---------------+
@@ -720,13 +741,16 @@ class HTTPv2(HTTP):
             |                   Header Block Fragment (*)                 ...
             +---------------------------------------------------------------+
 
-            Octets      Bits        Name                    Description
-              0           0     http.length             Length
-              3          24     http.type               Type (2)
-              4          32     http.flags              Flags
-              5          40     -                       Reserved
-              5          41     http.sid                Stream Identifier
-              9          73     http.frag               Header Block Fragment
+        Args:
+            size (int): length of packet data
+            kind (int): packet type
+            flag (str): packet flags (8 bits)
+
+        Returns:
+            DataType_HTTPv2_CONTINUATION: Parsed packet data.
+
+        Raises:
+            ProtocolError: If the packet is malformed.
 
         """
         _flag = dict(

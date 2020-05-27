@@ -66,6 +66,7 @@
         "ctid",
         "cttp",
         "deltatls",
+        "deps",
         "dhid",
         "didf",
         "didt",
@@ -83,6 +84,7 @@
         "dtlr",
         "dtls",
         "echore",
+        "edep",
         "elen",
         "emojize",
         "envvar",
@@ -186,6 +188,7 @@
         "padn",
         "padr",
         "pcaprec",
+        "pkey",
         "plen",
         "pocsp",
         "prio",
@@ -211,6 +214,7 @@
         "rhcn",
         "rhit",
         "rkey",
+        "rpid",
         "rpld",
         "rptr",
         "rsid",
@@ -292,7 +296,8 @@
         "vinfo",
         "vlen",
         "vmaj",
-        "vmin"
+        "vmin",
+        "wght"
     ],
     "restructuredtext.confPath": "${workspaceFolder}/docs/conf.py"
 }
