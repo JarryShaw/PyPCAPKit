@@ -38,7 +38,7 @@ pockets==0.9.1
 prompt-toolkit==3.0.5
 ptyprocess==0.6.0
 py==1.8.1
-pycodestyle==2.6.0a1
+pycodestyle==2.6.0
 pygments==2.6.1
 pylint==2.5.0
 pyparsing==3.0.0a1
