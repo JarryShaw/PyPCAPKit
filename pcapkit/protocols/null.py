@@ -57,29 +57,60 @@ class NoPayload(Protocol):
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+        """Read (parse) packet data.
+
+        Args:
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            dict: Parsed packet data.
+
+        """
+        return dict()
+
+    def make(self, **kwargs):
+        """Make (construct) packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        return bytes()
+
+    ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __new__(cls, *args, **kwargs):  # pylint: disable=signature-differs
-        self = super().__new__(cls)
-        return self
-
-    def __init__(self, *args, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
+    def __post_init__(self, file=None, length=None, **kwargs):  # pylint: disable=unused-argument
+        """Post initialisation hook.
 
         Args:
-            *args: Arbitrary positional arguments.
+            file (Optional[io.BytesIO]): Source packet stream.
+            length (Optional[int]): Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         """
-        #: pcapkit.protocols.null.NoPayload: Payload of current instance.
-        self._next = self
-        #: pcapkit.corekit.infoclass.Info: Info dict of current instance.
-        self._info = Info()
+        #: bytes: Raw packet data.
+        self._data = bytes()
         #: io.BytesIO: Source data stream.
         self._file = io.BytesIO()
+        #: pcapkit.corekit.infoclass.Info: Info dict of current instance.
+        self._info = Info()
+
+        #: pcapkit.protocols.null.NoPayload: Payload of current instance.
+        self._next = self
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
         self._protos = ProtoChain()
 

@@ -8,8 +8,8 @@ in [`dictdumper`](https://github.com/JarryShaw/dictdumper).
 """
 import sys
 
-from pcapkit.ipsuite.pcap.frame import Frame
-from pcapkit.ipsuite.pcap.header import Header
+from pcapkit.protocols.pcap.frame import Frame
+from pcapkit.protocols.pcap.header import Header
 
 __all__ = ['PCAP', 'NotImplementedIO']
 
@@ -47,9 +47,9 @@ class PCAP:
 
     def __call__(self, frame, **kwargs):
         packet = Frame(
-            frame.get('frame_info', frame),
             packet=frame.packet,
-            nanosecond=self._nsec
+            nanosecond=self._nsec,
+            **frame.get('frame_info', frame),
         ).data
         with open(self._file, 'ab') as file:
             file.write(packet)

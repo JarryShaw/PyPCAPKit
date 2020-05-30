@@ -25,7 +25,6 @@ Octets      Bits        Name                    Description
 
 from pcapkit.const.mh.packet import Packet as _MOBILITY_TYPE
 from pcapkit.const.reg.transtype import TransType
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -80,7 +79,7 @@ class MH(Internet):
     # Methods.
     ##########################################################################
 
-    def read_mh(self, length, extension):
+    def read(self, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
         """Read Mobility Header.
 
         Structure of MH header [:rfc:`6275`]::
@@ -98,8 +97,11 @@ class MH(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
-            extension (bool): if the packet is used as an IPv6 extension header
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the packet is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_MH: Parsed packet data.
@@ -131,12 +133,24 @@ class MH(Internet):
             return mh
         return self._decode_next_layer(mh, _next, length)
 
+    def make(self, **kwargs):
+        """Make (construct) packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        raise NotImplementedError
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
+    def __post_init__(self, file, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ
+        """Post initialisation hook.
 
         Args:
             file (io.BytesIO): Source packet stream.
@@ -146,9 +160,15 @@ class MH(Internet):
             extension (bool): If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
+        See Also:
+            For construction argument, please refer to :meth:`make`.
+
         """
-        self._file = _file
-        self._info = Info(self.read_mh(length, extension))
+        #: bool: If the protocol is used as an IPv6 extension header.
+        self._extf = extension
+
+        # call super __post_init__
+        super().__post_init__(file, length, extension=extension, **kwargs)
 
     def __length_hint__(self):
         """Return an estimated length for the object.

@@ -21,14 +21,21 @@ import datetime
 import importlib
 import io
 import os
+import sys
+import time
 import traceback
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.protocol import Protocol
+from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['Frame']
+
+# check Python version
+version_info = sys.version_info
+py37 = (version_info.major >= 3 and version_info.minor >= 7)
 
 
 class Frame(Protocol):
@@ -87,8 +94,11 @@ class Frame(Protocol):
         """
         return self._protos.index(name)
 
-    def read_frame(self):
+    def read(self, length=None):  # pylint: disable=unused-argument
         """Read each block after global header.
+
+        Args:
+            length (Optional[int]): Length of packet data.
 
         Returns:
             DataType_Frame: Parsed packet data.
@@ -144,16 +154,48 @@ class Frame(Protocol):
 
         return self._decode_next_layer(frame, length)
 
+    def make(self, **kwargs):
+        """Make frame packet data.
+
+        Keyword Args:
+            timestamp (float): UNIX-Epoch timestamp
+            ts_sec (int): timestamp seconds
+            ts_usec (int): timestamp microseconds
+            incl_len (int): number of octets of packet saved in file
+            orig_len (int): actual length of packet
+            packet (bytes): raw packet data (default: ``b''``)
+            nanosecond (bool): nanosecond-resolution file flag (default: :data:`False`)
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        # fetch values
+        ts_sec, ts_usec = self._make_timestamp(**kwargs)
+        packet = kwargs.get('packet', bytes())                   # raw packet data
+        incl_len = kwargs.get('incl_len', len(packet))           # number of octets of packet saved in file
+        orig_len = kwargs.get('orig_len', len(packet))           # actual length of packet
+
+        # make packet
+        return b'%s%s%s%s%s' % (
+            self._make_pack(ts_sec, size=4, lilendian=True),
+            self._make_pack(ts_usec, size=4, lilendian=True),
+            self._make_pack(incl_len, size=4, lilendian=True),
+            self._make_pack(orig_len, size=4, lilendian=True),
+            packet,
+        )
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, file, *args, num, proto, nanosecond, **kwargs):  # pylint: disable=super-init-not-called
+    def __post_init__(self, file=None, length=None, *, num, proto, nanosecond, **kwargs):  # pylint: disable=arguments-differ
         """Initialisation.
 
         Args:
-            file (io.BytesIO): Source packet stream.
-            *args: Arbitrary positional arguments.
+            file (Optional[io.BytesIO]): Source packet stream.
+            length (Optional[int]): Length of packet data.
 
         Keyword Args:
             num (int): Frame index number
@@ -171,24 +213,47 @@ class Frame(Protocol):
         For *multiprocessing* related parameters, please refer to
         :class:`pcapkit.foundation.extration.Extrator` for more information.
 
+        See Also:
+            For construction argument, please refer to :meth:`make`.
+
         """
         #: int: frame index number
         self._fnum = num
-        #: io.BytesIO: source packet stream
-        self._file = file
         #: pcapkit.const.reg.linktype.LinkType: next layer protocol index
         self._prot = proto
         #: bool: nanosecond-timestamp PCAP flag
         self._nsec = nanosecond
+
         #: multiprocessing.Queue: multiprocessing file descriptor queue (*not available after initialisation*)
         self._mpfp = kwargs.pop('mpfdp', None)
         #: multiprocessing.Namespace: multiprocessing auxiliaries (*not available after initialisation*)
         self._mpkt = kwargs.pop('mpkit', None)
-        #: pcapkit.corekit.infoclass.Info: info dict of current instance
-        self._info = Info(self.read_frame())
+
+        if file is None:
+            #: bytes: Raw packet data.
+            self._data = self.make(**kwargs)
+            #: io.BytesIO: Source packet stream.
+            self._file = io.BytesIO(self._data)
+            #: pcapkit.corekit.infoclass.Info: Parsed packet data.
+            self._info = Info(self.read())
+        else:
+            #: io.BytesIO: Source packet stream.
+            self._file = file
+            #: pcapkit.corekit.infoclass.Info: Parsed packet data.
+            self._info = Info(self.read())
+
+            #: bytes: Raw packet data.
+            self._data = self._read_packet(self._info.len)  # pylint: disable=no-member
+            #: io.BytesIO: Source packet stream.
+            self._file = io.BytesIO(self._data)
 
         # remove temporary multiprocessing support attributes
         [delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self))]  # pylint: disable=expression-not-assigned
+
+    @cached_property
+    def __len__(self):
+        """Total length of corresponding protocol."""
+        return self._info.len  # pylint: disable=no-member
 
     def __length_hint__(self):
         """Return an estimated length for the object.
@@ -261,6 +326,26 @@ class Frame(Protocol):
     ##########################################################################
     # Utilities.
     ##########################################################################
+
+    def _make_timestamp(self, **kwargs):  # pylint: disable=no-self-use
+        """Make timestamp.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Tuple[int, int]: Second and microsecond/nanosecond value of timestamp.
+
+        """
+        nanosecond = kwargs.get('nanosecond', False)         # nanosecond-resolution file flag
+        timestamp = kwargs.get('timestamp', time.time())     # timestamp
+        ts_sec = kwargs.get('ts_sec', int(timestamp))        # timestamp seconds
+        if py37 and nanosecond:
+            _default_ts_usec = time.time_ns() % 1000000000
+        else:
+            _default_ts_usec = int((timestamp - ts_sec) * (1000000000 if nanosecond else 1000000))
+        ts_usec = kwargs.get('ts_usec', _default_ts_usec)    # timestamp microseconds
+        return ts_sec, ts_usec
 
     def _decode_next_layer(self, data, length=None):  # pylint: disable=arguments-differ
         """Decode next layer protocol.

@@ -22,7 +22,6 @@ Octets      Bits        Name                    Description
 
 """
 from pcapkit.const.reg.transtype import TransType
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.utilities.exceptions import (ProtocolError, UnsupportedCall,
                                           VersionError)
@@ -78,7 +77,7 @@ class AH(IPsec):
     # Methods.
     ##########################################################################
 
-    def read_ah(self, length, version, extension):
+    def read(self, length=None, *, version=4, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
         """Read Authentication Header.
 
         Structure of AH header [:rfc:`4302`]::
@@ -98,7 +97,12 @@ class AH(IPsec):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            version (Literal[4, 6]): IP protocol version.
+            extension (bool): If the protocol is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_AH: Parsed packet data.
@@ -146,12 +150,24 @@ class AH(IPsec):
             return ah
         return self._decode_next_layer(ah, _next, length)
 
+    def make(self, **kwargs):
+        """Make (construct) packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        raise NotImplementedError
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, version=4, extension=False, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
+    def __post_init__(self, file, length=None, *, version=4, extension=False, **kwargs):  # pylint: disable=arguments-differ
+        """Post initialisation hook.
 
         Args:
             file (io.BytesIO): Source packet stream.
@@ -162,12 +178,15 @@ class AH(IPsec):
             extension (bool): If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
+        See Also:
+            For construction argument, please refer to :meth:`make`.
+
         """
         #: bool: If the protocol is used as an IPv6 extension header.
         self._extf = extension
 
-        self._file = _file
-        self._info = Info(self.read_ah(length, version, extension))
+        # call super __post_init__
+        super().__post_init__(file, length, version=version, extension=extension, **kwargs)
 
     def __length_hint__(self):
         """Return an estimated length for the object.

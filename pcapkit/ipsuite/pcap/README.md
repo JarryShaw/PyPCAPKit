@@ -1,3 +1,0 @@
-# PCAP File Headers
-
-<!-- NotImplemented -->

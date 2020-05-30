@@ -1,3 +1,0 @@
-# IPSuite Manual
-
-<!-- NotImplemented -->

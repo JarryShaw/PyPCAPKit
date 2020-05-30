@@ -26,7 +26,6 @@ import textwrap
 from pcapkit.const.ipx.packet import Packet as TYPE
 from pcapkit.const.ipx.socket import Socket as SOCK
 from pcapkit.const.reg.transtype import TransType
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 
 __all__ = ['IPX']
@@ -83,11 +82,14 @@ class IPX(Internet):
     # Methods.
     ##########################################################################
 
-    def read_ipx(self, length):
+    def read(self, length=None, **kwargs):
         """Read Internetwork Packet Exchange.
 
-        Args:
-            length (int): packet length
+         Args:
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_IPX: Parsed packet data.
@@ -118,23 +120,21 @@ class IPX(Internet):
 
         return self._decode_next_layer(ipx, proto, length)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = _file
-        self._info = Info(self.read_ipx(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

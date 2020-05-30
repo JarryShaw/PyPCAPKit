@@ -144,7 +144,7 @@ class IPv4(IP):
     # Methods.
     ##########################################################################
 
-    def read_ipv4(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read Internet Protocol version 4 (IPv4).
 
         Structure of IPv4 header [:rfc:`791`]::
@@ -166,7 +166,10 @@ class IPv4(IP):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_IPv4: Parsed packet data.
@@ -225,23 +228,21 @@ class IPv4(IP):
 
         return self._decode_next_layer(ipv4, _prot, raw_len)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = _file
-        self._info = Info(self.read_ipv4(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

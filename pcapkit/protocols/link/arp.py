@@ -39,7 +39,6 @@ import textwrap
 from pcapkit.const.arp.hardware import Hardware as HRD
 from pcapkit.const.arp.operation import Operation as OPER
 from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 
 __all__ = ['ARP']
@@ -124,11 +123,14 @@ class ARP(Link):
         """
         return ('ARP', 'InARP')
 
-    def read_arp(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read Address Resolution Protocol [:rfc:`826`].
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_ARP: Parsed packet data.
@@ -184,23 +186,21 @@ class ARP(Link):
 
         return self._decode_next_layer(arp, None, length)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (int): Packet length.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = file
-        self._info = Info(self.read_arp(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

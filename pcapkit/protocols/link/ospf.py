@@ -34,7 +34,6 @@ import ipaddress
 
 from pcapkit.const.ospf.authentication import Authentication as AUTH
 from pcapkit.const.ospf.packet import Packet as TYPE
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -84,7 +83,7 @@ class OSPF(Link):
     # Methods.
     ##########################################################################
 
-    def read_ospf(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read Open Shortest Path First.
 
         Structure of OSPF header [:rfc:`2328`]::
@@ -106,7 +105,10 @@ class OSPF(Link):
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_OSPF: Parsed packet data.
@@ -143,23 +145,21 @@ class OSPF(Link):
 
         return self._decode_next_layer(ospf, length)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (int): Packet length.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = file
-        self._info = Info(self.read_ospf(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

@@ -22,7 +22,6 @@ below:
 """
 import textwrap
 
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -82,11 +81,14 @@ class Ethernet(Link):
     # Methods.
     ##########################################################################
 
-    def read_ethernet(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read Ethernet Protocol [:rfc:`7042`].
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_Ethernet: Parsed packet data.
@@ -110,23 +112,21 @@ class Ethernet(Link):
 
         return self._decode_next_layer(ethernet, _type, length)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (int): Packet length.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = file
-        self._info = Info(self.read_ethernet(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

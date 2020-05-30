@@ -46,7 +46,6 @@ as below:
 .. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol
 
 """
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -88,7 +87,7 @@ class L2TP(Link):
     # Methods.
     ##########################################################################
 
-    def read_l2tp(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read Layer Two Tunnelling Protocol.
 
         Structure of L2TP header [:rfc:`2661`]::
@@ -106,7 +105,10 @@ class L2TP(Link):
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_L2TP: Parsed packet data.
@@ -151,23 +153,21 @@ class L2TP(Link):
 
         return self._decode_next_layer(l2tp, length)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (int): Packet length.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = file
-        self._info = Info(self.read_l2tp(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

@@ -14,7 +14,6 @@ from pcapkit.corekit import *
 from pcapkit.dumpkit import *
 from pcapkit.foundation import *
 from pcapkit.interface import *
-from pcapkit.ipsuite import *
 from pcapkit.protocols import *
 from pcapkit.reassembly import *
 from pcapkit.toolkit import *
@@ -47,9 +46,6 @@ __all__ = [
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',
                                                             # Engine Macros
-
-    # pcapkit.ipsuite
-    'IPSHeader', 'IPSFrame',                                # PCAP Headers
 
     # pcapkit.protocols
     'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',                    # Protocol Numbers

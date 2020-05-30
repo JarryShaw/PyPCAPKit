@@ -137,7 +137,7 @@ class IPv6_Opts(Internet):
     # Methods.
     ##########################################################################
 
-    def read_ipv6_opts(self, length, extension):
+    def read(self, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
         """Read Destination Options for IPv6.
 
         Structure of IPv6-Opts header [:rfc:`8200`]::
@@ -153,8 +153,11 @@ class IPv6_Opts(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
-            extension (bool): if the packet is used as an IPv6 extension header
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the packet is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_IPv6_Opts: Parsed packet data.
@@ -184,12 +187,24 @@ class IPv6_Opts(Internet):
             return ipv6_opts
         return self._decode_next_layer(ipv6_opts, _next, length)
 
+    def make(self, **kwargs):
+        """Make (construct) packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        raise NotImplementedError
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
+    def __post_init__(self, file, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ
+        """Post initialisation hook.
 
         Args:
             file (io.BytesIO): Source packet stream.
@@ -199,10 +214,15 @@ class IPv6_Opts(Internet):
             extension (bool): If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
+        See Also:
+            For construction argument, please refer to :meth:`make`.
+
         """
-        self._file = _file
+        #: bool: If the protocol is used as an IPv6 extension header.
         self._extf = extension
-        self._info = Info(self.read_ipv6_opts(length, extension))
+
+        # call super __post_init__
+        super().__post_init__(file, length, extension=extension, **kwargs)
 
     def __length_hint__(self):
         """Return an estimated length for the object.

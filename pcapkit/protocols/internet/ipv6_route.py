@@ -23,7 +23,6 @@ import ipaddress
 
 from pcapkit.const.ipv6.routing import Routing as _ROUTING_TYPE
 from pcapkit.const.reg.transtype import TransType
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
@@ -93,7 +92,7 @@ class IPv6_Route(Internet):
     # Methods.
     ##########################################################################
 
-    def read_ipv6_route(self, length, extension):
+    def read(self, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
         """Read Routing Header for IPv6.
 
         Structure of IPv6-Route header [:rfc:`8200`][:rfc:`5095`]::
@@ -109,8 +108,11 @@ class IPv6_Route(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
-            extension (bool): if the packet is used as an IPv6 extension header
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the packet is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_IPv6_Route: Parsed packet data.
@@ -146,12 +148,24 @@ class IPv6_Route(Internet):
             return ipv6_route
         return self._decode_next_layer(ipv6_route, _next, length)
 
+    def make(self, **kwargs):
+        """Make (construct) packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        raise NotImplementedError
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
+    def __post_init__(self, file, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ
+        """Post initialisation hook.
 
         Args:
             file (io.BytesIO): Source packet stream.
@@ -161,10 +175,15 @@ class IPv6_Route(Internet):
             extension (bool): If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
+        See Also:
+            For construction argument, please refer to :meth:`make`.
+
         """
-        self._file = _file
+        #: bool: If the protocol is used as an IPv6 extension header.
         self._extf = extension
-        self._info = Info(self.read_ipv6_route(length, extension))
+
+        # call super __post_init__
+        super().__post_init__(file, length, extension=extension, **kwargs)
 
     def __length_hint__(self):
         """Return an estimated length for the object.

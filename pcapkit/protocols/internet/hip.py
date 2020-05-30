@@ -113,7 +113,7 @@ class HIP(Internet):
     # Methods.
     ##########################################################################
 
-    def read_hip(self, length, extension):
+    def read(self, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
         """Read Host Identity Protocol.
 
         Structure of HIP header [:rfc:`5201`][:rfc:`7401`]:
@@ -144,8 +144,11 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
-            extension (bool): if the packet is used as an IPv6 extension header
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            extension (bool): If the packet is used as an IPv6 extension header.
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_HIP: Parsed packet data.
@@ -197,12 +200,24 @@ class HIP(Internet):
             return hip
         return self._decode_next_layer(hip, _next, length)
 
+    def make(self, **kwargs):
+        """Make (construct) packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        raise NotImplementedError
+
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, _file, length=None, *, extension=False, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
+    def __post_init__(self, file, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ
+        """Post initialisation hook.
 
         Args:
             file (io.BytesIO): Source packet stream.
@@ -212,10 +227,15 @@ class HIP(Internet):
             extension (bool): If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
+        See Also:
+            For construction argument, please refer to :meth:`make`.
+
         """
-        self._file = _file
+        #: bool: If the protocol is used as an IPv6 extension header.
         self._extf = extension
-        self._info = Info(self.read_hip(length, extension))
+
+        # call super __post_init__
+        super().__post_init__(file, length, extension=extension, **kwargs)
 
     def __length_hint__(self):
         """Return an estimated length for the object.

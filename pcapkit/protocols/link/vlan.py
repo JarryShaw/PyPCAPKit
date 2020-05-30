@@ -21,7 +21,6 @@ Octets      Bits        Name                    Description
 
 """
 from pcapkit.const.vlan.priority_level import PriorityLevel as _PCP
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -71,11 +70,14 @@ class VLAN(Link):
     # Methods.
     ##########################################################################
 
-    def read_vlan(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read 802.1Q Customer VLAN Tag Type.
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_VLAN: Parsed packet data.
@@ -101,23 +103,21 @@ class VLAN(Link):
 
         return self._decode_next_layer(vlan, _type, length)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (int): Packet length.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = _file
-        self._info = Info(self.read_vlan(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

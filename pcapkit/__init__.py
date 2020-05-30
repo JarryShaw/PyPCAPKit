@@ -38,10 +38,6 @@ different components.
   base on algorithms described in :rfc:`815`,
   implement datagram reassembly of IP and TCP packets
 
-- IPSuite (:mod:`pcapkit.ipsuite`)
-
-  collection of constructors for Internet Protocol Suite
-
 - Protocols (:mod:`pcapkit.protocols`)
 
   collection of all protocol family, with detailed

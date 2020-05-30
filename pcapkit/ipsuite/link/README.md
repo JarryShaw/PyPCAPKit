@@ -1,3 +1,0 @@
-# Link Layer Protocols
-
-<!-- NotImplemented -->
