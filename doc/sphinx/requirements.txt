@@ -42,7 +42,7 @@ pycodestyle==2.6.0
 pygments==2.6.1
 pylint==2.5.2
 pyparsing==3.0.0a1
-pyshark==0.4.2.9
+pyshark==0.4.2.11
 pysocks==1.7.1
 pytz==2020.1
 requests[socks]==2.23.0
