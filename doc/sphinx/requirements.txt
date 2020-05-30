@@ -29,7 +29,7 @@ lazy-object-proxy==1.4.3
 lxml==4.5.1
 markupsafe==2.0.0a1
 mccabe==0.6.1
-packaging==20.3
+packaging==20.4
 parso==0.7.0
 pbr==5.4.5
 pexpect==4.8.0 ; sys_platform != 'win32'
