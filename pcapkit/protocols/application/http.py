@@ -11,12 +11,7 @@ and :class:`HTTP/2 <pcapkit.protocols.application.application.httpv2>`.
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
 
 """
-import abc
-
-from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
-from pcapkit.protocols.null import NoPayload
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 __all__ = ['HTTP']
@@ -56,18 +51,6 @@ class HTTP(Application):  # pylint: disable=abstract-method
     # Methods.
     ##########################################################################
 
-    @abc.abstractmethod
-    def read_http(self, length):
-        """Read Hypertext Transfer Protocol (HTTP).
-
-        Args:
-            length (int): packet length
-
-        Returns:
-            dict: Parsed packet data.
-
-        """
-
     @classmethod
     def id(cls):
         """Index ID of the protocol.
@@ -77,24 +60,3 @@ class HTTP(Application):  # pylint: disable=abstract-method
 
         """
         return ('HTTPv1', 'HTTPv2')
-
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
-
-        Keyword Args:
-            **kwargs: Arbitrary keyword arguments.
-
-        """
-        self._file = _file
-        self._info = Info(self.read_http(length))
-
-        self._next = NoPayload()
-        self._protos = ProtoChain(self.__class__, self.alias)

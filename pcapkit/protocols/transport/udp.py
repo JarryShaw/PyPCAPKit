@@ -19,7 +19,6 @@ Octets      Bits        Name                    Description
 
 """
 from pcapkit.const.reg.transtype import TransType
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.transport.transport import Transport
 
 __all__ = ['UDP']
@@ -68,7 +67,7 @@ class UDP(Transport):
     # Methods.
     ##########################################################################
 
-    def read_udp(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read User Datagram Protocol (UDP).
 
         Structure of UDP header [:rfc:`768`]::
@@ -86,7 +85,10 @@ class UDP(Transport):
             +---------------- ...
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_UDP: Parsed packet data.
@@ -112,23 +114,21 @@ class UDP(Transport):
 
         return self._decode_next_layer(udp, None, length)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = _file
-        self._info = Info(self.read_udp(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

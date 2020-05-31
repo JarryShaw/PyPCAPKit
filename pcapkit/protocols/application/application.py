@@ -9,6 +9,8 @@ which is a base class for application layer protocols, eg.
 and etc.
 
 """
+from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
@@ -41,6 +43,28 @@ class Application(Protocol):  # pylint: disable=abstract-method
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    def __post_init__(self, file=None, length=None, **kwargs):
+        """Post initialisation hook.
+
+        Args:
+            file (Optional[io.BytesIO]): Source packet stream.
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        See Also:
+            For construction argument, please refer to :meth:`make`.
+
+        """
+        # call super post-init
+        super().__post_init__(file, length, **kwargs)
+
+        #: pcapkit.protocols.null.NoPayload: Payload of current instance.
+        self._next = NoPayload()
+        #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
+        self._protos = ProtoChain(self.__class__, self.alias)
 
     @classmethod
     def __index__(cls):  # pylint: disable=invalid-index-returned

@@ -145,6 +145,16 @@ class IPv6(IP):
         """
         raise NotImplementedError
 
+    @classmethod
+    def id(cls):
+        """Index ID of the protocol.
+
+        Returns:
+           Literal['IPv6']: Index ID of the protocol.
+
+        """
+        return cls.__name__
+
     ##########################################################################
     # Data models.
     ##########################################################################

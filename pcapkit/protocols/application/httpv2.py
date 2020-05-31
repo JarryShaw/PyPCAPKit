@@ -69,7 +69,7 @@ class HTTPv2(HTTP):
     # Methods.
     ##########################################################################
 
-    def read_http(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read Hypertext Transfer Protocol (HTTP/2).
 
         Structure of HTTP/2 packet [:rfc:`7540`]::
@@ -85,7 +85,10 @@ class HTTPv2(HTTP):
             +---------------------------------------------------------------+
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_HTTPv2: Parsed packet data.
@@ -128,6 +131,18 @@ class HTTPv2(HTTP):
         http.update(_http)
 
         return http
+
+    def make(self, **kwargs):
+        """Make (construct) packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        raise NotImplementedError
 
     @classmethod
     def id(cls):

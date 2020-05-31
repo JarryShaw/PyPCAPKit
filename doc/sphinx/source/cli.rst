@@ -1,8 +1,6 @@
 Command Line Interface
 ----------------------
 
-.. module:: pcapkit.__main__
-
 :mod:`pcapkit.__main__` was originally the module file of
 |jspcapy|_, which is now deprecated and merged with :mod:`pcapkit`.
 

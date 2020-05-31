@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'PyPCAPKit'
-copyright = '2020, Jarry Shaw'
+copyright = '2020, Jarry Shaw'  # pylint: disable=redefined-builtin
 author = 'Jarry Shaw'
 
 # The full version, including alpha/beta/rc tags
@@ -43,23 +43,22 @@ intersphinx_mapping = {
     'chardet': ('https://chardet.readthedocs.io/en/latest/', None),
     'dpkt': ('https://dpkt.readthedocs.io/en/latest/', None),
     'scapy': ('https://scapy.readthedocs.io/en/latest/', None),
-    'scapy': ('https://scapy.readthedocs.io/en/latest/', None),
     'requests': ('https://requests.readthedocs.io/en/latest/', None),
     'bs4': ('https://www.crummy.com/software/BeautifulSoup/bs4/doc/', None),
 }
 
-autodoc_typehints = 'description'
-#autodoc_member_order = 'bysource'
-#autodoc_member_order = 'alphabetic'
 autodoc_default_options = {
     'members': True,
-    'member-order': 'groupwise',
+    # 'member-order': 'groupwise',
     'special-members': '__init__',
     'undoc-members': True,
     'exclude-members': '__weakref__, _abc_impl',
     'ignore-module-all': True,
     'private-members': True,
 }
+autodoc_typehints = 'description'
+autodoc_member_order = 'bysource'
+#autodoc_member_order = 'alphabetic'
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -98,13 +97,13 @@ html_theme = 'alabaster'
 html_static_path = ['_static']
 
 
-def maybe_skip_member(app, what: str, name: str, obj: object, skip: bool, options: dict):
+def maybe_skip_member(app, what: str, name: str, obj: object, skip: bool, options: dict):  # pylint: disable=unused-argument
     if '_abc_impl' in name:
         return True
     return skip
 
 
-def remove_module_docstring(app, what: str, name: str, obj: object, options: dict, lines: list):
+def remove_module_docstring(app, what: str, name: str, obj: object, options: dict, lines: list):  # pylint: disable=unused-argument
     if what == "module" and "pcapkit" in name:
         lines.clear()
 

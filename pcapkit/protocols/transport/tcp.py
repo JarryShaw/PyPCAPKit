@@ -196,7 +196,7 @@ class TCP(Transport):
     # Methods.
     ##########################################################################
 
-    def read_tcp(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read Transmission Control Protocol (TCP).
 
         Structure of TCP header [:rfc:`793`]::
@@ -222,7 +222,10 @@ class TCP(Transport):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_TCP: Parsed packet data.
@@ -279,23 +282,21 @@ class TCP(Transport):
 
         return self._decode_next_layer(tcp, None, length)
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
+        Returns:
+            bytes: Constructed packet data.
+
         """
-        self._file = _file
-        self._info = Info(self.read_tcp(length))
+        raise NotImplementedError
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
 
     def __length_hint__(self):
         """Return an estimated length for the object.

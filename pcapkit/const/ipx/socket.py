@@ -13,35 +13,35 @@ class Socket(IntEnum):
     _ignore_ = 'Socket _'
     Socket = vars()
 
-    Socket['Routing Information Packet'] = 0x0001
+    Socket['Routing_Information_Packet'] = 0x0001
 
-    Socket['Echo Protocol Packet'] = 0x0002
+    Socket['Echo_Protocol_Packet'] = 0x0002
 
-    Socket['Error Handling Packet'] = 0x0003
+    Socket['Error_Handling_Packet'] = 0x0003
 
     #: NCP – used by Novell NetWare servers
-    Socket['NetWare Core Protocol'] = 0x0451
+    Socket['NetWare_Core_Protocol'] = 0x0451
 
     #: SAP
-    Socket['Service Advertising Protocol'] = 0x0452
+    Socket['Service_Advertising_Protocol'] = 0x0452
 
     #: RIP
-    Socket['Routing Information Protocol'] = 0x0453
+    Socket['Routing_Information_Protocol'] = 0x0453
 
     Socket['NetBIOS'] = 0x0455
 
-    Socket['Diagnostic Packet'] = 0x0456
+    Socket['Diagnostic_Packet'] = 0x0456
 
     #: used for NCP as well
-    Socket['Serialization Packet'] = 0x0457
+    Socket['Serialization_Packet'] = 0x0457
 
-    Socket['Used by Novell NetWare Client'] = 0x4003
+    Socket['Used_By_Novell_NetWare_Client'] = 0x4003
 
     Socket['IPX'] = 0x8060
 
-    Socket['TCP over IPXF'] = 0x9091
+    Socket['TCP_Over_IPXF'] = 0x9091
 
-    Socket['UDP over IPXF'] = 0x9092
+    Socket['UDP_Over_IPXF'] = 0x9092
 
     #: IPX Fragmentation Protocol
     Socket['IPXF'] = 0x9093

@@ -30,7 +30,7 @@ from pcapkit.protocols.link.arp import ARP
 __all__ = ['RARP']
 
 
-class RARP(ARP):
+class RARP(ARP):  # pylint: disable=abstract-method
     """This class implements Reverse Address Resolution Protocol."""
 
     #: Acronym of corresponding protocol.

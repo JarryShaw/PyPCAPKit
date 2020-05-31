@@ -162,6 +162,16 @@ class AH(IPsec):
         """
         raise NotImplementedError
 
+    @classmethod
+    def id(cls):
+        """Index ID of the protocol.
+
+        Returns:
+           Literal['AH']: Index ID of the protocol.
+
+        """
+        return cls.__name__
+
     ##########################################################################
     # Data models.
     ##########################################################################

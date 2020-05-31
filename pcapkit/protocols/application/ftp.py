@@ -13,10 +13,7 @@ import re
 
 from pcapkit.const.ftp.command import Command
 from pcapkit.const.ftp.return_code import ReturnCode
-from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.application.application import Application
-from pcapkit.protocols.null import NoPayload
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
 
 __all__ = ['FTP']
@@ -51,11 +48,14 @@ class FTP(Application):
     # Methods.
     ##########################################################################
 
-    def read_ftp(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read File Transfer Protocol (FTP).
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             Union[DataType_FTP_Request, DataType_FTP_Response]: Parsed packet data.
@@ -105,23 +105,14 @@ class FTP(Application):
 
         return ftp
 
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    def __init__(self, _file, length=None, **kwargs):  # pylint: disable=super-init-not-called
-        """Initialisation.
-
-        Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+    def make(self, **kwargs):
+        """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
-        """
-        self._file = _file
-        self._info = Info(self.read_ftp(length))
+        Returns:
+            bytes: Constructed packet data.
 
-        self._next = NoPayload()
-        self._protos = ProtoChain(self.__class__, self.alias)
+        """
+        raise NotImplementedError

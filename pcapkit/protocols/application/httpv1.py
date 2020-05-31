@@ -48,6 +48,13 @@ class HTTPv1(HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
 
     ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: Literal['request', 'response']: Type of HTTP receipt.
+    _receipt = None
+
+    ##########################################################################
     # Properties.
     ##########################################################################
 
@@ -57,13 +64,13 @@ class HTTPv1(HTTP):
 
         :rtype: Literal['HTTP/0.9', 'HTTP/1.0', 'HTTP/1.1']
         """
-        return f'HTTP/{self._info.header[self.__receipt__].version}'  # pylint: disable=E1101
+        return f'HTTP/{self._info.header[self._receipt].version}'  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read_http(self, length):
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read Hypertext Transfer Protocol (HTTP/1.*).
 
         Structure of HTTP/1.* packet [:rfc:`7230`]::
@@ -75,7 +82,10 @@ class HTTPv1(HTTP):
 
 
         Args:
-            length (int): packet length
+            length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_HTTP: Parsed packet data.
@@ -106,9 +116,21 @@ class HTTPv1(HTTP):
                 packet=self._read_packet(length),
             ),
         )
-        self.__receipt__ = http_receipt
+        self._receipt = http_receipt
 
         return http
+
+    def make(self, **kwargs):
+        """Make (construct) packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            bytes: Constructed packet data.
+
+        """
+        raise NotImplementedError
 
     @classmethod
     def id(cls):

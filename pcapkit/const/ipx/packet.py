@@ -18,9 +18,9 @@ class Packet(IntEnum):
     #: Routing Information Protocol ([:rfc:`1582`], [:rfc:`2091`])
     Packet['RIP'] = 1
 
-    Packet['Echo Packet'] = 2
+    Packet['Echo_Packet'] = 2
 
-    Packet['Error Packet'] = 3
+    Packet['Error_Packet'] = 3
 
     #: Packet Exchange Protocol, used for SAP (Service Advertising Protocol)
     Packet['PEP'] = 4
