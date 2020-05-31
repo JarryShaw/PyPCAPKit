@@ -14,45 +14,45 @@ ipv4.packet
     (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`)
     is as following:
 
-.. code:: python
+    .. code:: python
 
-   packet_dict = dict(
-     bufid = tuple(
-         ipv4.src,                   # source IP address
-         ipv4.dst,                   # destination IP address
-         ipv4.id,                    # identification
-         ipv4.proto,                 # payload protocol type
-     ),
-     num = frame.number,             # original packet range number
-     fo = ipv4.frag_offset,          # fragment offset
-     ihl = ipv4.hdr_len,             # internet header length
-     mf = ipv4.flags.mf,             # more fragment flag
-     tl = ipv4.len,                  # total length, header includes
-     header = ipv4.header,           # raw bytearray type header
-     payload = ipv4.payload,         # raw bytearray type payload
-   )
+       packet_dict = dict(
+         bufid = tuple(
+             ipv4.src,                   # source IP address
+             ipv4.dst,                   # destination IP address
+             ipv4.id,                    # identification
+             ipv4.proto,                 # payload protocol type
+         ),
+         num = frame.number,             # original packet range number
+         fo = ipv4.frag_offset,          # fragment offset
+         ihl = ipv4.hdr_len,             # internet header length
+         mf = ipv4.flags.mf,             # more fragment flag
+         tl = ipv4.len,                  # total length, header includes
+         header = ipv4.header,           # raw bytearray type header
+         payload = ipv4.payload,         # raw bytearray type payload
+       )
 
 ipv4.datagram
     Data structure for **reassembled IPv4 datagram** (element from
     :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
     is as following:
 
-.. code:: python
+    .. code:: python
 
-   (tuple) datagram
-    |--> (dict) data
-    |     |--> 'NotImplemented' : (bool) True --> implemented
-    |     |--> 'index' : (tuple) packet numbers
-    |     |               |--> (int) original packet range number
-    |     |--> 'packet' : (Optional[bytes]) reassembled IPv4 packet
-    |--> (dict) data
-    |     |--> 'NotImplemented' : (bool) False --> not implemented
-    |     |--> 'index' : (tuple) packet numbers
-    |     |               |--> (int) original packet range number
-    |     |--> 'header' : (Optional[bytes]) IPv4 header
-    |     |--> 'payload' : (Optional[tuple]) partially reassembled IPv4 payload
-    |                       |--> (Optional[bytes]) IPv4 payload fragment
-    |--> (dict) data ...
+       (tuple) datagram
+        |--> (dict) data
+        |     |--> 'NotImplemented' : (bool) True --> implemented
+        |     |--> 'index' : (tuple) packet numbers
+        |     |               |--> (int) original packet range number
+        |     |--> 'packet' : (Optional[bytes]) reassembled IPv4 packet
+        |--> (dict) data
+        |     |--> 'NotImplemented' : (bool) False --> not implemented
+        |     |--> 'index' : (tuple) packet numbers
+        |     |               |--> (int) original packet range number
+        |     |--> 'header' : (Optional[bytes]) IPv4 header
+        |     |--> 'payload' : (Optional[tuple]) partially reassembled IPv4 payload
+        |                       |--> (Optional[bytes]) IPv4 payload fragment
+        |--> (dict) data ...
 
 ipv4.buffer
     Data structure for internal buffering when performing reassembly algorithms

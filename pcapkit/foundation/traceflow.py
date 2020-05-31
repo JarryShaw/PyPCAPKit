@@ -1,9 +1,69 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=import-outside-toplevel
 """trace TCP flows
 
-`pcapkit.foundation.traceflow` is the interface to trace
-TCP flows from a series of packets and connections. This
-was implemented as the demand of my mate @gousaiyang.
+:mod:`pcapkit.foundation.traceflow` is the interface to trace
+TCP flows from a series of packets and connections.
+
+.. note::
+
+    This was implemented as the demand of my mate @gousaiyang.
+
+Glossary
+--------
+
+trace.packet
+    Data structure for **TCP flow tracing**
+    (:meth:`~pcapkit.foundation.traceflow.TraceFlow.dump`)
+    is as following:
+
+    .. code:: python
+
+       tract_dict = dict(
+           protocol=data_link,                     # data link type from global header
+           index=frame.info.number,                # frame number
+           frame=frame.info,                       # extracted frame info
+           syn=tcp.flags.syn,                      # TCP synchronise (SYN) flag
+           fin=tcp.flags.fin,                      # TCP finish (FIN) flag
+           src=ip.src,                             # source IP
+           dst=ip.dst,                             # destination IP
+           srcport=tcp.srcport,                    # TCP source port
+           dstport=tcp.dstport,                    # TCP destination port
+           timestamp=frame.info.time_epoch,        # frame timestamp
+       )
+
+trace.buffer
+    Data structure for internal buffering when performing flow tracing algorithms
+    (:attr:`~pcapkit.foundation.traceflow.TraceFlow._buffer`) is as following:
+
+    .. code:: python
+
+       (dict) buffer --> memory buffer for reassembly
+        |--> (tuple) BUFID : (dict)
+        |       |--> ip.src      |
+        |       |--> ip.dst      |
+        |       |--> tcp.srcport |
+        |       |--> tcp.dstport |
+        |                        |--> 'fpout' : (dictdumper.Dumper) output dumper object
+        |                        |--> 'index': (list) list of frame index
+        |                        |              |--> (int) frame index
+        |                        |--> 'label': (str) flow label generated from ``BUFID``
+        |--> (tuple) BUFID ...
+
+trace.index
+    Data structure for **TCP flow tracing** (element from
+    :attr:`~pcapkit.foundation.traceflow.TraceFlow.index` *tuple*)
+    is as following:
+
+    .. code:: python
+
+       (tuple) index
+        |--> (Info) data
+        |     |--> 'fpout' : (Optional[str]) output filename if exists
+        |     |--> 'index': (tuple) tuple of frame index
+        |     |              |--> (int) frame index
+        |     |--> 'label': (str) flow label generated from ``BUFID``
+        |--> (Info) data ...
 
 """
 import copy
@@ -26,23 +86,18 @@ __all__ = ['TraceFlow']
 
 
 class TraceFlow:
-    """Trace TCP flows.
+    """Trace TCP flows."""
 
-    Properties:
-        * index -- tuple<Info>, index table for traced flows
-
-    Methods:
-        * make_fout -- make root path for output
-        * dump -- dump frame to output files
-        * trace -- trace packets
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def index(self):
+        """Index table for traced flow.
+
+        :rtype: Tuple[Info]
+        """
         if self._newflg:
             return self.submit()
         return tuple(self._stream)
@@ -56,11 +111,19 @@ class TraceFlow:
         """Make root path for output.
 
         Positional arguments:
-            * fout -- str, root path for output
-            * fmt -- str, output format
+            fout (str): root path for output
+            fmt (str): output format
 
         Returns:
-            * output -- dumper of specified format
+            Tuple[Type[dictdumper.Dumper], str]: dumper of specified format and file
+            extension of output file
+
+        Warns:
+            FormatWarning: If ``fmt`` is not supported.
+            FileWarning: If ``fout`` exists and ``fmt`` is :data:`None`.
+
+        Raises:
+            FileExists: If ``fout`` exists and ``fmt`` is **NOT** :data:`None`.
 
         """
         if fmt == 'pcap':       # output PCAP file
@@ -73,7 +136,7 @@ class TraceFlow:
             from dictdumper import Tree as output
             fmt = 'txt'
         elif fmt == 'html':     # output JavaScript file
-            from dictdumper import JavaScript as output
+            from dictdumper import VueJS as output
             fmt = 'js'
         elif fmt == 'xml':      # output XML file
             from dictdumper import XML as output
@@ -90,47 +153,48 @@ class TraceFlow:
             if fmt is None:
                 warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
-                raise FileExists(*error.args) from None
+                raise FileExists(*error.args).with_traceback(error.__traceback__) from None
 
         return output, fmt
 
     def dump(self, packet):
         """Dump frame to output files.
 
-        Positional arguments:
-            * packet -- dict, a flow packet
-                |-- (str) protocol -- data link type from global header
-                |-- (int) index -- frame number
-                |-- (Info) frame -- extracted frame info
-                |-- (bool) syn -- TCP synchronise (SYN) flag
-                |-- (bool) fin -- TCP finish (FIN) flag
-                |-- (str) src -- source IP
-                |-- (int) srcport -- TCP source port
-                |-- (str) dst -- destination IP
-                |-- (int) dstport -- TCP destination port
-                |-- (numbers.Real) timestamp -- frame timestamp
+        Arguments:
+            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)
 
         """
         # fetch flow label
-        output = self.trace(packet, _check=False, _output=True)
+        output = self.trace(packet, check=False, output=True)
 
         # dump files
         output(packet['frame'], name=f"Frame {packet['index']}",
                byteorder=self._endian, nanosecond=self._nnsecd)
 
-    def trace(self, packet, *, _check=True, _output=False):
+    def trace(self, packet, *, check=True, output=False):
         """Trace packets.
 
-        Positional arguments:
-            * packet -- dict, a flow packet
+        Arguments:
+            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)
 
-        Keyword arguments:
-            * _check -- bool, flag if run validations
-            * _output -- bool, flag if has formatted dumper
+        Keyword Arguments:
+            check (bool): flag if run validations
+            output (bool): flag if has formatted dumper
+
+        Returns:
+            Union[dictdumper.Dumper, str]: If ``output`` is :data:`True`,
+            returns the initiated :class:`~dictdumper.Dumper` object, which
+            will dump data to the output file named after the flow label;
+            otherwise, returns the flow label itself.
+
+        Notes:
+            The flow label is formatted as following::
+
+                f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'
 
         """
         self._newflg = True
-        if _check:
+        if check:
             pkt_check(packet)
         info = Info(packet)
 
@@ -175,10 +239,15 @@ class TraceFlow:
             self._stream.append(Info(buf))
 
         # return label or output object
-        return fpout if _output else label
+        return fpout if output else label
 
     def submit(self):
-        """Submit traced TCP flows."""
+        """Submit traced TCP flows.
+
+        Returns:
+            Tuple[Info]: traced TCP flow (:term:`trace.buffer`)
+
+        """
         self._newflg = False
         ret = list()
         for buf in self._buffer.values():
@@ -196,34 +265,43 @@ class TraceFlow:
     # Data models.
     ##########################################################################
 
-    # Not hashable
-    __hash__ = None
-
-    def __init__(self, *, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):  # pylint: disable=redefined-builtin
+    def __init__(self, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):  # pylint: disable=redefined-builtin
         """Initialise instance.
 
-        Keyword arguments:
-            * fout -- str, output path
-            * format -- str, output format
-            * byteorder -- str, output file byte order
-            * nanosecond -- bool, output nanosecond-resolution file flag
+        Arguments:
+            fout (Optional[str]): output path
+            format (Optional[str]): output format
+            byteorder (str): output file byte order
+            nanosecond (bool): output nanosecond-resolution file flag
 
         """
-        self._newflg = False    # new packet flag
-        self._fproot = fout     # output root path
-        self._buffer = dict()   # buffer field
-        self._stream = list()   # stream index
+        #: bool: New packet flag.
+        self._newflg = False
+        #: str: Output root path.
+        self._fproot = fout
+
+        #: dict: Buffer field (:term:`trace.buffer`).
+        self._buffer = dict()
+        #: list: Stream index (:term:`trace.index`).
+        self._stream = list()
+
+        #: Literal['little', 'big']: Output file byte order.
         self._endian = byteorder
+        #: bool: Output nanosecond-resolution file flag.
         self._nnsecd = nanosecond
 
         # dump I/O object
-        self._foutio, self._fdpext = self.make_fout(fout, format)
+        fio, ext = self.make_fout(fout, format)
+        #: Type[dictdumper.Dumper]: Dumper class.
+        self._foutio = fio
+        #: str: Output file extension.
+        self._fdpext = ext
 
     def __call__(self, packet):
         """Dump frame to output files.
 
-        Positional arguments:
-            * packet -- dict, a flow packet
+        Arguments:
+            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)
 
         """
         self._newflg = True

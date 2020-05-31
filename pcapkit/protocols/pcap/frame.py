@@ -94,11 +94,14 @@ class Frame(Protocol):
         """
         return self._protos.index(name)
 
-    def read(self, length=None):  # pylint: disable=unused-argument
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read each block after global header.
 
         Args:
             length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_Frame: Parsed packet data.

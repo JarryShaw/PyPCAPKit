@@ -24,6 +24,9 @@ efficiency in some way.
 .. toctree::
    :maxdepth: 2
 
+   dumpkit/index
+   foundation/index
+   interface/index
    protocols/index
    reassembly/index
    toolkit/index

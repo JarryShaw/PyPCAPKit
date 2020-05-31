@@ -2,9 +2,9 @@
 # pylint: disable=bad-continuation
 """user interface
 
-`pcapkit.interface` defines several user-oriented
+:mod:`pcapkit.interface` defines several user-oriented
 interfaces, variables, and etc. These interfaces are
-designed to help and simplify the usage of `pcapkit`.
+designed to help and simplify the usage of :mod:`pcapkit`.
 
 """
 import io
@@ -18,8 +18,7 @@ from pcapkit.reassembly.ipv4 import IPv4_Reassembly
 from pcapkit.reassembly.ipv6 import IPv6_Reassembly
 from pcapkit.reassembly.tcp import TCP_Reassembly
 from pcapkit.utilities.exceptions import FormatError
-from pcapkit.utilities.validations import (bool_check, int_check, io_check,
-                                           str_check)
+from pcapkit.utilities.validations import bool_check, int_check, io_check, str_check
 
 __all__ = [
     'extract', 'analyse', 'reassemble', 'trace',            # interface functions
@@ -60,56 +59,39 @@ def extract(fin=None, fout=None, format=None,                           # basic 
             trace_byteorder=sys.byteorder, trace_nanosecond=False):     # trace settings
     """Extract a PCAP file.
 
-    Keyword arguments:
-        * fin  -- str, file name to be read; if file not exist, raise an error
-        * fout -- str, file name to be written
-        * format  -- str, file format of output
-                        <keyword> 'plist' / 'json' / 'tree' / 'html'
+    Arguments:
+        fin (Optiona[str]): file name to be read; if file not exist, raise :exc:`FileNotFound`
+        fout (Optiona[str]): file name to be written
+        format (Optional[Literal['plist', 'json', 'tree']]): file format of output
 
-        * auto -- bool, if automatically run till EOF (default is True)
-                        <keyword> True / False
-        * extension -- bool, if check and append extensions to output file (default is True)
-                        <keyword> True / False
-        * store -- bool, if store extracted packet info (default is True)
-                        <keyword> True / False
+        auto (bool): if automatically run till EOF
+        extension (bool): if check and append extensions to output file
+        store (bool): if store extracted packet info
 
-        * files -- bool, if split each frame into different files (default is False)
-                        <keyword> True / False
-        * nofile -- bool, if no output file is to be dumped (default is False)
-                        <keyword> True / False
-        * verbose -- bool, if print verbose output information (default is False)
-                        <keyword> True / False
+        files (bool): if split each frame into different files
+        nofile (bool): if no output file is to be dumped
+        verbose (bool): if print verbose output information
 
-        * engine -- str, extraction engine to be used
-                        <keyword> 'default | pcapkit'
-        * layer -- str, extract til which layer
-                        <keyword> 'Link' / 'Internet' / 'Transport' / 'Application'
-        * protocol -- str, extract til which protocol
-                        <keyword> available protocol name
+        engine (Optional[Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'server', 'pipeline']]):
+            extraction engine to be used
+        layer (Optional[Literal['Link', 'Internet', 'Transport', 'Application']]): extract til which layer
+        protocol (Optional[Union[str, Tuple[str], Type[Protocol]]]): extract til which protocol
 
-        * ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
-                        <keyword> True / False
-        * ipv4 -- bool, if perform IPv4 reassembly (default is False)
-                        <keyword> True / False
-        * ipv6 -- bool, if perform IPv6 reassembly (default is False)
-                        <keyword> True / False
-        * tcp -- bool, if perform TCP reassembly (default is False)
-                        <keyword> True / False
-        * strict -- bool, if set strict flag for reassembly (default is True)
-                        <keyword> True / False
+        ip (bool): if record data for IPv4 & IPv6 reassembly
+        ipv4 (bool): if perform IPv4 reassembly
+        ipv6 (bool): if perform IPv6 reassembly
+        tcp (bool): if perform TCP reassembly
+        strict (bool): if set strict flag for reassembly
 
-        * trace -- bool, if trace TCP traffic flows (default is False)
-                        <keyword> True / False
-        * trace_fout -- str, path name for flow tracer if necessary
-        * trace_format -- str, output file format of flow tracer
-                        <keyword> 'plist' / 'json' / 'tree' / 'html' / 'pcap'
-        * trace_byteorder -- str, output file byte order
-                        <keyword> 'little' / 'big'
-        * trace_nanosecond -- bool, output nanosecond-resolution file flag
-                        <keyword> True / False
+        trace (bool): if trace TCP traffic flows
+        trace_fout (Optional[str]): path name for flow tracer if necessary
+        trace_format (Optional[Literal['plist', 'json', 'tree', 'pcap']]): output file
+            format of flow tracer
+        trace_byteorder (Literal['little', 'big']): output file byte order
+        trace_nanosecond (bool): output nanosecond-resolution file flag
 
     Returns:
-        * Extractor -- an Extractor object form `pcapkit.extractor`
+        Extractor -- an :class:`~pcapkit.foundation.extraction.Extractor` object
 
     """
     if isinstance(layer, type) and issubclass(layer, Protocol):
@@ -135,12 +117,12 @@ def extract(fin=None, fout=None, format=None,                           # basic 
 def analyse(file, length=None):
     """Analyse application layer packets.
 
-    Keyword arguments:
-        * file -- bytes or file-like object, packet to be analysed
-        * length -- int, length of the analysing packet
+    Arguments:
+        file (Union[bytes, io.BytesIO]): packet to be analysed
+        length (Optional[int]): length of the analysing packet
 
     Returns:
-        * Analysis -- an Analysis object from `pcapkit.analyser`
+        Analysis: an :class:`~pcapkit.foundation.analysis.Analysis` object
 
     """
     if isinstance(file, bytes):
@@ -155,15 +137,16 @@ def analyse(file, length=None):
 def reassemble(protocol, strict=False):
     """Reassemble fragmented datagrams.
 
-    Keyword arguments:
-        * protocol -- str, protocol to be reassembled
-        * strict -- bool, if return all datagrams (including those not implemented) when submit (default is False)
-                        <keyword> True / False
+    Arguments:
+        protocol (Union[str, Type[Protocol]]) protocol to be reassembled
+        strict (bool): if return all datagrams (including those not implemented) when submit
 
     Returns:
-        * [if protocol is IPv4] IPv4_Reassembly -- a Reassembly object from `pcapkit.reassembly`
-        * [if protocol is IPv6] IPv6_Reassembly -- a Reassembly object from `pcapkit.reassembly`
-        * [if protocol is TCP] TCP_Reassembly -- a Reassembly object from `pcapkit.reassembly`
+        Union[IPv4_Reassembly, IPv6_Reassembly, TCP_Reassembly]: a :class:`~pcapkit.reassembly.reassembly.Reassembly`
+        object of corresponding protocol
+
+    Raises:
+        FormatError: If ``protocol`` is **NOT** any of IPv4, IPv6 or TCP.
 
     """
     if isinstance(protocol, type) and issubclass(protocol, Protocol):
@@ -184,11 +167,14 @@ def reassemble(protocol, strict=False):
 def trace(fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):  # pylint: disable=redefined-builtin
     """Trace TCP flows.
 
-    Keyword arguments:
-        * fout -- str, output path
-        * format -- str, output format
-        * byteorder -- str, output file byte order
-        * nanosecond -- bool, output nanosecond-resolution file flag
+    Arguments:
+        fout (str): output path
+        format (Optional[str]): output format
+        byteorder (str): output file byte order
+        nanosecond (bool): output nanosecond-resolution file flag
+
+    Returns:
+        TraceFlow: a :class:`~pcapkit.foundation.traceflow.TraceFlow` object
 
     """
     str_check(fout or '', format or '')

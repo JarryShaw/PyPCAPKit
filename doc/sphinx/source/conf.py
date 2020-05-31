@@ -34,7 +34,8 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.intersphinx',
     'sphinx.ext.autodoc', 'sphinx.ext.autodoc.typehints',
-    'sphinxcontrib.napoleon'
+    'sphinxcontrib.napoleon',
+    'sphinx.ext.todo',
 ]
 
 intersphinx_mapping = {
@@ -74,6 +75,8 @@ napoleon_use_param = True
 napoleon_use_rtype = True
 napoleon_use_keyword = True
 napoleon_custom_sections = None
+
+todo_include_todos = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

@@ -387,7 +387,7 @@ def _tcp_frag_check(*args, stacklevel=3):
 
 
 def pkt_check(*args, stacklevel=3):
-    """Check if arguments are valid packets (:term:`TCP packet <traceflow.packet>`).
+    """Check if arguments are valid packets (:term:`TCP packet <trace.packet>`).
 
     Args:
         *args: Arguments to check.

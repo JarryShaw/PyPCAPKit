@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=fixme, bad-continuation, attribute-defined-outside-init, protected-access
+# pylint: disable=import-outside-toplevel,fixme
 """extractor for PCAP files
 
-`pcapkit.foundation.extraction` contains `Extractor` only,
+:mod:`pcapkit.foundation.extraction` contains
+:class:`~pcapkit.foundation.extraction.Extractor` only,
 which synthesises file I/O and protocol analysis,
 coordinates information exchange in all network layers,
 extracts parametres from a PCAP file.
@@ -10,6 +11,7 @@ extracts parametres from a PCAP file.
 """
 # TODO: implement engine support for pypcap & pycapfile
 
+import builtins
 import collections
 import copy
 import datetime
@@ -57,19 +59,30 @@ from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWar
 ###############################################################################
 
 __all__ = ['Extractor']
-__fmt__ = format
 
 # check list
+#: List of layers.
 LAYER_LIST = {'None', 'Link', 'Internet', 'Transport', 'Application'}
+#: List of protocols.
 PROTO_LIST = {
-    'null', 'protocol', 'raw',                              # base protocols
-    'header', 'frame',                                      # PCAP headers
+    # base protocols
+    'null', 'protocol', 'raw',
+
+    # PCAP headers
+    'header', 'frame',
+
+    # Link layer
     'link', 'arp', 'inarp', 'ethernet', 'l2tp', 'ospf', 'rarp', 'drarp', 'vlan',
-                                                            # Link layer
+
+    # Internet layer
     'internet', 'ah', 'hip', 'hopopt', 'ip', 'ipsec', 'ipv4', 'ipv6', 'ipv6_frag',
-    'ipv6_opts', 'ipv6_route', 'ipx', 'mh',                 # Internet layer
-    'transport', 'tcp', 'udp',                              # Transport layer
-    'application', 'ftp', 'http', 'httpv1', 'httpv2',       # Application layer
+    'ipv6_opts', 'ipv6_route', 'ipx', 'mh',
+
+    # Transport layer
+    'transport', 'tcp', 'udp',
+
+    # Application layer
+    'application', 'ftp', 'http', 'httpv1', 'httpv2',
 }
 
 
@@ -153,50 +166,114 @@ class Extractor:
 
     @property
     def info(self):
+        """Version of input PCAP file.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._exeng <pcapkit.foundation.extraction.Extractor._exeng>`
+                is ``'scapy'`` or ``'pyshark'``, as such engines does not reserve such information.
+
+        :rtype: VersionInfo
+        """
         if self._exeng in ('scapy', 'pyshark'):
             raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'info'")
         return self._vinfo
 
     @property
     def length(self):
+        """Frame number (of current extracted frame or all).
+
+        :rtype: int
+        """
         return self._frnum
 
     @property
     def format(self):
+        """Format of output file.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_q <pcapkit.foundation.extraction.Extractor._flag_q>`
+                is set as :data:`True`, as output is disabled by initialisation parameter.
+
+        :rtype: str
+        """
         if self._flag_q:
             raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'format'")
         return self._type
 
     @property
     def input(self):
+        """Name of input PCAP file.
+
+        :rtype: str
+        """
         return self._ifnm
 
     @property
     def output(self):
+        """Name of output file.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_q <pcapkit.foundation.extraction.Extractor._flag_q>`
+                is set as :data:`True`, as output is disabled by initialisation parameter.
+
+        :rtype: str
+        """
         if self._flag_q:
             raise UnsupportedCall("'Extractor(nofile=True)' object has no attribute 'format'")
         return self._ofnm
 
     @property
     def header(self):
+        """Global header.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._exeng <pcapkit.foundation.extraction.Extractor._exeng>`
+                is ``'scapy'`` or ``'pyshark'``, as such engines does not reserve such information.
+
+        :rtype: Info[DataType_Header]
+        """
         if self._exeng in ('scapy', 'pyshark'):
             raise UnsupportedCall(f"'Extractor(engine={self._exeng})' object has no attribute 'header'")
         return self._gbhdr
 
     @property
     def protocol(self):
+        """Protocol chain of current frame.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_a <pcapkit.foundation.extraction.Extractor._flag_a>`
+                is :data:`True`, as such attribute is not applicable.
+
+        :rtype: ProtoChain
+        """
         if self._flag_a:
-            raise UnsupportedCall(f"'Extractor(auto=True)' object has no attribute 'protocol'")
+            raise UnsupportedCall("'Extractor(auto=True)' object has no attribute 'protocol'")
         return self._proto
 
     @property
     def frame(self):
+        """Extracted frames.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_d <pcapkit.foundation.extraction.Extractor._flag_d>`
+                is :data:`True`, as storing frame data is disabled.
+
+        :rtype: Tuple[Info[DataType_Frame]]
+        """
         if self._flag_d:
             return tuple(self._frame)
         raise UnsupportedCall("'Extractor(store=False)' object has no attribute 'frame'")
 
     @property
     def reassembly(self):
+        """Frame record for reassembly.
+
+        * ``ipv6`` -- tuple of TCP payload fragment (:class:`~pcapkit.reassembly.ipv4.IPv4_Reassembly`)
+        * ``ipv4`` -- tuple of TCP payload fragment (:class:`~pcapkit.reassembly.ipv6.IPv6_Reassembly`)
+        * ``tcp`` -- tuple of TCP payload fragment (:class:`~pcapkit.reassembly.tcp.TCP_Reassembly`)
+
+        :rtype: Info
+        """
         data = Info(
             ipv4=tuple(self._reasm[0].datagram) if self._ipv4 else None,
             ipv6=tuple(self._reasm[1].datagram) if self._ipv6 else None,
@@ -206,12 +283,24 @@ class Extractor:
 
     @property
     def trace(self):
+        """Index table for traced flow.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_t <pcapkit.foundation.extraction.Extractor._flag_t>`
+                is :data:`True`, as TCP flow tracing is disabled.
+
+        :rtype: Tuple[Info]
+        """
         if self._flag_t:
             return self._trace.index
         raise UnsupportedCall("'Extractor(trace=False)' object has no attribute 'trace'")
 
     @property
     def engine(self):
+        """PCAP extraction engine.
+
+        :rtype: str
+        """
         return self._exeng
 
     ##########################################################################
@@ -219,7 +308,29 @@ class Extractor:
     ##########################################################################
 
     def run(self):  # pylint: disable=inconsistent-return-statements
-        """Start extraction."""
+        """Start extraction.
+
+        Warns:
+            EngineWarning: If the extraction engine is not available. This is either due to
+                dependency not installed, number of CPUs is not enough, or supplied engine
+                unknown.
+
+        See Also:
+            We uses :meth:`~pcapkit.foundation.extraction.Extractor.import_test` to check if
+            a certain engine is available or not. For supported engines, each engine has
+            different driver method:
+
+            * Default drivers:
+              * Global header: :meth:`~pcapkit.foundation.extraction.Extractor.record_header`
+              * Packet frames: :meth:`~pcapkit.foundation.extraction.Extractor.record_frames`
+            * DPKT driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_dpkt`
+            * Scapy driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_scapy`
+            * PyShark driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_pyshark`
+            * Multiprocessing driver:
+              * Pipeline model: :meth:`~pcapkit.foundation.extraction.Extractor._run_pipeline`
+              * Server model: :meth:`~pcapkit.foundation.extraction.Extractor._run_server`
+
+        """
         flag = True
         if self._exeng == 'dpkt':
             flag, engine = self.import_test('dpkt', name='DPKT')
@@ -238,14 +349,14 @@ class Extractor:
             self._flag_m = flag = bool(flag and (self._flag_a and CPU_CNT > 1))
             if self._flag_m:
                 return self._run_pipeline(engine)
-            warnings.warn(f'extraction engine Pipeline Multiprocessing is not available; '
+            warnings.warn('extraction engine Pipeline Multiprocessing is not available; '
                           'using default engine instead', EngineWarning, stacklevel=stacklevel())
         elif self._exeng == 'server':
             flag, engine = self.import_test('multiprocessing', name='Server Multiprocessing')
             self._flag_m = flag = bool(flag and (self._flag_a and CPU_CNT > 2))
             if self._flag_m:
                 return self._run_server(engine)
-            warnings.warn(f'extraction engine Server Multiprocessing is not available; '
+            warnings.warn('extraction engine Server Multiprocessing is not available; '
                           'using default engine instead', EngineWarning, stacklevel=stacklevel())
         elif self._exeng not in ('default', 'pcapkit'):
             flag = False
@@ -258,6 +369,19 @@ class Extractor:
         self.record_frames()            # read frames
 
     def check(self):
+        """Check layer and protocol thresholds.
+
+        Warns:
+            LayerWarning: If :attr:`self._exlyr <pcapkit.foundation.extraction.Extractor._exlyr>`
+                is not recognised.
+            ProtocolWarning: If :attr:`self._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
+                is not recognised.
+
+        See Also:
+            * List of available layers: :data:`~pcapkit.foundation.extractor.LAYER_LIST`
+            * List of available protocols: :data:`~pcapkit.foundation.extractor.PROTO_LIST`
+
+        """
         layer = self._exlyr
         if layer is not None:
             if layer not in LAYER_LIST:
@@ -276,6 +400,22 @@ class Extractor:
 
     @staticmethod
     def import_test(engine, *, name=None):
+        """Test import for extractcion engine.
+
+        Args:
+            engine (str): Extraction engine module name.
+
+        Keyword Args:
+            name (Optional[str]): Extraction engine display name.
+
+        Warns:
+            EngineWarning: If the engine module is not installed.
+
+        Returns:
+            Tuple[bool, Optional[ModuleType]]: If succeeded, returns :data:`True`
+            and the module; otherwise, returns :data:`False` and :data:`None`.
+
+        """
         try:
             engine = importlib.import_module(engine)
             return True, engine
@@ -286,6 +426,34 @@ class Extractor:
 
     @classmethod
     def make_name(cls, fin, fout, fmt, extension, *, files=False, nofile=False):
+        """Generate input and output filenames.
+
+        Args:
+            fin (Optional[str]): Input filename.
+            fout (Optional[str]): Output filename.
+            fmt (str): Output file format.
+            extension (bool): If append ``.pcap`` file extension to the input filename
+                if ``fin`` does not have such file extension; if check and append extensions
+                to output file.
+
+        Keyword Args:
+            files (bool): If split each frame into different files.
+            nofile (bool): If no output file is to be dumped.
+
+        Returns:
+            Tuple[str, str, str, str, bool]: Generated input and output filenames:
+
+            0. input filename
+            1. output filename / directory name
+            2. output format
+            3. output file extension (without ``.``)
+            4. if split each frame into different files
+
+        Raises:
+            FileNotFound: If input file does not exists.
+            FormatError: If output format not provided and cannot be presumpted.
+
+        """
         if fin is None:
             ifnm = 'in.pcap'
         else:
@@ -340,14 +508,8 @@ class Extractor:
         return ifnm, ofnm, fmt, ext, files
 
     def record_header(self):
-        """Read global header.
-
-        - Extract global header.
-        - Make Info object out of header properties.
-        - Append Info.
-        - Write plist file.
-
-        """
+        """Read global header."""
+        # pylint: disable=attribute-defined-outside-init,protected-access
         self._gbhdr = Header(self._ifile)
         self._vinfo = self._gbhdr.version
         self._dlink = self._gbhdr.protocol
@@ -367,6 +529,7 @@ class Extractor:
                 self._type = self._ofile.kind
 
     def record_frames(self):
+        """Read packet frames."""
         if self._flag_a:
             while True:
                 try:
@@ -380,10 +543,7 @@ class Extractor:
     # Data modules.
     ##########################################################################
 
-    # Not hashable
-    __hash__ = None
-
-    def __init__(self, *,
+    def __init__(self,
                  fin=None, fout=None, format=None,                          # basic settings  # pylint: disable=redefined-builtin
                  auto=True, extension=True, store=True,                     # internal settings
                  files=False, nofile=False, verbose=False,                  # output settings
@@ -393,59 +553,48 @@ class Extractor:
                  trace_byteorder=sys.byteorder, trace_nanosecond=False):    # trace settings
         """Initialise PCAP Reader.
 
-        Keyword arguments:
-            * fin  -- str, file name to be read; if file not exist, raise an error
-            * fout -- str, file name to be written
-            * format  -- str, file format of output
-                            <keyword> 'plist' / 'json' / 'tree' / 'html'
+        Arguments:
+            fin (Optiona[str]): file name to be read; if file not exist, raise :exc:`FileNotFound`
+            fout (Optiona[str]): file name to be written
+            format (Optional[Literal['plist', 'json', 'tree']]): file format of output
 
-            * auto -- bool, if automatically run till EOF (default is True)
-                            <keyword> True / False
-            * extension -- bool, if check and append extensions to output file (default is True)
-                            <keyword> True / False
-            * store -- bool, if store extracted packet info (default is True)
-                            <keyword> True / False
+            auto (bool): if automatically run till EOF
+            extension (bool): if check and append extensions to output file
+            store (bool): if store extracted packet info
 
-            * files -- bool, if split each frame into different files (default is False)
-                            <keyword> True / False
-            * nofile -- bool, if no output file is to be dumped (default is False)
-                            <keyword> True / False
-            * verbose -- bool, if print verbose output information (default is False)
-                            <keyword> True / False
+            files (bool): if split each frame into different files
+            nofile (bool): if no output file is to be dumped
+            verbose (bool): if print verbose output information
 
-            * engine -- str, extraction engine to be used
-                            <keyword> 'default | pcapkit'
-            * layer -- str, extract til which layer
-                            <keyword> 'Link' / 'Internet' / 'Transport' / 'Application'
-            * protocol -- str, extract til which protocol
-                            <keyword> available protocol name
+            engine (Optional[Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'server', 'pipeline']]):
+                extraction engine to be used
+            layer (Optional[Literal['Link', 'Internet', 'Transport', 'Application']]): extract til which layer
+            protocol (Optional[Union[str, Tuple[str], Type[Protocol]]]): extract til which protocol
 
-            * ip -- bool, if record data for IPv4 & IPv6 reassembly (default is False)
-                            <keyword> True / False
-            * ipv4 -- bool, if perform IPv4 reassembly (default is False)
-                            <keyword> True / False
-            * ipv6 -- bool, if perform IPv6 reassembly (default is False)
-                            <keyword> True / False
-            * tcp -- bool, if perform TCP reassembly (default is False)
-                            <keyword> True / False
-            * strict -- bool, if set strict flag for reassembly (default is True)
-                            <keyword> True / False
+            ip (bool): if record data for IPv4 & IPv6 reassembly
+            ipv4 (bool): if perform IPv4 reassembly
+            ipv6 (bool): if perform IPv6 reassembly
+            tcp (bool): if perform TCP reassembly
+            strict (bool): if set strict flag for reassembly
 
-            * trace -- bool, if trace TCP traffic flows (default is False)
-                            <keyword> True / False
-            * trace_fout -- str, path name for flow tracer if necessary
-            * trace_format -- str, output file format of flow tracer
-                            <keyword> 'plist' / 'json' / 'tree' / 'html' / 'pcap'
-            * trace_byteorder -- str, output file byte order
-                            <keyword> 'little' / 'big'
-            * trace_nanosecond -- bool, output nanosecond-resolution file flag
-                            <keyword> True / False
+            trace (bool): if trace TCP traffic flows
+            trace_fout (Optional[str]): path name for flow tracer if necessary
+            trace_format (Optional[Literal['plist', 'json', 'tree', 'pcap']]): output file
+                format of flow tracer
+            trace_byteorder (Literal['little', 'big']): output file byte order
+            trace_nanosecond (bool): output nanosecond-resolution file flag
 
+        Warns:
+            FormatWarning: Warns under following circumstances:
+
+                * If using PCAP output for TCP flow tracing while the extraction engine is PyShark.
+                * If output file format is not supported.
 
         """
-        ifnm, ofnm, fmt, ext, files = \
-            self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
-        format = __fmt__
+        ifnm, ofnm, fmt, ext, files = self.make_name(fin, fout, format, extension, files=files, nofile=nofile)
+
+        # put back builtin
+        format = builtins.format
 
         self._ifnm = ifnm               # input file name
         self._ofnm = ofnm               # output file name
@@ -464,7 +613,8 @@ class Extractor:
         self._frame = list()            # frame record
         self._proto = None              # frame ProtoChain
 
-        self._reasm = [None] * 3        # frame record for reassembly (IPv4 / IPv6 / TCP)
+        self._reasm = [None for _ in range(3)]
+                                        # frame record for reassembly (IPv4 / IPv6 / TCP)
         self._trace = NotImplemented    # flow tracer
 
         self._ipv4 = ipv4 or ip         # IPv4 Reassembly
@@ -512,13 +662,24 @@ class Extractor:
                               FormatWarning, stacklevel=stacklevel())
 
             class DictDumper(output):
+                """Customised :class:`~dictdumper.dumper.Dumper` object."""
 
                 def object_hook(self, o):
+                    """Convert content for function call.
+
+                    Args:
+                        o (:obj:`Any`): object to convert
+
+                    Returns:
+                        :obj:`Any`: the converted object
+
+                    """
                     import enum
                     import aenum
+
                     if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
-                        return f'No.{o.value} {o.name}'
-                    if isinstance(o, ipaddress._BaseAddress):
+                        return f'<{o.name}: {o.value}>'
+                    if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
                         return str(o)
                     if isinstance(o, Info):
                         return dict(o)

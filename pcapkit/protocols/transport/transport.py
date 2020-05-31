@@ -67,7 +67,7 @@ class Transport(Protocol):  # pylint: disable=abstract-method
         if length == 0:
             next_ = NoPayload()
         elif self._onerror:
-            next_ = beholder_ng(protocol)(self._file, length, _termination=self._sigterm)
+            next_ = beholder_ng(protocol)(self._file, length, termination=self._sigterm)
         else:
-            next_ = protocol(self._file, length, _termination=self._sigterm)
+            next_ = protocol(self._file, length, termination=self._sigterm)
         return next_

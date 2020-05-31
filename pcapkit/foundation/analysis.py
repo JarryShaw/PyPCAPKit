@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=import-outside-toplevel
 """analyser for application layer
 
-`pcapkit.foundation.analysis` works as a header quarter to
+:mod:`pcapkit.foundation.analysis` works as a header quarter to
 analyse and match application layer protocol. Then, call
 corresponding modules and functions to extract the attributes.
 
@@ -21,10 +22,31 @@ from pcapkit.utilities.exceptions import ProtocolError
 __all__ = ['analyse']
 
 
-def analyse(file, length=None, *, _termination=False):
-    """Analyse application layer packets."""
+def analyse(file, length=None, *, termination=False):
+    """Analyse application layer packets.
+
+    Args:
+        file (io.BytesIO): source data stream
+        length (Optional[int]): packet length
+
+    Keyword Args:
+        termination (bool): If terminate parsing application layer protocol.
+
+    Returns:
+        Protocol: Parsed application layer protocol.
+
+    Notes:
+        Currently, the analysis processes in following order:
+
+        1. :class:`~pcapkit.protocols.application.ftp.FTP`
+        2. :class:`HTTP/1.* <pcapkit.protocols.application.httpv1.HTTPv1>`
+        3. :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>`
+
+        and :class:`~pcapkit.protocols.raw.Raw` as the fallback result.
+
+    """
     seekset = file.tell()
-    if not _termination:
+    if not termination:
         # FTP analysis
         flag, ftp = _analyse_ftp(file, length, seekset=seekset)
         if flag:
@@ -34,9 +56,6 @@ def analyse(file, length=None, *, _termination=False):
         flag, http = _analyse_httpv1(file, length, seekset=seekset)
         if flag:
             return http
-
-        # NOTE: due to format similarity of HTTP/2 and TLS/SSL, HTTP/2 won't be analysed before TLS/SSL is implemented.
-        # NB: the NOTE above is deprecated, since validations are performed
 
         # HTTP/2 analysis
         flag, http = _analyse_httpv2(file, length, seekset=seekset)
@@ -51,7 +70,22 @@ def analyse(file, length=None, *, _termination=False):
 
 
 @seekset_ng
-def _analyse_httpv1(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
+def _analyse_httpv1(file, length=None, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
+    """Analyse HTTP/1.* packet.
+
+    Args:
+        file (io.BytesIO): source data stream
+        length (Optional[int]): packet length
+
+    Keyword Args:
+        seekset (int): original file offset
+
+    Returns:
+        Tuple[bool, Optional[HTTPv1]]: If the packet is HTTP/1.*,
+        returns :data:`True` and parsed HTTP/1.* packet; otherwise
+        returns :data:`False` and :data:`None`.
+
+    """
     try:
         from pcapkit.protocols.application.httpv1 import HTTPv1
         http = HTTPv1(file, length)
@@ -62,6 +96,21 @@ def _analyse_httpv1(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=un
 
 @seekset_ng
 def _analyse_httpv2(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
+    """Analyse HTTP/2 packet.
+
+    Args:
+        file (io.BytesIO): source data stream
+        length (Optional[int]): packet length
+
+    Keyword Args:
+        seekset (int): original file offset
+
+    Returns:
+        Tuple[bool, Optional[HTTPv1]]: If the packet is HTTP/2,
+        returns :data:`True` and parsed HTTP/2 packet; otherwise
+        returns :data:`False` and :data:`None`.
+
+    """
     try:
         from pcapkit.protocols.application.httpv2 import HTTPv2
         http = HTTPv2(file, length)
@@ -72,6 +121,21 @@ def _analyse_httpv2(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=un
 
 @seekset_ng
 def _analyse_ftp(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
+    """Analyse FTP packet.
+
+    Args:
+        file (io.BytesIO): source data stream
+        length (Optional[int]): packet length
+
+    Keyword Args:
+        seekset (int): original file offset
+
+    Returns:
+        Tuple[bool, Optional[HTTPv1]]: If the packet is FTP,
+        returns :data:`True` and parsed FTP packet; otherwise
+        returns :data:`False` and :data:`None`.
+
+    """
     try:
         from pcapkit.protocols.application.ftp import FTP
         ftp = FTP(file, length)

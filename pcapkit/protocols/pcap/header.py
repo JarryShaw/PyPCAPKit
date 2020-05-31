@@ -119,7 +119,7 @@ class Header(Protocol):
     # Methods.
     ##########################################################################
 
-    def read(self, length=None):  # pylint: disable=unused-argument
+    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
         """Read global header of PCAP file.
 
         Notes:
@@ -132,6 +132,9 @@ class Header(Protocol):
 
         Args:
             length (Optional[int]): Length of packet data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_Header: Parsed packet data.

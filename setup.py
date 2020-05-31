@@ -73,7 +73,7 @@ attrs = dict(
         'Environment :: MacOS X',
         'Environment :: Win32 (MS Windows)',
         'Intended Audience :: Developers',
-        'License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)',
+        'License :: OSI Approved :: BSD License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
@@ -94,7 +94,7 @@ attrs = dict(
     # script_name
     # script_args
     # options
-    license='Mozilla Public License 2.0 (MPL 2.0)',
+    license='BSD 3-Clause License',
     keywords=[
         'computer-networking',
         'pcap-analyser',

@@ -1,6 +1,7 @@
-# -*- coding: utf-8 -*-
-# pylint: disable=unused-import, unused-wildcard-import
-"""library foundation
+Library Foundation
+==================
+
+.. module:: pcapkit.foundation
 
 :mod:`pcapkit.foundation` is a collection of fundations for
 :mod:`pcapkit`, including PCAP file extraction tool
@@ -8,9 +9,9 @@
 layer protocol analyser :class:`~pcapkit.foundation.analysis.Analysis`,
 and TCP flow tracer :class:`~pcapkit.foundation.tractflow.TraceFlow`.
 
-"""
-from pcapkit.foundation.analysis import analyse as analyse2
-from pcapkit.foundation.extraction import *
-from pcapkit.foundation.traceflow import *
+.. toctree::
+   :maxdepth: 2
 
-__all__ = ['analyse2', 'Extractor', 'TraceFlow']
+   analysis
+   extraction
+   traceflow
