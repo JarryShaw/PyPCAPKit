@@ -98,26 +98,8 @@ else:
 class Extractor:
     """Extractor for PCAP files.
 
-    Properties:
-        * info -- VersionInfo, version of input PCAP file
-        * length -- int, frame number (of current extracted frame or all)
-        * format -- str, format of output file
-        * input -- str, name of input PCAP file
-        * output -- str, name of output file
-        * header -- Info, global header
-        * frames -- tuple<Info>, extracted frames
-        * protocol -- ProtoChain, protocol chain of current/last frame
-        * reassembly -- Info, frame record for reassembly
-            |--> tcp -- tuple<TCP_Reassembly>, TCP payload fragment reassembly
-            |--> ipv4 -- tuple<IPv4_Reassembly>, IPv4 frame fragment reassembly
-            |--> ipv6 -- tuple<IPv6_Reassembly>, IPv6 frame fragment reassembly
+    Attributes::
 
-    Methods:
-        * make_name -- formatting input & output file name
-        * record_header -- extract global header
-        * record_frames -- extract frames
-
-    Attributes:
         * _flag_a -- bool, if run automatically to the end
 
         * _ifnm -- str, input file name (aka _ifile.name)
@@ -152,12 +134,6 @@ class Extractor:
         * _ipv4 -- bool, flag if perform IPv4 reassembly
         * _ipv6 -- bool, flag if perform IPv6 reassembly
         * _tcp -- bool, flag if perform TCP payload reassembly
-
-    Utilities:
-        * _read_frame -- read frames
-        * _tcp_reassembly -- store data for TCP reassembly
-        * _ipv4_reassembly -- store data for IPv4 reassembly
-        * _ipv6_reassembly -- store data for IPv6 reassembly
 
     """
     ##########################################################################
@@ -310,25 +286,24 @@ class Extractor:
     def run(self):  # pylint: disable=inconsistent-return-statements
         """Start extraction.
 
+        We uses :meth:`~pcapkit.foundation.extraction.Extractor.import_test` to check if
+        a certain engine is available or not. For supported engines, each engine has
+        different driver method:
+
+        * Default drivers:
+          * Global header: :meth:`~pcapkit.foundation.extraction.Extractor.record_header`
+          * Packet frames: :meth:`~pcapkit.foundation.extraction.Extractor.record_frames`
+        * DPKT driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_dpkt`
+        * Scapy driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_scapy`
+        * PyShark driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_pyshark`
+        * Multiprocessing driver:
+          * Pipeline model: :meth:`~pcapkit.foundation.extraction.Extractor._run_pipeline`
+          * Server model: :meth:`~pcapkit.foundation.extraction.Extractor._run_server`
+
         Warns:
             EngineWarning: If the extraction engine is not available. This is either due to
                 dependency not installed, number of CPUs is not enough, or supplied engine
                 unknown.
-
-        See Also:
-            We uses :meth:`~pcapkit.foundation.extraction.Extractor.import_test` to check if
-            a certain engine is available or not. For supported engines, each engine has
-            different driver method:
-
-            * Default drivers:
-              * Global header: :meth:`~pcapkit.foundation.extraction.Extractor.record_header`
-              * Packet frames: :meth:`~pcapkit.foundation.extraction.Extractor.record_frames`
-            * DPKT driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_dpkt`
-            * Scapy driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_scapy`
-            * PyShark driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_pyshark`
-            * Multiprocessing driver:
-              * Pipeline model: :meth:`~pcapkit.foundation.extraction.Extractor._run_pipeline`
-              * Server model: :meth:`~pcapkit.foundation.extraction.Extractor._run_server`
 
         """
         flag = True
@@ -428,6 +403,21 @@ class Extractor:
     def make_name(cls, fin, fout, fmt, extension, *, files=False, nofile=False):
         """Generate input and output filenames.
 
+        The method will perform following processing:
+
+        1. sanitise ``fin`` as the input PCAP filename; ``in.pcap`` as default value and
+           append ``.pcap`` extension if needed and ``extension`` is :data:`True`; as well
+           as test if the file exists;
+        2. if ``nofile`` is :data:`True`, skips following processing;
+        3. if ``fmt`` provided, then it presumes corresponding output file extension;
+        4. if ``fout`` not provided, it presumes the output file name based on the presumptive
+           file extension; the stem of the output file name is set as ``out``; should the file
+           extension is not available, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;
+        5. if ``fout`` provided, it presumes corresponding output format if needed; should the
+           presumption cannot be made, then it raises :exc:`~pcapkit.utilities.exceptions.FormatError`;
+        6. it will also append corresponding file extension to the output file name if needed
+           and ``extension`` is :data:`True`.
+
         Args:
             fin (Optional[str]): Input filename.
             fout (Optional[str]): Output filename.
@@ -508,7 +498,20 @@ class Extractor:
         return ifnm, ofnm, fmt, ext, files
 
     def record_header(self):
-        """Read global header."""
+        """Read global header.
+
+        The method will parse the PCAP global header and save the parsed result
+        as :attr:`_gbhdr`. Information such as PCAP version, data link layer
+        protocol type, nanosecond flag and byteorder will also be save the
+        current :class:`Extractor` instance.
+
+        If TCP flow tracing is enabled, the nanosecond flag and byteorder will
+        be used for the output PCAP file of the traced TCP flows.
+
+        For output, the method will dump the parsed PCAP global header under
+        the name of ``Global Header``.
+
+        """
         # pylint: disable=attribute-defined-outside-init,protected-access
         self._gbhdr = Header(self._ifile)
         self._vinfo = self._gbhdr.version
@@ -529,7 +532,16 @@ class Extractor:
                 self._type = self._ofile.kind
 
     def record_frames(self):
-        """Read packet frames."""
+        """Read packet frames.
+
+        The method calls :meth:`_read_frame` to parse each frame from the input
+        PCAP file; and calls :meth:`_cleanup` upon complision.
+
+        Notes:
+            Under non-auto mode, i.e. :attr:`_flag_a` is :data:`False`, the
+            method performs no action.
+
+        """
         if self._flag_a:
             while True:
                 try:
@@ -691,11 +703,24 @@ class Extractor:
         self.run()                      # start extraction
 
     def __iter__(self):
+        """Iterate and parse PCAP frame.
+
+        Raises:
+            IterableError: If :attr:`self._flag_a <pcapkit.foundation.extraction.Extractor._flag_a>`
+                is :data:`True`, as such operation is not applicable.
+
+        """
         if not self._flag_a:
             return self
         raise IterableError("'Extractor(auto=True)' object is not iterable")
 
     def __next__(self):
+        """Iterate and parse next PCAP frame.
+
+        It will call :meth:`_read_frame` to parse next PCAP frame internally,
+        until the EOF reached; then it calls :meth:`_cleanup` for the aftermath.
+
+        """
         try:
             return self._read_frame()
         except (EOFError, StopIteration):
@@ -703,6 +728,13 @@ class Extractor:
             raise StopIteration
 
     def __call__(self):
+        """Works as a simple wrapper for the iteration protocol.
+
+        Raises:
+            IterableError: If :attr:`self._flag_a <pcapkit.foundation.extraction.Extractor._flag_a>`
+                is :data:`True`, as iteration is not applicable.
+
+        """
         if not self._flag_a:
             try:
                 return self._read_frame()
@@ -712,9 +744,11 @@ class Extractor:
         raise CallableError("'Extractor(auto=True)' object is not callable")
 
     def __enter__(self):
+        """Uses :class:`Extractor` as a context manager."""
         return self
 
-    def __exit__(self, exc_type, exc_value, traceback):
+    def __exit__(self, exc_type, exc_value, traceback):  # pylint: disable=unused-argument
+        """Close the input file when exits."""
         self._ifile.close()
 
     ##########################################################################
@@ -722,44 +756,102 @@ class Extractor:
     ##########################################################################
 
     def _cleanup(self):
-        """Cleanup after extraction & analysis."""
+        """Cleanup after extraction & analysis.
+
+        The method clears the :attr:`_expkg` and :attr:`_extmp` attributes,
+        sets :attr:`self._flag_e  <pcapkit.foundation.extraction.Extrator._flag_e>`
+        as :data:`True` and closes the input file.
+
+        """
+        # pylint: disable=attribute-defined-outside-init
         self._expkg = None
         self._extmp = None
         self._flag_e = True
         self._ifile.close()
 
     def _aftermathmp(self):
-        """Aftermath for multiprocessing."""
-        if not self._flag_e and self._flag_m:
-            # join processes
-            [proc.join() for proc in self._mpprc]  # pylint: disable=expression-not-assigned
-            if self._exeng == 'server':
-                self._mpsvc.join()
+        """Aftermath for multiprocessing.
 
-            # restore attributes
-            if self._exeng == 'server':
-                self._frame = list(self._mpfrm)
-                self._reasm = list(self._mprsm)
-                self._trace = copy.deepcopy(self._mpkit.trace)
-            if self._exeng == 'pipeline':
-                self._frame = [self._mpkit.frames[x] for x in sorted(self._mpkit.frames)]
-                self._reasm = copy.deepcopy(self._mpkit.reassembly)
-                self._trace = copy.deepcopy(self._mpkit.trace)
+        The method will *join* all child processes forked/spawned as in :attr:`_mpprc`,
+        and will *join* :attr:`_mpsrv` server process if using multiprocessing server
+        engine.
 
-            # shutdown & cleanup
-            self._mpmng.shutdown()
-            [delattr(self, attr) for attr in filter(lambda s: s.startswith('_mp'), dir(self))]  # pylint: disable=expression-not-assigned
-            self._frnum -= 2
-            # map(lambda attr: delattr(self, attr), filter(lambda attr: re.match('^_mp.*', attr), dir(self)))
+        For multiprocessing server engine, it will
+
+        * assign :attr:`_mpfrm` to :attr:`_frame`
+        * assign :attr:`_mprsm` to :attr:`_reasm`
+        * copy :attr:`_mpkit.trace` to :attr:`_trace`
+
+        For multiprocessing pipeline engine, it will
+
+        * restore :attr:`_frame` from :attr:`_mpkit.frames`
+        * copy :attr:`_mpkit.reassembly` to :attr:`_reasm`
+        * copy :attr:`_mpkit.trace` to :attr:`_trace`
+
+        After restoring attributes, it will *shutdown* multiprocessing manager context
+        :attr:`_mpmng`, delete all multiprocessing attributes (i.e. starts with `_mp`),
+        and deduct the frame number :attr:`_frnum` by 2 (*hacking solution*).
+
+        Notes:
+            If :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>` is already
+            set as :data:`True`, do nothing.
+
+        Raises:
+            UnsupportedCall: If :attr:`self._flag_m <pcapkit.foundation.extraction.Extractor._flag_m>`
+                is :data:`False`, as such operation is not applicable.
+
+        """
+        if not self._flag_m:
+            raise UnsupportedCall(f"Extractor(engine={self._exeng})' has no attribute '_aftermathmp'")
+        if self._flag_e:
+            return
+
+        # join processes
+        [proc.join() for proc in self._mpprc]  # pylint: disable=expression-not-assigned
+        if self._exeng == 'server':
+            self._mpsrv.join()
+
+        # restore attributes
+        if self._exeng == 'server':
+            self._frame = list(self._mpfrm)
+            self._reasm = list(self._mprsm)
+            self._trace = copy.deepcopy(self._mpkit.trace)
+        if self._exeng == 'pipeline':
+            self._frame = [self._mpkit.frames[x] for x in sorted(self._mpkit.frames)]
+            self._reasm = copy.deepcopy(self._mpkit.reassembly)
+            self._trace = copy.deepcopy(self._mpkit.trace)
+
+        # shutdown & cleanup
+        self._mpmng.shutdown()
+        [delattr(self, attr) for attr in filter(lambda s: s.startswith('_mp'), dir(self))]  # pylint: disable=expression-not-assigned
+        self._frnum -= 2
 
     def _update_eof(self):
-        """Update EOF flag."""
+        """Update EOF flag.
+
+        This method calls :meth:`_aftermathmp` to cleanup multiproccessing stuff,
+        closes the input file and toggle :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
+        as :data:`True`.
+
+        """
         self._aftermathmp()
         self._ifile.close()
         self._flag_e = True
 
     def _read_frame(self):
-        """Headquarters for frame reader."""
+        """Headquarters for frame reader.
+
+        This method is a dispatcher for parsing frames.
+
+        * For Scapy engine, calls :meth:`_scapy_read_frame`.
+        * For DPKT engine, calls :meth:`_dpkt_read_frame`.
+        * For PyShark engine, calls :meth:`_pyshark_read_frame`.
+        * For default (PyPCAPKit) engine, calls :meth:`_default_read_frame`.
+
+        Returns:
+            The parsed frame instance.
+
+        """
         if self._exeng == 'scapy':
             return self._scapy_read_frame()
         if self._exeng == 'dpkt':
@@ -771,10 +863,22 @@ class Extractor:
     def _default_read_frame(self, *, frame=None, mpkit=None):
         """Read frames with default engine.
 
-        - Extract frames and each layer of packets.
-        - Make Info object out of frame properties.
-        - Append Info.
-        - Write plist & append Info.
+        This method performs following operations:
+
+        - extract frames and each layer of packets;
+        - make :class:`~pcapkit.corekit.infoclass.Info` object out of frame properties;
+        - write to output file with corresponding dumper;
+        - reassemble IP and/or TCP datagram;
+        - trace TCP flows if any;
+        - record frame :class:`~pcapkit.corekit.infoclass.Info` object to frame storage.
+
+        Keyword Args:
+            frame (Optional[pcapkit.protocols.pcap.frame.Frame]): The fallback ``frame`` data
+                (for multiprocessing engines).
+            mpkit (multiprocess.Namespace): The multiprocess data kit.
+
+        Returns:
+            Optional[pcapkit.protocols.pcap.frame.Frame]: Parsed frame instance.
 
         """
         from pcapkit.toolkit.default import (ipv4_reassembly, ipv6_reassembly,
@@ -842,7 +946,20 @@ class Extractor:
         return frame
 
     def _run_scapy(self, scapy_all):
-        """Call scapy.all.sniff to extract PCAP files."""
+        """Call :func:`scapy.all.sniff` to extract PCAP files.
+
+        This method assigns :attr:`_expkg` as :mod:`scapy.all` and :attr:`_extmp` as
+        an iterator from :func:`scapy.all.sniff`.
+
+        Args:
+            scapy_all (types.ModuleType): The :mod:`scapy.all` module.
+
+        Warns:
+            AttributeWarning: If :attr:`_exlyr` and/or :attr:`_exptl` is provided as
+                the Scapy engine currently does not support such operations.
+
+        """
+        # pylint: disable=attribute-defined-outside-init
         # if not self._flag_a:
         #     self._flag_a = True
         #     warnings.warn(f"'Extractor(engine=scapy)' object is not iterable; "
@@ -861,7 +978,15 @@ class Extractor:
         self.record_frames()
 
     def _scapy_read_frame(self):
-        """Read frames with Scapy."""
+        """Read frames with Scapy engine.
+
+        Returns:
+            scapy.packet.Packet: Parsed frame instance.
+
+        See Also:
+            Please refer to :meth:`_default_read_frame` for more operational information.
+
+        """
         from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly,
                                            packet2chain, packet2dict, tcp_reassembly,
                                            tcp_traceflow)
@@ -914,7 +1039,20 @@ class Extractor:
         return packet
 
     def _run_dpkt(self, dpkt):
-        """Call dpkt.pcap.Reader to extract PCAP files."""
+        """Call :class:`dpkt.pcap.Reader` to extract PCAP files.
+
+        This method assigns :attr:`_expkg` as :mod:`dpkt` and :attr:`_extmp` as
+        an iterator from :class:`dpkt.pcap.Reader`.
+
+        Args:
+            dpkt (types.ModuleType): The :mod:`dpkt` module.
+
+        Warns:
+            AttributeWarning: If :attr:`_exlyr` and/or :attr:`_exptl` is provided as
+                the DPKT engine currently does not support such operations.
+
+        """
+        # pylint: disable=attribute-defined-outside-init
         # if not self._flag_a:
         #     self._flag_a = True
         #     warnings.warn(f"'Extractor(engine=dpkt)' object is not iterable; "
@@ -937,7 +1075,15 @@ class Extractor:
         self.record_frames()
 
     def _dpkt_read_frame(self):
-        """Read frames."""
+        """Read frames with DPKT engine.
+
+        Returns:
+            dpkt.dpkt.Packet: Parsed frame instance.
+
+        See Also:
+            Please refer to :meth:`_default_read_frame` for more operational information.
+
+        """
         from pcapkit.toolkit.dpkt import (ipv4_reassembly, ipv6_reassembly,
                                           packet2chain, packet2dict, tcp_reassembly,
                                           tcp_traceflow)
@@ -1005,7 +1151,24 @@ class Extractor:
         return packet
 
     def _run_pyshark(self, pyshark):
-        """Call pyshark.FileCapture to extract PCAP files."""
+        """Call :class:`pyshark.FileCapture` to extract PCAP files.
+
+        This method assigns :attr:`_expkg` as :mod:`pyshark` and :attr:`_extmp` as
+        an iterator from :class:`pyshark.FileCapture`.
+
+        Args:
+            pyshark (types.ModuleType): The :mod:`pyshark` module.
+
+        Warns:
+            AttributeWarning: Warns under following circumstances:
+
+                * if :attr:`_exlyr` and/or :attr:`_exptl` is provided as the
+                  PyShark engine currently does not support such operations.
+                * if reassembly is enabled, as the PyShark engine currently
+                  does not support such operation.
+
+        """
+        # pylint: disable=attribute-defined-outside-init
         # if not self._flag_a:
         #     self._flag_a = True
         #     warnings.warn(f"'Extractor(engine=pyshark)' object is not iterable; "
@@ -1031,7 +1194,19 @@ class Extractor:
         self.record_frames()
 
     def _pyshark_read_frame(self):
-        """Read frames."""
+        """Read frames with PyShark engine.
+
+        Returns:
+            pyshark.packet.packet.Packet: Parsed frame instance.
+
+        Notes:
+            This method inserts :func:`~pcapkit.toolkit.pyshark.packet2dict` to the parsed
+            frame instance as :meth:`~pyshark.packet.packet.Packet.packet2dict` method.
+
+        See Also:
+            Please refer to :meth:`_default_read_frame` for more operational information.
+
+        """
         from pcapkit.toolkit.pyshark import packet2dict, tcp_traceflow
 
         # fetch PyShark packet
@@ -1072,6 +1247,7 @@ class Extractor:
 
     def _run_pipeline(self, multiprocessing):
         """Use pipeline multiprocessing to extract PCAP files."""
+        # pylint: disable=attribute-defined-outside-init
         if not self._flag_m:
             raise UnsupportedCall(f"Extractor(engine={self._exeng})' has no attribute '_run_pipline'")
 
@@ -1171,6 +1347,7 @@ class Extractor:
 
     def _run_server(self, multiprocessing):
         """Use server multiprocessing to extract PCAP files."""
+        # pylint: disable=attribute-defined-outside-init
         if not self._flag_m:
             raise UnsupportedCall(f"Extractor(engine={self._exeng})' has no attribute '_run_server'")
 
@@ -1181,7 +1358,7 @@ class Extractor:
 
         self._frnum = 1                                                 # frame number (revised)
         self._expkg = multiprocessing                                   # multiprocessing module
-        self._mpsvc = NotImplemented                                    # multiprocessing server process
+        self._mpsrv = NotImplemented                                    # multiprocessing server process
         self._mpprc = list()                                            # multiprocessing process list
         self._mpfdp = collections.defaultdict(multiprocessing.Queue)    # multiprocessing file pointer
 
@@ -1199,11 +1376,11 @@ class Extractor:
         # preparation
         self.record_header()
         self._mpfdp[0].put(self._gbhdr.length)
-        self._mpsvc = multiprocessing.Process(
+        self._mpsrv = multiprocessing.Process(
             target=self._server_analyse_frame,
             kwargs={'mpfrm': self._mpfrm, 'mprsm': self._mprsm, 'mpbuf': self._mpbuf, 'mpkit': self._mpkit}
         )
-        self._mpsvc.start()
+        self._mpsrv.start()
 
         # extraction
         while True:
@@ -1220,8 +1397,8 @@ class Extractor:
                 # create worker
                 # print(self._frnum, 'start')
                 proc = multiprocessing.Process(
-                        target=self._server_extract_frame,
-                        kwargs={'mpkit': self._mpkit, 'mpbuf': self._mpbuf, 'mpfdp': self._mpfdp[self._frnum]}
+                    target=self._server_extract_frame,
+                    kwargs={'mpkit': self._mpkit, 'mpbuf': self._mpbuf, 'mpfdp': self._mpfdp[self._frnum]}
                 )
 
                 # update status

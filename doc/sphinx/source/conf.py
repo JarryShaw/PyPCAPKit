@@ -50,7 +50,7 @@ intersphinx_mapping = {
 
 autodoc_default_options = {
     'members': True,
-    # 'member-order': 'groupwise',
+    'member-order': 'groupwise',
     'special-members': '__init__',
     'undoc-members': True,
     'exclude-members': '__weakref__, _abc_impl',
@@ -58,7 +58,7 @@ autodoc_default_options = {
     'private-members': True,
 }
 autodoc_typehints = 'description'
-autodoc_member_order = 'bysource'
+#autodoc_member_order = 'bysource'
 #autodoc_member_order = 'alphabetic'
 
 # Napoleon settings

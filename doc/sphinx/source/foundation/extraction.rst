@@ -11,11 +11,11 @@ extracts parametres from a PCAP file.
 
    Implement engine support for |pypcap|_ & |pycapfile|_.
 
-.. .. automodule:: pcapkit.foundation.extraction
-..    :members:
-..    :undoc-members:
-..    :private-members:
-..    :show-inheritance:
+.. automodule:: pcapkit.foundation.extraction
+   :members:
+   :undoc-members:
+   :private-members:
+   :show-inheritance:
 
 .. |pypcap| replace:: ``pypcap``
 .. _pypcap: https://pypcap.readthedocs.io/en/latest/
