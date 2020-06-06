@@ -12,11 +12,22 @@ message  ?= ""
 
 clean: clean-pyc clean-misc clean-pypi
 const: update-const
-dist: dist-pypi dist-upload
+#dist: dist-pypi dist-upload
 release: release-master
 pipenv: update-pipenv
 # update: update-const update-date
 update: update-const
+
+dist:
+	mkdir -p dist sdist eggs wheels
+	find dist -iname '*.egg' -exec mv {} eggs \;
+	find dist -iname '*.whl' -exec mv {} wheels \;
+	find dist -iname '*.tar.gz' -exec mv {} sdist \;
+	rm -rf build dist *.egg-info
+	pipenv run python setup.py sdist bdist_wheel --python-tag='cp38'
+	twine check dist/* || true
+	twine upload dist/* -r pypi --skip-existing
+	twine upload dist/* -r pypitest --skip-existing
 
 docs:
 	pipenv run $(MAKE) -C doc/sphinx html
