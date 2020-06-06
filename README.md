@@ -45,16 +45,15 @@
 
 ### Module Structure
 
-&emsp; In `pcapkit`, all files can be described as following six parts.
+&emsp; In `pcapkit`, all files can be described as following eight parts.
 
  - Interface (`pcapkit.interface`) -- user interface for the `pcapkit` library, which standardise and simplify the usage of this library
  - Foundation (`pcapkit.foundation`) -- synthesise file I/O and protocol analysis, coordinate information exchange in all network layers
  - Reassembly (`pcapkit.reassembly`) -- base on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implement datagram reassembly of IP and TCP packets
- - IPSuite (`pcapkit.ipsuite`) -- collection of constructors for [Internet Protocol Suite](https://en.wikipedia.org/wiki/Internet_protocol_suite)
- - Protocols (`pcapkit.protocols`) -- collection of all protocol family, with detail implementation and methods
+ - Protocols (`pcapkit.protocols`) -- collection of all protocol family, with detail implementation and methods as well as constructors
  - Utilities (`pcapkit.utilities`) -- collection of four utility functions and classes
  - CoreKit (`pcapkit.corekit`) -- core utilities for `pcapkit` implementation
- - ToolKit (`pcapkit.toolkit`) -- capability tools for `pcapkit` implementation
+ - ToolKit (`pcapkit.toolkit`) -- compatibility tools for `pcapkit` implementation
  - DumpKit (`pcapkit.dumpkit`) -- dump utilities for `pcapkit` implementation
 
 ![](https://github.com/JarryShaw/PyPCAPKit/blob/master/doc/img/jspcap.png)
@@ -361,7 +360,7 @@ Here are some usage samples:
  - [x] interface verbs
  - [x] review docstrings
  - [x] merge `jspcapy`
- - [ ] write documentation
- - [ ] implement IP and MAC address containers
+ - [x] write documentation
+ - [x] implement IP and MAC address containers
  - [ ] implement option list extractors
  - [ ] implement more protocols
