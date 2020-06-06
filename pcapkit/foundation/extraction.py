@@ -96,46 +96,8 @@ else:
 
 
 class Extractor:
-    """Extractor for PCAP files.
+    """Extractor for PCAP files."""
 
-    Attributes::
-
-        * _flag_a -- bool, if run automatically to the end
-
-        * _ifnm -- str, input file name (aka _ifile.name)
-        * _ofnm -- str, output file name (aka _ofile.name)
-        * _type -- str, output file kind (aka _ofile.kind)
-        * _fext -- str, output file extension
-
-        * _ifile -- FileIO, input file object
-        * _ofile -- object, temperory output writer
-
-        * _frnum -- int, frame number
-        * _frame -- list, each item contains `Info` of a record/package
-            |--> gbhdr -- Info object, global header
-            |--> frame 1 -- Info object, record/package header
-            |       |--> Info object, first (link layer) header
-            |       |--> Info object, next protocol header
-            |       |--> ......
-            |       |--> Info object, optional protocol trailer
-            |--> frame 2 -- Info object, record/package header
-            |       |--> ......
-        * _reasm -- list, frame reassembly instance
-            |--> IPv4 -- IPv4_Reassembly, reassembly instance
-            |--> IPv6 -- IPv6_Reassembly, reassembly instance
-            |--> TCP -- TCP_Reassembly, reassembly instance
-
-        * _gbhdr -- Info object, the global header
-        * _dlink -- str, data link layer protocol of input file
-        * _vinfo -- VersionInfo, version of input file
-        * _proto -- str, protocol chain of current frame
-
-        * _ip -- bool, flag if perform IPv4 & IPv6 reassembly
-        * _ipv4 -- bool, flag if perform IPv4 reassembly
-        * _ipv6 -- bool, flag if perform IPv6 reassembly
-        * _tcp -- bool, flag if perform TCP payload reassembly
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -291,12 +253,15 @@ class Extractor:
         different driver method:
 
         * Default drivers:
+
           * Global header: :meth:`~pcapkit.foundation.extraction.Extractor.record_header`
           * Packet frames: :meth:`~pcapkit.foundation.extraction.Extractor.record_frames`
+
         * DPKT driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_dpkt`
         * Scapy driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_scapy`
         * PyShark driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_pyshark`
         * Multiprocessing driver:
+
           * Pipeline model: :meth:`~pcapkit.foundation.extraction.Extractor._run_pipeline`
           * Server model: :meth:`~pcapkit.foundation.extraction.Extractor._run_server`
 
@@ -501,9 +466,9 @@ class Extractor:
         """Read global header.
 
         The method will parse the PCAP global header and save the parsed result
-        as :attr:`_gbhdr`. Information such as PCAP version, data link layer
-        protocol type, nanosecond flag and byteorder will also be save the
-        current :class:`Extractor` instance.
+        as :attr:`self._gbhdr <Extractor._gbhdr>`. Information such as PCAP version,
+        data link layer protocol type, nanosecond flag and byteorder will also be
+        save the current :class:`Extractor` instance.
 
         If TCP flow tracing is enabled, the nanosecond flag and byteorder will
         be used for the output PCAP file of the traced TCP flows.
@@ -538,8 +503,8 @@ class Extractor:
         PCAP file; and calls :meth:`_cleanup` upon complision.
 
         Notes:
-            Under non-auto mode, i.e. :attr:`_flag_a` is :data:`False`, the
-            method performs no action.
+            Under non-auto mode, i.e. :attr:`self._flag_a <Extractor._flag_a>` is
+            :data:`False`, the method performs no action.
 
         """
         if self._flag_a:
@@ -758,8 +723,9 @@ class Extractor:
     def _cleanup(self):
         """Cleanup after extraction & analysis.
 
-        The method clears the :attr:`_expkg` and :attr:`_extmp` attributes,
-        sets :attr:`self._flag_e  <pcapkit.foundation.extraction.Extrator._flag_e>`
+        The method clears the :attr:`self._expkg <Extractor._expkg>` and
+        :attr:`self._extmp <Extractor._extmp>` attributes, sets
+        :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
         as :data:`True` and closes the input file.
 
         """
@@ -772,25 +738,26 @@ class Extractor:
     def _aftermathmp(self):
         """Aftermath for multiprocessing.
 
-        The method will *join* all child processes forked/spawned as in :attr:`_mpprc`,
-        and will *join* :attr:`_mpsrv` server process if using multiprocessing server
-        engine.
+        The method will *join* all child processes forked/spawned as in
+        :attr:`self._mpprc <Extractor._mpprc>`, and will *join*
+        :attr:`self._mpsrv <Extractor._mpsrv>` server process if using
+        multiprocessing server engine.
 
         For multiprocessing server engine, it will
 
-        * assign :attr:`_mpfrm` to :attr:`_frame`
-        * assign :attr:`_mprsm` to :attr:`_reasm`
-        * copy :attr:`_mpkit.trace` to :attr:`_trace`
+        * assign :attr:`self._mpfrm <Extractor._mpfrm>` to :attr:`self._frame <Extractor._frame>`
+        * assign :attr:`self._mprsm <Extractor._mprsm>` to :attr:`self._reasm <Extractor._reasm>`
+        * copy :attr:`self._mpkit.trace <Extractor._mpkit.trace>` to :attr:`self._trace <Extractor._trace>`
 
         For multiprocessing pipeline engine, it will
 
-        * restore :attr:`_frame` from :attr:`_mpkit.frames`
-        * copy :attr:`_mpkit.reassembly` to :attr:`_reasm`
-        * copy :attr:`_mpkit.trace` to :attr:`_trace`
+        * restore :attr:`self._frame <Extractor._frame>` from :attr:`self._mpkit.frames <Extractor._mpkit.frames>`
+        * copy :attr:`self._mpkit.reassembly <Extractor._mpkit.reassembly>` to :attr:`self._reasm <Extractor._reasm>`
+        * copy :attr:`self._mpkit.trace <Extractor._mpkit.trace>` to :attr:`self._trace <Extractor._trace>`
 
         After restoring attributes, it will *shutdown* multiprocessing manager context
-        :attr:`_mpmng`, delete all multiprocessing attributes (i.e. starts with `_mp`),
-        and deduct the frame number :attr:`_frnum` by 2 (*hacking solution*).
+        :attr:`self._mpmng <Extractor._mpmng>`, delete all multiprocessing attributes (i.e. starts with `_mp`),
+        and deduct the frame number :attr:`self._frnum <Extractor._frnum>` by 2 (*hacking solution*).
 
         Notes:
             If :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>` is already
@@ -875,7 +842,7 @@ class Extractor:
         Keyword Args:
             frame (Optional[pcapkit.protocols.pcap.frame.Frame]): The fallback ``frame`` data
                 (for multiprocessing engines).
-            mpkit (multiprocess.Namespace): The multiprocess data kit.
+            mpkit (multiprocessing.managers.SyncManager.Namespace): The multiprocess data kit.
 
         Returns:
             Optional[pcapkit.protocols.pcap.frame.Frame]: Parsed frame instance.
@@ -948,15 +915,17 @@ class Extractor:
     def _run_scapy(self, scapy_all):
         """Call :func:`scapy.all.sniff` to extract PCAP files.
 
-        This method assigns :attr:`_expkg` as :mod:`scapy.all` and :attr:`_extmp` as
-        an iterator from :func:`scapy.all.sniff`.
+        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`scapy.all`
+        and :attr:`self._extmp <Extractor._extmp>` as an iterator from
+        :func:`scapy.all.sniff`.
 
         Args:
             scapy_all (types.ModuleType): The :mod:`scapy.all` module.
 
         Warns:
-            AttributeWarning: If :attr:`_exlyr` and/or :attr:`_exptl` is provided as
-                the Scapy engine currently does not support such operations.
+            AttributeWarning: If :attr:`self._exlyr <Extractor._exlyr>` and/or
+                :attr:`self._exptl <Extractor._exptl>` is provided as the Scapy
+                engine currently does not support such operations.
 
         """
         # pylint: disable=attribute-defined-outside-init
@@ -1041,15 +1010,16 @@ class Extractor:
     def _run_dpkt(self, dpkt):
         """Call :class:`dpkt.pcap.Reader` to extract PCAP files.
 
-        This method assigns :attr:`_expkg` as :mod:`dpkt` and :attr:`_extmp` as
-        an iterator from :class:`dpkt.pcap.Reader`.
+        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`dpkt` and
+        :attr:`self._extmp <Extractor._extmp>` as an iterator from :class:`dpkt.pcap.Reader`.
 
         Args:
             dpkt (types.ModuleType): The :mod:`dpkt` module.
 
         Warns:
-            AttributeWarning: If :attr:`_exlyr` and/or :attr:`_exptl` is provided as
-                the DPKT engine currently does not support such operations.
+            AttributeWarning: If :attr:`self._exlyr <Extractor._exlyr>` and/or
+                :attr:`self._exptl <Extractor._exptl>` is provided as the DPKT
+                engine currently does not support such operations.
 
         """
         # pylint: disable=attribute-defined-outside-init
@@ -1153,8 +1123,8 @@ class Extractor:
     def _run_pyshark(self, pyshark):
         """Call :class:`pyshark.FileCapture` to extract PCAP files.
 
-        This method assigns :attr:`_expkg` as :mod:`pyshark` and :attr:`_extmp` as
-        an iterator from :class:`pyshark.FileCapture`.
+        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`pyshark` and
+        :attr:`self._extmp <Extractor._extmp>` as an iterator from :class:`pyshark.FileCapture`.
 
         Args:
             pyshark (types.ModuleType): The :mod:`pyshark` module.
@@ -1162,7 +1132,8 @@ class Extractor:
         Warns:
             AttributeWarning: Warns under following circumstances:
 
-                * if :attr:`_exlyr` and/or :attr:`_exptl` is provided as the
+                * if :attr:`self._exlyr <Extractor._exlyr>` and/or
+                  :attr:`self._exptl <Extractor._exptl>` is provided as the
                   PyShark engine currently does not support such operations.
                 * if reassembly is enabled, as the PyShark engine currently
                   does not support such operation.
@@ -1181,7 +1152,7 @@ class Extractor:
 
         if (self._ipv4 or self._ipv6 or self._tcp):
             self._ipv4 = self._ipv6 = self._tcp = False
-            self._reasm = [None] * 3
+            self._reasm = [None, None, None]
             warnings.warn("'Extractor(engine=pyshark)' object dose not support reassembly; "
                           f"so 'ipv4={self._ipv4}', 'ipv6={self._ipv6}' and 'tcp={self._tcp}' will be ignored",
                           AttributeWarning, stacklevel=stacklevel())
@@ -1257,30 +1228,35 @@ class Extractor:
             still need to *wait* for the completion of analysis on previous frames before proceeding on such
             operations.
 
-        This method assigns :attr:`_expkg` as :mod:`multiprocessing`, creates a file pointer storage
-        as :attr:`_mpfdp`, manager context as :attr:`_mpmng` and namespace as :attr:`_mpkit`.
+        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`multiprocessing`, creates a file
+        pointer storage as :attr:`self._mpfdp <Extractor._mpfdp>`, manager context as
+        :attr:`self._mpmng <Extractor._mpmng>` and namespace as :attr:`self._mpkit <Extractor._mpkit>`.
 
         In the namespace, we initiate number of (on duty) workers as ``counter``, pool of (ready) workers
         as ``pool``, current frame number as ``current``, EOF flag as ``eof``, frame storage as ``frames``,
-        TCP flow tracer :attr:`_trace` as ``trace`` and the reassembly buffers :attr:`_reasm` as ``reassembly``.
+        TCP flow tracer :attr:`self._trace <Extractor._trace>` as ``trace`` and the reassembly buffers
+        :attr:`self._reasm <Extractor._reasm>` as ``reassembly``.
 
         After initial setup, the method calls :meth:`record_header` to parse the PCAP global header and
-        *put* the file offset to :attr:`_mpfdp` as the start of first frame. Then it starts the parsing of
-        each PCAP frame.
+        *put* the file offset to :attr:`self._mpfdp <Extractor._mpfdp>` as the start of first frame. Then
+        it starts the parsing of each PCAP frame.
 
-        During this phrase, it's a :token:`while <while_stmt>` clause until :attr:`_mpkit.eof` is set as :data:`True`
-        then it calls :meth:`_update_eof` and breaks. In the :token:`while <while_stmt>` clause, it maintains a
-        :class:`multiprocessing.pool.Pool` like worker pool. It checks the :attr:`_mpkit.pool` for available
-        workers and :attr:`_mpkit.counter` for active workers.
+        During this phrase, it's a :token:`while <while_stmt>` clause until
+        :attr:`self._mpkit.eof <Extractor._mpkit.eof>` is set as :data:`True` then it calls :meth:`_update_eof`
+        and breaks. In the :token:`while <while_stmt>` clause, it maintains a :class:`multiprocessing.pool.Pool`
+        like worker pool. It checks the :attr:`self._mpkit.pool <Extractor._mpkit.pool>` for available workers and
+        :attr:`self._mpkit.counter <Extractor._mpkit.counter>` for active workers.
 
         When starts a new worker, it first update the input file offset to the file offset as specified
-        in :attr:`_mpfdp`. Then creates a child process running :meth:`_pipeline_read_frame` with keyword
-        arguments ``mpkit`` as :attr:`_mpkit` and ``mpfdp`` as corresponding :class:`~multiprocessing.Queue` from
-        :attr:`_mpfdp`. Later, it decendants the :attr:`_mpkit.pool` and increments the
-        :attr:`_mpkit.counter`, both by ``1``. The child process will be appended to :attr:`_mpprc`.
+        in :attr:`self._mpfdp <Extractor._mpfdp>`. Then creates a child process running :meth:`_pipeline_read_frame`
+        with keyword arguments ``mpkit`` as :attr:`self._mpkit <Extractor._mpkit>` and ``mpfdp`` as corresponding
+        :class:`~multiprocessing.Queue` from :attr:`self._mpfdp <Extractor._mpfdp>`. Later, it decendants the
+        :attr:`self._mpkit.pool <Extractor._mpkit.pool>` and increments the
+        :attr:`self._mpkit.counter <Extractor._mpkit.counter>`, both by ``1``. The child process will be appended to
+        :attr:`self._mpprc <Extractor._mpprc>`.
 
         When the number of active workers is greater than or equal to :data:`CPU_CNT`, it waits and *join*
-        the leading child processes in :attr:`_mpprc` then removes their reference.
+        the leading child processes in :attr:`self._mpprc <Extractor._mpprc>` then removes their reference.
 
         Args:
             multiprocessing (types.ModuleType): The :mod:`multiprocessing` module.
@@ -1360,22 +1336,25 @@ class Extractor:
         """Extract frame with multiprocessing pipeline engine.
 
         The method calls :class:`~pcapkit.protocols.pcap.Frame` to parse the PCAP frame data.
-        Should :exc:`EOFError` raised, it will toggle :attr:`_mpkit.eof` as :data:`True`. Finally,
-        it will decendant :attr:`mpkit.counter` by ``1`` and closes the input source file (as the
-        child process exits).
+        Should :exc:`EOFError` raised, it will toggle :attr:`self._mpkit.eof <Extractor._mpkit.eof>` as
+        :data:`True`. Finally, it will decendant :attr:`self.mpkit.counter <Extractor.mpkit.counter>` by
+        ``1`` and closes the input source file (as the child process exits).
 
         For the parsed :class:`~pcapkit.protocols.pcap.Frame` instance, the instant will first wait
-        until :attr:`mpkit.current` is the same as :attr:`_frnum`, i.e. it's now time to process the
-        parsed frame as in a linear sequential order.
+        until :attr:`self.mpkit.current <Extractor.mpkit.current>` is the same as
+        :attr:`self._frnum <Extractor._frnum>`, i.e. it's now time to process the parsed frame as in a
+        linear sequential order.
 
         It will proceed by calling :meth:`_default_read_frame`, whilst temporarily assigning
-        :attr:`mpkit.trace` to :attr:`_trace` and :attr:`mpkit.reassembly` to :attr:`_reasm`
+        :attr:`self.mpkit.trace <Extractor.mpkit.trace>` to :attr:`self._trace <Extractor._trace>` and
+        :attr:`self.mpkit.reassembly <Extractor.mpkit.reassembly>` to :attr:`self._reasm <Extractor._reasm>`
         then put back.
 
         Keyword Args:
             mpfdp (multiprocessing.Queue): :class:`~multiprocessing.Queue` for multiprocessing file pointer (offset).
-            mpkit (multiprocessing.managers.Namespace): :class:`~multiprocessing.managers.Namespace`
-                instance as :attr:`_mpkit`.
+            mpkit (multiprocessing.managers.SyncManager.Namespace):
+                :class:`~multiprocessing.managers.SyncManager.Namespace` instance as
+                :attr:`self._mpkit <Extractor._mpkit>`.
 
         Raise:
             EOFError: If :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
@@ -1428,38 +1407,44 @@ class Extractor:
             all parsed PCAP frames, whilst parsing each PCAP frame in the same manner as in multiprocessing
             pipeline engine, i.e. each frame per worker.
 
-        This method assigns :attr:`_expkg` as :mod:`multiprocessing`, creates a file pointer storage
-        as :attr:`_mpfdp`, manager context as :attr:`_mpmng` and namespace as :attr:`_mpkit`. We will also
-        maintain the active process list :attr:`_mpprc` as in :meth:`_run_pipeline`.
+        This method assigns :attr:`self._expkg <Extractor._expkg>` as :mod:`multiprocessing`, creates a file
+        pointer storage as :attr:`self._mpfdp <Extractor._mpfdp>`, manager context as
+        :attr:`self._mpmng <Extractor._mpmng>` and namespace as :attr:`self._mpkit <Extractor._mpkit>`. We will
+        also maintain the active process list :attr:`self._mpprc <Extractor._mpprc>` as in :meth:`_run_pipeline`.
 
-        It will also creates a :obj:`dict` as :attr:`_mpbuf`, frame buffer (temporary storage) for the server
-        process to obtain the parsed frames; a :obj:`list` as :attr:`_mpfrm`, eventual frame storage; and
-        another :obj:`list` as :attr:`_mprsm`, storing the reassembly buffers :attr:`_reasm` before the server
-        process exits.
+        It will also creates a :obj:`dict` as :attr:`self._mpbuf <Extractor._mpbuf>`, frame buffer (temporary
+        storage) for the server process to obtain the parsed frames; a :obj:`list` as
+        :attr:`self._mpfrm <Extractor._mpfrm>`, eventual frame storage; and another :obj:`list` as
+        :attr:`self._mprsm <Extractor._mprsm>`, storing the reassembly buffers :attr:`self._reasm <Extractor._reasm>`
+        before the server process exits.
 
         In the namespace, we initiate number of (on duty) workers as ``counter``, pool of (ready) workers
         as ``pool``, current frame number as ``current``, EOF flag as ``eof``, frame storage as ``frames``,
-        and ``trace`` for storing TCP flow tracer :attr:`_trace` before the server process exits.
+        and ``trace`` for storing TCP flow tracer :attr:`self._trace <Extractor._trace>` before the server process
+        exits.
 
         After initial setup, the method calls :meth:`record_header` to parse the PCAP global header and
-        *put* the file offset to :attr:`_mpfdp` as the start of first frame. It will then starts the server
-        process :attr:`_mpsrv` from :meth:`_server_analyse_frame`. Finally, it starts the parsing of each
-        PCAP frame.
+        *put* the file offset to :attr:`self._mpfdp <Extractor._mpfdp>` as the start of first frame. It will then
+        starts the server process :attr:`self._mpsrv <Extractor._mpsrv>` from :meth:`_server_analyse_frame`. Finally,
+        it starts the parsing of each PCAP frame.
 
-        During this phrase, it's a :token:`while <while_stmt>` clause until :attr:`_mpkit.eof` is set as :data:`True`
-        then it calls :meth:`_update_eof` and breaks. In the :token:`while <while_stmt>` clause, it maintains a
-        :class:`multiprocessing.pool.Pool` like worker pool. It checks the :attr:`_mpkit.pool` for available
-        workers and :attr:`_mpkit.counter` for active workers.
+        During this phrase, it's a :token:`while <while_stmt>` clause until
+        :attr:`self._mpkit.eof <Extractor._mpkit.eof>` is set as :data:`True` then it calls :meth:`_update_eof` and
+        breaks. In the :token:`while <while_stmt>` clause, it maintains a :class:`multiprocessing.pool.Pool` like
+        worker pool. It checks the :attr:`self._mpkit.pool <Extractor._mpkit.pool>` for available workers and
+        :attr:`self._mpkit.counter <Extractor._mpkit.counter>` for active workers.
 
         When starts a new worker, it first update the input file offset to the file offset as specified
-        in :attr:`_mpfdp`. Then creates a child process running :meth:`_server_extract_frame` with keyword
-        arguments ``mpkit`` as :attr:`_mpkit`, `mpbuf` as :attr:`_mpbuf` and ``mpfdp`` as corresponding
-        :class:`~multiprocessing.Queue` from :attr:`_mpfdp`. Later, it decendants the :attr:`_mpkit.pool` and
-        increments the :attr:`_mpkit.counter`, both by ``1``. The child process will be appended to
-        :attr:`_mpprc`.
+        in :attr:`self._mpfdp <Extractor._mpfdp>`. Then creates a child process running :meth:`_server_extract_frame`
+        with keyword arguments ``mpkit`` as :attr:`self._mpkit <Extractor._mpkit>`, `mpbuf` as
+        :attr:`self._mpbuf <Extractor._mpbuf>` and ``mpfdp`` as corresponding :class:`~multiprocessing.Queue` from
+        :attr:`self._mpfdp <Extractor._mpfdp>`. Later, it decendants the
+        :attr:`self._mpkit.pool <Extractor._mpkit.pool>` and increments the
+        :attr:`self._mpkit.counter <Extractor._mpkit.counter>`, both by ``1``. The child process will
+        be appended to :attr:`self._mpprc <Extractor._mpprc>`.
 
         When the number of active workers is greater than or equal to :data:`CPU_CNT`, it waits and *join*
-        the leading child processes in :attr:`_mpprc` then removes their reference.
+        the leading child processes in :attr:`self._mpprc <Extractor._mpprc>` then removes their reference.
 
         Args:
             multiprocessing (types.ModuleType): The :mod:`multiprocessing` module.
@@ -1545,20 +1530,22 @@ class Extractor:
         """Extract frame using multiprocessing server engine.
 
         The method calls :class:`~pcapkit.protocols.pcap.Frame` to parse the PCAP frame data. The
-        parsed frame will be saved to ``mpbuf`` under the corresponding frame number :attr:`_frnum`.
+        parsed frame will be saved to ``mpbuf`` under the corresponding frame number
+        :attr:`self._frnum <Extractor._frnum>`.
 
-        Should :exc:`EOFError` raised, it will toggle :attr:`_mpkit.eof` as :data:`True`, and save
-        :exc:`EOFError` object to ``mpbuf`` under the corresponding frame number :attr:`_frnum`.
+        Should :exc:`EOFError` raised, it will toggle :attr:`self._mpkit.eof <Extractor._mpkit.eof>`
+        as :data:`True`, and save :exc:`EOFError` object to ``mpbuf`` under the corresponding frame
+        number :attr:`self._frnum <Extractor._frnum>`.
 
-        Finally, it will decendant :attr:`mpkit.counter` by ``1`` and closes the input source file
-        (as the child process exits).
+        Finally, it will decendant :attr:`self.mpkit.counter <Extractor.mpkit.counter>` by ``1`` and
+        closes the input source file (as the child process exits).
 
         Args:
             mpfdp (multiprocessing.Queue): :class:`~multiprocessing.Queue` for multiprocessing file pointer (offset).
-            mpkit (multiprocessing.managers.Namespace): :class:`~multiprocessing.managers.Namespace`
-                instance as :attr:`_mpkit`.
+            mpkit (multiprocessing.managers.SyncManager.Namespace):
+                :class:`~multiprocessing.managers.SyncManager.Namespace` instance as :attr:`_mpkit`.
             mpbuf (multiprocessing.managers.SyncManager.dict): Frame buffer (temporary storage) for the server process
-                :attr:`_mpsrv` to obtain the parsed frames.
+                :attr:`self._mpsrv <Extractor._mpsrv>` to obtain the parsed frames.
 
         Raise:
             EOFError: If :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
@@ -1586,21 +1573,21 @@ class Extractor:
     def _server_analyse_frame(self, *, mpkit, mpfrm, mprsm, mpbuf):
         """Analyse frame using multiprocessing server engine.
 
-        This method starts a :term:`while <while_stmt>` clause. For each round, it will *pop* the frame
-        :attr:`_frnum` from ``mpbuf`` then calls :meth:`_default_read_frame` to perform
+        This method starts a :token:`while <while_stmt>` clause. For each round, it will *pop* the frame
+        :attr:`self._frnum <Extractor._frnum>` from ``mpbuf`` then calls :meth:`_default_read_frame` to perform
         datagram reassembly and TCP flow tracing, etc.
 
         Once the frame popped is :exc:`EOFError`, i.e. the frame parsing had finished, it
-        breaks from the clause and updates ``mpfrm`` with :attr:`_frame`, ``mprsm`` with
-        :attr:`_reasm`, and ``mpkit.trace`` with :attr:`_trace`.
+        breaks from the clause and updates ``mpfrm`` with :attr:`self._frame <Extractor._frame>`, ``mprsm`` with
+        :attr:`self._reasm <Extractor._reasm>`, and ``mpkit.trace`` with :attr:`self._trace <Extractor._trace>`.
 
         Keyword Args:
-            mpkit (multiprocessing.managers.Namespace): :class:`~multiprocessing.managers.Namespace`
-                instance as :attr:`_mpkit`.
+            mpkit (multiprocessing.managers.SyncManager.Namespace):
+                :class:`~multiprocessing.managers.SyncManager.Namespace` instance as :attr:`_mpkit`.
             mpfrm (multiprocessing.managers.SyncManager.list): Frame storage.
             mprsm (multiprocessing.managers.SyncManager.list): Reassembly buffers.
             mpbuf (multiprocessing.managers.SyncManager.dict): Frame buffer (temporary storage) for the server process
-                :attr:`_mpsrv` to obtain the parsed frames.
+                :attr:`self._mpsrv <Extractor._mpsrv>` to obtain the parsed frames.
 
         """
         while True:

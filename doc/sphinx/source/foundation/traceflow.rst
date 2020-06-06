@@ -45,7 +45,7 @@ Data Structure
           |       |--> ip.dst      |
           |       |--> tcp.srcport |
           |       |--> tcp.dstport |
-          |                        |--> 'fpout' : (dictdumper.Dumper) output dumper object
+          |                        |--> 'fpout' : (dictdumper.dumper.Dumper) output dumper object
           |                        |--> 'index': (list) list of frame index
           |                        |              |--> (int) frame index
           |                        |--> 'label': (str) flow label generated from ``BUFID``

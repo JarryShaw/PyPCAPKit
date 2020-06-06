@@ -44,7 +44,7 @@ trace.buffer
         |       |--> ip.dst      |
         |       |--> tcp.srcport |
         |       |--> tcp.dstport |
-        |                        |--> 'fpout' : (dictdumper.Dumper) output dumper object
+        |                        |--> 'fpout' : (dictdumper.dumper.Dumper) output dumper object
         |                        |--> 'index': (list) list of frame index
         |                        |              |--> (int) frame index
         |                        |--> 'label': (str) flow label generated from ``BUFID``
@@ -115,7 +115,7 @@ class TraceFlow:
             fmt (str): output format
 
         Returns:
-            Tuple[Type[dictdumper.Dumper], str]: dumper of specified format and file
+            Tuple[Type[dictdumper.dumper.Dumper], str]: dumper of specified format and file
             extension of output file
 
         Warns:
@@ -182,8 +182,8 @@ class TraceFlow:
             output (bool): flag if has formatted dumper
 
         Returns:
-            Union[dictdumper.Dumper, str]: If ``output`` is :data:`True`,
-            returns the initiated :class:`~dictdumper.Dumper` object, which
+            Union[dictdumper.dumper.Dumper, str]: If ``output`` is :data:`True`,
+            returns the initiated :class:`~dictdumper.dumper.Dumper` object, which
             will dump data to the output file named after the flow label;
             otherwise, returns the flow label itself.
 
@@ -292,7 +292,7 @@ class TraceFlow:
 
         # dump I/O object
         fio, ext = self.make_fout(fout, format)
-        #: Type[dictdumper.Dumper]: Dumper class.
+        #: Type[dictdumper.dumper.Dumper]: Dumper class.
         self._foutio = fio
         #: str: Output file extension.
         self._fdpext = ext
