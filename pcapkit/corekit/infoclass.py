@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """info class
 
-`pcapkit.corekit.infoclass` contains dict-like class
-`Info` only, which is originally designed to work alike
-`dataclasses.dataclass` in Python 3.7 and later versions.
+:mod:`pcapkit.corekit.infoclass` contains :obj:`dict` like class
+:class:`~pcapkit.corekit.infoclass.Info` only, which is originally
+designed to work alike :func:`dataclasses.dataclass` as introduced
+in :pep:`557`.
 
 """
 import collections.abc
@@ -16,19 +17,30 @@ __all__ = ['Info']
 
 
 class Info(collections.abc.Mapping):
-    """Turn dictionaries into object-like instances.
-
-    Methods:
-        * info2dict -- reverse Info object into dict type
+    """Turn dictionaries into :obj:`object` like instances.
 
     Notes:
-        * Info objects inherit from `dict` type
-        * Info objects are iterable, and support all functions as `dict`
-        * Info objects are one-time-modeling, thus cannot set or delete
-            attributes after initialisation
+        * :class:`Info` objects inherit from :obj:`dict` type
+        * :class:`Info` objects are *iterable*, and support all functions as :obj:`dict`
+        * :class:`Info` objects are **one-time-modeling**, thus cannot set or delete
+          attributes after initialisation
 
     """
+
     def __new__(cls, dict_=None, **kwargs):
+        """Create a new instance.
+
+        Args:
+            dict_ (Dict[str, Any]): Source :obj:`dict` data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Notes:
+            Keys with the same names as the builtin methods will be renamed
+            with ``2`` suffix implicitly and internally.
+
+        """
         def __read__(dict_):
             __dict__ = dict()
             for (key, value) in dict_.items():
@@ -96,6 +108,12 @@ class Info(collections.abc.Mapping):
         raise UnsupportedCall("can't delete attribute")
 
     def info2dict(self):
+        """Convert :class:`Info` into :obj:`dict`.
+
+        Returns:
+            Dict[str, Any]: Converted :obj:`dict`.
+
+        """
         dict_ = dict()
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):

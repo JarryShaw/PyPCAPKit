@@ -24,11 +24,12 @@ efficiency in some way.
 .. toctree::
    :maxdepth: 2
 
-   dumpkit/index
    foundation/index
    interface/index
    protocols/index
    reassembly/index
+   corekit/index
+   dumpkit/index
    toolkit/index
    utilities/index
    const/index

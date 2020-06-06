@@ -96,7 +96,24 @@ else:
 
 
 class Extractor:
-    """Extractor for PCAP files."""
+    """Extractor for PCAP files.
+
+    For supported engines, please refer to corresponding driver method for more information:
+
+    * Default drivers:
+
+      * Global header: :meth:`~pcapkit.foundation.extraction.Extractor.record_header`
+      * Packet frames: :meth:`~pcapkit.foundation.extraction.Extractor.record_frames`
+
+    * DPKT driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_dpkt`
+    * Scapy driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_scapy`
+    * PyShark driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_pyshark`
+    * Multiprocessing driver:
+
+      * Pipeline model: :meth:`~pcapkit.foundation.extraction.Extractor._run_pipeline`
+      * Server model: :meth:`~pcapkit.foundation.extraction.Extractor._run_server`
+
+    """
 
     ##########################################################################
     # Properties.

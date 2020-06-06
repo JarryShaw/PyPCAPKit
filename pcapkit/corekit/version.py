@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """version info
 
-`pcapkit.corekit.version` contains tuple-like class
-`VersionInfo`, which is originally designed alike
-`sys.version_info`.
+:mod:`pcapkit.corekit.version` contains :obj:`tuple`
+like class :class:`~pcapkit.corekit.version.VersionInfo`,
+which is originally designed alike :class:`sys.version_info`.
 
 """
 import collections
@@ -11,4 +11,4 @@ import collections
 __all__ = ['VersionInfo']
 
 VersionInfo = collections.namedtuple('VersionInfo', ['major', 'minor'])
-VersionInfo.__doc__ = """VersionInfo is alike `sys.version_info`."""
+VersionInfo.__doc__ = """VersionInfo is alike :class:`sys.version_info`."""
