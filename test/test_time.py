@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import multiprocessing
 import statistics
 import time
 
 import pcapkit
 
-for engine in {'default', 'pyshark', 'scapy', 'dpkt', 'pipline', 'server'}:
+multiprocessing.freeze_support()
+
+for engine in ['default', 'dpkt', 'scapy', 'pyshark', 'pipline', 'server']:
     lid = list()
     for index in range(1, 101):
         now = time.time()

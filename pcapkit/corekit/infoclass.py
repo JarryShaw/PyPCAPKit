@@ -118,7 +118,7 @@ class Info(collections.abc.Mapping):
         for (key, value) in self.__dict__.items():
             if isinstance(value, Info):
                 dict_[key] = value.info2dict()
-            elif isinstance(value, (tuple, list, set, frozenset, collections.abc.Sequence)):
+            elif isinstance(value, (tuple, list, set, frozenset)):
                 temp = list()
                 for item in value:
                     if isinstance(item, Info):

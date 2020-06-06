@@ -298,7 +298,7 @@ class Protocol(metaclass=abc.ABCMeta):
         if file is None:
             _data = self.make(**kwargs)
         else:
-            _data = file.read(length, **kwargs)
+            _data = file.read(length)
 
         #: bytes: Raw packet data.
         self._data = _data

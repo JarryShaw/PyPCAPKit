@@ -672,11 +672,16 @@ class Extractor:
                     import aenum
 
                     if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
-                        return f'<{o.name}: {o.value}>'
+                        return dict(
+                            enum=type(o).__name__,
+                            desc=o.__doc__,
+                            name=o.name,
+                            value=o.value,
+                        )
                     if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
                         return str(o)
                     if isinstance(o, Info):
-                        return dict(o)
+                        return o.info2dict()
                     return super().object_hook(o)
 
             self._ofile = DictDumper if self._flag_f else DictDumper(ofnm)  # output file
