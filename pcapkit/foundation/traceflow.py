@@ -66,7 +66,7 @@ trace.index
         |--> (Info) data ...
 
 """
-import copy
+import ipaddress
 import pathlib
 import sys
 import warnings
@@ -155,7 +155,36 @@ class TraceFlow:
             else:
                 raise FileExists(*error.args).with_traceback(error.__traceback__) from None
 
-        return output, fmt
+        class DictDumper(output):
+            """Customised :class:`~dictdumper.dumper.Dumper` object."""
+
+            def object_hook(self, o):
+                """Convert content for function call.
+
+                Args:
+                    o (:obj:`Any`): object to convert
+
+                Returns:
+                    :obj:`Any`: the converted object
+
+                """
+                import enum
+                import aenum
+
+                if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
+                    return dict(
+                        enum=type(o).__name__,
+                        desc=o.__doc__,
+                        name=o.name,
+                        value=o.value,
+                    )
+                if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
+                    return str(o)
+                if isinstance(o, Info):
+                    return o.info2dict()
+                return super().object_hook(o)
+
+        return DictDumper, fmt
 
     def dump(self, packet):
         """Dump frame to output files.
@@ -168,8 +197,7 @@ class TraceFlow:
         output = self.trace(packet, check=False, output=True)
 
         # dump files
-        output(packet['frame'], name=f"Frame {packet['index']}",
-               byteorder=self._endian, nanosecond=self._nnsecd)
+        output(packet['frame'], name=f"Frame {packet['index']}")
 
     def trace(self, packet, *, check=True, output=False):
         """Trace packets.
@@ -216,8 +244,8 @@ class TraceFlow:
         if BUFID not in self._buffer:
             label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'  # pylint: disable=E1101
             self._buffer[BUFID] = dict(
-                fpout=self._foutio(f'{self._fproot}/{label}.{self._fdpext}',
-                                   protocol=info.protocol),  # pylint: disable=E1101
+                fpout=self._foutio(fname=f'{self._fproot}/{label}.{self._fdpext}', protocol=info.protocol,  # pylint: disable=E1101
+                                   byteorder=self._endian, nanosecond=self._nnsecd),
                 index=list(),
                 label=label,
             )
@@ -251,13 +279,10 @@ class TraceFlow:
         self._newflg = False
         ret = list()
         for buf in self._buffer.values():
-            buf = copy.deepcopy(buf)
-            if self._fdpext:
-                buf['fpout'] = f"{self._fproot}/{buf['label']}.{self._fdpext}"
-            else:
-                del buf['fpout']
-            buf['index'] = tuple(buf['index'])
-            ret.append(Info(buf))
+            lbl = buf['label']
+            ret.append(Info(fpout=f"{self._fproot}/{lbl}.{self._fdpext}" if self._fdpext else NotImplemented,
+                            index=tuple(buf['index']),
+                            label=lbl,))
         ret += self._stream
         return tuple(ret)
 

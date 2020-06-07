@@ -10,6 +10,11 @@ version  = $(shell cat setup.py | grep "^__version__" | sed "s/__version__ = '\(
 # commit message
 message  ?= ""
 
+profile:
+	pipenv run python -m cProfile -o /tmp/parse_pcap.pstats $@
+	gprof2dot -f pstats /tmp/parse_pcap.pstats | dot -Tpng -o /tmp/parse_pcap.png
+	open /tmp/parse_pcap.png
+
 clean: clean-pyc clean-misc clean-pypi
 const: update-const
 #dist: dist-pypi dist-upload

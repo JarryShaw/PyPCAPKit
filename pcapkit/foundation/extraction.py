@@ -558,7 +558,10 @@ class Extractor:
 
             files (bool): if split each frame into different files
             nofile (bool): if no output file is to be dumped
-            verbose (bool): if print verbose output information
+            verbose (Union[bool, Callable[[pcapkit.foundation.extraction.Extractor,
+                pcapkit.protocol.pcap.frame.Frame]]]): a :obj:`bool` value or a function takes the :class:`Extract`
+                instance and current parsed frame (depends on engine selected) as parameters to print verbose output
+                information
 
             engine (Optional[Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'server', 'pipeline']]):
                 extraction engine to be used
@@ -601,7 +604,13 @@ class Extractor:
         self._flag_m = False            # multiprocessing flag
         self._flag_q = nofile           # no output flag
         self._flag_t = trace            # trace flag
-        self._flag_v = verbose          # verbose output flag
+        self._flag_v = bool(verbose)    # verbose output flag
+
+        # verbose callback function
+        if isinstance(verbose, bool):
+            self._vfunc = NotImplemented
+        else:
+            self._vfunc = verbose
 
         self._frnum = 0                 # frame number
         self._frame = list()            # frame record
@@ -881,7 +890,10 @@ class Extractor:
 
         # verbose output
         if self._flag_v:
-            print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
+            if self._vfunc is NotImplemented:
+                print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
+            else:
+                self._vfunc(self, frame)
 
         # write plist
         frnum = f'Frame {self._frnum}'
@@ -989,7 +1001,10 @@ class Extractor:
         self._frnum += 1
         self._proto = packet2chain(packet)
         if self._flag_v:
-            print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            if self._vfunc is NotImplemented:
+                print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            else:
+                self._vfunc(self, packet)
 
         # write plist
         frnum = f'Frame {self._frnum}'
@@ -1102,7 +1117,10 @@ class Extractor:
         self._frnum += 1
         self._proto = packet2chain(packet)
         if self._flag_v:
-            print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            if self._vfunc is NotImplemented:
+                print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            else:
+                self._vfunc(self, packet)
 
         # write plist
         frnum = f'Frame {self._frnum}'
@@ -1213,7 +1231,10 @@ class Extractor:
         self._frnum = int(packet.number)
         self._proto = packet.frame_info.protocols
         if self._flag_v:
-            print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            if self._vfunc is NotImplemented:
+                print(f' - Frame {self._frnum:>3d}: {self._proto}')
+            else:
+                self._vfunc(self, packet)
 
         # write plist
         frnum = f'Frame {self._frnum}'

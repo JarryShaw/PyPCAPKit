@@ -102,7 +102,13 @@ class PCAP(dictdumper.Dumper):
             **kwargs: arbitrary keyword arguments
 
         """
+        #: int: Frame counter.
+        self._fnum = 1
+        #: bool: Nanosecond-resolution file flag.
         self._nsec = nanosecond
+        #: Union[pcapkit.const.reg.linktype.LinkType, enum.IntEnum, str, int]: Data link type.
+        self._link = protocol
+
         super().__init__(fname, protocol=protocol, byteorder=byteorder,
                          nanosecond=nanosecond, **kwargs)
 
@@ -155,6 +161,9 @@ class PCAP(dictdumper.Dumper):
         packet = Frame(
             packet=value.packet,
             nanosecond=self._nsec,
+            num=self._fnum,
+            proto=self._link,
             **value.get('frame_info', value),
         ).data
         file.write(packet)
+        self._fnum += 1

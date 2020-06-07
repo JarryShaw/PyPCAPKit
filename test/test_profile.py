@@ -11,7 +11,7 @@ def test():
                            store=False, nofile=True, engine=engine)
 
 
-for engine in {'default', 'pyshark', 'scapy', 'dpkt', 'pipline', 'server'}:
+for engine in ['default', 'dpkt', 'scapy', 'pyshark', 'pipline', 'server']:
     profiler = cProfile.Profile()
     profiler.runcall(test)
 

@@ -70,9 +70,16 @@ extracts parametres from a PCAP file.
       TCP flow tracing flag (as the ``trace`` parameter).
 
    .. attribute:: _flag_v
-      :type: bool
+      :type: Union[bool, Callable[[pcapkit.foundation.extraction.Extractor, pcapkit.protocols.pcap.frame.Frame]]]
 
-      Verbose output flag (as the ``verbose`` parameter).
+      A :obj:`bool` value or a function takes the :class:`Extract` instance and current parsed frame (depends on
+      the engine selected) as parameters to print verbose output information (as the ``verbose`` parameter).
+
+   .. attribute:: _vfunc
+      :type: Union[NotImplemented, Callable[[pcapkit.foundation.extraction.Extractor, pcapkit.protocols.pcap.frame.Frame]]]
+
+      If the ``verbose`` parameter is a callable, then it will be assigned as :attr:`self._vfunc <Extractor._vfunc>`;
+      otherwise, it keeps :obj:`NotImplemented` as a placeholder and has specific function for each engine.
 
    .. attribute:: _frnum
       :type: int
