@@ -40,7 +40,7 @@ ptyprocess==0.6.0
 py==1.8.1
 pycodestyle==2.6.0
 pygments==2.6.1
-pylint==2.5.2
+pylint==2.5.3
 pyparsing==3.0.0a1
 pyshark==0.4.2.11
 pysocks==1.7.1
