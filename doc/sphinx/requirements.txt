@@ -6,7 +6,7 @@ aenum==2.2.3
 alabaster==0.7.12
 appnope==0.1.0 ; sys_platform == 'darwin'
 astroid==2.4.2
-autopep8==1.5.2
+autopep8==1.5.3
 babel==2.8.0
 backcall==0.1.0
 beautifulsoup4[html5lib]==4.9.1
