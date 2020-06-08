@@ -14,7 +14,7 @@ certifi==2020.4.5.2
 chardet==3.0.4
 decorator==4.4.2
 dictdumper==0.8.4.post2
-doc8==0.8.0
+doc8==0.8.1
 docutils==0.16
 dpkt==1.9.2
 html5lib==1.0.1
