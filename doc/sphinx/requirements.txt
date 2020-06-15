@@ -8,7 +8,7 @@ appnope==0.1.0 ; sys_platform == 'darwin'
 astroid==2.4.2
 autopep8==1.5.3
 babel==2.8.0
-backcall==0.1.0
+backcall==0.2.0
 beautifulsoup4[html5lib]==4.9.1
 certifi==2020.4.5.2
 chardet==3.0.4
@@ -37,7 +37,7 @@ pickleshare==0.7.5
 pockets==0.9.1
 prompt-toolkit==3.0.5
 ptyprocess==0.6.0
-py==1.8.1
+py==1.8.2
 pycodestyle==2.6.0
 pygments==2.6.1
 pylint==2.5.3
@@ -52,7 +52,7 @@ scapy==2.4.3
 six==1.15.0
 snowballstemmer==2.0.0
 soupsieve==2.0.1
-sphinx==3.1.0
+sphinx==3.1.1
 sphinxcontrib-applehelp==1.0.2
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==1.0.3
