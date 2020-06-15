@@ -8,7 +8,7 @@ appnope==0.1.0 ; sys_platform == 'darwin'
 astroid==2.4.2
 autopep8==1.5.3
 babel==2.8.0
-backcall==0.1.0
+backcall==0.2.0
 beautifulsoup4[html5lib]==4.9.1
 certifi==2020.4.5.2
 chardet==3.0.4
