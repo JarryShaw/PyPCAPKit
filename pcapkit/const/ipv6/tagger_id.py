@@ -10,20 +10,17 @@ __all__ = ['TaggerID']
 class TaggerID(IntEnum):
     """[TaggerID] TaggerID Types"""
 
-    _ignore_ = 'TaggerID _'
-    TaggerID = vars()
+    #: NULL [:rfc:`6621`]
+    NULL = 0
 
-    #: [:rfc:`6621`]
-    TaggerID['NULL'] = 0
+    #: DEFAULT [:rfc:`6621`]
+    DEFAULT = 1
 
-    #: [:rfc:`6621`]
-    TaggerID['DEFAULT'] = 1
+    #: IPv4 [:rfc:`6621`]
+    IPv4 = 2
 
-    #: [:rfc:`6621`]
-    TaggerID['IPv4'] = 2
-
-    #: [:rfc:`6621`]
-    TaggerID['IPv6'] = 3
+    #: IPv6 [:rfc:`6621`]
+    IPv6 = 3
 
     @staticmethod
     def get(key, default=-1):
@@ -40,6 +37,7 @@ class TaggerID(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 7):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 4 <= value <= 7:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

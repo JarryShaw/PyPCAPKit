@@ -30,7 +30,7 @@ class OptionNumber(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self._safe_name(item[4]),  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[4]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[3].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def process(self, data):
@@ -49,7 +49,7 @@ class OptionNumber(Vendor):
 
         enum = list()
         miss = [
-            "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+            "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
         ]
         for item in reader:
@@ -66,15 +66,17 @@ class OptionNumber(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f" {''.join(temp)}" if rfcs else ''
+            tmp1 = f" {''.join(temp)}" if rfcs else ''
 
             abbr, name = re.split(r'\W+-\W+', dscp)
-            temp = re.sub(r'\[\d+\]', '', name)
-            name = f' {temp}' if temp else ''
+            tmp2 = re.sub(r'\[\d+\]', '', name)
+            name = f'{" - " if abbr else ""}{tmp2}' if tmp2 else ''
 
-            renm = self.rename(abbr or f'Unassigned [{code}]', code, original=dscp)
-            pres = f"{self.NAME}[{renm!r}] = {code}"
-            sufs = f'#:{desc}{name}' if desc or name else ''
+            desc = self.wrap_comment(f'{abbr}{name}{tmp1}')
+
+            renm = self.rename(abbr or f'Unassigned_{code}', code, original=dscp)
+            pres = f"{renm} = {code}"
+            sufs = f'#: {desc}'
 
             #if len(pres) > 74:
             #    sufs = f"\n{' '*80}{sufs}"

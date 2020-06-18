@@ -10,98 +10,95 @@ __all__ = ['OptionNumber']
 class OptionNumber(IntEnum):
     """[OptionNumber] IP Option Numbers"""
 
-    _ignore_ = 'OptionNumber _'
-    OptionNumber = vars()
+    #: EOOL - End of Options List [:rfc:`791`][Jon Postel]
+    EOOL = 0
 
-    #: [:rfc:`791`][Jon Postel] End of Options List
-    OptionNumber['EOOL'] = 0
+    #: NOP - No Operation [:rfc:`791`][Jon Postel]
+    NOP = 1
 
-    #: [:rfc:`791`][Jon Postel] No Operation
-    OptionNumber['NOP'] = 1
+    #: SEC - Security [:rfc:`1108`]
+    SEC = 130
 
-    #: [:rfc:`1108`] Security
-    OptionNumber['SEC'] = 130
+    #: LSR - Loose Source Route [:rfc:`791`][Jon Postel]
+    LSR = 131
 
-    #: [:rfc:`791`][Jon Postel] Loose Source Route
-    OptionNumber['LSR'] = 131
+    #: TS - Time Stamp [:rfc:`791`][Jon Postel]
+    TS = 68
 
-    #: [:rfc:`791`][Jon Postel] Time Stamp
-    OptionNumber['TS'] = 68
+    #: E-SEC - Extended Security [:rfc:`1108`]
+    E_SEC = 133
 
-    #: [:rfc:`1108`] Extended Security
-    OptionNumber['E_SEC'] = 133
+    #: CIPSO - Commercial Security [draft-ietf-cipso-ipsecurity-01]
+    CIPSO = 134
 
-    #: [draft-ietf-cipso-ipsecurity-01] Commercial Security
-    OptionNumber['CIPSO'] = 134
+    #: RR - Record Route [:rfc:`791`][Jon Postel]
+    RR = 7
 
-    #: [:rfc:`791`][Jon Postel] Record Route
-    OptionNumber['RR'] = 7
+    #: SID - Stream ID [:rfc:`791`][Jon Postel][:rfc:`6814`]
+    SID = 136
 
-    #: [:rfc:`791`][Jon Postel][:rfc:`6814`] Stream ID
-    OptionNumber['SID'] = 136
+    #: SSR - Strict Source Route [:rfc:`791`][Jon Postel]
+    SSR = 137
 
-    #: [:rfc:`791`][Jon Postel] Strict Source Route
-    OptionNumber['SSR'] = 137
+    #: ZSU - Experimental Measurement [ZSu]
+    ZSU = 10
 
-    #: [ZSu] Experimental Measurement
-    OptionNumber['ZSU'] = 10
+    #: MTUP - MTU Probe [:rfc:`1063`][:rfc:`1191`]
+    MTUP = 11
 
-    #: [:rfc:`1063`][:rfc:`1191`] MTU Probe
-    OptionNumber['MTUP'] = 11
+    #: MTUR - MTU Reply [:rfc:`1063`][:rfc:`1191`]
+    MTUR = 12
 
-    #: [:rfc:`1063`][:rfc:`1191`] MTU Reply
-    OptionNumber['MTUR'] = 12
+    #: FINN - Experimental Flow Control [Greg Finn]
+    FINN = 205
 
-    #: [Greg Finn] Experimental Flow Control
-    OptionNumber['FINN'] = 205
+    #: VISA - Experimental Access Control [Deborah Estrin][:rfc:`6814`]
+    VISA = 142
 
-    #: [Deborah Estrin][:rfc:`6814`] Experimental Access Control
-    OptionNumber['VISA'] = 142
+    #: ENCODE [VerSteeg][:rfc:`6814`]
+    ENCODE = 15
 
-    #: [VerSteeg][:rfc:`6814`]
-    OptionNumber['ENCODE'] = 15
+    #: IMITD - IMI Traffic Descriptor [Lee]
+    IMITD = 144
 
-    #: [Lee] IMI Traffic Descriptor
-    OptionNumber['IMITD'] = 144
+    #: EIP - Extended Internet Protocol [:rfc:`1385`][:rfc:`6814`]
+    EIP = 145
 
-    #: [:rfc:`1385`][:rfc:`6814`] Extended Internet Protocol
-    OptionNumber['EIP'] = 145
+    #: TR - Traceroute [:rfc:`1393`][:rfc:`6814`]
+    TR = 82
 
-    #: [:rfc:`1393`][:rfc:`6814`] Traceroute
-    OptionNumber['TR'] = 82
+    #: ADDEXT - Address Extension [Ullmann IPv7][:rfc:`6814`]
+    ADDEXT = 147
 
-    #: [Ullmann IPv7][:rfc:`6814`] Address Extension
-    OptionNumber['ADDEXT'] = 147
+    #: RTRALT - Router Alert [:rfc:`2113`]
+    RTRALT = 148
 
-    #: [:rfc:`2113`] Router Alert
-    OptionNumber['RTRALT'] = 148
-
-    #: [Charles Bud Graff][:rfc:`6814`] Selective Directed Broadcast
-    OptionNumber['SDB'] = 149
+    #: SDB - Selective Directed Broadcast [Charles Bud Graff][:rfc:`6814`]
+    SDB = 149
 
     #: Unassigned (Released 18 October 2005)
-    OptionNumber['Unassigned_150'] = 150
+    Unassigned_150 = 150
 
-    #: [Andy Malis][:rfc:`6814`] Dynamic Packet State
-    OptionNumber['DPS'] = 151
+    #: DPS - Dynamic Packet State [Andy Malis][:rfc:`6814`]
+    DPS = 151
 
-    #: [Dino Farinacci][:rfc:`6814`] Upstream Multicast Pkt.
-    OptionNumber['UMP'] = 152
+    #: UMP - Upstream Multicast Pkt. [Dino Farinacci][:rfc:`6814`]
+    UMP = 152
 
-    #: [:rfc:`4782`] Quick-Start
-    OptionNumber['QS'] = 25
+    #: QS - Quick-Start [:rfc:`4782`]
+    QS = 25
 
-    #: [:rfc:`4727`] RFC3692-style Experiment
-    OptionNumber['EXP_30'] = 30
+    #: EXP - RFC3692-style Experiment  [:rfc:`4727`]
+    EXP_30 = 30
 
-    #: [:rfc:`4727`] RFC3692-style Experiment
-    OptionNumber['EXP_94'] = 94
+    #: EXP - RFC3692-style Experiment  [:rfc:`4727`]
+    EXP_94 = 94
 
-    #: [:rfc:`4727`] RFC3692-style Experiment
-    OptionNumber['EXP_158'] = 158
+    #: EXP - RFC3692-style Experiment  [:rfc:`4727`]
+    EXP_158 = 158
 
-    #: [:rfc:`4727`] RFC3692-style Experiment
-    OptionNumber['EXP_222'] = 222
+    #: EXP - RFC3692-style Experiment  [:rfc:`4727`]
+    EXP_222 = 222
 
     @staticmethod
     def get(key, default=-1):
@@ -117,5 +114,5 @@ class OptionNumber(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

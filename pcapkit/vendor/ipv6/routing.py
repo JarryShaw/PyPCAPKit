@@ -52,13 +52,14 @@ class Routing(Vendor):
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             lrfc = f" {''.join(temp)}" if rfcs else ''
+            desc = self.wrap_comment(f'{name}{lrfc}{cmmt}')
 
             try:
                 code = int(item[0])
                 renm = self.rename(name, code)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = f"#:{lrfc}{cmmt}" if lrfc or cmmt else ''
+                pres = f"{renm} = {code}"
+                sufs = f"#: {desc}"
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"
@@ -69,9 +70,8 @@ class Routing(Vendor):
                 start, stop = item[0].split('-')
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                if lrfc or cmmt:
-                    miss.append(f'    #{lrfc}{cmmt}')
-                miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{name}_%d' % value, value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

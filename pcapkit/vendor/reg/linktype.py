@@ -45,7 +45,7 @@ class LinkType(Vendor):
         """
         enum = list()
         miss = [
-            "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+            "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
         ]
         for content in data:
@@ -57,7 +57,7 @@ class LinkType(Vendor):
             try:
                 code, _ = temp, int(temp)
 
-                pres = f"{self.NAME}[{name!r}] = {code}"
+                pres = f"{name} = {code}"
                 sufs = f"#: ``{desc}``"
 
                 # if len(pres) > 74:
@@ -68,10 +68,10 @@ class LinkType(Vendor):
             except ValueError:
                 start, stop = map(int, temp.split('-'))
                 for code in range(start, stop+1):
-                    name = f'USER{code-start}'
-                    desc = f'DLT_USER{code-start}'
+                    name = f'USER_{code-start}'
+                    desc = f'DLT_USER_{code-start}'
 
-                    pres = f"{self.NAME}[{name!r}] = {code}"
+                    pres = f"{name} = {code}"
                     sufs = f"#: ``{desc}``"
 
                     # if len(pres) > 74:

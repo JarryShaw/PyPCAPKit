@@ -10,20 +10,17 @@ __all__ = ['Transport']
 class Transport(IntEnum):
     """[Transport] HIP Transport Modes"""
 
-    _ignore_ = 'Transport _'
-    Transport = vars()
+    #: RESERVED [:rfc:`6261`]
+    RESERVED = 0
 
-    #: [:rfc:`6261`]
-    Transport['RESERVED'] = 0
+    #: DEFAULT [:rfc:`6261`]
+    DEFAULT = 1
 
-    #: [:rfc:`6261`]
-    Transport['DEFAULT'] = 1
+    #: ESP [:rfc:`6261`]
+    ESP = 2
 
-    #: [:rfc:`6261`]
-    Transport['ESP'] = 2
-
-    #: [:rfc:`6261`]
-    Transport['ESP_TCP'] = 3
+    #: ESP-TCP [:rfc:`6261`]
+    ESP_TCP = 3
 
     @staticmethod
     def get(key, default=-1):

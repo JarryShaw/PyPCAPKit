@@ -10,24 +10,21 @@ __all__ = ['ProtectionAuthority']
 class ProtectionAuthority(IntEnum):
     """[ProtectionAuthority] Protection Authority Bit Assignments"""
 
-    _ignore_ = 'ProtectionAuthority _'
-    ProtectionAuthority = vars()
+    GENSER = 0
 
-    ProtectionAuthority['GENSER'] = 0
+    SIOP_ESI = 1
 
-    ProtectionAuthority['SIOP_ESI'] = 1
+    SCI = 2
 
-    ProtectionAuthority['SCI'] = 2
+    NSA = 3
 
-    ProtectionAuthority['NSA'] = 3
+    DOE = 4
 
-    ProtectionAuthority['DOE'] = 4
+    Unassigned_5 = 5
 
-    ProtectionAuthority['Unassigned_5'] = 5
+    Unassigned_6 = 6
 
-    ProtectionAuthority['Unassigned_6'] = 6
-
-    ProtectionAuthority['Field_Termination_Indicator'] = 7
+    Field_Termination_Indicator = 7
 
     @staticmethod
     def get(key, default=-1):
@@ -43,5 +40,5 @@ class ProtectionAuthority(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 7):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

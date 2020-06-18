@@ -10,24 +10,21 @@ __all__ = ['ClassificationLevel']
 class ClassificationLevel(IntEnum):
     """[ClassificationLevel] Classification Level Encodings"""
 
-    _ignore_ = 'ClassificationLevel _'
-    ClassificationLevel = vars()
+    Reserved_4 = 0b00000001
 
-    ClassificationLevel['Reserved_4'] = 0b00000001
+    Top_Secret = 0b00111101
 
-    ClassificationLevel['Top_Secret'] = 0b00111101
+    Secret = 0b01011010
 
-    ClassificationLevel['Secret'] = 0b01011010
+    Confidential = 0b10010110
 
-    ClassificationLevel['Confidential'] = 0b10010110
+    Reserved_3 = 0b01100110
 
-    ClassificationLevel['Reserved_3'] = 0b01100110
+    Reserved_2 = 0b11001100
 
-    ClassificationLevel['Reserved_2'] = 0b11001100
+    Unclassified = 0b10101011
 
-    ClassificationLevel['Unclassified'] = 0b10101011
-
-    ClassificationLevel['Reserved_1'] = 0b11110001
+    Reserved_1 = 0b11110001
 
     @staticmethod
     def get(key, default=-1):
@@ -44,5 +41,5 @@ class ClassificationLevel(IntEnum):
         if not (isinstance(value, int) and 0b00000000 <= value <= 0b11111111):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         temp = bin(value)[2:].upper().zfill(8)
-        extend_enum(cls, 'Unassigned [0b%s]' % (temp[:4]+'_'+temp[4:]), value)
+        extend_enum(cls, 'Unassigned_0b%s' % (temp[:4]+'_'+temp[4:]), value)
         return cls(value)

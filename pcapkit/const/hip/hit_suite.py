@@ -10,20 +10,17 @@ __all__ = ['HITSuite']
 class HITSuite(IntEnum):
     """[HITSuite] HIT Suite ID"""
 
-    _ignore_ = 'HITSuite _'
-    HITSuite = vars()
+    #: RESERVED [:rfc:`7401`]
+    RESERVED = 0
 
-    #: [:rfc:`7401`]
-    HITSuite['RESERVED'] = 0
+    #: RSA,DSA/SHA-256 [:rfc:`7401`]
+    RSA_DSA_SHA_256 = 1
 
-    #: [:rfc:`7401`]
-    HITSuite['RSA_DSA_SHA_256'] = 1
+    #: ECDSA/SHA-384 [:rfc:`7401`]
+    ECDSA_SHA_384 = 2
 
-    #: [:rfc:`7401`]
-    HITSuite['ECDSA_SHA_384'] = 2
-
-    #: [:rfc:`7401`]
-    HITSuite['ECDSA_LOW_SHA_1'] = 3
+    #: ECDSA_LOW/SHA-1 [:rfc:`7401`]
+    ECDSA_LOW_SHA_1 = 3
 
     @staticmethod
     def get(key, default=-1):
@@ -40,6 +37,7 @@ class HITSuite(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 15):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 4 <= value <= 15:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

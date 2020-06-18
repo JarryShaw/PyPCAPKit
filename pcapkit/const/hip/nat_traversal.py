@@ -10,17 +10,14 @@ __all__ = ['NATTraversal']
 class NATTraversal(IntEnum):
     """[NATTraversal] HIP NAT Traversal Modes"""
 
-    _ignore_ = 'NATTraversal _'
-    NATTraversal = vars()
+    #: Reserved [:rfc:`5770`]
+    Reserved = 0
 
-    #: [:rfc:`5770`]
-    NATTraversal['Reserved'] = 0
+    #: UDP-ENCAPSULATION [:rfc:`5770`]
+    UDP_ENCAPSULATION = 1
 
-    #: [:rfc:`5770`]
-    NATTraversal['UDP_ENCAPSULATION'] = 1
-
-    #: [:rfc:`5770`]
-    NATTraversal['ICE_STUN_UDP'] = 2
+    #: ICE-STUN-UDP [:rfc:`5770`]
+    ICE_STUN_UDP = 2
 
     @staticmethod
     def get(key, default=-1):
@@ -37,6 +34,7 @@ class NATTraversal(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 65535:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

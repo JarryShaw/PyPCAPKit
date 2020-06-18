@@ -52,14 +52,15 @@ class Parameter(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            lrfc = f" {''.join(temp)}" if rfcs else ''
+            tmp1 = f" {''.join(temp)}" if rfcs else ''
+            desc = self.wrap_comment(f"{name}{tmp1}{plen}{cmmt}")
 
             try:
                 code, _ = item[0], int(item[0])
                 renm = self.rename(name, code, original=long)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = f"#:{lrfc}{plen}{cmmt}" if lrfc or cmmt or plen else ''
+                pres = f"{renm} = {code}"
+                sufs = f"#: {desc}"
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"
@@ -70,9 +71,8 @@ class Parameter(Vendor):
                 start, stop = item[0].split('-')
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                if lrfc or cmmt or plen:
-                    miss.append(f"#{lrfc}{plen}{cmmt}")
-                miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+                miss.append(f"    #: {desc}")
+                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

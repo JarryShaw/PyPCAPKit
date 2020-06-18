@@ -41,7 +41,7 @@ Frame 1
   |     |-- type 
   |     |     |-- enum -> EtherType
   |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_Version_6
+  |     |     |-- name -> Internet_Protocol_version_6
   |     |     |-- value -> 34525
   |     |-- packet 
   |     |     |-- header -> 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd
@@ -113,7 +113,7 @@ Frame 2
   |     |-- type 
   |     |     |-- enum -> EtherType
   |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_Version_6
+  |     |     |-- name -> Internet_Protocol_version_6
   |     |     |-- value -> 34525
   |     |-- packet 
   |     |     |-- header -> a4 5e 60 d9 6b 97 40 33 1a d1 85 1c 86 dd
@@ -181,7 +181,7 @@ Frame 3
   |     |-- type 
   |     |     |-- enum -> EtherType
   |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_Version_4
+  |     |     |-- name -> Internet_Protocol_version_4
   |     |     |-- value -> 2048
   |     |-- packet 
   |     |     |-- header -> a4 5e 60 d9 6b 97 b8 f8 83 a5 f9 47 08 00
@@ -294,7 +294,7 @@ Frame 4
   |     |-- type 
   |     |     |-- enum -> EtherType
   |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_Version_4
+  |     |     |-- name -> Internet_Protocol_version_4
   |     |     |-- value -> 2048
   |     |-- packet 
   |     |     |-- header -> b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00
@@ -407,7 +407,7 @@ Frame 5
   |     |-- type 
   |     |     |-- enum -> EtherType
   |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_Version_4
+  |     |     |-- name -> Internet_Protocol_version_4
   |     |     |-- value -> 2048
   |     |-- packet 
   |     |     |-- header -> b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00
@@ -526,7 +526,7 @@ Frame 6
   |     |-- type 
   |     |     |-- enum -> EtherType
   |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_Version_4
+  |     |     |-- name -> Internet_Protocol_version_4
   |     |     |-- value -> 2048
   |     |-- packet 
   |     |     |-- header -> ff ff ff ff ff ff b8 f8 83 a5 f9 47 08 00

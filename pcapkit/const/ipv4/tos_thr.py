@@ -10,12 +10,9 @@ __all__ = ['ToSThroughput']
 class ToSThroughput(IntEnum):
     """[ToSThroughput] ToS (DS Field) Throughput"""
 
-    _ignore_ = 'ToSThroughput _'
-    ToSThroughput = vars()
+    NORMAL = 0
 
-    ToSThroughput['NORMAL'] = 0
-
-    ToSThroughput['HIGH'] = 1
+    HIGH = 1
 
     @staticmethod
     def get(key, default=-1):
@@ -31,5 +28,5 @@ class ToSThroughput(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 1):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

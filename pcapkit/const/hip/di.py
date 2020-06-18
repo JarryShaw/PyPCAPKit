@@ -10,17 +10,14 @@ __all__ = ['DITypes']
 class DITypes(IntEnum):
     """[DITypes] DI-Types"""
 
-    _ignore_ = 'DITypes _'
-    DITypes = vars()
+    #: none included [:rfc:`7401`]
+    none_included = 0
 
-    #: [:rfc:`7401`]
-    DITypes['None_Included'] = 0
+    #: FQDN [:rfc:`7401`]
+    FQDN = 1
 
-    #: [:rfc:`7401`]
-    DITypes['FQDN'] = 1
-
-    #: [:rfc:`7401`]
-    DITypes['NAI'] = 2
+    #: NAI [:rfc:`7401`]
+    NAI = 2
 
     @staticmethod
     def get(key, default=-1):
@@ -37,6 +34,7 @@ class DITypes(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 15):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 15:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

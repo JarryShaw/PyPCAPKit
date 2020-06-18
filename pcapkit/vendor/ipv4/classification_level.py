@@ -50,7 +50,7 @@ class ClassificationLevel(Vendor):
             Counter: Field recordings.
 
         """
-        return collections.Counter(map(self._safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
+        return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
     def process(self, data):
         """Process registry data.
@@ -66,13 +66,13 @@ class ClassificationLevel(Vendor):
         enum = list()
         miss = [
             'temp = bin(value)[2:].upper().zfill(8)',
-            "extend_enum(cls, 'Unassigned [0b%s]' % (temp[:4]+'_'+temp[4:]), value)",
+            "extend_enum(cls, 'Unassigned_0b%s' % (temp[:4]+'_'+temp[4:]), value)",
             'return cls(value)'
         ]
         for code, name in data.items():
             code = binary(code)
             renm = self.rename(name, code)
-            enum.append(f"{self.NAME}[{renm!r}] = {code}".ljust(76))
+            enum.append(f"{renm} = {code}".ljust(76))
         return enum, miss
 
 

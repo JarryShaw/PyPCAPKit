@@ -10,16 +10,14 @@ __all__ = ['Registration']
 class Registration(IntEnum):
     """[Registration] Registration Types"""
 
-    _ignore_ = 'Registration _'
-    Registration = vars()
+    #: Unassigned
+    Unassigned = 0
 
-    Registration['Unassigned'] = 0
+    #: RENDEZVOUS [:rfc:`8004`]
+    RENDEZVOUS = 1
 
-    #: [:rfc:`8004`]
-    Registration['RENDEZVOUS'] = 1
-
-    #: [:rfc:`5770`]
-    Registration['RELAY_UDP_HIP'] = 2
+    #: RELAY_UDP_HIP [:rfc:`5770`]
+    RELAY_UDP_HIP = 2
 
     @staticmethod
     def get(key, default=-1):
@@ -36,10 +34,11 @@ class Registration(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 200:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 201 <= value <= 255:
-            #: [:rfc:`8003`]
-            extend_enum(cls, 'Reserved for Private Use [%d]' % value, value)
+            #: Reserved for Private Use [:rfc:`8003`]
+            extend_enum(cls, 'Reserved_For_Private_Use_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

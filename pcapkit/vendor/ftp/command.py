@@ -24,7 +24,7 @@ CONF = dict(
 
 #: Command entry template.
 make = lambda cmmd, feat, desc, kind, conf, rfcs, cmmt: f'''\
-    #: {cmmt}
+    # {cmmt}
     {cmmd}=Info(
         name={cmmd!r},
         feat={feat!r},
@@ -57,7 +57,7 @@ class defaultInfo(Info):
             return {MISS}
 
 
-# {DOCS}
+#: {DOCS}
 {NAME} = defaultInfo(
     {INFO}
 )

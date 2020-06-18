@@ -61,7 +61,7 @@ class Packet(Vendor):
 
         enum = list()
         miss = [
-            "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+            "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
         ]
         for item in content:
@@ -76,10 +76,13 @@ class Packet(Vendor):
                 cmmt = re.sub(r'RFC (\d+)', r'[:rfc:`\1`]', re.sub(r',([^ ])', r', \1', split[1].replace(')', '', 1)))
             else:
                 name, cmmt = desc, ''
-            renm = self._safe_name(name)
+            renm = self.safe_name(name)
 
-            pres = f"{self.NAME}[{renm!r}] = {pval}"
-            sufs = f'#: {cmmt}' if cmmt else ''
+            tmp1 = f' - {cmmt}' if cmmt else ''
+            desc = self.wrap_comment(f'{name}{tmp1}')
+
+            pres = f"{renm} = {pval}"
+            sufs = f'#: {desc}'
 
             # if len(pres) > 74:
             #     sufs = f"\n{' '*80}{sufs}"

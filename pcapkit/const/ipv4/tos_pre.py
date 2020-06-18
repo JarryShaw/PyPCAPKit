@@ -10,24 +10,21 @@ __all__ = ['ToSPrecedence']
 class ToSPrecedence(IntEnum):
     """[ToSPrecedence] ToS (DS Field) Precedence"""
 
-    _ignore_ = 'ToSPrecedence _'
-    ToSPrecedence = vars()
+    Network_Control = 7
 
-    ToSPrecedence['Network_Control'] = 7
+    Internetwork_Control = 6
 
-    ToSPrecedence['Internetwork_Control'] = 6
+    CRITIC_ECP = 5
 
-    ToSPrecedence['CRITIC_ECP'] = 5
+    Flash_Override = 4
 
-    ToSPrecedence['Flash_Override'] = 4
+    Flash = 3
 
-    ToSPrecedence['Flash'] = 3
+    Immediate = 2
 
-    ToSPrecedence['Immediate'] = 2
+    Priority = 1
 
-    ToSPrecedence['Priority'] = 1
-
-    ToSPrecedence['Routine'] = 0
+    Routine = 0
 
     @staticmethod
     def get(key, default=-1):
@@ -43,5 +40,5 @@ class ToSPrecedence(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0b000 <= value <= 0b111):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

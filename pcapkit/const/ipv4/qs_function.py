@@ -10,12 +10,9 @@ __all__ = ['QSFunction']
 class QSFunction(IntEnum):
     """[QSFunction] QS Functions"""
 
-    _ignore_ = 'QSFunction _'
-    QSFunction = vars()
+    Quick_Start_Request = 0
 
-    QSFunction['Quick_Start_Request'] = 0
-
-    QSFunction['Report_Of_Approved_Rate'] = 8
+    Report_of_Approved_Rate = 8
 
     @staticmethod
     def get(key, default=-1):
@@ -31,5 +28,5 @@ class QSFunction(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 8):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

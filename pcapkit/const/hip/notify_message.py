@@ -10,106 +10,110 @@ __all__ = ['NotifyMessage']
 class NotifyMessage(IntEnum):
     """[NotifyMessage] Notify Message Types"""
 
-    _ignore_ = 'NotifyMessage _'
-    NotifyMessage = vars()
+    #: Reserved [:rfc:`7401`]
+    Reserved = 0
 
-    #: [:rfc:`7401`]
-    NotifyMessage['Reserved'] = 0
+    #: UNSUPPORTED_CRITICAL_PARAMETER_TYPE [:rfc:`7401`]
+    UNSUPPORTED_CRITICAL_PARAMETER_TYPE = 1
 
-    #: [:rfc:`7401`]
-    NotifyMessage['UNSUPPORTED_CRITICAL_PARAMETER_TYPE'] = 1
+    #: INVALID_SYNTAX [:rfc:`7401`]
+    INVALID_SYNTAX = 7
 
-    #: [:rfc:`7401`]
-    NotifyMessage['INVALID_SYNTAX'] = 7
+    #: NO_DH_PROPOSAL_CHOSEN [:rfc:`7401`]
+    NO_DH_PROPOSAL_CHOSEN = 14
 
-    #: [:rfc:`7401`]
-    NotifyMessage['NO_DH_PROPOSAL_CHOSEN'] = 14
+    #: INVALID_DH_CHOSEN [:rfc:`7401`]
+    INVALID_DH_CHOSEN = 15
 
-    #: [:rfc:`7401`]
-    NotifyMessage['INVALID_DH_CHOSEN'] = 15
+    #: NO_HIP_PROPOSAL_CHOSEN [:rfc:`7401`]
+    NO_HIP_PROPOSAL_CHOSEN = 16
 
-    #: [:rfc:`7401`]
-    NotifyMessage['NO_HIP_PROPOSAL_CHOSEN'] = 16
+    #: INVALID_HIP_CIPHER_CHOSEN [:rfc:`7401`]
+    INVALID_HIP_CIPHER_CHOSEN = 17
 
-    #: [:rfc:`7401`]
-    NotifyMessage['INVALID_HIP_CIPHER_CHOSEN'] = 17
+    #: NO_ESP_PROPOSAL_CHOSEN [:rfc:`7402`]
+    NO_ESP_PROPOSAL_CHOSEN = 18
 
-    #: [:rfc:`7402`]
-    NotifyMessage['NO_ESP_PROPOSAL_CHOSEN'] = 18
+    #: INVALID_ESP_TRANSFORM_CHOSEN [:rfc:`7402`]
+    INVALID_ESP_TRANSFORM_CHOSEN = 19
 
-    #: [:rfc:`7402`]
-    NotifyMessage['INVALID_ESP_TRANSFORM_CHOSEN'] = 19
+    #: UNSUPPORTED_HIT_SUITE [:rfc:`7401`]
+    UNSUPPORTED_HIT_SUITE = 20
 
-    #: [:rfc:`7401`]
-    NotifyMessage['UNSUPPORTED_HIT_SUITE'] = 20
+    #: AUTHENTICATION_FAILED [:rfc:`7401`]
+    AUTHENTICATION_FAILED = 24
 
-    #: [:rfc:`7401`]
-    NotifyMessage['AUTHENTICATION_FAILED'] = 24
+    #: Unassigned
+    Unassigned_25 = 25
 
-    NotifyMessage['Unassigned_25'] = 25
+    #: CHECKSUM_FAILED [:rfc:`7401`]
+    CHECKSUM_FAILED = 26
 
-    #: [:rfc:`7401`]
-    NotifyMessage['CHECKSUM_FAILED'] = 26
+    #: Unassigned
+    Unassigned_27 = 27
 
-    NotifyMessage['Unassigned_27'] = 27
+    #: HIP_MAC_FAILED [:rfc:`7401`]
+    HIP_MAC_FAILED = 28
 
-    #: [:rfc:`7401`]
-    NotifyMessage['HIP_MAC_FAILED'] = 28
+    #: ENCRYPTION_FAILED [:rfc:`7401`]
+    ENCRYPTION_FAILED = 32
 
-    #: [:rfc:`7401`]
-    NotifyMessage['ENCRYPTION_FAILED'] = 32
+    #: INVALID_HIT [:rfc:`7401`]
+    INVALID_HIT = 40
 
-    #: [:rfc:`7401`]
-    NotifyMessage['INVALID_HIT'] = 40
+    #: Unassigned
+    Unassigned_41 = 41
 
-    NotifyMessage['Unassigned_41'] = 41
+    #: BLOCKED_BY_POLICY [:rfc:`7401`]
+    BLOCKED_BY_POLICY = 42
 
-    #: [:rfc:`7401`]
-    NotifyMessage['BLOCKED_BY_POLICY'] = 42
+    #: Unassigned
+    Unassigned_43 = 43
 
-    NotifyMessage['Unassigned_43'] = 43
+    #: RESPONDER_BUSY_PLEASE_RETRY [:rfc:`7401`]
+    RESPONDER_BUSY_PLEASE_RETRY = 44
 
-    #: [:rfc:`7401`]
-    NotifyMessage['RESPONDER_BUSY_PLEASE_RETRY'] = 44
+    #: Unassigned
+    Unassigned_45 = 45
 
-    NotifyMessage['Unassigned_45'] = 45
+    #: LOCATOR_TYPE_UNSUPPORTED [:rfc:`8046`]
+    LOCATOR_TYPE_UNSUPPORTED = 46
 
-    #: [:rfc:`8046`]
-    NotifyMessage['LOCATOR_TYPE_UNSUPPORTED'] = 46
+    #: Unassigned
+    Unassigned_47 = 47
 
-    NotifyMessage['Unassigned_47'] = 47
+    #: CREDENTIALS_REQUIRED [:rfc:`8002`]
+    CREDENTIALS_REQUIRED = 48
 
-    #: [:rfc:`8002`]
-    NotifyMessage['CREDENTIALS_REQUIRED'] = 48
+    #: Unassigned
+    Unassigned_49 = 49
 
-    NotifyMessage['Unassigned_49'] = 49
+    #: INVALID_CERTIFICATE [:rfc:`8002`]
+    INVALID_CERTIFICATE = 50
 
-    #: [:rfc:`8002`]
-    NotifyMessage['INVALID_CERTIFICATE'] = 50
+    #: REG_REQUIRED [:rfc:`8003`]
+    REG_REQUIRED = 51
 
-    #: [:rfc:`8003`]
-    NotifyMessage['REG_REQUIRED'] = 51
+    #: NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER [:rfc:`5770`]
+    NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER = 60
 
-    #: [:rfc:`5770`]
-    NotifyMessage['NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER'] = 60
+    #: CONNECTIVITY_CHECKS_FAILED [:rfc:`5770`]
+    CONNECTIVITY_CHECKS_FAILED = 61
 
-    #: [:rfc:`5770`]
-    NotifyMessage['CONNECTIVITY_CHECKS_FAILED'] = 61
+    #: MESSAGE_NOT_RELAYED [:rfc:`5770`]
+    MESSAGE_NOT_RELAYED = 62
 
-    #: [:rfc:`5770`]
-    NotifyMessage['MESSAGE_NOT_RELAYED'] = 62
+    #: OVERLAY_TTL_EXCEEDED [:rfc:`6079`]
+    OVERLAY_TTL_EXCEEDED = 70
 
-    #: [:rfc:`6079`]
-    NotifyMessage['OVERLAY_TTL_EXCEEDED'] = 70
+    #: UNKNOWN_NEXT_HOP [:rfc:`6028`]
+    UNKNOWN_NEXT_HOP = 90
 
-    #: [:rfc:`6028`]
-    NotifyMessage['UNKNOWN_NEXT_HOP'] = 90
+    #: NO_VALID_HIP_TRANSPORT_MODE [:rfc:`6261`]
+    NO_VALID_HIP_TRANSPORT_MODE = 100
 
-    #: [:rfc:`6261`]
-    NotifyMessage['NO_VALID_HIP_TRANSPORT_MODE'] = 100
-
-    #: [:rfc:`7401`]
-    NotifyMessage['I2_ACKNOWLEDGEMENT'] = 16384
+    #: I2_ACKNOWLEDGEMENT [:rfc:`7401`]
+    I2_ACKNOWLEDGEMENT = 16384
 
     @staticmethod
     def get(key, default=-1):
@@ -126,44 +130,55 @@ class NotifyMessage(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 6:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 8 <= value <= 13:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 21 <= value <= 23:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 29 <= value <= 31:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 33 <= value <= 39:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 52 <= value <= 59:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 63 <= value <= 69:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 71 <= value <= 89:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 91 <= value <= 99:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 101 <= value <= 8191:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 8192 <= value <= 16383:
-            #: [:rfc:`7401`]
-            extend_enum(cls, 'Reserved for Private Use [%d]' % value, value)
+            #: Reserved for Private Use [:rfc:`7401`]
+            extend_enum(cls, 'Reserved_For_Private_Use_%d' % value, value)
             return cls(value)
         if 16385 <= value <= 40959:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 40960 <= value <= 65535:
-            #: [:rfc:`7401`]
-            extend_enum(cls, 'Reserved for Private Use [%d]' % value, value)
+            #: Reserved for Private Use [:rfc:`7401`]
+            extend_enum(cls, 'Reserved_For_Private_Use_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

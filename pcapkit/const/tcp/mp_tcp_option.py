@@ -10,24 +10,21 @@ __all__ = ['MPTCPOption']
 class MPTCPOption(IntEnum):
     """[MPTCPOption] Multipath TCP options [:rfc:`6824`]"""
 
-    _ignore_ = 'MPTCPOption _'
-    MPTCPOption = vars()
+    MP_CAPABLE = 0
 
-    MPTCPOption['MP_CAPABLE'] = 0
+    MP_JOIN = 1
 
-    MPTCPOption['MP_JOIN'] = 1
+    DSS = 2
 
-    MPTCPOption['DSS'] = 2
+    ADD_ADDR = 3
 
-    MPTCPOption['ADD_ADDR'] = 3
+    REMOVE_ADDR = 4
 
-    MPTCPOption['REMOVE_ADDR'] = 4
+    MP_PRIO = 5
 
-    MPTCPOption['MP_PRIO'] = 5
+    MP_FAIL = 6
 
-    MPTCPOption['MP_FAIL'] = 6
-
-    MPTCPOption['MP_FASTCLOSE'] = 7
+    MP_FASTCLOSE = 7
 
     @staticmethod
     def get(key, default=-1):
@@ -43,5 +40,5 @@ class MPTCPOption(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

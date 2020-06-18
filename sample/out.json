@@ -49,7 +49,7 @@
 			"type": {
 				"enum": "EtherType",
 				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_Version_6",
+				"name": "Internet_Protocol_version_6",
 				"value": 34525
 			},
 			"packet": {
@@ -133,7 +133,7 @@
 			"type": {
 				"enum": "EtherType",
 				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_Version_6",
+				"name": "Internet_Protocol_version_6",
 				"value": 34525
 			},
 			"packet": {
@@ -217,7 +217,7 @@
 			"type": {
 				"enum": "EtherType",
 				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_Version_4",
+				"name": "Internet_Protocol_version_4",
 				"value": 2048
 			},
 			"packet": {
@@ -368,7 +368,7 @@
 			"type": {
 				"enum": "EtherType",
 				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_Version_4",
+				"name": "Internet_Protocol_version_4",
 				"value": 2048
 			},
 			"packet": {
@@ -519,7 +519,7 @@
 			"type": {
 				"enum": "EtherType",
 				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_Version_4",
+				"name": "Internet_Protocol_version_4",
 				"value": 2048
 			},
 			"packet": {
@@ -670,7 +670,7 @@
 			"type": {
 				"enum": "EtherType",
 				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_Version_4",
+				"name": "Internet_Protocol_version_4",
 				"value": 2048
 			},
 			"packet": {

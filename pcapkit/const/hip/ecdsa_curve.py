@@ -10,17 +10,14 @@ __all__ = ['ECDSACurve']
 class ECDSACurve(IntEnum):
     """[ECDSACurve] ECDSA Curve Label"""
 
-    _ignore_ = 'ECDSACurve _'
-    ECDSACurve = vars()
+    #: RESERVED [:rfc:`7401`]
+    RESERVED = 0
 
-    #: [:rfc:`7401`]
-    ECDSACurve['RESERVED'] = 0
+    #: NIST P-256 [:rfc:`7401`]
+    NIST_P_256 = 1
 
-    #: [:rfc:`7401`]
-    ECDSACurve['NIST_P_256'] = 1
-
-    #: [:rfc:`7401`]
-    ECDSACurve['NIST_P_384'] = 2
+    #: NIST P-384 [:rfc:`7401`]
+    NIST_P_384 = 2
 
     @staticmethod
     def get(key, default=-1):
@@ -37,6 +34,7 @@ class ECDSACurve(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 65535:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

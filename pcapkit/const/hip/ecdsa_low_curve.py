@@ -10,14 +10,11 @@ __all__ = ['ECDSALowCurve']
 class ECDSALowCurve(IntEnum):
     """[ECDSALowCurve] ECDSA_LOW Curve Label"""
 
-    _ignore_ = 'ECDSALowCurve _'
-    ECDSALowCurve = vars()
+    #: RESERVED [:rfc:`7401`]
+    RESERVED = 0
 
-    #: [:rfc:`7401`]
-    ECDSALowCurve['RESERVED'] = 0
-
-    #: [:rfc:`7401`]
-    ECDSALowCurve['SECP160R1'] = 1
+    #: SECP160R1 [:rfc:`7401`]
+    SECP160R1 = 1
 
     @staticmethod
     def get(key, default=-1):
@@ -34,6 +31,7 @@ class ECDSALowCurve(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 65535:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

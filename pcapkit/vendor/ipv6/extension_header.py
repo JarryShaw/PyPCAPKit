@@ -22,9 +22,6 @@ __all__ = ['{NAME}']
 class {NAME}(IntEnum):
     """[{NAME}] {DOCS}"""
 
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
-
     {ENUM}
 
     @staticmethod
@@ -56,7 +53,7 @@ class ExtensionHeader(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self._safe_name(item[1] or item[2]),  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[1] or item[2]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def process(self, data):
@@ -93,7 +90,7 @@ class ExtensionHeader(Vendor):
             lrfc = re.sub(r'( )( )*', ' ', f" {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
 
             subd = re.sub(r'( )( )*', ' ', item[2].replace('\n', ' '))
-            desc = f' {subd}' if item[2] else ''
+            tmp1 = f' {subd}' if item[2] else ''
 
             split = name.split(' (', 1)
             if len(split) == 2:
@@ -101,14 +98,18 @@ class ExtensionHeader(Vendor):
             else:
                 name, cmmt = name, ''  # pylint: disable=self-assigning-variable
 
+            if not name:
+                name, tmp1 = item[2], ''
+            desc = self.wrap_comment(f'{name}{lrfc}{tmp1}{cmmt}')
+
             try:
                 code, _ = item[0], int(item[0])
                 if not name:
                     name, desc = item[2], ''
                 renm = self.rename(name, code, original=item[1])
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = f"#:{lrfc}{desc}{cmmt}" if lrfc or desc or cmmt else ''
+                pres = f"{renm} = {code}"
+                sufs = f"#: {desc}"
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"
@@ -117,13 +118,10 @@ class ExtensionHeader(Vendor):
                 enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = item[0].split('-')
-                if not name:
-                    name, desc = item[2], ''
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                if lrfc or desc or cmmt:
-                    miss.append(f'    #:{lrfc}{desc}{cmmt}')
-                miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
                 miss.append('    return cls(value)')
         return enum
 

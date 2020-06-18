@@ -30,7 +30,7 @@ class EtherType(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self._safe_name(item[4]),  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[4]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[1].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def rename(self, name, code):  # pylint: disable=arguments-differ
@@ -47,9 +47,9 @@ class EtherType(Vendor):
             str: Revised field name.
 
         """
-        if self.record[self._safe_name(name)] > 1:
-            name = f'{name} [0x{code}]'
-        return self._safe_name(name)
+        if self.record[self.safe_name(name)] > 1:
+            name = f'{name}_0x{code}'
+        return self.safe_name(name)
 
     def process(self, data):
         """Process CSV data.
@@ -78,14 +78,17 @@ class EtherType(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = re.sub(r'( )( )*', ' ', f"#: {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
+            tmp1 = re.sub(r'( )( )*', ' ', f"{''.join(temp)}".replace('\n', ' ')) if rfcs else ''
+            tmp2 = re.sub(r'\r*\n', ' ', tmp1, re.MULTILINE)
+            tmp3 = name.replace('\n', ' ')
+            desc = self.wrap_comment(f"{tmp3} {tmp2}")
 
             try:
                 code, _ = item[1], int(item[1], base=16)
                 renm = re.sub(r'( )( )*', ' ', self.rename(name, code).replace('\n', ' '))
 
-                pres = f'{self.NAME}[{renm!r}] = 0x{code}'
-                sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
+                pres = f'{renm} = 0x{code}'
+                sufs = f'#: {desc}'
 
                 # if len(pres) > 74:
                 #     sufs = f"\n{' '*80}{sufs}"
@@ -94,13 +97,10 @@ class EtherType(Vendor):
                 enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = item[1].split('-')
-                more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
                 miss.append(f'if 0x{start} <= value <= 0x{stop}:')
-                if more:
-                    miss.append(f'    {more}')
-                miss.append(
-                    f"    extend_enum(cls, '{name} [0x%s]' % hex(value)[2:].upper().zfill(4), value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

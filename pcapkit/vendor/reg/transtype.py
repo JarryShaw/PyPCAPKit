@@ -30,7 +30,7 @@ class TransType(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self._safe_name(item[1] or item[2]),  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[1] or item[2]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def process(self, data):
@@ -63,22 +63,23 @@ class TransType(Vendor):
             lrfc = re.sub(r'( )( )*', ' ', f" {''.join(temp)}".replace('\n', ' ')) if rfcs else ''
 
             subd = re.sub(r'( )( )*', ' ', item[2].replace('\n', ' '))
-            desc = f' {subd}' if item[2] else ''
+            tmp1 = f' {subd}' if item[2] else ''
 
             split = long.split(' (', 1)
             if len(split) == 2:
-                name, cmmt = split[0], f" ({split[1]}"
+                name, cmmt = split[0], f" ({split[1]})"
             else:
                 name, cmmt = long, ''
             if not name:
                 name, desc = item[2], ''
+            desc = self.wrap_comment(f'{lrfc}{tmp1}{cmmt}')
 
             try:
                 code, _ = item[0], int(item[0])
                 renm = self.rename(name, code, original=long)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = f"#:{lrfc}{desc}{cmmt}" if lrfc or desc or cmmt else ''
+                pres = f"{renm} = {code}"
+                sufs = f"#: {desc}"
 
                 # if len(pres) > 74:
                 #     sufs = f"\n{' '*80}{sufs}"
@@ -89,9 +90,8 @@ class TransType(Vendor):
                 start, stop = item[0].split('-')
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                if lrfc or desc or cmmt:
-                    miss.append(f'    #{lrfc}{desc}{cmmt}')
-                miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{name}_%d' % value, value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

@@ -75,7 +75,7 @@
 				<key>desc</key>
 				<string>[EtherType] Ethertype IEEE 802 Numbers</string>
 				<key>name</key>
-				<string>Internet_Protocol_Version_6</string>
+				<string>Internet_Protocol_version_6</string>
 				<key>value</key>
 				<integer>34525</integer>
 			</dict>
@@ -183,7 +183,7 @@
 				<key>desc</key>
 				<string>[EtherType] Ethertype IEEE 802 Numbers</string>
 				<key>name</key>
-				<string>Internet_Protocol_Version_6</string>
+				<string>Internet_Protocol_version_6</string>
 				<key>value</key>
 				<integer>34525</integer>
 			</dict>
@@ -291,7 +291,7 @@
 				<key>desc</key>
 				<string>[EtherType] Ethertype IEEE 802 Numbers</string>
 				<key>name</key>
-				<string>Internet_Protocol_Version_4</string>
+				<string>Internet_Protocol_version_4</string>
 				<key>value</key>
 				<integer>2048</integer>
 			</dict>
@@ -501,7 +501,7 @@
 				<key>desc</key>
 				<string>[EtherType] Ethertype IEEE 802 Numbers</string>
 				<key>name</key>
-				<string>Internet_Protocol_Version_4</string>
+				<string>Internet_Protocol_version_4</string>
 				<key>value</key>
 				<integer>2048</integer>
 			</dict>
@@ -711,7 +711,7 @@
 				<key>desc</key>
 				<string>[EtherType] Ethertype IEEE 802 Numbers</string>
 				<key>name</key>
-				<string>Internet_Protocol_Version_4</string>
+				<string>Internet_Protocol_version_4</string>
 				<key>value</key>
 				<integer>2048</integer>
 			</dict>
@@ -921,7 +921,7 @@
 				<key>desc</key>
 				<string>[EtherType] Ethertype IEEE 802 Numbers</string>
 				<key>name</key>
-				<string>Internet_Protocol_Version_4</string>
+				<string>Internet_Protocol_version_4</string>
 				<key>value</key>
 				<integer>2048</integer>
 			</dict>

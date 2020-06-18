@@ -44,14 +44,14 @@ class RouterAlert(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f"#: {''.join(temp)}" if rfcs else ''
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f"{name} {''.join(temp) if rfcs else ''}", re.MULTILINE))
 
             try:
                 code, _ = item[0], int(item[0])
                 renm = self.rename(name, code)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
+                pres = f"{renm} = {code}"
+                sufs = f'#: {desc}'
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"
@@ -60,24 +60,22 @@ class RouterAlert(Vendor):
                 enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = map(int, item[0].split('-'))
-                sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
                 if 'Level' in name:
                     base = name.rstrip('s 0-31')
                     for code in range(start, stop+1):
-                        renm = self._safe_name(f'{base} {code-start}')
-                        pres = f"{self.NAME}[{renm!r}] = {code}"
+                        renm = self.safe_name(f'{base}_{code-start}')
+                        pres = f"{renm} = {code}"
 
                         #if len(pres) > 74:
                         #    sufs = f"\n{' '*80}{sufs}"
 
                         #enum.append(f'{pres.ljust(76)}{sufs}')
-                        enum.append(f'{sufs}\n    {pres}')
+                        enum.append(f'#: {desc}\n    {pres}')
                 else:
                     miss.append(f'if {start} <= value <= {stop}:')
-                    if sufs:
-                        miss.append(f'    {sufs}')
-                    miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+                    miss.append(f'    #: {desc}')
+                    miss.append(f"    extend_enum(cls, '{name}_%d' % value, value)")
                     miss.append('    return cls(value)')
         return enum, miss
 

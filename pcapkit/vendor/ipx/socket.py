@@ -72,13 +72,16 @@ class Socket(Vendor):
                 name, desc = data
             else:
                 name, desc = dscp, ''
-            renm = self._safe_name(name)
+            renm = self.safe_name(name)
+
+            tmp1 = f' - {desc}' if desc else ''
+            desc = self.wrap_comment(f'{name}{tmp1}')
 
             try:
                 code, _ = pval, int(pval, base=16)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = f'#: {desc}' if desc else ''
+                pres = f"{renm} = {code}"
+                sufs = f'#: {desc}'
 
                 # if len(pres) > 74:
                 #     sufs = f"\n{' '*80}{sufs}"
@@ -89,10 +92,8 @@ class Socket(Vendor):
                 start, stop = pval.split('–')
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                if desc:
-                    miss.append(f'    # {desc}')
-                miss.append(
-                    f"    extend_enum(cls, '{name} [0x%s]' % hex(value)[2:].upper().zfill(4), value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{name}_0x%s' % hex(value)[2:].upper().zfill(4), value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

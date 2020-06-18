@@ -50,20 +50,18 @@ class Setting(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f" {''.join(temp)}" if rfcs else ''
+            tmp1 = f" {''.join(temp)}" if rfcs else ''
             subs = re.sub(r'\(|\)', '', dscp)
             dscp = f' {subs}' if subs else ''
+            desc = self.wrap_comment(f'{name}{tmp1}{dscp}')
 
             try:
                 temp = int(item[0], base=16)
                 code = hexlify(temp)
                 renm = self.rename(name, code)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = f'#:{desc}{dscp}' if desc or dscp else ''
-
-                if len(pres) > 74:
-                    sufs = f"\n{' '*80}{sufs}"
+                pres = f"{renm} = {code}"
+                sufs = f'#: {desc}'
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"
@@ -74,10 +72,8 @@ class Setting(Vendor):
                 start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
 
                 miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
-                if desc or dscp:
-                    miss.append(f'    #{desc}{dscp}')
-                miss.append(
-                    f"    extend_enum(cls, '{name} [0x%s]' % hex(value)[2:].upper().zfill(4), value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

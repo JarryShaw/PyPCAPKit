@@ -10,35 +10,32 @@ __all__ = ['RegistrationFailure']
 class RegistrationFailure(IntEnum):
     """[RegistrationFailure] Registration Failure Types"""
 
-    _ignore_ = 'RegistrationFailure _'
-    RegistrationFailure = vars()
+    #: Registration requires additional credentials [:rfc:`8003`]
+    Registration_Requires_Additional_Credentials = 0
 
-    #: [:rfc:`8003`]
-    RegistrationFailure['Registration_Requires_Additional_Credentials'] = 0
+    #: Registration type unavailable [:rfc:`8003`]
+    Registration_Type_Unavailable = 1
 
-    #: [:rfc:`8003`]
-    RegistrationFailure['Registration_Type_Unavailable'] = 1
+    #: Insufficient resources [:rfc:`8003`]
+    Insufficient_Resources = 2
 
-    #: [:rfc:`8003`]
-    RegistrationFailure['Insufficient_Resources'] = 2
+    #: Invalid certificate [:rfc:`8003`]
+    Invalid_Certificate = 3
 
-    #: [:rfc:`8003`]
-    RegistrationFailure['Invalid_Certificate'] = 3
+    #: Bad certificate [:rfc:`8003`]
+    Bad_Certificate = 4
 
-    #: [:rfc:`8003`]
-    RegistrationFailure['Bad_Certificate'] = 4
+    #: Unsupported certificate [:rfc:`8003`]
+    Unsupported_Certificate = 5
 
-    #: [:rfc:`8003`]
-    RegistrationFailure['Unsupported_Certificate'] = 5
+    #: Certificate expired [:rfc:`8003`]
+    Certificate_Expired = 6
 
-    #: [:rfc:`8003`]
-    RegistrationFailure['Certificate_Expired'] = 6
+    #: Certificate other [:rfc:`8003`]
+    Certificate_Other = 7
 
-    #: [:rfc:`8003`]
-    RegistrationFailure['Certificate_Other'] = 7
-
-    #: [:rfc:`8003`]
-    RegistrationFailure['Unknown_CA'] = 8
+    #: Unknown CA [:rfc:`8003`]
+    Unknown_CA = 8
 
     @staticmethod
     def get(key, default=-1):
@@ -55,10 +52,11 @@ class RegistrationFailure(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 9 <= value <= 200:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 201 <= value <= 255:
-            #: [:rfc:`8003`]
-            extend_enum(cls, 'Reserved for Private Use [%d]' % value, value)
+            #: Reserved for Private Use [:rfc:`8003`]
+            extend_enum(cls, 'Reserved_For_Private_Use_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

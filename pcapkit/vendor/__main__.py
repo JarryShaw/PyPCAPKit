@@ -11,7 +11,7 @@ from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarnin
 from pcapkit.vendor import __all__ as vendor_all
 
 #: version string
-__version__ = '0.15.0'
+__version__ = '0.15.1'
 
 
 def get_parser():
@@ -43,7 +43,7 @@ def run(vendor):
     try:
         vendor()
     except Exception as error:
-        warnings.warn(error, VendorRuntimeWarning)
+        warnings.warn(f'{vendor.__module__}.{vendor.__name__} <{error!r}>', VendorRuntimeWarning, stacklevel=2)
 
 
 def main():

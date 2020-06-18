@@ -39,7 +39,7 @@ class ToSDelay(Vendor):
             Counter: Field recordings.
 
         """
-        return collections.Counter(map(self._safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
+        return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
     def process(self, data):
         """Process registry data.
@@ -54,12 +54,12 @@ class ToSDelay(Vendor):
         """
         enum = list()
         miss = [
-            "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+            "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
         ]
         for code, name in DATA.items():
             renm = self.rename(name, code).upper()
-            enum.append(f"{self.NAME}[{renm!r}] = {code}".ljust(76))
+            enum.append(f"{renm} = {code}".ljust(76))
         return enum, miss
 
 

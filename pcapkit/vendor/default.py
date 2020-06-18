@@ -9,6 +9,7 @@ import inspect
 import os
 import re
 import tempfile
+import textwrap
 import warnings
 import webbrowser
 
@@ -32,9 +33,6 @@ __all__ = ['{NAME}']
 
 class {NAME}(IntEnum):
     """[{NAME}] {DOCS}"""
-
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
 
     {ENUM}
 
@@ -105,6 +103,49 @@ class Vendor(metaclass=abc.ABCMeta):
     # Processors
     ###############
 
+    @staticmethod
+    def wrap_comment(text):
+        """Wraps long-length text to shorter lines of comments.
+
+        Args:
+            text (str): Source text.
+
+        Returns:
+            Wrapped comments.
+
+        """
+        return '\n    #: '.join(textwrap.wrap(text.strip(), 76))
+
+    def safe_name(self, name):
+        """Convert enumeration name to :class:`enum.Enum` friendly.
+
+        Args:
+            name (str): original enumeration name
+
+        Returns:
+            str: Converted enumeration name.
+
+        """
+        temp = '_'.join(
+            filter(
+                None,
+                re.sub(
+                    r'\W',
+                    '_',
+                    '_'.join(
+                        re.sub(
+                            r'\(.*\)',
+                            '',
+                            name
+                        ).split(),
+                    ),
+                ).split('_')
+            )
+        )
+        if temp.isidentifier():
+            return temp
+        return f'{self.NAME}_{temp}'
+
     def rename(self, name, code, *, original=None):  # pylint: disable=redefined-outer-name
         """Rename duplicated fields.
 
@@ -120,15 +161,15 @@ class Vendor(metaclass=abc.ABCMeta):
 
         Example:
             If ``name`` has multiple occurrences in the source registry,
-            the field name will be sanitised as ``${name} [${code}]``.
+            the field name will be sanitised as ``${name}_${code}``.
 
             Otherwise, the plain ``name`` will be returned.
 
         """
         index = original or name
-        if self.record[self._safe_name(index)] > 1:
-            name = f'{name} [{code}]'
-        return self._safe_name(name)
+        if self.record[self.safe_name(index)] > 1:
+            name = f'{name}_{code}'
+        return self.safe_name(name)
 
     def process(self, data):
         """Process CSV data.
@@ -157,14 +198,14 @@ class Vendor(metaclass=abc.ABCMeta):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f"#: {''.join(temp)}" if rfcs else ''
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f"{name} {''.join(temp) if rfcs else ''}", re.MULTILINE))
 
             try:
                 code, _ = item[0], int(item[0])
                 renm = self.rename(name, code)
 
-                pres = f'{self.NAME}[{renm!r}] = {code}'
-                sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
+                pres = f'{renm} = {code}'
+                sufs = f'#: {desc}'
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"
@@ -173,12 +214,10 @@ class Vendor(metaclass=abc.ABCMeta):
                 enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = item[0].split('-')
-                more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                if more:
-                    miss.append(f'    {more}')
-                miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
                 miss.append('    return cls(value)')
         return enum, miss
 
@@ -194,7 +233,7 @@ class Vendor(metaclass=abc.ABCMeta):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self._safe_name(item[1]),  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[1]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
     def context(self, data):
@@ -350,34 +389,3 @@ class Vendor(metaclass=abc.ABCMeta):
         else:
             text = page.text
         return self.request(text)
-
-    @staticmethod
-    def _safe_name(name):
-        """Convert enumeration name to :class:`enum.Enum` friendly.
-
-        Args:
-            name (str): original enumeration name
-
-        Returns:
-            str: Converted enumeration name.
-
-        """
-        return '_'.join(
-            filter(
-                None,
-                re.sub(
-                    r'\W',
-                    '_',
-                    '_'.join(
-                        map(
-                            lambda s: f'{s[0].upper()}{s[1:]}',
-                            re.sub(
-                                r'\(.*\)',
-                                '',
-                                name
-                            ).split()
-                        )
-                    )
-                ).split('_')
-            )
-        )

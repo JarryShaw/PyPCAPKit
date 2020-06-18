@@ -10,16 +10,13 @@ __all__ = ['OptionClass']
 class OptionClass(IntEnum):
     """[OptionClass] Option Classes"""
 
-    _ignore_ = 'OptionClass _'
-    OptionClass = vars()
+    control = 0
 
-    OptionClass['Control'] = 0
+    reserved_for_future_use_1 = 1
 
-    OptionClass['Reserved_For_Future_Use_1'] = 1
+    debugging_and_measurement = 2
 
-    OptionClass['Debugging_And_Measurement'] = 2
-
-    OptionClass['Reserved_For_Future_Use_3'] = 3
+    reserved_for_future_use_3 = 3
 
     @staticmethod
     def get(key, default=-1):
@@ -35,5 +32,5 @@ class OptionClass(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 3):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

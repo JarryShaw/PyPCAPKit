@@ -60,7 +60,7 @@ class Option(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self._safe_name(item[2]), reader))  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[2]), reader))  # pylint: disable=map-builtin-not-iterating
 
     def process(self, data):
         """Process CSV data.
@@ -91,16 +91,17 @@ class Option(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f"#: {''.join(temp)}" if rfcs else ''
-            name = dscp.split(' (')[0]
+            tmp1 = f" {''.join(temp)}" if rfcs else ''
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f'{dscp}{tmp1}', re.MULTILINE))
 
+            name = dscp.split(' (')[0]
             try:
                 code, _ = item[0], int(item[0])
                 name = DATA.get(int(code), (None, str()))[1].upper() or name
                 renm = self.rename(name or 'Unassigned', code, original=dscp)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
+                pres = f"{renm} = {code}"
+                sufs = f'#: {desc}'
 
                 # if len(pres) > 74:
                 #     sufs = f"\n{' '*80}{sufs}"
@@ -109,12 +110,10 @@ class Option(Vendor):
                 enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = item[0].split('-')
-                more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                if more:
-                    miss.append(f'    {more}')
-                miss.append(f"    extend_enum(cls, '{name} [%d]' % value, value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{name}_%d' % value, value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

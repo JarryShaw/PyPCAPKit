@@ -65,9 +65,10 @@ class PriorityLevel(Vendor):
             group = match.groups()
 
             code = f'0b{bin(int(pval))[2:].zfill(3)}'
+            tmp1 = self.wrap_comment(f"``{group[0]}`` - {desc} {group[1] or ''}")
 
-            pres = f"{self.NAME}[{abbr!r}] = {code}"
-            sufs = f"#: ``{group[0]}`` - {desc} {group[1] or ''}"
+            pres = f"{abbr} = {code}"
+            sufs = f"#: {tmp1}"
 
             # if len(pres) > 74:
             #     sufs = f"\n{' '*80}{sufs}"

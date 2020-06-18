@@ -41,7 +41,7 @@ class ToSECN(Vendor):
             Counter: Field recordings.
 
         """
-        return collections.Counter(map(self._safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
+        return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
     def rename(self, name, code):  # pylint: disable=arguments-differ
         """Rename duplicated fields.
@@ -54,9 +54,9 @@ class ToSECN(Vendor):
             str: Revised field name.
 
         """
-        if self.record[self._safe_name(name)] > 1:
+        if self.record[self.safe_name(name)] > 1:
             name = f'{name} [0b{bin(code)[2:].zfill(2)}]'
-        return self._safe_name(name)
+        return self.safe_name(name)
 
     def process(self, data):
         """Process registry data.
@@ -71,12 +71,12 @@ class ToSECN(Vendor):
         """
         enum = list()
         miss = [
-            "extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(2), value)",
+            "extend_enum(cls, 'Unassigned_0b%s' % bin(value)[2:].zfill(2), value)",
             'return cls(value)'
         ]
         for code, name in DATA.items():
             renm = self.rename(name, code)
-            enum.append(f"{self.NAME}[{renm!r}] = 0b{bin(code)[2:].zfill(2)}".ljust(76))
+            enum.append(f"{renm} = 0b{bin(code)[2:].zfill(2)}".ljust(76))
         return enum, miss
 
 

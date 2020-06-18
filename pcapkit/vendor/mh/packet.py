@@ -33,7 +33,7 @@ class Packet(Vendor):
 
         enum = list()
         miss = [
-            "extend_enum(cls, 'Unassigned [%d]' % value, value)",
+            "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
         ]
         for item in reader:
@@ -47,7 +47,7 @@ class Packet(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f" {''.join(temp)}" if rfcs else ''
+            tmp1 = f" {''.join(temp)}" if rfcs else ''
 
             split = long.split(' (', 1)
             if len(split) == 2:
@@ -55,12 +55,13 @@ class Packet(Vendor):
                 cmmt = f" ({split[1]}"
             else:
                 name, cmmt = long, ''
+            desc = self.wrap_comment(f'{name}{tmp1}{cmmt}')
 
             code, _ = item[0], int(item[0])
             renm = self.rename(name, code, original=long)
 
-            pres = f"{self.NAME}[{renm!r}] = {code}"
-            sufs = f'#: {desc}{cmmt}' if desc or cmmt else ''
+            pres = f"{renm} = {code}"
+            sufs = f'#: {desc}'
 
             # if len(pres) > 74:
             #     sufs = f"\n{' '*80}{sufs}"

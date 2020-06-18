@@ -41,7 +41,7 @@ class SeedID(Vendor):
             Counter: Field recordings.
 
         """
-        return collections.Counter(map(self._safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
+        return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
     def process(self, data):
         """Process registry data.
@@ -56,13 +56,13 @@ class SeedID(Vendor):
         """
         enum = list()
         miss = [
-            "extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(2), value)",
+            "extend_enum(cls, 'Unassigned_0b%s' % bin(value)[2:].zfill(2), value)",
             'return cls(value)'
         ]
         for code, name in data.items():
             code = f'0b{bin(code)[2:].zfill(2)}'
             renm = self.rename(name, code).upper()
-            enum.append(f"{self.NAME}[{renm!r}] = {code}".ljust(76))
+            enum.append(f"{renm} = {code}".ljust(76))
         return enum, miss
 
 

@@ -40,9 +40,6 @@ INFO = {{
 class {NAME}(IntEnum):
     """[{NAME}] {DOCS}"""
 
-    _ignore_ = '{NAME} _'
-    {NAME} = vars()
-
     {ENUM}
 
     @staticmethod
@@ -127,8 +124,8 @@ class ReturnCode(Vendor):
             #desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
             #enum.append(f'{self.NAME}[{self.rename(desc, code)!r}] = {code}')
 
-            sufs = '. '.join(map(lambda s: s.strip(), ' '.join(line[1].stripped_strings).split('.')))
-            pref = f"{self.NAME}['Code_{code}'] = {code}"
+            sufs = self.wrap_comment('. '.join(map(lambda s: s.strip(), ' '.join(line[1].stripped_strings).split('.'))))
+            pref = f"CODE_{code} = {code}"
 
             enum.append(f'#: {sufs}\n    {pref}')
         return enum

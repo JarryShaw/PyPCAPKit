@@ -10,12 +10,9 @@ __all__ = ['ToSDelay']
 class ToSDelay(IntEnum):
     """[ToSDelay] ToS (DS Field) Delay"""
 
-    _ignore_ = 'ToSDelay _'
-    ToSDelay = vars()
+    NORMAL = 0
 
-    ToSDelay['NORMAL'] = 0
-
-    ToSDelay['LOW'] = 1
+    LOW = 1
 
     @staticmethod
     def get(key, default=-1):
@@ -31,5 +28,5 @@ class ToSDelay(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 1):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

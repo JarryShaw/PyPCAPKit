@@ -52,19 +52,17 @@ class ErrorCode(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f" {''.join(temp)}" if rfcs else ''
+            tmp1 = f" {''.join(temp)}" if rfcs else ''
             dscp = f' {dscp}' if dscp else ''
+            desc = f'{name}{tmp1}{dscp}'
 
             try:
                 temp = int(item[0], base=16)
                 code = hexlify(temp)
                 renm = self.rename(name, code)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = f'#:{desc}{dscp}' if desc or dscp else ''
-
-                if len(pres) > 74:
-                    sufs = f"\n{' '*80}{sufs}"
+                pres = f"{renm} = {code}"
+                sufs = f'#: desc'
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"
@@ -75,10 +73,9 @@ class ErrorCode(Vendor):
                 start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
 
                 miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
-                if desc or dscp:
-                    miss.append(f'#{desc}{dscp}')
+                miss.append(f'    #: {desc}')
                 miss.append('    temp = hex(value)[2:].upper().zfill(8)')
-                miss.append(f"    extend_enum(cls, '{name} [0x%s]' % (temp[:4]+'_'+temp[4:]), value)")
+                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_0x%s' % (temp[:4]+'_'+temp[4:]), value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

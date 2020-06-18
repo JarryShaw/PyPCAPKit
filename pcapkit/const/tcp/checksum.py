@@ -10,16 +10,13 @@ __all__ = ['Checksum']
 class Checksum(IntEnum):
     """[Checksum] TCP Checksum [:rfc:`1146`]"""
 
-    _ignore_ = 'Checksum _'
-    Checksum = vars()
+    TCP_checksum = 0
 
-    Checksum['TCP_Checksum'] = 0
+    Checksum_8_bit_Fletcher_s_algorithm = 1
 
-    Checksum['8_bit_Fletcher_s_Algorithm'] = 1
+    Checksum_16_bit_Fletcher_s_algorithm = 2
 
-    Checksum['16_bit_Fletcher_s_Algorithm'] = 2
-
-    Checksum['Redundant_Checksum_Avoidance'] = 3
+    Redundant_Checksum_Avoidance = 3
 
     @staticmethod
     def get(key, default=-1):
@@ -35,5 +32,5 @@ class Checksum(IntEnum):
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        extend_enum(cls, 'Unassigned [%d]' % value, value)
+        extend_enum(cls, 'Unassigned_%d' % value, value)
         return cls(value)

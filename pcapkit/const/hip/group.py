@@ -10,44 +10,41 @@ __all__ = ['Group']
 class Group(IntEnum):
     """[Group] Group IDs"""
 
-    _ignore_ = 'Group _'
-    Group = vars()
+    #: Reserved [:rfc:`7401`]
+    Reserved = 0
 
-    #: [:rfc:`7401`]
-    Group['Reserved'] = 0
+    #: 384-bit group [:rfc:`5201`] DEPRECATED
+    Group_384_bit_group = 1
 
-    #: [:rfc:`5201`] DEPRECATED
-    Group['384_bit_Group'] = 1
+    #: OAKLEY well known group 1 [:rfc:`5201`] DEPRECATED
+    OAKLEY_well_known_group_1 = 2
 
-    #: [:rfc:`5201`] DEPRECATED
-    Group['OAKLEY_Well_Known_Group_1'] = 2
+    #: 1536-bit MODP group [:rfc:`7401`]
+    Group_1536_bit_MODP_group = 3
 
-    #: [:rfc:`7401`]
-    Group['1536_bit_MODP_Group'] = 3
+    #: 3072-bit MODP group [:rfc:`7401`]
+    Group_3072_bit_MODP_group = 4
 
-    #: [:rfc:`7401`]
-    Group['3072_bit_MODP_Group'] = 4
+    #: 6144-bit MODP group [:rfc:`5201`] DEPRECATED
+    Group_6144_bit_MODP_group = 5
 
-    #: [:rfc:`5201`] DEPRECATED
-    Group['6144_bit_MODP_Group'] = 5
+    #: 8192-bit MODP group [:rfc:`5201`] DEPRECATED
+    Group_8192_bit_MODP_group = 6
 
-    #: [:rfc:`5201`] DEPRECATED
-    Group['8192_bit_MODP_Group'] = 6
+    #: NIST P-256 [:rfc:`7401`]
+    NIST_P_256 = 7
 
-    #: [:rfc:`7401`]
-    Group['NIST_P_256'] = 7
+    #: NIST P-384 [:rfc:`7401`]
+    NIST_P_384 = 8
 
-    #: [:rfc:`7401`]
-    Group['NIST_P_384'] = 8
+    #: NIST P-521 [:rfc:`7401`]
+    NIST_P_521 = 9
 
-    #: [:rfc:`7401`]
-    Group['NIST_P_521'] = 9
+    #: SECP160R1 [:rfc:`7401`]
+    SECP160R1 = 10
 
-    #: [:rfc:`7401`]
-    Group['SECP160R1'] = 10
-
-    #: [:rfc:`7401`]
-    Group['2048_bit_MODP_Group'] = 11
+    #: 2048-bit MODP group [:rfc:`7401`]
+    Group_2048_bit_MODP_group = 11
 
     @staticmethod
     def get(key, default=-1):
@@ -64,6 +61,7 @@ class Group(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 12 <= value <= 255:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

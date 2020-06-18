@@ -49,15 +49,15 @@ class Frame(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f"#: {''.join(temp)}" if rfcs else ''
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f"{name} {''.join(temp) if rfcs else ''}", re.MULTILINE))
 
             try:
                 temp = int(item[0], base=16)
                 code = hexlify(temp)
                 renm = self.rename(name, code)
 
-                pres = f"{self.NAME}[{renm!r}] = {code}"
-                sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
+                pres = f"{renm} = {code}"
+                sufs = f'#: {desc}'
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"
@@ -66,13 +66,10 @@ class Frame(Vendor):
                 enum.append(f'{sufs}\n    {pres}')
             except ValueError:
                 start, stop = map(lambda s: int(s, base=16), item[0].split('-'))
-                more = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
 
                 miss.append(f'if {hexlify(start)} <= value <= {hexlify(stop)}:')
-                if more:
-                    miss.append(f'    {more}')
-                miss.append(
-                    f"    extend_enum(cls, '{name} [0x%s]' % hex(value)[2:].upper().zfill(2), value)")
+                miss.append(f'    #: {desc}')
+                miss.append(f"    extend_enum(cls, '{name}_0x%s' % hex(value)[2:].upper().zfill(2), value)")
                 miss.append('    return cls(value)')
         return enum, miss
 

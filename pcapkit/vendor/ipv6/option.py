@@ -57,7 +57,7 @@ class Option(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self._safe_name(item[4]), reader))  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[4]), reader))  # pylint: disable=map-builtin-not-iterating
 
     def process(self, data):
         """Process CSV data.
@@ -75,7 +75,7 @@ class Option(Vendor):
 
         enum = list()
         miss = [
-            "extend_enum(cls, 'Unassigned [0x%s]' % hex(value)[2:].upper().zfill(2), value)",
+            "extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)",
             'return cls(value)'
         ]
         for item in reader:
@@ -95,15 +95,17 @@ class Option(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = f"#: {''.join(temp)}" if rfcs else ''
+            tmp1 = f" {''.join(temp)}" if rfcs else ''
 
             splt = re.split(r' \[\d+\]', dscp)[0]
             subn = re.sub(r'.* \((.*)\)', r'\1', splt)
             name = DATA.get(int(code, base=16), (str(),))[0].upper() or subn
+
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f'{name}{tmp1}', re.MULTILINE))
             renm = self.rename(name or 'Unassigned', code, original=dscp)
 
-            pres = f"{self.NAME}[{renm!r}] = {code}"
-            sufs = re.sub(r'\r*\n', ' ', desc, re.MULTILINE)
+            pres = f"{renm} = {code}"
+            sufs = f'#: {desc}'
 
             #if len(pres) > 74:
             #    sufs = f"\n{' '*80}{sufs}"
