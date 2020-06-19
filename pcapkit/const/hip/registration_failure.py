@@ -11,28 +11,28 @@ class RegistrationFailure(IntEnum):
     """[RegistrationFailure] Registration Failure Types"""
 
     #: Registration requires additional credentials [:rfc:`8003`]
-    Registration_Requires_Additional_Credentials = 0
+    Registration_requires_additional_credentials = 0
 
     #: Registration type unavailable [:rfc:`8003`]
-    Registration_Type_Unavailable = 1
+    Registration_type_unavailable = 1
 
     #: Insufficient resources [:rfc:`8003`]
-    Insufficient_Resources = 2
+    Insufficient_resources = 2
 
     #: Invalid certificate [:rfc:`8003`]
-    Invalid_Certificate = 3
+    Invalid_certificate = 3
 
     #: Bad certificate [:rfc:`8003`]
-    Bad_Certificate = 4
+    Bad_certificate = 4
 
     #: Unsupported certificate [:rfc:`8003`]
-    Unsupported_Certificate = 5
+    Unsupported_certificate = 5
 
     #: Certificate expired [:rfc:`8003`]
-    Certificate_Expired = 6
+    Certificate_expired = 6
 
     #: Certificate other [:rfc:`8003`]
-    Certificate_Other = 7
+    Certificate_other = 7
 
     #: Unknown CA [:rfc:`8003`]
     Unknown_CA = 8
@@ -57,6 +57,6 @@ class RegistrationFailure(IntEnum):
             return cls(value)
         if 201 <= value <= 255:
             #: Reserved for Private Use [:rfc:`8003`]
-            extend_enum(cls, 'Reserved_For_Private_Use_%d' % value, value)
+            extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

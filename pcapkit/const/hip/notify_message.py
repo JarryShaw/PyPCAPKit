@@ -171,7 +171,7 @@ class NotifyMessage(IntEnum):
             return cls(value)
         if 8192 <= value <= 16383:
             #: Reserved for Private Use [:rfc:`7401`]
-            extend_enum(cls, 'Reserved_For_Private_Use_%d' % value, value)
+            extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
             return cls(value)
         if 16385 <= value <= 40959:
             #: Unassigned
@@ -179,6 +179,6 @@ class NotifyMessage(IntEnum):
             return cls(value)
         if 40960 <= value <= 65535:
             #: Reserved for Private Use [:rfc:`7401`]
-            extend_enum(cls, 'Reserved_For_Private_Use_%d' % value, value)
+            extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

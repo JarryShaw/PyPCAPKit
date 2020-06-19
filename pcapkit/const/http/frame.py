@@ -10,46 +10,44 @@ __all__ = ['Frame']
 class Frame(IntEnum):
     """[Frame] HTTP/2 Frame Type"""
 
-    _ignore_ = 'Frame _'
-    Frame = vars()
+    #: DATA [:rfc:`7540, Section 6.1`]
+    DATA = 0x00
 
-    #: [:rfc:`7540, Section 6.1`]
-    Frame['DATA'] = 0x00
+    #: HEADERS [:rfc:`7540, Section 6.2`]
+    HEADERS = 0x01
 
-    #: [:rfc:`7540, Section 6.2`]
-    Frame['HEADERS'] = 0x01
+    #: PRIORITY [:rfc:`7540, Section 6.3`]
+    PRIORITY = 0x02
 
-    #: [:rfc:`7540, Section 6.3`]
-    Frame['PRIORITY'] = 0x02
+    #: RST_STREAM [:rfc:`7540, Section 6.4`]
+    RST_STREAM = 0x03
 
-    #: [:rfc:`7540, Section 6.4`]
-    Frame['RST_STREAM'] = 0x03
+    #: SETTINGS [:rfc:`7540, Section 6.5`]
+    SETTINGS = 0x04
 
-    #: [:rfc:`7540, Section 6.5`]
-    Frame['SETTINGS'] = 0x04
+    #: PUSH_PROMISE [:rfc:`7540, Section 6.6`]
+    PUSH_PROMISE = 0x05
 
-    #: [:rfc:`7540, Section 6.6`]
-    Frame['PUSH_PROMISE'] = 0x05
+    #: PING [:rfc:`7540, Section 6.7`]
+    PING = 0x06
 
-    #: [:rfc:`7540, Section 6.7`]
-    Frame['PING'] = 0x06
+    #: GOAWAY [:rfc:`7540, Section 6.8`]
+    GOAWAY = 0x07
 
-    #: [:rfc:`7540, Section 6.8`]
-    Frame['GOAWAY'] = 0x07
+    #: WINDOW_UPDATE [:rfc:`7540, Section 6.9`]
+    WINDOW_UPDATE = 0x08
 
-    #: [:rfc:`7540, Section 6.9`]
-    Frame['WINDOW_UPDATE'] = 0x08
+    #: CONTINUATION [:rfc:`7540, Section 6.10`]
+    CONTINUATION = 0x09
 
-    #: [:rfc:`7540, Section 6.10`]
-    Frame['CONTINUATION'] = 0x09
+    #: ALTSVC [:rfc:`7838, Section 4`]
+    ALTSVC = 0x0A
 
-    #: [:rfc:`7838, Section 4`]
-    Frame['ALTSVC'] = 0x0A
+    #: Unassigned
+    Unassigned = 0x0B
 
-    Frame['Unassigned'] = 0x0B
-
-    #: [:rfc:`8336`]
-    Frame['ORIGIN'] = 0x0C
+    #: ORIGIN [:rfc:`8336`]
+    ORIGIN = 0x0C
 
     @staticmethod
     def get(key, default=-1):
@@ -66,10 +64,11 @@ class Frame(IntEnum):
         if not (isinstance(value, int) and 0x00 <= value <= 0xFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0D <= value <= 0xEF:
-            extend_enum(cls, 'Unassigned [0x%s]' % hex(value)[2:].upper().zfill(2), value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)
             return cls(value)
         if 0xF0 <= value <= 0xFF:
-            #: [:rfc:`7540`]
-            extend_enum(cls, 'Reserved for Experimental Use [0x%s]' % hex(value)[2:].upper().zfill(2), value)
+            #: Reserved for Experimental Use [:rfc:`7540`]
+            extend_enum(cls, 'Reserved for Experimental Use_0x%s' % hex(value)[2:].upper().zfill(2), value)
             return cls(value)
         return super()._missing_(value)

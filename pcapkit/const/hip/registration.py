@@ -39,6 +39,6 @@ class Registration(IntEnum):
             return cls(value)
         if 201 <= value <= 255:
             #: Reserved for Private Use [:rfc:`8003`]
-            extend_enum(cls, 'Reserved_For_Private_Use_%d' % value, value)
+            extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

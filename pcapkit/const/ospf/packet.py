@@ -10,25 +10,23 @@ __all__ = ['Packet']
 class Packet(IntEnum):
     """[Packet] OSPF Packet Types"""
 
-    _ignore_ = 'Packet _'
-    Packet = vars()
+    #: Reserved
+    Reserved = 0
 
-    Packet['Reserved'] = 0
+    #: Hello [:rfc:`2328`]
+    Hello = 1
 
-    #: [:rfc:`2328`]
-    Packet['Hello'] = 1
+    #: Database Description [:rfc:`2328`]
+    Database_Description = 2
 
-    #: [:rfc:`2328`]
-    Packet['Database_Description'] = 2
+    #: Link State Request [:rfc:`2328`]
+    Link_State_Request = 3
 
-    #: [:rfc:`2328`]
-    Packet['Link_State_Request'] = 3
+    #: Link State Update [:rfc:`2328`]
+    Link_State_Update = 4
 
-    #: [:rfc:`2328`]
-    Packet['Link_State_Update'] = 4
-
-    #: [:rfc:`2328`]
-    Packet['Link_State_Ack'] = 5
+    #: Link State Ack [:rfc:`2328`]
+    Link_State_Ack = 5
 
     @staticmethod
     def get(key, default=-1):
@@ -45,9 +43,11 @@ class Packet(IntEnum):
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 6 <= value <= 127:
-            extend_enum(cls, 'Unassigned [%d]' % value, value)
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         if 128 <= value <= 255:
-            extend_enum(cls, 'Reserved [%d]' % value, value)
+            #: Reserved
+            extend_enum(cls, 'Reserved_%d' % value, value)
             return cls(value)
         return super()._missing_(value)
