@@ -210,12 +210,12 @@ __ps__: `help` function in Python should always help you out.
 &emsp; As it shows in the help manual, it is quite easy to use:
 
 ```
-$ pcapkit --help
-usage: pcapkit [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a] [-v]
-               [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]
-               input-file-name
+$ pcapkit-cli --help
+usage: pcapkit-cli [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a]
+                   [-v] [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]
+                   input-file-name
 
-PCAP file extractor and formatted exporter
+PCAP file extractor and formatted dumper
 
 positional arguments:
   input-file-name       The name of input pcap file. If ".pcap" omits, it will
@@ -245,8 +245,8 @@ optional arguments:
   -v, --verbose         Show more information.
   -F, --files           Split each frame into different files.
   -E PKG, --engine PKG  Indicate extraction engine. Note that except default
-                        engine, all other engines need support of corresponding
-                        packages.
+                        or pcapkit engine, all other engines need support of
+                        corresponding packages.
   -P PROTOCOL, --protocol PROTOCOL
                         Indicate extraction stops after which protocol.
   -L LAYER, --layer LAYER
