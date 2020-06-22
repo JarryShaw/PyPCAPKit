@@ -10,7 +10,7 @@ autopep8==1.5.3
 babel==2.8.0
 backcall==0.2.0
 beautifulsoup4[html5lib]==4.9.1
-certifi==2020.4.5.2
+certifi==2020.6.20
 chardet==3.0.4
 decorator==4.4.2
 dictdumper==0.8.4.post2
