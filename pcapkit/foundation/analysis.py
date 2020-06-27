@@ -7,6 +7,7 @@ analyse and match application layer protocol. Then, call
 corresponding modules and functions to extract the attributes.
 
 """
+import importlib
 import os
 
 from pcapkit.protocols.raw import Raw
@@ -20,6 +21,13 @@ from pcapkit.utilities.exceptions import ProtocolError
 ###############################################################################
 
 __all__ = ['analyse']
+
+#: List of protocols supported by the analyser.
+ANALYSE_PROTO = [
+    ('pcapkit.protocols.application.ftp', 'FTP'),
+    ('pcapkit.protocols.application.httpv1', 'HTTPv1'),
+    ('pcapkit.protocols.application.httpv2', 'HTTPv2'),
+]
 
 
 def analyse(file, length=None, *, termination=False):
@@ -44,23 +52,22 @@ def analyse(file, length=None, *, termination=False):
 
         and :class:`~pcapkit.protocols.raw.Raw` as the fallback result.
 
+    See Also:
+        The analysis processes order is defined by :data:`~pcapkit.foundation.analysis.ANALYSE_PROTO`.
+
     """
     seekset = file.tell()
     if not termination:
-        # FTP analysis
-        flag, ftp = _analyse_ftp(file, length, seekset=seekset)
-        if flag:
-            return ftp
+        for (module, name) in ANALYSE_PROTO:
+            try:
+                protocol = getattr(importlib.import_module(module), name)
+            except (ImportError, AttributeError):
+                continue
 
-        # HTTP/1.* analysis
-        flag, http = _analyse_httpv1(file, length, seekset=seekset)
-        if flag:
-            return http
-
-        # HTTP/2 analysis
-        flag, http = _analyse_httpv2(file, length, seekset=seekset)
-        if flag:
-            return http
+            packet = _analyse(protocol, file, length, seekset=seekset)
+            if packet is None:
+                continue
+            return packet
 
         # backup file offset
         file.seek(seekset, os.SEEK_SET)
@@ -70,10 +77,11 @@ def analyse(file, length=None, *, termination=False):
 
 
 @seekset_ng
-def _analyse_httpv1(file, length=None, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
-    """Analyse HTTP/1.* packet.
+def _analyse(protocol, file, length=None, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
+    """Analyse packet.
 
     Args:
+        protocol (Protocol): target protocol class
         file (io.BytesIO): source data stream
         length (Optional[int]): packet length
 
@@ -81,64 +89,34 @@ def _analyse_httpv1(file, length=None, *, seekset=os.SEEK_SET):  # pylint: disab
         seekset (int): original file offset
 
     Returns:
-        Tuple[bool, Optional[HTTPv1]]: If the packet is HTTP/1.*,
-        returns :data:`True` and parsed HTTP/1.* packet; otherwise
-        returns :data:`False` and :data:`None`.
+        Optional[Protocol]: If the packet is parsed successfully,
+        returns the parsed  packet; otherwise returns :data:`None`.
 
     """
     try:
-        from pcapkit.protocols.application.httpv1 import HTTPv1
-        http = HTTPv1(file, length)
+        packet = protocol(file, length)
     except ProtocolError:
-        return False, None
-    return True, http
+        packet = None
+    return packet
 
 
-@seekset_ng
-def _analyse_httpv2(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
-    """Analyse HTTP/2 packet.
+def register(module, class_, *, index=None):
+    """Register a new protocol class.
 
-    Args:
-        file (io.BytesIO): source data stream
-        length (Optional[int]): packet length
+    Arguments:
+        module (str): module name
+        class_ (str): class name
 
-    Keyword Args:
-        seekset (int): original file offset
+    Keyword Arguments:
+        index (Optional[int]): Index of the protocol class
+            when inserted to :data:`~pcapkit.foundation.analysis.ANALYSE_PROTO`.
 
-    Returns:
-        Tuple[bool, Optional[HTTPv1]]: If the packet is HTTP/2,
-        returns :data:`True` and parsed HTTP/2 packet; otherwise
-        returns :data:`False` and :data:`None`.
+    Notes:
+        The full qualified class name of the new protocol class
+        should be as ``{module}.{class_}``.
 
     """
-    try:
-        from pcapkit.protocols.application.httpv2 import HTTPv2
-        http = HTTPv2(file, length)
-    except ProtocolError:
-        return False, None
-    return True, http
-
-
-@seekset_ng
-def _analyse_ftp(file, length, *, seekset=os.SEEK_SET):  # pylint: disable=unused-argument
-    """Analyse FTP packet.
-
-    Args:
-        file (io.BytesIO): source data stream
-        length (Optional[int]): packet length
-
-    Keyword Args:
-        seekset (int): original file offset
-
-    Returns:
-        Tuple[bool, Optional[HTTPv1]]: If the packet is FTP,
-        returns :data:`True` and parsed FTP packet; otherwise
-        returns :data:`False` and :data:`None`.
-
-    """
-    try:
-        from pcapkit.protocols.application.ftp import FTP
-        ftp = FTP(file, length)
-    except ProtocolError:
-        return False, None
-    return True, ftp
+    if index is None:
+        ANALYSE_PROTO.append((module, class_))
+    else:
+        ANALYSE_PROTO.insert(index, (module, class_))

@@ -54,6 +54,26 @@ class Link(Protocol):  # pylint: disable=abstract-method
         return self.__layer__
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def register(cls, code, module, class_):
+        """Register a new protocol class.
+
+        Arguments:
+            code (int): protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
+            module (str): module name
+            class_ (str): class name
+
+        Notes:
+            The full qualified class name of the new protocol class
+            should be as ``{module}.{class_}``.
+
+        """
+        cls.__proto__[code] = (module, class_)
+
+    ##########################################################################
     # Utilities.
     ##########################################################################
 
@@ -110,7 +130,10 @@ class Link(Protocol):  # pylint: disable=abstract-method
             from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
         else:
             module, name = self.__proto__[proto]
-            protocol = getattr(importlib.import_module(module), name)
+            try:
+                protocol = getattr(importlib.import_module(module), name)
+            except (ImportError, AttributeError):
+                from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
 
         next_ = protocol(self._file, length, error=self._onerror,
                          layer=self._exlayer, protocol=self._exproto)

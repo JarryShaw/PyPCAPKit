@@ -63,7 +63,9 @@ def seekset_ng(func):
     Note:
         The decorated function should have following signature::
 
-            func(file, *args, seekset=os.SEEK_SET, **kw)
+            func(protocol, file, *args, seekset=os.SEEK_SET, **kw)
+
+        c.f. :func:`pcapkit.foundation.analysis._analyse`.
 
     See Also:
         :mod:`pcapkit.foundation.analysis`
@@ -71,10 +73,10 @@ def seekset_ng(func):
     :meta decorator:
     """
     @functools.wraps(func)
-    def seekcur(file, *args, seekset=os.SEEK_SET, **kw):  # pylint: disable=redefined-outer-name
+    def seekcur(protocol, file, *args, seekset=os.SEEK_SET, **kw):  # pylint: disable=redefined-outer-name
         # seek_cur = file.tell()
         file.seek(seekset, os.SEEK_SET)
-        return_ = func(file, *args, seekset=seekset, **kw)
+        return_ = func(protocol, file, *args, seekset=seekset, **kw)
         # file.seek(seek_cur, os.SEEK_SET)
         return return_
     return seekcur

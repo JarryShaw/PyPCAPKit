@@ -4,7 +4,7 @@ import subprocess
 import sys
 
 # version string
-__version__ = '0.15.1.post1'
+__version__ = '0.15.2'
 
 # README
 with open('README.md', encoding='utf-8') as file:

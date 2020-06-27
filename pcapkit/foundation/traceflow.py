@@ -126,6 +126,9 @@ class TraceFlow:
             FileExists: If ``fout`` exists and ``fmt`` is **NOT** :data:`None`.
 
         """
+        if fout is None:
+            fout = './tmp'
+
         if fmt == 'pcap':       # output PCAP file
             from pcapkit.dumpkit import PCAP as output
         elif fmt == 'plist':    # output PLIST file

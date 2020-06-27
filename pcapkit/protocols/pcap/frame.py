@@ -79,6 +79,22 @@ class Frame(Protocol):
     # Methods.
     ##########################################################################
 
+    @classmethod
+    def register(cls, code, module, class_):
+        """Register a new protocol class.
+
+        Arguments:
+            code (int): protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
+            module (str): module name
+            class_ (str): class name
+
+        Notes:
+            The full qualified class name of the new protocol class
+            should be as ``{module}.{class_}``.
+
+        """
+        cls.__proto__[code] = (module, class_)
+
     def index(self, name):
         """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.
 
@@ -411,7 +427,11 @@ class Frame(Protocol):
 
         """
         module, name = self.__proto__[int(proto)]
-        protocol = getattr(importlib.import_module(module), name)
+        try:
+            protocol = getattr(importlib.import_module(module), name)
+        except (ImportError, AttributeError):
+            from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
+
         next_ = protocol(self._file, length, error=error,
                          layer=self._exlayer, protocol=self._exproto)
         return next_
