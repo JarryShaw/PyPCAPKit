@@ -17,7 +17,7 @@ dictdumper==0.8.4.post2
 doc8==0.8.1
 docutils==0.16
 dpkt==1.9.2
-html5lib==1.0.1
+html5lib==1.1
 idna==2.9
 imagesize==1.2.0
 ipython-genutils==0.2.0
