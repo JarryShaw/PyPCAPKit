@@ -65,6 +65,6 @@ tbtrim==0.3.1
 toml==0.10.1
 traitlets==4.3.3
 urllib3==1.25.9
-wcwidth==0.2.4
+wcwidth==0.2.5
 webencodings==0.5.1
 wrapt==1.12.1
