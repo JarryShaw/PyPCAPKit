@@ -16,7 +16,7 @@ decorator==4.4.2
 dictdumper==0.8.4.post2
 doc8==0.8.1
 docutils==0.16
-dpkt==1.9.2
+dpkt==1.9.3
 html5lib==1.1
 idna==2.10
 imagesize==1.2.0
