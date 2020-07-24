@@ -16,14 +16,14 @@ decorator==4.4.2
 dictdumper==0.8.4.post2
 doc8==0.8.1
 docutils==0.16
-dpkt==1.9.2
+dpkt==1.9.3
 html5lib==1.1
 idna==2.10
 imagesize==1.2.0
 ipython-genutils==0.2.0
 ipython==7.16.1
-isort==5.0.9
-jedi==0.17.1
+isort==5.1.4
+jedi==0.17.2
 jinja2==3.0.0a1
 lazy-object-proxy==1.5.0
 lxml==4.5.2
@@ -60,7 +60,7 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-napoleon==0.7
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
-stevedore==3.1.0
+stevedore==3.2.0
 tbtrim==0.3.1
 toml==0.10.1
 traitlets==4.3.3
