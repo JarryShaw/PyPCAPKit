@@ -2,7 +2,7 @@
 --extra-index-url https://mirrors.sjtug.sjtu.edu.cn/pypi/web/simple
 --extra-index-url https://pypi.org/simple
 -e .
-aenum==2.2.3
+aenum==2.2.4
 alabaster==0.7.12
 appnope==0.1.0 ; sys_platform == 'darwin'
 astroid==2.4.2
@@ -22,15 +22,15 @@ idna==2.10
 imagesize==1.2.0
 ipython-genutils==0.2.0
 ipython==7.16.1
-isort==5.1.4
+isort==5.2.0
 jedi==0.17.2
 jinja2==3.0.0a1
-lazy-object-proxy==1.5.0
+lazy-object-proxy==1.5.1
 lxml==4.5.2
 markupsafe==2.0.0a1
 mccabe==0.6.1
 packaging==20.4
-parso==0.7.0
+parso==0.7.1
 pbr==5.4.5
 pexpect==4.8.0 ; sys_platform != 'win32'
 pickleshare==0.7.5
@@ -64,7 +64,7 @@ stevedore==3.2.0
 tbtrim==0.3.1
 toml==0.10.1
 traitlets==4.3.3
-urllib3==1.25.9
+urllib3==1.25.10
 wcwidth==0.2.5
 webencodings==0.5.1
 wrapt==1.12.1
