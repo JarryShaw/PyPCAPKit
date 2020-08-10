@@ -35,7 +35,7 @@ pbr==5.4.5
 pexpect==4.8.0 ; sys_platform != 'win32'
 pickleshare==0.7.5
 pockets==0.9.1
-prompt-toolkit==3.0.5
+prompt-toolkit==3.0.6
 ptyprocess==0.6.0
 py==1.9.0
 pycodestyle==2.6.0
