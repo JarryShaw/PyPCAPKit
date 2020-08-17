@@ -32,6 +32,7 @@ from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, ProtocolUnbound,
                                           StructError)
+from pcapkit.utilities.logging import logger
 
 __all__ = ['Protocol']
 
@@ -122,7 +123,7 @@ class Protocol(metaclass=abc.ABCMeta):
         :rtype: Optional[str]
         """
         with contextlib.suppress(IndexError):
-            return self._protos[1]
+            return self._protos[0]
 
     # protocol chain of current instance
     @property
@@ -266,6 +267,8 @@ class Protocol(metaclass=abc.ABCMeta):
             **kwargs: Arbitrary keyword arguments.
 
         """
+        logger.debug(type(self).__name__)
+
         #: bool: If the object is initiated  after parsing errors.
         self._onerror = kwargs.pop('_error', False)
         #: str: Parse packet until such layer.

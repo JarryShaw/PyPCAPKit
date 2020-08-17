@@ -29,9 +29,10 @@ beautifulsoup4 = {extras = ["html5lib"],version = "*"}
 requests = {extras = ["socks"],version = "*"}
 ipython = "*"
 autopep8 = "*"
+bandit = "*"
+mypy = "*"
 pylint = "*"
 sphinx = "*"
-sphinxcontrib-napoleon = "*"
 doc8 = "*"
 rstcheck = "*"
 

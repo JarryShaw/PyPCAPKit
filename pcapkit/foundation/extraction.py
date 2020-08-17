@@ -31,6 +31,7 @@ from pcapkit.protocols.pcap.header import Header
 from pcapkit.utilities.compat import pathlib
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
+from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWarning, FormatWarning,
                                         LayerWarning, ProtocolWarning)
 
@@ -889,6 +890,7 @@ class Extractor:
             self._frnum += 1
 
         # verbose output
+        logger.info(f'Frame {self._frnum:>3d}: {frame.protochain}')  # pylint: disable=logging-fstring-interpolation
         if self._flag_v:
             if self._vfunc is NotImplemented:
                 print(f' - Frame {self._frnum:>3d}: {frame.protochain}')
@@ -1000,6 +1002,7 @@ class Extractor:
         # verbose output
         self._frnum += 1
         self._proto = packet2chain(packet)
+        logger.info(f'Frame {self._frnum:>3d}: {self._proto}')  # pylint: disable=logging-fstring-interpolation
         if self._flag_v:
             if self._vfunc is NotImplemented:
                 print(f' - Frame {self._frnum:>3d}: {self._proto}')
@@ -1116,6 +1119,7 @@ class Extractor:
         # verbose output
         self._frnum += 1
         self._proto = packet2chain(packet)
+        logger.info(f'Frame {self._frnum:>3d}: {self._proto}')  # pylint: disable=logging-fstring-interpolation
         if self._flag_v:
             if self._vfunc is NotImplemented:
                 print(f' - Frame {self._frnum:>3d}: {self._proto}')
@@ -1230,6 +1234,7 @@ class Extractor:
         # verbose output
         self._frnum = int(packet.number)
         self._proto = packet.frame_info.protocols
+        logger.info(f'Frame {self._frnum:>3d}: {self._proto}')  # pylint: disable=logging-fstring-interpolation
         if self._flag_v:
             if self._vfunc is NotImplemented:
                 print(f' - Frame {self._frnum:>3d}: {self._proto}')

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import subprocess
+import subprocess  # nosec
 import sys
 
 # version string
-__version__ = '0.15.2'
+__version__ = '0.15.3'
 
 # README
 with open('README.md', encoding='utf-8') as file:

@@ -163,7 +163,7 @@ class ARP(Link):
             self._name = 'Address Resolution Protocol'
 
         _htype = HRD.get(_hwty)
-        if re.match(r'.*Ethernet.*', _htype, re.IGNORECASE):
+        if re.match(r'.*Ethernet.*', _htype.name, re.IGNORECASE):
             _ptype = ETHERTYPE.get(_ptty)
         else:
             _ptype = f'Unknown [{_ptty}]'

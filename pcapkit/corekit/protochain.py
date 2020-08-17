@@ -386,7 +386,7 @@ class ProtoChain(collections.abc.Container):
             ProtoChain(<class 'pcapkit.protocols.link.ethernet.Ethernet'>, ...)
 
         """
-        return f"ProtoChain({', '.join(self.__proto__.data)})"
+        return f"ProtoChain({', '.join(map(lambda p: p.__name__, self.__proto__.data))})"
 
     def __str__(self):
         """Returns formatted hex representation of source data stream.
@@ -412,3 +412,15 @@ class ProtoChain(collections.abc.Container):
 
         """
         return (name in self.__proto__) or (name in self.__alias__)
+
+    def __getitem__(self, index):
+        """Subscription (``getitem``) support.
+
+        Args:
+            index (int): Indexing key.
+
+        Returns:
+            str: Protocol alias at such index.
+
+        """
+        return self.__alias__[index]

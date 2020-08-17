@@ -4,8 +4,11 @@
 :mod:`pcapkit.warnings` refined built-in warnings.
 
 """
+import warnings
 
 __all__ = [
+    'warn',
+
     # UserWarning
     'BaseWarning',
     # ImportWarning
@@ -16,6 +19,22 @@ __all__ = [
     # ResourceWarning
     'DPKTWarning', 'ScapyWarning', 'PySharkWarning'
 ]
+
+
+def warn(message, category, stacklevel=None):
+    """Wrapper function of :func:`warnings.warn`.
+
+    Args:
+        message (Union[str, Warning]): Warning message.
+        category (Type[Warning]): Warning category.
+        stacklevel (Optional[int]): Warning stack level.
+
+    """
+    from pcapkit.utilities.exceptions import stacklevel as stacklevel_calculator  # pylint: disable=import-outside-toplevel
+    if stacklevel is None:
+        stacklevel = stacklevel_calculator()
+    warnings.warn(message, category, stacklevel)
+
 
 ##############################################################################
 # BaseWarning (abc of warnings) session.
@@ -28,6 +47,10 @@ class BaseWarning(UserWarning):
     def __init__(self, *args, **kwargs):  # pylint: disable=useless-super-delegation
         # warnings.simplefilter('default')
         super().__init__(*args, **kwargs)
+
+        # log warning
+        from pcapkit.utilities.logging import logger  # pylint: disable=import-outside-toplevel
+        logger.warning(str(self), exc_info=self)
 
 
 ##############################################################################

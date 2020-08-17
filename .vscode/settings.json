@@ -178,6 +178,7 @@
         "nofile",
         "noindex",
         "nonr",
+        "nosec",
         "nrec",
         "nsec",
         "nseq",

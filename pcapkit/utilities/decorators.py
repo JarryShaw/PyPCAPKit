@@ -12,6 +12,8 @@ import io
 import os
 import traceback
 
+from pcapkit.utilities.logging import logger
+
 ###############################################################################
 # from pcapkit.foundation.analysis import analyse
 # from pcapkit.protocols.raw import Raw
@@ -109,10 +111,13 @@ def beholder(func):
         seek_cur = self._file.tell()
         try:
             return func(proto, length, *args, **kwargs)
-        except Exception:
+        except Exception as exc:
             from pcapkit.protocols.raw import Raw  # pylint: disable=import-outside-toplevel
             error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
             # error = traceback.format_exc()
+
+            # log error
+            logger.error(error, exc_info=exc)
 
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=error)
@@ -145,11 +150,14 @@ def beholder_ng(func):
         seek_cur = file.tell()
         try:
             return func(file, length, *args, **kwargs)
-        except Exception:
+        except Exception as exc:
             # from pcapkit.foundation.analysis import analyse
             from pcapkit.protocols.raw import Raw  # pylint: disable=import-outside-toplevel
             error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
             # error = traceback.format_exc()
+
+            # log error
+            logger.error(error, exc_info=exc)
 
             file.seek(seek_cur, os.SEEK_SET)
 

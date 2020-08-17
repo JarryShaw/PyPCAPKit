@@ -102,6 +102,10 @@ class BaseError(Exception):
             sys.tracebacklimit = 0
         super().__init__(*args, **kwargs)
 
+        # log error
+        from pcapkit.utilities.logging import logger  # pylint: disable=import-outside-toplevel
+        logger.error(str(self), exc_info=self)
+
 
 ##############################################################################
 # TypeError session.
