@@ -4,7 +4,7 @@ import subprocess  # nosec
 import sys
 
 # version string
-__version__ = '0.15.3'
+__version__ = '0.15.4'
 
 # README
 with open('README.md', encoding='utf-8') as file:

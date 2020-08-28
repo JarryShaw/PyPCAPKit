@@ -15,7 +15,7 @@ from pcapkit.foundation.extraction import Extractor
 from pcapkit.interface import JSON, PLIST, TREE
 
 #: version number
-__version__ = '0.15.3'
+__version__ = '0.15.4'
 
 
 def get_parser():

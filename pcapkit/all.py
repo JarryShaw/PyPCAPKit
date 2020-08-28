@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=unused-import, unused-wildcard-import, bad-continuation
+# pylint: disable=unused-import, unused-wildcard-import, bad-continuation,wildcard-import
 """index for the library
 
 :mod:`pcapkit` has defined various and numerous functions
