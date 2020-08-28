@@ -90,7 +90,7 @@ PROTO_LIST = {
 # CPU number
 if os.name == 'posix' and 'SC_NPROCESSORS_CONF' in os.sysconf_names:
     CPU_CNT = os.sysconf('SC_NPROCESSORS_CONF')
-elif 'sched_getaffinity' in os.__all__:
+elif 'sched_getaffinity' in os.__all__:  # type: ignore
     CPU_CNT = len(os.sched_getaffinity(0))  # pylint: disable=E1101
 else:
     CPU_CNT = os.cpu_count() or 1
@@ -1417,7 +1417,7 @@ class Extractor:
             """Analyse frame."""
             # wait until ready
             while mpkit.current != self._frnum:
-                time.sleep(random.randint(0, datetime.datetime.now().second) // 600)
+                time.sleep(random.randint(0, datetime.datetime.now().second) // 600)  # nosec
 
             # analysis and storage
             # print(self._frnum, 'get')

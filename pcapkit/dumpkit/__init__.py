@@ -13,7 +13,7 @@ import dictdumper
 from pcapkit.protocols.pcap.frame import Frame
 from pcapkit.protocols.pcap.header import Header
 
-__all__ = ['PCAP', 'NotImplementedIO']
+__all__ = ['PCAPIO', 'NotImplementedIO']
 
 
 class NotImplementedIO(dictdumper.Dumper):
@@ -70,7 +70,7 @@ class NotImplementedIO(dictdumper.Dumper):
         """
 
 
-class PCAP(dictdumper.Dumper):
+class PCAPIO(dictdumper.Dumper):
     """PCAP file dumper."""
 
     ##########################################################################

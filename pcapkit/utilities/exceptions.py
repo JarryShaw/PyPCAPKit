@@ -18,6 +18,8 @@ import traceback
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 
 __all__ = [
+    'stacklevel',
+
     'BaseError',                                                    # Exception
     'DigitError', 'IntError', 'RealError', 'ComplexError',          # TypeError
     'BoolError', 'BytesError', 'StringError', 'BytearrayError',     # TypeError

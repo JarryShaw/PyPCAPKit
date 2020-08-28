@@ -376,7 +376,7 @@ class Vendor(metaclass=abc.ABCMeta):
 
                     while True:
                         with contextlib.suppress(Exception):
-                            input('Press ENTER to continue...')
+                            input('Press ENTER to continue...')  # nosec
                         if os.path.isfile(temp_file):
                             break
                         print('File not found; please save the page source at')

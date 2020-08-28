@@ -1,5 +1,4 @@
 {
-    "python.pythonPath": ".venv/bin/python",
     "cSpell.words": [
         "Acked",
         "Chksum",
@@ -16,6 +15,7 @@
         "ISDN",
         "NPROCESSORS",
         "Oopt",
+        "PCAPIO",
         "PROTO",
         "RCVBT",
         "RHASH",
@@ -113,6 +113,7 @@
         "fpout",
         "fproot",
         "frnum",
+        "fstring",
         "gaocegege",
         "gbhdr",
         "genc",

@@ -9,7 +9,7 @@ contains all things from :mod:`pcapkit`.
 
 """
 import pcapkit.const as const
-# import pcapkit.vendor as vendor
+#import pcapkit.vendor as vendor
 from pcapkit.corekit import *
 from pcapkit.dumpkit import *
 from pcapkit.foundation import *
@@ -32,7 +32,7 @@ __all__ = [
     'VersionInfo',                                          # Version
 
     # pcapkit.dumpkit
-    'PCAP',                                                 # PCAP Dumper
+    'PCAPIO',                                                 # PCAP Dumper
     'NotImplementedIO',                                     # Simulated I/O
 
     # pcapkit.foundation

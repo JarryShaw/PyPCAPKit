@@ -130,7 +130,7 @@ class TraceFlow:
             fout = './tmp'
 
         if fmt == 'pcap':       # output PCAP file
-            from pcapkit.dumpkit import PCAP as output
+            from pcapkit.dumpkit import PCAPIO as output
         elif fmt == 'plist':    # output PLIST file
             from dictdumper import PLIST as output
         elif fmt == 'json':     # output JSON file
