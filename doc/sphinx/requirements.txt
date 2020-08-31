@@ -21,7 +21,7 @@ html5lib==1.1
 idna==2.10
 imagesize==1.2.0
 ipython-genutils==0.2.0
-ipython==7.17.0
+ipython==7.18.1
 isort==5.4.2
 jedi==0.17.2
 jinja2==3.0.0a1
