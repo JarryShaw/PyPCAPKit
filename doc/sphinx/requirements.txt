@@ -21,7 +21,7 @@ html5lib==1.1
 idna==2.10
 imagesize==1.2.0
 ipython-genutils==0.2.0
-ipython==7.17.0
+ipython==7.18.1
 isort==5.4.2
 jedi==0.17.2
 jinja2==3.0.0a1
@@ -35,7 +35,7 @@ pbr==5.4.5
 pexpect==4.8.0 ; sys_platform != 'win32'
 pickleshare==0.7.5
 pockets==0.9.1
-prompt-toolkit==3.0.6
+prompt-toolkit==3.0.7
 ptyprocess==0.6.0
 py==1.9.0
 pycodestyle==2.6.0
@@ -63,7 +63,7 @@ sphinxcontrib-serializinghtml==1.1.4
 stevedore==3.2.0
 tbtrim==0.3.1
 toml==0.10.1
-traitlets==4.3.3
+traitlets==5.0.0
 urllib3==1.25.10
 wcwidth==0.2.5
 webencodings==0.5.1
