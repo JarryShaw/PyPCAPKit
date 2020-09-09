@@ -4,7 +4,7 @@ import subprocess  # nosec
 import sys
 
 # version string
-__version__ = '0.15.4'
+__version__ = '0.15.4.post1'
 
 # README
 with open('README.md', encoding='utf-8') as file:
@@ -132,6 +132,9 @@ attrs = dict(
         'chardet',                  # for bytes decode
         'aenum',                    # for const types
         'tbtrim>=0.2.1',            # for refined exceptions
+        # version compatibility
+        'f2format; python_version < "3.6"',
+        'pathlib2>=2.3.2; python_version == "3.4"',
     ],
     entry_points={
         'console_scripts': [
@@ -153,10 +156,11 @@ attrs = dict(
         'PyShark': ['pyshark'],
         # for developers
         'vendor': ['requests[socks]', 'beautifulsoup4[html5lib]'],
-        # version compatibility
-        ':python_version < "3.6"': ['f2format'],
-        ':python_version == "3.4"': ['pathlib2>=2.3.2'],
     },
+    setup_requires=[
+        'f2format; python_version < "3.6"',
+        'pathlib2>=2.3.2; python_version == "3.4"',
+    ]
 )
 
 try:
@@ -166,7 +170,7 @@ try:
     version_info = sys.version_info[:2]
 
     attrs.update(dict(
-        include_package_data=True,
+        include_package_data=True,  # type: ignore
         # libraries
         # headers
         # ext_package
@@ -175,7 +179,7 @@ try:
         # fullname
         long_description_content_type='text/markdown',
         python_requires='>=3.4',
-        zip_safe=True,
+        zip_safe=True,  # type: ignore
     ))
 except ImportError:
     from distutils.core import setup
@@ -187,9 +191,14 @@ class build(build_py):
 
     def run(self):
         if version_info < (3, 6):
-            subprocess.check_call(
-                ['f2format', '--no-archive', 'pcapkit']
-            )
+            try:
+                subprocess.check_call(  # nosec
+                    [sys.executable, '-m', 'f2format', '--no-archive', 'pcapkit']
+                )
+            except subprocess.CalledProcessError as error:
+                print('Failed to perform assignment expression backport compiling.'
+                      'Please consider manually install `f2format` and try again.', file=sys.stderr)
+                sys.exit(error.returncode)
         build_py.run(self)
 
 
