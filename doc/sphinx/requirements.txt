@@ -39,7 +39,7 @@ prompt-toolkit==3.0.7
 ptyprocess==0.6.0
 py==1.9.0
 pycodestyle==2.6.0
-pygments==2.7.0
+pygments==2.7.1
 pylint==2.6.0
 pyparsing==3.0.0a2
 pyshark==0.4.2.11
