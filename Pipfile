@@ -27,15 +27,14 @@ dpkt = "*"
 scapy = "*"
 beautifulsoup4 = {extras = ["html5lib"],version = "*"}
 requests = {extras = ["socks"],version = "*"}
-ipython = "*"
 autopep8 = "*"
 bandit = "*"
 mypy = "*"
 pylint = "*"
+ipython = "*"
 coverage = "*"
 codecov = "*"
 sphinx = "*"
-doc8 = "*"
 rstcheck = "*"
 
 [requires]
