@@ -8,6 +8,9 @@ python:
   - "3.7"
   - "3.8"
 
+git:
+  submodules: false
+
 env:
   - PIPENV_SKIP_LOCK=1
 
