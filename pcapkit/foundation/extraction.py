@@ -694,6 +694,19 @@ class Extractor:
                         return o.info2dict()
                     return super().object_hook(o)
 
+                def default(self, o):
+                    """Check content type for function call."""
+                    return 'fallback'
+
+                def _append_fallback(self, value, file):
+                    if hasattr(value, '__slots__'):
+                        new_value = {key: getattr(value, key) for key in value.__slots__}
+                    else:
+                        new_value = vars(value)
+
+                    func = self._encode_func(new_value)
+                    func(new_value, file)
+
             self._ofile = DictDumper if self._flag_f else DictDumper(ofnm)  # output file
 
         self.check()                    # check layer & protocol

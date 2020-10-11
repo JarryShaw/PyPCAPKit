@@ -25,6 +25,7 @@ sample/test
 test/pcapkit
 test/dictdumper
 deprecated/
+temp
 
 # Created by https://www.gitignore.io/api/macos,python,visualstudiocode
 
