@@ -18,7 +18,7 @@ Data Structure
       (:meth:`~pcapkit.foundation.traceflow.TraceFlow.dump`)
       is as following:
 
-      .. code:: python
+      .. code-block:: python
 
          tract_dict = dict(
              protocol=data_link,                     # data link type from global header
@@ -37,7 +37,7 @@ Data Structure
       Data structure for internal buffering when performing reassembly algorithms
       (:attr:`~pcapkit.foundation.traceflow.TraceFlow._buffer`) is as following:
 
-      .. code:: python
+      .. code-block:: python
 
          (dict) buffer --> memory buffer for reassembly
           |--> (tuple) BUFID : (dict)
@@ -56,7 +56,7 @@ Data Structure
       :attr:`~pcapkit.foundation.traceflow.TraceFlow.index` *tuple*)
       is as following:
 
-      .. code:: python
+      .. code-block:: python
 
          (tuple) index
           |--> (Info) data

@@ -8,7 +8,7 @@ only, which implements extractor for global
 headers of PCAP, whose structure is described
 as below:
 
-.. code:: c
+.. code-block:: c
 
     typedef struct pcap_hdr_s {
         guint32 magic_number;   /* magic number */

@@ -651,17 +651,17 @@ class Extractor:
         self._ifile = open(ifnm, 'rb')                                      # input file
         if not self._flag_q:
             if fmt == 'plist':
-                from dictdumper import PLIST as output                      # output PLIST file
+                from dictdumper import PLIST as output  # output PLIST file
             elif fmt == 'json':
-                from dictdumper import JSON as output                       # output JSON file
+                from dictdumper import JSON as output  # output JSON file
             elif fmt == 'tree':
-                from dictdumper import Tree as output                       # output treeview text file
+                from dictdumper import Tree as output  # output treeview text file
             #elif fmt == 'html':
             #    from dictdumper import VueJS as output                      # output JavaScript file
             #elif fmt == 'xml':
             #    from dictdumper import XML as output                        # output XML file
             else:
-                from pcapkit.dumpkit import NotImplementedIO as output      # no output file
+                from pcapkit.dumpkit import NotImplementedIO as output  # no output file
                 warnings.warn(f'unsupported output format: {fmt}; disabled file output feature',
                               FormatWarning, stacklevel=stacklevel())
 
@@ -679,6 +679,7 @@ class Extractor:
 
                     """
                     import enum
+
                     import aenum
 
                     if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
@@ -893,8 +894,8 @@ class Extractor:
             Optional[pcapkit.protocols.pcap.frame.Frame]: Parsed frame instance.
 
         """
-        from pcapkit.toolkit.default import (ipv4_reassembly, ipv6_reassembly,
-                                             tcp_reassembly, tcp_traceflow)
+        from pcapkit.toolkit.default import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
+                                             tcp_traceflow)
 
         # read frame header
         if not self._flag_m:
@@ -1005,9 +1006,8 @@ class Extractor:
             Please refer to :meth:`_default_read_frame` for more operational information.
 
         """
-        from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly,
-                                           packet2chain, packet2dict, tcp_reassembly,
-                                           tcp_traceflow)
+        from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly, packet2chain,
+                                           packet2dict, tcp_reassembly, tcp_traceflow)
 
         # fetch Scapy packet
         packet = next(self._extmp)
@@ -1107,9 +1107,8 @@ class Extractor:
             Please refer to :meth:`_default_read_frame` for more operational information.
 
         """
-        from pcapkit.toolkit.dpkt import (ipv4_reassembly, ipv6_reassembly,
-                                          packet2chain, packet2dict, tcp_reassembly,
-                                          tcp_traceflow)
+        from pcapkit.toolkit.dpkt import (ipv4_reassembly, ipv6_reassembly, packet2chain,
+                                          packet2dict, tcp_reassembly, tcp_traceflow)
 
         # fetch DPKT packet
         timestamp, packet = next(self._extmp)

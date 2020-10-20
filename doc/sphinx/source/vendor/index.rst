@@ -31,7 +31,7 @@ Base Generator
 Command Line Tool
 -----------------
 
-.. code::
+.. code-block::
 
    usage: pcapkit-vendor [-h] [-V] ...
 

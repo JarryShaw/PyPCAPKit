@@ -73,7 +73,6 @@ Algorithm::
 from pcapkit.corekit.infoclass import Info
 from pcapkit.reassembly.reassembly import Reassembly
 
-
 __all__ = ['IP_Reassembly']
 
 

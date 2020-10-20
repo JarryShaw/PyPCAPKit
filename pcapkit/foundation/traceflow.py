@@ -17,7 +17,7 @@ trace.packet
     (:meth:`~pcapkit.foundation.traceflow.TraceFlow.dump`)
     is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        tract_dict = dict(
            protocol=data_link,                     # data link type from global header
@@ -36,7 +36,7 @@ trace.buffer
     Data structure for internal buffering when performing flow tracing algorithms
     (:attr:`~pcapkit.foundation.traceflow.TraceFlow._buffer`) is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        (dict) buffer --> memory buffer for reassembly
         |--> (tuple) BUFID : (dict)
@@ -55,7 +55,7 @@ trace.index
     :attr:`~pcapkit.foundation.traceflow.TraceFlow.index` *tuple*)
     is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        (tuple) index
         |--> (Info) data
@@ -172,6 +172,7 @@ class TraceFlow:
 
                 """
                 import enum
+
                 import aenum
 
                 if isinstance(o, (enum.IntEnum, aenum.IntEnum)):

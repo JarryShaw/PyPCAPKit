@@ -14,7 +14,7 @@ ipv6.packet
     (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`)
     is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        packet_dict = dict(
          bufid = tuple(
@@ -37,7 +37,7 @@ ipv6.datagram
     :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
     is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        (tuple) datagram
         |--> (dict) data
@@ -58,7 +58,7 @@ ipv6.buffer
     Data structure for internal buffering when performing reassembly algorithms
     (:attr:`~pcapkit.reassembly.reassembly.Reassembly._buffer`) is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        (dict) buffer --> memory buffer for reassembly
         |--> (tuple) BUFID : (dict)
@@ -79,7 +79,6 @@ ipv6.buffer
 
 """
 from pcapkit.reassembly.ip import IP_Reassembly
-
 
 __all__ = ['IPv6_Reassembly']
 

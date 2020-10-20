@@ -60,9 +60,11 @@ class Transport(Protocol):  # pylint: disable=abstract-method
 
         """
         if self._exproto == 'null' and self._exlayer == 'None':
-            from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.raw import \
+                Raw as protocol  # pylint: disable=import-outside-toplevel
         else:
-            from pcapkit.foundation.analysis import analyse as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.foundation.analysis import \
+                analyse as protocol  # pylint: disable=import-outside-toplevel
 
         if length == 0:
             next_ = NoPayload()

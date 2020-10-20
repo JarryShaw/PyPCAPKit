@@ -103,7 +103,7 @@ tcp.packet
     Data structure for **TCP datagram reassembly**
     (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`) is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        packet_dict = Info(
          bufid = tuple(
@@ -127,7 +127,7 @@ tcp.datagram
     :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
     is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        (tuple) datagram
         |--> (Info) data
@@ -166,7 +166,7 @@ tcp.buffer
     Data structure for internal buffering when performing reassembly algorithms
     (:attr:`~pcapkit.reassembly.reassembly.Reassembly._buffer`) is as following:
 
-    .. code:: python
+    .. code-block:: python
 
        (dict) buffer --> memory buffer for reassembly
         |--> (tuple) BUFID : (dict)

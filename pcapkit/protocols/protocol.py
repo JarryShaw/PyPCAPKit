@@ -729,9 +729,11 @@ class Protocol(metaclass=abc.ABCMeta):
 
         """
         if length is not None and length == 0:
-            from pcapkit.protocols.null import NoPayload as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.null import \
+                NoPayload as protocol  # pylint: disable=import-outside-toplevel
         elif self._sigterm:
-            from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.raw import \
+                Raw as protocol  # pylint: disable=import-outside-toplevel
         else:
             module, name = self.__proto__[proto]
             protocol = getattr(importlib.import_module(module), name)

@@ -183,15 +183,18 @@ class Internet(Protocol):  # pylint: disable=abstract-method
 
         """
         if length == 0:
-            from pcapkit.protocols.null import NoPayload as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.null import \
+                NoPayload as protocol  # pylint: disable=import-outside-toplevel
         elif self._sigterm or proto == 59:  # No Next Header for IPv6
-            from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.raw import \
+                Raw as protocol  # pylint: disable=import-outside-toplevel
         else:
             module, name = self.__proto__[proto]
             try:
                 protocol = getattr(importlib.import_module(module), name)
             except (ImportError, AttributeError):
-                from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.raw import \
+                    Raw as protocol  # pylint: disable=import-outside-toplevel
 
         next_ = protocol(self._file, length, version=version, extension=extension,
                          error=self._onerror, layer=self._exlayer, protocol=self._exproto)

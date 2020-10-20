@@ -1,0 +1,82 @@
+Core User Interface
+===================
+
+.. module:: pcapkit.interface.core
+
+:mod:`pcapkit.interface.core` defines core user-oriented
+interfaces, variables, and etc., which wraps around the
+foundation classes from :mod:`pcapkit.foundation`.
+
+PCAP Extration
+--------------
+
+.. autofunction:: pcapkit.interface.core.extract
+
+Application Layer Analysis
+--------------------------
+
+.. autofunction:: pcapkit.interface.core.analyse
+
+Payload Reassembly
+------------------
+
+.. autofunction:: pcapkit.interface.core.reassemble
+
+TCP Flow Tracing
+----------------
+
+.. autofunction:: pcapkit.interface.core.trace
+
+Output File Formats
+-------------------
+
+.. data:: pcapkit.interface.core.TREE
+   :value: 'tree'
+
+.. data:: pcapkit.interface.core.JSON
+   :value: 'json'
+
+.. data:: pcapkit.interface.core.PLIST
+   :value: 'plist'
+
+.. data:: pcapkit.interface.core.PCAP
+   :value: 'pcap'
+
+Layer Thresholds
+----------------
+
+.. data:: pcapkit.interface.core.RAW
+   :value: 'None'
+
+.. data:: pcapkit.interface.core.LINK
+   :value: 'Link'
+
+.. data:: pcapkit.interface.core.INET
+   :value: 'Internet'
+
+.. data:: pcapkit.interface.core.TRANS
+   :value: 'Transport'
+
+.. data:: pcapkit.interface.core.APP
+   :value: 'Application'
+
+Extration Engines
+-----------------
+
+.. data:: pcapkit.interface.core.DPKT
+   :value: 'dpkt'
+
+.. data:: pcapkit.interface.core.Scapy
+   :value: 'scapy'
+
+.. data:: pcapkit.interface.core.PCAPKit
+   :value: 'default'
+
+.. data:: pcapkit.interface.core.PyShark
+   :value: 'pyshark'
+
+.. data:: pcapkit.interface.core.MPServer
+   :value: 'server'
+
+.. data:: pcapkit.interface.core.MPPipeline
+   :value: 'pipeline'

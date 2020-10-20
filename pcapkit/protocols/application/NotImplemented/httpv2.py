@@ -20,9 +20,9 @@ as below.
 # Analyser for HTTP/2 packets
 
 
-from jspcap.exceptions import ProtocolError
-from jspcap.utilities import Info
-from jspcap.protocols.application.http import HTTP
+from pcapkit.exceptions import ProtocolError
+from pcapkit.protocols.application.http import HTTP
+from pcapkit.utilities import Info
 
 
 class HTTPv2(HTTP):

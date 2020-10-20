@@ -30,9 +30,8 @@ which implements Encapsulating Security Payload header
 # Analyser for ESP header
 
 
-from jspcap.utilities import Info
-from jspcap.protocols.internet.ipsec import IPsec
-
+from pcapkit.protocols.internet.ipsec import IPsec
+from pcapkit.utilities import Info
 
 __all__ = ['ESP']
 

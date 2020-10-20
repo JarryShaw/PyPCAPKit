@@ -6,7 +6,7 @@ Frame Header [*]_
 which implements extractor for frame headers of PCAP,
 whose structure is described as below:
 
-.. code:: c
+.. code-block:: c
 
    typedef struct pcaprec_hdr_s {
        guint32 ts_sec;     /* timestamp seconds */

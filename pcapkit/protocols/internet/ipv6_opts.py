@@ -321,7 +321,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts unassigned options [:rfc:`8200`]:
 
-        .. code:: text
+        .. code-block:: text
 
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
             |  Option Type  |  Opt Data Len |  Option Data
@@ -357,7 +357,7 @@ class IPv6_Opts(Internet):
 
         * ``Pad1`` option:
 
-          .. code:: text
+          .. code-block:: text
 
              +-+-+-+-+-+-+-+-+
              |       0       |
@@ -365,7 +365,7 @@ class IPv6_Opts(Internet):
 
         * ``PadN`` option:
 
-          .. code:: text
+          .. code-block:: text
 
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
              |       1       |  Opt Data Len |  Option Data
@@ -412,7 +412,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts Tunnel Encapsulation Limit option [:rfc:`2473`]:
 
-        .. code:: text
+        .. code-block:: text
 
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |Hdr Ext Len = 0| Opt Type = 4  |Opt Data Len=1 |
@@ -453,7 +453,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts Router Alert option [:rfc:`2711`]:
 
-        .. code:: text
+        .. code-block:: text
 
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |0 0 0|0 0 1 0 1|0 0 0 0 0 0 1 0|        Value (2 octets)       |
@@ -494,7 +494,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts ``CALIPSO`` option [:rfc:`5570`]:
 
-        .. code:: text
+        .. code-block:: text
 
             ------------------------------------------------------------
             | Next Header | Hdr Ext Len   | Option Type | Option Length|
@@ -559,7 +559,7 @@ class IPv6_Opts(Internet):
 
         * IPv6 ``SMF_DPD`` option header in **I-DPD** mode
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -573,7 +573,7 @@ class IPv6_Opts(Internet):
 
         * IPv6 ``SMF_DPD`` option header in **H-DPD** mode
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -688,7 +688,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts ``PDM`` option [:rfc:`8250`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -745,7 +745,7 @@ class IPv6_Opts(Internet):
 
         * A Quick-Start Request:
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -758,7 +758,7 @@ class IPv6_Opts(Internet):
 
         * Report of Approved Rate:
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -813,7 +813,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts ``RPL`` option [:rfc:`6553`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -869,7 +869,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts ``MPL`` option [:rfc:`7731`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -941,7 +941,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts ``ILNP`` Nonce option [:rfc:`6744`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -979,7 +979,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts Line-Identification option [:rfc:`6788`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1023,7 +1023,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts Jumbo Payload option [:rfc:`2675`]:
 
-        .. code:: text
+        .. code-block:: text
 
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                                             |  Option Type  |  Opt Data Len |
@@ -1064,7 +1064,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts Home Address option [:rfc:`6275`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1113,7 +1113,7 @@ class IPv6_Opts(Internet):
 
         Structure of IPv6-Opts ``IP_DFF`` option [:rfc:`6971`]:
 
-        .. code:: text
+        .. code-block:: text
 
                                  1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1

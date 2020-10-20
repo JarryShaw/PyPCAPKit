@@ -134,7 +134,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT header [:rfc:`8200`]:
 
-        .. code:: text
+        .. code-block:: text
 
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |  Hdr Ext Len  |                               |
@@ -315,7 +315,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT unassigned options [:rfc:`8200`]:
 
-        .. code:: text
+        .. code-block:: text
 
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
             |  Option Type  |  Opt Data Len |  Option Data
@@ -351,7 +351,7 @@ class HOPOPT(Internet):
 
         * ``Pad1`` option:
 
-          .. code:: text
+          .. code-block:: text
 
              +-+-+-+-+-+-+-+-+
              |       0       |
@@ -359,7 +359,7 @@ class HOPOPT(Internet):
 
         * ``PadN`` option:
 
-          .. code:: text
+          .. code-block:: text
 
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
              |       1       |  Opt Data Len |  Option Data
@@ -406,7 +406,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT Tunnel Encapsulation Limit option [:rfc:`2473`]:
 
-        .. code:: text
+        .. code-block:: text
 
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |  Next Header  |Hdr Ext Len = 0| Opt Type = 4  |Opt Data Len=1 |
@@ -447,7 +447,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT Router Alert option [:rfc:`2711`]:
 
-        .. code:: text
+        .. code-block:: text
 
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             |0 0 0|0 0 1 0 1|0 0 0 0 0 0 1 0|        Value (2 octets)       |
@@ -488,7 +488,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT ``CALIPSO`` option [:rfc:`5570`]:
 
-        .. code:: text
+        .. code-block:: text
 
             ------------------------------------------------------------
             | Next Header | Hdr Ext Len   | Option Type | Option Length|
@@ -553,7 +553,7 @@ class HOPOPT(Internet):
 
         * IPv6 ``SMF_DPD`` option header in **I-DPD** mode
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -567,7 +567,7 @@ class HOPOPT(Internet):
 
         * IPv6 ``SMF_DPD`` option header in **H-DPD** mode
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -682,7 +682,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT ``PDM`` option [:rfc:`8250`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -739,7 +739,7 @@ class HOPOPT(Internet):
 
         * A Quick-Start Request:
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -752,7 +752,7 @@ class HOPOPT(Internet):
 
         * Report of Approved Rate:
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -807,7 +807,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT ``RPL`` option [:rfc:`6553`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -863,7 +863,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT ``MPL`` option [:rfc:`7731`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -935,7 +935,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT ``ILNP`` Nonce option [:rfc:`6744`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -973,7 +973,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT Line-Identification option [:rfc:`6788`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1017,7 +1017,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT Jumbo Payload option [:rfc:`2675`]:
 
-        .. code:: text
+        .. code-block:: text
 
                                             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                                             |  Option Type  |  Opt Data Len |
@@ -1058,7 +1058,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT Home Address option [:rfc:`6275`]:
 
-        .. code:: text
+        .. code-block:: text
 
              0                   1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1107,7 +1107,7 @@ class HOPOPT(Internet):
 
         Structure of HOPOPT ``IP_DFF`` option [:rfc:`6971`]:
 
-        .. code:: text
+        .. code-block:: text
 
                                  1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1

@@ -40,12 +40,12 @@ from pcapkit.const.ipv4.option_number import OptionNumber as OPT_TYPE
 from pcapkit.const.ipv4.protection_authority import ProtectionAuthority as _PROTECTION_AUTHORITY
 from pcapkit.const.ipv4.qs_function import QSFunction as QS_FUNC
 from pcapkit.const.ipv4.router_alert import RouterAlert as _ROUTER_ALERT
-from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.ipv4.tos_del import ToSDelay as TOS_DEL
 from pcapkit.const.ipv4.tos_ecn import ToSECN as TOS_ECN
 from pcapkit.const.ipv4.tos_pre import ToSPrecedence as TOS_PRE
 from pcapkit.const.ipv4.tos_rel import ToSReliability as TOS_REL
 from pcapkit.const.ipv4.tos_thr import ToSThroughput as TOS_THR
+from pcapkit.const.reg.transtype import TransType
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.utilities.exceptions import ProtocolError
@@ -442,7 +442,7 @@ class IPv4(IP):
 
         * Loose Source Route
 
-          .. code:: text
+          .. code-block:: text
 
              +--------+--------+--------+---------//--------+
              |10000011| length | pointer|     route data    |
@@ -450,7 +450,7 @@ class IPv4(IP):
 
         * Strict Source Route
 
-          .. code:: text
+          .. code-block:: text
 
              +--------+--------+--------+---------//--------+
              |10001001| length | pointer|     route data    |
@@ -458,7 +458,7 @@ class IPv4(IP):
 
         * Record Route
 
-          .. code:: text
+          .. code-block:: text
 
              +--------+--------+--------+---------//--------+
              |00000111| length | pointer|     route data    |
@@ -506,7 +506,7 @@ class IPv4(IP):
 
         * A Quick-Start Request
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -519,7 +519,7 @@ class IPv4(IP):
 
         * Report of Approved Rate
 
-          .. code:: text
+          .. code-block:: text
 
               0                   1                   2                   3
               0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -695,7 +695,7 @@ class IPv4(IP):
 
         * Security (SEC)
 
-          .. code:: text
+          .. code-block:: text
 
              +------------+------------+------------+-------------//----------+
              |  10000010  |  XXXXXXXX  |  SSSSSSSS  |  AAAAAAA[1]    AAAAAAA0 |
@@ -706,7 +706,7 @@ class IPv4(IP):
                                                                  FLAGS
         * Extended Security (ESEC)
 
-          .. code:: text
+          .. code-block:: text
 
              +------------+------------+------------+-------//-------+
              |  10000101  |  000LLLLL  |  AAAAAAAA  |  add sec info  |

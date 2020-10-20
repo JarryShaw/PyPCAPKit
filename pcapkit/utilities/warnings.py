@@ -30,7 +30,8 @@ def warn(message, category, stacklevel=None):
         stacklevel (Optional[int]): Warning stack level.
 
     """
-    from pcapkit.utilities.exceptions import stacklevel as stacklevel_calculator  # pylint: disable=import-outside-toplevel
+    from pcapkit.utilities.exceptions import \
+        stacklevel as stacklevel_calculator  # pylint: disable=import-outside-toplevel
     if stacklevel is None:
         stacklevel = stacklevel_calculator()
     warnings.warn(message, category, stacklevel)

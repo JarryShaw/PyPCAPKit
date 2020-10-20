@@ -4,7 +4,7 @@ Command Line Interface
 :mod:`pcapkit.__main__` was originally the module file of
 |jspcapy|_, which is now deprecated and merged with :mod:`pcapkit`.
 
-.. code:: text
+.. code-block:: text
 
    usage: pcapkit-cli [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a]
                       [-v] [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]

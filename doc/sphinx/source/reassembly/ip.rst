@@ -38,7 +38,7 @@ Notation
 Algorithm
 ---------
 
-.. code:: text
+.. code-block:: text
 
    DO {
       BUFID <- source|destination|protocol|identification;

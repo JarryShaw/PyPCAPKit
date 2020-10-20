@@ -23,8 +23,7 @@ Octets      Bits        Name                    Description
 """
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.protocols.internet.ipsec import IPsec
-from pcapkit.utilities.exceptions import (ProtocolError, UnsupportedCall,
-                                          VersionError)
+from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, VersionError
 
 __all__ = ['AH']
 

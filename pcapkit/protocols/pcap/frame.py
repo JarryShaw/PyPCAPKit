@@ -6,7 +6,7 @@
 which implements extractor for frame headers of PCAP,
 whose structure is described as below:
 
-.. code:: c
+.. code-block:: c
 
     typedef struct pcaprec_hdr_s {
         guint32 ts_sec;     /* timestamp seconds */
@@ -430,7 +430,8 @@ class Frame(Protocol):
         try:
             protocol = getattr(importlib.import_module(module), name)
         except (ImportError, AttributeError):
-            from pcapkit.protocols.raw import Raw as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.raw import \
+                Raw as protocol  # pylint: disable=import-outside-toplevel
 
         next_ = protocol(self._file, length, error=error,
                          layer=self._exlayer, protocol=self._exproto)
