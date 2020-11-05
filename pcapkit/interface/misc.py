@@ -57,14 +57,14 @@ def follow_tcp_stream(fin=None, verbose=False, extension=True, engine=None,     
         fallback = True
 
     streams = list()
-    frames = extension.frame
-    for stream in extension.trace:
+    frames = extraction.frame
+    for stream in extraction.trace:
         reassembly = TCP_Reassembly(strict=False)
 
         packets = list()
         for index in stream.index:
-            frame = frames[index]
-            packets.append(frame.info)
+            frame = frames[index-1]
+            packets.append(frame)
 
             if fallback:
                 flag, data = tcp_reassembly(frame)
@@ -77,6 +77,6 @@ def follow_tcp_stream(fin=None, verbose=False, extension=True, engine=None,     
         streams.append(Info(
             filename=stream.fpout,
             packets=tuple(packets),
-            conversations=reassembly.datagram.payload,
+            conversations=[datagram.payload for datagram in reassembly.datagram],
         ))
     return tuple(streams)
