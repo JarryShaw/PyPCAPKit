@@ -66,7 +66,7 @@ def packet2dict(packet, timestamp, *, data_link):
     """Convert DPKT packet into :obj:`dict`.
 
     Args:
-        packet (c): Scapy packet.
+        packet (dpkt.dpkt.Packet): Scapy packet.
 
     Returns:
         Dict[str, Any]: A :obj:`dict` mapping of packet data.
