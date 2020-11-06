@@ -1,0 +1,46 @@
+name: "Regular update on Pipenv.lock"
+
+on:
+  schedule:
+    - cron: '0 12 * * *'
+
+jobs:
+  pipenv:
+    runs-on: macos-latest
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v2
+      - name: Setup Pipenv
+        run: |
+          brew install pipenv
+          export PIPENV_SKIP_LOCK=1
+          export PIPENV_VENV_IN_PROJECT=1
+          pipenv install --dev --python $(brew --prefix python@3.9)/bin/python3.9
+          while true; do
+            echo '+ pipenv install --dev'
+            pipenv install --dev && break
+            echo -e 'exit: $?'
+          done
+          echo -e 'exit: 0'
+      - name: pipenv update
+        run: |
+          export PIPENV_VENV_IN_PROJECT=1
+          pipenv run pip install -U pip setuptools wheel
+          while true; do
+            echo '+ pipenv update'
+            pipenv update && break
+            echo -e 'exit: $?'
+          done
+          echo -e 'exit: 0'
+          pipenv install --dev
+          pipenv clean
+      - name: Commit files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Updated Pipfile.lock at $(date)" -a
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

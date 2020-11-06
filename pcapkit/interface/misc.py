@@ -77,6 +77,8 @@ def follow_tcp_stream(fin=None, verbose=False, extension=True, engine=None,     
         streams.append(Info(
             filename=stream.fpout,
             packets=tuple(packets),
-            conversations=tuple(datagram.payload for datagram in reassembly.datagram),
+            conversations=tuple(datagram.payload for datagram in sorted(
+                reassembly.datagram, key=lambda datagram: datagram.index  # make sure the converstations are in order
+            )),
         ))
     return tuple(streams)

@@ -279,7 +279,7 @@ class TraceFlow:
             if self._fdpext:
                 buf['fpout'] = f'{self._fproot}/{label}.{self._fdpext}'
             else:
-                del buf['fpout']
+                buf['fpout'] = NotImplemented
             buf['index'] = tuple(buf['index'])
             self._stream.append(Info(buf))
 
