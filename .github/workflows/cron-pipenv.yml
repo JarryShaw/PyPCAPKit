@@ -38,7 +38,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -m "Updated Pipfile.lock at $(date)" -a
+          git commit -m "Updated Pipfile.lock at $(date)" -a || true
       - name: Push changes
         uses: ad-m/github-push-action@master
         with:
