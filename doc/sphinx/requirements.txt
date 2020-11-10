@@ -12,7 +12,7 @@ pyparsing==2.4.7
 six==1.15.0
 Pygments==2.7.2
 requests==2.24.0
-certifi==2020.6.20
+certifi==2020.11.8
 chardet==3.0.4
 idna==2.10
 urllib3==1.25.11
