@@ -15,7 +15,7 @@ requests==2.25.0
 certifi==2020.11.8
 chardet==3.0.4
 idna==2.10
-urllib3==1.25.11
+urllib3==1.26.2
 setuptools==50.3.2
 snowballstemmer==2.0.0
 sphinxcontrib-applehelp==1.0.2
