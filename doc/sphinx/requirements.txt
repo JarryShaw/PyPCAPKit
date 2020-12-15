@@ -7,13 +7,13 @@ docutils==0.16
 imagesize==1.2.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
-packaging==20.7
+packaging==20.8
 pyparsing==2.4.7
 six==1.15.0
 Pygments==2.7.3
 requests==2.25.0
 certifi==2020.12.5
-chardet==3.0.4
+chardet==4.0.0
 idna==2.10
 urllib3==1.26.2
 setuptools==51.0.0
