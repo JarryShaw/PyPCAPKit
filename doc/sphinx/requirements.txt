@@ -11,7 +11,7 @@ packaging==20.8
 pyparsing==2.4.7
 six==1.15.0
 Pygments==2.7.3
-requests==2.25.0
+requests==2.25.1
 certifi==2020.12.5
 chardet==4.0.0
 idna==2.10
