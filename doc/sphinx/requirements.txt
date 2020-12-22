@@ -1,5 +1,5 @@
 # sphinx
-Sphinx==3.3.1
+Sphinx==3.4.0
 alabaster==0.7.12
 Babel==2.9.0
 pytz==2020.4
@@ -11,12 +11,12 @@ packaging==20.8
 pyparsing==2.4.7
 six==1.15.0
 Pygments==2.7.3
-requests==2.25.0
+requests==2.25.1
 certifi==2020.12.5
 chardet==4.0.0
 idna==2.10
 urllib3==1.26.2
-setuptools==51.0.0
+setuptools==51.1.0.post20201221
 snowballstemmer==2.0.0
 sphinxcontrib-applehelp==1.0.2
 sphinxcontrib-devhelp==1.0.2
