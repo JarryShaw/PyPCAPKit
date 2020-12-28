@@ -1,5 +1,5 @@
 # sphinx
-Sphinx==3.4.0
+Sphinx==3.4.1
 alabaster==0.7.12
 Babel==2.9.0
 pytz==2020.4
