@@ -2,7 +2,7 @@
 Sphinx==3.4.1
 alabaster==0.7.12
 Babel==2.9.0
-pytz==2020.4
+pytz==2020.5
 docutils==0.16
 imagesize==1.2.0
 Jinja2==2.11.2
