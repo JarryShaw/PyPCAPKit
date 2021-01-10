@@ -1,0 +1,1717 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HIP Constant Enumerations &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="HTTP Constant Enumerations" href="http.html" />
+    <link rel="prev" title="FTP Constant Enumerations" href="ftp.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.const.hip">
+<span id="hip-constant-enumerations"></span><h1>HIP Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.hip" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pcapkit.const.hip.certificate">
+<span id="hip-certificate-types"></span><h2>HIP Certificate Types <a class="footnote-reference brackets" href="#id18" id="id1">*</a><a class="headerlink" href="#module-pcapkit.const.hip.certificate" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.certificate.Certificate">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.certificate.</code><code class="sig-name descname">Certificate</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/certificate.html#Certificate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Certificate] HIP Certificate Types</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.certificate.Certificate._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/certificate.html#Certificate._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.certificate.Certificate.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/certificate.html#Certificate.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.Distinguished_Name_of_X_509_v3">
+<code class="sig-name descname">Distinguished_Name_of_X_509_v3</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.Distinguished_Name_of_X_509_v3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Distinguished Name of X.509 v3 [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.Hash_and_URL_of_X_509_v3">
+<code class="sig-name descname">Hash_and_URL_of_X_509_v3</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.Hash_and_URL_of_X_509_v3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hash and URL of X.509 v3 [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.LDAP_URL_of_X_509_v3">
+<code class="sig-name descname">LDAP_URL_of_X_509_v3</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.LDAP_URL_of_X_509_v3" title="Permalink to this definition">¶</a></dt>
+<dd><p>LDAP URL of X.509 v3 [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.Obsoleted_2">
+<code class="sig-name descname">Obsoleted_2</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.Obsoleted_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obsoleted [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.Obsoleted_4">
+<code class="sig-name descname">Obsoleted_4</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.Obsoleted_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obsoleted [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.Obsoleted_6">
+<code class="sig-name descname">Obsoleted_6</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.Obsoleted_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obsoleted [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.Obsoleted_8">
+<code class="sig-name descname">Obsoleted_8</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.Obsoleted_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Obsoleted [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.certificate.Certificate.X_509_v3">
+<code class="sig-name descname">X_509_v3</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.certificate.Certificate.X_509_v3" title="Permalink to this definition">¶</a></dt>
+<dd><p>X.509 v3 [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.cipher">
+<span id="hip-cipher-ids"></span><h2>HIP Cipher IDs <a class="footnote-reference brackets" href="#id19" id="id2">†</a><a class="headerlink" href="#module-pcapkit.const.hip.cipher" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.cipher.Cipher">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.cipher.</code><code class="sig-name descname">Cipher</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/cipher.html#Cipher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.cipher.Cipher" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Cipher] Cipher IDs</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.cipher.Cipher._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/cipher.html#Cipher._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.cipher.Cipher._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.cipher.Cipher.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/cipher.html#Cipher.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.cipher.Cipher.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.cipher.Cipher.AES_128_CBC">
+<code class="sig-name descname">AES_128_CBC</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.cipher.Cipher.AES_128_CBC" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-128-CBC [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.cipher.Cipher.AES_256_CBC">
+<code class="sig-name descname">AES_256_CBC</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.hip.cipher.Cipher.AES_256_CBC" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-256-CBC [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.cipher.Cipher.NULL_ENCRYPT">
+<code class="sig-name descname">NULL_ENCRYPT</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.cipher.Cipher.NULL_ENCRYPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>NULL-ENCRYPT [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.cipher.Cipher.RESERVED_0">
+<code class="sig-name descname">RESERVED_0</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.cipher.Cipher.RESERVED_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESERVED [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.cipher.Cipher.RESERVED_3">
+<code class="sig-name descname">RESERVED_3</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.cipher.Cipher.RESERVED_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESERVED [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.di">
+<span id="di-types"></span><h2>DI-Types <a class="footnote-reference brackets" href="#id20" id="id3">‡</a><a class="headerlink" href="#module-pcapkit.const.hip.di" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.di.DITypes">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.di.</code><code class="sig-name descname">DITypes</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/di.html#DITypes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.di.DITypes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[DITypes] DI-Types</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.di.DITypes._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/di.html#DITypes._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.di.DITypes._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.di.DITypes.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/di.html#DITypes.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.di.DITypes.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.di.DITypes.FQDN">
+<code class="sig-name descname">FQDN</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.di.DITypes.FQDN" title="Permalink to this definition">¶</a></dt>
+<dd><p>FQDN [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.di.DITypes.NAI">
+<code class="sig-name descname">NAI</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.di.DITypes.NAI" title="Permalink to this definition">¶</a></dt>
+<dd><p>NAI [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.di.DITypes.none_included">
+<code class="sig-name descname">none_included</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.di.DITypes.none_included" title="Permalink to this definition">¶</a></dt>
+<dd><p>none included [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.ecdsa_curve">
+<span id="ecdsa-curve-label"></span><h2>ECDSA Curve Label <a class="footnote-reference brackets" href="#id21" id="id4">§</a><a class="headerlink" href="#module-pcapkit.const.hip.ecdsa_curve" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.ecdsa_curve.ECDSACurve">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.ecdsa_curve.</code><code class="sig-name descname">ECDSACurve</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/ecdsa_curve.html#ECDSACurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.ecdsa_curve.ECDSACurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ECDSACurve] ECDSA Curve Label</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.ecdsa_curve.ECDSACurve._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/ecdsa_curve.html#ECDSACurve._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.ecdsa_curve.ECDSACurve._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.ecdsa_curve.ECDSACurve.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/ecdsa_curve.html#ECDSACurve.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.ecdsa_curve.ECDSACurve.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.ecdsa_curve.ECDSACurve.NIST_P_256">
+<code class="sig-name descname">NIST_P_256</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.ecdsa_curve.ECDSACurve.NIST_P_256" title="Permalink to this definition">¶</a></dt>
+<dd><p>NIST P-256 [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.ecdsa_curve.ECDSACurve.NIST_P_384">
+<code class="sig-name descname">NIST_P_384</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.ecdsa_curve.ECDSACurve.NIST_P_384" title="Permalink to this definition">¶</a></dt>
+<dd><p>NIST P-384 [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.ecdsa_curve.ECDSACurve.RESERVED">
+<code class="sig-name descname">RESERVED</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.ecdsa_curve.ECDSACurve.RESERVED" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESERVED [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.ecdsa_low_curve">
+<span id="ecdsa-low-curve-label"></span><h2>ECDSA_LOW Curve Label <a class="footnote-reference brackets" href="#id22" id="id5">¶</a><a class="headerlink" href="#module-pcapkit.const.hip.ecdsa_low_curve" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.ecdsa_low_curve.</code><code class="sig-name descname">ECDSALowCurve</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/ecdsa_low_curve.html#ECDSALowCurve"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ECDSALowCurve] ECDSA_LOW Curve Label</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/ecdsa_low_curve.html#ECDSALowCurve._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/ecdsa_low_curve.html#ECDSALowCurve.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve.RESERVED">
+<code class="sig-name descname">RESERVED</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve.RESERVED" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESERVED [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve.SECP160R1">
+<code class="sig-name descname">SECP160R1</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve.SECP160R1" title="Permalink to this definition">¶</a></dt>
+<dd><p>SECP160R1 [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.esp_transform_suite">
+<span id="esp-transform-suite-ids"></span><h2>ESP Transform Suite IDs <a class="footnote-reference brackets" href="#id23" id="id6">#</a><a class="headerlink" href="#module-pcapkit.const.hip.esp_transform_suite" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.esp_transform_suite.</code><code class="sig-name descname">ESPTransformSuite</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/esp_transform_suite.html#ESPTransformSuite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ESPTransformSuite] ESP Transform Suite IDs</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/esp_transform_suite.html#ESPTransformSuite._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/esp_transform_suite.html#ESPTransformSuite.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_128_CBC_with_HMAC_SHA1">
+<code class="sig-name descname">AES_128_CBC_with_HMAC_SHA1</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_128_CBC_with_HMAC_SHA1" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-128-CBC with HMAC-SHA1 [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3602.html"><strong>RFC 3602</strong></a>][<span class="target" id="index-23"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2404.html"><strong>RFC 2404</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_128_CBC_with_HMAC_SHA_256">
+<code class="sig-name descname">AES_128_CBC_with_HMAC_SHA_256</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_128_CBC_with_HMAC_SHA_256" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-128-CBC with HMAC-SHA-256 [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3602.html"><strong>RFC 3602</strong></a>][<span class="target" id="index-25"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4868.html"><strong>RFC 4868</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_256_CBC_with_HMAC_SHA_256">
+<code class="sig-name descname">AES_256_CBC_with_HMAC_SHA_256</code><em class="property"> = 9</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_256_CBC_with_HMAC_SHA_256" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-256-CBC with HMAC-SHA-256 [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3602.html"><strong>RFC 3602</strong></a>][<span class="target" id="index-27"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4868.html"><strong>RFC 4868</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_CCM_16">
+<code class="sig-name descname">AES_CCM_16</code><em class="property"> = 11</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_CCM_16" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-CCM-16 [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4309.html"><strong>RFC 4309</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_CCM_8">
+<code class="sig-name descname">AES_CCM_8</code><em class="property"> = 10</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_CCM_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-CCM-8 [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4309.html"><strong>RFC 4309</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_CMAC_96">
+<code class="sig-name descname">AES_CMAC_96</code><em class="property"> = 14</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_CMAC_96" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-CMAC-96 [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4493.html"><strong>RFC 4493</strong></a>][<span class="target" id="index-31"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4494.html"><strong>RFC 4494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_GCM_with_a_16_octet_ICV">
+<code class="sig-name descname">AES_GCM_with_a_16_octet_ICV</code><em class="property"> = 13</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_GCM_with_a_16_octet_ICV" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-GCM with a 16 octet ICV [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4106.html"><strong>RFC 4106</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_GCM_with_an_8_octet_ICV">
+<code class="sig-name descname">AES_GCM_with_an_8_octet_ICV</code><em class="property"> = 12</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_GCM_with_an_8_octet_ICV" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-GCM with an 8 octet ICV [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4106.html"><strong>RFC 4106</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_GMAC">
+<code class="sig-name descname">AES_GMAC</code><em class="property"> = 15</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.AES_GMAC" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-GMAC [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4543.html"><strong>RFC 4543</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_2">
+<code class="sig-name descname">DEPRECATED_2</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEPRECATED [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_3">
+<code class="sig-name descname">DEPRECATED_3</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEPRECATED [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_4">
+<code class="sig-name descname">DEPRECATED_4</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEPRECATED [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_5">
+<code class="sig-name descname">DEPRECATED_5</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEPRECATED [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_6">
+<code class="sig-name descname">DEPRECATED_6</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.DEPRECATED_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEPRECATED [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.NULL_with_HMAC_SHA_256">
+<code class="sig-name descname">NULL_with_HMAC_SHA_256</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.NULL_with_HMAC_SHA_256" title="Permalink to this definition">¶</a></dt>
+<dd><p>NULL with HMAC-SHA-256 [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2410.html"><strong>RFC 2410</strong></a>][<span class="target" id="index-41"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4868.html"><strong>RFC 4868</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.RESERVED">
+<code class="sig-name descname">RESERVED</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.esp_transform_suite.ESPTransformSuite.RESERVED" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESERVED [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.group">
+<span id="group-ids"></span><h2>Group IDs <a class="footnote-reference brackets" href="#id24" id="id7">♠</a><a class="headerlink" href="#module-pcapkit.const.hip.group" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.group.Group">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.group.</code><code class="sig-name descname">Group</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/group.html#Group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.group.Group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Group] Group IDs</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.group.Group._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/group.html#Group._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.group.Group._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.group.Group.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/group.html#Group.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.group.Group.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.Group_1536_bit_MODP_group">
+<code class="sig-name descname">Group_1536_bit_MODP_group</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.Group_1536_bit_MODP_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>1536-bit MODP group [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.Group_2048_bit_MODP_group">
+<code class="sig-name descname">Group_2048_bit_MODP_group</code><em class="property"> = 11</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.Group_2048_bit_MODP_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>2048-bit MODP group [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.Group_3072_bit_MODP_group">
+<code class="sig-name descname">Group_3072_bit_MODP_group</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.Group_3072_bit_MODP_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>3072-bit MODP group [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.Group_384_bit_group">
+<code class="sig-name descname">Group_384_bit_group</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.Group_384_bit_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>384-bit group [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>] DEPRECATED</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.Group_6144_bit_MODP_group">
+<code class="sig-name descname">Group_6144_bit_MODP_group</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.Group_6144_bit_MODP_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>6144-bit MODP group [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>] DEPRECATED</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.Group_8192_bit_MODP_group">
+<code class="sig-name descname">Group_8192_bit_MODP_group</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.Group_8192_bit_MODP_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>8192-bit MODP group [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>] DEPRECATED</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.NIST_P_256">
+<code class="sig-name descname">NIST_P_256</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.NIST_P_256" title="Permalink to this definition">¶</a></dt>
+<dd><p>NIST P-256 [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.NIST_P_384">
+<code class="sig-name descname">NIST_P_384</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.NIST_P_384" title="Permalink to this definition">¶</a></dt>
+<dd><p>NIST P-384 [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.NIST_P_521">
+<code class="sig-name descname">NIST_P_521</code><em class="property"> = 9</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.NIST_P_521" title="Permalink to this definition">¶</a></dt>
+<dd><p>NIST P-521 [<span class="target" id="index-51"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.OAKLEY_well_known_group_1">
+<code class="sig-name descname">OAKLEY_well_known_group_1</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.OAKLEY_well_known_group_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>OAKLEY well known group 1 [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>] DEPRECATED</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-53"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.group.Group.SECP160R1">
+<code class="sig-name descname">SECP160R1</code><em class="property"> = 10</em><a class="headerlink" href="#pcapkit.const.hip.group.Group.SECP160R1" title="Permalink to this definition">¶</a></dt>
+<dd><p>SECP160R1 [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.hi_algorithm">
+<span id="hi-algorithm"></span><h2>HI Algorithm <a class="footnote-reference brackets" href="#id25" id="id8">♥</a><a class="headerlink" href="#module-pcapkit.const.hip.hi_algorithm" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.hi_algorithm.</code><code class="sig-name descname">HIAlgorithm</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/hi_algorithm.html#HIAlgorithm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[HIAlgorithm] HI Algorithm</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/hi_algorithm.html#HIAlgorithm._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/hi_algorithm.html#HIAlgorithm.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.DSA">
+<code class="sig-name descname">DSA</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.DSA" title="Permalink to this definition">¶</a></dt>
+<dd><p>DSA [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.ECDSA">
+<code class="sig-name descname">ECDSA</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.ECDSA" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECDSA [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.ECDSA_LOW">
+<code class="sig-name descname">ECDSA_LOW</code><em class="property"> = 9</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.ECDSA_LOW" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECDSA_LOW [<span class="target" id="index-57"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.NULL_ENCRYPT">
+<code class="sig-name descname">NULL_ENCRYPT</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.NULL_ENCRYPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>NULL-ENCRYPT [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2410.html"><strong>RFC 2410</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.RESERVED">
+<code class="sig-name descname">RESERVED</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.RESERVED" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESERVED [<span class="target" id="index-59"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.RSA">
+<code class="sig-name descname">RSA</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.RSA" title="Permalink to this definition">¶</a></dt>
+<dd><p>RSA [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.Unassigned_2">
+<code class="sig-name descname">Unassigned_2</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.Unassigned_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.Unassigned_4">
+<code class="sig-name descname">Unassigned_4</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.Unassigned_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.Unassigned_6">
+<code class="sig-name descname">Unassigned_6</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.Unassigned_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hi_algorithm.HIAlgorithm.Unassigned_8">
+<code class="sig-name descname">Unassigned_8</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.hip.hi_algorithm.HIAlgorithm.Unassigned_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.hit_suite">
+<span id="hit-suite-id"></span><h2>HIT Suite ID <a class="footnote-reference brackets" href="#id26" id="id9">♦</a><a class="headerlink" href="#module-pcapkit.const.hip.hit_suite" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.hit_suite.HITSuite">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.hit_suite.</code><code class="sig-name descname">HITSuite</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/hit_suite.html#HITSuite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.hit_suite.HITSuite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[HITSuite] HIT Suite ID</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.hit_suite.HITSuite._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/hit_suite.html#HITSuite._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.hit_suite.HITSuite._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.hit_suite.HITSuite.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/hit_suite.html#HITSuite.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.hit_suite.HITSuite.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hit_suite.HITSuite.ECDSA_LOW_SHA_1">
+<code class="sig-name descname">ECDSA_LOW_SHA_1</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.hit_suite.HITSuite.ECDSA_LOW_SHA_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECDSA_LOW/SHA-1 [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hit_suite.HITSuite.ECDSA_SHA_384">
+<code class="sig-name descname">ECDSA_SHA_384</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.hit_suite.HITSuite.ECDSA_SHA_384" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECDSA/SHA-384 [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hit_suite.HITSuite.RESERVED">
+<code class="sig-name descname">RESERVED</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.hit_suite.HITSuite.RESERVED" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESERVED [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.hit_suite.HITSuite.RSA_DSA_SHA_256">
+<code class="sig-name descname">RSA_DSA_SHA_256</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.hit_suite.HITSuite.RSA_DSA_SHA_256" title="Permalink to this definition">¶</a></dt>
+<dd><p>RSA,DSA/SHA-256 [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.nat_traversal">
+<span id="hip-nat-traversal-modes"></span><h2>HIP NAT Traversal Modes <a class="footnote-reference brackets" href="#id27" id="id10">♣</a><a class="headerlink" href="#module-pcapkit.const.hip.nat_traversal" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.nat_traversal.NATTraversal">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.nat_traversal.</code><code class="sig-name descname">NATTraversal</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/nat_traversal.html#NATTraversal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.nat_traversal.NATTraversal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[NATTraversal] HIP NAT Traversal Modes</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.nat_traversal.NATTraversal._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/nat_traversal.html#NATTraversal._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.nat_traversal.NATTraversal._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.nat_traversal.NATTraversal.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/nat_traversal.html#NATTraversal.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.nat_traversal.NATTraversal.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.nat_traversal.NATTraversal.ICE_STUN_UDP">
+<code class="sig-name descname">ICE_STUN_UDP</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.nat_traversal.NATTraversal.ICE_STUN_UDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>ICE-STUN-UDP [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.nat_traversal.NATTraversal.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.nat_traversal.NATTraversal.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.nat_traversal.NATTraversal.UDP_ENCAPSULATION">
+<code class="sig-name descname">UDP_ENCAPSULATION</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.nat_traversal.NATTraversal.UDP_ENCAPSULATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>UDP-ENCAPSULATION [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.notify_message">
+<span id="notify-message-types"></span><h2>Notify Message Types <a class="footnote-reference brackets" href="#id28" id="id11">**</a><a class="headerlink" href="#module-pcapkit.const.hip.notify_message" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.notify_message.</code><code class="sig-name descname">NotifyMessage</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/notify_message.html#NotifyMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[NotifyMessage] Notify Message Types</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/notify_message.html#NotifyMessage._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/notify_message.html#NotifyMessage.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.AUTHENTICATION_FAILED">
+<code class="sig-name descname">AUTHENTICATION_FAILED</code><em class="property"> = 24</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.AUTHENTICATION_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>AUTHENTICATION_FAILED [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.BLOCKED_BY_POLICY">
+<code class="sig-name descname">BLOCKED_BY_POLICY</code><em class="property"> = 42</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.BLOCKED_BY_POLICY" title="Permalink to this definition">¶</a></dt>
+<dd><p>BLOCKED_BY_POLICY [<span class="target" id="index-69"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.CHECKSUM_FAILED">
+<code class="sig-name descname">CHECKSUM_FAILED</code><em class="property"> = 26</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.CHECKSUM_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>CHECKSUM_FAILED [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.CONNECTIVITY_CHECKS_FAILED">
+<code class="sig-name descname">CONNECTIVITY_CHECKS_FAILED</code><em class="property"> = 61</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.CONNECTIVITY_CHECKS_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>CONNECTIVITY_CHECKS_FAILED [<span class="target" id="index-71"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.CREDENTIALS_REQUIRED">
+<code class="sig-name descname">CREDENTIALS_REQUIRED</code><em class="property"> = 48</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.CREDENTIALS_REQUIRED" title="Permalink to this definition">¶</a></dt>
+<dd><p>CREDENTIALS_REQUIRED [<span class="target" id="index-72"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.ENCRYPTION_FAILED">
+<code class="sig-name descname">ENCRYPTION_FAILED</code><em class="property"> = 32</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.ENCRYPTION_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>ENCRYPTION_FAILED [<span class="target" id="index-73"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.HIP_MAC_FAILED">
+<code class="sig-name descname">HIP_MAC_FAILED</code><em class="property"> = 28</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.HIP_MAC_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_MAC_FAILED [<span class="target" id="index-74"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.I2_ACKNOWLEDGEMENT">
+<code class="sig-name descname">I2_ACKNOWLEDGEMENT</code><em class="property"> = 16384</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.I2_ACKNOWLEDGEMENT" title="Permalink to this definition">¶</a></dt>
+<dd><p>I2_ACKNOWLEDGEMENT [<span class="target" id="index-75"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.INVALID_CERTIFICATE">
+<code class="sig-name descname">INVALID_CERTIFICATE</code><em class="property"> = 50</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.INVALID_CERTIFICATE" title="Permalink to this definition">¶</a></dt>
+<dd><p>INVALID_CERTIFICATE [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.INVALID_DH_CHOSEN">
+<code class="sig-name descname">INVALID_DH_CHOSEN</code><em class="property"> = 15</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.INVALID_DH_CHOSEN" title="Permalink to this definition">¶</a></dt>
+<dd><p>INVALID_DH_CHOSEN [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.INVALID_ESP_TRANSFORM_CHOSEN">
+<code class="sig-name descname">INVALID_ESP_TRANSFORM_CHOSEN</code><em class="property"> = 19</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.INVALID_ESP_TRANSFORM_CHOSEN" title="Permalink to this definition">¶</a></dt>
+<dd><p>INVALID_ESP_TRANSFORM_CHOSEN [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.INVALID_HIP_CIPHER_CHOSEN">
+<code class="sig-name descname">INVALID_HIP_CIPHER_CHOSEN</code><em class="property"> = 17</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.INVALID_HIP_CIPHER_CHOSEN" title="Permalink to this definition">¶</a></dt>
+<dd><p>INVALID_HIP_CIPHER_CHOSEN [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.INVALID_HIT">
+<code class="sig-name descname">INVALID_HIT</code><em class="property"> = 40</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.INVALID_HIT" title="Permalink to this definition">¶</a></dt>
+<dd><p>INVALID_HIT [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.INVALID_SYNTAX">
+<code class="sig-name descname">INVALID_SYNTAX</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.INVALID_SYNTAX" title="Permalink to this definition">¶</a></dt>
+<dd><p>INVALID_SYNTAX [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.LOCATOR_TYPE_UNSUPPORTED">
+<code class="sig-name descname">LOCATOR_TYPE_UNSUPPORTED</code><em class="property"> = 46</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.LOCATOR_TYPE_UNSUPPORTED" title="Permalink to this definition">¶</a></dt>
+<dd><p>LOCATOR_TYPE_UNSUPPORTED [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8046.html"><strong>RFC 8046</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.MESSAGE_NOT_RELAYED">
+<code class="sig-name descname">MESSAGE_NOT_RELAYED</code><em class="property"> = 62</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.MESSAGE_NOT_RELAYED" title="Permalink to this definition">¶</a></dt>
+<dd><p>MESSAGE_NOT_RELAYED [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.NO_DH_PROPOSAL_CHOSEN">
+<code class="sig-name descname">NO_DH_PROPOSAL_CHOSEN</code><em class="property"> = 14</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.NO_DH_PROPOSAL_CHOSEN" title="Permalink to this definition">¶</a></dt>
+<dd><p>NO_DH_PROPOSAL_CHOSEN [<span class="target" id="index-84"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.NO_ESP_PROPOSAL_CHOSEN">
+<code class="sig-name descname">NO_ESP_PROPOSAL_CHOSEN</code><em class="property"> = 18</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.NO_ESP_PROPOSAL_CHOSEN" title="Permalink to this definition">¶</a></dt>
+<dd><p>NO_ESP_PROPOSAL_CHOSEN [<span class="target" id="index-85"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.NO_HIP_PROPOSAL_CHOSEN">
+<code class="sig-name descname">NO_HIP_PROPOSAL_CHOSEN</code><em class="property"> = 16</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.NO_HIP_PROPOSAL_CHOSEN" title="Permalink to this definition">¶</a></dt>
+<dd><p>NO_HIP_PROPOSAL_CHOSEN [<span class="target" id="index-86"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.NO_VALID_HIP_TRANSPORT_MODE">
+<code class="sig-name descname">NO_VALID_HIP_TRANSPORT_MODE</code><em class="property"> = 100</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.NO_VALID_HIP_TRANSPORT_MODE" title="Permalink to this definition">¶</a></dt>
+<dd><p>NO_VALID_HIP_TRANSPORT_MODE [<span class="target" id="index-87"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6261.html"><strong>RFC 6261</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER">
+<code class="sig-name descname">NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER</code><em class="property"> = 60</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER" title="Permalink to this definition">¶</a></dt>
+<dd><p>NO_VALID_NAT_TRAVERSAL_MODE_PARAMETER [<span class="target" id="index-88"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.OVERLAY_TTL_EXCEEDED">
+<code class="sig-name descname">OVERLAY_TTL_EXCEEDED</code><em class="property"> = 70</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.OVERLAY_TTL_EXCEEDED" title="Permalink to this definition">¶</a></dt>
+<dd><p>OVERLAY_TTL_EXCEEDED [<span class="target" id="index-89"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6079.html"><strong>RFC 6079</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.REG_REQUIRED">
+<code class="sig-name descname">REG_REQUIRED</code><em class="property"> = 51</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.REG_REQUIRED" title="Permalink to this definition">¶</a></dt>
+<dd><p>REG_REQUIRED [<span class="target" id="index-90"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.RESPONDER_BUSY_PLEASE_RETRY">
+<code class="sig-name descname">RESPONDER_BUSY_PLEASE_RETRY</code><em class="property"> = 44</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.RESPONDER_BUSY_PLEASE_RETRY" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESPONDER_BUSY_PLEASE_RETRY [<span class="target" id="index-91"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-92"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.UNKNOWN_NEXT_HOP">
+<code class="sig-name descname">UNKNOWN_NEXT_HOP</code><em class="property"> = 90</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.UNKNOWN_NEXT_HOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>UNKNOWN_NEXT_HOP [<span class="target" id="index-93"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6028.html"><strong>RFC 6028</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.UNSUPPORTED_CRITICAL_PARAMETER_TYPE">
+<code class="sig-name descname">UNSUPPORTED_CRITICAL_PARAMETER_TYPE</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.UNSUPPORTED_CRITICAL_PARAMETER_TYPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>UNSUPPORTED_CRITICAL_PARAMETER_TYPE [<span class="target" id="index-94"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.UNSUPPORTED_HIT_SUITE">
+<code class="sig-name descname">UNSUPPORTED_HIT_SUITE</code><em class="property"> = 20</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.UNSUPPORTED_HIT_SUITE" title="Permalink to this definition">¶</a></dt>
+<dd><p>UNSUPPORTED_HIT_SUITE [<span class="target" id="index-95"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_25">
+<code class="sig-name descname">Unassigned_25</code><em class="property"> = 25</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_25" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_27">
+<code class="sig-name descname">Unassigned_27</code><em class="property"> = 27</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_27" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_41">
+<code class="sig-name descname">Unassigned_41</code><em class="property"> = 41</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_41" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_43">
+<code class="sig-name descname">Unassigned_43</code><em class="property"> = 43</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_43" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_45">
+<code class="sig-name descname">Unassigned_45</code><em class="property"> = 45</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_45" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_47">
+<code class="sig-name descname">Unassigned_47</code><em class="property"> = 47</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_47" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_49">
+<code class="sig-name descname">Unassigned_49</code><em class="property"> = 49</em><a class="headerlink" href="#pcapkit.const.hip.notify_message.NotifyMessage.Unassigned_49" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.packet">
+<span id="packet-types"></span><h2>Packet Types <a class="footnote-reference brackets" href="#id29" id="id12">††</a><a class="headerlink" href="#module-pcapkit.const.hip.packet" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.packet.Packet">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.packet.</code><code class="sig-name descname">Packet</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/packet.html#Packet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.packet.Packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Packet] HIP Packet Types</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.packet.Packet._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/packet.html#Packet._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.packet.Packet._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.packet.Packet.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/packet.html#Packet.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.CLOSE">
+<code class="sig-name descname">CLOSE</code><em class="property"> = 18</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.CLOSE" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLOSE [<span class="target" id="index-96"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] the HIP Association Closing Packet</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.CLOSE_ACK">
+<code class="sig-name descname">CLOSE_ACK</code><em class="property"> = 19</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.CLOSE_ACK" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLOSE_ACK [<span class="target" id="index-97"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] the HIP Closing Acknowledgment Packet</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.HDRR">
+<code class="sig-name descname">HDRR</code><em class="property"> = 20</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.HDRR" title="Permalink to this definition">¶</a></dt>
+<dd><p>HDRR [<span class="target" id="index-98"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6537.html"><strong>RFC 6537</strong></a>] HIP Distributed Hash Table Resource Record</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.HIP_DATA">
+<code class="sig-name descname">HIP_DATA</code><em class="property"> = 32</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.HIP_DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_DATA [<span class="target" id="index-99"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6078.html"><strong>RFC 6078</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.I1">
+<code class="sig-name descname">I1</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.I1" title="Permalink to this definition">¶</a></dt>
+<dd><p>I1 [<span class="target" id="index-100"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] the HIP Initiator Packet</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.I2">
+<code class="sig-name descname">I2</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.I2" title="Permalink to this definition">¶</a></dt>
+<dd><p>I2 [<span class="target" id="index-101"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] the Second HIP Initiator Packet</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.NOTIFY">
+<code class="sig-name descname">NOTIFY</code><em class="property"> = 17</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.NOTIFY" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOTIFY [<span class="target" id="index-102"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] the HIP Notify Packet</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.R1">
+<code class="sig-name descname">R1</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.R1" title="Permalink to this definition">¶</a></dt>
+<dd><p>R1 [<span class="target" id="index-103"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] the HIP Responder Packet</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.R2">
+<code class="sig-name descname">R2</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.R2" title="Permalink to this definition">¶</a></dt>
+<dd><p>R2 [<span class="target" id="index-104"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] the Second HIP Responder Packet</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-105"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.packet.Packet.UPDATE">
+<code class="sig-name descname">UPDATE</code><em class="property"> = 16</em><a class="headerlink" href="#pcapkit.const.hip.packet.Packet.UPDATE" title="Permalink to this definition">¶</a></dt>
+<dd><p>UPDATE [<span class="target" id="index-106"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] the HIP Update Packet</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.parameter">
+<span id="parameter-types"></span><h2>Parameter Types <a class="footnote-reference brackets" href="#id30" id="id13">‡‡</a><a class="headerlink" href="#module-pcapkit.const.hip.parameter" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.parameter.Parameter">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.parameter.</code><code class="sig-name descname">Parameter</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/parameter.html#Parameter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Parameter] HIP Parameter Types</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.parameter.Parameter._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/parameter.html#Parameter._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.parameter.Parameter.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/parameter.html#Parameter.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ACK">
+<code class="sig-name descname">ACK</code><em class="property"> = 449</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ACK" title="Permalink to this definition">¶</a></dt>
+<dd><p>ACK [<span class="target" id="index-107"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ACK_DATA">
+<code class="sig-name descname">ACK_DATA</code><em class="property"> = 4545</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ACK_DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>ACK_DATA [<span class="target" id="index-108"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6078.html"><strong>RFC 6078</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.CERT">
+<code class="sig-name descname">CERT</code><em class="property"> = 768</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.CERT" title="Permalink to this definition">¶</a></dt>
+<dd><p>CERT [<span class="target" id="index-109"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>][<span class="target" id="index-110"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8002.html"><strong>RFC 8002</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.DH_GROUP_LIST">
+<code class="sig-name descname">DH_GROUP_LIST</code><em class="property"> = 511</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.DH_GROUP_LIST" title="Permalink to this definition">¶</a></dt>
+<dd><p>DH_GROUP_LIST [<span class="target" id="index-111"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.DIFFIE_HELLMAN">
+<code class="sig-name descname">DIFFIE_HELLMAN</code><em class="property"> = 513</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.DIFFIE_HELLMAN" title="Permalink to this definition">¶</a></dt>
+<dd><p>DIFFIE_HELLMAN [<span class="target" id="index-112"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_SIGNED">
+<code class="sig-name descname">ECHO_REQUEST_SIGNED</code><em class="property"> = 897</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_SIGNED" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECHO_REQUEST_SIGNED [<span class="target" id="index-113"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_UNSIGNED">
+<code class="sig-name descname">ECHO_REQUEST_UNSIGNED</code><em class="property"> = 63661</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_UNSIGNED" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECHO_REQUEST_UNSIGNED [<span class="target" id="index-114"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_SIGNED">
+<code class="sig-name descname">ECHO_RESPONSE_SIGNED</code><em class="property"> = 961</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_SIGNED" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECHO_RESPONSE_SIGNED [<span class="target" id="index-115"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_UNSIGNED">
+<code class="sig-name descname">ECHO_RESPONSE_UNSIGNED</code><em class="property"> = 63425</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_UNSIGNED" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECHO_RESPONSE_UNSIGNED [<span class="target" id="index-116"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ENCRYPTED">
+<code class="sig-name descname">ENCRYPTED</code><em class="property"> = 641</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ENCRYPTED" title="Permalink to this definition">¶</a></dt>
+<dd><p>ENCRYPTED [<span class="target" id="index-117"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ESP_INFO">
+<code class="sig-name descname">ESP_INFO</code><em class="property"> = 65</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ESP_INFO" title="Permalink to this definition">¶</a></dt>
+<dd><p>ESP_INFO [<span class="target" id="index-118"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>] 12</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ESP_TRANSFORM">
+<code class="sig-name descname">ESP_TRANSFORM</code><em class="property"> = 4095</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ESP_TRANSFORM" title="Permalink to this definition">¶</a></dt>
+<dd><p>ESP_TRANSFORM [<span class="target" id="index-119"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7402.html"><strong>RFC 7402</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.FROM">
+<code class="sig-name descname">FROM</code><em class="property"> = 65498</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.FROM" title="Permalink to this definition">¶</a></dt>
+<dd><p>FROM [<span class="target" id="index-120"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8004.html"><strong>RFC 8004</strong></a>] 16</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HIP_CIPHER">
+<code class="sig-name descname">HIP_CIPHER</code><em class="property"> = 579</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HIP_CIPHER" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_CIPHER [<span class="target" id="index-121"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HIP_MAC">
+<code class="sig-name descname">HIP_MAC</code><em class="property"> = 61505</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HIP_MAC" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_MAC [<span class="target" id="index-122"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HIP_MAC_2">
+<code class="sig-name descname">HIP_MAC_2</code><em class="property"> = 61569</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HIP_MAC_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_MAC_2 [<span class="target" id="index-123"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE">
+<code class="sig-name descname">HIP_SIGNATURE</code><em class="property"> = 61697</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_SIGNATURE [<span class="target" id="index-124"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE_2">
+<code class="sig-name descname">HIP_SIGNATURE_2</code><em class="property"> = 61633</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_SIGNATURE_2 [<span class="target" id="index-125"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HIP_TRANSFORM">
+<code class="sig-name descname">HIP_TRANSFORM</code><em class="property"> = 577</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HIP_TRANSFORM" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_TRANSFORM [<span class="target" id="index-126"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>] (v1 only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HIP_TRANSPORT_MODE">
+<code class="sig-name descname">HIP_TRANSPORT_MODE</code><em class="property"> = 7680</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HIP_TRANSPORT_MODE" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP_TRANSPORT_MODE [<span class="target" id="index-127"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6261.html"><strong>RFC 6261</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HIT_SUITE_LIST">
+<code class="sig-name descname">HIT_SUITE_LIST</code><em class="property"> = 715</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HIT_SUITE_LIST" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIT_SUITE_LIST [<span class="target" id="index-128"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.HOST_ID">
+<code class="sig-name descname">HOST_ID</code><em class="property"> = 705</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.HOST_ID" title="Permalink to this definition">¶</a></dt>
+<dd><p>HOST_ID [<span class="target" id="index-129"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.LOCATOR_SET">
+<code class="sig-name descname">LOCATOR_SET</code><em class="property"> = 193</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.LOCATOR_SET" title="Permalink to this definition">¶</a></dt>
+<dd><p>LOCATOR_SET [<span class="target" id="index-130"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8046.html"><strong>RFC 8046</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.NAT_TRAVERSAL_MODE">
+<code class="sig-name descname">NAT_TRAVERSAL_MODE</code><em class="property"> = 608</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.NAT_TRAVERSAL_MODE" title="Permalink to this definition">¶</a></dt>
+<dd><p>NAT_TRAVERSAL_MODE [<span class="target" id="index-131"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.NOTIFICATION">
+<code class="sig-name descname">NOTIFICATION</code><em class="property"> = 832</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.NOTIFICATION" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOTIFICATION [<span class="target" id="index-132"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.OVERLAY_ID">
+<code class="sig-name descname">OVERLAY_ID</code><em class="property"> = 4592</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.OVERLAY_ID" title="Permalink to this definition">¶</a></dt>
+<dd><p>OVERLAY_ID [<span class="target" id="index-133"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6079.html"><strong>RFC 6079</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.OVERLAY_TTL">
+<code class="sig-name descname">OVERLAY_TTL</code><em class="property"> = 64011</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.OVERLAY_TTL" title="Permalink to this definition">¶</a></dt>
+<dd><p>OVERLAY_TTL [<span class="target" id="index-134"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6079.html"><strong>RFC 6079</strong></a>] 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.PAYLOAD_MIC">
+<code class="sig-name descname">PAYLOAD_MIC</code><em class="property"> = 4577</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.PAYLOAD_MIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>PAYLOAD_MIC [<span class="target" id="index-135"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6078.html"><strong>RFC 6078</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.PUZZLE">
+<code class="sig-name descname">PUZZLE</code><em class="property"> = 257</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.PUZZLE" title="Permalink to this definition">¶</a></dt>
+<dd><p>PUZZLE [<span class="target" id="index-136"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] 12</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.R1_COUNTER">
+<code class="sig-name descname">R1_COUNTER</code><em class="property"> = 129</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.R1_COUNTER" title="Permalink to this definition">¶</a></dt>
+<dd><p>R1_COUNTER [<span class="target" id="index-137"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] 12</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.R1_Counter">
+<code class="sig-name descname">R1_Counter</code><em class="property"> = 128</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.R1_Counter" title="Permalink to this definition">¶</a></dt>
+<dd><p>R1_Counter [<span class="target" id="index-138"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>] 12 (v1 only)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.REG_FAILED">
+<code class="sig-name descname">REG_FAILED</code><em class="property"> = 936</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.REG_FAILED" title="Permalink to this definition">¶</a></dt>
+<dd><p>REG_FAILED [<span class="target" id="index-139"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.REG_FROM">
+<code class="sig-name descname">REG_FROM</code><em class="property"> = 950</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.REG_FROM" title="Permalink to this definition">¶</a></dt>
+<dd><p>REG_FROM [<span class="target" id="index-140"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>] 20</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.REG_INFO">
+<code class="sig-name descname">REG_INFO</code><em class="property"> = 930</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.REG_INFO" title="Permalink to this definition">¶</a></dt>
+<dd><p>REG_INFO [<span class="target" id="index-141"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.REG_REQUEST">
+<code class="sig-name descname">REG_REQUEST</code><em class="property"> = 932</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.REG_REQUEST" title="Permalink to this definition">¶</a></dt>
+<dd><p>REG_REQUEST [<span class="target" id="index-142"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.REG_RESPONSE">
+<code class="sig-name descname">REG_RESPONSE</code><em class="property"> = 934</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.REG_RESPONSE" title="Permalink to this definition">¶</a></dt>
+<dd><p>REG_RESPONSE [<span class="target" id="index-143"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.RELAY_FROM">
+<code class="sig-name descname">RELAY_FROM</code><em class="property"> = 63998</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.RELAY_FROM" title="Permalink to this definition">¶</a></dt>
+<dd><p>RELAY_FROM [<span class="target" id="index-144"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>] 20</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.RELAY_HMAC">
+<code class="sig-name descname">RELAY_HMAC</code><em class="property"> = 65520</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.RELAY_HMAC" title="Permalink to this definition">¶</a></dt>
+<dd><p>RELAY_HMAC [<span class="target" id="index-145"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.RELAY_TO">
+<code class="sig-name descname">RELAY_TO</code><em class="property"> = 64002</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.RELAY_TO" title="Permalink to this definition">¶</a></dt>
+<dd><p>RELAY_TO [<span class="target" id="index-146"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>] 20</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ROUTE_DST">
+<code class="sig-name descname">ROUTE_DST</code><em class="property"> = 4601</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ROUTE_DST" title="Permalink to this definition">¶</a></dt>
+<dd><p>ROUTE_DST [<span class="target" id="index-147"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6028.html"><strong>RFC 6028</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.ROUTE_VIA">
+<code class="sig-name descname">ROUTE_VIA</code><em class="property"> = 64017</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.ROUTE_VIA" title="Permalink to this definition">¶</a></dt>
+<dd><p>ROUTE_VIA [<span class="target" id="index-148"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6028.html"><strong>RFC 6028</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.RVS_HMAC">
+<code class="sig-name descname">RVS_HMAC</code><em class="property"> = 65500</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.RVS_HMAC" title="Permalink to this definition">¶</a></dt>
+<dd><p>RVS_HMAC [<span class="target" id="index-149"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8004.html"><strong>RFC 8004</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.SEQ">
+<code class="sig-name descname">SEQ</code><em class="property"> = 385</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.SEQ" title="Permalink to this definition">¶</a></dt>
+<dd><p>SEQ [<span class="target" id="index-150"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.SEQ_DATA">
+<code class="sig-name descname">SEQ_DATA</code><em class="property"> = 4481</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.SEQ_DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>SEQ_DATA [<span class="target" id="index-151"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6078.html"><strong>RFC 6078</strong></a>] 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.SOLUTION">
+<code class="sig-name descname">SOLUTION</code><em class="property"> = 321</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.SOLUTION" title="Permalink to this definition">¶</a></dt>
+<dd><p>SOLUTION [<span class="target" id="index-152"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] 20</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.TRANSACTION_ID">
+<code class="sig-name descname">TRANSACTION_ID</code><em class="property"> = 4580</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.TRANSACTION_ID" title="Permalink to this definition">¶</a></dt>
+<dd><p>TRANSACTION_ID [<span class="target" id="index-153"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6078.html"><strong>RFC 6078</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.TRANSACTION_PACING">
+<code class="sig-name descname">TRANSACTION_PACING</code><em class="property"> = 610</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.TRANSACTION_PACING" title="Permalink to this definition">¶</a></dt>
+<dd><p>TRANSACTION_PACING [<span class="target" id="index-154"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>] 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.TRANSPORT_FORMAT_LIST">
+<code class="sig-name descname">TRANSPORT_FORMAT_LIST</code><em class="property"> = 2049</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.TRANSPORT_FORMAT_LIST" title="Permalink to this definition">¶</a></dt>
+<dd><p>TRANSPORT_FORMAT_LIST [<span class="target" id="index-155"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.Unassigned_512">
+<code class="sig-name descname">Unassigned_512</code><em class="property"> = 512</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.Unassigned_512" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.Unassigned_578">
+<code class="sig-name descname">Unassigned_578</code><em class="property"> = 578</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.Unassigned_578" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.Unassigned_609">
+<code class="sig-name descname">Unassigned_609</code><em class="property"> = 609</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.Unassigned_609" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.Unassigned_65499">
+<code class="sig-name descname">Unassigned_65499</code><em class="property"> = 65499</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.Unassigned_65499" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.Unassigned_65501">
+<code class="sig-name descname">Unassigned_65501</code><em class="property"> = 65501</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.Unassigned_65501" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.Unassigned_931">
+<code class="sig-name descname">Unassigned_931</code><em class="property"> = 931</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.Unassigned_931" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.Unassigned_933">
+<code class="sig-name descname">Unassigned_933</code><em class="property"> = 933</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.Unassigned_933" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.Unassigned_935">
+<code class="sig-name descname">Unassigned_935</code><em class="property"> = 935</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.Unassigned_935" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.parameter.Parameter.VIA_RVS">
+<code class="sig-name descname">VIA_RVS</code><em class="property"> = 65502</em><a class="headerlink" href="#pcapkit.const.hip.parameter.Parameter.VIA_RVS" title="Permalink to this definition">¶</a></dt>
+<dd><p>VIA_RVS [<span class="target" id="index-156"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8004.html"><strong>RFC 8004</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.registration">
+<span id="registration-types"></span><h2>Registration Types <a class="footnote-reference brackets" href="#id31" id="id14">§§</a><a class="headerlink" href="#module-pcapkit.const.hip.registration" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.registration.Registration">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.registration.</code><code class="sig-name descname">Registration</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/registration.html#Registration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.registration.Registration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Registration] Registration Types</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.registration.Registration._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/registration.html#Registration._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.registration.Registration._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.registration.Registration.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/registration.html#Registration.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.registration.Registration.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration.Registration.RELAY_UDP_HIP">
+<code class="sig-name descname">RELAY_UDP_HIP</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.registration.Registration.RELAY_UDP_HIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>RELAY_UDP_HIP [<span class="target" id="index-157"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5770.html"><strong>RFC 5770</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration.Registration.RENDEZVOUS">
+<code class="sig-name descname">RENDEZVOUS</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.registration.Registration.RENDEZVOUS" title="Permalink to this definition">¶</a></dt>
+<dd><p>RENDEZVOUS [<span class="target" id="index-158"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8004.html"><strong>RFC 8004</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration.Registration.Unassigned">
+<code class="sig-name descname">Unassigned</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.registration.Registration.Unassigned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.registration_failure">
+<span id="registration-failure-types"></span><h2>Registration Failure Types <a class="footnote-reference brackets" href="#id32" id="id15">¶¶</a><a class="headerlink" href="#module-pcapkit.const.hip.registration_failure" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.registration_failure.</code><code class="sig-name descname">RegistrationFailure</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/registration_failure.html#RegistrationFailure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[RegistrationFailure] Registration Failure Types</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/registration_failure.html#RegistrationFailure._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/registration_failure.html#RegistrationFailure.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Bad_certificate">
+<code class="sig-name descname">Bad_certificate</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Bad_certificate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bad certificate [<span class="target" id="index-159"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Certificate_expired">
+<code class="sig-name descname">Certificate_expired</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Certificate_expired" title="Permalink to this definition">¶</a></dt>
+<dd><p>Certificate expired [<span class="target" id="index-160"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Certificate_other">
+<code class="sig-name descname">Certificate_other</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Certificate_other" title="Permalink to this definition">¶</a></dt>
+<dd><p>Certificate other [<span class="target" id="index-161"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Insufficient_resources">
+<code class="sig-name descname">Insufficient_resources</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Insufficient_resources" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insufficient resources [<span class="target" id="index-162"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Invalid_certificate">
+<code class="sig-name descname">Invalid_certificate</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Invalid_certificate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invalid certificate [<span class="target" id="index-163"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Registration_requires_additional_credentials">
+<code class="sig-name descname">Registration_requires_additional_credentials</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Registration_requires_additional_credentials" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registration requires additional credentials [<span class="target" id="index-164"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Registration_type_unavailable">
+<code class="sig-name descname">Registration_type_unavailable</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Registration_type_unavailable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registration type unavailable [<span class="target" id="index-165"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Unknown_CA">
+<code class="sig-name descname">Unknown_CA</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Unknown_CA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unknown CA [<span class="target" id="index-166"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.registration_failure.RegistrationFailure.Unsupported_certificate">
+<code class="sig-name descname">Unsupported_certificate</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.hip.registration_failure.RegistrationFailure.Unsupported_certificate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unsupported certificate [<span class="target" id="index-167"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8003.html"><strong>RFC 8003</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.suite">
+<span id="suite-ids"></span><h2>Suite IDs <a class="footnote-reference brackets" href="#id33" id="id16">##</a><a class="headerlink" href="#module-pcapkit.const.hip.suite" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.suite.Suite">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.suite.</code><code class="sig-name descname">Suite</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/suite.html#Suite"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.suite.Suite" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Suite] Suite IDs</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.suite.Suite._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/suite.html#Suite._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.suite.Suite._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.suite.Suite.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/suite.html#Suite.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.suite.Suite.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.suite.Suite.AES_CBC_with_HMAC_SHA1">
+<code class="sig-name descname">AES_CBC_with_HMAC_SHA1</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.suite.Suite.AES_CBC_with_HMAC_SHA1" title="Permalink to this definition">¶</a></dt>
+<dd><p>AES-CBC with HMAC-SHA1 [<span class="target" id="index-168"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.suite.Suite.BLOWFISH_CBC_with_HMAC_SHA1">
+<code class="sig-name descname">BLOWFISH_CBC_with_HMAC_SHA1</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.hip.suite.Suite.BLOWFISH_CBC_with_HMAC_SHA1" title="Permalink to this definition">¶</a></dt>
+<dd><p>BLOWFISH-CBC with HMAC-SHA1 [<span class="target" id="index-169"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.suite.Suite.NULL_ENCRYPT_with_HMAC_MD5">
+<code class="sig-name descname">NULL_ENCRYPT_with_HMAC_MD5</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.hip.suite.Suite.NULL_ENCRYPT_with_HMAC_MD5" title="Permalink to this definition">¶</a></dt>
+<dd><p>NULL-ENCRYPT with HMAC-MD5 [<span class="target" id="index-170"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.suite.Suite.NULL_ENCRYPT_with_HMAC_SHA1">
+<code class="sig-name descname">NULL_ENCRYPT_with_HMAC_SHA1</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.hip.suite.Suite.NULL_ENCRYPT_with_HMAC_SHA1" title="Permalink to this definition">¶</a></dt>
+<dd><p>NULL-ENCRYPT with HMAC-SHA1 [<span class="target" id="index-171"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.suite.Suite.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.suite.Suite.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-172"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.suite.Suite.Suite_3DES_CBC_with_HMAC_MD5">
+<code class="sig-name descname">Suite_3DES_CBC_with_HMAC_MD5</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.suite.Suite.Suite_3DES_CBC_with_HMAC_MD5" title="Permalink to this definition">¶</a></dt>
+<dd><p>3DES-CBC with HMAC-MD5 [<span class="target" id="index-173"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.suite.Suite.Suite_3DES_CBC_with_HMAC_SHA1">
+<code class="sig-name descname">Suite_3DES_CBC_with_HMAC_SHA1</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.suite.Suite.Suite_3DES_CBC_with_HMAC_SHA1" title="Permalink to this definition">¶</a></dt>
+<dd><p>3DES-CBC with HMAC-SHA1 [<span class="target" id="index-174"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5201.html"><strong>RFC 5201</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.hip.transport">
+<span id="hip-transport-modes"></span><h2>HIP Transport Modes <a class="footnote-reference brackets" href="#id34" id="id17">♠♠</a><a class="headerlink" href="#module-pcapkit.const.hip.transport" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.hip.transport.Transport">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.hip.transport.</code><code class="sig-name descname">Transport</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/transport.html#Transport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.transport.Transport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[Transport] HIP Transport Modes</p>
+<dl class="py method">
+<dt id="pcapkit.const.hip.transport.Transport._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/transport.html#Transport._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.transport.Transport._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.hip.transport.Transport.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/hip/transport.html#Transport.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.hip.transport.Transport.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.transport.Transport.DEFAULT">
+<code class="sig-name descname">DEFAULT</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.hip.transport.Transport.DEFAULT" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEFAULT [<span class="target" id="index-175"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6261.html"><strong>RFC 6261</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.transport.Transport.ESP">
+<code class="sig-name descname">ESP</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.hip.transport.Transport.ESP" title="Permalink to this definition">¶</a></dt>
+<dd><p>ESP [<span class="target" id="index-176"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6261.html"><strong>RFC 6261</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.transport.Transport.ESP_TCP">
+<code class="sig-name descname">ESP_TCP</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.hip.transport.Transport.ESP_TCP" title="Permalink to this definition">¶</a></dt>
+<dd><p>ESP-TCP [<span class="target" id="index-177"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6261.html"><strong>RFC 6261</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.hip.transport.Transport.RESERVED">
+<code class="sig-name descname">RESERVED</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.hip.transport.Transport.RESERVED" title="Permalink to this definition">¶</a></dt>
+<dd><p>RESERVED [<span class="target" id="index-178"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6261.html"><strong>RFC 6261</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id18"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#certificate-types">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#certificate-types</a></p>
+</dd>
+<dt class="label" id="id19"><span class="brackets"><a class="fn-backref" href="#id2">†</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-cipher-id">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-cipher-id</a></p>
+</dd>
+<dt class="label" id="id20"><span class="brackets"><a class="fn-backref" href="#id3">‡</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-7">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-7</a></p>
+</dd>
+<dt class="label" id="id21"><span class="brackets"><a class="fn-backref" href="#id4">§</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-curve-label">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-curve-label</a></p>
+</dd>
+<dt class="label" id="id22"><span class="brackets"><a class="fn-backref" href="#id5">¶</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-low-curve-label">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#ecdsa-low-curve-label</a></p>
+</dd>
+<dt class="label" id="id23"><span class="brackets"><a class="fn-backref" href="#id6">#</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#esp-transform-suite-ids">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#esp-transform-suite-ids</a></p>
+</dd>
+<dt class="label" id="id24"><span class="brackets"><a class="fn-backref" href="#id7">♠</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-5">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-5</a></p>
+</dd>
+<dt class="label" id="id25"><span class="brackets"><a class="fn-backref" href="#id8">♥</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hi-algorithm">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hi-algorithm</a></p>
+</dd>
+<dt class="label" id="id26"><span class="brackets"><a class="fn-backref" href="#id9">♦</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hit-suite-id">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hit-suite-id</a></p>
+</dd>
+<dt class="label" id="id27"><span class="brackets"><a class="fn-backref" href="#id10">♣</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#nat-traversal">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#nat-traversal</a></p>
+</dd>
+<dt class="label" id="id28"><span class="brackets"><a class="fn-backref" href="#id11">**</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-9">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-9</a></p>
+</dd>
+<dt class="label" id="id29"><span class="brackets"><a class="fn-backref" href="#id12">††</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-1">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-1</a></p>
+</dd>
+<dt class="label" id="id30"><span class="brackets"><a class="fn-backref" href="#id13">‡‡</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-4">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-4</a></p>
+</dd>
+<dt class="label" id="id31"><span class="brackets"><a class="fn-backref" href="#id14">§§</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-11">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-11</a></p>
+</dd>
+<dt class="label" id="id32"><span class="brackets"><a class="fn-backref" href="#id15">¶¶</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-13">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-13</a></p>
+</dd>
+<dt class="label" id="id33"><span class="brackets"><a class="fn-backref" href="#id16">##</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-6">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#hip-parameters-6</a></p>
+</dd>
+<dt class="label" id="id34"><span class="brackets"><a class="fn-backref" href="#id17">♠♠</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#transport-modes">https://www.iana.org/assignments/hip-parameters/hip-parameters.xhtml#transport-modes</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Constant Enumerations</a><ul>
+      <li>Previous: <a href="ftp.html" title="previous chapter">FTP Constant Enumerations</a></li>
+      <li>Next: <a href="http.html" title="next chapter">HTTP Constant Enumerations</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/const/hip.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

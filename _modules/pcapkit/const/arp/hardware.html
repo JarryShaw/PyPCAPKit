@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.const.arp.hardware &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.const.arp.hardware</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=line-too-long</span>
+<span class="sd">&quot;&quot;&quot;Hardware Types [:rfc:`826`][:rfc:`5494`]&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Hardware&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Hardware"><a class="viewcode-back" href="../../../../const/arp.html#pcapkit.const.arp.hardware.Hardware">[docs]</a><span class="k">class</span> <span class="nc">Hardware</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;[Hardware] Hardware Types [:rfc:`826`][:rfc:`5494`]&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Reserved [:rfc:`5494`]</span>
+    <span class="n">Reserved_0</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#: Ethernet (10Mb) [Jon Postel]</span>
+    <span class="n">Ethernet</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1">#: Experimental Ethernet (3Mb) [Jon Postel]</span>
+    <span class="n">Experimental_Ethernet</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="c1">#: Amateur Radio AX.25 [Philip Koch]</span>
+    <span class="n">Amateur_Radio_AX_25</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c1">#: Proteon ProNET Token Ring [Avri Doria]</span>
+    <span class="n">Proteon_ProNET_Token_Ring</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="c1">#: Chaos [Gill Pratt]</span>
+    <span class="n">Chaos</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="c1">#: IEEE 802 Networks [Jon Postel]</span>
+    <span class="n">IEEE_802_Networks</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="c1">#: ARCNET [:rfc:`1201`]</span>
+    <span class="n">ARCNET</span> <span class="o">=</span> <span class="mi">7</span>
+
+    <span class="c1">#: Hyperchannel [Jon Postel]</span>
+    <span class="n">Hyperchannel</span> <span class="o">=</span> <span class="mi">8</span>
+
+    <span class="c1">#: Lanstar [Tom Unger]</span>
+    <span class="n">Lanstar</span> <span class="o">=</span> <span class="mi">9</span>
+
+    <span class="c1">#: Autonet Short Address [Mike Burrows]</span>
+    <span class="n">Autonet_Short_Address</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="c1">#: LocalTalk [Joyce K Reynolds]</span>
+    <span class="n">LocalTalk</span> <span class="o">=</span> <span class="mi">11</span>
+
+    <span class="c1">#: LocalNet (IBM PCNet or SYTEK LocalNET) [Joseph Murdock]</span>
+    <span class="n">LocalNet</span> <span class="o">=</span> <span class="mi">12</span>
+
+    <span class="c1">#: Ultra link [Rajiv Dhingra]</span>
+    <span class="n">Ultra_link</span> <span class="o">=</span> <span class="mi">13</span>
+
+    <span class="c1">#: SMDS [George Clapp]</span>
+    <span class="n">SMDS</span> <span class="o">=</span> <span class="mi">14</span>
+
+    <span class="c1">#: Frame Relay [Andy Malis]</span>
+    <span class="n">Frame_Relay</span> <span class="o">=</span> <span class="mi">15</span>
+
+    <span class="c1">#: Asynchronous Transmission Mode (ATM) [JXB2]</span>
+    <span class="n">Asynchronous_Transmission_Mode_16</span> <span class="o">=</span> <span class="mi">16</span>
+
+    <span class="c1">#: HDLC [Jon Postel]</span>
+    <span class="n">HDLC</span> <span class="o">=</span> <span class="mi">17</span>
+
+    <span class="c1">#: Fibre Channel [:rfc:`4338`]</span>
+    <span class="n">Fibre_Channel</span> <span class="o">=</span> <span class="mi">18</span>
+
+    <span class="c1">#: Asynchronous Transmission Mode (ATM) [:rfc:`2225`]</span>
+    <span class="n">Asynchronous_Transmission_Mode_19</span> <span class="o">=</span> <span class="mi">19</span>
+
+    <span class="c1">#: Serial Line [Jon Postel]</span>
+    <span class="n">Serial_Line</span> <span class="o">=</span> <span class="mi">20</span>
+
+    <span class="c1">#: Asynchronous Transmission Mode (ATM) [Mike Burrows]</span>
+    <span class="n">Asynchronous_Transmission_Mode_21</span> <span class="o">=</span> <span class="mi">21</span>
+
+    <span class="c1">#: MIL-STD-188-220 [Herb Jensen]</span>
+    <span class="n">MIL_STD_188_220</span> <span class="o">=</span> <span class="mi">22</span>
+
+    <span class="c1">#: Metricom [Jonathan Stone]</span>
+    <span class="n">Metricom</span> <span class="o">=</span> <span class="mi">23</span>
+
+    <span class="c1">#: IEEE 1394.1995 [Myron Hattig]</span>
+    <span class="n">IEEE_1394_1995</span> <span class="o">=</span> <span class="mi">24</span>
+
+    <span class="c1">#: MAPOS [Mitsuru Maruyama][:rfc:`2176`]</span>
+    <span class="n">MAPOS</span> <span class="o">=</span> <span class="mi">25</span>
+
+    <span class="c1">#: Twinaxial [Marion Pitts]</span>
+    <span class="n">Twinaxial</span> <span class="o">=</span> <span class="mi">26</span>
+
+    <span class="c1">#: EUI-64 [Kenji Fujisawa]</span>
+    <span class="n">EUI_64</span> <span class="o">=</span> <span class="mi">27</span>
+
+    <span class="c1">#: HIPARP [Jean Michel Pittet]</span>
+    <span class="n">HIPARP</span> <span class="o">=</span> <span class="mi">28</span>
+
+    <span class="c1">#: IP and ARP over ISO 7816-3 [Scott Guthery]</span>
+    <span class="n">IP_and_ARP_over_ISO_7816_3</span> <span class="o">=</span> <span class="mi">29</span>
+
+    <span class="c1">#: ARPSec [Jerome Etienne]</span>
+    <span class="n">ARPSec</span> <span class="o">=</span> <span class="mi">30</span>
+
+    <span class="c1">#: IPsec tunnel [:rfc:`3456`]</span>
+    <span class="n">IPsec_tunnel</span> <span class="o">=</span> <span class="mi">31</span>
+
+    <span class="c1">#: InfiniBand (TM) [:rfc:`4391`]</span>
+    <span class="n">InfiniBand</span> <span class="o">=</span> <span class="mi">32</span>
+
+    <span class="c1">#: TIA-102 Project 25 Common Air Interface (CAI) [Jeff Anderson,</span>
+    <span class="c1">#: Telecommunications Industry of America (TIA) TR-8.5 Formulating Group,</span>
+    <span class="c1">#: &lt;cja015&amp;motorola.com&gt;, June 2004]</span>
+    <span class="n">TIA_102_Project_25_Common_Air_Interface</span> <span class="o">=</span> <span class="mi">33</span>
+
+    <span class="c1">#: Wiegand Interface [Scott Guthery 2]</span>
+    <span class="n">Wiegand_Interface</span> <span class="o">=</span> <span class="mi">34</span>
+
+    <span class="c1">#: Pure IP [Inaky Perez-Gonzalez]</span>
+    <span class="n">Pure_IP</span> <span class="o">=</span> <span class="mi">35</span>
+
+    <span class="c1">#: HW_EXP1 [:rfc:`5494`]</span>
+    <span class="n">HW_EXP1</span> <span class="o">=</span> <span class="mi">36</span>
+
+    <span class="c1">#: HFI [Tseng-Hui Lin]</span>
+    <span class="n">HFI</span> <span class="o">=</span> <span class="mi">37</span>
+
+    <span class="c1">#: HW_EXP2 [:rfc:`5494`]</span>
+    <span class="n">HW_EXP2</span> <span class="o">=</span> <span class="mi">256</span>
+
+    <span class="c1">#: AEthernet [Geoffroy Gramaize]</span>
+    <span class="n">AEthernet</span> <span class="o">=</span> <span class="mi">257</span>
+
+    <span class="c1">#: Reserved [:rfc:`5494`]</span>
+    <span class="n">Reserved_65535</span> <span class="o">=</span> <span class="mi">65535</span>
+
+<div class="viewcode-block" id="Hardware.get"><a class="viewcode-back" href="../../../../const/arp.html#pcapkit.const.arp.hardware.Hardware.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Backport support for original codes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Hardware</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Hardware</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="n">Hardware</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Hardware</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Hardware._missing_"><a class="viewcode-back" href="../../../../const/arp.html#pcapkit.const.arp.hardware.Hardware._missing_">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">if</span> <span class="mi">38</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">255</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">258</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65534</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

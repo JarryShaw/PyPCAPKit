@@ -1,0 +1,289 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.interface.core &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.interface.core</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=bad-continuation</span>
+<span class="sd">&quot;&quot;&quot;core user interface</span>
+
+<span class="sd">:mod:`pcapkit.interface.core` defines core user-oriented</span>
+<span class="sd">interfaces, variables, and etc., which wraps around the</span>
+<span class="sd">foundation classes from :mod:`pcapkit.foundation`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.analysis</span> <span class="kn">import</span> <span class="n">analyse</span> <span class="k">as</span> <span class="n">analyse2</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">TraceFlow</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span> <span class="nn">pcapkit.reassembly.ipv4</span> <span class="kn">import</span> <span class="n">IPv4_Reassembly</span>
+<span class="kn">from</span> <span class="nn">pcapkit.reassembly.ipv6</span> <span class="kn">import</span> <span class="n">IPv6_Reassembly</span>
+<span class="kn">from</span> <span class="nn">pcapkit.reassembly.tcp</span> <span class="kn">import</span> <span class="n">TCP_Reassembly</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FormatError</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.validations</span> <span class="kn">import</span> <span class="n">bool_check</span><span class="p">,</span> <span class="n">int_check</span><span class="p">,</span> <span class="n">io_check</span><span class="p">,</span> <span class="n">str_check</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;extract&#39;</span><span class="p">,</span> <span class="s1">&#39;analyse&#39;</span><span class="p">,</span> <span class="s1">&#39;reassemble&#39;</span><span class="p">,</span> <span class="s1">&#39;trace&#39;</span><span class="p">,</span>            <span class="c1"># interface functions</span>
+    <span class="s1">&#39;TREE&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON&#39;</span><span class="p">,</span> <span class="s1">&#39;PLIST&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAP&#39;</span><span class="p">,</span>                        <span class="c1"># format macros</span>
+    <span class="s1">&#39;LINK&#39;</span><span class="p">,</span> <span class="s1">&#39;INET&#39;</span><span class="p">,</span> <span class="s1">&#39;TRANS&#39;</span><span class="p">,</span> <span class="s1">&#39;APP&#39;</span><span class="p">,</span> <span class="s1">&#39;RAW&#39;</span><span class="p">,</span>                  <span class="c1"># layer macros</span>
+    <span class="s1">&#39;DPKT&#39;</span><span class="p">,</span> <span class="s1">&#39;Scapy&#39;</span><span class="p">,</span> <span class="s1">&#39;PyShark&#39;</span><span class="p">,</span> <span class="s1">&#39;MPServer&#39;</span><span class="p">,</span> <span class="s1">&#39;MPPipeline&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAPKit&#39;</span><span class="p">,</span>
+                                                            <span class="c1"># engine macros</span>
+<span class="p">]</span>
+
+<span class="c1"># output file formats</span>
+<span class="n">TREE</span> <span class="o">=</span> <span class="s1">&#39;tree&#39;</span>
+<span class="n">JSON</span> <span class="o">=</span> <span class="s1">&#39;json&#39;</span>
+<span class="n">PLIST</span> <span class="o">=</span> <span class="s1">&#39;plist&#39;</span>
+<span class="n">PCAP</span> <span class="o">=</span> <span class="s1">&#39;pcap&#39;</span>
+
+<span class="c1"># layer thresholds</span>
+<span class="n">RAW</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+<span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;Link&#39;</span>
+<span class="n">INET</span> <span class="o">=</span> <span class="s1">&#39;Internet&#39;</span>
+<span class="n">TRANS</span> <span class="o">=</span> <span class="s1">&#39;Transport&#39;</span>
+<span class="n">APP</span> <span class="o">=</span> <span class="s1">&#39;Application&#39;</span>
+
+<span class="c1"># extraction engines</span>
+<span class="n">DPKT</span> <span class="o">=</span> <span class="s1">&#39;dpkt&#39;</span>
+<span class="n">Scapy</span> <span class="o">=</span> <span class="s1">&#39;scapy&#39;</span>
+<span class="n">PCAPKit</span> <span class="o">=</span> <span class="s1">&#39;default&#39;</span>
+<span class="n">PyShark</span> <span class="o">=</span> <span class="s1">&#39;pyshark&#39;</span>
+<span class="n">MPServer</span> <span class="o">=</span> <span class="s1">&#39;server&#39;</span>
+<span class="n">MPPipeline</span> <span class="o">=</span> <span class="s1">&#39;pipeline&#39;</span>
+
+
+<div class="viewcode-block" id="extract"><a class="viewcode-back" href="../../../interface/core.html#pcapkit.interface.core.extract">[docs]</a><span class="k">def</span> <span class="nf">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                           <span class="c1"># basic settings  # pylint: disable=redefined-builtin</span>
+            <span class="n">auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>                      <span class="c1"># internal settings</span>
+            <span class="n">files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>                   <span class="c1"># output settings</span>
+            <span class="n">engine</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>                     <span class="c1"># extraction settings</span>
+            <span class="n">ip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>   <span class="c1"># reassembly settings</span>
+            <span class="n">trace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>            <span class="c1"># trace settings  # pylint: disable=redefined-outer-name</span>
+            <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>     <span class="c1"># trace settings</span>
+    <span class="sd">&quot;&quot;&quot;Extract a PCAP file.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        fin (Optiona[str]): file name to be read; if file not exist, raise :exc:`FileNotFound`</span>
+<span class="sd">        fout (Optiona[str]): file name to be written</span>
+<span class="sd">        format (Optional[Literal[&#39;plist&#39;, &#39;json&#39;, &#39;tree&#39;]]): file format of output</span>
+
+<span class="sd">        auto (bool): if automatically run till EOF</span>
+<span class="sd">        extension (bool): if check and append extensions to output file</span>
+<span class="sd">        store (bool): if store extracted packet info</span>
+
+<span class="sd">        files (bool): if split each frame into different files</span>
+<span class="sd">        nofile (bool): if no output file is to be dumped</span>
+<span class="sd">        verbose (bool): if print verbose output information</span>
+
+<span class="sd">        engine (Optional[Literal[&#39;default&#39;, &#39;pcapkit&#39;, &#39;dpkt&#39;, &#39;scapy&#39;, &#39;pyshark&#39;, &#39;server&#39;, &#39;pipeline&#39;]]):</span>
+<span class="sd">            extraction engine to be used</span>
+<span class="sd">        layer (Optional[Literal[&#39;Link&#39;, &#39;Internet&#39;, &#39;Transport&#39;, &#39;Application&#39;]]): extract til which layer</span>
+<span class="sd">        protocol (Optional[Union[str, Tuple[str], Type[Protocol]]]): extract til which protocol</span>
+
+<span class="sd">        ip (bool): if record data for IPv4 &amp; IPv6 reassembly</span>
+<span class="sd">        ipv4 (bool): if perform IPv4 reassembly</span>
+<span class="sd">        ipv6 (bool): if perform IPv6 reassembly</span>
+<span class="sd">        tcp (bool): if perform TCP reassembly</span>
+<span class="sd">        strict (bool): if set strict flag for reassembly</span>
+
+<span class="sd">        trace (bool): if trace TCP traffic flows</span>
+<span class="sd">        trace_fout (Optional[str]): path name for flow tracer if necessary</span>
+<span class="sd">        trace_format (Optional[Literal[&#39;plist&#39;, &#39;json&#39;, &#39;tree&#39;, &#39;pcap&#39;]]): output file</span>
+<span class="sd">            format of flow tracer</span>
+<span class="sd">        trace_byteorder (Literal[&#39;little&#39;, &#39;big&#39;]): output file byte order</span>
+<span class="sd">        trace_nanosecond (bool): output nanosecond-resolution file flag</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Extractor -- an :class:`~pcapkit.foundation.extraction.Extractor` object</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">layer</span><span class="o">.</span><span class="n">__layer__</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">id</span><span class="p">()</span>
+
+    <span class="n">str_check</span><span class="p">(</span><span class="n">fin</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">fout</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">format</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+              <span class="n">trace_fout</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">trace_format</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+              <span class="n">engine</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">layer</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="n">protocol</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+    <span class="n">bool_check</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">nofile</span><span class="p">,</span> <span class="n">verbose</span><span class="p">,</span> <span class="n">auto</span><span class="p">,</span> <span class="n">extension</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span>
+               <span class="n">ip</span><span class="p">,</span> <span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv6</span><span class="p">,</span> <span class="n">tcp</span><span class="p">,</span> <span class="n">strict</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
+                     <span class="n">store</span><span class="o">=</span><span class="n">store</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="n">files</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="n">nofile</span><span class="p">,</span>
+                     <span class="n">auto</span><span class="o">=</span><span class="n">auto</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
+                     <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="n">layer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
+                     <span class="n">ip</span><span class="o">=</span><span class="n">ip</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="n">ipv6</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="n">tcp</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">,</span>
+                     <span class="n">trace</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">trace_fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="n">trace_format</span><span class="p">,</span>
+                     <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">trace_byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">trace_nanosecond</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="analyse"><a class="viewcode-back" href="../../../interface/core.html#pcapkit.interface.core.analyse">[docs]</a><span class="k">def</span> <span class="nf">analyse</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Analyse application layer packets.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        file (Union[bytes, io.BytesIO]): packet to be analysed</span>
+<span class="sd">        length (Optional[int]): length of the analysing packet</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Analysis: an :class:`~pcapkit.foundation.analysis.Analysis` object</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+
+    <span class="n">io_check</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+    <span class="n">int_check</span><span class="p">(</span><span class="n">length</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">analyse2</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="reassemble"><a class="viewcode-back" href="../../../interface/core.html#pcapkit.interface.core.reassemble">[docs]</a><span class="k">def</span> <span class="nf">reassemble</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reassemble fragmented datagrams.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        protocol (Union[str, Type[Protocol]]) protocol to be reassembled</span>
+<span class="sd">        strict (bool): if return all datagrams (including those not implemented) when submit</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[IPv4_Reassembly, IPv6_Reassembly, TCP_Reassembly]: a :class:`~pcapkit.reassembly.reassembly.Reassembly`</span>
+<span class="sd">        object of corresponding protocol</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        FormatError: If ``protocol`` is **NOT** any of IPv4, IPv6 or TCP.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="n">protocol</span> <span class="o">=</span> <span class="n">protocol</span><span class="o">.</span><span class="n">id</span><span class="p">()</span>
+
+    <span class="n">str_check</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span>
+    <span class="n">bool_check</span><span class="p">(</span><span class="n">strict</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IPv4_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IPv6_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">protocol</span> <span class="o">==</span> <span class="s1">&#39;TCP&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">FormatError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported reassembly protocol: </span><span class="si">{</span><span class="n">protocol</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="trace"><a class="viewcode-back" href="../../../interface/core.html#pcapkit.interface.core.trace">[docs]</a><span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+    <span class="sd">&quot;&quot;&quot;Trace TCP flows.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        fout (str): output path</span>
+<span class="sd">        format (Optional[str]): output format</span>
+<span class="sd">        byteorder (str): output file byte order</span>
+<span class="sd">        nanosecond (bool): output nanosecond-resolution file flag</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        TraceFlow: a :class:`~pcapkit.foundation.traceflow.TraceFlow` object</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">str_check</span><span class="p">(</span><span class="n">fout</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="nb">format</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">TraceFlow</span><span class="p">(</span><span class="n">fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

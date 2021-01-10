@@ -1,0 +1,207 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VLAN Constant Enumerations &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Web Crawlers for Constant Enumerations" href="../vendor/index.html" />
+    <link rel="prev" title="TCP Constant Enumerations" href="tcp.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.const.vlan">
+<span id="vlan-constant-enumerations"></span><h1>VLAN Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.vlan" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pcapkit.const.vlan.priority_level">
+<span id="priority-levels"></span><h2>Priority Levels <a class="footnote-reference brackets" href="#id2" id="id1">*</a><a class="headerlink" href="#module-pcapkit.const.vlan.priority_level" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.vlan.priority_level.</code><code class="sig-name descname">PriorityLevel</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/vlan/priority_level.html#PriorityLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[PriorityLevel] Priority levels defined in IEEE 802.1p.</p>
+<dl class="py method">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/vlan/priority_level.html#PriorityLevel._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/vlan/priority_level.html#PriorityLevel.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.BE">
+<code class="sig-name descname">BE</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.BE" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">1</span></code> - Best effort (default)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.BK">
+<code class="sig-name descname">BK</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.BK" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">0</span></code> - Background (lowest)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.CA">
+<code class="sig-name descname">CA</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.CA" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">3</span></code> - Critical applications</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.EE">
+<code class="sig-name descname">EE</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.EE" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">2</span></code> - Excellent effort</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.IC">
+<code class="sig-name descname">IC</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.IC" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">6</span></code> - Internetwork control</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.NC">
+<code class="sig-name descname">NC</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.NC" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">7</span></code> - Network control (highest)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.VI">
+<code class="sig-name descname">VI</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.VI" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">4</span></code> - Video, &lt; 100 ms latency and jitter</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.vlan.priority_level.PriorityLevel.VO">
+<code class="sig-name descname">VO</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.vlan.priority_level.PriorityLevel.VO" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">5</span></code> - Voice, &lt; 10 ms latency and jitter</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels">https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Constant Enumerations</a><ul>
+      <li>Previous: <a href="tcp.html" title="previous chapter">TCP Constant Enumerations</a></li>
+      <li>Next: <a href="../vendor/index.html" title="next chapter">Web Crawlers for Constant Enumerations</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/const/vlan.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

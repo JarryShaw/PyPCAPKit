@@ -1,0 +1,547 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IPv6 Vendor Crawler &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IPX Vendor Crawler" href="ipx.html" />
+    <link rel="prev" title="IPv4 Vendor Crawler" href="ipv4.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.vendor.ipv6">
+<span id="ipv6-vendor-crawler"></span><h1>IPv6 Vendor Crawler<a class="headerlink" href="#module-pcapkit.vendor.ipv6" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pcapkit.vendor.ipv6.extension_header">
+<span id="ipv6-extension-header-types"></span><h2>IPv6 Extension Header Types <a class="footnote-reference brackets" href="#id6" id="id1">*</a><a class="headerlink" href="#module-pcapkit.vendor.ipv6.extension_header" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipv6.extension_header.ExtensionHeader">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipv6.extension_header.</code><code class="sig-name descname">ExtensionHeader</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/extension_header.html#ExtensionHeader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.extension_header.ExtensionHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>IPv6 Extension Header Types</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.extension_header.ExtensionHeader.context">
+<code class="sig-name descname">context</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/extension_header.html#ExtensionHeader.context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate constant context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Constant context.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.extension_header.ExtensionHeader.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/extension_header.html#ExtensionHeader.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count field records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Field recordings.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Counter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.extension_header.ExtensionHeader.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/extension_header.html#ExtensionHeader.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process CSV data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.vendor.ipv6.extension_header.LINE">
+<code class="sig-prename descclassname">pcapkit.vendor.ipv6.extension_header.</code><code class="sig-name descname">LINE</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">NAME</span></em>, <em class="sig-param"><span class="n">DOCS</span></em>, <em class="sig-param"><span class="n">ENUM</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.ipv6.extension_header.LINE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.vendor.ipv6.option">
+<span id="destination-options-and-hop-by-hop-options"></span><h2>Destination Options and Hop-by-Hop Options <a class="footnote-reference brackets" href="#id7" id="id2">†</a><a class="headerlink" href="#module-pcapkit.vendor.ipv6.option" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipv6.option.Option">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipv6.option.</code><code class="sig-name descname">Option</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/option.html#Option"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.option.Option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>Destination Options and Hop-by-Hop Options</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.option.Option.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/option.html#Option.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.option.Option.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count field records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Field recordings.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Counter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.option.Option.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/option.html#Option.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.option.Option.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process CSV data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.option.Option.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0x00 &lt;= value &lt;= 0xFF'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.option.Option.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.option.Option.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-2.csv'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.option.Option.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt id="pcapkit.vendor.ipv6.option.DATA">
+<code class="sig-prename descclassname">pcapkit.vendor.ipv6.option.</code><code class="sig-name descname">DATA</code><em class="property"> = {0: ('pad', 'Pad1'), 1: ('padn', 'PadN'), 4: ('tun', 'Tunnel Encapsulation Limit'), 5: ('ra', 'Router Alert'), 7: ('calipso', 'Common Architecture Label IPv6 Security Option'), 8: ('smf_dpd', 'Simplified Multicast Forwarding'), 15: ('pdm', 'Performance and Diagnostic Metrics'), 38: ('qs', 'Quick-Start'), 99: ('rpl', 'Routing Protocol for Low-Power and Lossy Networks'), 109: ('mpl', 'Multicast Protocol for Low-Power and Lossy Networks'), 139: ('ilnp', 'Identifier-Locator Network Protocol Nonce'), 140: ('lio', 'Line-Identification Option'), 194: ('jumbo', 'Jumbo Payload'), 201: ('home', 'Home Address'), 238: ('ip_dff', 'Depth-First Forwarding')}</em><a class="headerlink" href="#pcapkit.vendor.ipv6.option.DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>IPv6 option registry.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.vendor.ipv6.qs_function">
+<span id="ipv6-qs-functions"></span><h2>IPv6 QS Functions<a class="headerlink" href="#module-pcapkit.vendor.ipv6.qs_function" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipv6.qs_function.QSFunction">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipv6.qs_function.</code><code class="sig-name descname">QSFunction</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/qs_function.html#QSFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.qs_function.QSFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>QS Functions</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.qs_function.QSFunction.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/qs_function.html#QSFunction.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.qs_function.QSFunction.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count field records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Registry data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Field recordings.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Counter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.qs_function.QSFunction.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/qs_function.html#QSFunction.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.qs_function.QSFunction.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process registry data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Registry data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.qs_function.QSFunction.request">
+<code class="sig-name descname">request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/qs_function.html#QSFunction.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.qs_function.QSFunction.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch registry data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Registry data (<a class="reference internal" href="#pcapkit.vendor.ipv6.qs_function.DATA" title="pcapkit.vendor.ipv6.qs_function.DATA"><code class="xref py py-data docutils literal notranslate"><span class="pre">DATA</span></code></a>).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.qs_function.QSFunction.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0 &lt;= value &lt;= 8'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.qs_function.QSFunction.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt id="pcapkit.vendor.ipv6.qs_function.DATA">
+<code class="sig-prename descclassname">pcapkit.vendor.ipv6.qs_function.</code><code class="sig-name descname">DATA</code><em class="property"> = {0: 'Quick-Start Request', 8: 'Report of Approved Rate'}</em><a class="headerlink" href="#pcapkit.vendor.ipv6.qs_function.DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>QS function registry.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.vendor.ipv6.router_alert">
+<span id="ipv6-router-alert-option-values"></span><h2>IPv6 Router Alert Option Values <a class="footnote-reference brackets" href="#id8" id="id3">‡</a><a class="headerlink" href="#module-pcapkit.vendor.ipv6.router_alert" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipv6.router_alert.RouterAlert">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipv6.router_alert.</code><code class="sig-name descname">RouterAlert</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/router_alert.html#RouterAlert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.router_alert.RouterAlert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>IPv6 Router Alert Option Values</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.router_alert.RouterAlert.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/router_alert.html#RouterAlert.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.router_alert.RouterAlert.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process CSV data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.router_alert.RouterAlert.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0 &lt;= value &lt;= 65535'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.router_alert.RouterAlert.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.router_alert.RouterAlert.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://www.iana.org/assignments/ipv6-routeralert-values/ipv6-routeralert-values-1.csv'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.router_alert.RouterAlert.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.vendor.ipv6.routing">
+<span id="routing-types"></span><h2>Routing Types <a class="footnote-reference brackets" href="#id9" id="id4">§</a><a class="headerlink" href="#module-pcapkit.vendor.ipv6.routing" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipv6.routing.Routing">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipv6.routing.</code><code class="sig-name descname">Routing</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/routing.html#Routing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.routing.Routing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>IPv6 Routing Types</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.routing.Routing.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/routing.html#Routing.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.routing.Routing.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process CSV data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.routing.Routing.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0 &lt;= value &lt;= 255'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.routing.Routing.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.routing.Routing.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-3.csv'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.routing.Routing.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.vendor.ipv6.seed_id">
+<span id="seed-id-types"></span><h2>Seed-ID Types<a class="headerlink" href="#module-pcapkit.vendor.ipv6.seed_id" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipv6.seed_id.SeedID">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipv6.seed_id.</code><code class="sig-name descname">SeedID</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/seed_id.html#SeedID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.seed_id.SeedID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>Seed-ID Types</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.seed_id.SeedID.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/seed_id.html#SeedID.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.seed_id.SeedID.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count field records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Registry data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Field recordings.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Counter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.seed_id.SeedID.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/seed_id.html#SeedID.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.seed_id.SeedID.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process registry data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – Registry data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.seed_id.SeedID.request">
+<code class="sig-name descname">request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/seed_id.html#SeedID.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.seed_id.SeedID.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch registry data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Registry data (<a class="reference internal" href="#pcapkit.vendor.ipv6.seed_id.DATA" title="pcapkit.vendor.ipv6.seed_id.DATA"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DATA</span></code></a>).</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.seed_id.SeedID.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0b00 &lt;= value &lt;= 0b11'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.seed_id.SeedID.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt id="pcapkit.vendor.ipv6.seed_id.DATA">
+<code class="sig-prename descclassname">pcapkit.vendor.ipv6.seed_id.</code><code class="sig-name descname">DATA</code><em class="property"> = {0: 'IPv6 Source Address', 1: '16-Bit Unsigned Integer', 2: '64-Bit Unsigned Integer', 3: '128-Bit Unsigned Integer'}</em><a class="headerlink" href="#pcapkit.vendor.ipv6.seed_id.DATA" title="Permalink to this definition">¶</a></dt>
+<dd><p>Seed-ID type registry [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>].</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.vendor.ipv6.tagger_id">
+<span id="taggerid-types"></span><h2>TaggerId Types <a class="footnote-reference brackets" href="#id10" id="id5">¶</a><a class="headerlink" href="#module-pcapkit.vendor.ipv6.tagger_id" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipv6.tagger_id.TaggerID">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipv6.tagger_id.</code><code class="sig-name descname">TaggerID</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/tagger_id.html#TaggerID"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.tagger_id.TaggerID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>TaggerID Types</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipv6.tagger_id.TaggerID.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipv6/tagger_id.html#TaggerID.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipv6.tagger_id.TaggerID.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process CSV data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.tagger_id.TaggerID.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0 &lt;= value &lt;= 7'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.tagger_id.TaggerID.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipv6.tagger_id.TaggerID.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://www.iana.org/assignments/ipv6-parameters/taggerId-types.csv'</em><a class="headerlink" href="#pcapkit.vendor.ipv6.tagger_id.TaggerID.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id6"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#extension-header">https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#extension-header</a></p>
+</dd>
+<dt class="label" id="id7"><span class="brackets"><a class="fn-backref" href="#id2">†</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#ipv6-parameters-2">https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#ipv6-parameters-2</a></p>
+</dd>
+<dt class="label" id="id8"><span class="brackets"><a class="fn-backref" href="#id3">‡</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ipv6-routeralert-values/ipv6-routeralert-values.xhtml#ipv6-routeralert-values-1">https://www.iana.org/assignments/ipv6-routeralert-values/ipv6-routeralert-values.xhtml#ipv6-routeralert-values-1</a></p>
+</dd>
+<dt class="label" id="id9"><span class="brackets"><a class="fn-backref" href="#id4">§</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#ipv6-parameters-3">https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#ipv6-parameters-3</a></p>
+</dd>
+<dt class="label" id="id10"><span class="brackets"><a class="fn-backref" href="#id5">¶</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#taggerId-types">https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#taggerId-types</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Web Crawlers for Constant Enumerations</a><ul>
+      <li>Previous: <a href="ipv4.html" title="previous chapter">IPv4 Vendor Crawler</a></li>
+      <li>Next: <a href="ipx.html" title="next chapter">IPX Vendor Crawler</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/vendor/ipv6.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auxiliary Interface &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Protocol Family" href="../protocols/index.html" />
+    <link rel="prev" title="Core User Interface" href="core.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.interface.misc">
+<span id="auxiliary-interface"></span><h1>Auxiliary Interface<a class="headerlink" href="#module-pcapkit.interface.misc" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.interface.misc" title="pcapkit.interface.misc"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface.misc</span></code></a> contains miscellaneous
+user interface functions, classes, etc., which are
+generally provided per user’s requests.</p>
+<dl class="py function">
+<dt id="pcapkit.interface.misc.follow_tcp_stream">
+<code class="sig-prename descclassname">pcapkit.interface.misc.</code><code class="sig-name descname">follow_tcp_stream</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fin</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">verbose</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">extension</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">engine</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">fout</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">format</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">byteorder</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">nanosecond</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/interface/misc.html#follow_tcp_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.interface.misc.follow_tcp_stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Follow TCP streams.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fin</strong> (<em>Optiona</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – file name to be read; if file not exist, raise <code class="xref py py-exc docutils literal notranslate"><span class="pre">FileNotFound</span></code></p></li>
+<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – if check and append extensions to output file</p></li>
+<li><p><strong>verbose</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – if print verbose output information</p></li>
+<li><p><strong>engine</strong> (<em>Optional</em><em>[</em><em>Literal</em><em>[</em><em>'default'</em><em>, </em><em>'pcapkit'</em><em>, </em><em>'dpkt'</em><em>, </em><em>'scapy'</em><em>, </em><em>'pyshark'</em><em>, </em><em>'server'</em><em>, </em><em>'pipeline'</em><em>]</em><em>]</em>) – extraction engine to be used</p></li>
+<li><p><strong>fout</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – path name for flow tracer if necessary</p></li>
+<li><p><strong>format</strong> (<em>Optional</em><em>[</em><em>Literal</em><em>[</em><em>'plist'</em><em>, </em><em>'json'</em><em>, </em><em>'tree'</em><em>, </em><em>'pcap'</em><em>]</em><em>]</em>) – output file
+format of flow tracer</p></li>
+<li><p><strong>byteorder</strong> (<em>Literal</em><em>[</em><em>'little'</em><em>, </em><em>'big'</em><em>]</em>) – output file byte order</p></li>
+<li><p><strong>nanosecond</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – output nanosecond-resolution file flag</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>List of extracted TCP streams.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">pcapkit.corekit.infoclass.Info</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">User Interface</a><ul>
+      <li>Previous: <a href="core.html" title="previous chapter">Core User Interface</a></li>
+      <li>Next: <a href="../protocols/index.html" title="next chapter">Protocol Family</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/interface/misc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

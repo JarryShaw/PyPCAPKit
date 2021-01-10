@@ -1,0 +1,266 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IPX Vendor Crawler &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="MH Vendor Crawler" href="mh.html" />
+    <link rel="prev" title="IPv6 Vendor Crawler" href="ipv6.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.vendor.ipx">
+<span id="ipx-vendor-crawler"></span><h1>IPX Vendor Crawler<a class="headerlink" href="#module-pcapkit.vendor.ipx" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pcapkit.vendor.ipx.packet">
+<span id="ipx-packet-types"></span><h2>IPX Packet Types <a class="footnote-reference brackets" href="#id3" id="id1">*</a><a class="headerlink" href="#module-pcapkit.vendor.ipx.packet" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipx.packet.Packet">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipx.packet.</code><code class="sig-name descname">Packet</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>IPX Packet Types</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipx.packet.Packet.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count field records.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipx.packet.Packet.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">soup</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process HTML source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>bs4.BeautifulSoup</em>) – Parsed HTML source.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipx.packet.Packet.request">
+<code class="sig-name descname">request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch HTML source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Context from <code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Parsed HTML source.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bs4.BeautifulSoup</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipx.packet.Packet.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0 &lt;= value &lt;= 255'</em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipx.packet.Packet.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure'</em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.vendor.ipx.socket">
+<span id="ipx-socket-types"></span><h2>IPX Socket Types <a class="footnote-reference brackets" href="#id4" id="id2">†</a><a class="headerlink" href="#module-pcapkit.vendor.ipx.socket" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ipx.socket.Socket">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ipx.socket.</code><code class="sig-name descname">Socket</code><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>Socket Types</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.ipx.socket.Socket.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count field records.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipx.socket.Socket.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">soup</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process HTML source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>bs4.BeautifulSoup</em>) – Parsed HTML source.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.ipx.socket.Socket.request">
+<code class="sig-name descname">request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch HTML source.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Context from <code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Parsed HTML source.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bs4.BeautifulSoup</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipx.socket.Socket.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0x0000 &lt;= value &lt;= 0xFFFF'</em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ipx.socket.Socket.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'</em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure">https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">†</a></span></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number">https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Web Crawlers for Constant Enumerations</a><ul>
+      <li>Previous: <a href="ipv6.html" title="previous chapter">IPv6 Vendor Crawler</a></li>
+      <li>Next: <a href="mh.html" title="next chapter">MH Vendor Crawler</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/vendor/ipx.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

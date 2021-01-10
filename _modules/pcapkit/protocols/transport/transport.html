@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.transport.transport &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.transport.transport</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=bad-whitespace</span>
+<span class="sd">&quot;&quot;&quot;root transport layer protocol</span>
+
+<span class="sd">:mod:`pcapkit.protocols.transport.transport` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.transport.Transport`,</span>
+<span class="sd">which is a base class for transport layer protocols, eg.</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.transport.tcp.TCP` and</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.transport.udp.UDP`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">TP_PROTO</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.null</span> <span class="kn">import</span> <span class="n">NoPayload</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.decorators</span> <span class="kn">import</span> <span class="n">beholder_ng</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># from pcapkit.fundation.analysis import analyse</span>
+<span class="c1">###############################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Transport&#39;</span><span class="p">,</span> <span class="s1">&#39;TP_PROTO&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Transport"><a class="viewcode-back" href="../../../../protocols/transport/index.html#pcapkit.protocols.transport.transport.Transport">[docs]</a><span class="k">class</span> <span class="nc">Transport</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for transport layer protocol family.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: Layer of protocol.</span>
+    <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">&#39;Transport&#39;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1"># protocol layer</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Protocol layer.</span>
+
+<span class="sd">        :rtype: Literal[&#39;Transport&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__layer__</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Transport._import_next_layer"><a class="viewcode-back" href="../../../../protocols/transport/index.html#pcapkit.protocols.transport.transport.Transport._import_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import next layer extractor.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            proto (str): next layer protocol name</span>
+<span class="sd">            length (int): valid (*non-padding*) length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pcapkit.protocols.protocol.Protocol: instance of next layer</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span> <span class="o">==</span> <span class="s1">&#39;null&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pcapkit.protocols.raw</span> <span class="kn">import</span> \
+                <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pcapkit.foundation.analysis</span> <span class="kn">import</span> \
+                <span class="n">analyse</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">NoPayload</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_onerror</span><span class="p">:</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">beholder_ng</span><span class="p">(</span><span class="n">protocol</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">termination</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">termination</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">next_</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

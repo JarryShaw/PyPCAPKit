@@ -1,0 +1,2861 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Protocol Type Registry Constant Enumerations &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TCP Constant Enumerations" href="tcp.html" />
+    <link rel="prev" title="OSPF Constant Enumerations" href="ospf.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.const.reg">
+<span id="protocol-type-registry-constant-enumerations"></span><h1>Protocol Type Registry Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.reg" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pcapkit.const.reg.linktype">
+<span id="link-layer-header-types"></span><h2>LINK-LAYER HEADER TYPES <a class="footnote-reference brackets" href="#id4" id="id1">*</a><a class="headerlink" href="#module-pcapkit.const.reg.linktype" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.reg.linktype.LinkType">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.reg.linktype.</code><code class="sig-name descname">LinkType</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/linktype.html#LinkType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[LinkType] Link-Layer Header Type Values</p>
+<dl class="py method">
+<dt id="pcapkit.const.reg.linktype.LinkType._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/linktype.html#LinkType._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.reg.linktype.LinkType.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/linktype.html#LinkType.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.APPLE_IP_OVER_IEEE1394">
+<code class="sig-name descname">APPLE_IP_OVER_IEEE1394</code><em class="property"> = 138</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.APPLE_IP_OVER_IEEE1394" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_APPLE_IP_OVER_IEEE1394</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ARCNET_BSD">
+<code class="sig-name descname">ARCNET_BSD</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ARCNET_BSD" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ARCNET</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ARCNET_LINUX">
+<code class="sig-name descname">ARCNET_LINUX</code><em class="property"> = 129</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ARCNET_LINUX" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ARCNET_LINUX</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ATM_RFC1483">
+<code class="sig-name descname">ATM_RFC1483</code><em class="property"> = 100</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ATM_RFC1483" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ATM_RFC1483</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ATSC_ALP">
+<code class="sig-name descname">ATSC_ALP</code><em class="property"> = 289</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ATSC_ALP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ATSC_ALP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.AX25">
+<code class="sig-name descname">AX25</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.AX25" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_AX25</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.AX25_KISS">
+<code class="sig-name descname">AX25_KISS</code><em class="property"> = 202</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.AX25_KISS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_AX25_KISS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.BACNET_MS_TP">
+<code class="sig-name descname">BACNET_MS_TP</code><em class="property"> = 165</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.BACNET_MS_TP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_BACNET_MS_TP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.BLUETOOTH_BREDR_BB">
+<code class="sig-name descname">BLUETOOTH_BREDR_BB</code><em class="property"> = 255</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.BLUETOOTH_BREDR_BB" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_BLUETOOTH_BREDR_BB</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.BLUETOOTH_HCI_H4">
+<code class="sig-name descname">BLUETOOTH_HCI_H4</code><em class="property"> = 187</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.BLUETOOTH_HCI_H4" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_BLUETOOTH_HCI_H4</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.BLUETOOTH_HCI_H4_WITH_PHDR">
+<code class="sig-name descname">BLUETOOTH_HCI_H4_WITH_PHDR</code><em class="property"> = 201</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.BLUETOOTH_HCI_H4_WITH_PHDR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_BLUETOOTH_HCI_H4_WITH_PHDR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.BLUETOOTH_LE_LL">
+<code class="sig-name descname">BLUETOOTH_LE_LL</code><em class="property"> = 251</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.BLUETOOTH_LE_LL" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_BLUETOOTH_LE_LL</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.BLUETOOTH_LE_LL_WITH_PHDR">
+<code class="sig-name descname">BLUETOOTH_LE_LL_WITH_PHDR</code><em class="property"> = 256</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.BLUETOOTH_LE_LL_WITH_PHDR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_BLUETOOTH_LE_LL_WITH_PHDR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.BLUETOOTH_LINUX_MONITOR">
+<code class="sig-name descname">BLUETOOTH_LINUX_MONITOR</code><em class="property"> = 254</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.BLUETOOTH_LINUX_MONITOR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_BLUETOOTH_LINUX_MONITOR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.CAN_SOCKETCAN">
+<code class="sig-name descname">CAN_SOCKETCAN</code><em class="property"> = 227</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.CAN_SOCKETCAN" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_CAN_SOCKETCAN</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.C_HDLC">
+<code class="sig-name descname">C_HDLC</code><em class="property"> = 104</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.C_HDLC" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_C_HDLC</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.C_HDLC_WITH_DIR">
+<code class="sig-name descname">C_HDLC_WITH_DIR</code><em class="property"> = 205</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.C_HDLC_WITH_DIR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_C_HDLC_WITH_DIR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DBUS">
+<code class="sig-name descname">DBUS</code><em class="property"> = 231</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DBUS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DBUS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DISPLAYPORT_AUX">
+<code class="sig-name descname">DISPLAYPORT_AUX</code><em class="property"> = 275</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DISPLAYPORT_AUX" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DISPLAYPORT_AUX</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DOCSIS">
+<code class="sig-name descname">DOCSIS</code><em class="property"> = 143</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DOCSIS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DOCSIS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DOCSIS31_XRA31">
+<code class="sig-name descname">DOCSIS31_XRA31</code><em class="property"> = 273</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DOCSIS31_XRA31" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DOCSIS31_XRA31</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DSA_TAG_BRCM">
+<code class="sig-name descname">DSA_TAG_BRCM</code><em class="property"> = 281</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DSA_TAG_BRCM" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DSA_TAG_BRCM</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DSA_TAG_BRCM_PREPEND">
+<code class="sig-name descname">DSA_TAG_BRCM_PREPEND</code><em class="property"> = 282</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DSA_TAG_BRCM_PREPEND" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DSA_TAG_BRCM_PREPEND</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DSA_TAG_DSA">
+<code class="sig-name descname">DSA_TAG_DSA</code><em class="property"> = 284</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DSA_TAG_DSA" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DSA_TAG_DSA</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DSA_TAG_EDSA">
+<code class="sig-name descname">DSA_TAG_EDSA</code><em class="property"> = 285</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DSA_TAG_EDSA" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DSA_TAG_EDSA</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.DVB_CI">
+<code class="sig-name descname">DVB_CI</code><em class="property"> = 235</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.DVB_CI" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_DVB_CI</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.EBHSCR">
+<code class="sig-name descname">EBHSCR</code><em class="property"> = 279</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.EBHSCR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_EBHSCR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ELEE">
+<code class="sig-name descname">ELEE</code><em class="property"> = 286</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ELEE" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ELEE</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.EPON">
+<code class="sig-name descname">EPON</code><em class="property"> = 259</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.EPON" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_EPON</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ERF">
+<code class="sig-name descname">ERF</code><em class="property"> = 197</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ERF" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ERF</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ETHERNET">
+<code class="sig-name descname">ETHERNET</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ETHERNET" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_EN10MB</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ETHERNET_MPACKET">
+<code class="sig-name descname">ETHERNET_MPACKET</code><em class="property"> = 274</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ETHERNET_MPACKET" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ETHERNET_MPACKET</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.FC_2">
+<code class="sig-name descname">FC_2</code><em class="property"> = 224</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.FC_2" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_FC_2</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.FC_2_WITH_FRAME_DELIMS">
+<code class="sig-name descname">FC_2_WITH_FRAME_DELIMS</code><em class="property"> = 225</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.FC_2_WITH_FRAME_DELIMS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_FC_2_WITH_FRAME_DELIMS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.FDDI">
+<code class="sig-name descname">FDDI</code><em class="property"> = 10</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.FDDI" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_FDDI</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.FRELAY">
+<code class="sig-name descname">FRELAY</code><em class="property"> = 107</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.FRELAY" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_FRELAY</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.FRELAY_WITH_DIR">
+<code class="sig-name descname">FRELAY_WITH_DIR</code><em class="property"> = 206</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.FRELAY_WITH_DIR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_FRELAY_WITH_DIR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.GPF_F">
+<code class="sig-name descname">GPF_F</code><em class="property"> = 171</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.GPF_F" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_GPF_F</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.GPF_T">
+<code class="sig-name descname">GPF_T</code><em class="property"> = 170</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.GPF_T" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_GPF_T</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.GPRS_LLC">
+<code class="sig-name descname">GPRS_LLC</code><em class="property"> = 169</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.GPRS_LLC" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_GPRS_LLC</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_11">
+<code class="sig-name descname">IEEE802_11</code><em class="property"> = 105</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_11" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_11</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_11_AVS">
+<code class="sig-name descname">IEEE802_11_AVS</code><em class="property"> = 163</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_11_AVS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_11_RADIO_AVS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_11_PRISM">
+<code class="sig-name descname">IEEE802_11_PRISM</code><em class="property"> = 119</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_11_PRISM" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PRISM_HEADER</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_11_RADIOTAP">
+<code class="sig-name descname">IEEE802_11_RADIOTAP</code><em class="property"> = 127</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_11_RADIOTAP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_11_RADIO</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_NOFCS">
+<code class="sig-name descname">IEEE802_15_4_NOFCS</code><em class="property"> = 230</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_NOFCS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_15_4_NOFCS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_NONASK_PHY">
+<code class="sig-name descname">IEEE802_15_4_NONASK_PHY</code><em class="property"> = 215</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_NONASK_PHY" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_15_4_NONASK_PHY</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_TAP">
+<code class="sig-name descname">IEEE802_15_4_TAP</code><em class="property"> = 283</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_TAP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_15_4_TAP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_WITHFCS">
+<code class="sig-name descname">IEEE802_15_4_WITHFCS</code><em class="property"> = 195</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_15_4_WITHFCS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IEEE802_15_4_WITHFCS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IEEE802_5">
+<code class="sig-name descname">IEEE802_5</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IEEE802_5" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IEEE802</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.INFINIBAND">
+<code class="sig-name descname">INFINIBAND</code><em class="property"> = 247</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.INFINIBAND" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_INFINIBAND</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IPMB_LINUX">
+<code class="sig-name descname">IPMB_LINUX</code><em class="property"> = 209</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IPMB_LINUX" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IPMB_LINUX</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IPMI_HPM_2">
+<code class="sig-name descname">IPMI_HPM_2</code><em class="property"> = 260</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IPMI_HPM_2" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IPMI_HPM_2</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IPNET">
+<code class="sig-name descname">IPNET</code><em class="property"> = 226</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IPNET" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IPNET</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IPOIB">
+<code class="sig-name descname">IPOIB</code><em class="property"> = 242</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IPOIB" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IPOIB</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IPV4">
+<code class="sig-name descname">IPV4</code><em class="property"> = 228</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IPV4" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IPV4</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IPV6">
+<code class="sig-name descname">IPV6</code><em class="property"> = 229</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IPV6" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IPV6</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.IP_OVER_FC">
+<code class="sig-name descname">IP_OVER_FC</code><em class="property"> = 122</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.IP_OVER_FC" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_IP_OVER_FC</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ISO_14443">
+<code class="sig-name descname">ISO_14443</code><em class="property"> = 264</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ISO_14443" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ISO_14443</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LAPB_WITH_DIR">
+<code class="sig-name descname">LAPB_WITH_DIR</code><em class="property"> = 207</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LAPB_WITH_DIR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LAPB_WITH_DIR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LAPD">
+<code class="sig-name descname">LAPD</code><em class="property"> = 203</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LAPD" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LAPD</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LINUX_IRDA">
+<code class="sig-name descname">LINUX_IRDA</code><em class="property"> = 144</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_IRDA" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LINUX_IRDA</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LINUX_LAPD">
+<code class="sig-name descname">LINUX_LAPD</code><em class="property"> = 177</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_LAPD" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LINUX_LAPD</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LINUX_SLL">
+<code class="sig-name descname">LINUX_SLL</code><em class="property"> = 113</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_SLL" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LINUX_SLL2">
+<code class="sig-name descname">LINUX_SLL2</code><em class="property"> = 276</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LINUX_SLL2" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LINUX_SLL2</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LOOP">
+<code class="sig-name descname">LOOP</code><em class="property"> = 108</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LOOP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LOOP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LORATAP">
+<code class="sig-name descname">LORATAP</code><em class="property"> = 270</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LORATAP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LORATAP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.LTALK">
+<code class="sig-name descname">LTALK</code><em class="property"> = 114</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.LTALK" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_LTALK</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.MFR">
+<code class="sig-name descname">MFR</code><em class="property"> = 182</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MFR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_MFR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.MPEG_2_TS">
+<code class="sig-name descname">MPEG_2_TS</code><em class="property"> = 243</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MPEG_2_TS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_MPEG_2_TS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.MTP2">
+<code class="sig-name descname">MTP2</code><em class="property"> = 140</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MTP2" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_MTP2</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.MTP2_WITH_PHDR">
+<code class="sig-name descname">MTP2_WITH_PHDR</code><em class="property"> = 139</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MTP2_WITH_PHDR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_MTP2_WITH_PHDR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.MTP3">
+<code class="sig-name descname">MTP3</code><em class="property"> = 141</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MTP3" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_MTP3</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.MUX27010">
+<code class="sig-name descname">MUX27010</code><em class="property"> = 236</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.MUX27010" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_MUX27010</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.NETANALYZER">
+<code class="sig-name descname">NETANALYZER</code><em class="property"> = 240</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NETANALYZER" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_NETANALYZER</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.NETANALYZER_TRANSPARENT">
+<code class="sig-name descname">NETANALYZER_TRANSPARENT</code><em class="property"> = 241</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NETANALYZER_TRANSPARENT" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_NETANALYZER_TRANSPARENT</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.NETLINK">
+<code class="sig-name descname">NETLINK</code><em class="property"> = 253</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NETLINK" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_NETLINK</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.NFC_LLCP">
+<code class="sig-name descname">NFC_LLCP</code><em class="property"> = 245</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NFC_LLCP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_NFC_LLCP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.NFLOG">
+<code class="sig-name descname">NFLOG</code><em class="property"> = 239</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NFLOG" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_NFLOG</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.NG40">
+<code class="sig-name descname">NG40</code><em class="property"> = 244</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NG40" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_NG40</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.NORDIC_BLE">
+<code class="sig-name descname">NORDIC_BLE</code><em class="property"> = 272</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NORDIC_BLE" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_NORDIC_BLE</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.NULL">
+<code class="sig-name descname">NULL</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.NULL" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_NULL</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.OPENVIZSLA">
+<code class="sig-name descname">OPENVIZSLA</code><em class="property"> = 278</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.OPENVIZSLA" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_OPENVIZSLA</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PFLOG">
+<code class="sig-name descname">PFLOG</code><em class="property"> = 117</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PFLOG" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PFLOG</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PKTAP">
+<code class="sig-name descname">PKTAP</code><em class="property"> = 258</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PKTAP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PKTAP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PPI">
+<code class="sig-name descname">PPI</code><em class="property"> = 192</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPI" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PPI</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PPP">
+<code class="sig-name descname">PPP</code><em class="property"> = 9</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PPP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PPP_ETHER">
+<code class="sig-name descname">PPP_ETHER</code><em class="property"> = 51</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPP_ETHER" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PPP_ETHER</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PPP_HDLC">
+<code class="sig-name descname">PPP_HDLC</code><em class="property"> = 50</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPP_HDLC" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PPP_SERIAL</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PPP_PPPD">
+<code class="sig-name descname">PPP_PPPD</code><em class="property"> = 166</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPP_PPPD" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PPP_PPPD</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PPP_WITH_DIR">
+<code class="sig-name descname">PPP_WITH_DIR</code><em class="property"> = 204</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PPP_WITH_DIR" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PPP_WITH_DIR</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.PROFIBUS_DL">
+<code class="sig-name descname">PROFIBUS_DL</code><em class="property"> = 257</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PROFIBUS_DL" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_PROFIBUS_DL</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.RAW">
+<code class="sig-name descname">RAW</code><em class="property"> = 101</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.RAW" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_RAW</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.RDS">
+<code class="sig-name descname">RDS</code><em class="property"> = 265</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.RDS" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_RDS</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.RTAC_SERIAL">
+<code class="sig-name descname">RTAC_SERIAL</code><em class="property"> = 250</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.RTAC_SERIAL" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_RTAC_SERIAL</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.SCCP">
+<code class="sig-name descname">SCCP</code><em class="property"> = 142</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SCCP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_SCCP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.SCTP">
+<code class="sig-name descname">SCTP</code><em class="property"> = 248</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SCTP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_SCTP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.SDLC">
+<code class="sig-name descname">SDLC</code><em class="property"> = 268</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SDLC" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_SDLC</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.SITA">
+<code class="sig-name descname">SITA</code><em class="property"> = 196</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SITA" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_SITA</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.SLIP">
+<code class="sig-name descname">SLIP</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SLIP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_SLIP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.STANAG_5066_D_PDU">
+<code class="sig-name descname">STANAG_5066_D_PDU</code><em class="property"> = 237</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.STANAG_5066_D_PDU" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_STANAG_5066_D_PDU</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.SUNATM">
+<code class="sig-name descname">SUNATM</code><em class="property"> = 123</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.SUNATM" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_SUNATM</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USBPCAP">
+<code class="sig-name descname">USBPCAP</code><em class="property"> = 249</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USBPCAP" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USBPCAP</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USB_2_0">
+<code class="sig-name descname">USB_2_0</code><em class="property"> = 288</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_2_0" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USB_2_0</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USB_DARWIN">
+<code class="sig-name descname">USB_DARWIN</code><em class="property"> = 266</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_DARWIN" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USB_DARWIN</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USB_LINUX">
+<code class="sig-name descname">USB_LINUX</code><em class="property"> = 189</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_LINUX" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USB_LINUX</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USB_LINUX_MMAPPED">
+<code class="sig-name descname">USB_LINUX_MMAPPED</code><em class="property"> = 220</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USB_LINUX_MMAPPED" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USB_LINUX_MMAPPED</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_0">
+<code class="sig-name descname">USER_0</code><em class="property"> = 147</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_0" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_0</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_1">
+<code class="sig-name descname">USER_1</code><em class="property"> = 148</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_1" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_1</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_10">
+<code class="sig-name descname">USER_10</code><em class="property"> = 157</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_10" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_10</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_11">
+<code class="sig-name descname">USER_11</code><em class="property"> = 158</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_11" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_11</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_12">
+<code class="sig-name descname">USER_12</code><em class="property"> = 159</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_12" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_12</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_13">
+<code class="sig-name descname">USER_13</code><em class="property"> = 160</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_13" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_13</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_14">
+<code class="sig-name descname">USER_14</code><em class="property"> = 161</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_14" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_14</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_15">
+<code class="sig-name descname">USER_15</code><em class="property"> = 162</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_15" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_15</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_2">
+<code class="sig-name descname">USER_2</code><em class="property"> = 149</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_2" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_2</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_3">
+<code class="sig-name descname">USER_3</code><em class="property"> = 150</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_3" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_3</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_4">
+<code class="sig-name descname">USER_4</code><em class="property"> = 151</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_4" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_4</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_5">
+<code class="sig-name descname">USER_5</code><em class="property"> = 152</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_5" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_5</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_6">
+<code class="sig-name descname">USER_6</code><em class="property"> = 153</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_6" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_6</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_7">
+<code class="sig-name descname">USER_7</code><em class="property"> = 154</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_7" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_7</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_8">
+<code class="sig-name descname">USER_8</code><em class="property"> = 155</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_8" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_8</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.USER_9">
+<code class="sig-name descname">USER_9</code><em class="property"> = 156</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.USER_9" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_USER_9</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.VPP_DISPATCH">
+<code class="sig-name descname">VPP_DISPATCH</code><em class="property"> = 280</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.VPP_DISPATCH" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_VPP_DISPATCH</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.VSOCK">
+<code class="sig-name descname">VSOCK</code><em class="property"> = 271</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.VSOCK" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_VSOCK</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.WATTSTOPPER_DLM">
+<code class="sig-name descname">WATTSTOPPER_DLM</code><em class="property"> = 263</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.WATTSTOPPER_DLM" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_WATTSTOPPER_DLM</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ZWAVE_R1_R2">
+<code class="sig-name descname">ZWAVE_R1_R2</code><em class="property"> = 261</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ZWAVE_R1_R2" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ZWAVE_R1_R2</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.ZWAVE_R3">
+<code class="sig-name descname">ZWAVE_R3</code><em class="property"> = 262</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.ZWAVE_R3" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_ZWAVE_R3</span></code></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.linktype.LinkType.Z_WAVE_SERIAL">
+<code class="sig-name descname">Z_WAVE_SERIAL</code><em class="property"> = 287</em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.Z_WAVE_SERIAL" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DLT_Z_WAVE_SERIAL</span></code></p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.reg.ethertype">
+<span id="ether-types"></span><h2>ETHER TYPES <a class="footnote-reference brackets" href="#id5" id="id2">†</a><a class="headerlink" href="#module-pcapkit.const.reg.ethertype" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.reg.ethertype.EtherType">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.reg.ethertype.</code><code class="sig-name descname">EtherType</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/ethertype.html#EtherType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[EtherType] Ethertype IEEE 802 Numbers</p>
+<dl class="py method">
+<dt id="pcapkit.const.reg.ethertype.EtherType._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/ethertype.html#EtherType._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.reg.ethertype.EtherType.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/ethertype.html#EtherType.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.ARAI_Bunkichi">
+<code class="sig-name descname">ARAI_Bunkichi</code><em class="property"> = 33188</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.ARAI_Bunkichi" title="Permalink to this definition">¶</a></dt>
+<dd><p>ARAI Bunkichi [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.ATOMIC">
+<code class="sig-name descname">ATOMIC</code><em class="property"> = 34527</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.ATOMIC" title="Permalink to this definition">¶</a></dt>
+<dd><p>ATOMIC [Joe Touch]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.AT_T_0x8008">
+<code class="sig-name descname">AT_T_0x8008</code><em class="property"> = 32776</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.AT_T_0x8008" title="Permalink to this definition">¶</a></dt>
+<dd><p>AT&amp;T [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.AT_T_0x8046">
+<code class="sig-name descname">AT_T_0x8046</code><em class="property"> = 32838</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.AT_T_0x8046" title="Permalink to this definition">¶</a></dt>
+<dd><p>AT&amp;T [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.AT_T_0x8047">
+<code class="sig-name descname">AT_T_0x8047</code><em class="property"> = 32839</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.AT_T_0x8047" title="Permalink to this definition">¶</a></dt>
+<dd><p>AT&amp;T [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.AT_T_0x8069">
+<code class="sig-name descname">AT_T_0x8069</code><em class="property"> = 32873</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.AT_T_0x8069" title="Permalink to this definition">¶</a></dt>
+<dd><p>AT&amp;T [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol">
+<code class="sig-name descname">Address_Resolution_Protocol</code><em class="property"> = 2054</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Address Resolution Protocol (ARP) [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Aeonic_Systems">
+<code class="sig-name descname">Aeonic_Systems</code><em class="property"> = 32822</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Aeonic_Systems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aeonic Systems [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Alpha_Micro">
+<code class="sig-name descname">Alpha_Micro</code><em class="property"> = 33098</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Alpha_Micro" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alpha Micro [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Apollo_Computer">
+<code class="sig-name descname">Apollo_Computer</code><em class="property"> = 33015</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Apollo_Computer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apollo Computer [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Apollo_Domain">
+<code class="sig-name descname">Apollo_Domain</code><em class="property"> = 32793</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Apollo_Domain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apollo Domain [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.AppleTalk_AARP">
+<code class="sig-name descname">AppleTalk_AARP</code><em class="property"> = 33011</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.AppleTalk_AARP" title="Permalink to this definition">¶</a></dt>
+<dd><p>AppleTalk AARP (Kinetics) [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Appletalk">
+<code class="sig-name descname">Appletalk</code><em class="property"> = 32923</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Appletalk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Appletalk [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Applitek_Corporation">
+<code class="sig-name descname">Applitek_Corporation</code><em class="property"> = 32967</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Applitek_Corporation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applitek Corporation [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Autophon">
+<code class="sig-name descname">Autophon</code><em class="property"> = 32874</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Autophon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autophon [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.BBN_Simnet">
+<code class="sig-name descname">BBN_Simnet</code><em class="property"> = 21000</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.BBN_Simnet" title="Permalink to this definition">¶</a></dt>
+<dd><p>BBN Simnet [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.BBN_VITAL_LanBridge_cache">
+<code class="sig-name descname">BBN_VITAL_LanBridge_cache</code><em class="property"> = 65280</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.BBN_VITAL_LanBridge_cache" title="Permalink to this definition">¶</a></dt>
+<dd><p>BBN VITAL-LanBridge cache [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.BIIN_0x814D">
+<code class="sig-name descname">BIIN_0x814D</code><em class="property"> = 33101</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.BIIN_0x814D" title="Permalink to this definition">¶</a></dt>
+<dd><p>BIIN [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.BIIN_0x814E">
+<code class="sig-name descname">BIIN_0x814E</code><em class="property"> = 33102</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.BIIN_0x814E" title="Permalink to this definition">¶</a></dt>
+<dd><p>BIIN [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Banyan_Systems_0x80C4">
+<code class="sig-name descname">Banyan_Systems_0x80C4</code><em class="property"> = 32964</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Banyan_Systems_0x80C4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Banyan Systems [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Banyan_Systems_0x80C5">
+<code class="sig-name descname">Banyan_Systems_0x80C5</code><em class="property"> = 32965</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Banyan_Systems_0x80C5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Banyan Systems [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Banyan_VINES">
+<code class="sig-name descname">Banyan_VINES</code><em class="property"> = 2989</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Banyan_VINES" title="Permalink to this definition">¶</a></dt>
+<dd><p>Banyan VINES [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Berkeley_Trailer_nego">
+<code class="sig-name descname">Berkeley_Trailer_nego</code><em class="property"> = 4096</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Berkeley_Trailer_nego" title="Permalink to this definition">¶</a></dt>
+<dd><p>Berkeley Trailer nego [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Cabletron">
+<code class="sig-name descname">Cabletron</code><em class="property"> = 28724</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Cabletron" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cabletron [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Chaosnet">
+<code class="sig-name descname">Chaosnet</code><em class="property"> = 2052</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Chaosnet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chaosnet [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.ComDesign">
+<code class="sig-name descname">ComDesign</code><em class="property"> = 32876</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.ComDesign" title="Permalink to this definition">¶</a></dt>
+<dd><p>ComDesign [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Computgraphic_Corp">
+<code class="sig-name descname">Computgraphic_Corp</code><em class="property"> = 32877</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Computgraphic_Corp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computgraphic Corp. [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Counterpoint_Computers">
+<code class="sig-name descname">Counterpoint_Computers</code><em class="property"> = 32866</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Counterpoint_Computers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Counterpoint Computers [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Cronus_Direct">
+<code class="sig-name descname">Cronus_Direct</code><em class="property"> = 32772</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Cronus_Direct" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cronus Direct [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc824.html"><strong>RFC 824</strong></a>][Daniel Tappan]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Cronus_VLN">
+<code class="sig-name descname">Cronus_VLN</code><em class="property"> = 32771</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Cronus_VLN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Cronus VLN [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc824.html"><strong>RFC 824</strong></a>][Daniel Tappan]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type">
+<code class="sig-name descname">Customer_VLAN_Tag_Type</code><em class="property"> = 33024</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Customer VLAN Tag Type (C-Tag, formerly called the Q-Tag) (initially
+Wellfleet) [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_Customer_Protocol">
+<code class="sig-name descname">DEC_Customer_Protocol</code><em class="property"> = 24582</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_Customer_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC Customer Protocol [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_DECNET_Phase_IV_Route">
+<code class="sig-name descname">DEC_DECNET_Phase_IV_Route</code><em class="property"> = 24579</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_DECNET_Phase_IV_Route" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC DECNET Phase IV Route [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_Diagnostic_Protocol">
+<code class="sig-name descname">DEC_Diagnostic_Protocol</code><em class="property"> = 24581</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_Diagnostic_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC Diagnostic Protocol [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_Ethernet_Encryption">
+<code class="sig-name descname">DEC_Ethernet_Encryption</code><em class="property"> = 32829</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_Ethernet_Encryption" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC Ethernet Encryption [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_LANBridge">
+<code class="sig-name descname">DEC_LANBridge</code><em class="property"> = 32824</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_LANBridge" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC LANBridge [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_LAN_Traffic_Monitor">
+<code class="sig-name descname">DEC_LAN_Traffic_Monitor</code><em class="property"> = 32831</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_LAN_Traffic_Monitor" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC LAN Traffic Monitor [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_LAT">
+<code class="sig-name descname">DEC_LAT</code><em class="property"> = 24580</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_LAT" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC LAT [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_LAVC_SCA">
+<code class="sig-name descname">DEC_LAVC_SCA</code><em class="property"> = 24583</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_LAVC_SCA" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC LAVC, SCA [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_MOP_Dump_Load">
+<code class="sig-name descname">DEC_MOP_Dump_Load</code><em class="property"> = 24577</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_MOP_Dump_Load" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC MOP Dump/Load [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_MOP_Remote_Console">
+<code class="sig-name descname">DEC_MOP_Remote_Console</code><em class="property"> = 24578</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_MOP_Remote_Console" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC MOP Remote Console [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_Unassigned_0x6000">
+<code class="sig-name descname">DEC_Unassigned_0x6000</code><em class="property"> = 24576</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_Unassigned_0x6000" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC Unassigned (Exp.) [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DEC_Unassigned_0x803E">
+<code class="sig-name descname">DEC_Unassigned_0x803E</code><em class="property"> = 32830</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DEC_Unassigned_0x803E" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEC Unassigned [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DLOG_0x0660">
+<code class="sig-name descname">DLOG_0x0660</code><em class="property"> = 1632</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DLOG_0x0660" title="Permalink to this definition">¶</a></dt>
+<dd><p>DLOG [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.DLOG_0x0661">
+<code class="sig-name descname">DLOG_0x0661</code><em class="property"> = 1633</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.DLOG_0x0661" title="Permalink to this definition">¶</a></dt>
+<dd><p>DLOG [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Dansk_Data_Elektronik">
+<code class="sig-name descname">Dansk_Data_Elektronik</code><em class="property"> = 32891</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Dansk_Data_Elektronik" title="Permalink to this definition">¶</a></dt>
+<dd><p>Dansk Data Elektronik [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Delta_Controls">
+<code class="sig-name descname">Delta_Controls</code><em class="property"> = 34526</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Delta_Controls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delta Controls [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.ECMA_Internet">
+<code class="sig-name descname">ECMA_Internet</code><em class="property"> = 2051</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.ECMA_Internet" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECMA Internet [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.EtherType_3Com_TCP_IP_Sys">
+<code class="sig-name descname">EtherType_3Com_TCP_IP_Sys</code><em class="property"> = 36866</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.EtherType_3Com_TCP_IP_Sys" title="Permalink to this definition">¶</a></dt>
+<dd><p>3Com(Bridge) TCP-IP Sys [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.EtherType_3Com_XNS_Sys_Mgmt">
+<code class="sig-name descname">EtherType_3Com_XNS_Sys_Mgmt</code><em class="property"> = 36865</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.EtherType_3Com_XNS_Sys_Mgmt" title="Permalink to this definition">¶</a></dt>
+<dd><p>3Com(Bridge) XNS Sys Mgmt [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.EtherType_3Com_loop_detect">
+<code class="sig-name descname">EtherType_3Com_loop_detect</code><em class="property"> = 36867</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.EtherType_3Com_loop_detect" title="Permalink to this definition">¶</a></dt>
+<dd><p>3Com(Bridge) loop detect [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Evans_Sutherland">
+<code class="sig-name descname">Evans_Sutherland</code><em class="property"> = 32861</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Evans_Sutherland" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evans &amp; Sutherland [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Excelan">
+<code class="sig-name descname">Excelan</code><em class="property"> = 32784</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Excelan" title="Permalink to this definition">¶</a></dt>
+<dd><p>Excelan [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.ExperData">
+<code class="sig-name descname">ExperData</code><em class="property"> = 32841</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.ExperData" title="Permalink to this definition">¶</a></dt>
+<dd><p>ExperData [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Frame_Relay_ARP">
+<code class="sig-name descname">Frame_Relay_ARP</code><em class="property"> = 2056</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Frame_Relay_ARP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frame Relay ARP [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.General_Dynamics">
+<code class="sig-name descname">General_Dynamics</code><em class="property"> = 32872</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.General_Dynamics" title="Permalink to this definition">¶</a></dt>
+<dd><p>General Dynamics [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.General_Switch_Management_Protocol">
+<code class="sig-name descname">General_Switch_Management_Protocol</code><em class="property"> = 34828</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.General_Switch_Management_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>General Switch Management Protocol (GSMP) [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.GeoNetworking_as_defined_in_ETSI_EN_302_636_4_1">
+<code class="sig-name descname">GeoNetworking_as_defined_in_ETSI_EN_302_636_4_1</code><em class="property"> = 35143</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.GeoNetworking_as_defined_in_ETSI_EN_302_636_4_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>GeoNetworking as defined in ETSI EN 302 636-4-1 [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.HIPPI_FP_encapsulation">
+<code class="sig-name descname">HIPPI_FP_encapsulation</code><em class="property"> = 33152</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.HIPPI_FP_encapsulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIPPI-FP encapsulation [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.HP_Probe">
+<code class="sig-name descname">HP_Probe</code><em class="property"> = 32773</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.HP_Probe" title="Permalink to this definition">¶</a></dt>
+<dd><p>HP Probe [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Hayes_Microcomputers">
+<code class="sig-name descname">Hayes_Microcomputers</code><em class="property"> = 33072</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Hayes_Microcomputers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hayes Microcomputers [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IBM_SNA_Service_on_Ether">
+<code class="sig-name descname">IBM_SNA_Service_on_Ether</code><em class="property"> = 32981</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IBM_SNA_Service_on_Ether" title="Permalink to this definition">¶</a></dt>
+<dd><p>IBM SNA Service on Ether [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_11_Fast_Roaming_Remote_Request">
+<code class="sig-name descname">IEEE_Std_802_11_Fast_Roaming_Remote_Request</code><em class="property"> = 35085</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_11_Fast_Roaming_Remote_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.11 - Fast Roaming Remote Request (802.11r) [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_11_Pre_Authentication">
+<code class="sig-name descname">IEEE_Std_802_11_Pre_Authentication</code><em class="property"> = 35015</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_11_Pre_Authentication" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.11 - Pre-Authentication (802.11i) [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1AB_Link_Layer_Discovery_Protocol">
+<code class="sig-name descname">IEEE_Std_802_1AB_Link_Layer_Discovery_Protocol</code><em class="property"> = 35020</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1AB_Link_Layer_Discovery_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.1AB - Link Layer Discovery Protocol (LLDP) [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1AE_Media_Access_Control_Security">
+<code class="sig-name descname">IEEE_Std_802_1AE_Media_Access_Control_Security</code><em class="property"> = 35045</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1AE_Media_Access_Control_Security" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.1AE - Media Access Control Security [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Multiple_Multicast_Registration_Protocol">
+<code class="sig-name descname">IEEE_Std_802_1Q_Multiple_Multicast_Registration_Protocol</code><em class="property"> = 35062</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Multiple_Multicast_Registration_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.1Q - Multiple Multicast Registration Protocol (MMRP) [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Multiple_VLAN_Registration_Protocol">
+<code class="sig-name descname">IEEE_Std_802_1Q_Multiple_VLAN_Registration_Protocol</code><em class="property"> = 35061</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Multiple_VLAN_Registration_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.1Q  - Multiple VLAN Registration Protocol (MVRP) [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier">
+<code class="sig-name descname">IEEE_Std_802_1Q_Service_VLAN_tag_identifier</code><em class="property"> = 34984</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Q_Service_VLAN_tag_identifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.1Q - Service VLAN tag identifier (S-Tag) [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Qbe_Multiple_I_SID_Registration_Protocol">
+<code class="sig-name descname">IEEE_Std_802_1Qbe_Multiple_I_SID_Registration_Protocol</code><em class="property"> = 35113</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Qbe_Multiple_I_SID_Registration_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.1Qbe - Multiple I-SID Registration Protocol [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Qbg_ECP_Protocol">
+<code class="sig-name descname">IEEE_Std_802_1Qbg_ECP_Protocol</code><em class="property"> = 35136</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1Qbg_ECP_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.1Qbg - ECP Protocol (also used in 802.1BR) [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1X_Port_based_network_access_control">
+<code class="sig-name descname">IEEE_Std_802_1X_Port_based_network_access_control</code><em class="property"> = 34958</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_1X_Port_based_network_access_control" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.1X - Port-based network access control [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_21_Media_Independent_Handover_Protocol">
+<code class="sig-name descname">IEEE_Std_802_21_Media_Independent_Handover_Protocol</code><em class="property"> = 35095</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_21_Media_Independent_Handover_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.21 - Media Independent Handover Protocol [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_3_Ethernet_Passive_Optical_Network">
+<code class="sig-name descname">IEEE_Std_802_3_Ethernet_Passive_Optical_Network</code><em class="property"> = 34824</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_3_Ethernet_Passive_Optical_Network" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802.3 - Ethernet Passive Optical Network (EPON) [EPON][<span class="target" id="index-6"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_Local_Experimental_Ethertype_0x88B5">
+<code class="sig-name descname">IEEE_Std_802_Local_Experimental_Ethertype_0x88B5</code><em class="property"> = 34997</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_Local_Experimental_Ethertype_0x88B5" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802 - Local Experimental Ethertype [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_Local_Experimental_Ethertype_0x88B6">
+<code class="sig-name descname">IEEE_Std_802_Local_Experimental_Ethertype_0x88B6</code><em class="property"> = 34998</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_Local_Experimental_Ethertype_0x88B6" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802 - Local Experimental Ethertype [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_OUI_Extended_Ethertype">
+<code class="sig-name descname">IEEE_Std_802_OUI_Extended_Ethertype</code><em class="property"> = 34999</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IEEE_Std_802_OUI_Extended_Ethertype" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE Std 802 - OUI Extended Ethertype [IEEE]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.IP_Autonomous_Systems">
+<code class="sig-name descname">IP_Autonomous_Systems</code><em class="property"> = 34668</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.IP_Autonomous_Systems" title="Permalink to this definition">¶</a></dt>
+<dd><p>IP Autonomous Systems [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4">
+<code class="sig-name descname">Internet_Protocol_version_4</code><em class="property"> = 2048</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internet Protocol version 4 (IPv4) [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6">
+<code class="sig-name descname">Internet_Protocol_version_6</code><em class="property"> = 34525</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Internet Protocol version 6 (IPv6) [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.L2_IS_IS">
+<code class="sig-name descname">L2_IS_IS</code><em class="property"> = 8948</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.L2_IS_IS" title="Permalink to this definition">¶</a></dt>
+<dd><p>L2-IS-IS [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6325.html"><strong>RFC 6325</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Little_Machines">
+<code class="sig-name descname">Little_Machines</code><em class="property"> = 32864</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Little_Machines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Little Machines [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.LoWPAN_encapsulation">
+<code class="sig-name descname">LoWPAN_encapsulation</code><em class="property"> = 41197</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.LoWPAN_encapsulation" title="Permalink to this definition">¶</a></dt>
+<dd><p>LoWPAN encapsulation [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7973.html"><strong>RFC 7973</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Logicraft">
+<code class="sig-name descname">Logicraft</code><em class="property"> = 33096</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Logicraft" title="Permalink to this definition">¶</a></dt>
+<dd><p>Logicraft [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Loopback">
+<code class="sig-name descname">Loopback</code><em class="property"> = 36864</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Loopback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loopback [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.MPLS">
+<code class="sig-name descname">MPLS</code><em class="property"> = 34887</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.MPLS" title="Permalink to this definition">¶</a></dt>
+<dd><p>MPLS [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5332.html"><strong>RFC 5332</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.MPLS_with_upstream_assigned_label">
+<code class="sig-name descname">MPLS_with_upstream_assigned_label</code><em class="property"> = 34888</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.MPLS_with_upstream_assigned_label" title="Permalink to this definition">¶</a></dt>
+<dd><p>MPLS with upstream-assigned label [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5332.html"><strong>RFC 5332</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Matra">
+<code class="sig-name descname">Matra</code><em class="property"> = 32890</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Matra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matra [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Merit_Internodal">
+<code class="sig-name descname">Merit_Internodal</code><em class="property"> = 32892</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Merit_Internodal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Merit Internodal [Hans Werner Braun]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Motorola_Computer">
+<code class="sig-name descname">Motorola_Computer</code><em class="property"> = 33165</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Motorola_Computer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Motorola Computer [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Multi_Topology">
+<code class="sig-name descname">Multi_Topology</code><em class="property"> = 39458</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Multi_Topology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multi-Topology [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8377.html"><strong>RFC 8377</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Multicast_Channel_Allocation_Protocol">
+<code class="sig-name descname">Multicast_Channel_Allocation_Protocol</code><em class="property"> = 34913</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Multicast_Channel_Allocation_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multicast Channel Allocation Protocol (MCAP) [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.NBS_Internet">
+<code class="sig-name descname">NBS_Internet</code><em class="property"> = 2050</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.NBS_Internet" title="Permalink to this definition">¶</a></dt>
+<dd><p>NBS Internet [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.NSH">
+<code class="sig-name descname">NSH</code><em class="property"> = 35151</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.NSH" title="Permalink to this definition">¶</a></dt>
+<dd><p>NSH (Network Service Header) [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8300.html"><strong>RFC 8300</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Nestar">
+<code class="sig-name descname">Nestar</code><em class="property"> = 32774</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Nestar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nestar [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Network_Computing_Devices">
+<code class="sig-name descname">Network_Computing_Devices</code><em class="property"> = 33097</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Network_Computing_Devices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Network Computing Devices [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Nixdorf">
+<code class="sig-name descname">Nixdorf</code><em class="property"> = 1024</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Nixdorf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nixdorf [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Nixdorf_Computers">
+<code class="sig-name descname">Nixdorf_Computers</code><em class="property"> = 32931</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Nixdorf_Computers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nixdorf Computers [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.PCS_Basic_Block_Protocol">
+<code class="sig-name descname">PCS_Basic_Block_Protocol</code><em class="property"> = 16962</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.PCS_Basic_Block_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>PCS Basic Block Protocol [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.PPP_over_Ethernet_Discovery_Stage">
+<code class="sig-name descname">PPP_over_Ethernet_Discovery_Stage</code><em class="property"> = 34915</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.PPP_over_Ethernet_Discovery_Stage" title="Permalink to this definition">¶</a></dt>
+<dd><p>PPP over Ethernet (PPPoE) Discovery Stage [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2516.html"><strong>RFC 2516</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.PPP_over_Ethernet_Session_Stage">
+<code class="sig-name descname">PPP_over_Ethernet_Session_Stage</code><em class="property"> = 34916</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.PPP_over_Ethernet_Session_Stage" title="Permalink to this definition">¶</a></dt>
+<dd><p>PPP over Ethernet (PPPoE) Session Stage [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2516.html"><strong>RFC 2516</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.PUP_Addr_Trans_0x0201">
+<code class="sig-name descname">PUP_Addr_Trans_0x0201</code><em class="property"> = 513</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.PUP_Addr_Trans_0x0201" title="Permalink to this definition">¶</a></dt>
+<dd><p>PUP Addr Trans (see 0A01) [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.PUP_Addr_Trans_0x0A01">
+<code class="sig-name descname">PUP_Addr_Trans_0x0A01</code><em class="property"> = 2561</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.PUP_Addr_Trans_0x0A01" title="Permalink to this definition">¶</a></dt>
+<dd><p>PUP Addr Trans [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Pacer_Software">
+<code class="sig-name descname">Pacer_Software</code><em class="property"> = 32966</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Pacer_Software" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pacer Software [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Planning_Research_Corp">
+<code class="sig-name descname">Planning_Research_Corp</code><em class="property"> = 32836</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Planning_Research_Corp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Planning Research Corp. [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Point_to_Point_Protocol">
+<code class="sig-name descname">Point_to_Point_Protocol</code><em class="property"> = 34827</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Point_to_Point_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Point-to-Point Protocol (PPP) [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Proteon">
+<code class="sig-name descname">Proteon</code><em class="property"> = 28720</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Proteon" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proteon [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Provider_Backbone_Bridging_Instance_tag">
+<code class="sig-name descname">Provider_Backbone_Bridging_Instance_tag</code><em class="property"> = 35047</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Provider_Backbone_Bridging_Instance_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Provider Backbone Bridging Instance tag [IEEE Std 802.1Q-2014]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Rational_Corp">
+<code class="sig-name descname">Rational_Corp</code><em class="property"> = 33104</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Rational_Corp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rational Corp [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Raw_Frame_Relay">
+<code class="sig-name descname">Raw_Frame_Relay</code><em class="property"> = 25945</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Raw_Frame_Relay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw Frame Relay [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 65535</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Reserved_for_HIPPI_6400_0x8182">
+<code class="sig-name descname">Reserved_for_HIPPI_6400_0x8182</code><em class="property"> = 33154</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Reserved_for_HIPPI_6400_0x8182" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved for HIPPI-6400 [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Reserved_for_HIPPI_6400_0x8183">
+<code class="sig-name descname">Reserved_for_HIPPI_6400_0x8183</code><em class="property"> = 33155</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Reserved_for_HIPPI_6400_0x8183" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved for HIPPI-6400 [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Retix">
+<code class="sig-name descname">Retix</code><em class="property"> = 33010</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Retix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retix [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol">
+<code class="sig-name descname">Reverse_Address_Resolution_Protocol</code><em class="property"> = 32821</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reverse Address Resolution Protocol (RARP) [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc903.html"><strong>RFC 903</strong></a>][Joseph Murdock]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.SECTRA">
+<code class="sig-name descname">SECTRA</code><em class="property"> = 34523</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.SECTRA" title="Permalink to this definition">¶</a></dt>
+<dd><p>SECTRA [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.SGI_Time_Warner_prop">
+<code class="sig-name descname">SGI_Time_Warner_prop</code><em class="property"> = 33150</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.SGI_Time_Warner_prop" title="Permalink to this definition">¶</a></dt>
+<dd><p>SGI/Time Warner prop. [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.SGI_bounce_server">
+<code class="sig-name descname">SGI_bounce_server</code><em class="property"> = 32790</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.SGI_bounce_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>SGI bounce server [Andrew Cherenson]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.SGI_diagnostics">
+<code class="sig-name descname">SGI_diagnostics</code><em class="property"> = 32787</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.SGI_diagnostics" title="Permalink to this definition">¶</a></dt>
+<dd><p>SGI diagnostics [Andrew Cherenson]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.SGI_network_games">
+<code class="sig-name descname">SGI_network_games</code><em class="property"> = 32788</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.SGI_network_games" title="Permalink to this definition">¶</a></dt>
+<dd><p>SGI network games [Andrew Cherenson]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.SGI_reserved">
+<code class="sig-name descname">SGI_reserved</code><em class="property"> = 32789</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.SGI_reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>SGI reserved [Andrew Cherenson]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.SNMP">
+<code class="sig-name descname">SNMP</code><em class="property"> = 33100</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.SNMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>SNMP [Joyce K Reynolds]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.STP_HIPPI_ST">
+<code class="sig-name descname">STP_HIPPI_ST</code><em class="property"> = 33153</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.STP_HIPPI_ST" title="Permalink to this definition">¶</a></dt>
+<dd><p>STP, HIPPI-ST [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Secure_Data">
+<code class="sig-name descname">Secure_Data</code><em class="property"> = 34669</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Secure_Data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Secure Data [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Spider_Systems_Ltd">
+<code class="sig-name descname">Spider_Systems_Ltd</code><em class="property"> = 32927</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Spider_Systems_Ltd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spider Systems Ltd. [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Stanford_V_Kernel_exp">
+<code class="sig-name descname">Stanford_V_Kernel_exp</code><em class="property"> = 32859</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Stanford_V_Kernel_exp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stanford V Kernel exp. [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Stanford_V_Kernel_prod">
+<code class="sig-name descname">Stanford_V_Kernel_prod</code><em class="property"> = 32860</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Stanford_V_Kernel_prod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stanford V Kernel prod. [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Symbolics_Private">
+<code class="sig-name descname">Symbolics_Private</code><em class="property"> = 2076</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Symbolics_Private" title="Permalink to this definition">¶</a></dt>
+<dd><p>Symbolics Private [David Plummer]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.TCP_IP_Compression">
+<code class="sig-name descname">TCP_IP_Compression</code><em class="property"> = 34667</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.TCP_IP_Compression" title="Permalink to this definition">¶</a></dt>
+<dd><p>TCP/IP Compression [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1144.html"><strong>RFC 1144</strong></a>][<span class="target" id="index-25"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.TRILL">
+<code class="sig-name descname">TRILL</code><em class="property"> = 8947</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.TRILL" title="Permalink to this definition">¶</a></dt>
+<dd><p>TRILL [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6325.html"><strong>RFC 6325</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.TRILL_Fine_Grained_Labeling">
+<code class="sig-name descname">TRILL_Fine_Grained_Labeling</code><em class="property"> = 35131</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.TRILL_Fine_Grained_Labeling" title="Permalink to this definition">¶</a></dt>
+<dd><p>TRILL Fine Grained Labeling (FGL) [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7172.html"><strong>RFC 7172</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.TRILL_RBridge_Channel">
+<code class="sig-name descname">TRILL_RBridge_Channel</code><em class="property"> = 35142</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.TRILL_RBridge_Channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>TRILL RBridge Channel [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7178.html"><strong>RFC 7178</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Technically_Elite_Concept">
+<code class="sig-name descname">Technically_Elite_Concept</code><em class="property"> = 33103</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Technically_Elite_Concept" title="Permalink to this definition">¶</a></dt>
+<dd><p>Technically Elite Concept [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.The_Ethertype_will_be_used_to_identify_a_Channel_in_which_control_messages_are_encapsulated_as_payload_of_GRE_packets_When_a_GRE_packet_tagged_with_the_Ethertype_is_received_the_payload_will_be_handed_to_the_network_processor_for_processing">
+<code class="sig-name descname">The_Ethertype_will_be_used_to_identify_a_Channel_in_which_control_messages_are_encapsulated_as_payload_of_GRE_packets_When_a_GRE_packet_tagged_with_the_Ethertype_is_received_the_payload_will_be_handed_to_the_network_processor_for_processing</code><em class="property"> = 47082</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.The_Ethertype_will_be_used_to_identify_a_Channel_in_which_control_messages_are_encapsulated_as_payload_of_GRE_packets_When_a_GRE_packet_tagged_with_the_Ethertype_is_received_the_payload_will_be_handed_to_the_network_processor_for_processing" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Ethertype will be used to identify a “Channel”          in which control
+messages are encapsulated as payload of GRE packets.          When a GRE
+packet tagged with the Ethertype is received, the payload          will be
+handed to the network processor for processing. [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8157.html"><strong>RFC 8157</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Tigan_Inc">
+<code class="sig-name descname">Tigan_Inc</code><em class="property"> = 32815</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Tigan_Inc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tigan, Inc. [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Trans_Ether_Bridging">
+<code class="sig-name descname">Trans_Ether_Bridging</code><em class="property"> = 25944</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Trans_Ether_Bridging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Trans Ether Bridging [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Tymshare">
+<code class="sig-name descname">Tymshare</code><em class="property"> = 32814</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Tymshare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tymshare [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Ungermann_Bass_dia_loop">
+<code class="sig-name descname">Ungermann_Bass_dia_loop</code><em class="property"> = 28674</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Ungermann_Bass_dia_loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ungermann-Bass dia/loop [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Ungermann_Bass_download">
+<code class="sig-name descname">Ungermann_Bass_download</code><em class="property"> = 28672</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Ungermann_Bass_download" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ungermann-Bass download [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Ungermann_Bass_net_debugr">
+<code class="sig-name descname">Ungermann_Bass_net_debugr</code><em class="property"> = 2304</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Ungermann_Bass_net_debugr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ungermann-Bass net debugr [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Univ_of_Mass_Amherst_0x8065">
+<code class="sig-name descname">Univ_of_Mass_Amherst_0x8065</code><em class="property"> = 32869</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Univ_of_Mass_Amherst_0x8065" title="Permalink to this definition">¶</a></dt>
+<dd><p>Univ. of Mass. &#64; Amherst [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Univ_of_Mass_Amherst_0x8066">
+<code class="sig-name descname">Univ_of_Mass_Amherst_0x8066</code><em class="property"> = 32870</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Univ_of_Mass_Amherst_0x8066" title="Permalink to this definition">¶</a></dt>
+<dd><p>Univ. of Mass. &#64; Amherst [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.VG_Laboratory_Systems">
+<code class="sig-name descname">VG_Laboratory_Systems</code><em class="property"> = 33073</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.VG_Laboratory_Systems" title="Permalink to this definition">¶</a></dt>
+<dd><p>VG Laboratory Systems [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.VINES_Echo">
+<code class="sig-name descname">VINES_Echo</code><em class="property"> = 2991</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.VINES_Echo" title="Permalink to this definition">¶</a></dt>
+<dd><p>VINES Echo [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.VINES_Loopback">
+<code class="sig-name descname">VINES_Loopback</code><em class="property"> = 2990</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.VINES_Loopback" title="Permalink to this definition">¶</a></dt>
+<dd><p>VINES Loopback [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Valid_Systems">
+<code class="sig-name descname">Valid_Systems</code><em class="property"> = 5632</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Valid_Systems" title="Permalink to this definition">¶</a></dt>
+<dd><p>Valid Systems [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Varian_Associates">
+<code class="sig-name descname">Varian_Associates</code><em class="property"> = 32989</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Varian_Associates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Varian Associates [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Veeco_Integrated_Auto">
+<code class="sig-name descname">Veeco_Integrated_Auto</code><em class="property"> = 32871</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Veeco_Integrated_Auto" title="Permalink to this definition">¶</a></dt>
+<dd><p>Veeco Integrated Auto. [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Vitalink_TransLAN_III">
+<code class="sig-name descname">Vitalink_TransLAN_III</code><em class="property"> = 32896</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Vitalink_TransLAN_III" title="Permalink to this definition">¶</a></dt>
+<dd><p>Vitalink TransLAN III [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Wellfleet_Communications">
+<code class="sig-name descname">Wellfleet_Communications</code><em class="property"> = 33023</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Wellfleet_Communications" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wellfleet Communications [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.XEROX_NS_IDP">
+<code class="sig-name descname">XEROX_NS_IDP</code><em class="property"> = 1536</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.XEROX_NS_IDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data Link Layer and
+Physical Layer Specification”, AA-K759B-TK, Digital Equipment Corporation,
+Maynard, MA. Also as: “The Ethernet - A Local Area Network”, Version 1.0,
+Digital Equipment Corporation, Intel Corporation, Xerox Corporation,
+September 1980. And: “The Ethernet, A Local Area Network: Data Link Layer
+and Physical Layer Specifications”, Digital, Intel and Xerox, November 1982.
+And: XEROX, “The Ethernet, A Local Area Network: Data Link Layer and
+Physical Layer Specification”, X3T51/80-50, Xerox Corporation, Stamford,
+CT., October 1980.][Neil Sembower]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>XEROX NS IDP [“The Ethernet, A Local Area Network</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.XEROX_PUP">
+<code class="sig-name descname">XEROX_PUP</code><em class="property"> = 512</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.XEROX_PUP" title="Permalink to this definition">¶</a></dt>
+<dd><p>XEROX PUP (see 0A00) [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, “PUP:
+An Internetwork Architecture”, XEROX Palo Alto Research Center, CSL-79-10,
+July 1979; also in IEEE Transactions on Communication, Volume COM-28, Number
+4, April 1980.][Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.XNS_Compatability">
+<code class="sig-name descname">XNS_Compatability</code><em class="property"> = 2055</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.XNS_Compatability" title="Permalink to this definition">¶</a></dt>
+<dd><p>XNS Compatability [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.XTP">
+<code class="sig-name descname">XTP</code><em class="property"> = 33149</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.XTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>XTP [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.X_25_Level_3">
+<code class="sig-name descname">X_25_Level_3</code><em class="property"> = 2053</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.X_25_Level_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>X.25 Level 3 [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.X_75_Internet">
+<code class="sig-name descname">X_75_Internet</code><em class="property"> = 2049</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.X_75_Internet" title="Permalink to this definition">¶</a></dt>
+<dd><p>X.75 Internet [Neil Sembower]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.ethertype.EtherType.Xerox_IEEE802_3_PUP">
+<code class="sig-name descname">Xerox_IEEE802_3_PUP</code><em class="property"> = 2560</em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Xerox_IEEE802_3_PUP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Xerox IEEE802.3 PUP [Neil Sembower]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.reg.transtype">
+<span id="assigned-internet-protocol-numbers"></span><h2>Assigned Internet Protocol Numbers <a class="footnote-reference brackets" href="#id6" id="id3">‡</a><a class="headerlink" href="#module-pcapkit.const.reg.transtype" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.reg.transtype.TransType">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.reg.transtype.</code><code class="sig-name descname">TransType</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/transtype.html#TransType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[TransType] Transport Layer Protocol Numbers</p>
+<dl class="py method">
+<dt id="pcapkit.const.reg.transtype.TransType._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/transtype.html#TransType._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.reg.transtype.TransType.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/reg/transtype.html#TransType.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.AH">
+<code class="sig-name descname">AH</code><em class="property"> = 51</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.AH" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-33"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4302.html"><strong>RFC 4302</strong></a>] Authentication Header</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ARGUS">
+<code class="sig-name descname">ARGUS</code><em class="property"> = 13</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ARGUS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Robert W Scheifler] ARGUS (deprecated))</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ARIS">
+<code class="sig-name descname">ARIS</code><em class="property"> = 104</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ARIS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Nancy Feldman] ARIS</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.AX_25">
+<code class="sig-name descname">AX_25</code><em class="property"> = 93</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.AX_25" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Brian Kantor] AX.25 Frames</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.A_N">
+<code class="sig-name descname">A_N</code><em class="property"> = 107</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.A_N" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Bob Braden] Active Networks</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.BBN_RCC_MON">
+<code class="sig-name descname">BBN_RCC_MON</code><em class="property"> = 10</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.BBN_RCC_MON" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steve Chipman] BBN RCC Monitoring</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.BNA">
+<code class="sig-name descname">BNA</code><em class="property"> = 49</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.BNA" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Gary Salamon] BNA</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.BR_SAT_MON">
+<code class="sig-name descname">BR_SAT_MON</code><em class="property"> = 76</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.BR_SAT_MON" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steven Blumenthal] Backroom SATNET Monitoring</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.CBT">
+<code class="sig-name descname">CBT</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.CBT" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Tony Ballardie] CBT</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.CFTP">
+<code class="sig-name descname">CFTP</code><em class="property"> = 62</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.CFTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Forsdick, H., “CFTP”, Network Message, Bolt Beranek and Newman, January
+1982.][Harry Forsdick] CFTP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.CHAOS">
+<code class="sig-name descname">CHAOS</code><em class="property"> = 16</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.CHAOS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[J Noel Chiappa] Chaos</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.CPHB">
+<code class="sig-name descname">CPHB</code><em class="property"> = 73</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.CPHB" title="Permalink to this definition">¶</a></dt>
+<dd><p>[David Mittnacht] Computer Protocol Heart Beat</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.CPNX">
+<code class="sig-name descname">CPNX</code><em class="property"> = 72</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.CPNX" title="Permalink to this definition">¶</a></dt>
+<dd><p>[David Mittnacht] Computer Protocol Network Executive</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.CRTP">
+<code class="sig-name descname">CRTP</code><em class="property"> = 126</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.CRTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Robert Sautter] Combat Radio Transport Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.CRUDP">
+<code class="sig-name descname">CRUDP</code><em class="property"> = 127</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.CRUDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Robert Sautter] Combat Radio User Datagram</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.Compaq_Peer">
+<code class="sig-name descname">Compaq_Peer</code><em class="property"> = 110</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Compaq_Peer" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Victor Volpe] Compaq Peer Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.DCCP">
+<code class="sig-name descname">DCCP</code><em class="property"> = 33</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.DCCP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-34"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4340.html"><strong>RFC 4340</strong></a>] Datagram Congestion Control Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.DCN_MEAS">
+<code class="sig-name descname">DCN_MEAS</code><em class="property"> = 19</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.DCN_MEAS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[David Mills] DCN Measurement Subsystems</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.DDP">
+<code class="sig-name descname">DDP</code><em class="property"> = 37</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.DDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Wesley Craig] Datagram Delivery Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.DDX">
+<code class="sig-name descname">DDX</code><em class="property"> = 116</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.DDX" title="Permalink to this definition">¶</a></dt>
+<dd><p>[John Worley] D-II Data Exchange (DDX)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.DGP">
+<code class="sig-name descname">DGP</code><em class="property"> = 86</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.DGP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[M/A-COM Government Systems, “Dissimilar Gateway Protocol Specification,
+Draft Version”, Contract no. CS901145, November 16, 1987.][Mike Little]
+Dissimilar Gateway Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.DSR">
+<code class="sig-name descname">DSR</code><em class="property"> = 48</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.DSR" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-35"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4728.html"><strong>RFC 4728</strong></a>] Dynamic Source Routing Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.EGP">
+<code class="sig-name descname">EGP</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.EGP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-36"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc888.html"><strong>RFC 888</strong></a>][David Mills] Exterior Gateway Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.EIGRP">
+<code class="sig-name descname">EIGRP</code><em class="property"> = 88</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.EIGRP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-37"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7868.html"><strong>RFC 7868</strong></a>] EIGRP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.EMCON">
+<code class="sig-name descname">EMCON</code><em class="property"> = 14</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.EMCON" title="Permalink to this definition">¶</a></dt>
+<dd><p>[&lt;mystery contact&gt;] EMCON</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ENCAP">
+<code class="sig-name descname">ENCAP</code><em class="property"> = 98</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ENCAP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-38"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1241.html"><strong>RFC 1241</strong></a>][Robert Woodburn] Encapsulation Header</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ESP">
+<code class="sig-name descname">ESP</code><em class="property"> = 50</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ESP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-39"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4303.html"><strong>RFC 4303</strong></a>] Encap Security Payload</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ETHERIP">
+<code class="sig-name descname">ETHERIP</code><em class="property"> = 97</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ETHERIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-40"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3378.html"><strong>RFC 3378</strong></a>] Ethernet-within-IP Encapsulation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.Ethernet">
+<code class="sig-name descname">Ethernet</code><em class="property"> = 143</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Ethernet" title="Permalink to this definition">¶</a></dt>
+<dd><p>[draft-ietf-spring-srv6-network-programming] Ethernet (TEMPORARY -
+registered 2020-01-31, expires 2021-01-31)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.FC">
+<code class="sig-name descname">FC</code><em class="property"> = 133</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.FC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Murali Rajagopal][<span class="target" id="index-41"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6172.html"><strong>RFC 6172</strong></a>] Fibre Channel</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.FIRE">
+<code class="sig-name descname">FIRE</code><em class="property"> = 125</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.FIRE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Criag Partridge]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.GGP">
+<code class="sig-name descname">GGP</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.GGP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-42"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc823.html"><strong>RFC 823</strong></a>] Gateway-to-Gateway</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.GMTP">
+<code class="sig-name descname">GMTP</code><em class="property"> = 100</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.GMTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[RXB5] GMTP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.GRE">
+<code class="sig-name descname">GRE</code><em class="property"> = 47</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.GRE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-43"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2784.html"><strong>RFC 2784</strong></a>][Tony Li] Generic Routing Encapsulation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.HIP">
+<code class="sig-name descname">HIP</code><em class="property"> = 139</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.HIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-44"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7401.html"><strong>RFC 7401</strong></a>] Host Identity Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.HMP">
+<code class="sig-name descname">HMP</code><em class="property"> = 20</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.HMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-45"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc869.html"><strong>RFC 869</strong></a>][Bob Hinden] Host Monitoring</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.HOPOPT">
+<code class="sig-name descname">HOPOPT</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.HOPOPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-46"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>] IPv6 Hop-by-Hop Option</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IATP">
+<code class="sig-name descname">IATP</code><em class="property"> = 117</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IATP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[John Murphy] Interactive Agent Transfer Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ICMP">
+<code class="sig-name descname">ICMP</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ICMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-47"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc792.html"><strong>RFC 792</strong></a>] Internet Control Message</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IDPR">
+<code class="sig-name descname">IDPR</code><em class="property"> = 35</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IDPR" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Martha Steenstrup] Inter-Domain Policy Routing Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IDPR_CMTP">
+<code class="sig-name descname">IDPR_CMTP</code><em class="property"> = 38</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IDPR_CMTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Martha Steenstrup] IDPR Control Message Transport Proto</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IDRP">
+<code class="sig-name descname">IDRP</code><em class="property"> = 45</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IDRP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Sue Hares] Inter-Domain Routing Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IFMP">
+<code class="sig-name descname">IFMP</code><em class="property"> = 101</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IFMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Bob Hinden][November 1995, 1997.] Ipsilon Flow Management Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IGMP">
+<code class="sig-name descname">IGMP</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IGMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-48"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1112.html"><strong>RFC 1112</strong></a>] Internet Group Management</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IGP">
+<code class="sig-name descname">IGP</code><em class="property"> = 9</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IGP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internet Assigned Numbers Authority] any private interior gateway (used by
+Cisco for their IGRP)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IL">
+<code class="sig-name descname">IL</code><em class="property"> = 40</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IL" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Dave Presotto] IL Transport Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPCV">
+<code class="sig-name descname">IPCV</code><em class="property"> = 71</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPCV" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steven Blumenthal] Internet Packet Core Utility</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPComp">
+<code class="sig-name descname">IPComp</code><em class="property"> = 108</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPComp" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-49"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2393.html"><strong>RFC 2393</strong></a>] IP Payload Compression Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPIP">
+<code class="sig-name descname">IPIP</code><em class="property"> = 94</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[John Ioannidis] IP-within-IP Encapsulation Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPLT">
+<code class="sig-name descname">IPLT</code><em class="property"> = 129</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPLT" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Hollbach]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPPC">
+<code class="sig-name descname">IPPC</code><em class="property"> = 67</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPPC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steven Blumenthal] Internet Pluribus Packet Core</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPTM">
+<code class="sig-name descname">IPTM</code><em class="property"> = 84</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPTM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Jim Stevens] Internet Protocol Traffic Manager</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPX_in_IP">
+<code class="sig-name descname">IPX_in_IP</code><em class="property"> = 111</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPX_in_IP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[CJ Lee] IPX in IP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPv4">
+<code class="sig-name descname">IPv4</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv4" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-50"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2003.html"><strong>RFC 2003</strong></a>] IPv4 encapsulation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPv6">
+<code class="sig-name descname">IPv6</code><em class="property"> = 41</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-51"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2473.html"><strong>RFC 2473</strong></a>] IPv6 encapsulation</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPv6_Frag">
+<code class="sig-name descname">IPv6_Frag</code><em class="property"> = 44</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6_Frag" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steve Deering] Fragment Header for IPv6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPv6_ICMP">
+<code class="sig-name descname">IPv6_ICMP</code><em class="property"> = 58</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6_ICMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-52"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>] ICMP for IPv6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPv6_NoNxt">
+<code class="sig-name descname">IPv6_NoNxt</code><em class="property"> = 59</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6_NoNxt" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-53"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>] No Next Header for IPv6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPv6_Opts">
+<code class="sig-name descname">IPv6_Opts</code><em class="property"> = 60</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6_Opts" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-54"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>] Destination Options for IPv6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IPv6_Route">
+<code class="sig-name descname">IPv6_Route</code><em class="property"> = 43</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IPv6_Route" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steve Deering] Routing Header for IPv6</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.IRTP">
+<code class="sig-name descname">IRTP</code><em class="property"> = 28</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.IRTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-55"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc938.html"><strong>RFC 938</strong></a>][Trudy Miller] Internet Reliable Transaction</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ISIS_over_IPv4">
+<code class="sig-name descname">ISIS_over_IPv4</code><em class="property"> = 124</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ISIS_over_IPv4" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Tony Przygienda]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ISO_IP">
+<code class="sig-name descname">ISO_IP</code><em class="property"> = 80</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ISO_IP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Marshall T Rose] ISO Internet Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ISO_TP4">
+<code class="sig-name descname">ISO_TP4</code><em class="property"> = 29</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ISO_TP4" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-56"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc905.html"><strong>RFC 905</strong></a>][&lt;mystery contact&gt;] ISO Transport Protocol Class 4</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.I_NLSP">
+<code class="sig-name descname">I_NLSP</code><em class="property"> = 52</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.I_NLSP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[K Robert Glenn] Integrated Net Layer Security TUBA</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.KRYPTOLAN">
+<code class="sig-name descname">KRYPTOLAN</code><em class="property"> = 65</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.KRYPTOLAN" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Paul Liu] Kryptolan</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.L2TP">
+<code class="sig-name descname">L2TP</code><em class="property"> = 115</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.L2TP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-57"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3931.html"><strong>RFC 3931</strong></a>][Bernard Aboba] Layer Two Tunneling Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.LARP">
+<code class="sig-name descname">LARP</code><em class="property"> = 91</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.LARP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Brian Horn] Locus Address Resolution Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.LEAF_1">
+<code class="sig-name descname">LEAF_1</code><em class="property"> = 25</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.LEAF_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Barry Boehm] Leaf-1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.LEAF_2">
+<code class="sig-name descname">LEAF_2</code><em class="property"> = 26</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.LEAF_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Barry Boehm] Leaf-2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.MERIT_INP">
+<code class="sig-name descname">MERIT_INP</code><em class="property"> = 32</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.MERIT_INP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Hans Werner Braun] MERIT Internodal Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.MFE_NSP">
+<code class="sig-name descname">MFE_NSP</code><em class="property"> = 31</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.MFE_NSP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Shuttleworth, B., “A Documentary of MFENet, a National Computer Network”,
+UCRL-52317, Lawrence Livermore Labs, Livermore, California, June
+1977.][Barry Howard] MFE Network Services Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.MICP">
+<code class="sig-name descname">MICP</code><em class="property"> = 95</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.MICP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[John Ioannidis] Mobile Internetworking Control Pro. (deprecated))</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.MOBILE">
+<code class="sig-name descname">MOBILE</code><em class="property"> = 55</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.MOBILE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Charlie Perkins] IP Mobility</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.MPLS_in_IP">
+<code class="sig-name descname">MPLS_in_IP</code><em class="property"> = 137</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.MPLS_in_IP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-58"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4023.html"><strong>RFC 4023</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.MTP">
+<code class="sig-name descname">MTP</code><em class="property"> = 92</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.MTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Susie Armstrong] Multicast Transport Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.MUX">
+<code class="sig-name descname">MUX</code><em class="property"> = 18</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.MUX" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Cohen, D. and J. Postel, “Multiplexing Protocol”, IEN 90, USC/Information
+Sciences Institute, May 1979.][Jon Postel] Multiplexing</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.Mobility_Header">
+<code class="sig-name descname">Mobility_Header</code><em class="property"> = 135</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Mobility_Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-59"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.NARP">
+<code class="sig-name descname">NARP</code><em class="property"> = 54</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.NARP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-60"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1735.html"><strong>RFC 1735</strong></a>] NBMA Address Resolution Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.NETBLT">
+<code class="sig-name descname">NETBLT</code><em class="property"> = 30</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.NETBLT" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-61"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc969.html"><strong>RFC 969</strong></a>][David Clark] Bulk Data Transfer Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.NSFNET_IGP">
+<code class="sig-name descname">NSFNET_IGP</code><em class="property"> = 85</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.NSFNET_IGP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Hans Werner Braun] NSFNET-IGP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.NVP_II">
+<code class="sig-name descname">NVP_II</code><em class="property"> = 11</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.NVP_II" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-62"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc741.html"><strong>RFC 741</strong></a>][Steve Casner] Network Voice Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.OSPFIGP">
+<code class="sig-name descname">OSPFIGP</code><em class="property"> = 89</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.OSPFIGP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-63"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1583.html"><strong>RFC 1583</strong></a>][<span class="target" id="index-64"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2328.html"><strong>RFC 2328</strong></a>][<span class="target" id="index-65"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5340.html"><strong>RFC 5340</strong></a>][John Moy] OSPFIGP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.PGM">
+<code class="sig-name descname">PGM</code><em class="property"> = 113</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PGM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Tony Speakman] PGM Reliable Transport Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.PIM">
+<code class="sig-name descname">PIM</code><em class="property"> = 103</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PIM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-66"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7761.html"><strong>RFC 7761</strong></a>][Dino Farinacci] Protocol Independent Multicast</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.PIPE">
+<code class="sig-name descname">PIPE</code><em class="property"> = 131</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PIPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Bernhard Petri] Private IP Encapsulation within IP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.PNNI">
+<code class="sig-name descname">PNNI</code><em class="property"> = 102</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PNNI" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Ross Callon] PNNI over IP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.PRM">
+<code class="sig-name descname">PRM</code><em class="property"> = 21</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PRM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Zaw Sing Su] Packet Radio Measurement</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.PTP">
+<code class="sig-name descname">PTP</code><em class="property"> = 123</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Michael Welzl] Performance Transparency Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.PUP">
+<code class="sig-name descname">PUP</code><em class="property"> = 12</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PUP" title="Permalink to this definition">¶</a></dt>
+<dd><p>An Internetwork
+Architecture”, XEROX Palo Alto Research Center, CSL-79-10, July 1979; also
+in IEEE Transactions on Communication, Volume COM-28, Number 4, April
+1980.][XEROX] PUP</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>[Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, “PUP</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.PVP">
+<code class="sig-name descname">PVP</code><em class="property"> = 75</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.PVP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steve Casner] Packet Video Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.QNX">
+<code class="sig-name descname">QNX</code><em class="property"> = 106</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.QNX" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Michael Hunter] QNX</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.RDP">
+<code class="sig-name descname">RDP</code><em class="property"> = 27</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.RDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-67"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc908.html"><strong>RFC 908</strong></a>][Bob Hinden] Reliable Data Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ROHC">
+<code class="sig-name descname">ROHC</code><em class="property"> = 142</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ROHC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-68"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5858.html"><strong>RFC 5858</strong></a>] Robust Header Compression</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.RSVP">
+<code class="sig-name descname">RSVP</code><em class="property"> = 46</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.RSVP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-69"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2205.html"><strong>RFC 2205</strong></a>][<span class="target" id="index-70"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3209.html"><strong>RFC 3209</strong></a>][Bob Braden] Reservation Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.RSVP_E2E_IGNORE">
+<code class="sig-name descname">RSVP_E2E_IGNORE</code><em class="property"> = 134</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.RSVP_E2E_IGNORE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-71"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.RVD">
+<code class="sig-name descname">RVD</code><em class="property"> = 66</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.RVD" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Michael Greenwald] MIT Remote Virtual Disk Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 255</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internet Assigned Numbers Authority]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SAT_EXPAK">
+<code class="sig-name descname">SAT_EXPAK</code><em class="property"> = 64</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SAT_EXPAK" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steven Blumenthal] SATNET and Backroom EXPAK</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SAT_MON">
+<code class="sig-name descname">SAT_MON</code><em class="property"> = 69</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SAT_MON" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steven Blumenthal] SATNET Monitoring</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SCC_SP">
+<code class="sig-name descname">SCC_SP</code><em class="property"> = 96</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SCC_SP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Howard Hart] Semaphore Communications Sec. Pro.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SCPS">
+<code class="sig-name descname">SCPS</code><em class="property"> = 105</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SCPS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Robert Durst] SCPS</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SCTP">
+<code class="sig-name descname">SCTP</code><em class="property"> = 132</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SCTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Randall R Stewart] Stream Control Transmission Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SDRP">
+<code class="sig-name descname">SDRP</code><em class="property"> = 42</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SDRP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Deborah Estrin] Source Demand Routing Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SECURE_VMTP">
+<code class="sig-name descname">SECURE_VMTP</code><em class="property"> = 82</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SECURE_VMTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Dave Cheriton] SECURE-VMTP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SKIP">
+<code class="sig-name descname">SKIP</code><em class="property"> = 57</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SKIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Tom Markson] SKIP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SM">
+<code class="sig-name descname">SM</code><em class="property"> = 122</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SM" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Jon Crowcroft][draft-perlman-simple-multicast] Simple Multicast Protocol
+(deprecated))</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SMP">
+<code class="sig-name descname">SMP</code><em class="property"> = 121</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Leif Ekblad] Simple Message Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SNP">
+<code class="sig-name descname">SNP</code><em class="property"> = 109</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SNP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Manickam R Sridhar] Sitara Networks Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SPS">
+<code class="sig-name descname">SPS</code><em class="property"> = 130</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SPS" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Bill McIntosh] Secure Packet Shield</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SRP">
+<code class="sig-name descname">SRP</code><em class="property"> = 119</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SRP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Mark Hamilton] SpectraLink Radio Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SSCOPMCE">
+<code class="sig-name descname">SSCOPMCE</code><em class="property"> = 128</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SSCOPMCE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Kurt Waber]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.ST">
+<code class="sig-name descname">ST</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.ST" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-72"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1190.html"><strong>RFC 1190</strong></a>][<span class="target" id="index-73"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1819.html"><strong>RFC 1819</strong></a>] Stream</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.STP">
+<code class="sig-name descname">STP</code><em class="property"> = 118</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.STP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Jean Michel Pittet] Schedule Transfer Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SUN_ND">
+<code class="sig-name descname">SUN_ND</code><em class="property"> = 77</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SUN_ND" title="Permalink to this definition">¶</a></dt>
+<dd><p>[William Melohn] SUN ND PROTOCOL-Temporary</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.SWIPE">
+<code class="sig-name descname">SWIPE</code><em class="property"> = 53</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.SWIPE" title="Permalink to this definition">¶</a></dt>
+<dd><p>[John Ioannidis] IP with Encryption (deprecated))</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.Shim6">
+<code class="sig-name descname">Shim6</code><em class="property"> = 140</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Shim6" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-74"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5533.html"><strong>RFC 5533</strong></a>] Shim6 Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.Sprite_RPC">
+<code class="sig-name descname">Sprite_RPC</code><em class="property"> = 90</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Sprite_RPC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Welch, B., “The Sprite Remote Procedure Call System”, Technical Report,
+UCB/Computer Science Dept., 86/302, University of California at Berkeley,
+June 1986.][Bruce Willins] Sprite RPC Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.TCF">
+<code class="sig-name descname">TCF</code><em class="property"> = 87</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TCF" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Guillermo A Loyola] TCF</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.TCP">
+<code class="sig-name descname">TCP</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TCP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-75"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc793.html"><strong>RFC 793</strong></a>] Transmission Control</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.TLSP">
+<code class="sig-name descname">TLSP</code><em class="property"> = 56</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TLSP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Christer Oberg] Transport Layer Security Protocol using Kryptonet key
+management</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.TP">
+<code class="sig-name descname">TP</code><em class="property"> = 39</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Dirk Fromhein] TP++ Transport Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.TRUNK_1">
+<code class="sig-name descname">TRUNK_1</code><em class="property"> = 23</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TRUNK_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Barry Boehm] Trunk-1</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.TRUNK_2">
+<code class="sig-name descname">TRUNK_2</code><em class="property"> = 24</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TRUNK_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Barry Boehm] Trunk-2</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.TTP">
+<code class="sig-name descname">TTP</code><em class="property"> = 84</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Jim Stevens] Transaction Transport Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.TransType_3PC">
+<code class="sig-name descname">TransType_3PC</code><em class="property"> = 34</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TransType_3PC" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Stuart A Friedberg] Third Party Connect Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.UDP">
+<code class="sig-name descname">UDP</code><em class="property"> = 17</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.UDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-76"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc768.html"><strong>RFC 768</strong></a>][Jon Postel] User Datagram</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.UDPLite">
+<code class="sig-name descname">UDPLite</code><em class="property"> = 136</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.UDPLite" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-77"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3828.html"><strong>RFC 3828</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.UTI">
+<code class="sig-name descname">UTI</code><em class="property"> = 120</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.UTI" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Peter Lothberg] UTI</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_253">
+<code class="sig-name descname">Use_for_experimentation_and_testing_253</code><em class="property"> = 253</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_253" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-78"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3692.html"><strong>RFC 3692</strong></a>] Use for experimentation and testing</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_254">
+<code class="sig-name descname">Use_for_experimentation_and_testing_254</code><em class="property"> = 254</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_254" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-79"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3692.html"><strong>RFC 3692</strong></a>] Use for experimentation and testing</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.VINES">
+<code class="sig-name descname">VINES</code><em class="property"> = 83</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.VINES" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Brian Horn] VINES</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.VISA">
+<code class="sig-name descname">VISA</code><em class="property"> = 70</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.VISA" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Gene Tsudik] VISA Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.VMTP">
+<code class="sig-name descname">VMTP</code><em class="property"> = 81</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.VMTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Dave Cheriton] VMTP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.VRRP">
+<code class="sig-name descname">VRRP</code><em class="property"> = 112</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.VRRP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-80"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5798.html"><strong>RFC 5798</strong></a>] Virtual Router Redundancy Protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.WB_EXPAK">
+<code class="sig-name descname">WB_EXPAK</code><em class="property"> = 79</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.WB_EXPAK" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steven Blumenthal] WIDEBAND EXPAK</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.WB_MON">
+<code class="sig-name descname">WB_MON</code><em class="property"> = 78</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.WB_MON" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Steven Blumenthal] WIDEBAND Monitoring</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.WESP">
+<code class="sig-name descname">WESP</code><em class="property"> = 141</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.WESP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-81"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5840.html"><strong>RFC 5840</strong></a>] Wrapped Encapsulating Security Payload</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.WSN">
+<code class="sig-name descname">WSN</code><em class="property"> = 74</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.WSN" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Victor Dafoulas] Wang Span Network</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.XNET">
+<code class="sig-name descname">XNET</code><em class="property"> = 15</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.XNET" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Haverty, J., “XNET Formats for Internet Protocol Version 4”, IEN 158,
+October 1980.][Jack Haverty] Cross Net Debugger</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.XNS_IDP">
+<code class="sig-name descname">XNS_IDP</code><em class="property"> = 22</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.XNS_IDP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data Link Layer and Physical Layer
+Specification”, AA-K759B-TK, Digital Equipment Corporation, Maynard, MA.
+Also as: “The Ethernet - A Local Area Network”, Version 1.0, Digital
+Equipment Corporation, Intel Corporation, Xerox Corporation, September 1980.
+And: “The Ethernet, A Local Area Network: Data Link Layer and Physical Layer
+Specifications”, Digital, Intel and Xerox, November 1982. And: XEROX, “The
+Ethernet, A Local Area Network: Data Link Layer and Physical Layer
+Specification”, X3T51/80-50, Xerox Corporation, Stamford, CT., October
+1980.][XEROX] XEROX NS IDP</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>[“The Ethernet, A Local Area Network</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.XTP">
+<code class="sig-name descname">XTP</code><em class="property"> = 36</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.XTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Greg Chesson] XTP</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.any_0_hop_protocol">
+<code class="sig-name descname">any_0_hop_protocol</code><em class="property"> = 114</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.any_0_hop_protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internet Assigned Numbers Authority] any 0-hop protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.any_distributed_file_system">
+<code class="sig-name descname">any_distributed_file_system</code><em class="property"> = 68</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.any_distributed_file_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internet Assigned Numbers Authority] any distributed file system</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.any_host_internal_protocol">
+<code class="sig-name descname">any_host_internal_protocol</code><em class="property"> = 61</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.any_host_internal_protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internet Assigned Numbers Authority] any host internal protocol</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.any_local_network">
+<code class="sig-name descname">any_local_network</code><em class="property"> = 63</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.any_local_network" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internet Assigned Numbers Authority] any local network</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.any_private_encryption_scheme">
+<code class="sig-name descname">any_private_encryption_scheme</code><em class="property"> = 99</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.any_private_encryption_scheme" title="Permalink to this definition">¶</a></dt>
+<dd><p>[Internet Assigned Numbers Authority] any private encryption scheme</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.reg.transtype.TransType.manet">
+<code class="sig-name descname">manet</code><em class="property"> = 138</em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.manet" title="Permalink to this definition">¶</a></dt>
+<dd><p>[<span class="target" id="index-82"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5498.html"><strong>RFC 5498</strong></a>] MANET Protocols</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="http://www.tcpdump.org/linktypes.html">http://www.tcpdump.org/linktypes.html</a></p>
+</dd>
+<dt class="label" id="id5"><span class="brackets"><a class="fn-backref" href="#id2">†</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1">https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml#ieee-802-numbers-1</a></p>
+</dd>
+<dt class="label" id="id6"><span class="brackets"><a class="fn-backref" href="#id3">‡</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1">https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml#protocol-numbers-1</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Constant Enumerations</a><ul>
+      <li>Previous: <a href="ospf.html" title="previous chapter">OSPF Constant Enumerations</a></li>
+      <li>Next: <a href="tcp.html" title="next chapter">TCP Constant Enumerations</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/const/reg.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

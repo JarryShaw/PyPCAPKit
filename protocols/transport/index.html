@@ -1,0 +1,227 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transport Layer Protocols &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="UDP - User Datagram Protocol" href="udp.html" />
+    <link rel="prev" title="MH - Mobility Header" href="../internet/mh.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.protocols.transport">
+<span id="transport-layer-protocols"></span><h1>Transport Layer Protocols<a class="headerlink" href="#module-pcapkit.protocols.transport" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.protocols.transport" title="pcapkit.protocols.transport"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport</span></code></a> is collection of all protocols in
+transport layer, with detailed implementation and methods.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="udp.html">UDP - User Datagram Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="udp.html#data-structure">Data Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tcp.html">TCP - Transmission Control Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tcp.html#data-structure">Data Structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html#tcp-miscellaneous-options">TCP Miscellaneous Options</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#no-process-options">No Process Options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#unpack-process-options">Unpack Process Options</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html#timestamps-option">Timestamps Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html#partial-order-connection-service-profile-option">Partial Order Connection Service Profile Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html#alternate-checksum-request-option">Alternate Checksum Request Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html#quick-start-response-option">Quick-Start Response Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html#user-timeout-option">User Timeout Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html#authentication-option">Authentication Option</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tcp.html#multipath-tcp-options">Multipath TCP Options</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#multipath-capable-option">Multipath Capable Option</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#join-connection-option">Join Connection Option</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="tcp.html#mp-join-syn"><code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="tcp.html#mp-join-syn-ack"><code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="tcp.html#mp-join-ack"><code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#data-sequence-signal-option">Data Sequence Signal Option</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#add-address-option">Add Address Option</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#remove-address-option">Remove Address Option</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#change-subflow-priority-option">Change Subflow Priority Option</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#fallback-option">Fallback Option</a></li>
+<li class="toctree-l4"><a class="reference internal" href="tcp.html#fast-close-option">Fast Close Option</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="base-protocol">
+<h2>Base Protocol<a class="headerlink" href="#base-protocol" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#module-pcapkit.protocols.transport.transport" title="pcapkit.protocols.transport.transport"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.transport</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>,
+which is a base class for transport layer protocols, eg.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> and
+<code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code>.</p>
+<span class="target" id="module-pcapkit.protocols.transport.transport"></span><dl class="py class">
+<dt id="pcapkit.protocols.transport.transport.Transport">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.transport.transport.</code><code class="sig-name descname">Transport</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/transport/transport.html#Transport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol</span></code></a></p>
+<p>Abstract base class for transport layer protocol family.</p>
+<dl class="py attribute">
+<dt id="pcapkit.protocols.transport.transport.Transport.__layer__">
+<code class="sig-name descname">__layer__</code><em class="property"> = 'Transport'</em><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport.__layer__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Layer of protocol.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.transport.transport.Transport._import_next_layer">
+<code class="sig-name descname">_import_next_layer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">proto</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/transport/transport.html#Transport._import_next_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport._import_next_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import next layer extractor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>proto</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – next layer protocol name</p></li>
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – valid (<em>non-padding</em>) length</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>instance of next layer</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">pcapkit.protocols.protocol.Protocol</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.transport.transport.Transport.layer">
+<em class="property">property </em><code class="sig-name descname">layer</code><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport.layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Protocol layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Literal[‘Transport’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="../index.html">Protocol Family</a><ul>
+      <li>Previous: <a href="../internet/mh.html" title="previous chapter">MH - Mobility Header</a></li>
+      <li>Next: <a href="udp.html" title="next chapter">UDP - User Datagram Protocol</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../../_sources/protocols/transport/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

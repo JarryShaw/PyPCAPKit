@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.foundation.analysis &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.foundation.analysis</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=import-outside-toplevel</span>
+<span class="sd">&quot;&quot;&quot;analyser for application layer</span>
+
+<span class="sd">:mod:`pcapkit.foundation.analysis` works as a header quarter to</span>
+<span class="sd">analyse and match application layer protocol. Then, call</span>
+<span class="sd">corresponding modules and functions to extract the attributes.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.raw</span> <span class="kn">import</span> <span class="n">Raw</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.decorators</span> <span class="kn">import</span> <span class="n">seekset_ng</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># from pcapkit.protocols.application.ftp import FTP</span>
+<span class="c1"># from pcapkit.protocols.application.httpv1 import HTTPv1</span>
+<span class="c1"># from pcapkit.protocols.application.httpv2 import HTTPv2</span>
+<span class="c1">###############################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;analyse&#39;</span><span class="p">]</span>
+
+<span class="c1">#: List of protocols supported by the analyser.</span>
+<span class="n">ANALYSE_PROTO</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.application.ftp&#39;</span><span class="p">,</span> <span class="s1">&#39;FTP&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.application.httpv1&#39;</span><span class="p">,</span> <span class="s1">&#39;HTTPv1&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.application.httpv2&#39;</span><span class="p">,</span> <span class="s1">&#39;HTTPv2&#39;</span><span class="p">),</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="analyse"><a class="viewcode-back" href="../../../foundation/analysis.html#pcapkit.foundation.analysis.analyse">[docs]</a><span class="k">def</span> <span class="nf">analyse</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">termination</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Analyse application layer packets.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file (io.BytesIO): source data stream</span>
+<span class="sd">        length (Optional[int]): packet length</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        termination (bool): If terminate parsing application layer protocol.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Protocol: Parsed application layer protocol.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        Currently, the analysis processes in following order:</span>
+
+<span class="sd">        1. :class:`~pcapkit.protocols.application.ftp.FTP`</span>
+<span class="sd">        2. :class:`HTTP/1.* &lt;pcapkit.protocols.application.httpv1.HTTPv1&gt;`</span>
+<span class="sd">        3. :class:`HTTP/2 &lt;pcapkit.protocols.application.httpv2.HTTPv2&gt;`</span>
+
+<span class="sd">        and :class:`~pcapkit.protocols.raw.Raw` as the fallback result.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        The analysis processes order is defined by :data:`~pcapkit.foundation.analysis.ANALYSE_PROTO`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">seekset</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">termination</span><span class="p">:</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ANALYSE_PROTO</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">packet</span> <span class="o">=</span> <span class="n">_analyse</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">seekset</span><span class="o">=</span><span class="n">seekset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">packet</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">return</span> <span class="n">packet</span>
+
+        <span class="c1"># backup file offset</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seekset</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+    <span class="c1"># raw packet analysis</span>
+    <span class="k">return</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="_analyse"><a class="viewcode-back" href="../../../foundation/analysis.html#pcapkit.foundation.analysis._analyse">[docs]</a><span class="nd">@seekset_ng</span>
+<span class="k">def</span> <span class="nf">_analyse</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">seekset</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+    <span class="sd">&quot;&quot;&quot;Analyse packet.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol (Protocol): target protocol class</span>
+<span class="sd">        file (io.BytesIO): source data stream</span>
+<span class="sd">        length (Optional[int]): packet length</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        seekset (int): original file offset</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Optional[Protocol]: If the packet is parsed successfully,</span>
+<span class="sd">        returns the parsed  packet; otherwise returns :data:`None`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">ProtocolError</span><span class="p">:</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">packet</span></div>
+
+
+<div class="viewcode-block" id="register"><a class="viewcode-back" href="../../../foundation/analysis.html#pcapkit.foundation.analysis.register">[docs]</a><span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        module (str): module name</span>
+<span class="sd">        class_ (str): class name</span>
+
+<span class="sd">    Keyword Arguments:</span>
+<span class="sd">        index (Optional[int]): Index of the protocol class</span>
+<span class="sd">            when inserted to :data:`~pcapkit.foundation.analysis.ANALYSE_PROTO`.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ANALYSE_PROTO</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ANALYSE_PROTO</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

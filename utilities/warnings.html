@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Defined Warnings &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Constant Enumerations" href="../const/index.html" />
+    <link rel="prev" title="Validation Utilities" href="validations.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="user-defined-warnings">
+<h1>User Defined Warnings<a class="headerlink" href="#user-defined-warnings" title="Permalink to this headline">¶</a></h1>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.warnings</span></code> refined built-in warnings.</p>
+<span class="target" id="module-pcapkit.utilities.warnings"></span><dl class="py exception">
+<dt id="pcapkit.utilities.warnings.AttributeWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">AttributeWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#AttributeWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.AttributeWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Unsupported attribute.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.BaseWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">BaseWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#BaseWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.BaseWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#UserWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">UserWarning</span></code></a></p>
+<p>Base warning class of all kinds.</p>
+<dl class="py method">
+<dt id="pcapkit.utilities.warnings.BaseWarning.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#BaseWarning.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.BaseWarning.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.DPKTWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">DPKTWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#DPKTWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.DPKTWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ResourceWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceWarning</span></code></a></p>
+<p>Warnings on DPKT usage.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.DevModeWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">DevModeWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#DevModeWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.DevModeWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Run in development mode.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.EngineWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">EngineWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#EngineWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.EngineWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ImportWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportWarning</span></code></a></p>
+<p>Unsupported extraction engine.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.FileWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">FileWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#FileWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.FileWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Warning on file(s).</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.FormatWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">FormatWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#FormatWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.FormatWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ImportWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportWarning</span></code></a></p>
+<p>Warning on unknown format(s).</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.InvalidVendorWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">InvalidVendorWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#InvalidVendorWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.InvalidVendorWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ImportWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ImportWarning</span></code></a></p>
+<p>Vendor CLI invalid updater.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.LayerWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">LayerWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#LayerWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.LayerWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Unrecognised layer.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.ProtocolWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">ProtocolWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#ProtocolWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.ProtocolWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Unrecognised protocol.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.PySharkWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">PySharkWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#PySharkWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.PySharkWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ResourceWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceWarning</span></code></a></p>
+<p>Warnings on PyShark usage.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.ScapyWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">ScapyWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#ScapyWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.ScapyWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ResourceWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ResourceWarning</span></code></a></p>
+<p>Warnings on Scapy usage.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.VendorRequestWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">VendorRequestWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#VendorRequestWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.VendorRequestWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Vendor request connection failed.</p>
+</dd></dl>
+
+<dl class="py exception">
+<dt id="pcapkit.utilities.warnings.VendorRuntimeWarning">
+<em class="property">exception </em><code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">VendorRuntimeWarning</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#VendorRuntimeWarning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.VendorRuntimeWarning" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.BaseWarning</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeWarning" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">RuntimeWarning</span></code></a></p>
+<p>Vendor failed during runtime.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.warnings.warn">
+<code class="sig-prename descclassname">pcapkit.utilities.warnings.</code><code class="sig-name descname">warn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span></em>, <em class="sig-param"><span class="n">category</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/warnings.html#warn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.warnings.warn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper function of <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>Union</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.9)"><em>Warning</em></a><em>]</em>) – Warning message.</p></li>
+<li><p><strong>category</strong> (<em>Type</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#Warning" title="(in Python v3.9)"><em>Warning</em></a><em>]</em>) – Warning category.</p></li>
+<li><p><strong>stacklevel</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – Warning stack level.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Utility Functions &amp; Classes</a><ul>
+      <li>Previous: <a href="validations.html" title="previous chapter">Validation Utilities</a></li>
+      <li>Next: <a href="../const/index.html" title="next chapter">Constant Enumerations</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/utilities/warnings.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

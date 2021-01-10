@@ -1,0 +1,181 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.link.rarp &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.link.rarp</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;(dynamic) reverse address resolution protocol</span>
+
+<span class="sd">:mod:`pcapkit.protocols.link.rarp` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.link.rarp.RARP` only,</span>
+<span class="sd">which implements extractor for (Dynamic) Reverse</span>
+<span class="sd">Address Resolution Protocol (RARP/DRARP) [*]_,</span>
+<span class="sd">whose structure is described as below:</span>
+
+<span class="sd">====== ========= ========================= =========================</span>
+<span class="sd">Octets      Bits        Name                    Description</span>
+<span class="sd">====== ========= ========================= =========================</span>
+<span class="sd">  0           0   ``rarp.htype``            Hardware Type</span>
+<span class="sd">  2          16   ``rarp.ptype``            Protocol Type</span>
+<span class="sd">  4          32   ``rarp.hlen``             Hardware Address Length</span>
+<span class="sd">  5          40   ``rarp.plen``             Protocol Address Length</span>
+<span class="sd">  6          48   ``rarp.oper``             Operation</span>
+<span class="sd">  8          64   ``rarp.sha``              Sender Hardware Address</span>
+<span class="sd">  14        112   ``rarp.spa``              Sender Protocol Address</span>
+<span class="sd">  18        144   ``rarp.tha``              Target Hardware Address</span>
+<span class="sd">  24        192   ``rarp.tpa``              Target Protocol Address</span>
+<span class="sd">====== ========= ========================= =========================</span>
+
+<span class="sd">.. [*] http://en.wikipedia.org/wiki/Address_Resolution_Protocol</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.link.arp</span> <span class="kn">import</span> <span class="n">ARP</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;RARP&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="RARP"><a class="viewcode-back" href="../../../../protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP">[docs]</a><span class="k">class</span> <span class="nc">RARP</span><span class="p">(</span><span class="n">ARP</span><span class="p">):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+    <span class="sd">&quot;&quot;&quot;This class implements Reverse Address Resolution Protocol.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Acronym of corresponding protocol.</span>
+    <span class="n">_acnm</span> <span class="o">=</span> <span class="s1">&#39;RARP&#39;</span>
+    <span class="c1">#: Name of corresponding protocol.</span>
+    <span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;Reverse Address Resolution Protocol&#39;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="RARP.id"><a class="viewcode-back" href="../../../../protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP.id">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[Literal[&#39;RARP&#39;], Literal[&#39;DRARP&#39;]]: Index ID of the protocol.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;RARP&#39;</span><span class="p">,</span> <span class="s1">&#39;DRARP&#39;</span><span class="p">)</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="RARP.__index__"><a class="viewcode-back" href="../../../../protocols/link/rarp.html#pcapkit.protocols.link.rarp.RARP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pcapkit.const.reg.ethertype.EtherType: Numeral registry index of the</span>
+<span class="sd">            protocol in `IANA`_.</span>
+
+<span class="sd">        .. _IANA: https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">EtherType</span><span class="p">(</span><span class="mh">0x8035</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

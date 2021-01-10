@@ -1,0 +1,374 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.link.arp &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.link.arp</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;(inverse) address resolution protocol</span>
+
+<span class="sd">:mod:`pcapkit.protocols.link.arp` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.link.arp.ARP` only,</span>
+<span class="sd">which implements extractor for (Inverse) Address Resolution</span>
+<span class="sd">Protocol (ARP/InARP) [*]_, whose structure is described as</span>
+<span class="sd">below:</span>
+
+<span class="sd">+========+=======+===============+=========================+</span>
+<span class="sd">| Octets | Bits  | Name          | Description             |</span>
+<span class="sd">+========+=======+===============+=========================+</span>
+<span class="sd">| 0      |     0 | ``arp.htype`` | Hardware Type           |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+<span class="sd">| 2      |    16 | ``arp.ptype`` | Protocol Type           |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+<span class="sd">| 4      |    32 | ``arp.hlen``  | Hardware Address Length |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+<span class="sd">| 5      |    40 | ``arp.plen``  | Protocol Address Length |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+<span class="sd">| 6      |    48 | ``arp.oper``  | Operation               |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+<span class="sd">| 8      |    64 | ``arp.sha``   | Sender Hardware Address |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+<span class="sd">| 14     |   112 | ``arp.spa``   | Sender Protocol Address |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+<span class="sd">| 18     |   144 | ``arp.tha``   | Target Hardware Address |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+<span class="sd">| 24     |   192 | ``arp.tpa``   | Target Protocol Address |</span>
+<span class="sd">+--------+-------+---------------+-------------------------+</span>
+
+<span class="sd">.. [*] http://en.wikipedia.org/wiki/Address_Resolution_Protocol</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">ipaddress</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.const.arp.hardware</span> <span class="kn">import</span> <span class="n">Hardware</span> <span class="k">as</span> <span class="n">HRD</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.arp.operation</span> <span class="kn">import</span> <span class="n">Operation</span> <span class="k">as</span> <span class="n">OPER</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">ETHERTYPE</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ARP&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="ARP"><a class="viewcode-back" href="../../../../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP">[docs]</a><span class="k">class</span> <span class="nc">ARP</span><span class="p">(</span><span class="n">Link</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class implements all protocols in ARP family.</span>
+
+<span class="sd">    - Address Resolution Protocol (ARP) [:rfc:`826`]</span>
+<span class="sd">    - Reverse Address Resolution Protocol (RARP) [:rfc:`903`]</span>
+<span class="sd">    - Dynamic Reverse Address Resolution Protocol (DRARP) [:rfc:`1931`]</span>
+<span class="sd">    - Inverse Address Resolution Protocol (InARP) [:rfc:`2390`]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Name of current protocol.</span>
+
+<span class="sd">        :rtype: Literal[&#39;Dynamic Reverse Address Resolution Protocol&#39;, &#39;Inverse Address Resolution Protocol&#39;,</span>
+<span class="sd">                        &#39;Reverse Address Resolution Protocol&#39;, &#39;Address Resolution Protocol&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">alias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Acronym of corresponding protocol.</span>
+
+<span class="sd">        :rtype: Literal[&#39;ARP&#39;, &#39;InARP&#39;, &#39;RARP&#39;, &#39;DRARP&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_acnm</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Header length of current protocol.</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">len</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sender hardware &amp; protocol address.</span>
+
+<span class="sd">        :rtype: Tuple[str, Union[ipaddress.IPv4Address, ipaddress.IPv6Address, str]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">sha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">spa</span><span class="p">)</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Target hardware &amp; protocol address.</span>
+
+<span class="sd">        :rtype: Tuple[str, Union[ipaddress.IPv4Address, ipaddress.IPv6Address, str]]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">tha</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">tpa</span><span class="p">)</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Hardware &amp; protocol type.</span>
+
+<span class="sd">        :rtype: Tuple[pcapkit.const.arp.hardware.Hardware, pcapkit.const.reg.ethertype.EtherType]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">htype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">ptype</span><span class="p">)</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="ARP.id"><a class="viewcode-back" href="../../../../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.id">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[Literal[&#39;ARP&#39;], Literal[&#39;InARP&#39;]]: Index ID of the protocol.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;ARP&#39;</span><span class="p">,</span> <span class="s1">&#39;InARP&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ARP.read"><a class="viewcode-back" href="../../../../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read Address Resolution Protocol [:rfc:`826`].</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length (Optional[int]): Length of packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_ARP: Parsed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">_hwty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_ptty</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_hlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_plen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_oper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_shwa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_addr_resolve</span><span class="p">(</span><span class="n">_hlen</span><span class="p">,</span> <span class="n">_hwty</span><span class="p">)</span>
+        <span class="n">_spta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_proto_resolve</span><span class="p">(</span><span class="n">_plen</span><span class="p">,</span> <span class="n">_ptty</span><span class="p">)</span>
+        <span class="n">_thwa</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_addr_resolve</span><span class="p">(</span><span class="n">_hlen</span><span class="p">,</span> <span class="n">_hwty</span><span class="p">)</span>
+        <span class="n">_tpta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_proto_resolve</span><span class="p">(</span><span class="n">_plen</span><span class="p">,</span> <span class="n">_ptty</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_oper</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acnm</span> <span class="o">=</span> <span class="s1">&#39;DRARP&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;Dynamic Reverse Address Resolution Protocol&#39;</span>
+        <span class="k">elif</span> <span class="n">_oper</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acnm</span> <span class="o">=</span> <span class="s1">&#39;InARP&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;Inverse Address Resolution Protocol&#39;</span>
+        <span class="k">elif</span> <span class="n">_oper</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acnm</span> <span class="o">=</span> <span class="s1">&#39;RARP&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;Reverse Address Resolution Protocol&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_acnm</span> <span class="o">=</span> <span class="s1">&#39;ARP&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="s1">&#39;Address Resolution Protocol&#39;</span>
+
+        <span class="n">_htype</span> <span class="o">=</span> <span class="n">HRD</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_hwty</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;.*Ethernet.*&#39;</span><span class="p">,</span> <span class="n">_htype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+            <span class="n">_ptype</span> <span class="o">=</span> <span class="n">ETHERTYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_ptty</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_ptype</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;Unknown [</span><span class="si">{</span><span class="n">_ptty</span><span class="si">}</span><span class="s1">]&#39;</span>
+
+        <span class="n">arp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">htype</span><span class="o">=</span><span class="n">_htype</span><span class="p">,</span>
+            <span class="n">ptype</span><span class="o">=</span><span class="n">_ptype</span><span class="p">,</span>
+            <span class="n">hlen</span><span class="o">=</span><span class="n">_hlen</span><span class="p">,</span>
+            <span class="n">plen</span><span class="o">=</span><span class="n">_plen</span><span class="p">,</span>
+            <span class="n">oper</span><span class="o">=</span><span class="n">OPER</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_oper</span><span class="p">),</span>
+            <span class="n">sha</span><span class="o">=</span><span class="n">_shwa</span><span class="p">,</span>
+            <span class="n">spa</span><span class="o">=</span><span class="n">_spta</span><span class="p">,</span>
+            <span class="n">tha</span><span class="o">=</span><span class="n">_thwa</span><span class="p">,</span>
+            <span class="n">tpa</span><span class="o">=</span><span class="n">_tpta</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="mi">8</span> <span class="o">+</span> <span class="n">_hlen</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">_plen</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">length</span> <span class="o">-=</span> <span class="n">arp</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">]</span>
+        <span class="n">arp</span><span class="p">[</span><span class="s1">&#39;packet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">arp</span><span class="p">[</span><span class="s1">&#39;len&#39;</span><span class="p">],</span> <span class="n">payload</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">arp</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ARP.make"><a class="viewcode-back" href="../../../../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bytes: Constructed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="ARP.__length_hint__"><a class="viewcode-back" href="../../../../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.</span>
+
+<span class="sd">        :rtype: Literal[28]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">28</span></div>
+
+<div class="viewcode-block" id="ARP.__index__"><a class="viewcode-back" href="../../../../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pcapkit.const.reg.ethertype.EtherType: Numeral registry index of the</span>
+<span class="sd">            protocol in `IANA`_.</span>
+
+<span class="sd">        .. _IANA: https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ETHERTYPE</span><span class="p">(</span><span class="mh">0x0806</span><span class="p">)</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="ARP._read_addr_resolve"><a class="viewcode-back" href="../../../../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP._read_addr_resolve">[docs]</a>    <span class="k">def</span> <span class="nf">_read_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">htype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolve headware address according to protocol.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            length (int): Hardware address length.</span>
+<span class="sd">            htype (int): Hardware type.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Hardware address. If ``htype`` is ``1``, i.e. MAC address,</span>
+<span class="sd">            returns ``:`` seperated *hex* encoded MAC address.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">htype</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>  <span class="c1"># Ethernet</span>
+            <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+            <span class="n">_addr</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">_byte</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_addr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_addr</span></div>
+
+<div class="viewcode-block" id="ARP._read_proto_resolve"><a class="viewcode-back" href="../../../../protocols/link/arp.html#pcapkit.protocols.link.arp.ARP._read_proto_resolve">[docs]</a>    <span class="k">def</span> <span class="nf">_read_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">ptype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolve protocol address according to protocol.</span>
+
+<span class="sd">        Positional arguments:</span>
+<span class="sd">            length (int): Protocol address length.</span>
+<span class="sd">            ptype (int): Protocol type.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[ipaddress.IPv4Address, ipaddress.IPv6Address, str]: Protocol address. If ``ptype``</span>
+<span class="sd">            is ``0x0800``, i.e. IPv4 adddress, returns an :class:`~ipaddress.IPv4Address` object; if</span>
+<span class="sd">            ``ptype`` is ``0x86dd``, i.e. IPv6 address, returns an :class:`~ipaddress.IPv6Address`</span>
+<span class="sd">            object; otherwise, returns a raw :data:`str` representing the protocol address.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="mh">0x0800</span><span class="p">:</span>  <span class="c1"># IPv4</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="mh">0x86dd</span><span class="p">:</span>  <span class="c1"># IPv6</span>
+            <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

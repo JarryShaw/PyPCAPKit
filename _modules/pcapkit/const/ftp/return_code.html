@@ -1,0 +1,315 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.const.ftp.return_code &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.const.ftp.return_code</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=line-too-long</span>
+<span class="sd">&quot;&quot;&quot;FTP Server Return Code&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ReturnCode&#39;</span><span class="p">]</span>
+
+<span class="c1">#: Response kind; whether the response is good, bad or incomplete.</span>
+<span class="n">KIND</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="s1">&#39;Positive Preliminary&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="s1">&#39;Positive Completion&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="s1">&#39;Positive Intermediate&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="s1">&#39;Transient Negative Completion&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="s1">&#39;Permanent Negative Completion&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;6&#39;</span><span class="p">:</span> <span class="s1">&#39;Protected&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1">#: Grouping information.</span>
+<span class="n">INFO</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;0&#39;</span><span class="p">:</span> <span class="s1">&#39;Syntax&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;1&#39;</span><span class="p">:</span> <span class="s1">&#39;Information&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;2&#39;</span><span class="p">:</span> <span class="s1">&#39;Connections&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;3&#39;</span><span class="p">:</span> <span class="s1">&#39;Authentication and accounting&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;4&#39;</span><span class="p">:</span> <span class="s1">&#39;Unspecified&#39;</span><span class="p">,</span>                     <span class="c1"># [RFC 959]</span>
+    <span class="s1">&#39;5&#39;</span><span class="p">:</span> <span class="s1">&#39;File system&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="ReturnCode"><a class="viewcode-back" href="../../../../const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode">[docs]</a><span class="k">class</span> <span class="nc">ReturnCode</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;[ReturnCode] FTP Server Return Code&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Restart marker replay. In this case, the text is exact and not left to the</span>
+    <span class="c1">#: particular implementation; it must read: MARK yyyy = mmmm where yyyy is</span>
+    <span class="c1">#: User-process data stream marker, and mmmm server&#39;s equivalent marker (note</span>
+    <span class="c1">#: the spaces between markers and &quot;=&quot;).</span>
+    <span class="n">CODE_110</span> <span class="o">=</span> <span class="mi">110</span>
+
+    <span class="c1">#: Service ready in nnn minutes.</span>
+    <span class="n">CODE_120</span> <span class="o">=</span> <span class="mi">120</span>
+
+    <span class="c1">#: Data connection already open; transfer starting.</span>
+    <span class="n">CODE_125</span> <span class="o">=</span> <span class="mi">125</span>
+
+    <span class="c1">#: File status okay; about to open data connection.</span>
+    <span class="n">CODE_150</span> <span class="o">=</span> <span class="mi">150</span>
+
+    <span class="c1">#: Command not implemented, superfluous at this site.</span>
+    <span class="n">CODE_202</span> <span class="o">=</span> <span class="mi">202</span>
+
+    <span class="c1">#: System status, or system help reply.</span>
+    <span class="n">CODE_211</span> <span class="o">=</span> <span class="mi">211</span>
+
+    <span class="c1">#: Directory status.</span>
+    <span class="n">CODE_212</span> <span class="o">=</span> <span class="mi">212</span>
+
+    <span class="c1">#: File status.</span>
+    <span class="n">CODE_213</span> <span class="o">=</span> <span class="mi">213</span>
+
+    <span class="c1">#: Help message. Explains how to use the server or the meaning of a particular</span>
+    <span class="c1">#: non-standard command. This reply is useful only to the human user.</span>
+    <span class="n">CODE_214</span> <span class="o">=</span> <span class="mi">214</span>
+
+    <span class="c1">#: NAME system type. Where NAME is an official system name from the registry</span>
+    <span class="c1">#: kept by IANA.</span>
+    <span class="n">CODE_215</span> <span class="o">=</span> <span class="mi">215</span>
+
+    <span class="c1">#: Service ready for new user.</span>
+    <span class="n">CODE_220</span> <span class="o">=</span> <span class="mi">220</span>
+
+    <span class="c1">#: Service closing control connection.</span>
+    <span class="n">CODE_221</span> <span class="o">=</span> <span class="mi">221</span>
+
+    <span class="c1">#: Data connection open; no transfer in progress.</span>
+    <span class="n">CODE_225</span> <span class="o">=</span> <span class="mi">225</span>
+
+    <span class="c1">#: Closing data connection. Requested file action successful (for example, file</span>
+    <span class="c1">#: transfer or file abort).</span>
+    <span class="n">CODE_226</span> <span class="o">=</span> <span class="mi">226</span>
+
+    <span class="c1">#: Entering Passive Mode (h1,h2,h3,h4,p1,p2).</span>
+    <span class="n">CODE_227</span> <span class="o">=</span> <span class="mi">227</span>
+
+    <span class="c1">#: Entering Long Passive Mode (long address, port).</span>
+    <span class="n">CODE_228</span> <span class="o">=</span> <span class="mi">228</span>
+
+    <span class="c1">#: Entering Extended Passive Mode (|||port|).</span>
+    <span class="n">CODE_229</span> <span class="o">=</span> <span class="mi">229</span>
+
+    <span class="c1">#: User logged in, proceed. Logged out if appropriate.</span>
+    <span class="n">CODE_230</span> <span class="o">=</span> <span class="mi">230</span>
+
+    <span class="c1">#: User logged out; service terminated.</span>
+    <span class="n">CODE_231</span> <span class="o">=</span> <span class="mi">231</span>
+
+    <span class="c1">#: Logout command noted, will complete when transfer done.</span>
+    <span class="n">CODE_232</span> <span class="o">=</span> <span class="mi">232</span>
+
+    <span class="c1">#: Specifies that the server accepts the authentication mechanism specified by</span>
+    <span class="c1">#: the client, and the exchange of security data is complete. A higher level</span>
+    <span class="c1">#: nonstandard code created by Microsoft.</span>
+    <span class="n">CODE_234</span> <span class="o">=</span> <span class="mi">234</span>
+
+    <span class="c1">#: Requested file action okay, completed.</span>
+    <span class="n">CODE_250</span> <span class="o">=</span> <span class="mi">250</span>
+
+    <span class="c1">#: &quot;PATHNAME&quot; created.</span>
+    <span class="n">CODE_257</span> <span class="o">=</span> <span class="mi">257</span>
+
+    <span class="c1">#: User name okay, need password.</span>
+    <span class="n">CODE_331</span> <span class="o">=</span> <span class="mi">331</span>
+
+    <span class="c1">#: Need account for login.</span>
+    <span class="n">CODE_332</span> <span class="o">=</span> <span class="mi">332</span>
+
+    <span class="c1">#: Requested file action pending further information</span>
+    <span class="n">CODE_350</span> <span class="o">=</span> <span class="mi">350</span>
+
+    <span class="c1">#: Service not available, closing control connection. This may be a reply to</span>
+    <span class="c1">#: any command if the service knows it must shut down.</span>
+    <span class="n">CODE_421</span> <span class="o">=</span> <span class="mi">421</span>
+
+    <span class="c1">#: Can&#39;t open data connection.</span>
+    <span class="n">CODE_425</span> <span class="o">=</span> <span class="mi">425</span>
+
+    <span class="c1">#: Connection closed; transfer aborted.</span>
+    <span class="n">CODE_426</span> <span class="o">=</span> <span class="mi">426</span>
+
+    <span class="c1">#: Invalid username or password</span>
+    <span class="n">CODE_430</span> <span class="o">=</span> <span class="mi">430</span>
+
+    <span class="c1">#: Requested host unavailable.</span>
+    <span class="n">CODE_434</span> <span class="o">=</span> <span class="mi">434</span>
+
+    <span class="c1">#: Requested file action not taken.</span>
+    <span class="n">CODE_450</span> <span class="o">=</span> <span class="mi">450</span>
+
+    <span class="c1">#: Requested action aborted. Local error in processing.</span>
+    <span class="n">CODE_451</span> <span class="o">=</span> <span class="mi">451</span>
+
+    <span class="c1">#: Requested action not taken. Insufficient storage space in system. File</span>
+    <span class="c1">#: unavailable (e. g. , file busy).</span>
+    <span class="n">CODE_452</span> <span class="o">=</span> <span class="mi">452</span>
+
+    <span class="c1">#: Syntax error in parameters or arguments.</span>
+    <span class="n">CODE_501</span> <span class="o">=</span> <span class="mi">501</span>
+
+    <span class="c1">#: Command not implemented.</span>
+    <span class="n">CODE_502</span> <span class="o">=</span> <span class="mi">502</span>
+
+    <span class="c1">#: Bad sequence of commands.</span>
+    <span class="n">CODE_503</span> <span class="o">=</span> <span class="mi">503</span>
+
+    <span class="c1">#: Command not implemented for that parameter.</span>
+    <span class="n">CODE_504</span> <span class="o">=</span> <span class="mi">504</span>
+
+    <span class="c1">#: Not logged in.</span>
+    <span class="n">CODE_530</span> <span class="o">=</span> <span class="mi">530</span>
+
+    <span class="c1">#: Need account for storing files.</span>
+    <span class="n">CODE_532</span> <span class="o">=</span> <span class="mi">532</span>
+
+    <span class="c1">#: Could Not Connect to Server - Policy Requires SSL</span>
+    <span class="n">CODE_534</span> <span class="o">=</span> <span class="mi">534</span>
+
+    <span class="c1">#: Requested action not taken. File unavailable (e. g. , file not found, no</span>
+    <span class="c1">#: access).</span>
+    <span class="n">CODE_550</span> <span class="o">=</span> <span class="mi">550</span>
+
+    <span class="c1">#: Requested action aborted. Page type unknown.</span>
+    <span class="n">CODE_551</span> <span class="o">=</span> <span class="mi">551</span>
+
+    <span class="c1">#: Requested file action aborted. Exceeded storage allocation (for current</span>
+    <span class="c1">#: directory or dataset).</span>
+    <span class="n">CODE_552</span> <span class="o">=</span> <span class="mi">552</span>
+
+    <span class="c1">#: Requested action not taken. File name not allowed.</span>
+    <span class="n">CODE_553</span> <span class="o">=</span> <span class="mi">553</span>
+
+    <span class="c1">#: Integrity protected reply.</span>
+    <span class="n">CODE_631</span> <span class="o">=</span> <span class="mi">631</span>
+
+    <span class="c1">#: Confidentiality and integrity protected reply.</span>
+    <span class="n">CODE_632</span> <span class="o">=</span> <span class="mi">632</span>
+
+    <span class="c1">#: Confidentiality protected reply.</span>
+    <span class="n">CODE_633</span> <span class="o">=</span> <span class="mi">633</span>
+
+<div class="viewcode-block" id="ReturnCode.get"><a class="viewcode-back" href="../../../../const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Backport support for original codes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ReturnCode</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ReturnCode</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="n">ReturnCode</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ReturnCode</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ReturnCode._missing_"><a class="viewcode-back" href="../../../../const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode._missing_">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">100</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">659</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">kind</span> <span class="o">=</span> <span class="n">KIND</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;Reserved&#39;</span><span class="p">)</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">INFO</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="s1">&#39;Reserved&#39;</span><span class="p">)</span>
+        <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> [</span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">info</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

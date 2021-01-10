@@ -1,0 +1,1260 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.internet.hopopt &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.internet.hopopt</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;IPv6 hop-by-hop options</span>
+
+<span class="sd">:mod:`pcapkit.protocols.internet.hopopt` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.hopopt.HOPOPT`</span>
+<span class="sd">only, which implements extractor for IPv6 Hop-by-Hop</span>
+<span class="sd">Options header (HOPOPT) [*]_, whose structure is</span>
+<span class="sd">described as below:</span>
+
+<span class="sd">======= ========= =================== =================================</span>
+<span class="sd">Octets      Bits        Name                    Description</span>
+<span class="sd">======= ========= =================== =================================</span>
+<span class="sd">  0           0   ``hopopt.next``             Next Header</span>
+<span class="sd">  1           8   ``hopopt.length``           Header Extensive Length</span>
+<span class="sd">  2          16   ``hopopt.options``          Options</span>
+<span class="sd">======= ========= =================== =================================</span>
+
+<span class="sd">.. [*] https://en.wikipedia.org/wiki/IPv6_packet#Hop-by-hop_options_and_destination_options</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">ipaddress</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">_OPT_TYPE</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.qs_function</span> <span class="kn">import</span> <span class="n">QSFunction</span> <span class="k">as</span> <span class="n">_QS_FUNC</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.router_alert</span> <span class="kn">import</span> <span class="n">RouterAlert</span> <span class="k">as</span> <span class="n">_ROUTER_ALERT</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.seed_id</span> <span class="kn">import</span> <span class="n">SeedID</span> <span class="k">as</span> <span class="n">_HOPOPT_SEED</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.tagger_id</span> <span class="kn">import</span> <span class="n">TaggerID</span> <span class="k">as</span> <span class="n">_TID_TYPE</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;HOPOPT&#39;</span><span class="p">]</span>
+
+<span class="c1">#: HOPOPT unknown option actions.</span>
+<span class="n">_HOPOPT_ACT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;00&#39;</span><span class="p">:</span> <span class="s1">&#39;skip over this option and continue processing the header&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;01&#39;</span><span class="p">:</span> <span class="s1">&#39;discard the packet&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;10&#39;</span><span class="p">:</span> <span class="s2">&quot;discard the packet and, regardless of whether or not the &quot;</span>
+          <span class="s2">&quot;packet&#39;s Destination Address was a multicast address, send an &quot;</span>
+          <span class="s2">&quot;ICMP Parameter Problem, Code 2, message to the packet&#39;s &quot;</span>
+          <span class="s1">&#39;Source Address, pointing to the unrecognized Option Type&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;11&#39;</span><span class="p">:</span> <span class="s2">&quot;discard the packet and, only if the packet&#39;s Destination &quot;</span>
+          <span class="s2">&quot;Address was not a multicast address, send an ICMP Parameter &quot;</span>
+          <span class="s2">&quot;Problem, Code 2, message to the packet&#39;s Source Address, &quot;</span>
+          <span class="s2">&quot;pointing to the unrecognized Option Type&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1">#: HOPOPT options.</span>
+<span class="n">_HOPOPT_OPT</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mh">0x00</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pad&#39;</span><span class="p">,</span> <span class="s1">&#39;Pad1&#39;</span><span class="p">),</span>                                                  <span class="c1"># [RFC 8200] 0</span>
+    <span class="mh">0x01</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pad&#39;</span><span class="p">,</span> <span class="s1">&#39;PadN&#39;</span><span class="p">),</span>                                                  <span class="c1"># [RFC 8200]</span>
+    <span class="mh">0x04</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;tun&#39;</span><span class="p">,</span> <span class="s1">&#39;Tunnel Encapsulation Limit&#39;</span><span class="p">),</span>                            <span class="c1"># [RFC 2473] 1</span>
+    <span class="mh">0x05</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;ra&#39;</span><span class="p">,</span> <span class="s1">&#39;Router Alert&#39;</span><span class="p">),</span>                                           <span class="c1"># [RFC 2711] 2</span>
+    <span class="mh">0x07</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;calipso&#39;</span><span class="p">,</span> <span class="s1">&#39;Common Architecture Label IPv6 Security Option&#39;</span><span class="p">),</span>    <span class="c1"># [RFC 5570]</span>
+    <span class="mh">0x08</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;smf_dpd&#39;</span><span class="p">,</span> <span class="s1">&#39;Simplified Multicast Forwarding&#39;</span><span class="p">),</span>                   <span class="c1"># [RFC 6621]</span>
+    <span class="mh">0x0F</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pdm&#39;</span><span class="p">,</span> <span class="s1">&#39;Performance and Diagnostic Metrics&#39;</span><span class="p">),</span>                    <span class="c1"># [RFC 8250] 10</span>
+    <span class="mh">0x26</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;qs&#39;</span><span class="p">,</span> <span class="s1">&#39;Quick-Start&#39;</span><span class="p">),</span>                                            <span class="c1"># [RFC 4782][RFC Errata 2034] 6</span>
+    <span class="mh">0x63</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;rpl&#39;</span><span class="p">,</span> <span class="s1">&#39;Routing Protocol for Low-Power and Lossy Networks&#39;</span><span class="p">),</span>     <span class="c1"># [RFC 6553]</span>
+    <span class="mh">0x6D</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;mpl&#39;</span><span class="p">,</span> <span class="s1">&#39;Multicast Protocol for Low-Power and Lossy Networks&#39;</span><span class="p">),</span>   <span class="c1"># [RFC 7731]</span>
+    <span class="mh">0x8B</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;ilnp&#39;</span><span class="p">,</span> <span class="s1">&#39;Identifier-Locator Network Protocol Nonce&#39;</span><span class="p">),</span>            <span class="c1"># [RFC 6744]</span>
+    <span class="mh">0x8C</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;lio&#39;</span><span class="p">,</span> <span class="s1">&#39;Line-Identification Option&#39;</span><span class="p">),</span>                            <span class="c1"># [RFC 6788]</span>
+    <span class="mh">0xC2</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;jumbo&#39;</span><span class="p">,</span> <span class="s1">&#39;Jumbo Payload&#39;</span><span class="p">),</span>                                       <span class="c1"># [RFC 2675]</span>
+    <span class="mh">0xC9</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;home&#39;</span><span class="p">,</span> <span class="s1">&#39;Home Address&#39;</span><span class="p">),</span>                                         <span class="c1"># [RFC 6275]</span>
+    <span class="mh">0xEE</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;ip_dff&#39;</span><span class="p">,</span> <span class="s1">&#39;Depth-First Forwarding&#39;</span><span class="p">),</span>                             <span class="c1"># [RFC 6971]</span>
+<span class="p">}</span>
+
+<span class="c1">#: HOPOPT unknown option descriptions.</span>
+<span class="n">_HOPOPT_NULL</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mh">0x1E</span><span class="p">:</span> <span class="s1">&#39;RFC3692-style Experiment [0x1E]&#39;</span><span class="p">,</span>                                <span class="c1"># [RFC 4727]</span>
+    <span class="mh">0x3E</span><span class="p">:</span> <span class="s1">&#39;RFC3692-style Experiment [0x3E]&#39;</span><span class="p">,</span>                                <span class="c1"># [RFC 4727]</span>
+    <span class="mh">0x4D</span><span class="p">:</span> <span class="s1">&#39;Deprecated [0x4D]&#39;</span><span class="p">,</span>                                              <span class="c1"># [RFC 7731]</span>
+    <span class="mh">0x5E</span><span class="p">:</span> <span class="s1">&#39;RFC3692-style Experiment [0x5E]&#39;</span><span class="p">,</span>                                <span class="c1"># [RFC 4727]</span>
+    <span class="mh">0x7E</span><span class="p">:</span> <span class="s1">&#39;RFC3692-style Experiment [0x7E]&#39;</span><span class="p">,</span>                                <span class="c1"># [RFC 4727]</span>
+    <span class="mh">0x8A</span><span class="p">:</span> <span class="s1">&#39;Endpoint Identification [0x8A]&#39;</span><span class="p">,</span>                                 <span class="c1"># DEPRECATED</span>
+    <span class="mh">0x9E</span><span class="p">:</span> <span class="s1">&#39;RFC3692-style Experiment [0x9E]&#39;</span><span class="p">,</span>                                <span class="c1"># [RFC 4727]</span>
+    <span class="mh">0xBE</span><span class="p">:</span> <span class="s1">&#39;RFC3692-style Experiment [0xBE]&#39;</span><span class="p">,</span>                                <span class="c1"># [RFC 4727]</span>
+    <span class="mh">0xDE</span><span class="p">:</span> <span class="s1">&#39;RFC3692-style Experiment [0xDE]&#39;</span><span class="p">,</span>                                <span class="c1"># [RFC 4727]</span>
+    <span class="mh">0xFE</span><span class="p">:</span> <span class="s1">&#39;RFC3692-style Experiment [0xFE]&#39;</span><span class="p">,</span>                                <span class="c1"># [RFC 4727]</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="HOPOPT"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT">[docs]</a><span class="k">class</span> <span class="nc">HOPOPT</span><span class="p">(</span><span class="n">Internet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class implements IPv6 Hop-by-Hop Options.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Name of current protocol.</span>
+
+<span class="sd">        :rtype: Literal[&#39;IPv6 Hop-by-Hop Options&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;IPv6 Hop-by-Hop Options&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Header length of current protocol.</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">length</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">payload</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Payload of current instance.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: if the protocol is used as an IPv6 extension header</span>
+
+<span class="sd">        :rtype: pcapkit.protocols.protocol.Protocol</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;payload&#39;&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Name of next layer protocol.</span>
+
+<span class="sd">        :rtype: pcapkit.const.reg.transtype.TransType</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">next</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="HOPOPT.read"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=arguments-differ,unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv6 Hop-by-Hop Options.</span>
+
+<span class="sd">        Structure of HOPOPT header [:rfc:`8200`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |  Next Header  |  Hdr Ext Len  |                               |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            .                                                               .</span>
+<span class="sd">            .                            Options                            .</span>
+<span class="sd">            .                                                               .</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length (Optional[int]): Length of packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            extension (bool): If the packet is used as an IPv6 extension header.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_HOPOPT: Parsed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">_next</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_protos</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_hlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># _opts = self._read_fileng(_hlen*8+6)</span>
+
+        <span class="n">hopopt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="nb">next</span><span class="o">=</span><span class="n">_next</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="p">(</span><span class="n">_hlen</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_hopopt_options</span><span class="p">(</span><span class="n">_hlen</span> <span class="o">*</span> <span class="mi">8</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span>
+        <span class="n">hopopt</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>      <span class="c1"># tuple of option acronyms</span>
+        <span class="n">hopopt</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>           <span class="c1"># merge option info to buffer</span>
+
+        <span class="n">length</span> <span class="o">-=</span> <span class="n">hopopt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span>
+        <span class="n">hopopt</span><span class="p">[</span><span class="s1">&#39;packet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">hopopt</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">],</span> <span class="n">payload</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">extension</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">hopopt</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">hopopt</span><span class="p">,</span> <span class="n">_next</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HOPOPT.make"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bytes: Constructed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="HOPOPT.__post_init__"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file (io.BytesIO): Source packet stream.</span>
+<span class="sd">            length (Optional[int]): Length of packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            extension (bool): If the protocol is used as an IPv6 extension header.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            For construction argument, please refer to :meth:`make`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#: bool: If the protocol is used as an IPv6 extension header.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extf</span> <span class="o">=</span> <span class="n">extension</span>
+
+        <span class="c1"># call super __post_init__</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HOPOPT.__length_hint__"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.</span>
+
+<span class="sd">        :rtype: Literal[2]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="HOPOPT.__index__"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT.__index__">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pcapkit.const.reg.transtype.TransType: Numeral registry index of the</span>
+<span class="sd">            protocol in `IANA`_.</span>
+
+<span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TransType</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_type"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_type">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>  <span class="c1"># pylint: disable=no-self-use</span>
+        <span class="sd">&quot;&quot;&quot;Read option type field.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind (int): option kind value</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Option_Type: extracted HOPOPT option type field</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bin_</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">kind</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="n">type_</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">action</span><span class="o">=</span><span class="n">_HOPOPT_ACT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">bin_</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span>
+            <span class="n">change</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">type_</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_hopopt_options"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_hopopt_options">[docs]</a>    <span class="k">def</span> <span class="nf">_read_hopopt_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT options.</span>
+
+<span class="sd">        Positional arguments:</span>
+<span class="sd">            length (int): length of options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[Tuple[pcapkit.const.ipv6.option.Option],</span>
+<span class="sd">            Dict[str, DataType_Option]]: extracted HOPOPT options</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the threshold is **NOT** matching.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>         <span class="c1"># length of read options</span>
+        <span class="n">optkind</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>    <span class="c1"># option type list</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>    <span class="c1"># dict of option data</span>
+
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="c1"># break when eol triggered</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># extract parameter</span>
+            <span class="n">abbr</span><span class="p">,</span> <span class="n">desc</span> <span class="o">=</span> <span class="n">_HOPOPT_OPT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;Unassigned&#39;</span><span class="p">))</span>
+            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">abbr</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="s1">&#39;_read_opt_none&#39;</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">)</span>
+            <span class="n">enum</span> <span class="o">=</span> <span class="n">_OPT_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+            <span class="c1"># record parameter data</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;length&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">enum</span> <span class="ow">in</span> <span class="n">optkind</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="n">abbr</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="n">options</span><span class="p">[</span><span class="n">abbr</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">Info</span><span class="p">(</span><span class="n">data</span><span class="p">),)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">options</span><span class="p">[</span><span class="n">abbr</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Info</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="n">abbr</span><span class="p">]),</span> <span class="n">Info</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">optkind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enum</span><span class="p">)</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">abbr</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="c1"># check threshold</span>
+        <span class="k">if</span> <span class="n">counter</span> <span class="o">!=</span> <span class="n">length</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: invalid format&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">optkind</span><span class="p">),</span> <span class="n">options</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_none"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_none">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_none</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT unassigned options.</span>
+
+<span class="sd">        Structure of HOPOPT unassigned options [:rfc:`8200`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -</span>
+<span class="sd">            |  Option Type  |  Opt Data Len |  Option Data</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_None: parsed option data</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">_HOPOPT_NULL</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">desc</span><span class="p">),</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="n">_data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_pad"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pad">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT padding options.</span>
+
+<span class="sd">        Structure of HOPOPT padding options [:rfc:`8200`]:</span>
+
+<span class="sd">        * ``Pad1`` option:</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">             +-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |       0       |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        * ``PadN`` option:</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -</span>
+<span class="sd">             |       1       |  Opt Data Len |  Option Data</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[DataType_Opt_Pad1, DataType_Opt_PadN]: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``code`` is **NOT** ``0`` or ``1``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">code</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">_padn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
+
+            <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">padding</span><span class="o">=</span><span class="n">_padn</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_tun"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_tun">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_tun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT Tunnel Encapsulation Limit option.</span>
+
+<span class="sd">        Structure of HOPOPT Tunnel Encapsulation Limit option [:rfc:`2473`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |  Next Header  |Hdr Ext Len = 0| Opt Type = 4  |Opt Data Len=1 |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            | Tun Encap Lim |PadN Opt Type=1|Opt Data Len=1 |       0       |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_TUN: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``hopopt.tun.length`` is **NOT** ``1``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_limt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">limit</span><span class="o">=</span><span class="n">_limt</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_ra"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ra">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT Router Alert option.</span>
+
+<span class="sd">        Structure of HOPOPT Router Alert option [:rfc:`2711`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |0 0 0|0 0 1 0 1|0 0 0 0 0 0 1 0|        Value (2 octets)       |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_RA: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``hopopt.tun.length`` is **NOT** ``2``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_rval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">_dscp</span> <span class="o">=</span> <span class="n">_ROUTER_ALERT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_rval</span><span class="p">)</span>
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">_rval</span><span class="p">,</span>
+            <span class="n">alert</span><span class="o">=</span><span class="n">_dscp</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_calipso"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_calipso">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_calipso</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT ``CALIPSO`` option.</span>
+
+<span class="sd">        Structure of HOPOPT ``CALIPSO`` option [:rfc:`5570`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            ------------------------------------------------------------</span>
+<span class="sd">            | Next Header | Hdr Ext Len   | Option Type | Option Length|</span>
+<span class="sd">            +-------------+---------------+-------------+--------------+</span>
+<span class="sd">            |             CALIPSO Domain of Interpretation             |</span>
+<span class="sd">            +-------------+---------------+-------------+--------------+</span>
+<span class="sd">            | Cmpt Length |  Sens Level   |     Checksum (CRC-16)      |</span>
+<span class="sd">            +-------------+---------------+-------------+--------------+</span>
+<span class="sd">            |      Compartment Bitmap (Optional; variable length)      |</span>
+<span class="sd">            +-------------+---------------+-------------+--------------+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_CALIPSO: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">&lt;</span> <span class="mi">8</span> <span class="ow">and</span> <span class="n">_size</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_cmpt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">_clen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_clen</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_sens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">domain</span><span class="o">=</span><span class="n">_cmpt</span><span class="p">,</span>
+            <span class="n">cmpt_len</span><span class="o">=</span><span class="n">_clen</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="n">level</span><span class="o">=</span><span class="n">_sens</span><span class="p">,</span>
+            <span class="n">chksum</span><span class="o">=</span><span class="n">_csum</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_clen</span><span class="p">:</span>
+            <span class="n">_bmap</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">_clen</span> <span class="o">//</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">_bmap</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+            <span class="n">opt</span><span class="p">[</span><span class="s1">&#39;bitmap&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_bmap</span><span class="p">)</span>
+
+        <span class="n">_plen</span> <span class="o">=</span> <span class="n">_size</span> <span class="o">-</span> <span class="n">_clen</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">-</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="n">_plen</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_plen</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_smf_dpd"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_smf_dpd">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_smf_dpd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT ``SMF_DPD`` option.</span>
+
+<span class="sd">        Structure of HOPOPT ``SMF_DPD`` option [:rfc:`5570`]:</span>
+
+<span class="sd">        * IPv6 ``SMF_DPD`` option header in **I-DPD** mode</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">              0                   1                   2                   3</span>
+<span class="sd">              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                            ...              |0|0|0|  01000  | Opt. Data Len |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |0|TidTy| TidLen|             TaggerID (optional) ...           |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |                               |            Identifier  ...</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        * IPv6 ``SMF_DPD`` option header in **H-DPD** mode</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">              0                   1                   2                   3</span>
+<span class="sd">              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                            ...              |0|0|0| OptType | Opt. Data Len |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |1|    Hash Assist Value (HAV) ...</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Union[DataType_Opt_SMF_I_PDP, DataType_Opt_SMF_H_PDP]: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_tidd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_tidd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+            <span class="n">_mode</span> <span class="o">=</span> <span class="s1">&#39;I-DPD&#39;</span>
+            <span class="n">_tidt</span> <span class="o">=</span> <span class="n">_TID_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">_tidl</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">_TID_TYPE</span><span class="o">.</span><span class="n">NULL</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_tidl</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+                <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+                <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">dpd_type</span><span class="o">=</span><span class="n">_mode</span><span class="p">,</span>
+                    <span class="n">tid_type</span><span class="o">=</span><span class="n">_tidt</span><span class="p">,</span>
+                    <span class="n">tid_len</span><span class="o">=</span><span class="n">_tidl</span><span class="p">,</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="n">_iden</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">_TID_TYPE</span><span class="o">.</span><span class="n">IPv4</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_tidl</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+                <span class="n">_tidf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+                <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+
+                <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">dpd_type</span><span class="o">=</span><span class="n">_mode</span><span class="p">,</span>
+                    <span class="n">tid_type</span><span class="o">=</span><span class="n">_tidt</span><span class="p">,</span>
+                    <span class="n">tid_len</span><span class="o">=</span><span class="n">_tidl</span><span class="p">,</span>
+                    <span class="n">tid</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">_tidf</span><span class="p">),</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="n">_iden</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">_tidt</span> <span class="o">==</span> <span class="n">_TID_TYPE</span><span class="o">.</span><span class="n">IPv6</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">_tidl</span> <span class="o">!=</span> <span class="mi">15</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+                <span class="n">_tidf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+                <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">15</span><span class="p">)</span>
+
+                <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">dpd_type</span><span class="o">=</span><span class="n">_mode</span><span class="p">,</span>
+                    <span class="n">tid_type</span><span class="o">=</span><span class="n">_tidt</span><span class="p">,</span>
+                    <span class="n">tid_len</span><span class="o">=</span><span class="n">_tidl</span><span class="p">,</span>
+                    <span class="n">tid</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">_tidf</span><span class="p">),</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="n">_iden</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">_tidf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">_tidl</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="n">_tidl</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+                <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                    <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+                    <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                    <span class="n">dpd_type</span><span class="o">=</span><span class="n">_mode</span><span class="p">,</span>
+                    <span class="n">tid_type</span><span class="o">=</span><span class="n">_tidt</span><span class="p">,</span>
+                    <span class="n">tid_len</span><span class="o">=</span><span class="n">_tidl</span><span class="p">,</span>
+                    <span class="n">tid</span><span class="o">=</span><span class="n">_tidf</span><span class="p">,</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="n">_iden</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_tidd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;1&#39;</span><span class="p">:</span>
+            <span class="n">_mode</span> <span class="o">=</span> <span class="s1">&#39;H-DPD&#39;</span>
+            <span class="n">_tidt</span> <span class="o">=</span> <span class="n">_TID_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+                <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+                <span class="n">dpd_type</span><span class="o">=</span><span class="n">_mode</span><span class="p">,</span>
+                <span class="n">tid_type</span><span class="o">=</span><span class="n">_tidt</span><span class="p">,</span>
+                <span class="n">hav</span><span class="o">=</span><span class="n">_tidd</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">_data</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_pdm"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_pdm">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_pdm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT ``PDM`` option.</span>
+
+<span class="sd">        Structure of HOPOPT ``PDM`` option [:rfc:`8250`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |  Option Type  | Option Length |    ScaleDTLR  |     ScaleDTLS |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |   PSN This Packet             |  PSN Last Received            |</span>
+<span class="sd">            |-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |   Delta Time Last Received    |  Delta Time Last Sent         |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_PDM: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``hopopt.pdm.length`` is **NOT** ``10``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_stlr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_stls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_psnt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_psnl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_dtlr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_dtls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">scaledtlr</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_stlr</span><span class="p">),</span>
+            <span class="n">scaledtls</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_stls</span><span class="p">),</span>
+            <span class="n">psntp</span><span class="o">=</span><span class="n">_psnt</span><span class="p">,</span>
+            <span class="n">psnlr</span><span class="o">=</span><span class="n">_psnl</span><span class="p">,</span>
+            <span class="n">deltatlr</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_dtlr</span><span class="p">),</span>
+            <span class="n">deltatls</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_dtls</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_qs"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT Quick Start option.</span>
+
+<span class="sd">        Structure of HOPOPT Quick-Start option [:rfc:`4782`]:</span>
+
+<span class="sd">        * A Quick-Start Request:</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">              0                   1                   2                   3</span>
+<span class="sd">              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |   Option      |  Length=6     | Func. | Rate  |   QS TTL      |</span>
+<span class="sd">             |               |               | 0000  |Request|               |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |                        QS Nonce                           | R |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        * Report of Approved Rate:</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">              0                   1                   2                   3</span>
+<span class="sd">              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |   Option      |  Length=6     | Func. | Rate  |   Not Used    |</span>
+<span class="sd">             |               |               | 1000  | Report|               |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |                        QS Nonce                           | R |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_QS: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_fcrr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_func</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_fcrr</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_fcrr</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_ttlv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_nonr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">_qsnn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_nonr</span><span class="p">[:</span><span class="mi">30</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">func</span><span class="o">=</span><span class="n">_QS_FUNC</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_func</span><span class="p">),</span>
+            <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">_rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="n">ttl</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">_func</span> <span class="k">else</span> <span class="n">_rate</span><span class="p">,</span>
+            <span class="n">nounce</span><span class="o">=</span><span class="n">_qsnn</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_rpl"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_rpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_rpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT ``RPL`` option.</span>
+
+<span class="sd">        Structure of HOPOPT ``RPL`` option [:rfc:`6553`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                            |  Option Type  |  Opt Data Len |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |O|R|F|0|0|0|0|0| RPLInstanceID |          SenderRank           |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |                         (sub-TLVs)                            |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_RPL: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``hopopt.rpl.length`` is **LESS THAN** ``4``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_rpld</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_rank</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">down</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+                <span class="n">rank_error</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+                <span class="n">fwd_error</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+            <span class="p">),</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">_rpld</span><span class="p">,</span>
+            <span class="n">rank</span><span class="o">=</span><span class="n">_rank</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">opt</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_mpl"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_mpl">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mpl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT ``MPL`` option.</span>
+
+<span class="sd">        Structure of HOPOPT ``MPL`` option [:rfc:`7731`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                            |  Option Type  |  Opt Data Len |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            | S |M|V|  rsv  |   sequence    |      seed-id (optional)       |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_MPL: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_smvr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_seqn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">seed_len</span><span class="o">=</span><span class="n">_HOPOPT_SEED</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_smvr</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+            <span class="n">flags</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="nb">max</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_smvr</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+                <span class="n">verification</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_smvr</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+            <span class="p">),</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">_seqn</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">_kind</span> <span class="o">=</span> <span class="n">_smvr</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">_kind</span> <span class="o">==</span> <span class="s1">&#39;00&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_kind</span> <span class="o">==</span> <span class="s1">&#39;01&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="n">opt</span><span class="p">[</span><span class="s1">&#39;seed_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_kind</span> <span class="o">==</span> <span class="s1">&#39;10&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">10</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="n">opt</span><span class="p">[</span><span class="s1">&#39;seed_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">_kind</span> <span class="o">==</span> <span class="s1">&#39;11&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">18</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="n">opt</span><span class="p">[</span><span class="s1">&#39;seed_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">opt</span><span class="p">[</span><span class="s1">&#39;seed_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">_size</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">_plen</span> <span class="o">=</span> <span class="n">_size</span> <span class="o">-</span> <span class="n">opt</span><span class="p">[</span><span class="s1">&#39;seed_len&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">_plen</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_plen</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_ilnp"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ilnp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ilnp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT ``ILNP`` Nonce option.</span>
+
+<span class="sd">        Structure of HOPOPT ``ILNP`` Nonce option [:rfc:`6744`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            | Next Header   | Hdr Ext Len   |  Option Type  | Option Length |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            /                         Nonce Value                           /</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_ILNP: parsed option data</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_nval</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_size</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">value</span><span class="o">=</span><span class="n">_nval</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_lio"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_lio">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_lio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT Line-Identification option.</span>
+
+<span class="sd">        Structure of HOPOPT Line-Identification option [:rfc:`6788`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                            |  Option Type  | Option Length |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            | LineIDLen     |     Line ID...</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_LIO: parsed option data</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_llen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_llen</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">lid_len</span><span class="o">=</span><span class="n">_llen</span><span class="p">,</span>
+            <span class="n">lid</span><span class="o">=</span><span class="n">_line</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">_plen</span> <span class="o">=</span> <span class="n">_size</span> <span class="o">-</span> <span class="n">_llen</span>
+        <span class="k">if</span> <span class="n">_plen</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">_plen</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_jumbo"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_jumbo">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_jumbo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT Jumbo Payload option.</span>
+
+<span class="sd">        Structure of HOPOPT Jumbo Payload option [:rfc:`2675`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                            |  Option Type  |  Opt Data Len |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |                     Jumbo Payload Length                      |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_Jumbo: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``4``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_jlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">payload_len</span><span class="o">=</span><span class="n">_jlen</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_home"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_home">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_home</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT Home Address option.</span>
+
+<span class="sd">        Structure of HOPOPT Home Address option [:rfc:`6275`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">                                            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">                                            |  Option Type  | Option Length |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +                                                               +</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +                          Home Address                         +</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +                                                               +</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_Home: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``hopopt.jumbo.length`` is **NOT** ``16``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">16</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_addr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">16</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">ip</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">_addr</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div>
+
+<div class="viewcode-block" id="HOPOPT._read_opt_ip_dff"><a class="viewcode-back" href="../../../../protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT._read_opt_ip_dff">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ip_dff</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">desc</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read HOPOPT ``IP_DFF`` option.</span>
+
+<span class="sd">        Structure of HOPOPT ``IP_DFF`` option [:rfc:`6971`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |  Next Header  |  Hdr Ext Len  |  OptTypeDFF   | OptDataLenDFF |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |VER|D|R|0|0|0|0|        Sequence Number        |      Pad1     |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            code (int): option type value</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            desc (str): option description</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Opt_IP_DFF: parsed option data</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``hopopt.ip_dff.length`` is **NOT** ``2``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_type</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_size</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+        <span class="n">_verf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_seqn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">desc</span><span class="o">=</span><span class="n">desc</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">_size</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">version</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_verf</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">flags</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">dup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_verf</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+                <span class="n">ret</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_verf</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+            <span class="p">),</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">_seqn</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">opt</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

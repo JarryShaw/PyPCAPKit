@@ -1,0 +1,229 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.utilities.warnings &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.utilities.warnings</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;user defined warnings</span>
+
+<span class="sd">:mod:`pcapkit.warnings` refined built-in warnings.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;warn&#39;</span><span class="p">,</span>
+
+    <span class="c1"># UserWarning</span>
+    <span class="s1">&#39;BaseWarning&#39;</span><span class="p">,</span>
+    <span class="c1"># ImportWarning</span>
+    <span class="s1">&#39;FormatWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;EngineWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;InvalidVendorWarning&#39;</span><span class="p">,</span>
+    <span class="c1"># RuntimeWarning</span>
+    <span class="s1">&#39;FileWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;LayerWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ProtocolWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;AttributeWarning&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;DevModeWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRequestWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRuntimeWarning&#39;</span><span class="p">,</span>
+    <span class="c1"># ResourceWarning</span>
+    <span class="s1">&#39;DPKTWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ScapyWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;PySharkWarning&#39;</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper function of :func:`warnings.warn`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        message (Union[str, Warning]): Warning message.</span>
+<span class="sd">        category (Type[Warning]): Warning category.</span>
+<span class="sd">        stacklevel (Optional[int]): Warning stack level.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> \
+        <span class="n">stacklevel</span> <span class="k">as</span> <span class="n">stacklevel_calculator</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+    <span class="k">if</span> <span class="n">stacklevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">stacklevel</span> <span class="o">=</span> <span class="n">stacklevel_calculator</span><span class="p">()</span>
+    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># BaseWarning (abc of warnings) session.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="BaseWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning">[docs]</a><span class="k">class</span> <span class="nc">BaseWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base warning class of all kinds.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BaseWarning.__init__"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
+        <span class="c1"># warnings.simplefilter(&#39;default&#39;)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1"># log warning</span>
+        <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># ImportWarning session.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="FormatWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.FormatWarning">[docs]</a><span class="k">class</span> <span class="nc">FormatWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ImportWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warning on unknown format(s).&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="EngineWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning">[docs]</a><span class="k">class</span> <span class="nc">EngineWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ImportWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unsupported extraction engine.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="InvalidVendorWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.InvalidVendorWarning">[docs]</a><span class="k">class</span> <span class="nc">InvalidVendorWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ImportWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Vendor CLI invalid updater.&quot;&quot;&quot;</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># RuntimeWarning session.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="FileWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.FileWarning">[docs]</a><span class="k">class</span> <span class="nc">FileWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warning on file(s).&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="LayerWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.LayerWarning">[docs]</a><span class="k">class</span> <span class="nc">LayerWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unrecognised layer.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ProtocolWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning">[docs]</a><span class="k">class</span> <span class="nc">ProtocolWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unrecognised protocol.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="AttributeWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning">[docs]</a><span class="k">class</span> <span class="nc">AttributeWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unsupported attribute.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="DevModeWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.DevModeWarning">[docs]</a><span class="k">class</span> <span class="nc">DevModeWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run in development mode.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="VendorRequestWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.VendorRequestWarning">[docs]</a><span class="k">class</span> <span class="nc">VendorRequestWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Vendor request connection failed.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="VendorRuntimeWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.VendorRuntimeWarning">[docs]</a><span class="k">class</span> <span class="nc">VendorRuntimeWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">RuntimeWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Vendor failed during runtime.&quot;&quot;&quot;</span></div>
+
+
+<span class="c1">##############################################################################</span>
+<span class="c1"># ResourceWarning session.</span>
+<span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="DPKTWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.DPKTWarning">[docs]</a><span class="k">class</span> <span class="nc">DPKTWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warnings on DPKT usage.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ScapyWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.ScapyWarning">[docs]</a><span class="k">class</span> <span class="nc">ScapyWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warnings on Scapy usage.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="PySharkWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.PySharkWarning">[docs]</a><span class="k">class</span> <span class="nc">PySharkWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warnings on PyShark usage.&quot;&quot;&quot;</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

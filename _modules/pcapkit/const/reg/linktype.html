@@ -1,0 +1,520 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.const.reg.linktype &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.const.reg.linktype</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=line-too-long</span>
+<span class="sd">&quot;&quot;&quot;Link-Layer Header Type Values&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LinkType&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="LinkType"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.linktype.LinkType">[docs]</a><span class="k">class</span> <span class="nc">LinkType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;[LinkType] Link-Layer Header Type Values&quot;&quot;&quot;</span>
+
+    <span class="c1">#: ``DLT_NULL``</span>
+    <span class="n">NULL</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#: ``DLT_EN10MB``</span>
+    <span class="n">ETHERNET</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c1">#: ``DLT_AX25``</span>
+    <span class="n">AX25</span> <span class="o">=</span> <span class="mi">3</span>
+
+    <span class="c1">#: ``DLT_IEEE802``</span>
+    <span class="n">IEEE802_5</span> <span class="o">=</span> <span class="mi">6</span>
+
+    <span class="c1">#: ``DLT_ARCNET``</span>
+    <span class="n">ARCNET_BSD</span> <span class="o">=</span> <span class="mi">7</span>
+
+    <span class="c1">#: ``DLT_SLIP``</span>
+    <span class="n">SLIP</span> <span class="o">=</span> <span class="mi">8</span>
+
+    <span class="c1">#: ``DLT_PPP``</span>
+    <span class="n">PPP</span> <span class="o">=</span> <span class="mi">9</span>
+
+    <span class="c1">#: ``DLT_FDDI``</span>
+    <span class="n">FDDI</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="c1">#: ``DLT_PPP_SERIAL``</span>
+    <span class="n">PPP_HDLC</span> <span class="o">=</span> <span class="mi">50</span>
+
+    <span class="c1">#: ``DLT_PPP_ETHER``</span>
+    <span class="n">PPP_ETHER</span> <span class="o">=</span> <span class="mi">51</span>
+
+    <span class="c1">#: ``DLT_ATM_RFC1483``</span>
+    <span class="n">ATM_RFC1483</span> <span class="o">=</span> <span class="mi">100</span>
+
+    <span class="c1">#: ``DLT_RAW``</span>
+    <span class="n">RAW</span> <span class="o">=</span> <span class="mi">101</span>
+
+    <span class="c1">#: ``DLT_C_HDLC``</span>
+    <span class="n">C_HDLC</span> <span class="o">=</span> <span class="mi">104</span>
+
+    <span class="c1">#: ``DLT_IEEE802_11``</span>
+    <span class="n">IEEE802_11</span> <span class="o">=</span> <span class="mi">105</span>
+
+    <span class="c1">#: ``DLT_FRELAY``</span>
+    <span class="n">FRELAY</span> <span class="o">=</span> <span class="mi">107</span>
+
+    <span class="c1">#: ``DLT_LOOP``</span>
+    <span class="n">LOOP</span> <span class="o">=</span> <span class="mi">108</span>
+
+    <span class="c1">#: ``DLT_LINUX_SLL``</span>
+    <span class="n">LINUX_SLL</span> <span class="o">=</span> <span class="mi">113</span>
+
+    <span class="c1">#: ``DLT_LTALK``</span>
+    <span class="n">LTALK</span> <span class="o">=</span> <span class="mi">114</span>
+
+    <span class="c1">#: ``DLT_PFLOG``</span>
+    <span class="n">PFLOG</span> <span class="o">=</span> <span class="mi">117</span>
+
+    <span class="c1">#: ``DLT_PRISM_HEADER``</span>
+    <span class="n">IEEE802_11_PRISM</span> <span class="o">=</span> <span class="mi">119</span>
+
+    <span class="c1">#: ``DLT_IP_OVER_FC``</span>
+    <span class="n">IP_OVER_FC</span> <span class="o">=</span> <span class="mi">122</span>
+
+    <span class="c1">#: ``DLT_SUNATM``</span>
+    <span class="n">SUNATM</span> <span class="o">=</span> <span class="mi">123</span>
+
+    <span class="c1">#: ``DLT_IEEE802_11_RADIO``</span>
+    <span class="n">IEEE802_11_RADIOTAP</span> <span class="o">=</span> <span class="mi">127</span>
+
+    <span class="c1">#: ``DLT_ARCNET_LINUX``</span>
+    <span class="n">ARCNET_LINUX</span> <span class="o">=</span> <span class="mi">129</span>
+
+    <span class="c1">#: ``DLT_APPLE_IP_OVER_IEEE1394``</span>
+    <span class="n">APPLE_IP_OVER_IEEE1394</span> <span class="o">=</span> <span class="mi">138</span>
+
+    <span class="c1">#: ``DLT_MTP2_WITH_PHDR``</span>
+    <span class="n">MTP2_WITH_PHDR</span> <span class="o">=</span> <span class="mi">139</span>
+
+    <span class="c1">#: ``DLT_MTP2``</span>
+    <span class="n">MTP2</span> <span class="o">=</span> <span class="mi">140</span>
+
+    <span class="c1">#: ``DLT_MTP3``</span>
+    <span class="n">MTP3</span> <span class="o">=</span> <span class="mi">141</span>
+
+    <span class="c1">#: ``DLT_SCCP``</span>
+    <span class="n">SCCP</span> <span class="o">=</span> <span class="mi">142</span>
+
+    <span class="c1">#: ``DLT_DOCSIS``</span>
+    <span class="n">DOCSIS</span> <span class="o">=</span> <span class="mi">143</span>
+
+    <span class="c1">#: ``DLT_LINUX_IRDA``</span>
+    <span class="n">LINUX_IRDA</span> <span class="o">=</span> <span class="mi">144</span>
+
+    <span class="c1">#: ``DLT_USER_0``</span>
+    <span class="n">USER_0</span> <span class="o">=</span> <span class="mi">147</span>
+
+    <span class="c1">#: ``DLT_USER_1``</span>
+    <span class="n">USER_1</span> <span class="o">=</span> <span class="mi">148</span>
+
+    <span class="c1">#: ``DLT_USER_2``</span>
+    <span class="n">USER_2</span> <span class="o">=</span> <span class="mi">149</span>
+
+    <span class="c1">#: ``DLT_USER_3``</span>
+    <span class="n">USER_3</span> <span class="o">=</span> <span class="mi">150</span>
+
+    <span class="c1">#: ``DLT_USER_4``</span>
+    <span class="n">USER_4</span> <span class="o">=</span> <span class="mi">151</span>
+
+    <span class="c1">#: ``DLT_USER_5``</span>
+    <span class="n">USER_5</span> <span class="o">=</span> <span class="mi">152</span>
+
+    <span class="c1">#: ``DLT_USER_6``</span>
+    <span class="n">USER_6</span> <span class="o">=</span> <span class="mi">153</span>
+
+    <span class="c1">#: ``DLT_USER_7``</span>
+    <span class="n">USER_7</span> <span class="o">=</span> <span class="mi">154</span>
+
+    <span class="c1">#: ``DLT_USER_8``</span>
+    <span class="n">USER_8</span> <span class="o">=</span> <span class="mi">155</span>
+
+    <span class="c1">#: ``DLT_USER_9``</span>
+    <span class="n">USER_9</span> <span class="o">=</span> <span class="mi">156</span>
+
+    <span class="c1">#: ``DLT_USER_10``</span>
+    <span class="n">USER_10</span> <span class="o">=</span> <span class="mi">157</span>
+
+    <span class="c1">#: ``DLT_USER_11``</span>
+    <span class="n">USER_11</span> <span class="o">=</span> <span class="mi">158</span>
+
+    <span class="c1">#: ``DLT_USER_12``</span>
+    <span class="n">USER_12</span> <span class="o">=</span> <span class="mi">159</span>
+
+    <span class="c1">#: ``DLT_USER_13``</span>
+    <span class="n">USER_13</span> <span class="o">=</span> <span class="mi">160</span>
+
+    <span class="c1">#: ``DLT_USER_14``</span>
+    <span class="n">USER_14</span> <span class="o">=</span> <span class="mi">161</span>
+
+    <span class="c1">#: ``DLT_USER_15``</span>
+    <span class="n">USER_15</span> <span class="o">=</span> <span class="mi">162</span>
+
+    <span class="c1">#: ``DLT_IEEE802_11_RADIO_AVS``</span>
+    <span class="n">IEEE802_11_AVS</span> <span class="o">=</span> <span class="mi">163</span>
+
+    <span class="c1">#: ``DLT_BACNET_MS_TP``</span>
+    <span class="n">BACNET_MS_TP</span> <span class="o">=</span> <span class="mi">165</span>
+
+    <span class="c1">#: ``DLT_PPP_PPPD``</span>
+    <span class="n">PPP_PPPD</span> <span class="o">=</span> <span class="mi">166</span>
+
+    <span class="c1">#: ``DLT_GPRS_LLC``</span>
+    <span class="n">GPRS_LLC</span> <span class="o">=</span> <span class="mi">169</span>
+
+    <span class="c1">#: ``DLT_GPF_T``</span>
+    <span class="n">GPF_T</span> <span class="o">=</span> <span class="mi">170</span>
+
+    <span class="c1">#: ``DLT_GPF_F``</span>
+    <span class="n">GPF_F</span> <span class="o">=</span> <span class="mi">171</span>
+
+    <span class="c1">#: ``DLT_LINUX_LAPD``</span>
+    <span class="n">LINUX_LAPD</span> <span class="o">=</span> <span class="mi">177</span>
+
+    <span class="c1">#: ``DLT_MFR``</span>
+    <span class="n">MFR</span> <span class="o">=</span> <span class="mi">182</span>
+
+    <span class="c1">#: ``DLT_BLUETOOTH_HCI_H4``</span>
+    <span class="n">BLUETOOTH_HCI_H4</span> <span class="o">=</span> <span class="mi">187</span>
+
+    <span class="c1">#: ``DLT_USB_LINUX``</span>
+    <span class="n">USB_LINUX</span> <span class="o">=</span> <span class="mi">189</span>
+
+    <span class="c1">#: ``DLT_PPI``</span>
+    <span class="n">PPI</span> <span class="o">=</span> <span class="mi">192</span>
+
+    <span class="c1">#: ``DLT_IEEE802_15_4_WITHFCS``</span>
+    <span class="n">IEEE802_15_4_WITHFCS</span> <span class="o">=</span> <span class="mi">195</span>
+
+    <span class="c1">#: ``DLT_SITA``</span>
+    <span class="n">SITA</span> <span class="o">=</span> <span class="mi">196</span>
+
+    <span class="c1">#: ``DLT_ERF``</span>
+    <span class="n">ERF</span> <span class="o">=</span> <span class="mi">197</span>
+
+    <span class="c1">#: ``DLT_BLUETOOTH_HCI_H4_WITH_PHDR``</span>
+    <span class="n">BLUETOOTH_HCI_H4_WITH_PHDR</span> <span class="o">=</span> <span class="mi">201</span>
+
+    <span class="c1">#: ``DLT_AX25_KISS``</span>
+    <span class="n">AX25_KISS</span> <span class="o">=</span> <span class="mi">202</span>
+
+    <span class="c1">#: ``DLT_LAPD``</span>
+    <span class="n">LAPD</span> <span class="o">=</span> <span class="mi">203</span>
+
+    <span class="c1">#: ``DLT_PPP_WITH_DIR``</span>
+    <span class="n">PPP_WITH_DIR</span> <span class="o">=</span> <span class="mi">204</span>
+
+    <span class="c1">#: ``DLT_C_HDLC_WITH_DIR``</span>
+    <span class="n">C_HDLC_WITH_DIR</span> <span class="o">=</span> <span class="mi">205</span>
+
+    <span class="c1">#: ``DLT_FRELAY_WITH_DIR``</span>
+    <span class="n">FRELAY_WITH_DIR</span> <span class="o">=</span> <span class="mi">206</span>
+
+    <span class="c1">#: ``DLT_LAPB_WITH_DIR``</span>
+    <span class="n">LAPB_WITH_DIR</span> <span class="o">=</span> <span class="mi">207</span>
+
+    <span class="c1">#: ``DLT_IPMB_LINUX``</span>
+    <span class="n">IPMB_LINUX</span> <span class="o">=</span> <span class="mi">209</span>
+
+    <span class="c1">#: ``DLT_IEEE802_15_4_NONASK_PHY``</span>
+    <span class="n">IEEE802_15_4_NONASK_PHY</span> <span class="o">=</span> <span class="mi">215</span>
+
+    <span class="c1">#: ``DLT_USB_LINUX_MMAPPED``</span>
+    <span class="n">USB_LINUX_MMAPPED</span> <span class="o">=</span> <span class="mi">220</span>
+
+    <span class="c1">#: ``DLT_FC_2``</span>
+    <span class="n">FC_2</span> <span class="o">=</span> <span class="mi">224</span>
+
+    <span class="c1">#: ``DLT_FC_2_WITH_FRAME_DELIMS``</span>
+    <span class="n">FC_2_WITH_FRAME_DELIMS</span> <span class="o">=</span> <span class="mi">225</span>
+
+    <span class="c1">#: ``DLT_IPNET``</span>
+    <span class="n">IPNET</span> <span class="o">=</span> <span class="mi">226</span>
+
+    <span class="c1">#: ``DLT_CAN_SOCKETCAN``</span>
+    <span class="n">CAN_SOCKETCAN</span> <span class="o">=</span> <span class="mi">227</span>
+
+    <span class="c1">#: ``DLT_IPV4``</span>
+    <span class="n">IPV4</span> <span class="o">=</span> <span class="mi">228</span>
+
+    <span class="c1">#: ``DLT_IPV6``</span>
+    <span class="n">IPV6</span> <span class="o">=</span> <span class="mi">229</span>
+
+    <span class="c1">#: ``DLT_IEEE802_15_4_NOFCS``</span>
+    <span class="n">IEEE802_15_4_NOFCS</span> <span class="o">=</span> <span class="mi">230</span>
+
+    <span class="c1">#: ``DLT_DBUS``</span>
+    <span class="n">DBUS</span> <span class="o">=</span> <span class="mi">231</span>
+
+    <span class="c1">#: ``DLT_DVB_CI``</span>
+    <span class="n">DVB_CI</span> <span class="o">=</span> <span class="mi">235</span>
+
+    <span class="c1">#: ``DLT_MUX27010``</span>
+    <span class="n">MUX27010</span> <span class="o">=</span> <span class="mi">236</span>
+
+    <span class="c1">#: ``DLT_STANAG_5066_D_PDU``</span>
+    <span class="n">STANAG_5066_D_PDU</span> <span class="o">=</span> <span class="mi">237</span>
+
+    <span class="c1">#: ``DLT_NFLOG``</span>
+    <span class="n">NFLOG</span> <span class="o">=</span> <span class="mi">239</span>
+
+    <span class="c1">#: ``DLT_NETANALYZER``</span>
+    <span class="n">NETANALYZER</span> <span class="o">=</span> <span class="mi">240</span>
+
+    <span class="c1">#: ``DLT_NETANALYZER_TRANSPARENT``</span>
+    <span class="n">NETANALYZER_TRANSPARENT</span> <span class="o">=</span> <span class="mi">241</span>
+
+    <span class="c1">#: ``DLT_IPOIB``</span>
+    <span class="n">IPOIB</span> <span class="o">=</span> <span class="mi">242</span>
+
+    <span class="c1">#: ``DLT_MPEG_2_TS``</span>
+    <span class="n">MPEG_2_TS</span> <span class="o">=</span> <span class="mi">243</span>
+
+    <span class="c1">#: ``DLT_NG40``</span>
+    <span class="n">NG40</span> <span class="o">=</span> <span class="mi">244</span>
+
+    <span class="c1">#: ``DLT_NFC_LLCP``</span>
+    <span class="n">NFC_LLCP</span> <span class="o">=</span> <span class="mi">245</span>
+
+    <span class="c1">#: ``DLT_INFINIBAND``</span>
+    <span class="n">INFINIBAND</span> <span class="o">=</span> <span class="mi">247</span>
+
+    <span class="c1">#: ``DLT_SCTP``</span>
+    <span class="n">SCTP</span> <span class="o">=</span> <span class="mi">248</span>
+
+    <span class="c1">#: ``DLT_USBPCAP``</span>
+    <span class="n">USBPCAP</span> <span class="o">=</span> <span class="mi">249</span>
+
+    <span class="c1">#: ``DLT_RTAC_SERIAL``</span>
+    <span class="n">RTAC_SERIAL</span> <span class="o">=</span> <span class="mi">250</span>
+
+    <span class="c1">#: ``DLT_BLUETOOTH_LE_LL``</span>
+    <span class="n">BLUETOOTH_LE_LL</span> <span class="o">=</span> <span class="mi">251</span>
+
+    <span class="c1">#: ``DLT_NETLINK``</span>
+    <span class="n">NETLINK</span> <span class="o">=</span> <span class="mi">253</span>
+
+    <span class="c1">#: ``DLT_BLUETOOTH_LINUX_MONITOR``</span>
+    <span class="n">BLUETOOTH_LINUX_MONITOR</span> <span class="o">=</span> <span class="mi">254</span>
+
+    <span class="c1">#: ``DLT_BLUETOOTH_BREDR_BB``</span>
+    <span class="n">BLUETOOTH_BREDR_BB</span> <span class="o">=</span> <span class="mi">255</span>
+
+    <span class="c1">#: ``DLT_BLUETOOTH_LE_LL_WITH_PHDR``</span>
+    <span class="n">BLUETOOTH_LE_LL_WITH_PHDR</span> <span class="o">=</span> <span class="mi">256</span>
+
+    <span class="c1">#: ``DLT_PROFIBUS_DL``</span>
+    <span class="n">PROFIBUS_DL</span> <span class="o">=</span> <span class="mi">257</span>
+
+    <span class="c1">#: ``DLT_PKTAP``</span>
+    <span class="n">PKTAP</span> <span class="o">=</span> <span class="mi">258</span>
+
+    <span class="c1">#: ``DLT_EPON``</span>
+    <span class="n">EPON</span> <span class="o">=</span> <span class="mi">259</span>
+
+    <span class="c1">#: ``DLT_IPMI_HPM_2``</span>
+    <span class="n">IPMI_HPM_2</span> <span class="o">=</span> <span class="mi">260</span>
+
+    <span class="c1">#: ``DLT_ZWAVE_R1_R2``</span>
+    <span class="n">ZWAVE_R1_R2</span> <span class="o">=</span> <span class="mi">261</span>
+
+    <span class="c1">#: ``DLT_ZWAVE_R3``</span>
+    <span class="n">ZWAVE_R3</span> <span class="o">=</span> <span class="mi">262</span>
+
+    <span class="c1">#: ``DLT_WATTSTOPPER_DLM``</span>
+    <span class="n">WATTSTOPPER_DLM</span> <span class="o">=</span> <span class="mi">263</span>
+
+    <span class="c1">#: ``DLT_ISO_14443``</span>
+    <span class="n">ISO_14443</span> <span class="o">=</span> <span class="mi">264</span>
+
+    <span class="c1">#: ``DLT_RDS``</span>
+    <span class="n">RDS</span> <span class="o">=</span> <span class="mi">265</span>
+
+    <span class="c1">#: ``DLT_USB_DARWIN``</span>
+    <span class="n">USB_DARWIN</span> <span class="o">=</span> <span class="mi">266</span>
+
+    <span class="c1">#: ``DLT_SDLC``</span>
+    <span class="n">SDLC</span> <span class="o">=</span> <span class="mi">268</span>
+
+    <span class="c1">#: ``DLT_LORATAP``</span>
+    <span class="n">LORATAP</span> <span class="o">=</span> <span class="mi">270</span>
+
+    <span class="c1">#: ``DLT_VSOCK``</span>
+    <span class="n">VSOCK</span> <span class="o">=</span> <span class="mi">271</span>
+
+    <span class="c1">#: ``DLT_NORDIC_BLE``</span>
+    <span class="n">NORDIC_BLE</span> <span class="o">=</span> <span class="mi">272</span>
+
+    <span class="c1">#: ``DLT_DOCSIS31_XRA31``</span>
+    <span class="n">DOCSIS31_XRA31</span> <span class="o">=</span> <span class="mi">273</span>
+
+    <span class="c1">#: ``DLT_ETHERNET_MPACKET``</span>
+    <span class="n">ETHERNET_MPACKET</span> <span class="o">=</span> <span class="mi">274</span>
+
+    <span class="c1">#: ``DLT_DISPLAYPORT_AUX``</span>
+    <span class="n">DISPLAYPORT_AUX</span> <span class="o">=</span> <span class="mi">275</span>
+
+    <span class="c1">#: ``DLT_LINUX_SLL2``</span>
+    <span class="n">LINUX_SLL2</span> <span class="o">=</span> <span class="mi">276</span>
+
+    <span class="c1">#: ``DLT_OPENVIZSLA``</span>
+    <span class="n">OPENVIZSLA</span> <span class="o">=</span> <span class="mi">278</span>
+
+    <span class="c1">#: ``DLT_EBHSCR``</span>
+    <span class="n">EBHSCR</span> <span class="o">=</span> <span class="mi">279</span>
+
+    <span class="c1">#: ``DLT_VPP_DISPATCH``</span>
+    <span class="n">VPP_DISPATCH</span> <span class="o">=</span> <span class="mi">280</span>
+
+    <span class="c1">#: ``DLT_DSA_TAG_BRCM``</span>
+    <span class="n">DSA_TAG_BRCM</span> <span class="o">=</span> <span class="mi">281</span>
+
+    <span class="c1">#: ``DLT_DSA_TAG_BRCM_PREPEND``</span>
+    <span class="n">DSA_TAG_BRCM_PREPEND</span> <span class="o">=</span> <span class="mi">282</span>
+
+    <span class="c1">#: ``DLT_IEEE802_15_4_TAP``</span>
+    <span class="n">IEEE802_15_4_TAP</span> <span class="o">=</span> <span class="mi">283</span>
+
+    <span class="c1">#: ``DLT_DSA_TAG_DSA``</span>
+    <span class="n">DSA_TAG_DSA</span> <span class="o">=</span> <span class="mi">284</span>
+
+    <span class="c1">#: ``DLT_DSA_TAG_EDSA``</span>
+    <span class="n">DSA_TAG_EDSA</span> <span class="o">=</span> <span class="mi">285</span>
+
+    <span class="c1">#: ``DLT_ELEE``</span>
+    <span class="n">ELEE</span> <span class="o">=</span> <span class="mi">286</span>
+
+    <span class="c1">#: ``DLT_Z_WAVE_SERIAL``</span>
+    <span class="n">Z_WAVE_SERIAL</span> <span class="o">=</span> <span class="mi">287</span>
+
+    <span class="c1">#: ``DLT_USB_2_0``</span>
+    <span class="n">USB_2_0</span> <span class="o">=</span> <span class="mi">288</span>
+
+    <span class="c1">#: ``DLT_ATSC_ALP``</span>
+    <span class="n">ATSC_ALP</span> <span class="o">=</span> <span class="mi">289</span>
+
+<div class="viewcode-block" id="LinkType.get"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.linktype.LinkType.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Backport support for original codes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">LinkType</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LinkType</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="n">LinkType</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LinkType</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="LinkType._missing_"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.linktype.LinkType._missing_">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mh">0x00000000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFFFFFFFF</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,1158 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IPv4 Constant Enumerations &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="IPv6 Constant Enumerations" href="ipv6.html" />
+    <link rel="prev" title="HTTP Constant Enumerations" href="http.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.const.ipv4">
+<span id="ipv4-constant-enumerations"></span><h1>IPv4 Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.ipv4" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pcapkit.const.ipv4.classification_level">
+<span id="classification-level-encodings"></span><h2>Classification Level Encodings<a class="headerlink" href="#module-pcapkit.const.ipv4.classification_level" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.classification_level.</code><code class="sig-name descname">ClassificationLevel</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/classification_level.html#ClassificationLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ClassificationLevel] Classification Level Encodings</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/classification_level.html#ClassificationLevel._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/classification_level.html#ClassificationLevel.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.Confidential">
+<code class="sig-name descname">Confidential</code><em class="property"> = 150</em><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.Confidential" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.Reserved_1">
+<code class="sig-name descname">Reserved_1</code><em class="property"> = 241</em><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.Reserved_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.Reserved_2">
+<code class="sig-name descname">Reserved_2</code><em class="property"> = 204</em><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.Reserved_2" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.Reserved_3">
+<code class="sig-name descname">Reserved_3</code><em class="property"> = 102</em><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.Reserved_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.Reserved_4">
+<code class="sig-name descname">Reserved_4</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.Reserved_4" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.Secret">
+<code class="sig-name descname">Secret</code><em class="property"> = 90</em><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.Secret" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.Top_Secret">
+<code class="sig-name descname">Top_Secret</code><em class="property"> = 61</em><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.Top_Secret" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.classification_level.ClassificationLevel.Unclassified">
+<code class="sig-name descname">Unclassified</code><em class="property"> = 171</em><a class="headerlink" href="#pcapkit.const.ipv4.classification_level.ClassificationLevel.Unclassified" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.option_class">
+<span id="option-classes"></span><h2>Option Classes<a class="headerlink" href="#module-pcapkit.const.ipv4.option_class" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.option_class.OptionClass">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.option_class.</code><code class="sig-name descname">OptionClass</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/option_class.html#OptionClass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[OptionClass] Option Classes</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.option_class.OptionClass._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/option_class.html#OptionClass._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.option_class.OptionClass.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/option_class.html#OptionClass.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_class.OptionClass.control">
+<code class="sig-name descname">control</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass.control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_class.OptionClass.debugging_and_measurement">
+<code class="sig-name descname">debugging_and_measurement</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass.debugging_and_measurement" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_class.OptionClass.reserved_for_future_use_1">
+<code class="sig-name descname">reserved_for_future_use_1</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass.reserved_for_future_use_1" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_class.OptionClass.reserved_for_future_use_3">
+<code class="sig-name descname">reserved_for_future_use_3</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.ipv4.option_class.OptionClass.reserved_for_future_use_3" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.option_number">
+<span id="ip-option-numbers"></span><h2>IP Option Numbers <a class="footnote-reference brackets" href="#id3" id="id1">*</a><a class="headerlink" href="#module-pcapkit.const.ipv4.option_number" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.option_number.</code><code class="sig-name descname">OptionNumber</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/option_number.html#OptionNumber"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[OptionNumber] IP Option Numbers</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/option_number.html#OptionNumber._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/option_number.html#OptionNumber.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.ADDEXT">
+<code class="sig-name descname">ADDEXT</code><em class="property"> = 147</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.ADDEXT" title="Permalink to this definition">¶</a></dt>
+<dd><p>ADDEXT - Address Extension [Ullmann IPv7][<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.CIPSO">
+<code class="sig-name descname">CIPSO</code><em class="property"> = 134</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.CIPSO" title="Permalink to this definition">¶</a></dt>
+<dd><p>CIPSO - Commercial Security [draft-ietf-cipso-ipsecurity-01]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.DPS">
+<code class="sig-name descname">DPS</code><em class="property"> = 151</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.DPS" title="Permalink to this definition">¶</a></dt>
+<dd><p>DPS - Dynamic Packet State [Andy Malis][<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.EIP">
+<code class="sig-name descname">EIP</code><em class="property"> = 145</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.EIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>EIP - Extended Internet Protocol [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1385.html"><strong>RFC 1385</strong></a>][<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.ENCODE">
+<code class="sig-name descname">ENCODE</code><em class="property"> = 15</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.ENCODE" title="Permalink to this definition">¶</a></dt>
+<dd><p>ENCODE [VerSteeg][<span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.EOOL">
+<code class="sig-name descname">EOOL</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.EOOL" title="Permalink to this definition">¶</a></dt>
+<dd><p>EOOL - End of Options List [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>][Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.EXP_158">
+<code class="sig-name descname">EXP_158</code><em class="property"> = 158</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.EXP_158" title="Permalink to this definition">¶</a></dt>
+<dd><p>EXP - RFC3692-style Experiment  [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.EXP_222">
+<code class="sig-name descname">EXP_222</code><em class="property"> = 222</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.EXP_222" title="Permalink to this definition">¶</a></dt>
+<dd><p>EXP - RFC3692-style Experiment  [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.EXP_30">
+<code class="sig-name descname">EXP_30</code><em class="property"> = 30</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.EXP_30" title="Permalink to this definition">¶</a></dt>
+<dd><p>EXP - RFC3692-style Experiment  [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.EXP_94">
+<code class="sig-name descname">EXP_94</code><em class="property"> = 94</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.EXP_94" title="Permalink to this definition">¶</a></dt>
+<dd><p>EXP - RFC3692-style Experiment  [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.E_SEC">
+<code class="sig-name descname">E_SEC</code><em class="property"> = 133</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.E_SEC" title="Permalink to this definition">¶</a></dt>
+<dd><p>E-SEC - Extended Security [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1108.html"><strong>RFC 1108</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.FINN">
+<code class="sig-name descname">FINN</code><em class="property"> = 205</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.FINN" title="Permalink to this definition">¶</a></dt>
+<dd><p>FINN - Experimental Flow Control [Greg Finn]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.IMITD">
+<code class="sig-name descname">IMITD</code><em class="property"> = 144</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.IMITD" title="Permalink to this definition">¶</a></dt>
+<dd><p>IMITD - IMI Traffic Descriptor [Lee]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.LSR">
+<code class="sig-name descname">LSR</code><em class="property"> = 131</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.LSR" title="Permalink to this definition">¶</a></dt>
+<dd><p>LSR - Loose Source Route [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>][Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.MTUP">
+<code class="sig-name descname">MTUP</code><em class="property"> = 11</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.MTUP" title="Permalink to this definition">¶</a></dt>
+<dd><p>MTUP - MTU Probe [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1063.html"><strong>RFC 1063</strong></a>][<span class="target" id="index-13"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1191.html"><strong>RFC 1191</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.MTUR">
+<code class="sig-name descname">MTUR</code><em class="property"> = 12</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.MTUR" title="Permalink to this definition">¶</a></dt>
+<dd><p>MTUR - MTU Reply [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1063.html"><strong>RFC 1063</strong></a>][<span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1191.html"><strong>RFC 1191</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.NOP">
+<code class="sig-name descname">NOP</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.NOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>NOP - No Operation [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>][Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.QS">
+<code class="sig-name descname">QS</code><em class="property"> = 25</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.QS" title="Permalink to this definition">¶</a></dt>
+<dd><p>QS - Quick-Start [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4782.html"><strong>RFC 4782</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.RR">
+<code class="sig-name descname">RR</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.RR" title="Permalink to this definition">¶</a></dt>
+<dd><p>RR - Record Route [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>][Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.RTRALT">
+<code class="sig-name descname">RTRALT</code><em class="property"> = 148</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.RTRALT" title="Permalink to this definition">¶</a></dt>
+<dd><p>RTRALT - Router Alert [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2113.html"><strong>RFC 2113</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.SDB">
+<code class="sig-name descname">SDB</code><em class="property"> = 149</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.SDB" title="Permalink to this definition">¶</a></dt>
+<dd><p>SDB - Selective Directed Broadcast [Charles Bud Graff][<span class="target" id="index-20"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.SEC">
+<code class="sig-name descname">SEC</code><em class="property"> = 130</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.SEC" title="Permalink to this definition">¶</a></dt>
+<dd><p>SEC - Security [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1108.html"><strong>RFC 1108</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.SID">
+<code class="sig-name descname">SID</code><em class="property"> = 136</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.SID" title="Permalink to this definition">¶</a></dt>
+<dd><p>SID - Stream ID [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>][Jon Postel][<span class="target" id="index-23"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.SSR">
+<code class="sig-name descname">SSR</code><em class="property"> = 137</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.SSR" title="Permalink to this definition">¶</a></dt>
+<dd><p>SSR - Strict Source Route [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>][Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.TR">
+<code class="sig-name descname">TR</code><em class="property"> = 82</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.TR" title="Permalink to this definition">¶</a></dt>
+<dd><p>TR - Traceroute [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1393.html"><strong>RFC 1393</strong></a>][<span class="target" id="index-26"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.TS">
+<code class="sig-name descname">TS</code><em class="property"> = 68</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.TS" title="Permalink to this definition">¶</a></dt>
+<dd><p>TS - Time Stamp [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>][Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.UMP">
+<code class="sig-name descname">UMP</code><em class="property"> = 152</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.UMP" title="Permalink to this definition">¶</a></dt>
+<dd><p>UMP - Upstream Multicast Pkt. [Dino Farinacci][<span class="target" id="index-28"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.Unassigned_150">
+<code class="sig-name descname">Unassigned_150</code><em class="property"> = 150</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.Unassigned_150" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned (Released 18 October 2005)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.VISA">
+<code class="sig-name descname">VISA</code><em class="property"> = 142</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.VISA" title="Permalink to this definition">¶</a></dt>
+<dd><p>VISA - Experimental Access Control [Deborah Estrin][<span class="target" id="index-29"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6814.html"><strong>RFC 6814</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.option_number.OptionNumber.ZSU">
+<code class="sig-name descname">ZSU</code><em class="property"> = 10</em><a class="headerlink" href="#pcapkit.const.ipv4.option_number.OptionNumber.ZSU" title="Permalink to this definition">¶</a></dt>
+<dd><p>ZSU - Experimental Measurement [ZSu]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.protection_authority">
+<span id="protection-authority-bit-assignments"></span><h2>Protection Authority Bit Assignments<a class="headerlink" href="#module-pcapkit.const.ipv4.protection_authority" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.protection_authority.</code><code class="sig-name descname">ProtectionAuthority</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/protection_authority.html#ProtectionAuthority"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ProtectionAuthority] Protection Authority Bit Assignments</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/protection_authority.html#ProtectionAuthority._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/protection_authority.html#ProtectionAuthority.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.DOE">
+<code class="sig-name descname">DOE</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.DOE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.Field_Termination_Indicator">
+<code class="sig-name descname">Field_Termination_Indicator</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.Field_Termination_Indicator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.GENSER">
+<code class="sig-name descname">GENSER</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.GENSER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.NSA">
+<code class="sig-name descname">NSA</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.NSA" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.SCI">
+<code class="sig-name descname">SCI</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.SCI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.SIOP_ESI">
+<code class="sig-name descname">SIOP_ESI</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.SIOP_ESI" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.Unassigned_5">
+<code class="sig-name descname">Unassigned_5</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.Unassigned_5" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.protection_authority.ProtectionAuthority.Unassigned_6">
+<code class="sig-name descname">Unassigned_6</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.ipv4.protection_authority.ProtectionAuthority.Unassigned_6" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.qs_function">
+<span id="qs-functions"></span><h2>QS Functions<a class="headerlink" href="#module-pcapkit.const.ipv4.qs_function" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.qs_function.QSFunction">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.qs_function.</code><code class="sig-name descname">QSFunction</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/qs_function.html#QSFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.qs_function.QSFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[QSFunction] QS Functions</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.qs_function.QSFunction._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/qs_function.html#QSFunction._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.qs_function.QSFunction._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.qs_function.QSFunction.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/qs_function.html#QSFunction.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.qs_function.QSFunction.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.qs_function.QSFunction.Quick_Start_Request">
+<code class="sig-name descname">Quick_Start_Request</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.qs_function.QSFunction.Quick_Start_Request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.qs_function.QSFunction.Report_of_Approved_Rate">
+<code class="sig-name descname">Report_of_Approved_Rate</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.ipv4.qs_function.QSFunction.Report_of_Approved_Rate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.router_alert">
+<span id="ipv4-router-alert-option-values"></span><h2>IPv4 Router Alert Option Values <a class="footnote-reference brackets" href="#id4" id="id2">†</a><a class="headerlink" href="#module-pcapkit.const.ipv4.router_alert" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.router_alert.</code><code class="sig-name descname">RouterAlert</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/router_alert.html#RouterAlert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[RouterAlert] IPv4 Router Alert Option Values</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/router_alert.html#RouterAlert._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/router_alert.html#RouterAlert.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_0">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_0</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_1">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_1</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_10">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_10</code><em class="property"> = 11</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_10" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_11">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_11</code><em class="property"> = 12</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_11" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_12">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_12</code><em class="property"> = 13</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_12" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_13">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_13</code><em class="property"> = 14</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_13" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_14">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_14</code><em class="property"> = 15</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_14" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_15">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_15</code><em class="property"> = 16</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_15" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_16">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_16</code><em class="property"> = 17</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_16" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_17">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_17</code><em class="property"> = 18</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_17" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_18">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_18</code><em class="property"> = 19</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_18" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_19">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_19</code><em class="property"> = 20</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_19" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_2">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_2</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_20">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_20</code><em class="property"> = 21</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_20" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_21">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_21</code><em class="property"> = 22</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_21" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_22">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_22</code><em class="property"> = 23</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_22" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_23">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_23</code><em class="property"> = 24</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_23" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_24">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_24</code><em class="property"> = 25</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_24" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_25">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_25</code><em class="property"> = 26</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_25" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_26">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_26</code><em class="property"> = 27</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_26" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_27">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_27</code><em class="property"> = 28</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_27" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_28">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_28</code><em class="property"> = 29</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_28" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-51"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_29">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_29</code><em class="property"> = 30</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_29" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_3">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_3</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-53"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_30">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_30</code><em class="property"> = 31</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_30" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_31">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_31</code><em class="property"> = 32</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_31" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_4">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_4</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_5">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_5</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-57"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_6">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_6</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_7">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_7</code><em class="property"> = 8</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_7" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-59"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_8">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_8</code><em class="property"> = 9</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_9">
+<code class="sig-name descname">Aggregated_Reservation_Nesting_Level_9</code><em class="property"> = 10</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_9" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.NSIS_NATFW_NSLP">
+<code class="sig-name descname">NSIS_NATFW_NSLP</code><em class="property"> = 65</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.NSIS_NATFW_NSLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>NSIS NATFW NSLP [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5973.html"><strong>RFC 5973</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_0">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_0</code><em class="property"> = 33</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_1">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_1</code><em class="property"> = 34</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_10">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_10</code><em class="property"> = 43</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_10" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_11">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_11</code><em class="property"> = 44</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_11" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_12">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_12</code><em class="property"> = 45</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_12" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_13">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_13</code><em class="property"> = 46</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_13" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_14">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_14</code><em class="property"> = 47</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_14" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-69"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_15">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_15</code><em class="property"> = 48</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_15" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_16">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_16</code><em class="property"> = 49</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_16" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-71"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_17">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_17</code><em class="property"> = 50</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_17" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-72"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_18">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_18</code><em class="property"> = 51</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_18" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-73"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_19">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_19</code><em class="property"> = 52</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_19" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-74"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_2">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_2</code><em class="property"> = 35</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-75"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_20">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_20</code><em class="property"> = 53</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_20" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_21">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_21</code><em class="property"> = 54</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_21" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_22">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_22</code><em class="property"> = 55</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_22" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_23">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_23</code><em class="property"> = 56</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_23" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_24">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_24</code><em class="property"> = 57</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_24" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_25">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_25</code><em class="property"> = 58</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_25" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_26">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_26</code><em class="property"> = 59</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_26" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_27">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_27</code><em class="property"> = 60</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_27" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_28">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_28</code><em class="property"> = 61</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_28" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-84"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_29">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_29</code><em class="property"> = 62</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_29" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-85"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_3">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_3</code><em class="property"> = 36</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-86"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_30">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_30</code><em class="property"> = 63</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_30" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-87"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_31">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_31</code><em class="property"> = 64</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_31" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-88"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_4">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_4</code><em class="property"> = 37</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-89"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_5">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_5</code><em class="property"> = 38</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-90"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_6">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_6</code><em class="property"> = 39</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-91"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_7">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_7</code><em class="property"> = 40</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_7" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-92"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_8">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_8</code><em class="property"> = 41</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-93"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_9">
+<code class="sig-name descname">QoS_NSLP_Aggregation_Level_9</code><em class="property"> = 42</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_9" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-94"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.router_alert.RouterAlert.Reserved">
+<code class="sig-name descname">Reserved</code><em class="property"> = 65535</em><a class="headerlink" href="#pcapkit.const.ipv4.router_alert.RouterAlert.Reserved" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-95"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5350.html"><strong>RFC 5350</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.tos_del">
+<span id="tos-ds-field-delay"></span><h2>ToS (DS Field) Delay<a class="headerlink" href="#module-pcapkit.const.ipv4.tos_del" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.tos_del.ToSDelay">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.tos_del.</code><code class="sig-name descname">ToSDelay</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_del.html#ToSDelay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_del.ToSDelay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ToSDelay] ToS (DS Field) Delay</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_del.ToSDelay._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_del.html#ToSDelay._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_del.ToSDelay._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_del.ToSDelay.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_del.html#ToSDelay.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_del.ToSDelay.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_del.ToSDelay.LOW">
+<code class="sig-name descname">LOW</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_del.ToSDelay.LOW" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_del.ToSDelay.NORMAL">
+<code class="sig-name descname">NORMAL</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_del.ToSDelay.NORMAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.tos_ecn">
+<span id="tos-ecn-field"></span><h2>ToS ECN Field<a class="headerlink" href="#module-pcapkit.const.ipv4.tos_ecn" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.tos_ecn.ToSECN">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.tos_ecn.</code><code class="sig-name descname">ToSECN</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_ecn.html#ToSECN"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ToSECN] ToS ECN Field</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_ecn.ToSECN._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_ecn.html#ToSECN._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_ecn.ToSECN.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_ecn.html#ToSECN.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_ecn.ToSECN.CE">
+<code class="sig-name descname">CE</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN.CE" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_ecn.ToSECN.ECT_0b01">
+<code class="sig-name descname">ECT_0b01</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN.ECT_0b01" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_ecn.ToSECN.ECT_0b10">
+<code class="sig-name descname">ECT_0b10</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN.ECT_0b10" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_ecn.ToSECN.Not_ECT">
+<code class="sig-name descname">Not_ECT</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_ecn.ToSECN.Not_ECT" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.tos_pre">
+<span id="tos-ds-field-precedence"></span><h2>ToS (DS Field) Precedence<a class="headerlink" href="#module-pcapkit.const.ipv4.tos_pre" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.tos_pre.</code><code class="sig-name descname">ToSPrecedence</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_pre.html#ToSPrecedence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ToSPrecedence] ToS (DS Field) Precedence</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_pre.html#ToSPrecedence._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_pre.html#ToSPrecedence.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.CRITIC_ECP">
+<code class="sig-name descname">CRITIC_ECP</code><em class="property"> = 5</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.CRITIC_ECP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.Flash">
+<code class="sig-name descname">Flash</code><em class="property"> = 3</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.Flash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.Flash_Override">
+<code class="sig-name descname">Flash_Override</code><em class="property"> = 4</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.Flash_Override" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.Immediate">
+<code class="sig-name descname">Immediate</code><em class="property"> = 2</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.Immediate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.Internetwork_Control">
+<code class="sig-name descname">Internetwork_Control</code><em class="property"> = 6</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.Internetwork_Control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.Network_Control">
+<code class="sig-name descname">Network_Control</code><em class="property"> = 7</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.Network_Control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.Priority">
+<code class="sig-name descname">Priority</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.Priority" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_pre.ToSPrecedence.Routine">
+<code class="sig-name descname">Routine</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_pre.ToSPrecedence.Routine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.tos_rel">
+<span id="tos-ds-field-reliability"></span><h2>ToS (DS Field) Reliability<a class="headerlink" href="#module-pcapkit.const.ipv4.tos_rel" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.tos_rel.ToSReliability">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.tos_rel.</code><code class="sig-name descname">ToSReliability</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_rel.html#ToSReliability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_rel.ToSReliability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ToSReliability] ToS (DS Field) Reliability</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_rel.ToSReliability._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_rel.html#ToSReliability._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_rel.ToSReliability._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_rel.ToSReliability.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_rel.html#ToSReliability.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_rel.ToSReliability.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_rel.ToSReliability.HIGH">
+<code class="sig-name descname">HIGH</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_rel.ToSReliability.HIGH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_rel.ToSReliability.NORMAL">
+<code class="sig-name descname">NORMAL</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_rel.ToSReliability.NORMAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.const.ipv4.tos_thr">
+<span id="tos-ds-field-throughput"></span><h2>ToS (DS Field) Throughput<a class="headerlink" href="#module-pcapkit.const.ipv4.tos_thr" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.const.ipv4.tos_thr.ToSThroughput">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.const.ipv4.tos_thr.</code><code class="sig-name descname">ToSThroughput</code><span class="sig-paren">(</span><em class="sig-param">value=&lt;object object&gt;</em>, <em class="sig-param">names=None</em>, <em class="sig-param">module=None</em>, <em class="sig-param">type=None</em>, <em class="sig-param">start=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_thr.html#ToSThroughput"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<p>[ToSThroughput] ToS (DS Field) Throughput</p>
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_thr.ToSThroughput._missing_">
+<em class="property">classmethod </em><code class="sig-name descname">_missing_</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">value</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_thr.html#ToSThroughput._missing_"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.const.ipv4.tos_thr.ToSThroughput.get">
+<em class="property">static </em><code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em>, <em class="sig-param"><span class="n">default</span><span class="o">=</span><span class="default_value">- 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/ipv4/tos_thr.html#ToSThroughput.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_thr.ToSThroughput.HIGH">
+<code class="sig-name descname">HIGH</code><em class="property"> = 1</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput.HIGH" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.const.ipv4.tos_thr.ToSThroughput.NORMAL">
+<code class="sig-name descname">NORMAL</code><em class="property"> = 0</em><a class="headerlink" href="#pcapkit.const.ipv4.tos_thr.ToSThroughput.NORMAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1">https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ip-parameters-1</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">†</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ipv4-router-alert-option-values">https://www.iana.org/assignments/ip-parameters/ip-parameters.xhtml#ipv4-router-alert-option-values</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Constant Enumerations</a><ul>
+      <li>Previous: <a href="http.html" title="previous chapter">HTTP Constant Enumerations</a></li>
+      <li>Next: <a href="ipv6.html" title="next chapter">IPv6 Constant Enumerations</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/const/ipv4.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,269 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.link.ethernet &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.link.ethernet</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;ethernet protocol</span>
+
+<span class="sd">:mod:`pcapkit.protocols.link.ethernet` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.link.ethernet.Ethernet`</span>
+<span class="sd">only, which implements extractor for Ethernet</span>
+<span class="sd">Protocol [*]_, whose structure is described as</span>
+<span class="sd">below:</span>
+
+<span class="sd">+========+=======+==============+===========================+</span>
+<span class="sd">| Octets | Bits  | Name         | Description               |</span>
+<span class="sd">+========+=======+==============+===========================+</span>
+<span class="sd">| 0      |     0 | ``eth.dst``  | Destination MAC Address   |</span>
+<span class="sd">+--------+-------+--------------+---------------------------+</span>
+<span class="sd">| 1      |     8 | ``eth.src``  | Source MAC Address        |</span>
+<span class="sd">+--------+-------+--------------+---------------------------+</span>
+<span class="sd">| 2      |    16 | ``eth.type`` | Protocol (Internet Layer) |</span>
+<span class="sd">+--------+-------+--------------+---------------------------+</span>
+
+<span class="sd">.. [*] https://en.wikipedia.org/wiki/Ethernet</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Ethernet&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Ethernet"><a class="viewcode-back" href="../../../../protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet">[docs]</a><span class="k">class</span> <span class="nc">Ethernet</span><span class="p">(</span><span class="n">Link</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class implements Ethernet Protocol.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Name of current protocol.</span>
+
+<span class="sd">        :rtype: Literal[&#39;Ethernet Protocol&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;Ethernet Protocol&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Header length of current protocol.</span>
+
+<span class="sd">        :rtype: Literal[14]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">14</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Name of next layer protocol.</span>
+
+<span class="sd">        :rtype: pcapkit.const.reg.ethertype.EtherType</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="c1"># source mac address</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Source mac address.</span>
+
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">src</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="c1"># destination mac address</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Destination mac address.</span>
+
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dst</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Ethernet.read"><a class="viewcode-back" href="../../../../protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read Ethernet Protocol [:rfc:`7042`].</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length (Optional[int]): Length of packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Ethernet: Parsed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">_dstm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mac_addr</span><span class="p">()</span>
+        <span class="n">_srcm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mac_addr</span><span class="p">()</span>
+        <span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_protos</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">ethernet</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">dst</span><span class="o">=</span><span class="n">_dstm</span><span class="p">,</span>
+            <span class="n">src</span><span class="o">=</span><span class="n">_srcm</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">_type</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">length</span> <span class="o">-=</span> <span class="mi">14</span>
+        <span class="n">ethernet</span><span class="p">[</span><span class="s1">&#39;packet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="mi">14</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ethernet</span><span class="p">,</span> <span class="n">_type</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Ethernet.make"><a class="viewcode-back" href="../../../../protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bytes: Constructed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Ethernet.__length_hint__"><a class="viewcode-back" href="../../../../protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.</span>
+
+<span class="sd">        :rtype: Literal[14]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">14</span></div>
+
+<div class="viewcode-block" id="Ethernet.__index__"><a class="viewcode-back" href="../../../../protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet.__index__">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer&#39;</span><span class="p">)</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Ethernet._read_mac_addr"><a class="viewcode-back" href="../../../../protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mac_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read MAC address.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Colon (``:``) seperated *hex* encoded MAC address.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">_addr</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">_byte</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_addr</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

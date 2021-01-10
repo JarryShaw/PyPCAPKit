@@ -1,0 +1,200 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VLAN Vendor Crawler &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Command Line Interface" href="../cli.html" />
+    <link rel="prev" title="TCP Vendor Crawler" href="tcp.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.vendor.vlan">
+<span id="vlan-vendor-crawler"></span><h1>VLAN Vendor Crawler<a class="headerlink" href="#module-pcapkit.vendor.vlan" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pcapkit.vendor.vlan.priority_level">
+<span id="priority-levels"></span><h2>Priority Levels <a class="footnote-reference brackets" href="#id2" id="id1">*</a><a class="headerlink" href="#module-pcapkit.vendor.vlan.priority_level" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.vlan.priority_level.</code><code class="sig-name descname">PriorityLevel</code><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>Priority levels defined in IEEE 802.1p.</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">soup</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count field records.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">soup</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process HTML data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>bs4.BeautifulSoup</em>) – Parsed HTML source.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.request">
+<code class="sig-name descname">request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Context from <a class="reference internal" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK" title="pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Parsed HTML source.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bs4.BeautifulSoup</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0b000 &lt;= value &lt;= 0b111'</em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels'</em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels">https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Web Crawlers for Constant Enumerations</a><ul>
+      <li>Previous: <a href="tcp.html" title="previous chapter">TCP Vendor Crawler</a></li>
+      <li>Next: <a href="../cli.html" title="next chapter">Command Line Interface</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/vendor/vlan.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

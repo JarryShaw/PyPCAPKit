@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Constant Enumerations &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ARP Constant Enumerations" href="arp.html" />
+    <link rel="prev" title="User Defined Warnings" href="../utilities/warnings.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.const">
+<span id="constant-enumerations"></span><h1>Constant Enumerations<a class="headerlink" href="#module-pcapkit.const" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="arp.html">ARP Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arp.html#module-pcapkit.const.arp.hardware">ARP Hardware Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="arp.html#module-pcapkit.const.arp.operation">Operation Codes </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ftp.html">FTP Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ftp.html#module-pcapkit.const.ftp.command">FTP Commands </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ftp.html#module-pcapkit.const.ftp.return_code">FTP Return Codes </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hip.html">HIP Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.certificate">HIP Certificate Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.cipher">HIP Cipher IDs </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.di">DI-Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.ecdsa_curve">ECDSA Curve Label </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.ecdsa_low_curve">ECDSA_LOW Curve Label </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.esp_transform_suite">ESP Transform Suite IDs </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.group">Group IDs </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.hi_algorithm">HI Algorithm </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.hit_suite">HIT Suite ID </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.nat_traversal">HIP NAT Traversal Modes </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.notify_message">Notify Message Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.packet">Packet Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.parameter">Parameter Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.registration">Registration Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.registration_failure">Registration Failure Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.suite">Suite IDs </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.const.hip.transport">HIP Transport Modes </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="http.html">HTTP Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="http.html#module-pcapkit.const.http.error_code">HTTP/2 Error Code </a></li>
+<li class="toctree-l2"><a class="reference internal" href="http.html#module-pcapkit.const.http.frame">HTTP/2 Frame Type </a></li>
+<li class="toctree-l2"><a class="reference internal" href="http.html#module-pcapkit.const.http.setting">HTTP/2 Settings </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipv4.html">IPv4 Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.classification_level">Classification Level Encodings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.option_class">Option Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.option_number">IP Option Numbers </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.protection_authority">Protection Authority Bit Assignments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.qs_function">QS Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.router_alert">IPv4 Router Alert Option Values </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.tos_del">ToS (DS Field) Delay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.tos_ecn">ToS ECN Field</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.tos_pre">ToS (DS Field) Precedence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.tos_rel">ToS (DS Field) Reliability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.const.ipv4.tos_thr">ToS (DS Field) Throughput</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipv6.html">IPv6 Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.const.ipv6.extension_header">IPv6 Extension Header Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.const.ipv6.option">Destination Options and Hop-by-Hop Options </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.const.ipv6.qs_function">IPv6 QS Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.const.ipv6.router_alert">IPv6 Router Alert Option Values </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.const.ipv6.routing">Routing Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.const.ipv6.seed_id">Seed-ID Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.const.ipv6.tagger_id">TaggerId Types </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipx.html">IPX Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipx.html#module-pcapkit.const.ipx.packet">IPX Packet Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipx.html#module-pcapkit.const.ipx.socket">IPX Socket Types </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mh.html">MH Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mh.html#module-pcapkit.const.mh.packet">Mobility Header Types </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ospf.html">OSPF Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ospf.html#module-pcapkit.const.ospf.authentication">Authentication Codes </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ospf.html#module-pcapkit.const.ospf.packet">OSPF Packet Type </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reg.html">Protocol Type Registry Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.linktype">LINK-LAYER HEADER TYPES </a></li>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.ethertype">ETHER TYPES </a></li>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.transtype">Assigned Internet Protocol Numbers </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tcp.html">TCP Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.const.tcp.checksum">TCP Checksum </a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.const.tcp.option">TCP Option Kind Numbers </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vlan.html">VLAN Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vlan.html#module-pcapkit.const.vlan.priority_level">Priority Levels </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+      <li>Previous: <a href="../utilities/warnings.html" title="previous chapter">User Defined Warnings</a></li>
+      <li>Next: <a href="arp.html" title="next chapter">ARP Constant Enumerations</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/const/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

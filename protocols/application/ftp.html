@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FTP - File Transfer Protocol &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="HTTP - Hypertext Transfer Protocol" href="http.html" />
+    <link rel="prev" title="Application Layer Protocols" href="index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="ftp-file-transfer-protocol">
+<h1>FTP - File Transfer Protocol<a class="headerlink" href="#ftp-file-transfer-protocol" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.protocols.application.ftp" title="pcapkit.protocols.application.ftp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.application.ftp.FTP" title="pcapkit.protocols.application.ftp.FTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code></a> only,
+which implements extractor for File Transfer Protocol
+(FTP) <a class="footnote-reference brackets" href="#id2" id="id1">*</a>.</p>
+<span class="target" id="module-pcapkit.protocols.application.ftp"></span><dl class="py class">
+<dt id="pcapkit.protocols.application.ftp.FTP">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.ftp.</code><code class="sig-name descname">FTP</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.application.Application</span></code></a></p>
+<p>This class implements File Transfer Protocol.</p>
+<dl class="py method">
+<dt id="pcapkit.protocols.application.ftp.FTP.make">
+<code class="sig-name descname">make</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP.make"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make (construct) packet data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Constructed packet data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.application.ftp.FTP.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read File Transfer Protocol (FTP).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – Length of packet data.</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Parsed packet data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Union[<a class="reference internal" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request" title="pcapkit.protocols.application.ftp.DataType_FTP_Request">DataType_FTP_Request</a>, <a class="reference internal" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response" title="pcapkit.protocols.application.ftp.DataType_FTP_Response">DataType_FTP_Response</a>]</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the packet is malformed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.application.ftp.FTP.length">
+<em class="property">property </em><code class="sig-name descname">length</code><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Header length of current protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.application.ftp.FTP.length" title="pcapkit.protocols.application.ftp.FTP.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.application.ftp.FTP.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of current protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Literal[‘File Transfer Protocol’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="data-structure">
+<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Following classes are only for <em>documentation</em> purpose.
+They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
+</div>
+<dl class="py class">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.ftp.</code><code class="sig-name descname">DataType_FTP_Request</code><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases</dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of FTP request packet [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc959.html"><strong>RFC 959</strong></a>].</p>
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request.type">
+<code class="sig-name descname">type</code><em class="property">: Literal<span class="p">[</span>request<span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Packet type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request.command">
+<code class="sig-name descname">command</code><em class="property">: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">pcapkit.corekit.infoclass.Info</a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.command" title="Permalink to this definition">¶</a></dt>
+<dd><p>FTP command.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request.arg">
+<code class="sig-name descname">arg</code><em class="property">: Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.arg" title="Permalink to this definition">¶</a></dt>
+<dd><p>FTP command arguments.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request.raw">
+<code class="sig-name descname">raw</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw packet data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.ftp.</code><code class="sig-name descname">DataType_FTP_Response</code><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases</dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of FTP response packet [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc959.html"><strong>RFC 959</strong></a>].</p>
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.type">
+<code class="sig-name descname">type</code><em class="property">: Literal<span class="p">[</span>response<span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Packet type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.code">
+<code class="sig-name descname">code</code><em class="property">: <a class="reference internal" href="../../const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode">pcapkit.const.ftp.return_code.ReturnCode</a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.code" title="Permalink to this definition">¶</a></dt>
+<dd><p>FTP response code.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.arg">
+<code class="sig-name descname">arg</code><em class="property">: Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.arg" title="Permalink to this definition">¶</a></dt>
+<dd><p>FTP response arguments (messages).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.mf">
+<code class="sig-name descname">mf</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.mf" title="Permalink to this definition">¶</a></dt>
+<dd><p>More fragmented messages flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.raw">
+<code class="sig-name descname">raw</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw packet data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/File_Transfer_Protocol">https://en.wikipedia.org/wiki/File_Transfer_Protocol</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="../index.html">Protocol Family</a><ul>
+  <li><a href="index.html">Application Layer Protocols</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Application Layer Protocols</a></li>
+      <li>Next: <a href="http.html" title="next chapter">HTTP - Hypertext Transfer Protocol</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../../_sources/protocols/application/ftp.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

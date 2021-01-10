@@ -1,0 +1,252 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.link.link &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.link.link</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=bad-whitespace</span>
+<span class="sd">&quot;&quot;&quot;root link layer protocol</span>
+
+<span class="sd">:mod:`pcapkit.protocols.link.link` contains :class:`~pcapkit.protocols.link.link.Link`,</span>
+<span class="sd">which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.link.link.arp.ARP`/InARP,</span>
+<span class="sd">:class:`~pcapkit.protocols.link.link.ethernet.Ethernet`, :class:`~pcapkit.protocols.link.link.l2tp.L2TP`,</span>
+<span class="sd">:class:`~pcapkit.protocols.link.link.ospf.OSPF`, :class:`~pcapkit.protocols.link.link.rarp.RARP`/DRARP and etc.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">ETHERTYPE</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">LINKTYPE</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Link&#39;</span><span class="p">,</span> <span class="s1">&#39;LINKTYPE&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Link"><a class="viewcode-back" href="../../../../protocols/link/index.html#pcapkit.protocols.link.link.Link">[docs]</a><span class="k">class</span> <span class="nc">Link</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for link layer protocol family.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: Layer of protocol.</span>
+    <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">&#39;Link&#39;</span>
+
+    <span class="c1">#: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
+    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
+    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.link.link.Link._import_next_layer&gt;`.</span>
+    <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span> <span class="p">{</span>
+        <span class="mh">0x0806</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link.arp&#39;</span><span class="p">,</span>      <span class="s1">&#39;ARP&#39;</span><span class="p">),</span>
+        <span class="mh">0x8035</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link.rarp&#39;</span><span class="p">,</span>     <span class="s1">&#39;RARP&#39;</span><span class="p">),</span>
+        <span class="mh">0x8100</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link.vlan&#39;</span><span class="p">,</span>     <span class="s1">&#39;VLAN&#39;</span><span class="p">),</span>
+        <span class="mh">0x0800</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv4&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
+        <span class="mh">0x86DD</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipv6&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
+        <span class="mh">0x8137</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet.ipx&#39;</span><span class="p">,</span>  <span class="s1">&#39;IPX&#39;</span><span class="p">),</span>
+    <span class="p">})</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1"># protocol layer</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">layer</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Protocol layer.</span>
+
+<span class="sd">        :rtype: Literal[&#39;Link&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__layer__</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Link.register"><a class="viewcode-back" href="../../../../protocols/link/index.html#pcapkit.protocols.link.link.Link.register">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            code (int): protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`</span>
+<span class="sd">            module (str): module name</span>
+<span class="sd">            class_ (str): class name</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            The full qualified class name of the new protocol class</span>
+<span class="sd">            should be as ``{module}.{class_}``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Link._read_protos"><a class="viewcode-back" href="../../../../protocols/link/index.html#pcapkit.protocols.link.link.Link._read_protos">[docs]</a>    <span class="k">def</span> <span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): buffer size</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pcapkit.const.reg.ethertype.EtherType: next layer&#39;s protocol enumeration</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">_prot</span> <span class="o">=</span> <span class="n">ETHERTYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_prot</span></div>
+
+<div class="viewcode-block" id="Link._import_next_layer"><a class="viewcode-back" href="../../../../protocols/link/index.html#pcapkit.protocols.link.link.Link._import_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Import next layer extractor.</span>
+
+<span class="sd">        This method currently supports following protocols as registered in</span>
+<span class="sd">        :data:`~pcapkit.const.reg.ethertype.EtherType`:</span>
+
+<span class="sd">        .. list-table::</span>
+<span class="sd">           :header-rows: 1</span>
+
+<span class="sd">           * - ``proto``</span>
+<span class="sd">             - Protocol</span>
+<span class="sd">           * - 0x0806</span>
+<span class="sd">             - :class:`~pcapkit.protocols.link.arp.ARP`</span>
+<span class="sd">           * - 0x8035</span>
+<span class="sd">             - :class:`~pcapkit.protocols.link.rarp.RARP`</span>
+<span class="sd">           * - 0x8100</span>
+<span class="sd">             - :class:`~pcapkit.protocols.link.vlan.VLAN`</span>
+<span class="sd">           * - 0x0800</span>
+<span class="sd">             - :class:`~pcapkit.protocols.internet.ipv4.IPv4`</span>
+<span class="sd">           * - 0x86DD</span>
+<span class="sd">             - :class:`~pcapkit.protocols.internet.ipv6.IPv6`</span>
+<span class="sd">           * - 0x8137</span>
+<span class="sd">             - :class:`~pcapkit.protocols.internet.ipx.IPX`</span>
+
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            proto (int): next layer protocol index</span>
+<span class="sd">            length (int): valid (*non-padding*) length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pcapkit.protocols.protocol.Protocol: instance of next layer</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pcapkit.protocols.null</span> <span class="kn">import</span> \
+                <span class="n">NoPayload</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigterm</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pcapkit.protocols.raw</span> <span class="kn">import</span> \
+                <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">module</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">proto</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ImportError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                <span class="kn">from</span> <span class="nn">pcapkit.protocols.raw</span> <span class="kn">import</span> \
+                    <span class="n">Raw</span> <span class="k">as</span> <span class="n">protocol</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+
+        <span class="n">next_</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_onerror</span><span class="p">,</span>
+                         <span class="n">layer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exlayer</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_exproto</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">next_</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

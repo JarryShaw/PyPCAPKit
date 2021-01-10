@@ -1,0 +1,1255 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.transport.tcp &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.transport.tcp</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;transmission control protocol</span>
+
+<span class="sd">:mod:`pcapkit.protocols.transport.tcp` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.transport.tcp.TCP` only,</span>
+<span class="sd">which implements extractor for Transmission Control</span>
+<span class="sd">Protocol (TCP) [*]_, whose structure is described as</span>
+<span class="sd">below:</span>
+
+<span class="sd">======= ========= ========================= =======================================</span>
+<span class="sd">Octets      Bits        Name                    Description</span>
+<span class="sd">======= ========= ========================= =======================================</span>
+<span class="sd">  0           0   ``tcp.srcport``           Source Port</span>
+<span class="sd">  2          16   ``tcp.dstport``           Destination Port</span>
+<span class="sd">  4          32   ``tcp.seq``               Sequence Number</span>
+<span class="sd">  8          64   ``tcp.ack``               Acknowledgement Number (if ACK set)</span>
+<span class="sd">  12         96   ``tcp.hdr_len``           Data Offset</span>
+<span class="sd">  12        100                             Reserved (must be ``\\x00``)</span>
+<span class="sd">  12        103   ``tcp.flags.ns``          ECN Concealment Protection (NS)</span>
+<span class="sd">  13        104   ``tcp.flags.cwr``         Congestion Window Reduced (CWR)</span>
+<span class="sd">  13        105   ``tcp.flags.ece``         ECN-Echo (ECE)</span>
+<span class="sd">  13        106   ``tcp.flags.urg``         Urgent (URG)</span>
+<span class="sd">  13        107   ``tcp.flags.ack``         Acknowledgement (ACK)</span>
+<span class="sd">  13        108   ``tcp.flags.psh``         Push Function (PSH)</span>
+<span class="sd">  13        109   ``tcp.flags.rst``         Reset Connection (RST)</span>
+<span class="sd">  13        110   ``tcp.flags.syn``         Synchronize Sequence Numbers (SYN)</span>
+<span class="sd">  13        111   ``tcp.flags.fin``         Last Packet from Sender (FIN)</span>
+<span class="sd">  14        112   ``tcp.window_size``       Size of Receive Window</span>
+<span class="sd">  16        128   ``tcp.checksum``          Checksum</span>
+<span class="sd">  18        144   ``tcp.urgent_pointer``    Urgent Pointer (if URG set)</span>
+<span class="sd">  20        160   ``tcp.opt``               TCP Options (if data offset &gt; 5)</span>
+<span class="sd">======= ========= ========================= =======================================</span>
+
+<span class="sd">.. [*] https://en.wikipedia.org/wiki/Transmission_Control_Protocol</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">ipaddress</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.checksum</span> <span class="kn">import</span> <span class="n">Checksum</span> <span class="k">as</span> <span class="n">chksum_opt</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">OPT_TYPE</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.transport</span> <span class="kn">import</span> <span class="n">Transport</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TCP&#39;</span><span class="p">]</span>
+
+<span class="n">T</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">F</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">nm_len</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span> <span class="o">-</span> <span class="mi">2</span>
+<span class="n">op_len</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">n</span><span class="p">:</span> <span class="n">n</span> <span class="o">*</span> <span class="mi">8</span>
+
+<span class="c1"># pylint: disable=protected-access</span>
+<span class="n">mptcp_opt</span> <span class="o">=</span> <span class="p">{</span>   <span class="c1"># [RFC 6824]</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_capable</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>      <span class="c1"># MP_CAPABLE</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_join</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>         <span class="c1"># MP_JOIN</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_dss</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>          <span class="c1"># DSS</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_add</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>          <span class="c1"># ADD_ADDR</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_remove</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>       <span class="c1"># REMOVE_ADDR</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_prio</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>         <span class="c1"># MP_PRIO</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_fail</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>         <span class="c1"># MP_FAIL</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mptcp_fastclose</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>    <span class="c1"># MP_FASTCLOSE</span>
+<span class="p">}</span>
+
+<span class="c1"># pylint: disable=protected-access</span>
+<span class="n">process_opt</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mi">0</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_donone</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>    <span class="c1"># do nothing</span>
+    <span class="mi">1</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>    <span class="c1"># unpack according to size</span>
+    <span class="mi">2</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_tsopt</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>     <span class="c1"># Timestamps</span>
+    <span class="mi">3</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_pocsp</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>     <span class="c1"># POC Service Profile</span>
+    <span class="mi">4</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_acopt</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>     <span class="c1"># Alternate Checksum Request</span>
+    <span class="mi">5</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_qsopt</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>     <span class="c1"># Quick-Start Response</span>
+    <span class="mi">6</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_utopt</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>     <span class="c1"># User Timeout Option</span>
+    <span class="mi">7</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_tcpao</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>     <span class="c1"># TCP Authentication Option</span>
+    <span class="mi">8</span><span class="p">:</span> <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_mode_mptcp</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">),</span>     <span class="c1"># Multipath TCP</span>
+<span class="p">}</span>
+
+<span class="n">TCP_OPT</span> <span class="o">=</span> <span class="p">{</span>                          <span class="c1"># # kind  length  type  process  comment            name</span>
+    <span class="mi">0</span><span class="p">:</span>  <span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="s1">&#39;eool&#39;</span><span class="p">),</span>                 <span class="c1"># #   0      -      -      -                [RFC 793] End of Option List</span>
+    <span class="mi">1</span><span class="p">:</span>  <span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="s1">&#39;nop&#39;</span><span class="p">),</span>                  <span class="c1"># #   1      -      -      -                [RFC 793] No-Operation</span>
+    <span class="mi">2</span><span class="p">:</span>  <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;mss&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>       <span class="c1"># #   2      4      H      1                [RFC 793] Maximum Segment Size</span>
+    <span class="mi">3</span><span class="p">:</span>  <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;ws&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>        <span class="c1"># #   3      3      B      1                [RFC 7323] Window Scale</span>
+    <span class="mi">4</span><span class="p">:</span>  <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;sackpmt&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">),</span>      <span class="c1"># #   4      2      ?      -       True     [RFC 2018] SACK Permitted</span>
+    <span class="mi">5</span><span class="p">:</span>  <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;sack&#39;</span><span class="p">,</span> <span class="n">op_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>      <span class="c1"># #   5      N      P      0      2+8*N     [RFC 2018] SACK</span>
+    <span class="mi">6</span><span class="p">:</span>  <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>      <span class="c1"># #   6      6      P      0                [RFC 1072][RFC 6247] Echo</span>
+    <span class="mi">7</span><span class="p">:</span>  <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;echore&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    <span class="c1"># #   7      6      P      0                [RFC 1072][RFC 6247] Echo Reply</span>
+    <span class="mi">8</span><span class="p">:</span>  <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;ts&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>        <span class="c1"># #   8     10     II      2                [RFC 7323] Timestamps</span>
+    <span class="mi">9</span><span class="p">:</span>  <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;poc&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">),</span>          <span class="c1"># #   9      2      ?      -       True     [RFC 1693][RFC 6247] POC Permitted</span>
+    <span class="mi">10</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;pocsp&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>     <span class="c1"># #  10      3    ??P      3                [RFC 1693][RFC 6247] POC-Serv Profile</span>
+    <span class="mi">11</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;cc&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>        <span class="c1"># #  11      6      P      0                [RFC 1693][RFC 6247] Connection Count</span>
+    <span class="mi">12</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;ccnew&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>     <span class="c1"># #  12      6      P      0                [RFC 1693][RFC 6247] CC.NEW</span>
+    <span class="mi">13</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;ccecho&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    <span class="c1"># #  13      6      P      0                [RFC 1693][RFC 6247] CC.ECHO</span>
+    <span class="mi">14</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;chkreq&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span>    <span class="c1"># #  14      3      B      4                [RFC 1146][RFC 6247] Alt-Chksum Request</span>
+    <span class="mi">15</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;chksum&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>    <span class="c1"># #  15      N      P      0                [RFC 1146][RFC 6247] Alt-Chksum Data</span>
+    <span class="mi">19</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;sig&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>       <span class="c1"># #  19     18      P      0                [RFC 2385] MD5 Signature Option</span>
+    <span class="mi">27</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;qs&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>        <span class="c1"># #  27      8      P      5                [RFC 4782] Quick-Start Response</span>
+    <span class="mi">28</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;timeout&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span>   <span class="c1"># #  28      4      P      6                [RFC 5482] User Timeout Option</span>
+    <span class="mi">29</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;ao&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span>        <span class="c1"># #  29      N      P      7                [RFC 5925] TCP Authentication Option</span>
+    <span class="mi">30</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;mp&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span>        <span class="c1"># #  30      N      P      8                [RFC 6824] Multipath TCP</span>
+    <span class="mi">34</span><span class="p">:</span> <span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="s1">&#39;fastopen&#39;</span><span class="p">,</span> <span class="n">nm_len</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>  <span class="c1"># #  34      N      P      0                [RFC 7413] Fast Open</span>
+<span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;TCP Option Utility Table</span>
+
+<span class="sd">T | F</span>
+<span class="sd">    bool, short of True / False</span>
+
+<span class="sd">nm_len | op_len</span>
+<span class="sd">    function, length of data bytes</span>
+
+<span class="sd">chksum_opt</span>
+<span class="sd">    dict, checksum algorithm</span>
+
+<span class="sd">mptcp_opt</span>
+<span class="sd">    dict, Multipath TCP option subtype dict</span>
+
+<span class="sd">TCP_OPT</span>
+<span class="sd">    dict, TCP option dict.</span>
+<span class="sd">    Value is a tuple which contains:</span>
+<span class="sd">        |--&gt; bool, if length greater than 1</span>
+<span class="sd">        |       |--&gt; T - True</span>
+<span class="sd">        |       |--&gt; F - False</span>
+<span class="sd">        |--&gt; str, description string, also attribute name</span>
+<span class="sd">        |--&gt; (optional) function, length of data bytes</span>
+<span class="sd">        |       |--&gt; nm_len - default length calculation</span>
+<span class="sd">        |       |--&gt; op_len - optional length calculation (indicates in comment)</span>
+<span class="sd">        |--&gt; (optional) int, process that data bytes need (when length greater than 2)</span>
+<span class="sd">                |--&gt; 0: do nothing</span>
+<span class="sd">                |--&gt; 1: unpack according to size</span>
+<span class="sd">                |--&gt; 2: unpack TSopt then add to dict</span>
+<span class="sd">                |--&gt; 3: unpack POC-SP then add to dict</span>
+<span class="sd">                |--&gt; 4: unpack ACopt then fetch algorithm</span>
+<span class="sd">                |           |--&gt; TCP checksum</span>
+<span class="sd">                |           |--&gt; 8-bit Fletcher&#39;s algorithm</span>
+<span class="sd">                |           |--&gt; 16-bit Fletcher&#39;s algorithm</span>
+<span class="sd">                |           |--&gt; Redundant Checksum Avoidance</span>
+<span class="sd">                |--&gt; 5: unpack QSopt then add to dict</span>
+<span class="sd">                |--&gt; 6: unpack UTopt then add to dict</span>
+<span class="sd">                |--&gt; 7: unpack TCP-AO then add tot dict</span>
+<span class="sd">                |--&gt; 8: unpack MPTCP then add to dict</span>
+<span class="sd">                            |--&gt; extract subtype MP_CAPABLE</span>
+<span class="sd">                            |--&gt; extract subtype MP_JOIN (SYN | SYN/ACK | ACK)</span>
+<span class="sd">                            |--&gt; extract subtype DSS</span>
+<span class="sd">                            |--&gt; extract subtype ADD_ADDR</span>
+<span class="sd">                            |--&gt; extract subtype REMOVE_ADDR</span>
+<span class="sd">                            |--&gt; extract subtype MP_PRIO</span>
+<span class="sd">                            |--&gt; extract subtype MP_FAIL</span>
+<span class="sd">                            |--&gt; extract subtype MP_FASTCLOSE</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="TCP"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP">[docs]</a><span class="k">class</span> <span class="nc">TCP</span><span class="p">(</span><span class="n">Transport</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class implements Transmission Control Protocol.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Name of current protocol.</span>
+
+<span class="sd">        :rtype: Literal[&#39;Transmission Control Protocol&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;Transmission Control Protocol&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Header length of current protocol.</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">hdr_len</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Source port.</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">srcport</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Destination port.</span>
+
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dstport</span>  <span class="c1"># pylint: disable=E1101</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="TCP.read"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read Transmission Control Protocol (TCP).</span>
+
+<span class="sd">        Structure of TCP header [:rfc:`793`]::</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |          Source Port          |       Destination Port        |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |                        Sequence Number                        |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |                   Acknowledgement Number                      |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |  Data |           |U|A|P|R|S|F|                               |</span>
+<span class="sd">            | Offset| Reserved  |R|C|S|S|Y|I|            Window             |</span>
+<span class="sd">            |       |           |G|K|H|T|N|N|                               |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |           Checksum            |         Urgent Pointer        |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |                    Options                    |    Padding    |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |                             data                              |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length (Optional[int]): Length of packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP: Parsed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">_srcp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_dstp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_seqn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">_ackn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">_lenf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_wins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_urgp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">tcp</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">srcport</span><span class="o">=</span><span class="n">_srcp</span><span class="p">,</span>
+            <span class="n">dstport</span><span class="o">=</span><span class="n">_dstp</span><span class="p">,</span>
+            <span class="n">seq</span><span class="o">=</span><span class="n">_seqn</span><span class="p">,</span>
+            <span class="n">ack</span><span class="o">=</span><span class="n">_ackn</span><span class="p">,</span>
+            <span class="n">hdr_len</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_lenf</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">ns</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_lenf</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>
+                <span class="n">cwr</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
+                <span class="n">ece</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+                <span class="n">urg</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
+                <span class="n">ack</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
+                <span class="n">psh</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">4</span><span class="p">])),</span>
+                <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">5</span><span class="p">])),</span>
+                <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>
+                <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>
+            <span class="p">),</span>
+            <span class="n">window_size</span><span class="o">=</span><span class="n">_wins</span><span class="p">,</span>
+            <span class="n">checksum</span><span class="o">=</span><span class="n">_csum</span><span class="p">,</span>
+            <span class="n">urgent_pointer</span><span class="o">=</span><span class="n">_urgp</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># packet type flags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_syn</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ack</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+        <span class="n">_hlen</span> <span class="o">=</span> <span class="n">tcp</span><span class="p">[</span><span class="s1">&#39;hdr_len&#39;</span><span class="p">]</span>
+        <span class="n">_optl</span> <span class="o">=</span> <span class="n">_hlen</span> <span class="o">-</span> <span class="mi">20</span>
+        <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_tcp_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)</span>
+            <span class="n">tcp</span><span class="p">[</span><span class="s1">&#39;opt&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>     <span class="c1"># tuple of option acronyms</span>
+            <span class="n">tcp</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>      <span class="c1"># merge option info to buffer</span>
+
+        <span class="n">length</span> <span class="o">-=</span> <span class="n">_hlen</span>
+        <span class="n">tcp</span><span class="p">[</span><span class="s1">&#39;packet&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_packet</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">_hlen</span><span class="p">,</span> <span class="n">payload</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">tcp</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TCP.make"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bytes: Constructed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="TCP.__length_hint__"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.</span>
+
+<span class="sd">        :rtype: Literal[20]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">20</span></div>
+
+<div class="viewcode-block" id="TCP.__index__"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pcapkit.const.reg.transtype.TransType: Numeral registry index of the</span>
+<span class="sd">            protocol in `IANA`_.</span>
+
+<span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">TransType</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="TCP._read_tcp_options"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_tcp_options">[docs]</a>    <span class="k">def</span> <span class="nf">_read_tcp_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read TCP option list.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option list</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[Tuple[pcapkit.const.tcp.option.Option], DataType_TCP_Opt]:</span>
+<span class="sd">            Tuple of TCP option list and extracted TCP options.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>         <span class="c1"># length of read option list</span>
+        <span class="n">optkind</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>    <span class="c1"># option kind list</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>    <span class="c1"># dict of option data</span>
+
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="c1"># get option kind</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># fetch corresponding option tuple</span>
+            <span class="n">opts</span> <span class="o">=</span> <span class="n">TCP_OPT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+            <span class="n">enum</span> <span class="o">=</span> <span class="n">OPT_TYPE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">opts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">len_</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="n">counter</span>
+                <span class="n">counter</span> <span class="o">=</span> <span class="n">size</span>
+                <span class="n">optkind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enum</span><span class="p">)</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">enum</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">len_</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="c1"># extract option</span>
+            <span class="n">dscp</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">opts</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">len_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">byte</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="mi">2</span><span class="p">](</span><span class="n">len_</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>    <span class="c1"># check option process mode</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">process_opt</span><span class="p">[</span><span class="n">opts</span><span class="p">[</span><span class="mi">3</span><span class="p">]](</span><span class="bp">self</span><span class="p">,</span> <span class="n">byte</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>       <span class="c1"># permission options (length is 2)</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>      <span class="c1"># option kind</span>
+                        <span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>       <span class="c1"># option length</span>
+                        <span class="n">flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>      <span class="c1"># permission flag</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>           <span class="c1"># 1-bytes options</span>
+                <span class="n">len_</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>      <span class="c1"># option kind</span>
+                    <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>       <span class="c1"># option length</span>
+                <span class="p">)</span>
+
+            <span class="c1"># record option data</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="n">len_</span>
+            <span class="k">if</span> <span class="n">enum</span> <span class="ow">in</span> <span class="n">optkind</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="n">dscp</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="n">options</span><span class="p">[</span><span class="n">dscp</span><span class="p">]</span> <span class="o">+=</span> <span class="p">(</span><span class="n">Info</span><span class="p">(</span><span class="n">data</span><span class="p">),)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">options</span><span class="p">[</span><span class="n">dscp</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">Info</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="n">dscp</span><span class="p">]),</span> <span class="n">Info</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">optkind</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">enum</span><span class="p">)</span>
+                <span class="n">options</span><span class="p">[</span><span class="n">dscp</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+            <span class="c1"># break when eol triggered</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">kind</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="c1"># get padding</span>
+        <span class="k">if</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">size</span><span class="p">:</span>
+            <span class="n">len_</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="n">counter</span>
+            <span class="n">options</span><span class="p">[</span><span class="s1">&#39;padding&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">len_</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">optkind</span><span class="p">),</span> <span class="n">options</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_donone"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_donone">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_donone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read options request no process.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (int): option kind value</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_DONONE: Extracted option with no operation.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_unpack"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_unpack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read options request unpack process.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (int): option kind value</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_UNPACK: Extracted option which unpacked.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_tsopt"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_tsopt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_tsopt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Timestamps option.</span>
+
+<span class="sd">        Structure of TCP ``TSopt`` [:rfc:`7323`]::</span>
+
+<span class="sd">            +-------+-------+---------------------+---------------------+</span>
+<span class="sd">            |Kind=8 |  10   |   TS Value (TSval)  |TS Echo Reply (TSecr)|</span>
+<span class="sd">            +-------+-------+---------------------+---------------------+</span>
+<span class="sd">                1       1              4                     4</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[8]): option kind value (Timestamps)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_TS: extracted Timestamps (``TS``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;&gt;II&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span><span class="p">))</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">val</span><span class="o">=</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">ecr</span><span class="o">=</span><span class="n">temp</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_pocsp"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_pocsp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_pocsp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Partial Order Connection Service Profile option.</span>
+
+<span class="sd">        Structure of TCP ``POC-SP`` Option [:rfc:`1693`][:rfc:`6247`]::</span>
+
+<span class="sd">                                      1 bit        1 bit    6 bits</span>
+<span class="sd">            +----------+----------+------------+----------+--------+</span>
+<span class="sd">            |  Kind=10 | Length=3 | Start_flag | End_flag | Filler |</span>
+<span class="sd">            +----------+----------+------------+----------+--------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[10]): option kind value (POC-Serv Profile)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_POCSP: extracted Partial Order Connection Service Profile (``POC-SP``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">start</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
+            <span class="n">end</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+            <span class="n">filler</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_acopt"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_acopt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_acopt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Alternate Checksum Request option.</span>
+
+<span class="sd">        Structure of TCP ``CHKSUM-REQ`` [:rfc:`1146`][:rfc:`6247`]::</span>
+
+<span class="sd">            +----------+----------+----------+</span>
+<span class="sd">            |  Kind=14 | Length=3 |  chksum  |</span>
+<span class="sd">            +----------+----------+----------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[14]): option kind value (Alt-Chksum Request)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_ACOPT: extracted Alternate Checksum Request (``CHKSUM-REQ``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">algo</span> <span class="o">=</span> <span class="n">chksum_opt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">ac</span><span class="o">=</span><span class="n">algo</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_qsopt"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_qsopt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_qsopt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Quick-Start Response option.</span>
+
+<span class="sd">        Structure of TCP ``QSopt`` [:rfc:`4782`]::</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |     Kind      |  Length=8     | Resv. | Rate  |   TTL Diff    |</span>
+<span class="sd">            |               |               |       |Request|               |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |                   QS Nonce                                | R |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[27]): option kind value (Quick-Start Response)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_QSOPT: extracted Quick-Start Response (``QS``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">rvrr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ttld</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">noun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">req_rate</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">rvrr</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">ttl_diff</span><span class="o">=</span><span class="n">ttld</span><span class="p">,</span>
+            <span class="n">nounce</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">noun</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_utopt"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_utopt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_utopt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read User Timeout option.</span>
+
+<span class="sd">        Structure of TCP ``TIMEOUT`` [:rfc:`5482`]::</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |   Kind = 28   |   Length = 4  |G|        User Timeout         |</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[28]): option kind value (User Timeout Option)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_UTOPT: extracted User Timeout (``TIMEOUT``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">minutes</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">granularity</span><span class="o">=</span><span class="s1">&#39;minutes&#39;</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">else</span> <span class="s1">&#39;seconds&#39;</span><span class="p">,</span>
+            <span class="n">timeout</span><span class="o">=</span><span class="n">time</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_tcpao"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_tcpao">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_tcpao</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Authentication option.</span>
+
+<span class="sd">        Structure of TCP ``AOopt`` [:rfc:`5925`]::</span>
+
+<span class="sd">            +------------+------------+------------+------------+</span>
+<span class="sd">            |  Kind=29   |   Length   |   KeyID    | RNextKeyID |</span>
+<span class="sd">            +------------+------------+------------+------------+</span>
+<span class="sd">            |                     MAC           ...</span>
+<span class="sd">            +-----------------------------------...</span>
+
+<span class="sd">            ...-----------------+</span>
+<span class="sd">            ...  MAC (con&#39;t)    |</span>
+<span class="sd">            ...-----------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[29]): option kind value (TCP Authentication Option)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_TCPAO: extracted Authentication (``AO``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">key_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">rkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">mac_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">key_id</span><span class="o">=</span><span class="n">key_</span><span class="p">,</span>
+            <span class="n">r_next_key_id</span><span class="o">=</span><span class="n">rkey</span><span class="p">,</span>
+            <span class="n">mac</span><span class="o">=</span><span class="n">mac_</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mode_mptcp"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mode_mptcp">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mode_mptcp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Multipath TCP option.</span>
+
+<span class="sd">        Structure of ``MP-TCP`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-----------------------+</span>
+<span class="sd">            |     Kind      |    Length     |Subtype|                       |</span>
+<span class="sd">            +---------------+---------------+-------+                       |</span>
+<span class="sd">            |                     Subtype-specific data                     |</span>
+<span class="sd">            |                       (variable length)                       |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_MPTCP: extracted Multipath TCP (``MP-TCP``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">subt</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bins</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>    <span class="c1"># subtype number</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="mi">4</span><span class="p">:]</span>                 <span class="c1"># 4-bit data</span>
+        <span class="n">dlen</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span>                 <span class="c1"># length of remaining data</span>
+
+        <span class="c1"># fetch subtype-specific data</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">mptcp_opt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subt</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>    <span class="c1"># if subtype not exist, directly read all data</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">dlen</span><span class="p">)</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+                <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+                <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">subt</span><span class="p">),</span>
+                <span class="n">data</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">temp</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>               <span class="c1"># fetch corresponding subtype data dict</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">dlen</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mptcp_capable"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_capable">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_capable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Multipath Capable option.</span>
+
+<span class="sd">        Structure of ``MP_CAPABLE`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-------+---------------+</span>
+<span class="sd">            |     Kind      |    Length     |Subtype|Version|A|B|C|D|E|F|G|H|</span>
+<span class="sd">            +---------------+---------------+-------+-------+---------------+</span>
+<span class="sd">            |                   Option Sender&#39;s Key (64 bits)               |</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+<span class="sd">            |                  Option Receiver&#39;s Key (64 bits)              |</span>
+<span class="sd">            |                     (if option Length == 20)                  |</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_MP_CAPABLE: extracted Multipath Capable (``MP_CAPABLE``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">skey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">rkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="k">if</span> <span class="n">size</span> <span class="o">==</span> <span class="mi">17</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+            <span class="n">capable</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">version</span><span class="o">=</span><span class="n">vers</span><span class="p">,</span>
+                <span class="n">flags</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">req</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span>
+                    <span class="n">ext</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+                    <span class="n">res</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bit</span><span class="p">))</span> <span class="k">for</span> <span class="n">bit</span> <span class="ow">in</span> <span class="n">bits</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">7</span><span class="p">]),</span>
+                    <span class="n">hsa</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bins</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>
+                <span class="p">),</span>
+                <span class="n">skey</span><span class="o">=</span><span class="n">skey</span><span class="p">,</span>
+                <span class="n">rkey</span><span class="o">=</span><span class="n">rkey</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mptcp_join"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_join">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Join Connection option.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_MP_JOIN: extracted Join Connection (``MP_JOIN``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ack</span><span class="p">:</span>      <span class="c1"># MP_JOIN-SYN/ACK</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_join_synack</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syn</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ack</span><span class="p">:</span>  <span class="c1"># MP_JOIN-SYN</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_join_syn</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_syn</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ack</span><span class="p">:</span>  <span class="c1"># MP_JOIN-ACK</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_join_ack</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>   <span class="c1"># illegal MP_JOIN occurred</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">connection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">join</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">data</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">temp</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_join_syn"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_syn">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_syn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Join Connection option for Initial SYN.</span>
+
+<span class="sd">        Structure of ``MP_JOIN-SYN`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-----+-+---------------+</span>
+<span class="sd">            |     Kind      |  Length = 12  |Subtype|     |B|   Address ID  |</span>
+<span class="sd">            +---------------+---------------+-------+-----+-+---------------+</span>
+<span class="sd">            |                   Receiver&#39;s Token (32 bits)                  |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+<span class="sd">            |                Sender&#39;s Random Number (32 bits)               |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_MP_JOIN_SYN: extracted Join Connection (``MP_JOIN-SYN``) option for Initial SYN</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">adid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">rtkn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">srno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">connection</span><span class="o">=</span><span class="s1">&#39;SYN&#39;</span><span class="p">,</span>
+            <span class="n">join</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">syn</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">backup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
+                    <span class="n">addr_id</span><span class="o">=</span><span class="n">adid</span><span class="p">,</span>
+                    <span class="n">token</span><span class="o">=</span><span class="n">rtkn</span><span class="p">,</span>
+                    <span class="n">rand_num</span><span class="o">=</span><span class="n">srno</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_join_synack"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_synack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_synack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Join Connection option for Responding SYN/ACK.</span>
+
+<span class="sd">        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-----+-+---------------+</span>
+<span class="sd">            |     Kind      |  Length = 16  |Subtype|     |B|   Address ID  |</span>
+<span class="sd">            +---------------+---------------+-------+-----+-+---------------+</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            |                Sender&#39;s Truncated HMAC (64 bits)              |</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+<span class="sd">            |                Sender&#39;s Random Number (32 bits)               |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_MP_JOIN_SYNACK: extracted Join Connection (``MP_JOIN-SYN/ACK``)</span>
+<span class="sd">            option for Responding SYN/ACK</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">adid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">hmac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">srno</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">connection</span><span class="o">=</span><span class="s1">&#39;SYN/ACK&#39;</span><span class="p">,</span>
+            <span class="n">join</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">synack</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">backup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
+                    <span class="n">addr_id</span><span class="o">=</span><span class="n">adid</span><span class="p">,</span>
+                    <span class="n">hmac</span><span class="o">=</span><span class="n">hmac</span><span class="p">,</span>
+                    <span class="n">rand_num</span><span class="o">=</span><span class="n">srno</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_join_ack"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_join_ack">[docs]</a>    <span class="k">def</span> <span class="nf">_read_join_ack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read Join Connection option for Third ACK.</span>
+
+<span class="sd">        Structure of ``MP_JOIN-ACK`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-----------------------+</span>
+<span class="sd">            |     Kind      |  Length = 24  |Subtype|      (reserved)       |</span>
+<span class="sd">            +---------------+---------------+-------+-----------------------+</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            |                   Sender&#39;s HMAC (160 bits)                    |</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_MP_JOIN_ACK: extracted Join Connection (``MP_JOIN-ACK``)</span>
+<span class="sd">            option for Third ACK</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+            <span class="n">connection</span><span class="o">=</span><span class="s1">&#39;ACK&#39;</span><span class="p">,</span>
+            <span class="n">join</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">ack</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">hmac</span><span class="o">=</span><span class="n">temp</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mptcp_dss"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_dss">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_dss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.</span>
+
+<span class="sd">        Structure of ``DSS`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+----------------------+</span>
+<span class="sd">            |     Kind      |    Length     |Subtype| (reserved) |F|m|M|a|A|</span>
+<span class="sd">            +---------------+---------------+-------+----------------------+</span>
+<span class="sd">            |                                                              |</span>
+<span class="sd">            |           Data ACK (4 or 8 octets, depending on flags)       |</span>
+<span class="sd">            |                                                              |</span>
+<span class="sd">            +--------------------------------------------------------------+</span>
+<span class="sd">            |                                                              |</span>
+<span class="sd">            |   Data sequence number (4 or 8 octets, depending on flags)   |</span>
+<span class="sd">            |                                                              |</span>
+<span class="sd">            +--------------------------------------------------------------+</span>
+<span class="sd">            |              Subflow Sequence Number (4 octets)              |</span>
+<span class="sd">            +-------------------------------+------------------------------+</span>
+<span class="sd">            |  Data-Level Length (2 octets) |      Checksum (2 octets)     |</span>
+<span class="sd">            +-------------------------------+------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_DSS: extracted Data Sequence Signal (``DSS``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">mflg</span> <span class="o">=</span> <span class="mi">8</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span> <span class="k">else</span> <span class="mi">4</span>
+        <span class="n">Mflg</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+        <span class="n">aflg</span> <span class="o">=</span> <span class="mi">8</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="k">else</span> <span class="mi">4</span>
+        <span class="n">Aflg</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span>
+        <span class="n">ack_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">aflg</span><span class="p">)</span> <span class="k">if</span> <span class="n">Aflg</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">dsn_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">mflg</span><span class="p">)</span> <span class="k">if</span> <span class="n">Mflg</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">ssn_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="k">if</span> <span class="n">Mflg</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">dll_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">Mflg</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">chk_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">Mflg</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">dss</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">flags</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
+                    <span class="n">dsn_len</span><span class="o">=</span><span class="n">mflg</span><span class="p">,</span>
+                    <span class="n">data_pre</span><span class="o">=</span><span class="n">Mflg</span><span class="p">,</span>
+                    <span class="n">ack_len</span><span class="o">=</span><span class="n">aflg</span><span class="p">,</span>
+                    <span class="n">ack_pre</span><span class="o">=</span><span class="n">Aflg</span><span class="p">,</span>
+                <span class="p">),</span>
+                <span class="n">ack</span><span class="o">=</span><span class="n">ack_</span><span class="p">,</span>
+                <span class="n">dsn</span><span class="o">=</span><span class="n">dsn_</span><span class="p">,</span>
+                <span class="n">ssn</span><span class="o">=</span><span class="n">ssn_</span><span class="p">,</span>
+                <span class="n">dl_len</span><span class="o">=</span><span class="n">dll_</span><span class="p">,</span>
+                <span class="n">checksum</span><span class="o">=</span><span class="n">chk_</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mptcp_add"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_add">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Add Address option.</span>
+
+<span class="sd">        Structure of ``ADD_ADDR`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-------+---------------+</span>
+<span class="sd">            |     Kind      |     Length    |Subtype| IPVer |  Address ID   |</span>
+<span class="sd">            +---------------+---------------+-------+-------+---------------+</span>
+<span class="sd">            |          Address (IPv4 - 4 octets / IPv6 - 16 octets)         |</span>
+<span class="sd">            +-------------------------------+-------------------------------+</span>
+<span class="sd">            |   Port (2 octets, optional)   |</span>
+<span class="sd">            +-------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_ADD_ADDR: extracted Add Address (``ADD_ADDR``) option</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">vers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vers</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">ip_l</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="k">elif</span> <span class="n">vers</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
+            <span class="n">ip_l</span> <span class="o">=</span> <span class="mi">16</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="s1">&#39;[MP_TCP ADD_ADDR] malformed option&#39;</span><span class="p">)</span>
+
+        <span class="n">adid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">ipad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">ip_l</span><span class="p">)</span>
+        <span class="n">pt_l</span> <span class="o">=</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">ip_l</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">if</span> <span class="n">pt_l</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">3</span><span class="p">),</span>
+            <span class="n">add_addr</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">ip_ver</span><span class="o">=</span><span class="n">vers</span><span class="p">,</span>
+                <span class="n">addrid</span><span class="o">=</span><span class="n">adid</span><span class="p">,</span>
+                <span class="n">addr</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipad</span><span class="p">),</span>
+                <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mptcp_remove"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_remove">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read Remove Address option.</span>
+
+<span class="sd">        Structure of ``REMOVE_ADDR`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-------+---------------+</span>
+<span class="sd">            |     Kind      |  Length = 3+n |Subtype|(resvd)|   Address ID  | ...</span>
+<span class="sd">            +---------------+---------------+-------+-------+---------------+</span>
+<span class="sd">                                       (followed by n-1 Address IDs, if required)</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_REMOVE_ADDR: extracted Remove Address (``REMOVE_ADDR``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">adid</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">size</span><span class="p">:</span>
+            <span class="n">adid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+            <span class="n">removeaddr</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">addr_id</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">adid</span><span class="p">),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mptcp_prio"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_prio">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_prio</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Read Change Subflow Priority option.</span>
+
+<span class="sd">        Structure of ``MP_PRIO`` [RFC 6824]::</span>
+
+<span class="sd">                                  1                   2                   3</span>
+<span class="sd">              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-----+-+--------------+</span>
+<span class="sd">            |     Kind      |     Length    |Subtype|     |B| AddrID (opt) |</span>
+<span class="sd">            +---------------+---------------+-------+-----+-+--------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_REMOVE_ADDR: extracted Change Subflow Priority (``MP_PRIO``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">size</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span>
+            <span class="n">prio</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">backup</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bits</span><span class="p">[</span><span class="mi">3</span><span class="p">])),</span>
+                <span class="n">addr_id</span><span class="o">=</span><span class="n">temp</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mptcp_fail"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fail">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_fail</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read Fallback option.</span>
+
+<span class="sd">        Structure of ``MP_FAIL`` [:rfc:`6824`]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+----------------------+</span>
+<span class="sd">            |     Kind      |   Length=12   |Subtype|      (reserved)      |</span>
+<span class="sd">            +---------------+---------------+-------+----------------------+</span>
+<span class="sd">            |                                                              |</span>
+<span class="sd">            |                 Data Sequence Number (8 octets)              |</span>
+<span class="sd">            |                                                              |</span>
+<span class="sd">            +--------------------------------------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_MP_FAIL: extracted Fallback (``MP_FAIL``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># pylint: disable=unused-variable</span>
+        <span class="n">dsn_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">6</span><span class="p">),</span>
+            <span class="n">fail</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">dsn</span><span class="o">=</span><span class="n">dsn_</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="TCP._read_mptcp_fastclose"><a class="viewcode-back" href="../../../../protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP._read_mptcp_fastclose">[docs]</a>    <span class="k">def</span> <span class="nf">_read_mptcp_fastclose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bits</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">kind</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read Fast Close option.</span>
+
+<span class="sd">        Structure of ``MP_FASTCLOSE`` [RFC 6824]::</span>
+
+<span class="sd">                                 1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +---------------+---------------+-------+-----------------------+</span>
+<span class="sd">            |     Kind      |    Length     |Subtype|      (reserved)       |</span>
+<span class="sd">            +---------------+---------------+-------+-----------------------+</span>
+<span class="sd">            |                      Option Receiver&#39;s Key                    |</span>
+<span class="sd">            |                            (64 bits)                          |</span>
+<span class="sd">            |                                                               |</span>
+<span class="sd">            +---------------------------------------------------------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            bits (str): 4-bit data (after subtype)</span>
+<span class="sd">            size (int): length of option</span>
+<span class="sd">            kind (Literal[30]): option kind value (Multipath TCP)</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_TCP_Opt_MP_FAIL: extracted Fast Close (``MP_FASTCLOSE``) option</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">resv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># pylint: disable=unused-variable</span>
+        <span class="n">rkey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">subtype</span><span class="o">=</span><span class="n">MPTCPOption</span><span class="p">(</span><span class="mi">7</span><span class="p">),</span>
+            <span class="n">fastclose</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+                <span class="n">rkey</span><span class="o">=</span><span class="n">rkey</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

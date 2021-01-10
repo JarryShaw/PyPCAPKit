@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.dumpkit &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.dumpkit</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;dump utilities</span>
+
+<span class="sd">:mod:`pcapkit.dumpkit` is the collection of dumpers for</span>
+<span class="sd">:mod:`pcapkit` implementation, which is alike those described</span>
+<span class="sd">in :mod:`dictdumper`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">dictdumper</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PCAPIO&#39;</span><span class="p">,</span> <span class="s1">&#39;NotImplementedIO&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="NotImplementedIO"><a class="viewcode-back" href="../../dumpkit/index.html#pcapkit.dumpkit.NotImplementedIO">[docs]</a><span class="k">class</span> <span class="nc">NotImplementedIO</span><span class="p">(</span><span class="n">dictdumper</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Unspecified output format.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;File format of current dumper.</span>
+
+<span class="sd">        :rtype: Literal[NotImplemented]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">NotImplemented</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="NotImplementedIO.__call__"><a class="viewcode-back" href="../../dumpkit/index.html#pcapkit.dumpkit.NotImplementedIO.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Dump a new frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (:obj:`Dict[str, Any]`): content to be dumped</span>
+<span class="sd">            name (:obj:`Optional[str]`): name of current content block</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`PCAP`: the dumper class itself (to support chain calling)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="NotImplementedIO._dump_header"><a class="viewcode-back" href="../../dumpkit/index.html#pcapkit.dumpkit.NotImplementedIO._dump_header">[docs]</a>    <span class="k">def</span> <span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Initially dump file heads and tails.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: arbitrary keyword arguments</span>
+
+<span class="sd">        &quot;&quot;&quot;</span></div>
+
+<div class="viewcode-block" id="NotImplementedIO._append_value"><a class="viewcode-back" href="../../dumpkit/index.html#pcapkit.dumpkit.NotImplementedIO._append_value">[docs]</a>    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (Dict[str, Any]): content to be dumped</span>
+<span class="sd">            file (io.TextIOWrapper): output file</span>
+<span class="sd">            name (str): name of current content block</span>
+
+<span class="sd">        &quot;&quot;&quot;</span></div></div>
+
+
+<span class="k">class</span> <span class="nc">PCAPIO</span><span class="p">(</span><span class="n">dictdumper</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;PCAP file dumper.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">kind</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;File format of current dumper.</span>
+
+<span class="sd">        :rtype: Literal[&#39;pcap&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;pcap&#39;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;Initialise dumper.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fname (str): output file name</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            protocol (Union[pcapkit.const.reg.linktype.LinkType, enum.IntEnum, str, int]): data link type</span>
+<span class="sd">            byteorder (Literal[&#39;little&#39;, &#39;big&#39;]): header byte order</span>
+<span class="sd">            nanosecond (bool): nanosecond-resolution file flag</span>
+<span class="sd">            **kwargs: arbitrary keyword arguments</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#: int: Frame counter.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1">#: bool: Nanosecond-resolution file flag.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span> <span class="o">=</span> <span class="n">nanosecond</span>
+        <span class="c1">#: Union[pcapkit.const.reg.linktype.LinkType, enum.IntEnum, str, int]: Data link type.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_link</span> <span class="o">=</span> <span class="n">protocol</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span>
+                         <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Dump a new frame.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (Info[DataType_Frame]): content to be dumped</span>
+<span class="sd">            name (:obj:`Optional[str]`): name of current content block</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            :class:`PCAP`: the dumper class itself (to support chain calling)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">&#39;ab&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_append_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span> <span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">byteorder</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=arguments-differ,unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Initially dump file heads and tails.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            protocol (Union[pcapkit.const.reg.linktype.LinkType, enum.IntEnum, str, int]): data link type</span>
+<span class="sd">            byteorder (Literal[&#39;little&#39;, &#39;big&#39;]): header byte order</span>
+<span class="sd">            nanosecond (bool): nanosecond-resolution file flag</span>
+<span class="sd">            **kwargs: arbitrary keyword arguments</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="n">Header</span><span class="p">(</span>
+            <span class="n">network</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span>
+            <span class="n">byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span>
+            <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value (Info[DataType_Frame]): content to be dumped</span>
+<span class="sd">            file (io.BufferedReader): output file</span>
+<span class="sd">            name (str): name of current content block</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">packet</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span>
+            <span class="n">packet</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">packet</span><span class="p">,</span>
+            <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span><span class="p">,</span>
+            <span class="n">num</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="p">,</span>
+            <span class="n">proto</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_link</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">value</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;frame_info&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">),</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

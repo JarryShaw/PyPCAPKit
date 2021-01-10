@@ -1,0 +1,184 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OSPF Vendor Crawler &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Protocol Type Registry Vendor Crawlers" href="reg.html" />
+    <link rel="prev" title="MH Vendor Crawler" href="mh.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.vendor.ospf">
+<span id="ospf-vendor-crawler"></span><h1>OSPF Vendor Crawler<a class="headerlink" href="#module-pcapkit.vendor.ospf" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pcapkit.vendor.ospf.authentication">
+<span id="authentication-codes"></span><h2>Authentication Codes <a class="footnote-reference brackets" href="#id3" id="id1">*</a><a class="headerlink" href="#module-pcapkit.vendor.ospf.authentication" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ospf.authentication.Authentication">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ospf.authentication.</code><code class="sig-name descname">Authentication</code><a class="reference internal" href="../_modules/pcapkit/vendor/ospf/authentication.html#Authentication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ospf.authentication.Authentication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>Authentication Types</p>
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ospf.authentication.Authentication.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0 &lt;= value &lt;= 65535'</em><a class="headerlink" href="#pcapkit.vendor.ospf.authentication.Authentication.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ospf.authentication.Authentication.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://www.iana.org/assignments/ospf-authentication-codes/authentication-codes.csv'</em><a class="headerlink" href="#pcapkit.vendor.ospf.authentication.Authentication.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pcapkit.vendor.ospf.packet">
+<span id="ospf-packet-type"></span><h2>OSPF Packet Type <a class="footnote-reference brackets" href="#id4" id="id2">†</a><a class="headerlink" href="#module-pcapkit.vendor.ospf.packet" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.ospf.packet.Packet">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.ospf.packet.</code><code class="sig-name descname">Packet</code><a class="reference internal" href="../_modules/pcapkit/vendor/ospf/packet.html#Packet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.ospf.packet.Packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
+<p>OSPF Packet Types</p>
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ospf.packet.Packet.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0 &lt;= value &lt;= 65535'</em><a class="headerlink" href="#pcapkit.vendor.ospf.packet.Packet.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.ospf.packet.Packet.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = 'https://www.iana.org/assignments/ospfv2-parameters/ospfv2-parameters-3.csv'</em><a class="headerlink" href="#pcapkit.vendor.ospf.packet.Packet.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ospf-authentication-codes/ospf-authentication-codes.xhtml#authentication-codes">https://www.iana.org/assignments/ospf-authentication-codes/ospf-authentication-codes.xhtml#authentication-codes</a></p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">†</a></span></dt>
+<dd><p><a class="reference external" href="https://www.iana.org/assignments/ospfv2-parameters/ospfv2-parameters.xhtml#ospfv2-parameters-3">https://www.iana.org/assignments/ospfv2-parameters/ospfv2-parameters.xhtml#ospfv2-parameters-3</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Web Crawlers for Constant Enumerations</a><ul>
+      <li>Previous: <a href="mh.html" title="previous chapter">MH Vendor Crawler</a></li>
+      <li>Next: <a href="reg.html" title="next chapter">Protocol Type Registry Vendor Crawlers</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/vendor/ospf.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

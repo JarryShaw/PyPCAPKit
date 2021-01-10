@@ -1,0 +1,304 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.reassembly.ip &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.reassembly.ip</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;IP fragments reassembly</span>
+
+<span class="sd">:mod:`pcapkit.reassembly.ipv4` contains</span>
+<span class="sd">:class:`~pcapkit.reassembly.ipv4.IP_Reassembly`</span>
+<span class="sd">only, which reconstructs fragmented IP packets back to</span>
+<span class="sd">origin. The following algorithm implement is based on IP</span>
+<span class="sd">reassembly procedure introduced in :rfc:`791`, using</span>
+<span class="sd">``RCVBT`` (fragment receivedbit table). Though another</span>
+<span class="sd">algorithm is explained in :rfc:`815`, replacing ``RCVBT``,</span>
+<span class="sd">however, this implement still used the elder one.</span>
+
+<span class="sd">Notations::</span>
+
+<span class="sd">    FO    - Fragment Offset</span>
+<span class="sd">    IHL   - Internet Header Length</span>
+<span class="sd">    MF    - More Fragments flag</span>
+<span class="sd">    TTL   - Time To Live</span>
+<span class="sd">    NFB   - Number of Fragment Blocks</span>
+<span class="sd">    TL    - Total Length</span>
+<span class="sd">    TDL   - Total Data Length</span>
+<span class="sd">    BUFID - Buffer Identifier</span>
+<span class="sd">    RCVBT - Fragment Received Bit Table</span>
+<span class="sd">    TLB   - Timer Lower Bound</span>
+
+<span class="sd">Algorithm::</span>
+
+<span class="sd">    DO {</span>
+<span class="sd">        BUFID &lt;- source|destination|protocol|identification;</span>
+
+<span class="sd">        IF (FO = 0 AND MF = 0) {</span>
+<span class="sd">            IF (buffer with BUFID is allocated) {</span>
+<span class="sd">                flush all reassembly for this BUFID;</span>
+<span class="sd">                Submit datagram to next step;</span>
+<span class="sd">                DONE.</span>
+<span class="sd">            }</span>
+<span class="sd">        }</span>
+
+<span class="sd">        IF (no buffer with BUFID is allocated) {</span>
+<span class="sd">            allocate reassembly resources with BUFID;</span>
+<span class="sd">            TIMER &lt;- TLB;</span>
+<span class="sd">            TDL &lt;- 0;</span>
+<span class="sd">            put data from fragment into data buffer with BUFID</span>
+<span class="sd">                [from octet FO*8 to octet (TL-(IHL*4))+FO*8];</span>
+<span class="sd">            set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];</span>
+<span class="sd">        }</span>
+
+<span class="sd">        IF (MF = 0) {</span>
+<span class="sd">            TDL &lt;- TL-(IHL*4)+(FO*8)</span>
+<span class="sd">        }</span>
+
+<span class="sd">        IF (FO = 0) {</span>
+<span class="sd">            put header in header buffer</span>
+<span class="sd">        }</span>
+
+<span class="sd">        IF (TDL # 0 AND all RCVBT bits [from 0 to (TDL+7)/8] are set) {</span>
+<span class="sd">            TL &lt;- TDL+(IHL*4)</span>
+<span class="sd">            Submit datagram to next step;</span>
+<span class="sd">            free all reassembly resources for this BUFID;</span>
+<span class="sd">            DONE.</span>
+<span class="sd">        }</span>
+
+<span class="sd">        TIMER &lt;- MAX(TIMER,TTL);</span>
+
+<span class="sd">    } give up until (next fragment or timer expires);</span>
+
+<span class="sd">    timer expires: {</span>
+<span class="sd">        flush all reassembly with this BUFID;</span>
+<span class="sd">        DONE.</span>
+<span class="sd">    }</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.reassembly.reassembly</span> <span class="kn">import</span> <span class="n">Reassembly</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IP_Reassembly&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="IP_Reassembly"><a class="viewcode-back" href="../../../reassembly/ip.html#pcapkit.reassembly.ip.IP_Reassembly">[docs]</a><span class="k">class</span> <span class="nc">IP_Reassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+    <span class="sd">&quot;&quot;&quot;Reassembly for IP payload.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="IP_Reassembly.reassembly"><a class="viewcode-back" href="../../../reassembly/ip.html#pcapkit.reassembly.ip.IP_Reassembly.reassembly">[docs]</a>    <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            info (pcapkit.corekit.infoclass.Info): info dict of packets to be reassembled</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BUFID</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">bufid</span>  <span class="c1"># Buffer Identifier</span>
+        <span class="n">FO</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">fo</span>        <span class="c1"># Fragment Offset</span>
+        <span class="n">IHL</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">ihl</span>      <span class="c1"># Internet Header Length</span>
+        <span class="n">MF</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">mf</span>        <span class="c1"># More Fragments flag</span>
+        <span class="n">TL</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">tl</span>        <span class="c1"># Total Length</span>
+
+        <span class="c1"># when non-fragmented (possibly discarded) packet received</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">])</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span>
+                <span class="k">return</span>
+
+        <span class="c1"># initialise buffer with BUFID</span>
+        <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+                <span class="n">TDL</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>                          <span class="c1"># Total Data Length</span>
+                <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8191</span><span class="p">),</span>          <span class="c1"># Fragment Received Bit Table</span>
+                <span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(),</span>                   <span class="c1"># index record</span>
+                <span class="n">header</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(),</span>             <span class="c1"># header buffer</span>
+                <span class="n">datagram</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">65535</span><span class="p">),</span>      <span class="c1"># data buffer</span>
+            <span class="p">)</span>
+
+        <span class="c1"># append packet index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">][</span><span class="s1">&#39;index&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+
+        <span class="c1"># put data into data buffer</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">FO</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="n">FO</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">][</span><span class="s1">&#39;datagram&#39;</span><span class="p">][</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
+
+        <span class="c1"># set RCVBT bits (in 8 octets)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">+</span> <span class="p">(</span><span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">][</span><span class="s1">&#39;RCVBT&#39;</span><span class="p">][</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x01</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">stop</span> <span class="o">-</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># get total data length (header excludes)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
+            <span class="n">TDL</span> <span class="o">=</span> <span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="n">FO</span>
+
+        <span class="c1"># put header into header buffer</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">][</span><span class="s1">&#39;header&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">header</span>
+
+        <span class="c1"># when datagram is reassembled in whole</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="n">TDL</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">][</span><span class="s1">&#39;RCVBT&#39;</span><span class="p">][</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">],</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="IP_Reassembly.submit"><a class="viewcode-back" href="../../../reassembly/ip.html#pcapkit.reassembly.ip.IP_Reassembly.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buf (dict): buffer dict of reassembled packets</span>
+
+<span class="sd">        Keyword Arguments:</span>
+<span class="sd">            bufid (tuple): buffer identifier</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: reassembled packets</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="s1">&#39;TDL&#39;</span><span class="p">]</span>
+        <span class="n">RCVBT</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="s1">&#39;RCVBT&#39;</span><span class="p">]</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="s1">&#39;header&#39;</span><span class="p">]</span>
+        <span class="n">datagram</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[</span><span class="s1">&#39;datagram&#39;</span><span class="p">]</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">checked</span> <span class="ow">or</span> <span class="p">(</span><span class="n">TDL</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">RCVBT</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]))</span>
+        <span class="c1"># if datagram is not implemented</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strflg</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+            <span class="n">byte</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+            <span class="c1"># extract received payload</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">bctr</span><span class="p">,</span> <span class="n">bit</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">RCVBT</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">bit</span><span class="p">:</span>     <span class="c1"># received bit</span>
+                    <span class="n">this</span> <span class="o">=</span> <span class="n">bctr</span> <span class="o">*</span> <span class="mi">8</span>
+                    <span class="n">that</span> <span class="o">=</span> <span class="n">this</span> <span class="o">+</span> <span class="mi">8</span>
+                    <span class="n">byte</span> <span class="o">+=</span> <span class="n">datagram</span><span class="p">[</span><span class="n">this</span><span class="p">:</span><span class="n">that</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>       <span class="c1"># missing bit</span>
+                    <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>    <span class="c1"># strip empty payload</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
+                    <span class="n">byte</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+            <span class="c1"># strip empty packets</span>
+            <span class="k">if</span> <span class="n">data</span> <span class="ow">or</span> <span class="n">header</span><span class="p">:</span>
+                <span class="n">packet</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span>
+                    <span class="bp">NotImplemented</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
+                    <span class="n">header</span><span class="o">=</span><span class="n">header</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="n">payload</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="c1"># if datagram is reassembled in whole</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">datagram</span><span class="p">[:</span><span class="n">TDL</span><span class="p">]</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span>
+                <span class="bp">NotImplemented</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
+                <span class="n">packet</span><span class="o">=</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">+</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">packet</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

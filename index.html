@@ -1,0 +1,399 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Welcome to PyPCAPKit’s documentation! &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Stream PCAP File Extractor" href="pcapkit.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="welcome-to-pypcapkit-s-documentation">
+<h1>Welcome to PyPCAPKit’s documentation!<a class="headerlink" href="#welcome-to-pypcapkit-s-documentation" title="Permalink to this headline">¶</a></h1>
+<p>The <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> project is an open source Python program focus
+on <a class="reference external" href="https://en.wikipedia.org/wiki/Pcap">PCAP</a> parsing and analysis, which works as a stream PCAP file extractor.
+With support of <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a>, it shall support multiple
+output report formats.</p>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The whole project supports <strong>Python 3.4</strong> or later.</p>
+</div>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pcapkit.html">Stream PCAP File Extractor</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+</ul>
+</div>
+<div class="section" id="about">
+<h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> is an independent open source library, using only
+<a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a> as its formatted output dumper.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>There is a project called <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> works on <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which is a
+command line tool for PCAP extraction but now <strong>*DEPRECATED*</strong>.</p>
+</div>
+<p>Unlike popular PCAP file extractors, such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.4.4.dev0)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
+<code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">PyShark</span></code>, and etc, <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> uses
+<strong>streaming</strong> strategy to read input files. That is to read frame by frame,
+decrease occupation on memory, as well as enhance efficiency in some way.</p>
+<div class="section" id="module-structure">
+<h3>Module Structure<a class="headerlink" href="#module-structure" title="Permalink to this headline">¶</a></h3>
+<p>In <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, all files can be described as following eight parts.</p>
+<ul>
+<li><p>Interface (<a class="reference internal" href="interface/index.html#module-pcapkit.interface" title="pcapkit.interface"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.interface</span></code></a>)</p>
+<p>User interface for the <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> library, which standardise and
+simplify the usage of this library.</p>
+</li>
+<li><p>Foundation (<a class="reference internal" href="foundation/index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>)</p>
+<p>Synthesise file I/O and protocol analysis, coordinate information
+exchange in all network layers.</p>
+</li>
+<li><p>Reassembly (<a class="reference internal" href="reassembly/index.html#module-pcapkit.reassembly" title="pcapkit.reassembly"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.reassembly</span></code></a>)</p>
+<p>Based on algorithms described in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc815.html"><strong>RFC 815</strong></a>, implement datagram reassembly
+of IP and TCP packets.</p>
+</li>
+<li><p>Protocols (<a class="reference internal" href="protocols/index.html#module-pcapkit.protocols" title="pcapkit.protocols"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols</span></code></a>)</p>
+<p>Collection of all protocol family, with detail implementation and methods,
+as well as constructors.</p>
+</li>
+<li><p>CoreKit (<a class="reference internal" href="corekit/index.html#module-pcapkit.corekit" title="pcapkit.corekit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit</span></code></a>)</p>
+<p>Core utilities for <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implementation.</p>
+</li>
+<li><p>TookKit (<a class="reference internal" href="toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>)</p>
+<p>Compatibility tools for <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implementation.</p>
+</li>
+<li><p>DumpKit (<a class="reference internal" href="dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a></p>
+<p>Dump utilities for <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implementation.</p>
+</li>
+<li><p>Utilities (<a class="reference internal" href="utilities/index.html#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a>)</p>
+<p>Collection of four utility functions and classes.</p>
+</li>
+</ul>
+</div>
+<div class="section" id="engine-comparison">
+<h3>Engine Comparison<a class="headerlink" href="#engine-comparison" title="Permalink to this headline">¶</a></h3>
+<p>Besides, due to complexity of <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, its extraction procedure takes
+around <em>0.0009</em> seconds per packet, which is not ideal enough. Thus
+<a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> introduced alternative extractionengines to accelerate this
+procedure. By now <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>, and <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>.
+Plus, <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports two strategies of multiprocessing (<code class="docutils literal notranslate"><span class="pre">server</span></code> &amp;
+<code class="docutils literal notranslate"><span class="pre">pipeline</span></code>). For more information, please refer to the documentation.</p>
+<div class="section" id="test-environment">
+<h4>Test Environment<a class="headerlink" href="#test-environment" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Operating System</p></td>
+<td><p>macOS Mojave</p></td>
+</tr>
+<tr class="row-even"><td><p>Processor Name</p></td>
+<td><p>Intel Core i7</p></td>
+</tr>
+<tr class="row-odd"><td><p>Processor Speed</p></td>
+<td><p>2.6 GHz</p></td>
+</tr>
+<tr class="row-even"><td><p>Total Number of Cores</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-odd"><td><p>Memory</p></td>
+<td><p>16 GB</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="test-results">
+<h4>Test Results<a class="headerlink" href="#test-results" title="Permalink to this headline">¶</a></h4>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 28%" />
+<col style="width: 72%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Engine</p></th>
+<th class="head"><p>Performance (seconds per packet)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></p></td>
+<td><p>0.00017389218012491862</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">scapy</span></code></p></td>
+<td><p>0.00036091208457946774</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">default</span></code></p></td>
+<td><p>0.0009537641207377116</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pipeline</span></code></p></td>
+<td><p>0.0009694552421569824</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">server</span></code></p></td>
+<td><p>0.018088217973709107</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></p></td>
+<td><p>0.04200994372367859</p></td>
+</tr>
+</tbody>
+</table>
+<br /></div>
+</div>
+</div>
+<div class="section" id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports Python versions <strong>since 3.4</strong>.</p>
+</div>
+<p>Simply run the following to install the current version from PyPI:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip install pypcapkit
+</pre></div>
+</div>
+<p>Or install the latest version from the gi repository:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/JarryShaw/PyPCAPKit.git
+<span class="nb">cd</span> pypcapkit
+pip install -e .
+<span class="c1"># and to update at any time</span>
+git pull
+</pre></div>
+</div>
+<p>And since <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports various extraction engines, and extensive
+plug-in functions, you may want to install the optional ones:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="c1"># for DPKT only</span>
+pip install pypcapkit<span class="o">[</span>DPKT<span class="o">]</span>
+<span class="c1"># for Scapy only</span>
+pip install pypcapkit<span class="o">[</span>Scapy<span class="o">]</span>
+<span class="c1"># for PyShark only</span>
+pip install pypcapkit<span class="o">[</span>PyShark<span class="o">]</span>
+<span class="c1"># and to install all the optional packages</span>
+pip install pypcapkit<span class="o">[</span>all<span class="o">]</span>
+<span class="c1"># or to do this explicitly</span>
+pip install pypcapkit dpkt scapy pyshark
+</pre></div>
+</div>
+</div>
+<div class="section" id="samples">
+<h2>Samples<a class="headerlink" href="#samples" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="usage-samples">
+<h3>Usage Samples<a class="headerlink" href="#usage-samples" title="Permalink to this headline">¶</a></h3>
+<p>As described above, :mo:d`pcapkit` is quite easy to use, with simply three
+verbs as its main interface. Several scenarios are shown as below.</p>
+<ol class="arabic">
+<li><p>extract a PCAP file and dump the result to a specific file
+(with no reassembly)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pcapkit</span>
+<span class="c1"># dump to a PLIST file with no frame storage (property frame disabled)</span>
+<span class="n">plist</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out.plist&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;plist&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1"># dump to a JSON file with no extension auto-complete</span>
+<span class="n">json</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.cap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out.json&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="c1"># dump to a folder with each tree-view text file per frame</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p>extract a PCAP file and fetch IP packet (both IPv4 and IPv6) from a frame
+(with no output file)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">pcapkit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">extraction</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">frame0</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go"># check if IP in this frame, otherwise ProtocolNotFound will be raised</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">flag</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">IP</span> <span class="ow">in</span> <span class="n">frame0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tcp</span> <span class="o">=</span> <span class="n">frame0</span><span class="p">[</span><span class="n">pcapkit</span><span class="o">.</span><span class="n">IP</span><span class="p">]</span> <span class="k">if</span> <span class="n">flag</span> <span class="k">else</span> <span class="kc">None</span>
+</pre></div>
+</div>
+</li>
+<li><p>extract a PCAP file and reassemble TCP payload
+(with no output file nor frame storage)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pcapkit</span>
+<span class="c1"># set strict to make sure full reassembly</span>
+<span class="n">extraction</span> <span class="o">=</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># print extracted packet if HTTP in reassembled payloads</span>
+<span class="k">for</span> <span class="n">packet</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">reassembly</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">reassembly</span> <span class="ow">in</span> <span class="n">packet</span><span class="o">.</span><span class="n">packets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">pcapkit</span><span class="o">.</span><span class="n">HTTP</span> <span class="ow">in</span> <span class="n">reassembly</span><span class="o">.</span><span class="n">protochain</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">reassembly</span><span class="o">.</span><span class="n">info</span><span class="p">)</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+<div class="section" id="cli-samples">
+<h3>CLI Samples<a class="headerlink" href="#cli-samples" title="Permalink to this headline">¶</a></h3>
+<p>The CLI (command line interface) of <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has two different access.</p>
+<ul>
+<li><p>through console scripts</p>
+<p>Use command name <code class="docutils literal notranslate"><span class="pre">pcapkit</span> <span class="pre">[...]</span></code> directly (as shown in samples).</p>
+</li>
+<li><p>through Python module</p>
+<p><code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">pypcapkit</span> <span class="pre">[...]</span></code> works exactly the same as above.</p>
+</li>
+</ul>
+<p>Here are some usage samples:</p>
+<ol class="arabic">
+<li><p>export to a macOS Property List
+(<a class="reference external" href="https://developer.apple.com/xcode">Xcode</a> has special support for this format)</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit in --format plist --verbose
+🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
+ - Frame   <span class="m">1</span>: Ethernet:IPv6:ICMPv6
+ - Frame   <span class="m">2</span>: Ethernet:IPv6:ICMPv6
+ - Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">6</span>: Ethernet:IPv4:UDP
+🍺Report file stored in <span class="s1">&#39;out.plist&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p>export to a JSON file (with no format specified)</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit in --output out.json --verbose
+🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
+ - Frame   <span class="m">1</span>: Ethernet:IPv6:ICMPv6
+ - Frame   <span class="m">2</span>: Ethernet:IPv6:ICMPv6
+ - Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">6</span>: Ethernet:IPv4:UDP
+🍺Report file stored in <span class="s1">&#39;out.json&#39;</span>
+</pre></div>
+</div>
+</li>
+<li><p>export to a text tree view file (without extension autocorrect)</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit in --output out --format tree --verbose
+🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
+ - Frame   <span class="m">1</span>: Ethernet:IPv6:ICMPv6
+ - Frame   <span class="m">2</span>: Ethernet:IPv6:ICMPv6
+ - Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
+ - Frame   <span class="m">6</span>: Ethernet:IPv4:UDP
+🍺Report file stored in <span class="s1">&#39;out&#39;</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="pcapkit.html" title="next chapter">Stream PCAP File Extractor</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

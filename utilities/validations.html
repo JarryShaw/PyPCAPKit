@@ -1,0 +1,484 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Validation Utilities &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="User Defined Warnings" href="warnings.html" />
+    <link rel="prev" title="Logging System" href="logging.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="validation-utilities">
+<h1>Validation Utilities<a class="headerlink" href="#validation-utilities" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.utilities.validations" title="pcapkit.utilities.validations"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.validations</span></code></a> contains functions to
+validate arguments for functions and classes. It was first
+used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib">PyNTLib</a> as validators.</p>
+<span class="target" id="module-pcapkit.utilities.validations"></span><dl class="py function">
+<dt id="pcapkit.utilities.validations._ip_frag_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">_ip_frag_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#_ip_frag_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations._ip_frag_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are valid IP fragments (<a class="reference internal" href="../reassembly/ipv4.html#term-ipv4.packet"><span class="xref std std-term">IPv4</span></a> and/or <a class="reference internal" href="../reassembly/ipv6.html#term-ipv6.packet"><span class="xref std std-term">IPv6</span></a> packet).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../toolkit/default.html#pcapkit.toolkit.default.ipv4_reassembly" title="pcapkit.toolkit.default.ipv4_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.default.ipv4_reassembly()</span></code></a></p></li>
+<li><p><a class="reference internal" href="../toolkit/default.html#pcapkit.toolkit.default.ipv6_reassembly" title="pcapkit.toolkit.default.ipv6_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.default.ipv6_reassembly()</span></code></a></p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations._tcp_frag_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">_tcp_frag_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#_tcp_frag_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations._tcp_frag_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are valid TCP fragments (<a class="reference internal" href="../reassembly/tcp.html#term-tcp.packet"><span class="xref std std-term">TCP packet</span></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../toolkit/default.html#pcapkit.toolkit.default.tcp_reassembly" title="pcapkit.toolkit.default.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.default.tcp_reassembly()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.bool_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">bool_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bool_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.bool_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <code class="docutils literal notranslate"><span class="pre">bool</span></code> type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.BoolError" title="pcapkit.utilities.exceptions.BoolError"><strong>BoolError</strong></a> – If any of the arguments is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">bool</span></code> type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.bytearray_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">bytearray_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bytearray_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.bytearray_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <code class="docutils literal notranslate"><span class="pre">bytearray</span></code> type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.BytearrayError" title="pcapkit.utilities.exceptions.BytearrayError"><strong>BytearrayError</strong></a> – If any of the arguments is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">bytearray</span></code> type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.bytes_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">bytes_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bytes_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.bytes_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.BytesError" title="pcapkit.utilities.exceptions.BytesError"><strong>BytesError</strong></a> – If any of the arguments is <strong>NOT</strong> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.complex_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">complex_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#complex_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.complex_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <em>complex numbers</em> (<code class="docutils literal notranslate"><span class="pre">complex</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ComplexError" title="pcapkit.utilities.exceptions.ComplexError"><strong>ComplexError</strong></a> – If any of the arguments is <strong>NOT</strong> <em>complex number</em> (<code class="docutils literal notranslate"><span class="pre">complex</span></code>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.dict_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">dict_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#dict_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.dict_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.DictError" title="pcapkit.utilities.exceptions.DictError"><strong>DictError</strong></a> – If any of the arguments is <strong>NOT</strong> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.enum_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">enum_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#enum_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.enum_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are of <em>enumeration protocol</em> type (<code class="docutils literal notranslate"><span class="pre">enum.EnumMeta</span></code> and/or <code class="docutils literal notranslate"><span class="pre">aenum.EnumMeta</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.EnumError" title="pcapkit.utilities.exceptions.EnumError"><strong>EnumError</strong></a> – If any of the arguments is <strong>NOT</strong> <em>enumeration protocol</em> type
+    (<code class="docutils literal notranslate"><span class="pre">enum.EnumMeta</span></code> and/or <code class="docutils literal notranslate"><span class="pre">aenum.EnumMeta</span></code>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.frag_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">frag_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">protocol</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#frag_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.frag_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are valid fragments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>protocol</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Originated fragmentation protocol (IPv4, IPv6 or TCP).</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+</dl>
+<ul class="simple">
+<li><p>If the protocol is IPv4, the fragment should be as an IPv4 <a class="reference internal" href="../reassembly/ipv4.html#term-ipv4.packet"><span class="xref std std-term">fragmentation</span></a>.</p></li>
+<li><p>If the protocol is IPv6, the fragment should be as an IPv6 <a class="reference internal" href="../reassembly/ipv6.html#term-ipv6.packet"><span class="xref std std-term">fragmentation</span></a>.</p></li>
+<li><p>If the protocol is TCP, the fragment should be as an TCP <a class="reference internal" href="../reassembly/tcp.html#term-tcp.packet"><span class="xref std std-term">fragmentation</span></a>.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.FragmentError" title="pcapkit.utilities.exceptions.FragmentError"><strong>FragmentError</strong></a> – If any of the arguments is <strong>NOT</strong> valid fragment.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pcapkit.utilities.validations._ip_frag_check" title="pcapkit.utilities.validations._ip_frag_check"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.validations._ip_frag_check()</span></code></a></p></li>
+<li><p><a class="reference internal" href="#pcapkit.utilities.validations._tcp_frag_check" title="pcapkit.utilities.validations._tcp_frag_check"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.utilities.validations._tcp_frag_check()</span></code></a></p></li>
+</ul>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.info_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">info_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#info_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.info_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> instances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.InfoError" title="pcapkit.utilities.exceptions.InfoError"><strong>InfoError</strong></a> – If any of the arguments is <strong>NOT</strong> <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> instance.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.int_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">int_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#int_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.int_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <em>integrals</em> (<code class="docutils literal notranslate"><span class="pre">int</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.IntError" title="pcapkit.utilities.exceptions.IntError"><strong>IntError</strong></a> – If any of the arguments is <strong>NOT</strong> <em>integral</em> (<code class="docutils literal notranslate"><span class="pre">int</span></code>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.io_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">io_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#io_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.io_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <em>file-like object</em> (<code class="docutils literal notranslate"><span class="pre">io.IOBase</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.IOObjError" title="pcapkit.utilities.exceptions.IOObjError"><strong>IOObjError</strong></a> – If any of the arguments is <strong>NOT</strong> <em>file-like object</em> (<code class="docutils literal notranslate"><span class="pre">io.IOBase</span></code>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.ip_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">ip_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#ip_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.ip_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <em>IP addresses</em> (<code class="docutils literal notranslate"><span class="pre">ipaddress.IPv4Address</span></code> and/or <code class="docutils literal notranslate"><span class="pre">ipaddress.IPv6Address</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.IPError" title="pcapkit.utilities.exceptions.IPError"><strong>IPError</strong></a> – If any of the arguments is <strong>NOT</strong> <em>IP address</em>
+    (<code class="docutils literal notranslate"><span class="pre">ipaddress.IPv4Address</span></code> and/or <code class="docutils literal notranslate"><span class="pre">ipaddress.IPv6Address</span></code>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.list_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">list_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#list_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.list_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <code class="docutils literal notranslate"><span class="pre">list</span></code> type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.ListError" title="pcapkit.utilities.exceptions.ListError"><strong>ListError</strong></a> – If any of the arguments is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">list</span></code> type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.number_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">number_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#number_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.number_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <em>numbers</em>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.DigitError" title="pcapkit.utilities.exceptions.DigitError"><strong>DigitError</strong></a> – If any of the arguments is <strong>NOT</strong> <em>number</em> (<code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">float</span></code> and/or <code class="docutils literal notranslate"><span class="pre">complex</span></code>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.pkt_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">pkt_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">3</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#pkt_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.pkt_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are valid packets (<a class="reference internal" href="../foundation/traceflow.html#term-trace.packet"><span class="xref std std-term">TCP packet</span></a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.PacketError" title="pcapkit.utilities.exceptions.PacketError"><strong>PacketError</strong></a> – If any of the arguments is <strong>NOT</strong> valid packet.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="../toolkit/default.html#pcapkit.toolkit.default.tcp_traceflow" title="pcapkit.toolkit.default.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.toolkit.default.tcp_traceflow()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.real_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">real_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#real_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.real_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <em>real numbers</em> (<code class="docutils literal notranslate"><span class="pre">int</span></code> and/or <code class="docutils literal notranslate"><span class="pre">float</span></code>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.RealError" title="pcapkit.utilities.exceptions.RealError"><strong>RealError</strong></a> – If any of the arguments is <strong>NOT</strong> <em>real number</em> (<code class="docutils literal notranslate"><span class="pre">int</span></code> and/or <code class="docutils literal notranslate"><span class="pre">float</span></code>).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.str_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">str_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#str_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.str_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.StringError" title="pcapkit.utilities.exceptions.StringError"><strong>StringError</strong></a> – If any of the arguments is <strong>NOT</strong> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.utilities.validations.tuple_check">
+<code class="sig-prename descclassname">pcapkit.utilities.validations.</code><code class="sig-name descname">tuple_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">stacklevel</span><span class="o">=</span><span class="default_value">2</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#tuple_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.utilities.validations.tuple_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if arguments are <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Arguments to check.</p></li>
+<li><p><strong>stacklevel</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Stack level to fetch originated function name.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference internal" href="exceptions.html#pcapkit.utilities.exceptions.TupleError" title="pcapkit.utilities.exceptions.TupleError"><strong>TupleError</strong></a> – If any of the arguments is <strong>NOT</strong> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="index.html">Utility Functions &amp; Classes</a><ul>
+      <li>Previous: <a href="logging.html" title="previous chapter">Logging System</a></li>
+      <li>Next: <a href="warnings.html" title="next chapter">User Defined Warnings</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/utilities/validations.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.const.ipv6.extension_header &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.const.ipv6.extension_header</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=line-too-long</span>
+<span class="sd">&quot;&quot;&quot;IPv6 Extension Header Types&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ExtensionHeader&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="ExtensionHeader"><a class="viewcode-back" href="../../../../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader">[docs]</a><span class="k">class</span> <span class="nc">ExtensionHeader</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;[ExtensionHeader] IPv6 Extension Header Types&quot;&quot;&quot;</span>
+
+    <span class="c1">#: HOPOPT [:rfc:`8200`] IPv6 Hop-by-Hop Option</span>
+    <span class="n">HOPOPT</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1">#: IPv6-Route [Steve Deering] Routing Header for IPv6</span>
+    <span class="n">IPv6_Route</span> <span class="o">=</span> <span class="mi">43</span>
+
+    <span class="c1">#: IPv6-Frag [Steve Deering] Fragment Header for IPv6</span>
+    <span class="n">IPv6_Frag</span> <span class="o">=</span> <span class="mi">44</span>
+
+    <span class="c1">#: ESP [:rfc:`4303`] Encap Security Payload</span>
+    <span class="n">ESP</span> <span class="o">=</span> <span class="mi">50</span>
+
+    <span class="c1">#: AH [:rfc:`4302`] Authentication Header</span>
+    <span class="n">AH</span> <span class="o">=</span> <span class="mi">51</span>
+
+    <span class="c1">#: IPv6-Opts [:rfc:`8200`] Destination Options for IPv6</span>
+    <span class="n">IPv6_Opts</span> <span class="o">=</span> <span class="mi">60</span>
+
+    <span class="c1">#: Mobility Header [:rfc:`6275`]</span>
+    <span class="n">Mobility_Header</span> <span class="o">=</span> <span class="mi">135</span>
+
+    <span class="c1">#: HIP [:rfc:`7401`] Host Identity Protocol</span>
+    <span class="n">HIP</span> <span class="o">=</span> <span class="mi">139</span>
+
+    <span class="c1">#: Shim6 [:rfc:`5533`] Shim6 Protocol</span>
+    <span class="n">Shim6</span> <span class="o">=</span> <span class="mi">140</span>
+
+    <span class="c1">#: Use for experimentation and testing [:rfc:`3692`]</span>
+    <span class="n">Use_for_experimentation_and_testing_253</span> <span class="o">=</span> <span class="mi">253</span>
+
+    <span class="c1">#: Use for experimentation and testing [:rfc:`3692`]</span>
+    <span class="n">Use_for_experimentation_and_testing_254</span> <span class="o">=</span> <span class="mi">254</span>
+
+<div class="viewcode-block" id="ExtensionHeader.get"><a class="viewcode-back" href="../../../../const/ipv6.html#pcapkit.const.ipv6.extension_header.ExtensionHeader.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Backport support for original codes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">ExtensionHeader</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ExtensionHeader</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="n">ExtensionHeader</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ExtensionHeader</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

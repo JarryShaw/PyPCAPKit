@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Application Layer Protocols &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="FTP - File Transfer Protocol" href="ftp.html" />
+    <link rel="prev" title="TCP - Transmission Control Protocol" href="../transport/tcp.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.protocols.application">
+<span id="application-layer-protocols"></span><h1>Application Layer Protocols<a class="headerlink" href="#module-pcapkit.protocols.application" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application</span></code></a> is collection of all protocols in
+application layer, with detailed implementation and methods.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ftp.html">FTP - File Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ftp.html#data-structure">Data Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="httpv1.html#data-structure">Data Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="httpv2.html#data-structure">Data Structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-unassigned-frame">HTTP/2 Unassigned Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-data-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">DATA</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-headers-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-priority-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">PRIORITY</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-rst-stream-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">RST_STREAM</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-settings-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-push-promise-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">PUSH_PROMISE</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-ping-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">PING</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-goaway-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-window-update-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">WINDOW_UPDATE</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-continuation-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">CONTINUATION</span></code> Frame</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="base-protocol">
+<h2>Base Protocol<a class="headerlink" href="#base-protocol" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="#module-pcapkit.protocols.application.application" title="pcapkit.protocols.application.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.application</span></code></a> contains only
+<a class="reference internal" href="#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>,
+which is a base class for application layer protocols, eg.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/1.*</span></code>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/2</span></code>
+and etc.</p>
+<span class="target" id="module-pcapkit.protocols.application.application"></span><dl class="py class">
+<dt id="pcapkit.protocols.application.application.Application">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.application.</code><code class="sig-name descname">Application</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol</span></code></a></p>
+<p>Abstract base class for transport layer protocol family.</p>
+<dl class="py attribute">
+<dt id="pcapkit.protocols.application.application.Application.__layer__">
+<code class="sig-name descname">__layer__</code><em class="property"> = 'Application'</em><a class="headerlink" href="#pcapkit.protocols.application.application.Application.__layer__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Layer of protocol.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.application.application.Application.__index__">
+<em class="property">classmethod </em><code class="sig-name descname">__index__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application.__index__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application.__index__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeral registry index of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.IntError" title="pcapkit.utilities.exceptions.IntError"><strong>IntError</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.application.application.Application.__index__" title="pcapkit.protocols.application.application.Application.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.application.application.Application.__post_init__">
+<code class="sig-name descname">__post_init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application.__post_init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application.__post_init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post initialisation hook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.9)"><em>io.BytesIO</em></a><em>]</em>) – Source packet stream.</p></li>
+<li><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – Length of packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>For construction argument, please refer to <code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.application.application.Application._decode_next_layer">
+<code class="sig-name descname">_decode_next_layer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dict_</span></em>, <em class="sig-param"><span class="n">proto</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application._decode_next_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application._decode_next_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decode next layer protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.application.application.Application._decode_next_layer" title="pcapkit.protocols.application.application.Application._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.application.application.Application._import_next_layer">
+<code class="sig-name descname">_import_next_layer</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">proto</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application._import_next_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application._import_next_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import next layer extractor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.application.application.Application._import_next_layer" title="pcapkit.protocols.application.application.Application._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.application.application.Application.layer">
+<em class="property">property </em><code class="sig-name descname">layer</code><a class="headerlink" href="#pcapkit.protocols.application.application.Application.layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Protocol layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Literal[‘Application’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="../index.html">Protocol Family</a><ul>
+      <li>Previous: <a href="../transport/tcp.html" title="previous chapter">TCP - Transmission Control Protocol</a></li>
+      <li>Next: <a href="ftp.html" title="next chapter">FTP - File Transfer Protocol</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../../_sources/protocols/application/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,845 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.const.reg.ethertype &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.const.reg.ethertype</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=line-too-long</span>
+<span class="sd">&quot;&quot;&quot;Ethertype IEEE 802 Numbers&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;EtherType&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="EtherType"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.ethertype.EtherType">[docs]</a><span class="k">class</span> <span class="nc">EtherType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;[EtherType] Ethertype IEEE 802 Numbers&quot;&quot;&quot;</span>
+
+    <span class="c1">#: XEROX PUP (see 0A00) [Boggs, D., J. Shoch, E. Taft, and R. Metcalfe, &quot;PUP:</span>
+    <span class="c1">#: An Internetwork Architecture&quot;, XEROX Palo Alto Research Center, CSL-79-10,</span>
+    <span class="c1">#: July 1979; also in IEEE Transactions on Communication, Volume COM-28, Number</span>
+    <span class="c1">#: 4, April 1980.][Neil Sembower]</span>
+    <span class="n">XEROX_PUP</span> <span class="o">=</span> <span class="mh">0x0200</span>
+
+    <span class="c1">#: PUP Addr Trans (see 0A01) [Neil Sembower]</span>
+    <span class="n">PUP_Addr_Trans_0x0201</span> <span class="o">=</span> <span class="mh">0x0201</span>
+
+    <span class="c1">#: Nixdorf [Neil Sembower]</span>
+    <span class="n">Nixdorf</span> <span class="o">=</span> <span class="mh">0x0400</span>
+
+    <span class="c1">#: XEROX NS IDP [&quot;The Ethernet, A Local Area Network: Data Link Layer and</span>
+    <span class="c1">#: Physical Layer Specification&quot;, AA-K759B-TK, Digital Equipment Corporation,</span>
+    <span class="c1">#: Maynard, MA. Also as: &quot;The Ethernet - A Local Area Network&quot;, Version 1.0,</span>
+    <span class="c1">#: Digital Equipment Corporation, Intel Corporation, Xerox Corporation,</span>
+    <span class="c1">#: September 1980. And: &quot;The Ethernet, A Local Area Network: Data Link Layer</span>
+    <span class="c1">#: and Physical Layer Specifications&quot;, Digital, Intel and Xerox, November 1982.</span>
+    <span class="c1">#: And: XEROX, &quot;The Ethernet, A Local Area Network: Data Link Layer and</span>
+    <span class="c1">#: Physical Layer Specification&quot;, X3T51/80-50, Xerox Corporation, Stamford,</span>
+    <span class="c1">#: CT., October 1980.][Neil Sembower]</span>
+    <span class="n">XEROX_NS_IDP</span> <span class="o">=</span> <span class="mh">0x0600</span>
+
+    <span class="c1">#: DLOG [Neil Sembower]</span>
+    <span class="n">DLOG_0x0660</span> <span class="o">=</span> <span class="mh">0x0660</span>
+
+    <span class="c1">#: DLOG [Neil Sembower]</span>
+    <span class="n">DLOG_0x0661</span> <span class="o">=</span> <span class="mh">0x0661</span>
+
+    <span class="c1">#: Internet Protocol version 4 (IPv4) [:rfc:`7042`]</span>
+    <span class="n">Internet_Protocol_version_4</span> <span class="o">=</span> <span class="mh">0x0800</span>
+
+    <span class="c1">#: X.75 Internet [Neil Sembower]</span>
+    <span class="n">X_75_Internet</span> <span class="o">=</span> <span class="mh">0x0801</span>
+
+    <span class="c1">#: NBS Internet [Neil Sembower]</span>
+    <span class="n">NBS_Internet</span> <span class="o">=</span> <span class="mh">0x0802</span>
+
+    <span class="c1">#: ECMA Internet [Neil Sembower]</span>
+    <span class="n">ECMA_Internet</span> <span class="o">=</span> <span class="mh">0x0803</span>
+
+    <span class="c1">#: Chaosnet [Neil Sembower]</span>
+    <span class="n">Chaosnet</span> <span class="o">=</span> <span class="mh">0x0804</span>
+
+    <span class="c1">#: X.25 Level 3 [Neil Sembower]</span>
+    <span class="n">X_25_Level_3</span> <span class="o">=</span> <span class="mh">0x0805</span>
+
+    <span class="c1">#: Address Resolution Protocol (ARP) [:rfc:`7042`]</span>
+    <span class="n">Address_Resolution_Protocol</span> <span class="o">=</span> <span class="mh">0x0806</span>
+
+    <span class="c1">#: XNS Compatability [Neil Sembower]</span>
+    <span class="n">XNS_Compatability</span> <span class="o">=</span> <span class="mh">0x0807</span>
+
+    <span class="c1">#: Frame Relay ARP [:rfc:`1701`]</span>
+    <span class="n">Frame_Relay_ARP</span> <span class="o">=</span> <span class="mh">0x0808</span>
+
+    <span class="c1">#: Symbolics Private [David Plummer]</span>
+    <span class="n">Symbolics_Private</span> <span class="o">=</span> <span class="mh">0x081C</span>
+
+    <span class="c1">#: Ungermann-Bass net debugr [Neil Sembower]</span>
+    <span class="n">Ungermann_Bass_net_debugr</span> <span class="o">=</span> <span class="mh">0x0900</span>
+
+    <span class="c1">#: Xerox IEEE802.3 PUP [Neil Sembower]</span>
+    <span class="n">Xerox_IEEE802_3_PUP</span> <span class="o">=</span> <span class="mh">0x0A00</span>
+
+    <span class="c1">#: PUP Addr Trans [Neil Sembower]</span>
+    <span class="n">PUP_Addr_Trans_0x0A01</span> <span class="o">=</span> <span class="mh">0x0A01</span>
+
+    <span class="c1">#: Banyan VINES [Neil Sembower]</span>
+    <span class="n">Banyan_VINES</span> <span class="o">=</span> <span class="mh">0x0BAD</span>
+
+    <span class="c1">#: VINES Loopback [:rfc:`1701`]</span>
+    <span class="n">VINES_Loopback</span> <span class="o">=</span> <span class="mh">0x0BAE</span>
+
+    <span class="c1">#: VINES Echo [:rfc:`1701`]</span>
+    <span class="n">VINES_Echo</span> <span class="o">=</span> <span class="mh">0x0BAF</span>
+
+    <span class="c1">#: Berkeley Trailer nego [Neil Sembower]</span>
+    <span class="n">Berkeley_Trailer_nego</span> <span class="o">=</span> <span class="mh">0x1000</span>
+
+    <span class="c1">#: Valid Systems [Neil Sembower]</span>
+    <span class="n">Valid_Systems</span> <span class="o">=</span> <span class="mh">0x1600</span>
+
+    <span class="c1">#: TRILL [:rfc:`6325`]</span>
+    <span class="n">TRILL</span> <span class="o">=</span> <span class="mh">0x22F3</span>
+
+    <span class="c1">#: L2-IS-IS [:rfc:`6325`]</span>
+    <span class="n">L2_IS_IS</span> <span class="o">=</span> <span class="mh">0x22F4</span>
+
+    <span class="c1">#: PCS Basic Block Protocol [Neil Sembower]</span>
+    <span class="n">PCS_Basic_Block_Protocol</span> <span class="o">=</span> <span class="mh">0x4242</span>
+
+    <span class="c1">#: BBN Simnet [Neil Sembower]</span>
+    <span class="n">BBN_Simnet</span> <span class="o">=</span> <span class="mh">0x5208</span>
+
+    <span class="c1">#: DEC Unassigned (Exp.) [Neil Sembower]</span>
+    <span class="n">DEC_Unassigned_0x6000</span> <span class="o">=</span> <span class="mh">0x6000</span>
+
+    <span class="c1">#: DEC MOP Dump/Load [Neil Sembower]</span>
+    <span class="n">DEC_MOP_Dump_Load</span> <span class="o">=</span> <span class="mh">0x6001</span>
+
+    <span class="c1">#: DEC MOP Remote Console [Neil Sembower]</span>
+    <span class="n">DEC_MOP_Remote_Console</span> <span class="o">=</span> <span class="mh">0x6002</span>
+
+    <span class="c1">#: DEC DECNET Phase IV Route [Neil Sembower]</span>
+    <span class="n">DEC_DECNET_Phase_IV_Route</span> <span class="o">=</span> <span class="mh">0x6003</span>
+
+    <span class="c1">#: DEC LAT [Neil Sembower]</span>
+    <span class="n">DEC_LAT</span> <span class="o">=</span> <span class="mh">0x6004</span>
+
+    <span class="c1">#: DEC Diagnostic Protocol [Neil Sembower]</span>
+    <span class="n">DEC_Diagnostic_Protocol</span> <span class="o">=</span> <span class="mh">0x6005</span>
+
+    <span class="c1">#: DEC Customer Protocol [Neil Sembower]</span>
+    <span class="n">DEC_Customer_Protocol</span> <span class="o">=</span> <span class="mh">0x6006</span>
+
+    <span class="c1">#: DEC LAVC, SCA [Neil Sembower]</span>
+    <span class="n">DEC_LAVC_SCA</span> <span class="o">=</span> <span class="mh">0x6007</span>
+
+    <span class="c1">#: Trans Ether Bridging [:rfc:`1701`]</span>
+    <span class="n">Trans_Ether_Bridging</span> <span class="o">=</span> <span class="mh">0x6558</span>
+
+    <span class="c1">#: Raw Frame Relay [:rfc:`1701`]</span>
+    <span class="n">Raw_Frame_Relay</span> <span class="o">=</span> <span class="mh">0x6559</span>
+
+    <span class="c1">#: Ungermann-Bass download [Neil Sembower]</span>
+    <span class="n">Ungermann_Bass_download</span> <span class="o">=</span> <span class="mh">0x7000</span>
+
+    <span class="c1">#: Ungermann-Bass dia/loop [Neil Sembower]</span>
+    <span class="n">Ungermann_Bass_dia_loop</span> <span class="o">=</span> <span class="mh">0x7002</span>
+
+    <span class="c1">#: Proteon [Neil Sembower]</span>
+    <span class="n">Proteon</span> <span class="o">=</span> <span class="mh">0x7030</span>
+
+    <span class="c1">#: Cabletron [Neil Sembower]</span>
+    <span class="n">Cabletron</span> <span class="o">=</span> <span class="mh">0x7034</span>
+
+    <span class="c1">#: Cronus VLN [:rfc:`824`][Daniel Tappan]</span>
+    <span class="n">Cronus_VLN</span> <span class="o">=</span> <span class="mh">0x8003</span>
+
+    <span class="c1">#: Cronus Direct [:rfc:`824`][Daniel Tappan]</span>
+    <span class="n">Cronus_Direct</span> <span class="o">=</span> <span class="mh">0x8004</span>
+
+    <span class="c1">#: HP Probe [Neil Sembower]</span>
+    <span class="n">HP_Probe</span> <span class="o">=</span> <span class="mh">0x8005</span>
+
+    <span class="c1">#: Nestar [Neil Sembower]</span>
+    <span class="n">Nestar</span> <span class="o">=</span> <span class="mh">0x8006</span>
+
+    <span class="c1">#: AT&amp;T [Neil Sembower]</span>
+    <span class="n">AT_T_0x8008</span> <span class="o">=</span> <span class="mh">0x8008</span>
+
+    <span class="c1">#: Excelan [Neil Sembower]</span>
+    <span class="n">Excelan</span> <span class="o">=</span> <span class="mh">0x8010</span>
+
+    <span class="c1">#: SGI diagnostics [Andrew Cherenson]</span>
+    <span class="n">SGI_diagnostics</span> <span class="o">=</span> <span class="mh">0x8013</span>
+
+    <span class="c1">#: SGI network games [Andrew Cherenson]</span>
+    <span class="n">SGI_network_games</span> <span class="o">=</span> <span class="mh">0x8014</span>
+
+    <span class="c1">#: SGI reserved [Andrew Cherenson]</span>
+    <span class="n">SGI_reserved</span> <span class="o">=</span> <span class="mh">0x8015</span>
+
+    <span class="c1">#: SGI bounce server [Andrew Cherenson]</span>
+    <span class="n">SGI_bounce_server</span> <span class="o">=</span> <span class="mh">0x8016</span>
+
+    <span class="c1">#: Apollo Domain [Neil Sembower]</span>
+    <span class="n">Apollo_Domain</span> <span class="o">=</span> <span class="mh">0x8019</span>
+
+    <span class="c1">#: Tymshare [Neil Sembower]</span>
+    <span class="n">Tymshare</span> <span class="o">=</span> <span class="mh">0x802E</span>
+
+    <span class="c1">#: Tigan, Inc. [Neil Sembower]</span>
+    <span class="n">Tigan_Inc</span> <span class="o">=</span> <span class="mh">0x802F</span>
+
+    <span class="c1">#: Reverse Address Resolution Protocol (RARP) [:rfc:`903`][Joseph Murdock]</span>
+    <span class="n">Reverse_Address_Resolution_Protocol</span> <span class="o">=</span> <span class="mh">0x8035</span>
+
+    <span class="c1">#: Aeonic Systems [Neil Sembower]</span>
+    <span class="n">Aeonic_Systems</span> <span class="o">=</span> <span class="mh">0x8036</span>
+
+    <span class="c1">#: DEC LANBridge [Neil Sembower]</span>
+    <span class="n">DEC_LANBridge</span> <span class="o">=</span> <span class="mh">0x8038</span>
+
+    <span class="c1">#: DEC Ethernet Encryption [Neil Sembower]</span>
+    <span class="n">DEC_Ethernet_Encryption</span> <span class="o">=</span> <span class="mh">0x803D</span>
+
+    <span class="c1">#: DEC Unassigned [Neil Sembower]</span>
+    <span class="n">DEC_Unassigned_0x803E</span> <span class="o">=</span> <span class="mh">0x803E</span>
+
+    <span class="c1">#: DEC LAN Traffic Monitor [Neil Sembower]</span>
+    <span class="n">DEC_LAN_Traffic_Monitor</span> <span class="o">=</span> <span class="mh">0x803F</span>
+
+    <span class="c1">#: Planning Research Corp. [Neil Sembower]</span>
+    <span class="n">Planning_Research_Corp</span> <span class="o">=</span> <span class="mh">0x8044</span>
+
+    <span class="c1">#: AT&amp;T [Neil Sembower]</span>
+    <span class="n">AT_T_0x8046</span> <span class="o">=</span> <span class="mh">0x8046</span>
+
+    <span class="c1">#: AT&amp;T [Neil Sembower]</span>
+    <span class="n">AT_T_0x8047</span> <span class="o">=</span> <span class="mh">0x8047</span>
+
+    <span class="c1">#: ExperData [Neil Sembower]</span>
+    <span class="n">ExperData</span> <span class="o">=</span> <span class="mh">0x8049</span>
+
+    <span class="c1">#: Stanford V Kernel exp. [Neil Sembower]</span>
+    <span class="n">Stanford_V_Kernel_exp</span> <span class="o">=</span> <span class="mh">0x805B</span>
+
+    <span class="c1">#: Stanford V Kernel prod. [Neil Sembower]</span>
+    <span class="n">Stanford_V_Kernel_prod</span> <span class="o">=</span> <span class="mh">0x805C</span>
+
+    <span class="c1">#: Evans &amp; Sutherland [Neil Sembower]</span>
+    <span class="n">Evans_Sutherland</span> <span class="o">=</span> <span class="mh">0x805D</span>
+
+    <span class="c1">#: Little Machines [Neil Sembower]</span>
+    <span class="n">Little_Machines</span> <span class="o">=</span> <span class="mh">0x8060</span>
+
+    <span class="c1">#: Counterpoint Computers [Neil Sembower]</span>
+    <span class="n">Counterpoint_Computers</span> <span class="o">=</span> <span class="mh">0x8062</span>
+
+    <span class="c1">#: Univ. of Mass. @ Amherst [Neil Sembower]</span>
+    <span class="n">Univ_of_Mass_Amherst_0x8065</span> <span class="o">=</span> <span class="mh">0x8065</span>
+
+    <span class="c1">#: Univ. of Mass. @ Amherst [Neil Sembower]</span>
+    <span class="n">Univ_of_Mass_Amherst_0x8066</span> <span class="o">=</span> <span class="mh">0x8066</span>
+
+    <span class="c1">#: Veeco Integrated Auto. [Neil Sembower]</span>
+    <span class="n">Veeco_Integrated_Auto</span> <span class="o">=</span> <span class="mh">0x8067</span>
+
+    <span class="c1">#: General Dynamics [Neil Sembower]</span>
+    <span class="n">General_Dynamics</span> <span class="o">=</span> <span class="mh">0x8068</span>
+
+    <span class="c1">#: AT&amp;T [Neil Sembower]</span>
+    <span class="n">AT_T_0x8069</span> <span class="o">=</span> <span class="mh">0x8069</span>
+
+    <span class="c1">#: Autophon [Neil Sembower]</span>
+    <span class="n">Autophon</span> <span class="o">=</span> <span class="mh">0x806A</span>
+
+    <span class="c1">#: ComDesign [Neil Sembower]</span>
+    <span class="n">ComDesign</span> <span class="o">=</span> <span class="mh">0x806C</span>
+
+    <span class="c1">#: Computgraphic Corp. [Neil Sembower]</span>
+    <span class="n">Computgraphic_Corp</span> <span class="o">=</span> <span class="mh">0x806D</span>
+
+    <span class="c1">#: Matra [Neil Sembower]</span>
+    <span class="n">Matra</span> <span class="o">=</span> <span class="mh">0x807A</span>
+
+    <span class="c1">#: Dansk Data Elektronik [Neil Sembower]</span>
+    <span class="n">Dansk_Data_Elektronik</span> <span class="o">=</span> <span class="mh">0x807B</span>
+
+    <span class="c1">#: Merit Internodal [Hans Werner Braun]</span>
+    <span class="n">Merit_Internodal</span> <span class="o">=</span> <span class="mh">0x807C</span>
+
+    <span class="c1">#: Vitalink TransLAN III [Neil Sembower]</span>
+    <span class="n">Vitalink_TransLAN_III</span> <span class="o">=</span> <span class="mh">0x8080</span>
+
+    <span class="c1">#: Appletalk [Neil Sembower]</span>
+    <span class="n">Appletalk</span> <span class="o">=</span> <span class="mh">0x809B</span>
+
+    <span class="c1">#: Spider Systems Ltd. [Neil Sembower]</span>
+    <span class="n">Spider_Systems_Ltd</span> <span class="o">=</span> <span class="mh">0x809F</span>
+
+    <span class="c1">#: Nixdorf Computers [Neil Sembower]</span>
+    <span class="n">Nixdorf_Computers</span> <span class="o">=</span> <span class="mh">0x80A3</span>
+
+    <span class="c1">#: Banyan Systems [Neil Sembower]</span>
+    <span class="n">Banyan_Systems_0x80C4</span> <span class="o">=</span> <span class="mh">0x80C4</span>
+
+    <span class="c1">#: Banyan Systems [Neil Sembower]</span>
+    <span class="n">Banyan_Systems_0x80C5</span> <span class="o">=</span> <span class="mh">0x80C5</span>
+
+    <span class="c1">#: Pacer Software [Neil Sembower]</span>
+    <span class="n">Pacer_Software</span> <span class="o">=</span> <span class="mh">0x80C6</span>
+
+    <span class="c1">#: Applitek Corporation [Neil Sembower]</span>
+    <span class="n">Applitek_Corporation</span> <span class="o">=</span> <span class="mh">0x80C7</span>
+
+    <span class="c1">#: IBM SNA Service on Ether [Neil Sembower]</span>
+    <span class="n">IBM_SNA_Service_on_Ether</span> <span class="o">=</span> <span class="mh">0x80D5</span>
+
+    <span class="c1">#: Varian Associates [Neil Sembower]</span>
+    <span class="n">Varian_Associates</span> <span class="o">=</span> <span class="mh">0x80DD</span>
+
+    <span class="c1">#: Retix [Neil Sembower]</span>
+    <span class="n">Retix</span> <span class="o">=</span> <span class="mh">0x80F2</span>
+
+    <span class="c1">#: AppleTalk AARP (Kinetics) [Neil Sembower]</span>
+    <span class="n">AppleTalk_AARP</span> <span class="o">=</span> <span class="mh">0x80F3</span>
+
+    <span class="c1">#: Apollo Computer [Neil Sembower]</span>
+    <span class="n">Apollo_Computer</span> <span class="o">=</span> <span class="mh">0x80F7</span>
+
+    <span class="c1">#: Wellfleet Communications [Neil Sembower]</span>
+    <span class="n">Wellfleet_Communications</span> <span class="o">=</span> <span class="mh">0x80FF</span>
+
+    <span class="c1">#: Customer VLAN Tag Type (C-Tag, formerly called the Q-Tag) (initially</span>
+    <span class="c1">#: Wellfleet) [:rfc:`7042`]</span>
+    <span class="n">Customer_VLAN_Tag_Type</span> <span class="o">=</span> <span class="mh">0x8100</span>
+
+    <span class="c1">#: Hayes Microcomputers [Neil Sembower]</span>
+    <span class="n">Hayes_Microcomputers</span> <span class="o">=</span> <span class="mh">0x8130</span>
+
+    <span class="c1">#: VG Laboratory Systems [Neil Sembower]</span>
+    <span class="n">VG_Laboratory_Systems</span> <span class="o">=</span> <span class="mh">0x8131</span>
+
+    <span class="c1">#: Logicraft [Neil Sembower]</span>
+    <span class="n">Logicraft</span> <span class="o">=</span> <span class="mh">0x8148</span>
+
+    <span class="c1">#: Network Computing Devices [Neil Sembower]</span>
+    <span class="n">Network_Computing_Devices</span> <span class="o">=</span> <span class="mh">0x8149</span>
+
+    <span class="c1">#: Alpha Micro [Neil Sembower]</span>
+    <span class="n">Alpha_Micro</span> <span class="o">=</span> <span class="mh">0x814A</span>
+
+    <span class="c1">#: SNMP [Joyce K Reynolds]</span>
+    <span class="n">SNMP</span> <span class="o">=</span> <span class="mh">0x814C</span>
+
+    <span class="c1">#: BIIN [Neil Sembower]</span>
+    <span class="n">BIIN_0x814D</span> <span class="o">=</span> <span class="mh">0x814D</span>
+
+    <span class="c1">#: BIIN [Neil Sembower]</span>
+    <span class="n">BIIN_0x814E</span> <span class="o">=</span> <span class="mh">0x814E</span>
+
+    <span class="c1">#: Technically Elite Concept [Neil Sembower]</span>
+    <span class="n">Technically_Elite_Concept</span> <span class="o">=</span> <span class="mh">0x814F</span>
+
+    <span class="c1">#: Rational Corp [Neil Sembower]</span>
+    <span class="n">Rational_Corp</span> <span class="o">=</span> <span class="mh">0x8150</span>
+
+    <span class="c1">#: XTP [Neil Sembower]</span>
+    <span class="n">XTP</span> <span class="o">=</span> <span class="mh">0x817D</span>
+
+    <span class="c1">#: SGI/Time Warner prop. [Neil Sembower]</span>
+    <span class="n">SGI_Time_Warner_prop</span> <span class="o">=</span> <span class="mh">0x817E</span>
+
+    <span class="c1">#: HIPPI-FP encapsulation [Neil Sembower]</span>
+    <span class="n">HIPPI_FP_encapsulation</span> <span class="o">=</span> <span class="mh">0x8180</span>
+
+    <span class="c1">#: STP, HIPPI-ST [Neil Sembower]</span>
+    <span class="n">STP_HIPPI_ST</span> <span class="o">=</span> <span class="mh">0x8181</span>
+
+    <span class="c1">#: Reserved for HIPPI-6400 [Neil Sembower]</span>
+    <span class="n">Reserved_for_HIPPI_6400_0x8182</span> <span class="o">=</span> <span class="mh">0x8182</span>
+
+    <span class="c1">#: Reserved for HIPPI-6400 [Neil Sembower]</span>
+    <span class="n">Reserved_for_HIPPI_6400_0x8183</span> <span class="o">=</span> <span class="mh">0x8183</span>
+
+    <span class="c1">#: Motorola Computer [Neil Sembower]</span>
+    <span class="n">Motorola_Computer</span> <span class="o">=</span> <span class="mh">0x818D</span>
+
+    <span class="c1">#: ARAI Bunkichi [Neil Sembower]</span>
+    <span class="n">ARAI_Bunkichi</span> <span class="o">=</span> <span class="mh">0x81A4</span>
+
+    <span class="c1">#: SECTRA [Neil Sembower]</span>
+    <span class="n">SECTRA</span> <span class="o">=</span> <span class="mh">0x86DB</span>
+
+    <span class="c1">#: Delta Controls [Neil Sembower]</span>
+    <span class="n">Delta_Controls</span> <span class="o">=</span> <span class="mh">0x86DE</span>
+
+    <span class="c1">#: Internet Protocol version 6 (IPv6) [:rfc:`7042`]</span>
+    <span class="n">Internet_Protocol_version_6</span> <span class="o">=</span> <span class="mh">0x86DD</span>
+
+    <span class="c1">#: ATOMIC [Joe Touch]</span>
+    <span class="n">ATOMIC</span> <span class="o">=</span> <span class="mh">0x86DF</span>
+
+    <span class="c1">#: TCP/IP Compression [:rfc:`1144`][:rfc:`1701`]</span>
+    <span class="n">TCP_IP_Compression</span> <span class="o">=</span> <span class="mh">0x876B</span>
+
+    <span class="c1">#: IP Autonomous Systems [:rfc:`1701`]</span>
+    <span class="n">IP_Autonomous_Systems</span> <span class="o">=</span> <span class="mh">0x876C</span>
+
+    <span class="c1">#: Secure Data [:rfc:`1701`]</span>
+    <span class="n">Secure_Data</span> <span class="o">=</span> <span class="mh">0x876D</span>
+
+    <span class="c1">#: IEEE Std 802.3 - Ethernet Passive Optical Network (EPON) [EPON][:rfc:`7042`]</span>
+    <span class="n">IEEE_Std_802_3_Ethernet_Passive_Optical_Network</span> <span class="o">=</span> <span class="mh">0x8808</span>
+
+    <span class="c1">#: Point-to-Point Protocol (PPP) [:rfc:`7042`]</span>
+    <span class="n">Point_to_Point_Protocol</span> <span class="o">=</span> <span class="mh">0x880B</span>
+
+    <span class="c1">#: General Switch Management Protocol (GSMP) [:rfc:`7042`]</span>
+    <span class="n">General_Switch_Management_Protocol</span> <span class="o">=</span> <span class="mh">0x880C</span>
+
+    <span class="c1">#: MPLS [:rfc:`5332`]</span>
+    <span class="n">MPLS</span> <span class="o">=</span> <span class="mh">0x8847</span>
+
+    <span class="c1">#: MPLS with upstream-assigned label [:rfc:`5332`]</span>
+    <span class="n">MPLS_with_upstream_assigned_label</span> <span class="o">=</span> <span class="mh">0x8848</span>
+
+    <span class="c1">#: Multicast Channel Allocation Protocol (MCAP) [:rfc:`7042`]</span>
+    <span class="n">Multicast_Channel_Allocation_Protocol</span> <span class="o">=</span> <span class="mh">0x8861</span>
+
+    <span class="c1">#: PPP over Ethernet (PPPoE) Discovery Stage [:rfc:`2516`]</span>
+    <span class="n">PPP_over_Ethernet_Discovery_Stage</span> <span class="o">=</span> <span class="mh">0x8863</span>
+
+    <span class="c1">#: PPP over Ethernet (PPPoE) Session Stage [:rfc:`2516`]</span>
+    <span class="n">PPP_over_Ethernet_Session_Stage</span> <span class="o">=</span> <span class="mh">0x8864</span>
+
+    <span class="c1">#: IEEE Std 802.1X - Port-based network access control [IEEE]</span>
+    <span class="n">IEEE_Std_802_1X_Port_based_network_access_control</span> <span class="o">=</span> <span class="mh">0x888E</span>
+
+    <span class="c1">#: IEEE Std 802.1Q - Service VLAN tag identifier (S-Tag) [IEEE]</span>
+    <span class="n">IEEE_Std_802_1Q_Service_VLAN_tag_identifier</span> <span class="o">=</span> <span class="mh">0x88A8</span>
+
+    <span class="c1">#: IEEE Std 802 - Local Experimental Ethertype [IEEE]</span>
+    <span class="n">IEEE_Std_802_Local_Experimental_Ethertype_0x88B5</span> <span class="o">=</span> <span class="mh">0x88B5</span>
+
+    <span class="c1">#: IEEE Std 802 - Local Experimental Ethertype [IEEE]</span>
+    <span class="n">IEEE_Std_802_Local_Experimental_Ethertype_0x88B6</span> <span class="o">=</span> <span class="mh">0x88B6</span>
+
+    <span class="c1">#: IEEE Std 802 - OUI Extended Ethertype [IEEE]</span>
+    <span class="n">IEEE_Std_802_OUI_Extended_Ethertype</span> <span class="o">=</span> <span class="mh">0x88B7</span>
+
+    <span class="c1">#: IEEE Std 802.11 - Pre-Authentication (802.11i) [IEEE]</span>
+    <span class="n">IEEE_Std_802_11_Pre_Authentication</span> <span class="o">=</span> <span class="mh">0x88C7</span>
+
+    <span class="c1">#: IEEE Std 802.1AB - Link Layer Discovery Protocol (LLDP) [IEEE]</span>
+    <span class="n">IEEE_Std_802_1AB_Link_Layer_Discovery_Protocol</span> <span class="o">=</span> <span class="mh">0x88CC</span>
+
+    <span class="c1">#: IEEE Std 802.1AE - Media Access Control Security [IEEE]</span>
+    <span class="n">IEEE_Std_802_1AE_Media_Access_Control_Security</span> <span class="o">=</span> <span class="mh">0x88E5</span>
+
+    <span class="c1">#: Provider Backbone Bridging Instance tag [IEEE Std 802.1Q-2014]</span>
+    <span class="n">Provider_Backbone_Bridging_Instance_tag</span> <span class="o">=</span> <span class="mh">0x88E7</span>
+
+    <span class="c1">#: IEEE Std 802.1Q  - Multiple VLAN Registration Protocol (MVRP) [IEEE]</span>
+    <span class="n">IEEE_Std_802_1Q_Multiple_VLAN_Registration_Protocol</span> <span class="o">=</span> <span class="mh">0x88F5</span>
+
+    <span class="c1">#: IEEE Std 802.1Q - Multiple Multicast Registration Protocol (MMRP) [IEEE]</span>
+    <span class="n">IEEE_Std_802_1Q_Multiple_Multicast_Registration_Protocol</span> <span class="o">=</span> <span class="mh">0x88F6</span>
+
+    <span class="c1">#: IEEE Std 802.11 - Fast Roaming Remote Request (802.11r) [IEEE]</span>
+    <span class="n">IEEE_Std_802_11_Fast_Roaming_Remote_Request</span> <span class="o">=</span> <span class="mh">0x890D</span>
+
+    <span class="c1">#: IEEE Std 802.21 - Media Independent Handover Protocol [IEEE]</span>
+    <span class="n">IEEE_Std_802_21_Media_Independent_Handover_Protocol</span> <span class="o">=</span> <span class="mh">0x8917</span>
+
+    <span class="c1">#: IEEE Std 802.1Qbe - Multiple I-SID Registration Protocol [IEEE]</span>
+    <span class="n">IEEE_Std_802_1Qbe_Multiple_I_SID_Registration_Protocol</span> <span class="o">=</span> <span class="mh">0x8929</span>
+
+    <span class="c1">#: TRILL Fine Grained Labeling (FGL) [:rfc:`7172`]</span>
+    <span class="n">TRILL_Fine_Grained_Labeling</span> <span class="o">=</span> <span class="mh">0x893B</span>
+
+    <span class="c1">#: IEEE Std 802.1Qbg - ECP Protocol (also used in 802.1BR) [IEEE]</span>
+    <span class="n">IEEE_Std_802_1Qbg_ECP_Protocol</span> <span class="o">=</span> <span class="mh">0x8940</span>
+
+    <span class="c1">#: TRILL RBridge Channel [:rfc:`7178`]</span>
+    <span class="n">TRILL_RBridge_Channel</span> <span class="o">=</span> <span class="mh">0x8946</span>
+
+    <span class="c1">#: GeoNetworking as defined in ETSI EN 302 636-4-1 [IEEE]</span>
+    <span class="n">GeoNetworking_as_defined_in_ETSI_EN_302_636_4_1</span> <span class="o">=</span> <span class="mh">0x8947</span>
+
+    <span class="c1">#: NSH (Network Service Header) [:rfc:`8300`]</span>
+    <span class="n">NSH</span> <span class="o">=</span> <span class="mh">0x894F</span>
+
+    <span class="c1">#: Loopback [Neil Sembower]</span>
+    <span class="n">Loopback</span> <span class="o">=</span> <span class="mh">0x9000</span>
+
+    <span class="c1">#: 3Com(Bridge) XNS Sys Mgmt [Neil Sembower]</span>
+    <span class="n">EtherType_3Com_XNS_Sys_Mgmt</span> <span class="o">=</span> <span class="mh">0x9001</span>
+
+    <span class="c1">#: 3Com(Bridge) TCP-IP Sys [Neil Sembower]</span>
+    <span class="n">EtherType_3Com_TCP_IP_Sys</span> <span class="o">=</span> <span class="mh">0x9002</span>
+
+    <span class="c1">#: 3Com(Bridge) loop detect [Neil Sembower]</span>
+    <span class="n">EtherType_3Com_loop_detect</span> <span class="o">=</span> <span class="mh">0x9003</span>
+
+    <span class="c1">#: Multi-Topology [:rfc:`8377`]</span>
+    <span class="n">Multi_Topology</span> <span class="o">=</span> <span class="mh">0x9A22</span>
+
+    <span class="c1">#: LoWPAN encapsulation [:rfc:`7973`]</span>
+    <span class="n">LoWPAN_encapsulation</span> <span class="o">=</span> <span class="mh">0xA0ED</span>
+
+    <span class="c1">#: The Ethertype will be used to identify a &quot;Channel&quot;          in which control</span>
+    <span class="c1">#: messages are encapsulated as payload of GRE packets.          When a GRE</span>
+    <span class="c1">#: packet tagged with the Ethertype is received, the payload          will be</span>
+    <span class="c1">#: handed to the network processor for processing. [:rfc:`8157`]</span>
+    <span class="n">The_Ethertype_will_be_used_to_identify_a_Channel_in_which_control_messages_are_encapsulated_as_payload_of_GRE_packets_When_a_GRE_packet_tagged_with_the_Ethertype_is_received_the_payload_will_be_handed_to_the_network_processor_for_processing</span> <span class="o">=</span> <span class="mh">0xB7EA</span>
+
+    <span class="c1">#: BBN VITAL-LanBridge cache [Neil Sembower]</span>
+    <span class="n">BBN_VITAL_LanBridge_cache</span> <span class="o">=</span> <span class="mh">0xFF00</span>
+
+    <span class="c1">#: Reserved [:rfc:`1701`]</span>
+    <span class="n">Reserved</span> <span class="o">=</span> <span class="mh">0xFFFF</span>
+
+<div class="viewcode-block" id="EtherType.get"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.ethertype.EtherType.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Backport support for original codes.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">EtherType</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">EtherType</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="n">EtherType</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EtherType</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="EtherType._missing_"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.ethertype.EtherType._missing_">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mh">0x0000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFFFF</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">if</span> <span class="mh">0x0000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x05DC</span><span class="p">:</span>
+            <span class="c1">#: IEEE802.3 Length Field [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;IEEE802_3_Length_Field_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x0101</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x01FF</span><span class="p">:</span>
+            <span class="c1">#: Experimental [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Experimental_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x0888</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x088A</span><span class="p">:</span>
+            <span class="c1">#: Xyplex [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Xyplex_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x1001</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x100F</span><span class="p">:</span>
+            <span class="c1">#: Berkeley Trailer encap/IP [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Berkeley_Trailer_encap_IP_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x6008</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x6009</span><span class="p">:</span>
+            <span class="c1">#: DEC Unassigned [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;DEC_Unassigned_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x6010</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x6014</span><span class="p">:</span>
+            <span class="c1">#: 3Com Corporation [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;EtherType_3Com_Corporation_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x7020</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x7029</span><span class="p">:</span>
+            <span class="c1">#: LRT [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;LRT_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8039</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x803C</span><span class="p">:</span>
+            <span class="c1">#: DEC Unassigned [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;DEC_Unassigned_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8040</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8042</span><span class="p">:</span>
+            <span class="c1">#: DEC Unassigned [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;DEC_Unassigned_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x806E</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8077</span><span class="p">:</span>
+            <span class="c1">#: Landmark Graphics Corp. [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Landmark_Graphics_Corp_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x807D</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x807F</span><span class="p">:</span>
+            <span class="c1">#: Vitalink Communications [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Vitalink_Communications_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8081</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8083</span><span class="p">:</span>
+            <span class="c1">#: Counterpoint Computers [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Counterpoint_Computers_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x809C</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x809E</span><span class="p">:</span>
+            <span class="c1">#: Datability [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Datability_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80A4</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80B3</span><span class="p">:</span>
+            <span class="c1">#: Siemens Gammasonics Inc. [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Siemens_Gammasonics_Inc_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80C0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80C3</span><span class="p">:</span>
+            <span class="c1">#: DCA Data Exchange Cluster [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;DCA_Data_Exchange_Cluster_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80C8</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80CC</span><span class="p">:</span>
+            <span class="c1">#: Intergraph Corporation [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Intergraph_Corporation_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80CD</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80CE</span><span class="p">:</span>
+            <span class="c1">#: Harris Corporation [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Harris_Corporation_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80CF</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80D2</span><span class="p">:</span>
+            <span class="c1">#: Taylor Instrument [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Taylor_Instrument_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80D3</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80D4</span><span class="p">:</span>
+            <span class="c1">#: Rosemount Corporation [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Rosemount_Corporation_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80DE</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80DF</span><span class="p">:</span>
+            <span class="c1">#: Integrated Solutions TRFS [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Integrated_Solutions_TRFS_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80E0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80E3</span><span class="p">:</span>
+            <span class="c1">#: Allen-Bradley [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Allen_Bradley_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80E4</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80F0</span><span class="p">:</span>
+            <span class="c1">#: Datability [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Datability_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x80F4</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x80F5</span><span class="p">:</span>
+            <span class="c1">#: Kinetics [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Kinetics_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8101</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8103</span><span class="p">:</span>
+            <span class="c1">#: Wellfleet Communications [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Wellfleet_Communications_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8107</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8109</span><span class="p">:</span>
+            <span class="c1">#: Symbolics Private [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Symbolics_Private_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8132</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8136</span><span class="p">:</span>
+            <span class="c1">#: Bridge Communications [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Bridge_Communications_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8137</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8138</span><span class="p">:</span>
+            <span class="c1">#: Novell, Inc. [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Novell_Inc_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8139</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x813D</span><span class="p">:</span>
+            <span class="c1">#: KTI [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;KTI_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8151</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8153</span><span class="p">:</span>
+            <span class="c1">#: Qualcomm [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Qualcomm_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x815C</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x815E</span><span class="p">:</span>
+            <span class="c1">#: Computer Protocol Pty Ltd [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Computer_Protocol_Pty_Ltd_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8164</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8166</span><span class="p">:</span>
+            <span class="c1">#: Charles River Data System [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Charles_River_Data_System_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8184</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x818C</span><span class="p">:</span>
+            <span class="c1">#: Silicon Graphics prop. [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Silicon_Graphics_prop_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x819A</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81A3</span><span class="p">:</span>
+            <span class="c1">#: Qualcomm [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Qualcomm_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x81A5</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81AE</span><span class="p">:</span>
+            <span class="c1">#: RAD Network Devices [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;RAD_Network_Devices_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x81B7</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81B9</span><span class="p">:</span>
+            <span class="c1">#: Xyplex [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Xyplex_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x81CC</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81D5</span><span class="p">:</span>
+            <span class="c1">#: Apricot Computers [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Apricot_Computers_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x81D6</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81DD</span><span class="p">:</span>
+            <span class="c1">#: Artisoft [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Artisoft_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x81E6</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81EF</span><span class="p">:</span>
+            <span class="c1">#: Polygon [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Polygon_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x81F0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81F2</span><span class="p">:</span>
+            <span class="c1">#: Comsat Labs [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Comsat_Labs_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x81F3</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81F5</span><span class="p">:</span>
+            <span class="c1">#: SAIC [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;SAIC_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x81F6</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x81F8</span><span class="p">:</span>
+            <span class="c1">#: VG Analytical [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;VG_Analytical_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8203</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8205</span><span class="p">:</span>
+            <span class="c1">#: Quantum Software [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Quantum_Software_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8221</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8222</span><span class="p">:</span>
+            <span class="c1">#: Ascom Banking Systems [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Ascom_Banking_Systems_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x823E</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8240</span><span class="p">:</span>
+            <span class="c1">#: Advanced Encryption Syste [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Advanced_Encryption_Syste_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x827F</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8282</span><span class="p">:</span>
+            <span class="c1">#: Athena Programming [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Athena_Programming_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8263</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x826A</span><span class="p">:</span>
+            <span class="c1">#: Charles River Data System [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Charles_River_Data_System_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x829A</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x829B</span><span class="p">:</span>
+            <span class="c1">#: Inst Ind Info Tech [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Inst_Ind_Info_Tech_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x829C</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x82AB</span><span class="p">:</span>
+            <span class="c1">#: Taurus Controls [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Taurus_Controls_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x82AC</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8693</span><span class="p">:</span>
+            <span class="c1">#: Walker Richer &amp; Quinn [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Walker_Richer_Quinn_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8694</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x869D</span><span class="p">:</span>
+            <span class="c1">#: Idea Courier [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Idea_Courier_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x869E</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x86A1</span><span class="p">:</span>
+            <span class="c1">#: Computer Network Tech [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Computer_Network_Tech_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x86A3</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x86AC</span><span class="p">:</span>
+            <span class="c1">#: Gateway Communications [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Gateway_Communications_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x86E0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x86EF</span><span class="p">:</span>
+            <span class="c1">#: Landis &amp; Gyr Powers [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Landis_Gyr_Powers_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8700</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8710</span><span class="p">:</span>
+            <span class="c1">#: Motorola [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Motorola_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0x8A96</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0x8A97</span><span class="p">:</span>
+            <span class="c1">#: Invisible Software [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Invisible_Software_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mh">0xFF00</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFF0F</span><span class="p">:</span>
+            <span class="c1">#: ISC Bunker Ramo [Neil Sembower]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;ISC_Bunker_Ramo_0x</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

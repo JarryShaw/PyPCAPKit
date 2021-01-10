@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Command Line Interface &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="VLAN Vendor Crawler" href="vendor/vlan.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="command-line-interface">
+<h1>Command Line Interface<a class="headerlink" href="#command-line-interface" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.__main__" title="pcapkit.__main__"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.__main__</span></code></a> was originally the module file of
+<a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a>, which is now deprecated and merged with <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>usage: pcapkit-cli [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a]
+                   [-v] [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]
+                   input-file-name
+
+PCAP file extractor and formatted dumper
+
+positional arguments:
+  input-file-name       The name of input pcap file. If &quot;.pcap&quot; omits, it will
+                        be automatically appended.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -V, --version         show program&#39;s version number and exit
+  -o file-name, --output file-name
+                        The name of input pcap file. If format extension
+                        omits, it will be automatically appended.
+  -f format, --format format
+                        Print a extraction report in the specified output
+                        format. Available are all formats supported by
+                        dictdumper, e.g.: json, plist, and tree.
+  -j, --json            Display extraction report as json. This will yield
+                        &quot;raw&quot; output that may be used by external tools. This
+                        option overrides all other options.
+  -p, --plist           Display extraction report as macOS Property List
+                        (plist). This will yield &quot;raw&quot; output that may be used
+                        by external tools. This option overrides all other
+                        options.
+  -t, --tree            Display extraction report as tree view text. This will
+                        yield &quot;raw&quot; output that may be used by external tools.
+                        This option overrides all other options.
+  -a, --auto-extension  If output file extension omits, append automatically.
+  -v, --verbose         Show more information.
+  -F, --files           Split each frame into different files.
+  -E PKG, --engine PKG  Indicate extraction engine. Note that except default
+                        or pcapkit engine, all other engines need support of
+                        corresponding packages.
+  -P PROTOCOL, --protocol PROTOCOL
+                        Indicate extraction stops after which protocol.
+  -L LAYER, --layer LAYER
+                        Indicate extract frames until which layer.
+</pre></div>
+</div>
+<span class="target" id="module-pcapkit.__main__"></span><dl class="py function">
+<dt id="pcapkit.__main__.get_parser">
+<code class="sig-prename descclassname">pcapkit.__main__.</code><code class="sig-name descname">get_parser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pcapkit/__main__.html#get_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.__main__.get_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLI argument parser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Argument parser.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.9)">argparse.ArgumentParser</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.__main__.main">
+<code class="sig-prename descclassname">pcapkit.__main__.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pcapkit/__main__.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.__main__.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entrypoint.</p>
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="vendor/vlan.html" title="previous chapter">VLAN Vendor Crawler</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="_sources/cli.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

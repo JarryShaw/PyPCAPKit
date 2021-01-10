@@ -1,0 +1,396 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MH - Mobility Header &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Transport Layer Protocols" href="../transport/index.html" />
+    <link rel="prev" title="IPX - Internetwork Packet Exchange" href="ipx.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="mh-mobility-header">
+<h1>MH - Mobility Header<a class="headerlink" href="#mh-mobility-header" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.protocols.internet.mh" title="pcapkit.protocols.internet.mh"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.mh</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> only,
+which implements extractor for Mobility Header
+(MH) <a class="footnote-reference brackets" href="#id2" id="id1">*</a>, whose structure is described as below:</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 14%" />
+<col style="width: 28%" />
+<col style="width: 48%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mh.next</span></code></p></td>
+<td><p>Next Header</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mh.length</span></code></p></td>
+<td><p>Header Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mh.type</span></code></p></td>
+<td><p>Mobility Header Type</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>24</p></td>
+<td></td>
+<td><p>Reserved</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mh.chksum</span></code></p></td>
+<td><p>Checksum</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>48</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">mh.data</span></code></p></td>
+<td><p>Message Data</p></td>
+</tr>
+</tbody>
+</table>
+<br /><span class="target" id="module-pcapkit.protocols.internet.mh"></span><dl class="py class">
+<dt id="pcapkit.protocols.internet.mh.MH">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.internet.mh.</code><code class="sig-name descname">MH</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/mh.html#MH"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.internet.Internet</span></code></a></p>
+<p>This class implements Mobility Header.</p>
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.__index__">
+<em class="property">classmethod </em><code class="sig-name descname">__index__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/mh.html#MH.__index__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.__index__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeral registry index of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Numeral registry index of the
+protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType">pcapkit.const.reg.transtype.TransType</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.__length_hint__">
+<code class="sig-name descname">__length_hint__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/mh.html#MH.__length_hint__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.__length_hint__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an estimated length for the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Literal[6]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.__post_init__">
+<code class="sig-name descname">__post_init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">extension</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/mh.html#MH.__post_init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.__post_init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post initialisation hook.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.9)"><em>io.BytesIO</em></a>) – Source packet stream.</p></li>
+<li><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – Length of packet data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If the protocol is used as an IPv6 extension header.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.internet.mh.MH.make" title="pcapkit.protocols.internet.mh.MH.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.make">
+<code class="sig-name descname">make</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/mh.html#MH.make"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make (construct) packet data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments</dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Constructed packet data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.read">
+<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">extension</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/mh.html#MH.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read Mobility Header.</p>
+<p>Structure of MH header [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="o">|</span> <span class="n">Payload</span> <span class="n">Proto</span> <span class="o">|</span>  <span class="n">Header</span> <span class="n">Len</span>   <span class="o">|</span>   <span class="n">MH</span> <span class="n">Type</span>     <span class="o">|</span>   <span class="n">Reserved</span>    <span class="o">|</span>
+<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="o">|</span>           <span class="n">Checksum</span>            <span class="o">|</span>                               <span class="o">|</span>
+<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>                               <span class="o">|</span>
+<span class="o">|</span>                                                               <span class="o">|</span>
+<span class="o">.</span>                                                               <span class="o">.</span>
+<span class="o">.</span>                       <span class="n">Message</span> <span class="n">Data</span>                            <span class="o">.</span>
+<span class="o">.</span>                                                               <span class="o">.</span>
+<span class="o">|</span>                                                               <span class="o">|</span>
+<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a><em>]</em>) – Length of packet data.</p>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><em>bool</em></a>) – If the packet is used as an IPv6 extension header.</p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Parsed packet data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.mh.DataType_MH" title="pcapkit.protocols.internet.mh.DataType_MH">DataType_MH</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.length">
+<em class="property">property </em><code class="sig-name descname">length</code><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Header length of current protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.name">
+<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of current protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Literal[‘Mobility Header’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.payload">
+<em class="property">property </em><code class="sig-name descname">payload</code><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.payload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Payload of current instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – if the protocol is used as an IPv6 extension header</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">pcapkit.protocols.protocol.Protocol</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.protocols.internet.mh.MH.protocol">
+<em class="property">property </em><code class="sig-name descname">protocol</code><a class="headerlink" href="#pcapkit.protocols.internet.mh.MH.protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of next layer protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType">pcapkit.const.reg.transtype.TransType</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="section" id="data-structure">
+<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Following classes are only for <em>documentation</em> purpose.
+They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
+</div>
+<dl class="py class">
+<dt id="pcapkit.protocols.internet.mh.DataType_MH">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.internet.mh.</code><code class="sig-name descname">DataType_MH</code><a class="headerlink" href="#pcapkit.protocols.internet.mh.DataType_MH" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases</dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt id="pcapkit.protocols.internet.mh.DataType_MH.next">
+<code class="sig-name descname">next</code><em class="property">: <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType">pcapkit.const.reg.transtype.TransType</a></em><a class="headerlink" href="#pcapkit.protocols.internet.mh.DataType_MH.next" title="Permalink to this definition">¶</a></dt>
+<dd><p>Next header.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.internet.mh.DataType_MH.length">
+<code class="sig-name descname">length</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.internet.mh.DataType_MH.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Header length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.internet.mh.DataType_MH.type">
+<code class="sig-name descname">type</code><em class="property">: <a class="reference internal" href="../../const/mh.html#pcapkit.const.mh.packet.Packet" title="pcapkit.const.mh.packet.Packet">pcapkit.const.mh.packet.Packet</a></em><a class="headerlink" href="#pcapkit.protocols.internet.mh.DataType_MH.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mobility header type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.internet.mh.DataType_MH.chksum">
+<code class="sig-name descname">chksum</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></em><a class="headerlink" href="#pcapkit.protocols.internet.mh.DataType_MH.chksum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checksum.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.protocols.internet.mh.DataType_MH.data">
+<code class="sig-name descname">data</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></em><a class="headerlink" href="#pcapkit.protocols.internet.mh.DataType_MH.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
+<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6">https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6</a></p>
+</dd>
+</dl>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../../pcapkit.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="../index.html">Protocol Family</a><ul>
+  <li><a href="index.html">Internet Layer Protocols</a><ul>
+      <li>Previous: <a href="ipx.html" title="previous chapter">IPX - Internetwork Packet Exchange</a></li>
+      <li>Next: <a href="../transport/index.html" title="next chapter">Transport Layer Protocols</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../../_sources/protocols/internet/mh.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

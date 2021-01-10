@@ -1,0 +1,276 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.utilities.decorators &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.utilities.decorators</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=protected-access</span>
+<span class="sd">&quot;&quot;&quot;decorator functions</span>
+
+<span class="sd">:mod:`pcapkit.utilities.decorators` contains several useful</span>
+<span class="sd">decorators, including :func:`~pcapkit.utilities.decorators.seekset`</span>
+<span class="sd">and :func:`~pcapkit.utilities.decorators.beholder`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># from pcapkit.foundation.analysis import analyse</span>
+<span class="c1"># from pcapkit.protocols.raw import Raw</span>
+<span class="c1">###############################################################################</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;seekset&#39;</span><span class="p">,</span> <span class="s1">&#39;seekset_ng&#39;</span><span class="p">,</span> <span class="s1">&#39;beholder&#39;</span><span class="p">,</span> <span class="s1">&#39;beholder_ng&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="seekset"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.seekset">[docs]</a><span class="k">def</span> <span class="nf">seekset</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read file from start then set back to original.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This decorator function is designed for decorating *class methods*.</span>
+
+<span class="sd">    The decorator will keep the current offset of :attr:`self._file`, then</span>
+<span class="sd">    call the decorated function. Afterwards, it will rewind the  offset of</span>
+<span class="sd">    :attr:`self._file` to the original and returns the return value from</span>
+<span class="sd">    the decorated function.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The decorated function should have following signature::</span>
+
+<span class="sd">            func(self, *args, **kw)</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :meth:`pcapkit.protocols.protocol.Protocol._read_packet`</span>
+
+<span class="sd">    :meta decorator:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">seekcur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="n">seek_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seekset</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="n">return_</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">return_</span>
+    <span class="k">return</span> <span class="n">seekcur</span></div>
+
+
+<div class="viewcode-block" id="seekset_ng"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.seekset_ng">[docs]</a><span class="k">def</span> <span class="nf">seekset_ng</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read file from start then set back to original.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This decorator function is designed for decorating *plain functions*.</span>
+
+<span class="sd">    The decorator will rewind the offset of ``file``  to ``seekset``, then</span>
+<span class="sd">    call the decorated function and returns its return value.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The decorated function should have following signature::</span>
+
+<span class="sd">            func(protocol, file, *args, seekset=os.SEEK_SET, **kw)</span>
+
+<span class="sd">        c.f. :func:`pcapkit.foundation.analysis._analyse`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :mod:`pcapkit.foundation.analysis`</span>
+
+<span class="sd">    :meta decorator:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">seekcur</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">seekset</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>  <span class="c1"># pylint: disable=redefined-outer-name</span>
+        <span class="c1"># seek_cur = file.tell()</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seekset</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="n">return_</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">seekset</span><span class="o">=</span><span class="n">seekset</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="c1"># file.seek(seek_cur, os.SEEK_SET)</span>
+        <span class="k">return</span> <span class="n">return_</span>
+    <span class="k">return</span> <span class="n">seekcur</span></div>
+
+
+<div class="viewcode-block" id="beholder"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.beholder">[docs]</a><span class="k">def</span> <span class="nf">beholder</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Behold extraction procedure.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This decorator function is designed for decorating *class methods*.</span>
+
+<span class="sd">    This decorate first keep the current offset of</span>
+<span class="sd">    :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`, then</span>
+<span class="sd">    try to call the decorated function. Should any exception raised, it will</span>
+<span class="sd">    re-parse the :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`</span>
+<span class="sd">    as :class:`~pcapkit.protocols.raw.Raw` protocol.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The decorated function should have following signature::</span>
+
+<span class="sd">            func(self, proto, length, *args, **kwargs)</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :meth:`pcapkit.protocols.protocol.Protocol._decode_next_layer`</span>
+
+<span class="sd">    :meta decorator:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">behold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">seek_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pcapkit.protocols.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># error = traceback.format_exc()</span>
+
+            <span class="c1"># log error</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exc</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)),</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">next_</span>
+    <span class="k">return</span> <span class="n">behold</span></div>
+
+
+<div class="viewcode-block" id="beholder_ng"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.beholder_ng">[docs]</a><span class="k">def</span> <span class="nf">beholder_ng</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Behold analysis procedure.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This decorator function is designed for decorating *plain functions*.</span>
+
+<span class="sd">    This decorate first keep the current offset of ``file``, then try to call</span>
+<span class="sd">    the decorated function. Should any exception raised, it will re-parse the</span>
+<span class="sd">    ``file`` as :class:`~pcapkit.protocols.raw.Raw` protocol.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        The decorated function should have following signature::</span>
+
+<span class="sd">            func(file, length, *args, **kwargs)</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :meth:`pcapkit.protocols.transport.transport.Transport._import_next_layer`</span>
+
+<span class="sd">    :meta decorator:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">behold</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">seek_cur</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="c1"># from pcapkit.foundation.analysis import analyse</span>
+            <span class="kn">from</span> <span class="nn">pcapkit.protocols.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="c1"># error = traceback.format_exc()</span>
+
+            <span class="c1"># log error</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exc</span><span class="p">)</span>
+
+            <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+
+            <span class="c1"># raw = Raw(file, length, error=str(error))</span>
+            <span class="c1"># return analyse(raw.info, raw.protochain, raw.alias)</span>
+            <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">next_</span>
+    <span class="k">return</span> <span class="n">behold</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

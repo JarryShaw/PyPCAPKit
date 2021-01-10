@@ -1,0 +1,540 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Web Crawlers for Constant Enumerations &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="ARP Vendor Crawlers" href="arp.html" />
+    <link rel="prev" title="VLAN Constant Enumerations" href="../const/vlan.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pcapkit.vendor">
+<span id="web-crawlers-for-constant-enumerations"></span><h1>Web Crawlers for Constant Enumerations<a class="headerlink" href="#module-pcapkit.vendor" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="arp.html">ARP Vendor Crawlers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="arp.html#module-pcapkit.vendor.arp.hardware">ARP Hardware Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="arp.html#module-pcapkit.vendor.arp.operation">Operation Codes </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ftp.html">FTP Vendor Crawlers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ftp.html#module-pcapkit.vendor.ftp.command">FTP Commands </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ftp.html#module-pcapkit.vendor.ftp.return_code">FTP Return Codes </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="hip.html">HIP Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.certificate">HIP Certificate Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.cipher">HIP Cipher IDs </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.di">DI-Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.ecdsa_curve">ECDSA Curve Label </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.ecdsa_low_curve">ECDSA_LOW Curve Label </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.esp_transform_suite">ESP Transform Suite IDs </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.group">Group IDs </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.hi_algorithm">HI Algorithm </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.hit_suite">HIT Suite ID </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.nat_traversal">HIP NAT Traversal Modes </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.notify_message">Notify Message Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.packet">Packet Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.parameter">Parameter Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.registration">Registration Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.registration_failure">Registration Failure Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.suite">Suite IDs </a></li>
+<li class="toctree-l2"><a class="reference internal" href="hip.html#module-pcapkit.vendor.hip.transport">HIP Transport Modes </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="http.html">HTTP Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="http.html#module-pcapkit.vendor.http.error_code">HTTP/2 Error Code </a></li>
+<li class="toctree-l2"><a class="reference internal" href="http.html#module-pcapkit.vendor.http.frame">HTTP/2 Frame Type </a></li>
+<li class="toctree-l2"><a class="reference internal" href="http.html#module-pcapkit.vendor.http.setting">HTTP/2 Settings </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipv4.html">IPv4 Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.classification_level">Classification Level Encodings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.option_class">Option Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.option_number">IP Option Numbers </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.protection_authority">Protection Authority Bit Assignments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.qs_function">QS Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.router_alert">IPv4 Router Alert Option Values </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.tos_del">ToS (DS Field) Delay</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.tos_ecn">ToS ECN Field</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.tos_pre">ToS (DS Field) Precedence</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.tos_rel">ToS (DS Field) Reliability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv4.html#module-pcapkit.vendor.ipv4.tos_thr">ToS (DS Field) Throughput</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipv6.html">IPv6 Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.vendor.ipv6.extension_header">IPv6 Extension Header Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.vendor.ipv6.option">Destination Options and Hop-by-Hop Options </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.vendor.ipv6.qs_function">IPv6 QS Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.vendor.ipv6.router_alert">IPv6 Router Alert Option Values </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.vendor.ipv6.routing">Routing Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.vendor.ipv6.seed_id">Seed-ID Types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipv6.html#module-pcapkit.vendor.ipv6.tagger_id">TaggerId Types </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ipx.html">IPX Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ipx.html#module-pcapkit.vendor.ipx.packet">IPX Packet Types </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ipx.html#module-pcapkit.vendor.ipx.socket">IPX Socket Types </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="mh.html">MH Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="mh.html#module-pcapkit.vendor.mh.packet">Mobility Header Types </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ospf.html">OSPF Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ospf.html#module-pcapkit.vendor.ospf.authentication">Authentication Codes </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ospf.html#module-pcapkit.vendor.ospf.packet">OSPF Packet Type </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="reg.html">Protocol Type Registry Vendor Crawlers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.linktype">LINK-LAYER HEADER TYPES </a></li>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.ethertype">ETHER TYPES </a></li>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.vendor.reg.transtype">Assigned Internet Protocol Numbers </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tcp.html">TCP Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.vendor.tcp.checksum">TCP Checksum </a></li>
+<li class="toctree-l2"><a class="reference internal" href="tcp.html#module-pcapkit.vendor.tcp.option">TCP Option Kind Numbers </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vlan.html">VLAN Vendor Crawler</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vlan.html#module-pcapkit.vendor.vlan.priority_level">Priority Levels </a></li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section" id="module-pcapkit.vendor.default">
+<span id="base-generator"></span><h2>Base Generator<a class="headerlink" href="#module-pcapkit.vendor.default" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pcapkit.vendor.default.Vendor">
+<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.default.</code><code class="sig-name descname">Vendor</code><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Default vendor generator.</p>
+<p>Inherit this class with <a class="reference internal" href="#pcapkit.vendor.default.Vendor.FLAG" title="pcapkit.vendor.default.Vendor.FLAG"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FLAG</span></code></a> &amp;
+<a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a> attributes, etc. to implement
+a new vendor generator.</p>
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate new constant files.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.__new__">
+<em class="property">static </em><code class="sig-name descname">__new__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cls</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.__new__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.__new__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subclassing checkpoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.VendorNotImplemented" title="pcapkit.utilities.exceptions.VendorNotImplemented"><strong>VendorNotImplemented</strong></a> – If <code class="docutils literal notranslate"><span class="pre">cls</span></code> is not a subclass of <a class="reference internal" href="#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor._request">
+<code class="sig-name descname">_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor._request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor._request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch CSV data from <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>.</p>
+<p>This is the low-level call of <a class="reference internal" href="#pcapkit.vendor.default.Vendor.request" title="pcapkit.vendor.default.Vendor.request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">request()</span></code></a>.</p>
+<p>If <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a> is <code class="docutils literal notranslate"><span class="pre">None</span></code>, it will directly
+call the upper method <a class="reference internal" href="#pcapkit.vendor.default.Vendor.request" title="pcapkit.vendor.default.Vendor.request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">request()</span></code></a> with <strong>NO</strong>
+arguments.</p>
+<p>The method will first try to <em>GET</em> the content of <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>.
+Should any exception raised, it will first try with proxy settings from
+<a class="reference internal" href="#pcapkit.vendor.default.get_proxies" title="pcapkit.vendor.default.get_proxies"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_proxies()</span></code></a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Since some <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a> links are from Wikipedia, etc., they
+might not be available in certain areas, e.g. the amazing PRC :)</p>
+</div>
+<p>Would proxies failed again, it will prompt for user intervention, i.e.
+it will use <a class="reference external" href="https://docs.python.org/3/library/webbrowser.html#webbrowser.open" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">webbrowser.open()</span></code></a> to open the page in browser for you, and
+you can manually load that page and save the HTML source at the location
+it provides.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>CSV data.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+<dt class="field-odd">Warns</dt>
+<dd class="field-odd"><p><strong>VendorRequestWarning</strong> – If connection failed with and/or without proxies.</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pcapkit.vendor.default.Vendor.request" title="pcapkit.vendor.default.Vendor.request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">request()</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.context">
+<code class="sig-name descname">context</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.context"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.context" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate constant context.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Constant context.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.count">
+<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>Count field records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Field recordings.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Counter</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.process">
+<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process CSV data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a><em>]</em>) – CSV data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enumeration fields.
+List[str]: Missing fields.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.rename">
+<code class="sig-name descname">rename</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em>, <em class="sig-param"><span class="n">code</span></em>, <em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">original</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename duplicated fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Field name.</p></li>
+<li><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><em>int</em></a>) – Field code.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments</dt>
+<dd class="field-even"><p><strong>original</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Original field name (extracted from CSV records).</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Revised field name.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<p>If <code class="docutils literal notranslate"><span class="pre">name</span></code> has multiple occurrences in the source registry,
+the field name will be sanitised as <code class="docutils literal notranslate"><span class="pre">${name}_${code}</span></code>.</p>
+<p>Otherwise, the plain <code class="docutils literal notranslate"><span class="pre">name</span></code> will be returned.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.request">
+<code class="sig-name descname">request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch CSV file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Context from <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>CSV data.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.safe_name">
+<code class="sig-name descname">safe_name</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.safe_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.safe_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert enumeration name to <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">enum.Enum</span></code></a> friendly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – original enumeration name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Converted enumeration name.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pcapkit.vendor.default.Vendor.wrap_comment">
+<em class="property">static </em><code class="sig-name descname">wrap_comment</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#Vendor.wrap_comment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.Vendor.wrap_comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wraps long-length text to shorter lines of comments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>text</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><em>str</em></a>) – Source text.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Wrapped comments.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.default.Vendor.DOCS">
+<code class="sig-name descname">DOCS</code><a class="headerlink" href="#pcapkit.vendor.default.Vendor.DOCS" title="Permalink to this definition">¶</a></dt>
+<dd><p>Docstring of constant enumeration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.default.Vendor.FLAG">
+<code class="sig-name descname">FLAG</code><em class="property"> = None</em><a class="headerlink" href="#pcapkit.vendor.default.Vendor.FLAG" title="Permalink to this definition">¶</a></dt>
+<dd><p>Value limit checker.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.default.Vendor.LINK">
+<code class="sig-name descname">LINK</code><em class="property"> = None</em><a class="headerlink" href="#pcapkit.vendor.default.Vendor.LINK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Link to registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pcapkit.vendor.default.Vendor.NAME">
+<code class="sig-name descname">NAME</code><a class="headerlink" href="#pcapkit.vendor.default.Vendor.NAME" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of constant enumeration.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.vendor.default.LINE">
+<code class="sig-prename descclassname">pcapkit.vendor.default.</code><code class="sig-name descname">LINE</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">NAME</span></em>, <em class="sig-param"><span class="n">DOCS</span></em>, <em class="sig-param"><span class="n">FLAG</span></em>, <em class="sig-param"><span class="n">ENUM</span></em>, <em class="sig-param"><span class="n">MISS</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.default.LINE" title="Permalink to this definition">¶</a></dt>
+<dd><p>Default constant template of enumerate registry from IANA CSV.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.vendor.default.get_proxies">
+<code class="sig-prename descclassname">pcapkit.vendor.default.</code><code class="sig-name descname">get_proxies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/default.html#get_proxies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.default.get_proxies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get proxy for blocked sites.</p>
+<p>The function will read <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTP_PROXY</span></code>
+and <span class="target" id="index-1"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PCAPKIT_HTTPS_PROXY</span></code>, if any, for the
+proxy settings of <a class="reference external" href="https://requests.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">requests</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Proxy settings for <a class="reference external" href="https://requests.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">requests</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Dict[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="command-line-tool">
+<h2>Command Line Tool<a class="headerlink" href="#command-line-tool" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">usage</span><span class="p">:</span> <span class="n">pcapkit</span><span class="o">-</span><span class="n">vendor</span> <span class="p">[</span><span class="o">-</span><span class="n">h</span><span class="p">]</span> <span class="p">[</span><span class="o">-</span><span class="n">V</span><span class="p">]</span> <span class="o">...</span>
+
+<span class="n">update</span> <span class="n">constant</span> <span class="n">enumerations</span>
+
+<span class="n">positional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="n">target</span>         <span class="n">update</span> <span class="n">targets</span><span class="p">,</span> <span class="n">supply</span> <span class="n">none</span> <span class="n">to</span> <span class="n">update</span> <span class="nb">all</span>
+
+<span class="n">optional</span> <span class="n">arguments</span><span class="p">:</span>
+  <span class="o">-</span><span class="n">h</span><span class="p">,</span> <span class="o">--</span><span class="n">help</span>     <span class="n">show</span> <span class="n">this</span> <span class="n">help</span> <span class="n">message</span> <span class="ow">and</span> <span class="n">exit</span>
+  <span class="o">-</span><span class="n">V</span><span class="p">,</span> <span class="o">--</span><span class="n">version</span>  <span class="n">show</span> <span class="n">program</span><span class="s1">&#39;s version number and exit</span>
+</pre></div>
+</div>
+<span class="target" id="module-pcapkit.vendor.__main__"></span><dl class="py function">
+<dt id="pcapkit.vendor.__main__.get_parser">
+<code class="sig-prename descclassname">pcapkit.vendor.__main__.</code><code class="sig-name descname">get_parser</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/__main__.html#get_parser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.__main__.get_parser" title="Permalink to this definition">¶</a></dt>
+<dd><p>CLI argument parser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Argument parser.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser" title="(in Python v3.9)">argparse.ArgumentParser</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.vendor.__main__.main">
+<code class="sig-prename descclassname">pcapkit.vendor.__main__.</code><code class="sig-name descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/__main__.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.__main__.main" title="Permalink to this definition">¶</a></dt>
+<dd><p>Entrypoint.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Warns</dt>
+<dd class="field-odd"><p><strong>InvalidVendorWarning</strong> – If vendor target not found in <a class="reference internal" href="#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> module.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pcapkit.vendor.__main__.run">
+<code class="sig-prename descclassname">pcapkit.vendor.__main__.</code><code class="sig-name descname">run</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">vendor</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/__main__.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.__main__.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Script runner.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>vendor</strong> (<em>Type</em><em>[</em><a class="reference internal" href="#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><em>Vendor</em></a><em>]</em>) – Subclass of <a class="reference internal" href="#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Vendor</span></code></a> from <a class="reference internal" href="#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a>.</p>
+</dd>
+<dt class="field-even">Warns</dt>
+<dd class="field-even"><p><strong>VendorRuntimeWarning</strong> – If failed to initiate the <code class="docutils literal notranslate"><span class="pre">vendor</span></code> class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../pcapkit.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../pcapkit.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../cli.html">Command Line Interface</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../pcapkit.html">Stream PCAP File Extractor</a><ul>
+      <li>Previous: <a href="../const/vlan.html" title="previous chapter">VLAN Constant Enumerations</a></li>
+      <li>Next: <a href="arp.html" title="next chapter">ARP Vendor Crawlers</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018-2020, Jarry Shaw.
+      
+      |
+      <a href="../_sources/vendor/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
