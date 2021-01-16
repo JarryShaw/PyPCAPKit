@@ -270,7 +270,7 @@ verbs as its main interface. Several scenarios are shown as below.</p>
 <ol class="arabic">
 <li><p>export to a macOS Property List
 (<a class="reference external" href="https://developer.apple.com/xcode">Xcode</a> has special support for this format)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit in --format plist --verbose
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit <span class="k">in</span> --format plist --verbose
 🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
  - Frame   <span class="m">1</span>: Ethernet:IPv6:ICMPv6
  - Frame   <span class="m">2</span>: Ethernet:IPv6:ICMPv6
@@ -278,12 +278,12 @@ verbs as its main interface. Several scenarios are shown as below.</p>
  - Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
  - Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
  - Frame   <span class="m">6</span>: Ethernet:IPv4:UDP
-🍺Report file stored in <span class="s1">&#39;out.plist&#39;</span>
+🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out.plist&#39;</span>
 </pre></div>
 </div>
 </li>
 <li><p>export to a JSON file (with no format specified)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit in --output out.json --verbose
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit <span class="k">in</span> --output out.json --verbose
 🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
  - Frame   <span class="m">1</span>: Ethernet:IPv6:ICMPv6
  - Frame   <span class="m">2</span>: Ethernet:IPv6:ICMPv6
@@ -291,12 +291,12 @@ verbs as its main interface. Several scenarios are shown as below.</p>
  - Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
  - Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
  - Frame   <span class="m">6</span>: Ethernet:IPv4:UDP
-🍺Report file stored in <span class="s1">&#39;out.json&#39;</span>
+🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out.json&#39;</span>
 </pre></div>
 </div>
 </li>
 <li><p>export to a text tree view file (without extension autocorrect)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit in --output out --format tree --verbose
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit <span class="k">in</span> --output out --format tree --verbose
 🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
  - Frame   <span class="m">1</span>: Ethernet:IPv6:ICMPv6
  - Frame   <span class="m">2</span>: Ethernet:IPv6:ICMPv6
@@ -304,7 +304,7 @@ verbs as its main interface. Several scenarios are shown as below.</p>
  - Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
  - Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
  - Frame   <span class="m">6</span>: Ethernet:IPv4:UDP
-🍺Report file stored in <span class="s1">&#39;out&#39;</span>
+🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out&#39;</span>
 </pre></div>
 </div>
 </li>
