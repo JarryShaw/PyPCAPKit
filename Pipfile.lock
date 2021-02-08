@@ -94,10 +94,11 @@
         },
         "autopep8": {
             "hashes": [
-                "sha256:d21d3901cb0da6ebd1e83fc9b0dfbde8b46afc2ede4fe32fbda0c7c6118ca094"
+                "sha256:9e136c472c475f4ee4978b51a88a494bfcd4e3ed17950a44a988d9e434837bea",
+                "sha256:cae4bc0fb616408191af41d062d7ec7ef8679c7f27b068875ca3a9e2878d5443"
             ],
             "index": "tuna",
-            "version": "==1.5.4"
+            "version": "==1.5.5"
         },
         "babel": {
             "hashes": [
@@ -230,11 +231,11 @@
         },
         "dpkt": {
             "hashes": [
-                "sha256:0747aa9b3c404ab4a3bc390f29875c9aa99975dacfe3543de0af392076b6b729",
-                "sha256:f4e579cbaf6e2285ebf3a9e84019459b4367636bac079ba169527e582fca48b4"
+                "sha256:141cab4defcb4ead83e664765ebb045f55dbe73e17d617acafd6eaf368d7c55e",
+                "sha256:c07b4a61a4f957edda40b36683851604f2f799d76a2b7c315f01811e100ec320"
             ],
             "index": "tuna",
-            "version": "==1.9.4"
+            "version": "==1.9.5"
         },
         "gitdb": {
             "hashes": [
@@ -277,11 +278,11 @@
         },
         "ipython": {
             "hashes": [
-                "sha256:c987e8178ced651532b3b1ff9965925bfd445c279239697052561a9ab806d28f",
-                "sha256:cbb2ef3d5961d44e6a963b9817d4ea4e1fa2eb589c371a470fed14d8d40cbd6a"
+                "sha256:1918dea4bfdc5d1a830fcfce9a710d1d809cbed123e85eab0539259cb0f56640",
+                "sha256:1923af00820a8cf58e91d56b89efc59780a6e81363b94464a0f17c039dffff9e"
             ],
             "index": "tuna",
-            "version": "==7.19.0"
+            "version": "==7.20.0"
         },
         "ipython-genutils": {
             "hashes": [
@@ -584,11 +585,11 @@
         },
         "pyshark": {
             "hashes": [
-                "sha256:340f5c3b0eb1c2d4f8bc85764dded28720e51e49cd7d96f4c96b461199b41611",
-                "sha256:cf6d5a82d836b206e9f87f2b796a5a445699c5bec8a4c2523054a62932b6a322"
+                "sha256:28b60bdc1826aa87a3ef8cf397981b4aaf80467a9e13b5260f8bc0229432a362",
+                "sha256:b16f2c444f43d65928beb0cb9811ef2b6bdabaab9ff379342cef370a3a2f45b7"
             ],
             "index": "tuna",
-            "version": "==0.4.2.11"
+            "version": "==0.4.3"
         },
         "pysocks": {
             "hashes": [
