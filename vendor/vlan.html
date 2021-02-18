@@ -38,18 +38,18 @@
 <span id="priority-levels"></span><h2>Priority Levels <a class="footnote-reference brackets" href="#id2" id="id1">*</a><a class="headerlink" href="#module-pcapkit.vendor.vlan.priority_level" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.vendor.vlan.priority_level.</code><code class="sig-name descname">PriorityLevel</code><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.vlan.priority_level.</span></code><code class="sig-name descname"><span class="pre">PriorityLevel</span></code><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
 <p>Priority levels defined in IEEE 802.1p.</p>
 <dl class="py method">
 <dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.count">
-<code class="sig-name descname">count</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">soup</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.count"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.count" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">count</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.count" title="Permalink to this definition">¶</a></dt>
 <dd><p>Count field records.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.process">
-<code class="sig-name descname">process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">soup</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.process" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">process</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process HTML data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -67,7 +67,7 @@ List[str]: Missing fields.</p>
 
 <dl class="py method">
 <dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.request">
-<code class="sig-name descname">request</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">text</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.request" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/vlan/priority_level.html#PriorityLevel.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch CSV file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -84,13 +84,13 @@ List[str]: Missing fields.</p>
 
 <dl class="py attribute">
 <dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.FLAG">
-<code class="sig-name descname">FLAG</code><em class="property"> = 'isinstance(value, int) and 0b000 &lt;= value &lt;= 0b111'</em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.FLAG" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">FLAG</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0b000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0b111'</span></em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.FLAG" title="Permalink to this definition">¶</a></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK">
-<code class="sig-name descname">LINK</code><em class="property"> = 'https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels'</em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">LINK</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels'</span></em><a class="headerlink" href="#pcapkit.vendor.vlan.priority_level.PriorityLevel.LINK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 

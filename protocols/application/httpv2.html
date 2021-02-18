@@ -88,12 +88,12 @@ below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">HTTPv2</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">HTTPv2</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.HTTP</span></code></a></p>
 <p>This class implements Hypertext Transfer Protocol (HTTP/2).</p>
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2.__length_hint__">
-<code class="sig-name descname">__length_hint__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2.__length_hint__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.__length_hint__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">__length_hint__</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.__length_hint__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Total length of corresponding protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -104,7 +104,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_continuation">
-<code class="sig-name descname">_read_http_continuation</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_continuation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_continuation" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_continuation</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_continuation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_continuation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">CONTINUATION</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">CONTINUATION</span></code> frame [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------------------------+</span>
@@ -140,7 +140,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_data">
-<code class="sig-name descname">_read_http_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">DATA</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">DATA</span></code> frame [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+-----------------------------------------------+
@@ -180,7 +180,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_goaway">
-<code class="sig-name descname">_read_http_goaway</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_goaway"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_goaway" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_goaway</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_goaway"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_goaway" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> frame [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------------------------+</span>
@@ -220,7 +220,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_headers">
-<code class="sig-name descname">_read_http_headers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_headers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_headers" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_headers</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_headers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> frame [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+-----------------------------------------------+
@@ -264,7 +264,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_none">
-<code class="sig-name descname">_read_http_none</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_none"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_none" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_none</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_none"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_none" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP packet with unassigned type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -288,7 +288,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_ping">
-<code class="sig-name descname">_read_http_ping</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_ping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_ping" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_ping</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_ping"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_ping" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">PING</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">PING</span></code> frame [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------------------------+</span>
@@ -326,7 +326,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_priority">
-<code class="sig-name descname">_read_http_priority</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_priority"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_priority" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_priority</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_priority"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_priority" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">PRIORITY</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">PRIORITY</span></code> frame [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------------------------+</span>
@@ -364,7 +364,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_push_promise">
-<code class="sig-name descname">_read_http_push_promise</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_push_promise"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_push_promise" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_push_promise</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_push_promise"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_push_promise" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">PUSH_PROMISE</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">PUSH_PROMISE</span></code> frame [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span>+-----------------------------------------------+
@@ -406,7 +406,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_rst_stream">
-<code class="sig-name descname">_read_http_rst_stream</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_rst_stream"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_rst_stream" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_rst_stream</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_rst_stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_rst_stream" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">RST_STREAM</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">RST_STREAM</span></code> frame [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------------------------+</span>
@@ -442,7 +442,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_settings">
-<code class="sig-name descname">_read_http_settings</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_settings" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code> frame [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------------------------+</span>
@@ -481,7 +481,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2._read_http_window_update">
-<code class="sig-name descname">_read_http_window_update</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">size</span></em>, <em class="sig-param"><span class="n">kind</span></em>, <em class="sig-param"><span class="n">flag</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_window_update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_window_update" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">_read_http_window_update</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flag</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2._read_http_window_update"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2._read_http_window_update" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read HTTP/2 <code class="docutils literal notranslate"><span class="pre">WINDOW_UPDATE</span></code> frames.</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">WINDOW_UPDATE</span></code> frame [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------------------------+</span>
@@ -517,7 +517,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2.id">
-<em class="property">classmethod </em><code class="sig-name descname">id</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2.id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.id" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span> </em><code class="sig-name descname"><span class="pre">id</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Index ID of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -531,7 +531,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2.make">
-<code class="sig-name descname">make</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2.make"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.make" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">make</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.make" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
@@ -548,7 +548,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2.read">
-<code class="sig-name descname">read</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">length</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2.read"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.read" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">read</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv2.html#HTTPv2.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read Hypertext Transfer Protocol (HTTP/2).</p>
 <p>Structure of HTTP/2 packet [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>]:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------------------------+</span>
@@ -583,7 +583,7 @@ below:</p>
 
 <dl class="py method">
 <dt id="pcapkit.protocols.application.httpv2.HTTPv2.alias">
-<em class="property">property </em><code class="sig-name descname">alias</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.alias" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">alias</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.HTTPv2.alias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acronym of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -596,7 +596,7 @@ below:</p>
 
 <dl class="py data">
 <dt id="pcapkit.protocols.application.httpv2.pcapkit.protocols.application.httpv2._HTTP_FUNC">
-<code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">_HTTP_FUNC</code><em class="property">: Dict<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">, </span>Callable<span class="p">[</span><span class="p">[</span><a class="reference internal" href="#pcapkit.protocols.application.httpv2.HTTPv2" title="pcapkit.protocols.application.httpv2.HTTPv2">pcapkit.protocols.application.httpv2.HTTPv2</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a><span class="p">, </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)">str</a><span class="p">]</span><span class="p">, </span><a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Frame" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_Frame">DataType_HTTPv2_Frame</a><span class="p">]</span><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.pcapkit.protocols.application.httpv2._HTTP_FUNC" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">_HTTP_FUNC</span></code><em class="property"><span class="pre">:</span> <span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.application.httpv2.HTTPv2" title="pcapkit.protocols.application.httpv2.HTTPv2"><span class="pre">pcapkit.protocols.application.httpv2.HTTPv2</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span> </span><a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Frame" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_Frame"><span class="pre">DataType_HTTPv2_Frame</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.pcapkit.protocols.application.httpv2._HTTP_FUNC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process method for HTTP/2 packets.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -668,7 +668,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </div>
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -677,25 +677,25 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <p>Structure of HTTP/2 packet [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2.length">
-<code class="sig-name descname">length</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2.length" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">length</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Length.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2.type">
-<code class="sig-name descname">type</code><em class="property">: <a class="reference internal" href="../../const/http.html#pcapkit.const.http.frame.Frame" title="pcapkit.const.http.frame.Frame">pcapkit.const.http.frame.Frame</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2.type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">type</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../const/http.html#pcapkit.const.http.frame.Frame" title="pcapkit.const.http.frame.Frame"><span class="pre">pcapkit.const.http.frame.Frame</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Type.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2.sid">
-<code class="sig-name descname">sid</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2.sid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">sid</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2.sid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stream identifier.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2.packet">
-<code class="sig-name descname">packet</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2.packet" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">packet</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2.packet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw packet data.</p>
 </dd></dl>
 
@@ -703,7 +703,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_Frame">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_Frame</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Frame" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_Frame</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Frame" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -716,7 +716,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <h3>HTTP/2 Unassigned Frame<a class="headerlink" href="#http-2-unassigned-frame" title="Permalink to this headline">¶</a></h3>
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_Unassigned</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_Unassigned</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -724,13 +724,13 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned.flags">
-<code class="sig-name descname">flags</code><em class="property">: Literal<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned.payload">
-<code class="sig-name descname">payload</code><em class="property">: Optional<span class="p">[</span>types<span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned.payload" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">payload</span></code><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">types</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_Unassigned.payload" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw packet payload.</p>
 </dd></dl>
 
@@ -800,7 +800,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_DATA</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_DATA</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -809,13 +809,13 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">DATA</span></code> frame [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA.flags">
-<code class="sig-name descname">flags</code><em class="property">: <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags">DataType_HTTPv2_DATA_Flags</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags"><span class="pre">DataType_HTTPv2_DATA_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA.data">
-<code class="sig-name descname">data</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA.data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">data</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 transferred data.</p>
 </dd></dl>
 
@@ -823,7 +823,7 @@ its structure is described as below:</p>
 
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_DATA_Flags</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_DATA_Flags</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -832,7 +832,7 @@ its structure is described as below:</p>
 <p>HTTP/2 <code class="docutils literal notranslate"><span class="pre">DATA</span></code> frame packet flags.</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags.END_STREAM">
-<code class="sig-name descname">END_STREAM</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags.END_STREAM" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">END_STREAM</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags.END_STREAM" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>0</p>
@@ -842,7 +842,7 @@ its structure is described as below:</p>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags.PADDED">
-<code class="sig-name descname">PADDED</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags.PADDED" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">PADDED</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_DATA_Flags.PADDED" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>3</p>
@@ -931,7 +931,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_HEADERS</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_HEADERS</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -940,37 +940,37 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> frame [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.flags">
-<code class="sig-name descname">flags</code><em class="property">: <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags">DataType_HTTPv2_HEADERS_Flags</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags"><span class="pre">DataType_HTTPv2_HEADERS_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.frag">
-<code class="sig-name descname">frag</code><em class="property">: Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.frag" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">frag</span></code><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.frag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header block fragment.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.pad_len">
-<code class="sig-name descname">pad_len</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.pad_len" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">pad_len</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.pad_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pad length.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.exclusive">
-<code class="sig-name descname">exclusive</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.exclusive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">exclusive</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.exclusive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exclusive flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.deps">
-<code class="sig-name descname">deps</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.deps" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">deps</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.deps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stream dependency.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.weight">
-<code class="sig-name descname">weight</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.weight" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">weight</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS.weight" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weight.</p>
 </dd></dl>
 
@@ -978,7 +978,7 @@ its structure is described as below:</p>
 
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_HEADERS_Flags</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_HEADERS_Flags</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -987,7 +987,7 @@ its structure is described as below:</p>
 <p>HTTP/2 <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> frame packet flags.</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.END_STREAM">
-<code class="sig-name descname">END_STREAM</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.END_STREAM" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">END_STREAM</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.END_STREAM" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>0</p>
@@ -997,7 +997,7 @@ its structure is described as below:</p>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.END_HEADERS">
-<code class="sig-name descname">END_HEADERS</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">END_HEADERS</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>2</p>
@@ -1007,7 +1007,7 @@ its structure is described as below:</p>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.PADDED">
-<code class="sig-name descname">PADDED</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.PADDED" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">PADDED</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.PADDED" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>3</p>
@@ -1017,7 +1017,7 @@ its structure is described as below:</p>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.PRIORITY">
-<code class="sig-name descname">PRIORITY</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.PRIORITY" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">PRIORITY</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_HEADERS_Flags.PRIORITY" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>5</p>
@@ -1091,7 +1091,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_PRIORITY</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_PRIORITY</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -1100,25 +1100,25 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">PRIORITY</span></code> frame [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.flags">
-<code class="sig-name descname">flags</code><em class="property">: Literal<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.exclusive">
-<code class="sig-name descname">exclusive</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.exclusive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">exclusive</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.exclusive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Exclusive flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.deps">
-<code class="sig-name descname">deps</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.deps" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">deps</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.deps" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stream dependency.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.weight">
-<code class="sig-name descname">weight</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.weight" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">weight</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PRIORITY.weight" title="Permalink to this definition">¶</a></dt>
 <dd><p>Weight.</p>
 </dd></dl>
 
@@ -1178,7 +1178,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_RST_STREAM</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_RST_STREAM</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -1187,13 +1187,13 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">PRIORITY</span></code> frame [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM.flags">
-<code class="sig-name descname">flags</code><em class="property">: Literal<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM.error">
-<code class="sig-name descname">error</code><em class="property">: <a class="reference internal" href="../../const/http.html#pcapkit.const.http.error_code.ErrorCode" title="pcapkit.const.http.error_code.ErrorCode">pcapkit.const.http.error_code.ErrorCode</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM.error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">error</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../const/http.html#pcapkit.const.http.error_code.ErrorCode" title="pcapkit.const.http.error_code.ErrorCode"><span class="pre">pcapkit.const.http.error_code.ErrorCode</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Error code.</p>
 </dd></dl>
 
@@ -1263,7 +1263,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_SETTINGS</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_SETTINGS</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -1272,13 +1272,13 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code> frame [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS.flags">
-<code class="sig-name descname">flags</code><em class="property">: <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags">DataType_HTTPv2_SETTINGS_Flags</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags"><span class="pre">DataType_HTTPv2_SETTINGS_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS.settings">
-<code class="sig-name descname">settings</code><em class="property">: Tuple<span class="p">[</span><a class="reference internal" href="../../const/http.html#pcapkit.const.http.setting.Setting" title="pcapkit.const.http.setting.Setting">pcapkit.const.http.setting.Setting</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS.settings" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">settings</span></code><em class="property"><span class="pre">:</span> <span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/http.html#pcapkit.const.http.setting.Setting" title="pcapkit.const.http.setting.Setting"><span class="pre">pcapkit.const.http.setting.Setting</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS.settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Array of HTTP/2 settings.</p>
 </dd></dl>
 
@@ -1286,7 +1286,7 @@ its structure is described as below:</p>
 
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_SETTINGS_Flags</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_SETTINGS_Flags</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -1295,7 +1295,7 @@ its structure is described as below:</p>
 <p>HTTP/2 packet flags.</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags.ACK">
-<code class="sig-name descname">ACK</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags.ACK" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ACK</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_SETTINGS_Flags.ACK" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>0</p>
@@ -1379,7 +1379,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_PUSH_PROMISE</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_PUSH_PROMISE</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -1388,25 +1388,25 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">PUSH_PROMISE</span></code> frame [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.flags">
-<code class="sig-name descname">flags</code><em class="property">: <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags">DataType_HTTPv2_PUSH_PROMISE_Flags</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags"><span class="pre">DataType_HTTPv2_PUSH_PROMISE_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.pid">
-<code class="sig-name descname">pid</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.pid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">pid</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.pid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Promised stream ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.frag">
-<code class="sig-name descname">frag</code><em class="property">: Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.frag" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">frag</span></code><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.frag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header block fragment.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.pad_len">
-<code class="sig-name descname">pad_len</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.pad_len" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">pad_len</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.pad_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pad length.</p>
 </dd></dl>
 
@@ -1414,7 +1414,7 @@ its structure is described as below:</p>
 
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_PUSH_PROMISE_Flags</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_PUSH_PROMISE_Flags</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -1423,7 +1423,7 @@ its structure is described as below:</p>
 <p>HTTP/2 packet flags.</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags.END_HEADERS">
-<code class="sig-name descname">END_HEADERS</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">END_HEADERS</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>2</p>
@@ -1433,7 +1433,7 @@ its structure is described as below:</p>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags.PADDED">
-<code class="sig-name descname">PADDED</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags.PADDED" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">PADDED</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE_Flags.PADDED" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>3</p>
@@ -1497,7 +1497,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_PING</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_PING</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -1506,13 +1506,13 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">PING</span></code> frame [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING.flags">
-<code class="sig-name descname">flags</code><em class="property">: <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags">DataType_HTTPv2_PING_Flags</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags"><span class="pre">DataType_HTTPv2_PING_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING.data">
-<code class="sig-name descname">data</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING.data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">data</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Opaque data.</p>
 </dd></dl>
 
@@ -1520,7 +1520,7 @@ its structure is described as below:</p>
 
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_PING_Flags</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_PING_Flags</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -1529,7 +1529,7 @@ its structure is described as below:</p>
 <p>HTTP/2 packet flags.</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags.ACK">
-<code class="sig-name descname">ACK</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags.ACK" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">ACK</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PING_Flags.ACK" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>0</p>
@@ -1608,7 +1608,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_GOAWAY</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_GOAWAY</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -1617,25 +1617,25 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> frame [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.flags">
-<code class="sig-name descname">flags</code><em class="property">: Literal<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.last_sid">
-<code class="sig-name descname">last_sid</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.last_sid" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">last_sid</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.last_sid" title="Permalink to this definition">¶</a></dt>
 <dd><p>Last stream ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.error">
-<code class="sig-name descname">error</code><em class="property">: <a class="reference internal" href="../../const/http.html#pcapkit.const.http.error_code.ErrorCode" title="pcapkit.const.http.error_code.ErrorCode">pcapkit.const.http.error_code.ErrorCode</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">error</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../const/http.html#pcapkit.const.http.error_code.ErrorCode" title="pcapkit.const.http.error_code.ErrorCode"><span class="pre">pcapkit.const.http.error_code.ErrorCode</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Error code.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.data">
-<code class="sig-name descname">data</code><em class="property">: Optional<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">data</span></code><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_GOAWAY.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Additional debug data.</p>
 </dd></dl>
 
@@ -1700,7 +1700,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_WINDOW_UPDATE</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_WINDOW_UPDATE</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -1709,13 +1709,13 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">WINDOW_UPDATE</span></code> frame [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE.flags">
-<code class="sig-name descname">flags</code><em class="property">: Literal<span class="p">[</span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)">None</a><span class="p">]</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.9)"><span class="pre">None</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE.window">
-<code class="sig-name descname">window</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)">int</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE.window" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">window</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.9)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE.window" title="Permalink to this definition">¶</a></dt>
 <dd><p>Window size increment.</p>
 </dd></dl>
 
@@ -1775,7 +1775,7 @@ its structure is described as below:</p>
 </table>
 <br /><dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_CONTINUATION</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_CONTINUATION</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>DataType_HTTPv2_Frame</p>
@@ -1784,13 +1784,13 @@ its structure is described as below:</p>
 <p>Structure of HTTP/2 <code class="docutils literal notranslate"><span class="pre">CONTINUATION</span></code> frame [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7540.html"><strong>RFC 7540</strong></a>].</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION.flags">
-<code class="sig-name descname">flags</code><em class="property">: <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags">DataType_HTTPv2_CONTINUATION_Flags</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION.flags" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">flags</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags" title="pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags"><span class="pre">DataType_HTTPv2_CONTINUATION_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION.flags" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP/2 packet flags.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION.frag">
-<code class="sig-name descname">frag</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)">bytes</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION.frag" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">frag</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION.frag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header block fragment.</p>
 </dd></dl>
 
@@ -1798,7 +1798,7 @@ its structure is described as below:</p>
 
 <dl class="py class">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.protocols.application.httpv2.</code><code class="sig-name descname">DataType_HTTPv2_CONTINUATION_Flags</code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv2.</span></code><code class="sig-name descname"><span class="pre">DataType_HTTPv2_CONTINUATION_Flags</span></code><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -1807,7 +1807,7 @@ its structure is described as below:</p>
 <p>HTTP/2 packet flags.</p>
 <dl class="py attribute">
 <dt id="pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags.END_HEADERS">
-<code class="sig-name descname">END_HEADERS</code><em class="property">: <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)">bool</a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">END_HEADERS</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION_Flags.END_HEADERS" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bit</dt>
 <dd class="field-odd"><p>2</p>

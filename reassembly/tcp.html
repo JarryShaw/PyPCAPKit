@@ -165,7 +165,7 @@ for further handling. Otherwise, return.</p></li>
 <div class="section" id="data-structure">
 <h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
 <dl class="glossary">
-<dt id="term-tcp.packet">tcp.packet</dt><dd><p>Data structure for <strong>TCP datagram reassembly</strong>
+<dt id="term-tcp.packet">tcp.packet<a class="headerlink" href="#term-tcp.packet" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>TCP datagram reassembly</strong>
 (<a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reassembly()</span></code></a>) is as following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">packet_dict</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span>
   <span class="n">bufid</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
@@ -186,7 +186,7 @@ for further handling. Otherwise, return.</p></li>
 </pre></div>
 </div>
 </dd>
-<dt id="term-tcp.datagram">tcp.datagram</dt><dd><p>Data structure for <strong>reassembled TCP datagram</strong> (element from
+<dt id="term-tcp.datagram">tcp.datagram<a class="headerlink" href="#term-tcp.datagram" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>reassembled TCP datagram</strong> (element from
 <a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly.datagram" title="pcapkit.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> <em>tuple</em>)
 is as following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nb">tuple</span><span class="p">)</span> <span class="n">datagram</span>
@@ -224,7 +224,7 @@ is as following:</p>
 </pre></div>
 </div>
 </dd>
-<dt id="term-tcp.buffer">tcp.buffer</dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
+<dt id="term-tcp.buffer">tcp.buffer<a class="headerlink" href="#term-tcp.buffer" title="Permalink to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
 (<a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly._buffer" title="pcapkit.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a>) is as following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span> <span class="n">buffer</span> <span class="o">--&gt;</span> <span class="n">memory</span> <span class="n">buffer</span> <span class="k">for</span> <span class="n">reassembly</span>
  <span class="o">|--&gt;</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">)</span> <span class="n">BUFID</span> <span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
@@ -254,7 +254,7 @@ is as following:</p>
 <span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-pcapkit.reassembly.tcp" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pcapkit.reassembly.tcp.TCP_Reassembly">
-<em class="property">class </em><code class="sig-prename descclassname">pcapkit.reassembly.tcp.</code><code class="sig-name descname">TCP_Reassembly</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">strict</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/tcp.html#TCP_Reassembly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.reassembly.tcp.</span></code><code class="sig-name descname"><span class="pre">TCP_Reassembly</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/tcp.html#TCP_Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly" title="pcapkit.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.reassembly.reassembly.Reassembly</span></code></a></p>
 <p>Reassembly for TCP payload.</p>
 <div class="admonition-example admonition">
@@ -271,7 +271,7 @@ is as following:</p>
 </div>
 <dl class="py method">
 <dt id="pcapkit.reassembly.tcp.TCP_Reassembly.reassembly">
-<code class="sig-name descname">reassembly</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">info</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/tcp.html#TCP_Reassembly.reassembly"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly.reassembly" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reassembly</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/tcp.html#TCP_Reassembly.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly.reassembly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reassembly procedure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -282,7 +282,7 @@ is as following:</p>
 
 <dl class="py method">
 <dt id="pcapkit.reassembly.tcp.TCP_Reassembly.submit">
-<code class="sig-name descname">submit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">buf</span></em>, <em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">bufid</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/tcp.html#TCP_Reassembly.submit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly.submit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">submit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bufid</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/tcp.html#TCP_Reassembly.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly.submit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Submit reassembled payload.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -302,7 +302,7 @@ is as following:</p>
 
 <dl class="py method">
 <dt id="pcapkit.reassembly.tcp.TCP_Reassembly.name">
-<em class="property">property </em><code class="sig-name descname">name</code><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol of current packet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -313,7 +313,7 @@ is as following:</p>
 
 <dl class="py method">
 <dt id="pcapkit.reassembly.tcp.TCP_Reassembly.protocol">
-<em class="property">property </em><code class="sig-name descname">protocol</code><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">protocol</span></code><a class="headerlink" href="#pcapkit.reassembly.tcp.TCP_Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol of current reassembly object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
