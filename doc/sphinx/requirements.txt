@@ -1,2 +1,2 @@
 # sphinx
-Sphinx==3.5.0
+Sphinx==3.5.2
