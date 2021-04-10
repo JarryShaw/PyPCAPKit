@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+
     <title>IP Datagram Reassembly &#8212; PyPCAPKit 0.15.5 documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
@@ -32,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="ip-datagram-reassembly">
+  <section id="ip-datagram-reassembly">
 <h1>IP Datagram Reassembly<a class="headerlink" href="#ip-datagram-reassembly" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.reassembly.ip" title="pcapkit.reassembly.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.reassembly.ip</span></code></a> contains
 <a class="reference internal" href="#pcapkit.reassembly.ip.IP_Reassembly" title="pcapkit.reassembly.ip.IP_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Reassembly</span></code></a>
@@ -42,7 +43,7 @@ reassembly procedure introduced in <span class="target" id="index-0"></span><a c
 <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> (fragment receivedbit table). Though another
 algorithm is explained in <span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc815.html"><strong>RFC 815</strong></a>, replacing <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code>,
 however, this implement still used the elder one.</p>
-<div class="section" id="notation">
+<section id="notation">
 <h2>Notation<a class="headerlink" href="#notation" title="Permalink to this headline">¶</a></h2>
 <table class="docutils align-default">
 <colgroup>
@@ -82,8 +83,8 @@ however, this implement still used the elder one.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="algorithm">
+</section>
+<section id="algorithm">
 <h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DO {
    BUFID &lt;- source|destination|protocol|identification;
@@ -130,8 +131,8 @@ timer expires: {
 }
 </pre></div>
 </div>
-</div>
-<div class="section" id="module-pcapkit.reassembly.ip">
+</section>
+<section id="module-pcapkit.reassembly.ip">
 <span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-pcapkit.reassembly.ip" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pcapkit.reassembly.ip.IP_Reassembly">
@@ -171,8 +172,8 @@ timer expires: {
 
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
           </div>
