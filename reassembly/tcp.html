@@ -4,8 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TCP Datagram Reassembly &#8212; PyPCAPKit 0.15.5 documentation</title>
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
@@ -33,13 +32,13 @@
 
           <div class="body" role="main">
             
-  <section id="tcp-datagram-reassembly">
+  <div class="section" id="tcp-datagram-reassembly">
 <h1>TCP Datagram Reassembly<a class="headerlink" href="#tcp-datagram-reassembly" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.reassembly.tcp" title="pcapkit.reassembly.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.reassembly.tcp</span></code></a> contains
 <a class="reference internal" href="#pcapkit.reassembly.tcp.TCP_Reassembly" title="pcapkit.reassembly.tcp.TCP_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP_Reassembly</span></code></a> only,
 which reconstructs fragmented TCP packets back to origin.
 The algorithm for TCP reassembly is described as below.</p>
-<section id="notation">
+<div class="section" id="notation">
 <h2>Notation<a class="headerlink" href="#notation" title="Permalink to this headline">¶</a></h2>
 <table class="docutils align-default">
 <colgroup>
@@ -85,8 +84,8 @@ The algorithm for TCP reassembly is described as below.</p>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="algorithm">
+</div>
+<div class="section" id="algorithm">
 <h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DO {
    BUFID &lt;- src|dst|srcport|dstport|ACK;
@@ -162,8 +161,8 @@ descriptor <code class="docutils literal notranslate"><span class="pre">new_hole
 complete. Pass it on to the higher level protocol processor
 for further handling. Otherwise, return.</p></li>
 </ol>
-</section>
-<section id="data-structure">
+</div>
+<div class="section" id="data-structure">
 <h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
 <dl class="glossary">
 <dt id="term-tcp.packet">tcp.packet<a class="headerlink" href="#term-tcp.packet" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>TCP datagram reassembly</strong>
@@ -250,8 +249,8 @@ is as following:</p>
 </div>
 </dd>
 </dl>
-</section>
-<section id="module-pcapkit.reassembly.tcp">
+</div>
+<div class="section" id="module-pcapkit.reassembly.tcp">
 <span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-pcapkit.reassembly.tcp" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="pcapkit.reassembly.tcp.TCP_Reassembly">
@@ -325,8 +324,8 @@ is as following:</p>
 
 </dd></dl>
 
-</section>
-</section>
+</div>
+</div>
 
 
           </div>
