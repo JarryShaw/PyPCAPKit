@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>FTP - File Transfer Protocol &#8212; PyPCAPKit 0.15.5 documentation</title>
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
@@ -32,20 +33,20 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="ftp-file-transfer-protocol">
+  <section id="ftp-file-transfer-protocol">
 <h1>FTP - File Transfer Protocol<a class="headerlink" href="#ftp-file-transfer-protocol" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.application.ftp" title="pcapkit.protocols.application.ftp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ftp</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.application.ftp.FTP" title="pcapkit.protocols.application.ftp.FTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code></a> only,
 which implements extractor for File Transfer Protocol
 (FTP) <a class="footnote-reference brackets" href="#id2" id="id1">*</a>.</p>
 <span class="target" id="module-pcapkit.protocols.application.ftp"></span><dl class="py class">
-<dt id="pcapkit.protocols.application.ftp.FTP">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ftp.</span></code><code class="sig-name descname"><span class="pre">FTP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.FTP">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ftp.</span></span><span class="sig-name descname"><span class="pre">FTP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.application.Application</span></code></a></p>
 <p>This class implements File Transfer Protocol.</p>
 <dl class="py method">
-<dt id="pcapkit.protocols.application.ftp.FTP.make">
-<code class="sig-name descname"><span class="pre">make</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.make" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.FTP.make">
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.make" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
@@ -61,8 +62,8 @@ which implements extractor for File Transfer Protocol
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.protocols.application.ftp.FTP.read">
-<code class="sig-name descname"><span class="pre">read</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.read" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.FTP.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/ftp.html#FTP.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read File Transfer Protocol (FTP).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -83,9 +84,9 @@ which implements extractor for File Transfer Protocol
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pcapkit.protocols.application.ftp.FTP.length">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">length</span></code><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.length" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.FTP.length">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Raises</dt>
@@ -94,9 +95,9 @@ which implements extractor for File Transfer Protocol
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt id="pcapkit.protocols.application.ftp.FTP.name">
-<em class="property"><span class="pre">property</span> </em><code class="sig-name descname"><span class="pre">name</span></code><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.name" title="Permalink to this definition">¶</a></dt>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.FTP.name">
+<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.protocols.application.ftp.FTP.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -107,7 +108,7 @@ which implements extractor for File Transfer Protocol
 
 </dd></dl>
 
-<div class="section" id="data-structure">
+<section id="data-structure">
 <h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -115,8 +116,8 @@ which implements extractor for File Transfer Protocol
 They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
 </div>
 <dl class="py class">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ftp.</span></code><code class="sig-name descname"><span class="pre">DataType_FTP_Request</span></code><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Request">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ftp.</span></span><span class="sig-name descname"><span class="pre">DataType_FTP_Request</span></span><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -124,34 +125,34 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>Structure of FTP request packet [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc959.html"><strong>RFC 959</strong></a>].</p>
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request.type">
-<code class="sig-name descname"><span class="pre">type</span></code><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">request</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.type" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Request.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">request</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Packet type.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request.command">
-<code class="sig-name descname"><span class="pre">command</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">pcapkit.corekit.infoclass.Info</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.command" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Request.command">
+<span class="sig-name descname"><span class="pre">command</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><span class="pre">pcapkit.corekit.infoclass.Info</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.command" title="Permalink to this definition">¶</a></dt>
 <dd><p>FTP command.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request.arg">
-<code class="sig-name descname"><span class="pre">arg</span></code><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.arg" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Request.arg">
+<span class="sig-name descname"><span class="pre">arg</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.arg" title="Permalink to this definition">¶</a></dt>
 <dd><p>FTP command arguments.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Request.raw">
-<code class="sig-name descname"><span class="pre">raw</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.raw" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Request.raw">
+<span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Request.raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw packet data.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ftp.</span></code><code class="sig-name descname"><span class="pre">DataType_FTP_Response</span></code><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Response">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.ftp.</span></span><span class="sig-name descname"><span class="pre">DataType_FTP_Response</span></span><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -159,32 +160,32 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>Structure of FTP response packet [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc959.html"><strong>RFC 959</strong></a>].</p>
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.type">
-<code class="sig-name descname"><span class="pre">type</span></code><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">response</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.type" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Response.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="pre">:</span> <span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="pre">response</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Packet type.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.code">
-<code class="sig-name descname"><span class="pre">code</span></code><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><span class="pre">pcapkit.const.ftp.return_code.ReturnCode</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.code" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Response.code">
+<span class="sig-name descname"><span class="pre">code</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode" title="pcapkit.const.ftp.return_code.ReturnCode"><span class="pre">pcapkit.const.ftp.return_code.ReturnCode</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.code" title="Permalink to this definition">¶</a></dt>
 <dd><p>FTP response code.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.arg">
-<code class="sig-name descname"><span class="pre">arg</span></code><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.arg" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Response.arg">
+<span class="sig-name descname"><span class="pre">arg</span></span><em class="property"><span class="pre">:</span> <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.arg" title="Permalink to this definition">¶</a></dt>
 <dd><p>FTP response arguments (messages).</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.mf">
-<code class="sig-name descname"><span class="pre">mf</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.mf" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Response.mf">
+<span class="sig-name descname"><span class="pre">mf</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.9)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.mf" title="Permalink to this definition">¶</a></dt>
 <dd><p>More fragmented messages flag.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.protocols.application.ftp.DataType_FTP_Response.raw">
-<code class="sig-name descname"><span class="pre">raw</span></code><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.raw" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.application.ftp.DataType_FTP_Response.raw">
+<span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.ftp.DataType_FTP_Response.raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw packet data.</p>
 </dd></dl>
 
@@ -195,8 +196,8 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/File_Transfer_Protocol">https://en.wikipedia.org/wiki/File_Transfer_Protocol</a></p>
 </dd>
 </dl>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>

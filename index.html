@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Welcome to PyPCAPKit’s documentation! &#8212; PyPCAPKit 0.15.5 documentation</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
@@ -31,7 +32,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="welcome-to-pypcapkit-s-documentation">
+  <section id="welcome-to-pypcapkit-s-documentation">
 <h1>Welcome to PyPCAPKit’s documentation!<a class="headerlink" href="#welcome-to-pypcapkit-s-documentation" title="Permalink to this headline">¶</a></h1>
 <p>The <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> project is an open source Python program focus
 on <a class="reference external" href="https://en.wikipedia.org/wiki/Pcap">PCAP</a> parsing and analysis, which works as a stream PCAP file extractor.
@@ -60,7 +61,7 @@ output report formats.</p>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">Command Line Interface</a></li>
 </ul>
 </div>
-<div class="section" id="about">
+<section id="about">
 <h2>About<a class="headerlink" href="#about" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> is an independent open source library, using only
 <a class="reference external" href="https://dictdumper.jarryshaw.me/en/latest/dictdumper.html#module-dictdumper" title="(in DictDumper)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">DictDumper</span></code></a> as its formatted output dumper.</p>
@@ -69,11 +70,11 @@ output report formats.</p>
 <p>There is a project called <a class="reference external" href="https://github.com/JarryShaw/jspcapy"><code class="docutils literal notranslate"><span class="pre">jspcapy</span></code></a> works on <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which is a
 command line tool for PCAP extraction but now <strong>*DEPRECATED*</strong>.</p>
 </div>
-<p>Unlike popular PCAP file extractors, such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.4.5rc1.dev28)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
+<p>Unlike popular PCAP file extractors, such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.4.5rc1.dev30)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">PyShark</span></code>, and etc, <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> uses
 <strong>streaming</strong> strategy to read input files. That is to read frame by frame,
 decrease occupation on memory, as well as enhance efficiency in some way.</p>
-<div class="section" id="module-structure">
+<section id="module-structure">
 <h3>Module Structure<a class="headerlink" href="#module-structure" title="Permalink to this headline">¶</a></h3>
 <p>In <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, all files can be described as following eight parts.</p>
 <ul>
@@ -106,8 +107,8 @@ as well as constructors.</p>
 <p>Collection of four utility functions and classes.</p>
 </li>
 </ul>
-</div>
-<div class="section" id="engine-comparison">
+</section>
+<section id="engine-comparison">
 <h3>Engine Comparison<a class="headerlink" href="#engine-comparison" title="Permalink to this headline">¶</a></h3>
 <p>Besides, due to complexity of <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, its extraction procedure takes
 around <em>0.0009</em> seconds per packet, which is not ideal enough. Thus
@@ -115,7 +116,7 @@ around <em>0.0009</em> seconds per packet, which is not ideal enough. Thus
 procedure. By now <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>, and <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>.
 Plus, <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> supports two strategies of multiprocessing (<code class="docutils literal notranslate"><span class="pre">server</span></code> &amp;
 <code class="docutils literal notranslate"><span class="pre">pipeline</span></code>). For more information, please refer to the documentation.</p>
-<div class="section" id="test-environment">
+<section id="test-environment">
 <h4>Test Environment<a class="headerlink" href="#test-environment" title="Permalink to this headline">¶</a></h4>
 <table class="docutils align-default">
 <colgroup>
@@ -140,8 +141,8 @@ Plus, <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pc
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="test-results">
+</section>
+<section id="test-results">
 <h4>Test Results<a class="headerlink" href="#test-results" title="Permalink to this headline">¶</a></h4>
 <table class="docutils align-default">
 <colgroup>
@@ -174,10 +175,10 @@ Plus, <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pc
 </tr>
 </tbody>
 </table>
-<br /></div>
-</div>
-</div>
-<div class="section" id="installation">
+<br /></section>
+</section>
+</section>
+<section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -209,10 +210,10 @@ pip install pypcapkit<span class="o">[</span>all<span class="o">]</span>
 pip install pypcapkit dpkt scapy pyshark
 </pre></div>
 </div>
-</div>
-<div class="section" id="samples">
+</section>
+<section id="samples">
 <h2>Samples<a class="headerlink" href="#samples" title="Permalink to this headline">¶</a></h2>
-<div class="section" id="usage-samples">
+<section id="usage-samples">
 <h3>Usage Samples<a class="headerlink" href="#usage-samples" title="Permalink to this headline">¶</a></h3>
 <p>As described above, :mo:d`pcapkit` is quite easy to use, with simply three
 verbs as its main interface. Several scenarios are shown as below.</p>
@@ -254,8 +255,8 @@ verbs as its main interface. Several scenarios are shown as below.</p>
 </div>
 </li>
 </ol>
-</div>
-<div class="section" id="cli-samples">
+</section>
+<section id="cli-samples">
 <h3>CLI Samples<a class="headerlink" href="#cli-samples" title="Permalink to this headline">¶</a></h3>
 <p>The CLI (command line interface) of <a class="reference internal" href="pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> has two different access.</p>
 <ul>
@@ -309,17 +310,17 @@ verbs as its main interface. Several scenarios are shown as below.</p>
 </div>
 </li>
 </ol>
-</div>
-</div>
-</div>
-<div class="section" id="indices-and-tables">
+</section>
+</section>
+</section>
+<section id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
 <li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
 <li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
 <li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
 </ul>
-</div>
+</section>
 
 
           </div>

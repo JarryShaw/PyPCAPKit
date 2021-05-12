@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>IP Datagram Reassembly &#8212; PyPCAPKit 0.15.5 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -32,7 +33,7 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="ip-datagram-reassembly">
+  <section id="ip-datagram-reassembly">
 <h1>IP Datagram Reassembly<a class="headerlink" href="#ip-datagram-reassembly" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.reassembly.ip" title="pcapkit.reassembly.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.reassembly.ip</span></code></a> contains
 <a class="reference internal" href="#pcapkit.reassembly.ip.IP_Reassembly" title="pcapkit.reassembly.ip.IP_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Reassembly</span></code></a>
@@ -42,7 +43,7 @@ reassembly procedure introduced in <span class="target" id="index-0"></span><a c
 <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> (fragment receivedbit table). Though another
 algorithm is explained in <span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc815.html"><strong>RFC 815</strong></a>, replacing <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code>,
 however, this implement still used the elder one.</p>
-<div class="section" id="notation">
+<section id="notation">
 <h2>Notation<a class="headerlink" href="#notation" title="Permalink to this headline">¶</a></h2>
 <table class="docutils align-default">
 <colgroup>
@@ -82,8 +83,8 @@ however, this implement still used the elder one.</p>
 </tr>
 </tbody>
 </table>
-</div>
-<div class="section" id="algorithm">
+</section>
+<section id="algorithm">
 <h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DO {
    BUFID &lt;- source|destination|protocol|identification;
@@ -130,17 +131,17 @@ timer expires: {
 }
 </pre></div>
 </div>
-</div>
-<div class="section" id="module-pcapkit.reassembly.ip">
+</section>
+<section id="module-pcapkit.reassembly.ip">
 <span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-pcapkit.reassembly.ip" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pcapkit.reassembly.ip.IP_Reassembly">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.reassembly.ip.</span></code><code class="sig-name descname"><span class="pre">IP_Reassembly</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.reassembly.ip.IP_Reassembly">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">IP_Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly" title="pcapkit.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.reassembly.reassembly.Reassembly</span></code></a></p>
 <p>Reassembly for IP payload.</p>
 <dl class="py method">
-<dt id="pcapkit.reassembly.ip.IP_Reassembly.reassembly">
-<code class="sig-name descname"><span class="pre">reassembly</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly.reassembly" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.reassembly.ip.IP_Reassembly.reassembly">
+<span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly.reassembly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reassembly procedure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -150,8 +151,8 @@ timer expires: {
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.reassembly.ip.IP_Reassembly.submit">
-<code class="sig-name descname"><span class="pre">submit</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly.submit" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.reassembly.ip.IP_Reassembly.submit">
+<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly.submit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Submit reassembled payload.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -171,8 +172,8 @@ timer expires: {
 
 </dd></dl>
 
-</div>
-</div>
+</section>
+</section>
 
 
           </div>

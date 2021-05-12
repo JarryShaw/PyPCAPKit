@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Analyser for Application Layer &#8212; PyPCAPKit 0.15.5 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -32,14 +33,14 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="analyser-for-application-layer">
+  <section id="analyser-for-application-layer">
 <h1>Analyser for Application Layer<a class="headerlink" href="#analyser-for-application-layer" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.foundation.analysis" title="pcapkit.foundation.analysis"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></a> works as a header quarter to
 analyse and match application layer protocol. Then, call
 corresponding modules and functions to extract the attributes.</p>
 <span class="target" id="module-pcapkit.foundation.analysis"></span><dl class="py function">
-<dt id="pcapkit.foundation.analysis._analyse">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.</span></code><code class="sig-name descname"><span class="pre">_analyse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seekset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/foundation/analysis.html#_analyse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.analysis._analyse" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.analysis._analyse">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.</span></span><span class="sig-name descname"><span class="pre">_analyse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seekset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/foundation/analysis.html#_analyse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.analysis._analyse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Analyse packet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -63,8 +64,8 @@ returns the parsed  packet; otherwise returns <a class="reference external" href
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.foundation.analysis.analyse">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.</span></code><code class="sig-name descname"><span class="pre">analyse</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">termination</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/foundation/analysis.html#analyse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.analysis.analyse" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.analysis.analyse">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.</span></span><span class="sig-name descname"><span class="pre">analyse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">termination</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/foundation/analysis.html#analyse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.analysis.analyse" title="Permalink to this definition">¶</a></dt>
 <dd><p>Analyse application layer packets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -100,8 +101,8 @@ returns the parsed  packet; otherwise returns <a class="reference external" href
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.foundation.analysis.register">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.</span></code><code class="sig-name descname"><span class="pre">register</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/foundation/analysis.html#register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.analysis.register" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.analysis.register">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.</span></span><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/foundation/analysis.html#register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.analysis.register" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a new protocol class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -123,12 +124,12 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 </dd></dl>
 
 <dl class="py data">
-<dt id="pcapkit.foundation.analysis.ANALYSE_PROTO">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.</span></code><code class="sig-name descname"><span class="pre">ANALYSE_PROTO</span></code><em class="property"> <span class="pre">=</span> <span class="pre">[('pcapkit.protocols.application.ftp',</span> <span class="pre">'FTP'),</span> <span class="pre">('pcapkit.protocols.application.httpv1',</span> <span class="pre">'HTTPv1'),</span> <span class="pre">('pcapkit.protocols.application.httpv2',</span> <span class="pre">'HTTPv2')]</span></em><a class="headerlink" href="#pcapkit.foundation.analysis.ANALYSE_PROTO" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.foundation.analysis.ANALYSE_PROTO">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.analysis.</span></span><span class="sig-name descname"><span class="pre">ANALYSE_PROTO</span></span><em class="property"> <span class="pre">=</span> <span class="pre">[('pcapkit.protocols.application.ftp',</span> <span class="pre">'FTP'),</span> <span class="pre">('pcapkit.protocols.application.httpv1',</span> <span class="pre">'HTTPv1'),</span> <span class="pre">('pcapkit.protocols.application.httpv2',</span> <span class="pre">'HTTPv2')]</span></em><a class="headerlink" href="#pcapkit.foundation.analysis.ANALYSE_PROTO" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of protocols supported by the analyser.</p>
 </dd></dl>
 
-</div>
+</section>
 
 
           </div>

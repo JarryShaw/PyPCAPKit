@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>FTP Vendor Crawlers &#8212; PyPCAPKit 0.15.5 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -32,18 +33,18 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-pcapkit.vendor.ftp">
+  <section id="module-pcapkit.vendor.ftp">
 <span id="ftp-vendor-crawlers"></span><h1>FTP Vendor Crawlers<a class="headerlink" href="#module-pcapkit.vendor.ftp" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-pcapkit.vendor.ftp.command">
+<section id="module-pcapkit.vendor.ftp.command">
 <span id="ftp-commands"></span><h2>FTP Commands <a class="footnote-reference brackets" href="#id3" id="id1">*</a><a class="headerlink" href="#module-pcapkit.vendor.ftp.command" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pcapkit.vendor.ftp.command.Command">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></code><code class="sig-name descname"><span class="pre">Command</span></code><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/command.html#Command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.Command">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></span><span class="sig-name descname"><span class="pre">Command</span></span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/command.html#Command"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
 <p>FTP Command</p>
 <dl class="py method">
-<dt id="pcapkit.vendor.ftp.command.Command.context">
-<code class="sig-name descname"><span class="pre">context</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/command.html#Command.context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command.context" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.Command.context">
+<span class="sig-name descname"><span class="pre">context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/command.html#Command.context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command.context" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate constant context.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -59,8 +60,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.vendor.ftp.command.Command.process">
-<code class="sig-name descname"><span class="pre">process</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/command.html#Command.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command.process" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.Command.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/command.html#Command.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process CSV data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -77,48 +78,48 @@ List[str]: Missing fields.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.vendor.ftp.command.Command.LINK">
-<code class="sig-name descname"><span class="pre">LINK</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions-2.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.Command.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions-2.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.command.Command.LINK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.vendor.ftp.command.LINE">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></code><code class="sig-name descname"><span class="pre">LINE</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NAME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOCS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">INFO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MISS</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.ftp.command.LINE" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.LINE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></span><span class="sig-name descname"><span class="pre">LINE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NAME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOCS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">INFO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">MISS</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.ftp.command.LINE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Constant template of enumerate registry from IANA CSV.</p>
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.vendor.ftp.command.make">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></code><code class="sig-name descname"><span class="pre">make</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmmt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.ftp.command.make" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.make">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></span><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmmd</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">conf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rfcs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmmt</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.ftp.command.make" title="Permalink to this definition">¶</a></dt>
 <dd><p>Command entry template.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="pcapkit.vendor.ftp.command.CONF">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></code><code class="sig-name descname"><span class="pre">CONF</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'h':</span> <span class="pre">'historic',</span> <span class="pre">'m':</span> <span class="pre">'mandatory</span> <span class="pre">to</span> <span class="pre">implement',</span> <span class="pre">'o':</span> <span class="pre">'optional'}</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.command.CONF" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.CONF">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></span><span class="sig-name descname"><span class="pre">CONF</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'h':</span> <span class="pre">'historic',</span> <span class="pre">'m':</span> <span class="pre">'mandatory</span> <span class="pre">to</span> <span class="pre">implement',</span> <span class="pre">'o':</span> <span class="pre">'optional'}</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.command.CONF" title="Permalink to this definition">¶</a></dt>
 <dd><p>Conformance requirements.</p>
 </dd></dl>
 
 <dl class="py data">
-<dt id="pcapkit.vendor.ftp.command.KIND">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></code><code class="sig-name descname"><span class="pre">KIND</span></code><em class="property"> <span class="pre">=</span> <span class="pre">{'a':</span> <span class="pre">'access</span> <span class="pre">control',</span> <span class="pre">'p':</span> <span class="pre">'parameter</span> <span class="pre">setting',</span> <span class="pre">'s':</span> <span class="pre">'service</span> <span class="pre">execution'}</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.command.KIND" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.command.KIND">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.command.</span></span><span class="sig-name descname"><span class="pre">KIND</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{'a':</span> <span class="pre">'access</span> <span class="pre">control',</span> <span class="pre">'p':</span> <span class="pre">'parameter</span> <span class="pre">setting',</span> <span class="pre">'s':</span> <span class="pre">'service</span> <span class="pre">execution'}</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.command.KIND" title="Permalink to this definition">¶</a></dt>
 <dd><p>Command type.</p>
 </dd></dl>
 
-</div>
-<div class="section" id="module-pcapkit.vendor.ftp.return_code">
+</section>
+<section id="module-pcapkit.vendor.ftp.return_code">
 <span id="ftp-return-codes"></span><h2>FTP Return Codes <a class="footnote-reference brackets" href="#id4" id="id2">†</a><a class="headerlink" href="#module-pcapkit.vendor.ftp.return_code" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pcapkit.vendor.ftp.return_code.ReturnCode">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.return_code.</span></code><code class="sig-name descname"><span class="pre">ReturnCode</span></code><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.ReturnCode">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.return_code.</span></span><span class="sig-name descname"><span class="pre">ReturnCode</span></span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
 <p>FTP Server Return Code</p>
 <dl class="py method">
-<dt id="pcapkit.vendor.ftp.return_code.ReturnCode.context">
-<code class="sig-name descname"><span class="pre">context</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode.context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.context" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.ReturnCode.context">
+<span class="sig-name descname"><span class="pre">context</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode.context"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.context" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate constant context.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -134,14 +135,14 @@ List[str]: Missing fields.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.vendor.ftp.return_code.ReturnCode.count">
-<code class="sig-name descname"><span class="pre">count</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.count" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.ReturnCode.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.count" title="Permalink to this definition">¶</a></dt>
 <dd><p>Count field records.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.vendor.ftp.return_code.ReturnCode.process">
-<code class="sig-name descname"><span class="pre">process</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.process" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.ReturnCode.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process registry data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -158,8 +159,8 @@ List[str]: Missing fields.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.vendor.ftp.return_code.ReturnCode.request">
-<code class="sig-name descname"><span class="pre">request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.request" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.ReturnCode.request">
+<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ftp/return_code.html#ReturnCode.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch registry data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -175,22 +176,22 @@ List[str]: Missing fields.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.vendor.ftp.return_code.ReturnCode.FLAG">
-<code class="sig-name descname"><span class="pre">FLAG</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">100</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">659'</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.ReturnCode.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">100</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">659'</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.FLAG" title="Permalink to this definition">¶</a></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.vendor.ftp.return_code.ReturnCode.LINK">
-<code class="sig-name descname"><span class="pre">LINK</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes'</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.ReturnCode.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes'</span></em><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.ReturnCode.LINK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.vendor.ftp.return_code.LINE">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.return_code.</span></code><code class="sig-name descname"><span class="pre">LINE</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NAME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOCS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FLAG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ENUM</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.LINE" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ftp.return_code.LINE">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ftp.return_code.</span></span><span class="sig-name descname"><span class="pre">LINE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">NAME</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">DOCS</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">FLAG</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ENUM</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.vendor.ftp.return_code.LINE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <hr /><dl class="footnote brackets">
@@ -201,8 +202,8 @@ List[str]: Missing fields.</p>
 <dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes">https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes</a></p>
 </dd>
 </dl>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>

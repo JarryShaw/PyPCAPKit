@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>IPX Vendor Crawler &#8212; PyPCAPKit 0.15.5 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -32,24 +33,24 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="module-pcapkit.vendor.ipx">
+  <section id="module-pcapkit.vendor.ipx">
 <span id="ipx-vendor-crawler"></span><h1>IPX Vendor Crawler<a class="headerlink" href="#module-pcapkit.vendor.ipx" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="module-pcapkit.vendor.ipx.packet">
+<section id="module-pcapkit.vendor.ipx.packet">
 <span id="ipx-packet-types"></span><h2>IPX Packet Types <a class="footnote-reference brackets" href="#id3" id="id1">*</a><a class="headerlink" href="#module-pcapkit.vendor.ipx.packet" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pcapkit.vendor.ipx.packet.Packet">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.packet.</span></code><code class="sig-name descname"><span class="pre">Packet</span></code><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.packet.</span></span><span class="sig-name descname"><span class="pre">Packet</span></span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
 <p>IPX Packet Types</p>
 <dl class="py method">
-<dt id="pcapkit.vendor.ipx.packet.Packet.count">
-<code class="sig-name descname"><span class="pre">count</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.count" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.count" title="Permalink to this definition">¶</a></dt>
 <dd><p>Count field records.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.vendor.ipx.packet.Packet.process">
-<code class="sig-name descname"><span class="pre">process</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.process" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process HTML source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -66,8 +67,8 @@ List[str]: Missing fields.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.vendor.ipx.packet.Packet.request">
-<code class="sig-name descname"><span class="pre">request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.request" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet.request">
+<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/packet.html#Packet.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch HTML source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -83,36 +84,36 @@ List[str]: Missing fields.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.vendor.ipx.packet.Packet.FLAG">
-<code class="sig-name descname"><span class="pre">FLAG</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">255'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.FLAG" title="Permalink to this definition">¶</a></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.vendor.ipx.packet.Packet.LINK">
-<code class="sig-name descname"><span class="pre">LINK</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.packet.Packet.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.packet.Packet.LINK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
 </dd></dl>
 
-</div>
-<div class="section" id="module-pcapkit.vendor.ipx.socket">
+</section>
+<section id="module-pcapkit.vendor.ipx.socket">
 <span id="ipx-socket-types"></span><h2>IPX Socket Types <a class="footnote-reference brackets" href="#id4" id="id2">†</a><a class="headerlink" href="#module-pcapkit.vendor.ipx.socket" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
-<dt id="pcapkit.vendor.ipx.socket.Socket">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.socket.</span></code><code class="sig-name descname"><span class="pre">Socket</span></code><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.ipx.socket.</span></span><span class="sig-name descname"><span class="pre">Socket</span></span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
 <p>Socket Types</p>
 <dl class="py method">
-<dt id="pcapkit.vendor.ipx.socket.Socket.count">
-<code class="sig-name descname"><span class="pre">count</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.count" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.count">
+<span class="sig-name descname"><span class="pre">count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.count" title="Permalink to this definition">¶</a></dt>
 <dd><p>Count field records.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.vendor.ipx.socket.Socket.process">
-<code class="sig-name descname"><span class="pre">process</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.process" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.process">
+<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">soup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process HTML source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -129,8 +130,8 @@ List[str]: Missing fields.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="pcapkit.vendor.ipx.socket.Socket.request">
-<code class="sig-name descname"><span class="pre">request</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.request" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.request">
+<span class="sig-name descname"><span class="pre">request</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/ipx/socket.html#Socket.request"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch HTML source.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -146,14 +147,14 @@ List[str]: Missing fields.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.vendor.ipx.socket.Socket.FLAG">
-<code class="sig-name descname"><span class="pre">FLAG</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.FLAG" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.FLAG">
+<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.FLAG" title="Permalink to this definition">¶</a></dt>
 <dd><p>Value limit checker.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt id="pcapkit.vendor.ipx.socket.Socket.LINK">
-<code class="sig-name descname"><span class="pre">LINK</span></code><em class="property"> <span class="pre">=</span> <span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.LINK" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.vendor.ipx.socket.Socket.LINK">
+<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'</span></em><a class="headerlink" href="#pcapkit.vendor.ipx.socket.Socket.LINK" title="Permalink to this definition">¶</a></dt>
 <dd><p>Link to registry.</p>
 </dd></dl>
 
@@ -167,8 +168,8 @@ List[str]: Missing fields.</p>
 <dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number">https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number</a></p>
 </dd>
 </dl>
-</div>
-</div>
+</section>
+</section>
 
 
           </div>

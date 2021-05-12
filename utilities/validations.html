@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Validation Utilities &#8212; PyPCAPKit 0.15.5 documentation</title>
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
     <script src="../_static/doctools.js"></script>
@@ -32,14 +33,14 @@
 
           <div class="body" role="main">
             
-  <div class="section" id="validation-utilities">
+  <section id="validation-utilities">
 <h1>Validation Utilities<a class="headerlink" href="#validation-utilities" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.utilities.validations" title="pcapkit.utilities.validations"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.validations</span></code></a> contains functions to
 validate arguments for functions and classes. It was first
 used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib">PyNTLib</a> as validators.</p>
 <span class="target" id="module-pcapkit.utilities.validations"></span><dl class="py function">
-<dt id="pcapkit.utilities.validations._ip_frag_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">_ip_frag_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#_ip_frag_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations._ip_frag_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations._ip_frag_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">_ip_frag_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#_ip_frag_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations._ip_frag_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are valid IP fragments (<a class="reference internal" href="../reassembly/ipv4.html#term-ipv4.packet"><span class="xref std std-term">IPv4</span></a> and/or <a class="reference internal" href="../reassembly/ipv6.html#term-ipv6.packet"><span class="xref std std-term">IPv6</span></a> packet).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -59,8 +60,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations._tcp_frag_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">_tcp_frag_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#_tcp_frag_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations._tcp_frag_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations._tcp_frag_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">_tcp_frag_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#_tcp_frag_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations._tcp_frag_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are valid TCP fragments (<a class="reference internal" href="../reassembly/tcp.html#term-tcp.packet"><span class="xref std std-term">TCP packet</span></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -77,8 +78,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.bool_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">bool_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bool_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.bool_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.bool_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">bool_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bool_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.bool_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <code class="docutils literal notranslate"><span class="pre">bool</span></code> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -94,8 +95,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.bytearray_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">bytearray_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bytearray_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.bytearray_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.bytearray_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">bytearray_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bytearray_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.bytearray_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <code class="docutils literal notranslate"><span class="pre">bytearray</span></code> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -111,8 +112,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.bytes_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">bytes_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bytes_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.bytes_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.bytes_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">bytes_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#bytes_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.bytes_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -128,8 +129,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.complex_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">complex_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#complex_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.complex_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.complex_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">complex_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#complex_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.complex_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <em>complex numbers</em> (<code class="docutils literal notranslate"><span class="pre">complex</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -145,8 +146,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.dict_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">dict_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#dict_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.dict_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.dict_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">dict_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#dict_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.dict_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -162,8 +163,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.enum_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">enum_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#enum_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.enum_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.enum_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">enum_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#enum_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.enum_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are of <em>enumeration protocol</em> type (<code class="docutils literal notranslate"><span class="pre">enum.EnumMeta</span></code> and/or <code class="docutils literal notranslate"><span class="pre">aenum.EnumMeta</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -180,8 +181,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.frag_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">frag_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#frag_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.frag_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.frag_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">frag_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#frag_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.frag_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are valid fragments.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -212,8 +213,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.info_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">info_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#info_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.info_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.info_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">info_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#info_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.info_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> instances.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -229,8 +230,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.int_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">int_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#int_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.int_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.int_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">int_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#int_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.int_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <em>integrals</em> (<code class="docutils literal notranslate"><span class="pre">int</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -246,8 +247,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.io_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">io_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#io_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.io_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.io_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">io_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#io_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.io_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <em>file-like object</em> (<code class="docutils literal notranslate"><span class="pre">io.IOBase</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -263,8 +264,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.ip_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">ip_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#ip_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.ip_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.ip_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">ip_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#ip_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.ip_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <em>IP addresses</em> (<code class="docutils literal notranslate"><span class="pre">ipaddress.IPv4Address</span></code> and/or <code class="docutils literal notranslate"><span class="pre">ipaddress.IPv6Address</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -281,8 +282,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.list_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">list_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#list_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.list_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.list_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">list_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#list_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.list_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <code class="docutils literal notranslate"><span class="pre">list</span></code> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -298,8 +299,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.number_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">number_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#number_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.number_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.number_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">number_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#number_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.number_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <em>numbers</em>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -315,8 +316,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.pkt_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">pkt_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#pkt_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.pkt_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.pkt_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">pkt_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#pkt_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.pkt_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are valid packets (<a class="reference internal" href="../foundation/traceflow.html#term-trace.packet"><span class="xref std std-term">TCP packet</span></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -336,8 +337,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.real_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">real_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#real_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.real_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.real_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">real_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#real_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.real_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <em>real numbers</em> (<code class="docutils literal notranslate"><span class="pre">int</span></code> and/or <code class="docutils literal notranslate"><span class="pre">float</span></code>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -353,8 +354,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.str_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">str_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#str_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.str_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.str_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">str_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#str_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.str_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -370,8 +371,8 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dd></dl>
 
 <dl class="py function">
-<dt id="pcapkit.utilities.validations.tuple_check">
-<code class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></code><code class="sig-name descname"><span class="pre">tuple_check</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#tuple_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.tuple_check" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.utilities.validations.tuple_check">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.validations.</span></span><span class="sig-name descname"><span class="pre">tuple_check</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stacklevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/utilities/validations.html#tuple_check"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.validations.tuple_check" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if arguments are <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.9)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tuple</span></code></a> type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -386,7 +387,7 @@ used in <a class="reference external" href="https://github.com/JarryShaw/pyntlib
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
           </div>
