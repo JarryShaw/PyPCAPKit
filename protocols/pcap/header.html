@@ -40,15 +40,15 @@
 which implements extractor for global headers
 <a class="footnote-reference brackets" href="#id2" id="id1">*</a> of PCAP, whose structure is described as
 below:</p>
-<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span> <span class="k">struct</span> <span class="nc">pcap_hdr_s</span> <span class="p">{</span>
-    <span class="n">guint32</span> <span class="n">magic_number</span><span class="p">;</span>   <span class="cm">/* magic number */</span>
-    <span class="n">guint16</span> <span class="n">version_major</span><span class="p">;</span>  <span class="cm">/* major version number */</span>
-    <span class="n">guint16</span> <span class="n">version_minor</span><span class="p">;</span>  <span class="cm">/* minor version number */</span>
-    <span class="n">gint32</span>  <span class="n">thiszone</span><span class="p">;</span>       <span class="cm">/* GMT to local correction */</span>
-    <span class="n">guint32</span> <span class="n">sigfigs</span><span class="p">;</span>        <span class="cm">/* accuracy of timestamps */</span>
-    <span class="n">guint32</span> <span class="n">snaplen</span><span class="p">;</span>        <span class="cm">/* max length of captured packets, in octets */</span>
-    <span class="n">guint32</span> <span class="n">network</span><span class="p">;</span>        <span class="cm">/* data link type */</span>
-<span class="p">}</span> <span class="n">pcap_hdr_t</span><span class="p">;</span>
+<div class="highlight-c notranslate"><div class="highlight"><pre><span></span><span class="k">typedef</span><span class="w"> </span><span class="k">struct</span> <span class="nc">pcap_hdr_s</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">magic_number</span><span class="p">;</span><span class="w">   </span><span class="cm">/* magic number */</span><span class="w"></span>
+<span class="w">    </span><span class="n">guint16</span><span class="w"> </span><span class="n">version_major</span><span class="p">;</span><span class="w">  </span><span class="cm">/* major version number */</span><span class="w"></span>
+<span class="w">    </span><span class="n">guint16</span><span class="w"> </span><span class="n">version_minor</span><span class="p">;</span><span class="w">  </span><span class="cm">/* minor version number */</span><span class="w"></span>
+<span class="w">    </span><span class="n">gint32</span><span class="w">  </span><span class="n">thiszone</span><span class="p">;</span><span class="w">       </span><span class="cm">/* GMT to local correction */</span><span class="w"></span>
+<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">sigfigs</span><span class="p">;</span><span class="w">        </span><span class="cm">/* accuracy of timestamps */</span><span class="w"></span>
+<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">snaplen</span><span class="p">;</span><span class="w">        </span><span class="cm">/* max length of captured packets, in octets */</span><span class="w"></span>
+<span class="w">    </span><span class="n">guint32</span><span class="w"> </span><span class="n">network</span><span class="p">;</span><span class="w">        </span><span class="cm">/* data link type */</span><span class="w"></span>
+<span class="p">}</span><span class="w"> </span><span class="n">pcap_hdr_t</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
 <br /><span class="target" id="module-pcapkit.protocols.pcap.header"></span><dl class="py class">
