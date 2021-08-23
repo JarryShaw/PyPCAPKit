@@ -212,11 +212,11 @@
         },
         "dpkt": {
             "hashes": [
-                "sha256:b1739c594297b2b6321dfbf133e3f8dcf54c0ef54cb5739d204331d34a0d8fe4",
-                "sha256:b5737010fd420d142e02ed04fa616edd1fc05e414980baef594f72287c875eef"
+                "sha256:2f26b84c97cfa31250b2399060900a987dd53653e06889c0fb1188da8833055f",
+                "sha256:74899d557ec4e337db29cecc80548b23a1205384d30ee407397cfb9ab178e3d4"
             ],
             "index": "tuna",
-            "version": "==1.9.6"
+            "version": "==1.9.7.1"
         },
         "gitdb": {
             "hashes": [
@@ -530,11 +530,11 @@
         },
         "prompt-toolkit": {
             "hashes": [
-                "sha256:08360ee3a3148bdb5163621709ee322ec34fc4375099afa4bbf751e9b7b7fa4f",
-                "sha256:7089d8d2938043508aa9420ec18ce0922885304cddae87fb96eebca942299f88"
+                "sha256:6076e46efae19b1e0ca1ec003ed37a933dc94b4d20f486235d436e64771dcd5c",
+                "sha256:eb71d5a6b72ce6db177af4a7d4d7085b99756bf656d98ffcc4fecd36850eea6c"
             ],
-            "markers": "python_full_version >= '3.6.1'",
-            "version": "==3.0.19"
+            "markers": "python_full_version >= '3.6.2'",
+            "version": "==3.0.20"
         },
         "ptyprocess": {
             "hashes": [
@@ -759,11 +759,11 @@
         },
         "stevedore": {
             "hashes": [
-                "sha256:3a5bbd0652bf552748871eaa73a4a8dc2899786bc497a2aa1fcb4dcdb0debeee",
-                "sha256:50d7b78fbaf0d04cd62411188fa7eedcb03eb7f4c4b37005615ceebe582aa82a"
+                "sha256:59b58edb7f57b11897f150475e7bc0c39c5381f0b8e3fa9f5c20ce6c89ec4aa1",
+                "sha256:920ce6259f0b2498aaa4545989536a27e4e4607b8318802d7ddc3a533d3d069e"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==3.3.0"
+            "version": "==3.4.0"
         },
         "toml": {
             "hashes": [
