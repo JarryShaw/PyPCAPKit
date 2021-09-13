@@ -127,12 +127,11 @@
                 "html5lib"
             ],
             "hashes": [
-                "sha256:4c98143716ef1cb40bf7f39a8e3eec8f8b009509e74904ba3a7b315431577e35",
-                "sha256:84729e322ad1d5b4d25f805bfa05b902dd96450f43842c4e99067d5e1369eb25",
-                "sha256:fff47e031e34ec82bf17e00da8f592fe7de69aeea38be00523c04623c04fb666"
+                "sha256:9a315ce70049920ea4572a4055bc4bd700c940521d36fc858205ad4fcde149bf",
+                "sha256:c23ad23c521d818955a4151a67d81580319d4bf548d3d49f4223ae041ff98891"
             ],
             "index": "tuna",
-            "version": "==4.9.3"
+            "version": "==4.10.0"
         },
         "certifi": {
             "hashes": [
@@ -196,11 +195,11 @@
         },
         "decorator": {
             "hashes": [
-                "sha256:6e5c199c16f7a9f0e3a61a4a54b3d27e7dad0dbdde92b944426cb20914376323",
-                "sha256:72ecfba4320a893c53f9706bebb2d55c270c1e51a28789361aa93e4a21319ed5"
+                "sha256:7b12e7c3c6ab203a29e157335e9122cb03de9ab7264b137594103fd4a683b374",
+                "sha256:e59913af105b9860aa2c8d3272d9de5a56a4e608db9a2f167a8480b323d529a7"
             ],
             "markers": "python_version >= '3.5'",
-            "version": "==5.0.9"
+            "version": "==5.1.0"
         },
         "docutils": {
             "hashes": [
@@ -433,11 +432,11 @@
         },
         "matplotlib-inline": {
             "hashes": [
-                "sha256:5cf1176f554abb4fa98cb362aa2b55c500147e4bdbb07e3fda359143e1da0811",
-                "sha256:f41d5ff73c9f5385775d5c0bc13b424535c8402fe70ea8210f93e11f3683993e"
+                "sha256:a04bfba22e0d1395479f866853ec1ee28eea1485c1d69a6faf00dc3e24ff34ee",
+                "sha256:aed605ba3b72462d64d475a21a9296f400a19c4f74a31b59103d2a99ffd5aa5c"
             ],
             "markers": "python_version >= '3.5'",
-            "version": "==0.1.2"
+            "version": "==0.1.3"
         },
         "mccabe": {
             "hashes": [
@@ -570,11 +569,11 @@
         },
         "pyparsing": {
             "hashes": [
-                "sha256:10f1886e70da7b76ca1b4cf9bbd60f708ef037892496d5cb7c77ab2982412b2d",
-                "sha256:e96a96967098a5221a78bf94d72930cd1cfaf0ab88dae2ea6bfc2b8b8ccb1930"
+                "sha256:14e99e14e11a14cadf4d99effd4c5c30a9f46b116551ee69b4e5f8f6004f62d5",
+                "sha256:61b247121581f50c7988eece6ebb2d87ccc3be46c5552daf910d56e20cf6da75"
             ],
             "markers": "python_version >= '3.5'",
-            "version": "==3.0.0b3"
+            "version": "==3.0.0rc1"
         },
         "pypcapkit": {
             "editable": true,
@@ -691,16 +690,16 @@
                 "sha256:052774848f448cf19c7e959adf5566904d525f33a3f8b6ba6f6f8f26ec7de0cc",
                 "sha256:c2c1c2d44f158cdbddab7824a9af8c4f83c76b1e23e049479aa432feb6c4c23b"
             ],
-            "markers": "python_version >= '3'",
+            "markers": "python_version >= '3.6'",
             "version": "==2.2.1"
         },
         "sphinx": {
             "hashes": [
-                "sha256:3092d929cd807926d846018f2ace47ba2f3b671b309c7a89cd3306e80c826b13",
-                "sha256:46d52c6cee13fec44744b8c01ed692c18a640f6910a725cbb938bc36e8d64544"
+                "sha256:94078db9184491e15bce0a56d9186e0aec95f16ac20b12d00e06d4e36f1058a6",
+                "sha256:98a535c62a4fcfcc362528592f69b26f7caec587d32cd55688db580be0287ae0"
             ],
             "index": "tuna",
-            "version": "==4.1.2"
+            "version": "==4.2.0"
         },
         "sphinxcontrib-applehelp": {
             "hashes": [
