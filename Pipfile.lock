@@ -53,10 +53,10 @@
         },
         "emoji": {
             "hashes": [
-                "sha256:21257f311e24468031e85685867c00b87249dc7612b82dc763a771ba5fb00c01"
+                "sha256:2eddd062f940924fb25a3108d84d77dc571927d91a419b4c30f37e253c791b19"
             ],
             "index": "tuna",
-            "version": "==1.4.2"
+            "version": "==1.5.0"
         },
         "tbtrim": {
             "hashes": [
@@ -142,11 +142,11 @@
         },
         "charset-normalizer": {
             "hashes": [
-                "sha256:0c8911edd15d19223366a194a513099a302055a962bca2cec0f54b8b63175d8b",
-                "sha256:f23667ebe1084be45f6ae0538e4a5a865206544097e4e8bbcacf42cd02a348f3"
+                "sha256:5d209c0a931f215cee683b6445e2d77677e7e75e159f78def0db09d68fafcaa6",
+                "sha256:5ec46d183433dcbd0ab716f2d7f29d8dee50505b3fdb40c6b985c7c4f5a3591f"
             ],
             "markers": "python_version >= '3'",
-            "version": "==2.0.4"
+            "version": "==2.0.6"
         },
         "codecov": {
             "hashes": [
@@ -227,11 +227,11 @@
         },
         "gitpython": {
             "hashes": [
-                "sha256:b838a895977b45ab6f0cc926a9045c8d1c44e2b653c1fcc39fe91f42c6e8f05b",
-                "sha256:fce760879cd2aebd2991b3542876dc5c4a909b30c9d69dfc488e504a8db37ee8"
+                "sha256:dc0a7f2f697657acc8d7f89033e8b1ea94dd90356b2983bca89dc8d2ab3cc647",
+                "sha256:df83fdf5e684fef7c6ee2c02fc68a5ceb7e7e759d08b694088d0cacb4eba59e5"
             ],
-            "markers": "python_version >= '3.6'",
-            "version": "==3.1.18"
+            "markers": "python_version >= '3.7'",
+            "version": "==3.1.24"
         },
         "html5lib": {
             "hashes": [
@@ -779,6 +779,7 @@
                 "sha256:d8226d10bc02a29bcc81df19a26e56a9647f8b0a6d4a83924139f4a8b01f17b7",
                 "sha256:f1d25edafde516b146ecd0613dabcc61409817af4766fbbcfb8d1ad4ec441a34"
             ],
+            "markers": "python_version < '3.10'",
             "version": "==3.10.0.2"
         },
         "urllib3": {
