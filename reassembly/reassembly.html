@@ -42,7 +42,7 @@ bases on algorithms described in <span class="target" id="index-0"></span><a cla
 datagram reassembly of IP and TCP packets.</p>
 <span class="target" id="module-pcapkit.reassembly.reassembly"></span><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.reassembly.reassembly.Reassembly">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/reassembly.html#Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.reassembly.reassembly.</span></span><span class="sig-name descname"><span class="pre">Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/reassembly.html#Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class for reassembly procedure.</p>
 <dl class="py method">
@@ -112,7 +112,7 @@ if not found, returns <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.reassembly.reassembly.Reassembly.reassembly">
-<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/reassembly.html#Reassembly.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.reassembly" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/reassembly.html#Reassembly.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.reassembly" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reassembly procedure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -134,7 +134,7 @@ if not found, returns <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.reassembly.reassembly.Reassembly.submit">
-<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/reassembly.html#Reassembly.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.submit" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/reassembly.html#Reassembly.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.submit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Submit reassembled payload.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -179,7 +179,7 @@ if not found, returns <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.reassembly.reassembly.Reassembly.count">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">count</span></span><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.count" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">count</span></span><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.count" title="Permalink to this definition">¶</a></dt>
 <dd><p>Total number of reassembled packets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -190,7 +190,7 @@ if not found, returns <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.reassembly.reassembly.Reassembly.datagram">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">datagram</span></span><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.datagram" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">datagram</span></span><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.datagram" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reassembled datagram.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -201,7 +201,7 @@ if not found, returns <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.reassembly.reassembly.Reassembly.name">
-<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol of current packet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -212,7 +212,7 @@ if not found, returns <code class="docutils literal notranslate"><span class="pr
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.reassembly.reassembly.Reassembly.protocol">
-<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">protocol</span></span><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><a class="headerlink" href="#pcapkit.reassembly.reassembly.Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol of current reassembly object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>

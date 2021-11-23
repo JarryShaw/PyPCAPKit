@@ -35,143 +35,14 @@
             
   <section id="module-pcapkit.vendor.http">
 <span id="http-vendor-crawler"></span><h1>HTTP Vendor Crawler<a class="headerlink" href="#module-pcapkit.vendor.http" title="Permalink to this headline">¶</a></h1>
-<section id="module-pcapkit.vendor.http.error_code">
-<span id="http-2-error-code"></span><h2>HTTP/2 Error Code <a class="footnote-reference brackets" href="#id4" id="id1">*</a><a class="headerlink" href="#module-pcapkit.vendor.http.error_code" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.error_code.ErrorCode">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.http.error_code.</span></span><span class="sig-name descname"><span class="pre">ErrorCode</span></span><a class="reference internal" href="../_modules/pcapkit/vendor/http/error_code.html#ErrorCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.error_code.ErrorCode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
-<p>HTTP/2 Error Code</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.error_code.ErrorCode.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/http/error_code.html#ErrorCode.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.error_code.ErrorCode.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – CSV data.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Enumeration fields.
-List[str]: Missing fields.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.error_code.ErrorCode.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x00000000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFFFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.http.error_code.ErrorCode.FLAG" title="Permalink to this definition">¶</a></dt>
-<dd><p>Value limit checker.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.error_code.ErrorCode.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://www.iana.org/assignments/http2-parameters/error-code.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.http.error_code.ErrorCode.LINK" title="Permalink to this definition">¶</a></dt>
-<dd><p>Link to registry.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.error_code.hexlify">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.http.error_code.</span></span><span class="sig-name descname"><span class="pre">hexlify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/http/error_code.html#hexlify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.error_code.hexlify" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert code to hex form.</p>
-</dd></dl>
-
+<section id="http-2-error-code">
+<h2>HTTP/2 Error Code <a class="footnote-reference brackets" href="#id4" id="id1">*</a><a class="headerlink" href="#http-2-error-code" title="Permalink to this headline">¶</a></h2>
 </section>
-<section id="module-pcapkit.vendor.http.frame">
-<span id="http-2-frame-type"></span><h2>HTTP/2 Frame Type <a class="footnote-reference brackets" href="#id5" id="id2">†</a><a class="headerlink" href="#module-pcapkit.vendor.http.frame" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.frame.Frame">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.http.frame.</span></span><span class="sig-name descname"><span class="pre">Frame</span></span><a class="reference internal" href="../_modules/pcapkit/vendor/http/frame.html#Frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.frame.Frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
-<p>HTTP/2 Frame Type</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.frame.Frame.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/http/frame.html#Frame.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.frame.Frame.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – CSV data.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Enumeration fields.
-List[str]: Missing fields.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.frame.Frame.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x00</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFF'</span></em><a class="headerlink" href="#pcapkit.vendor.http.frame.Frame.FLAG" title="Permalink to this definition">¶</a></dt>
-<dd><p>Value limit checker.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.frame.Frame.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://www.iana.org/assignments/http2-parameters/frame-type.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.http.frame.Frame.LINK" title="Permalink to this definition">¶</a></dt>
-<dd><p>Link to registry.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.frame.hexlify">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.http.frame.</span></span><span class="sig-name descname"><span class="pre">hexlify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/http/frame.html#hexlify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.frame.hexlify" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert code to hex form.</p>
-</dd></dl>
-
+<section id="http-2-frame-type">
+<h2>HTTP/2 Frame Type <a class="footnote-reference brackets" href="#id5" id="id2">†</a><a class="headerlink" href="#http-2-frame-type" title="Permalink to this headline">¶</a></h2>
 </section>
-<section id="module-pcapkit.vendor.http.setting">
-<span id="http-2-settings"></span><h2>HTTP/2 Settings <a class="footnote-reference brackets" href="#id6" id="id3">‡</a><a class="headerlink" href="#module-pcapkit.vendor.http.setting" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.setting.Setting">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.http.setting.</span></span><span class="sig-name descname"><span class="pre">Setting</span></span><a class="reference internal" href="../_modules/pcapkit/vendor/http/setting.html#Setting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.setting.Setting" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.vendor.default.Vendor" title="pcapkit.vendor.default.Vendor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.default.Vendor</span></code></a></p>
-<p>HTTP/2 Settings</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.setting.Setting.process">
-<span class="sig-name descname"><span class="pre">process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/http/setting.html#Setting.process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.setting.Setting.process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Process CSV data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – CSV data.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Enumeration fields.
-List[str]: Missing fields.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>List[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.setting.Setting.FLAG">
-<span class="sig-name descname"><span class="pre">FLAG</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'isinstance(value,</span> <span class="pre">int)</span> <span class="pre">and</span> <span class="pre">0x0000</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">0xFFFF'</span></em><a class="headerlink" href="#pcapkit.vendor.http.setting.Setting.FLAG" title="Permalink to this definition">¶</a></dt>
-<dd><p>Value limit checker.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.setting.Setting.LINK">
-<span class="sig-name descname"><span class="pre">LINK</span></span><em class="property"> <span class="pre">=</span> <span class="pre">'https://www.iana.org/assignments/http2-parameters/settings.csv'</span></em><a class="headerlink" href="#pcapkit.vendor.http.setting.Setting.LINK" title="Permalink to this definition">¶</a></dt>
-<dd><p>Link to registry.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.vendor.http.setting.hexlify">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.vendor.http.setting.</span></span><span class="sig-name descname"><span class="pre">hexlify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/vendor/http/setting.html#hexlify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.vendor.http.setting.hexlify" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert code to hex form.</p>
-</dd></dl>
-
+<section id="http-2-settings">
+<h2>HTTP/2 Settings <a class="footnote-reference brackets" href="#id6" id="id3">‡</a><a class="headerlink" href="#http-2-settings" title="Permalink to this headline">¶</a></h2>
 <hr /><dl class="footnote brackets">
 <dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
 <dd><p><a class="reference external" href="https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#error-code">https://www.iana.org/assignments/http2-parameters/http2-parameters.xhtml#error-code</a></p>

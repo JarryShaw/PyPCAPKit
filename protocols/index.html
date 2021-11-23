@@ -95,12 +95,12 @@ with detailed implementation and methods.</p>
 <h2>Base Protocol<a class="headerlink" href="#base-protocol" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.protocol.</span></span><span class="sig-name descname"><span class="pre">Protocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.protocol.</span></span><span class="sig-name descname"><span class="pre">Protocol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Abstract base class for all protocol family.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__layer__">
-<span class="sig-name descname"><span class="pre">__layer__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">None</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__layer__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__layer__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__layer__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Layer of protocol.
 Can be one of <code class="docutils literal notranslate"><span class="pre">Link</span></code>, <code class="docutils literal notranslate"><span class="pre">Internet</span></code>, <code class="docutils literal notranslate"><span class="pre">Transport</span></code> and <code class="docutils literal notranslate"><span class="pre">Application</span></code>.</p>
 <dl class="field-list simple">
@@ -112,7 +112,7 @@ Can be one of <code class="docutils literal notranslate"><span class="pre">Link<
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__proto__">
-<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"> <span class="pre">=</span> <span class="pre">{}</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__proto__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__proto__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol index mapping for decoding next layer,
 c.f. <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
 &amp; <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
@@ -149,7 +149,7 @@ The values should be a tuple representing the module name and class name.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__eq__">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__eq__" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__eq__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.__eq__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__eq__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns if <code class="docutils literal notranslate"><span class="pre">other</span></code> is of the same protocol as the current object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -203,7 +203,7 @@ the method will fetch its indexes (<a class="reference internal" href="#pcapkit.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.__index__">
-<em class="property"><span class="pre">abstract</span> <span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__index__" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.__index__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Numeral registry index of the protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -343,7 +343,7 @@ the method will fetch its indexes (<a class="reference internal" href="#pcapkit.
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._make_index">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lilendian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol._make_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._make_index" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_make_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">namespace</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reversed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lilendian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol._make_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._make_index" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return first index of <code class="docutils literal notranslate"><span class="pre">name</span></code> from a <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> or enumeration.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -379,7 +379,7 @@ returns <a class="reference external" href="https://docs.python.org/3/library/fu
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol._make_pack">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_make_pack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lilendian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol._make_pack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._make_pack" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_make_pack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">integer</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">signed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lilendian</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol._make_pack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol._make_pack" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pack integers to bytes.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -525,7 +525,7 @@ returns <a class="reference external" href="https://docs.python.org/3/library/fu
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.decode">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">byte</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.decode" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">byte</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'strict'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.decode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.decode" title="Permalink to this definition">¶</a></dt>
 <dd><p>Decode <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>.</p>
 <p>Should decoding failed using <code class="docutils literal notranslate"><span class="pre">encoding</span></code>, the method will try again decoding
 the <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a> as <code class="docutils literal notranslate"><span class="pre">'unicode_escape'</span></code>.</p>
@@ -560,7 +560,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.id">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.id" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.id" title="Permalink to this definition">¶</a></dt>
 <dd><p>Index ID of the protocol.</p>
 <p>By default, it returns the name of the protocol.</p>
 <dl class="field-list simple">
@@ -579,7 +579,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.make">
-<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.make" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.make" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Keyword Arguments</dt>
@@ -596,7 +596,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.read">
-<em class="property"><span class="pre">abstract</span> </em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.read" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.read" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read (parse) packet data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -616,7 +616,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.unquote">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">unquote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'replace'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.unquote"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.unquote" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">unquote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'replace'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/protocols/protocol.html#Protocol.unquote"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.unquote" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unquote URLs into readable format.</p>
 <p>Should decoding failed , the method will try again replacing <code class="docutils literal notranslate"><span class="pre">'%'</span></code> with <code class="docutils literal notranslate"><span class="pre">'\x'</span></code> then
 decoding the <code class="docutils literal notranslate"><span class="pre">url</span></code> as <code class="docutils literal notranslate"><span class="pre">'unicode_escape'</span></code>.</p>
@@ -704,7 +704,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.alias">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">alias</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.alias" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alias</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.alias" title="Permalink to this definition">¶</a></dt>
 <dd><p>Acronym of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -715,7 +715,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.data">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.data" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Binary packet data of current instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -726,7 +726,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.info">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">info</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.info" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">info</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.info" title="Permalink to this definition">¶</a></dt>
 <dd><p>Info dict of current instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -737,7 +737,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.length">
-<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.length" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -748,7 +748,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.name">
-<em class="property"><span class="pre">abstract</span> <span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -759,7 +759,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.payload">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">payload</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.payload" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">payload</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.payload" title="Permalink to this definition">¶</a></dt>
 <dd><p>Payload of current instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -770,7 +770,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.protochain">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">protochain</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.protochain" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protochain</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.protochain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol chain of current instance.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -781,7 +781,7 @@ can handle <a class="reference external" href="https://docs.python.org/3/library
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.protocol.Protocol.protocol">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">protocol</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.protocol" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><a class="headerlink" href="#pcapkit.protocols.protocol.Protocol.protocol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of next layer protocol (if any).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>

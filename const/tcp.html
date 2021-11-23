@@ -39,39 +39,39 @@
 <span id="tcp-checksum"></span><h2>TCP Checksum <a class="footnote-reference brackets" href="#id7" id="id1">*</a><a class="headerlink" href="#module-pcapkit.const.tcp.checksum" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.checksum.</span></span><span class="sig-name descname"><span class="pre">Checksum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">value=&lt;no_arg&gt;</span></em>, <em class="sig-param"><span class="pre">names=None</span></em>, <em class="sig-param"><span class="pre">module=None</span></em>, <em class="sig-param"><span class="pre">type=None</span></em>, <em class="sig-param"><span class="pre">start=1</span></em>, <em class="sig-param"><span class="pre">boundary=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/checksum.html#Checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.checksum.</span></span><span class="sig-name descname"><span class="pre">Checksum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/checksum.html#Checksum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[Checksum] TCP Checksum [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1146.html"><strong>RFC 1146</strong></a>]</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum._missing_">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/checksum.html#Checksum._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum._missing_" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/checksum.html#Checksum._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum._missing_" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.get">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/checksum.html#Checksum.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.get" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/checksum.html#Checksum.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backport support for original codes.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.Checksum_16_bit_Fletcher_s_algorithm">
-<span class="sig-name descname"><span class="pre">Checksum_16_bit_Fletcher_s_algorithm</span></span><em class="property"> <span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_16_bit_Fletcher_s_algorithm" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Checksum_16_bit_Fletcher_s_algorithm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_16_bit_Fletcher_s_algorithm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.Checksum_8_bit_Fletcher_s_algorithm">
-<span class="sig-name descname"><span class="pre">Checksum_8_bit_Fletcher_s_algorithm</span></span><em class="property"> <span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_8_bit_Fletcher_s_algorithm" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Checksum_8_bit_Fletcher_s_algorithm</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Checksum_8_bit_Fletcher_s_algorithm" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.Redundant_Checksum_Avoidance">
-<span class="sig-name descname"><span class="pre">Redundant_Checksum_Avoidance</span></span><em class="property"> <span class="pre">=</span> <span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Redundant_Checksum_Avoidance" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Redundant_Checksum_Avoidance</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.Redundant_Checksum_Avoidance" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.checksum.Checksum.TCP_checksum">
-<span class="sig-name descname"><span class="pre">TCP_checksum</span></span><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.TCP_checksum" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TCP_checksum</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.checksum.Checksum.TCP_checksum" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -81,273 +81,273 @@
 <span id="tcp-option-kind-numbers"></span><h2>TCP Option Kind Numbers <a class="footnote-reference brackets" href="#id8" id="id2">†</a><a class="headerlink" href="#module-pcapkit.const.tcp.option" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.option.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">value=&lt;no_arg&gt;</span></em>, <em class="sig-param"><span class="pre">names=None</span></em>, <em class="sig-param"><span class="pre">module=None</span></em>, <em class="sig-param"><span class="pre">type=None</span></em>, <em class="sig-param"><span class="pre">start=1</span></em>, <em class="sig-param"><span class="pre">boundary=None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/option.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.tcp.option.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/option.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[Option] TCP Option Kind Numbers</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option._missing_">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/option.html#Option._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option._missing_" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/option.html#Option._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option._missing_" title="Permalink to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.get">
-<em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/option.html#Option.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option.get" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/const/tcp/option.html#Option.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.tcp.option.Option.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Backport support for original codes.</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.AO">
-<span class="sig-name descname"><span class="pre">AO</span></span><em class="property"> <span class="pre">=</span> <span class="pre">29</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.AO" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">AO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.AO" title="Permalink to this definition">¶</a></dt>
 <dd><p>TCP Authentication Option (TCP-AO) [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5925.html"><strong>RFC 5925</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Bubba">
-<span class="sig-name descname"><span class="pre">Bubba</span></span><em class="property"> <span class="pre">=</span> <span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Bubba" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Bubba</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Bubba" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bubba [Stev Knowles]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.CC">
-<span class="sig-name descname"><span class="pre">CC</span></span><em class="property"> <span class="pre">=</span> <span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CC" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CC" title="Permalink to this definition">¶</a></dt>
 <dd><p>CC (obsolete) [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1644.html"><strong>RFC 1644</strong></a>][<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.CCECHO">
-<span class="sig-name descname"><span class="pre">CCECHO</span></span><em class="property"> <span class="pre">=</span> <span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CCECHO" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CCECHO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CCECHO" title="Permalink to this definition">¶</a></dt>
 <dd><p>CC.ECHO (obsolete) [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1644.html"><strong>RFC 1644</strong></a>][<span class="target" id="index-5"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.CCNEW">
-<span class="sig-name descname"><span class="pre">CCNEW</span></span><em class="property"> <span class="pre">=</span> <span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CCNEW" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CCNEW</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CCNEW" title="Permalink to this definition">¶</a></dt>
 <dd><p>CC.NEW (obsolete) [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1644.html"><strong>RFC 1644</strong></a>][<span class="target" id="index-7"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.CHKREQ">
-<span class="sig-name descname"><span class="pre">CHKREQ</span></span><em class="property"> <span class="pre">=</span> <span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CHKREQ" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CHKREQ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CHKREQ" title="Permalink to this definition">¶</a></dt>
 <dd><p>TCP Alternate Checksum Request (obsolete) [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1146.html"><strong>RFC 1146</strong></a>][<span class="target" id="index-9"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.CHKSUM">
-<span class="sig-name descname"><span class="pre">CHKSUM</span></span><em class="property"> <span class="pre">=</span> <span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CHKSUM" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">CHKSUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.CHKSUM" title="Permalink to this definition">¶</a></dt>
 <dd><p>TCP Alternate Checksum Data (obsolete) [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1146.html"><strong>RFC 1146</strong></a>][<span class="target" id="index-11"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Corruption_experienced">
-<span class="sig-name descname"><span class="pre">Corruption_experienced</span></span><em class="property"> <span class="pre">=</span> <span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Corruption_experienced" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Corruption_experienced</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Corruption_experienced" title="Permalink to this definition">¶</a></dt>
 <dd><p>Corruption experienced [Keith Scott]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.ECHO">
-<span class="sig-name descname"><span class="pre">ECHO</span></span><em class="property"> <span class="pre">=</span> <span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.ECHO" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ECHO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.ECHO" title="Permalink to this definition">¶</a></dt>
 <dd><p>Echo (obsoleted by option 8) [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1072.html"><strong>RFC 1072</strong></a>][<span class="target" id="index-13"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.ECHORE">
-<span class="sig-name descname"><span class="pre">ECHORE</span></span><em class="property"> <span class="pre">=</span> <span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.ECHORE" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ECHORE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.ECHORE" title="Permalink to this definition">¶</a></dt>
 <dd><p>Echo Reply (obsoleted by option 8) [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1072.html"><strong>RFC 1072</strong></a>][<span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.EOOL">
-<span class="sig-name descname"><span class="pre">EOOL</span></span><em class="property"> <span class="pre">=</span> <span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.EOOL" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">EOOL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.EOOL" title="Permalink to this definition">¶</a></dt>
 <dd><p>End of Option List [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc793.html"><strong>RFC 793</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Encryption_Negotiation">
-<span class="sig-name descname"><span class="pre">Encryption_Negotiation</span></span><em class="property"> <span class="pre">=</span> <span class="pre">69</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Encryption_Negotiation" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Encryption_Negotiation</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">69</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Encryption_Negotiation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Encryption Negotiation (TCP-ENO) [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8547.html"><strong>RFC 8547</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.FASTOPEN">
-<span class="sig-name descname"><span class="pre">FASTOPEN</span></span><em class="property"> <span class="pre">=</span> <span class="pre">34</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.FASTOPEN" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">FASTOPEN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.FASTOPEN" title="Permalink to this definition">¶</a></dt>
 <dd><p>TCP Fast Open Cookie [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7413.html"><strong>RFC 7413</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.MP">
-<span class="sig-name descname"><span class="pre">MP</span></span><em class="property"> <span class="pre">=</span> <span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.MP" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.MP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Multipath TCP (MPTCP) [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8684.html"><strong>RFC 8684</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.MSS">
-<span class="sig-name descname"><span class="pre">MSS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.MSS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">MSS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.MSS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Maximum Segment Size [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc793.html"><strong>RFC 793</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.NOP">
-<span class="sig-name descname"><span class="pre">NOP</span></span><em class="property"> <span class="pre">=</span> <span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.NOP" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">NOP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.NOP" title="Permalink to this definition">¶</a></dt>
 <dd><p>No-Operation [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc793.html"><strong>RFC 793</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.POC">
-<span class="sig-name descname"><span class="pre">POC</span></span><em class="property"> <span class="pre">=</span> <span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.POC" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">POC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.POC" title="Permalink to this definition">¶</a></dt>
 <dd><p>Partial Order Connection Permitted (obsolete) [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-23"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.POCSP">
-<span class="sig-name descname"><span class="pre">POCSP</span></span><em class="property"> <span class="pre">=</span> <span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.POCSP" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">POCSP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.POCSP" title="Permalink to this definition">¶</a></dt>
 <dd><p>Partial Order Service Profile (obsolete) [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-25"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6247.html"><strong>RFC 6247</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.QS">
-<span class="sig-name descname"><span class="pre">QS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">27</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.QS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">QS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.QS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Quick-Start Response [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4782.html"><strong>RFC 4782</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_1">
-<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_1</span></span><em class="property"> <span class="pre">=</span> <span class="pre">253</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_1" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">253</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_1" title="Permalink to this definition">¶</a></dt>
 <dd><p>RFC3692-style Experiment 1 (also improperly used for shipping
 products) [*] [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_2">
-<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_2</span></span><em class="property"> <span class="pre">=</span> <span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_2" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.RFC3692_style_Experiment_2" title="Permalink to this definition">¶</a></dt>
 <dd><p>RFC3692-style Experiment 2 (also improperly used for shipping
 products) [*] [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Record_Boundaries">
-<span class="sig-name descname"><span class="pre">Record_Boundaries</span></span><em class="property"> <span class="pre">=</span> <span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Record_Boundaries" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Record_Boundaries</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Record_Boundaries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Record Boundaries [Keith Scott]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_31">
-<span class="sig-name descname"><span class="pre">Reserved_31</span></span><em class="property"> <span class="pre">=</span> <span class="pre">31</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_31" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_31</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_31" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_32">
-<span class="sig-name descname"><span class="pre">Reserved_32</span></span><em class="property"> <span class="pre">=</span> <span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_32" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_32</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_32" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_33">
-<span class="sig-name descname"><span class="pre">Reserved_33</span></span><em class="property"> <span class="pre">=</span> <span class="pre">33</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_33" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_33</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_33" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_70">
-<span class="sig-name descname"><span class="pre">Reserved_70</span></span><em class="property"> <span class="pre">=</span> <span class="pre">70</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_70" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_70</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">70</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_70" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_76">
-<span class="sig-name descname"><span class="pre">Reserved_76</span></span><em class="property"> <span class="pre">=</span> <span class="pre">76</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_76" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_76</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">76</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_76" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_77">
-<span class="sig-name descname"><span class="pre">Reserved_77</span></span><em class="property"> <span class="pre">=</span> <span class="pre">77</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_77" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_77</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">77</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_77" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Reserved_78">
-<span class="sig-name descname"><span class="pre">Reserved_78</span></span><em class="property"> <span class="pre">=</span> <span class="pre">78</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_78" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Reserved_78</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">78</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Reserved_78" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reserved (known unauthorized use without proper IANA assignment) [**]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SACK">
-<span class="sig-name descname"><span class="pre">SACK</span></span><em class="property"> <span class="pre">=</span> <span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SACK" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SACK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SACK" title="Permalink to this definition">¶</a></dt>
 <dd><p>SACK [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2018.html"><strong>RFC 2018</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SACKPMT">
-<span class="sig-name descname"><span class="pre">SACKPMT</span></span><em class="property"> <span class="pre">=</span> <span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SACKPMT" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SACKPMT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SACKPMT" title="Permalink to this definition">¶</a></dt>
 <dd><p>SACK Permitted [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2018.html"><strong>RFC 2018</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SCPS_Capabilities">
-<span class="sig-name descname"><span class="pre">SCPS_Capabilities</span></span><em class="property"> <span class="pre">=</span> <span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SCPS_Capabilities" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SCPS_Capabilities</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SCPS_Capabilities" title="Permalink to this definition">¶</a></dt>
 <dd><p>SCPS Capabilities [Keith Scott]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SIG">
-<span class="sig-name descname"><span class="pre">SIG</span></span><em class="property"> <span class="pre">=</span> <span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SIG" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SIG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SIG" title="Permalink to this definition">¶</a></dt>
 <dd><p>MD5 Signature Option (obsoleted by option 29) [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2385.html"><strong>RFC 2385</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.SNAP">
-<span class="sig-name descname"><span class="pre">SNAP</span></span><em class="property"> <span class="pre">=</span> <span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SNAP" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">SNAP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.SNAP" title="Permalink to this definition">¶</a></dt>
 <dd><p>SNAP [Vladimir Sukonnik]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Selective_Negative_Acknowledgements">
-<span class="sig-name descname"><span class="pre">Selective_Negative_Acknowledgements</span></span><em class="property"> <span class="pre">=</span> <span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Selective_Negative_Acknowledgements" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Selective_Negative_Acknowledgements</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Selective_Negative_Acknowledgements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Selective Negative Acknowledgements [Keith Scott]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Skeeter">
-<span class="sig-name descname"><span class="pre">Skeeter</span></span><em class="property"> <span class="pre">=</span> <span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Skeeter" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Skeeter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Skeeter" title="Permalink to this definition">¶</a></dt>
 <dd><p>Skeeter [Stev Knowles]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.TCP_Compression_Filter">
-<span class="sig-name descname"><span class="pre">TCP_Compression_Filter</span></span><em class="property"> <span class="pre">=</span> <span class="pre">26</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Compression_Filter" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TCP_Compression_Filter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TCP_Compression_Filter" title="Permalink to this definition">¶</a></dt>
 <dd><p>TCP Compression Filter [Steve Bellovin]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.TIMEOUT">
-<span class="sig-name descname"><span class="pre">TIMEOUT</span></span><em class="property"> <span class="pre">=</span> <span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TIMEOUT" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TIMEOUT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TIMEOUT" title="Permalink to this definition">¶</a></dt>
 <dd><p>User Timeout Option (also, other known unauthorized use) [<a href="#id3"><span class="problematic" id="id4">**</span></a><a href="#id5"><span class="problematic" id="id6">*</span></a>][1]
 [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5482.html"><strong>RFC 5482</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.TS">
-<span class="sig-name descname"><span class="pre">TS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">TS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.TS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Timestamps [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7323.html"><strong>RFC 7323</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Trailer_Checksum_Option">
-<span class="sig-name descname"><span class="pre">Trailer_Checksum_Option</span></span><em class="property"> <span class="pre">=</span> <span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Trailer_Checksum_Option" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Trailer_Checksum_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Trailer_Checksum_Option" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trailer Checksum Option [Subbu Subramaniam][Monroe Bridges]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.Unassigned">
-<span class="sig-name descname"><span class="pre">Unassigned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">released</span> <span class="pre">2000-12-18</span></em><span class="sig-paren">)</span><em class="property"> <span class="pre">=</span> <span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Unassigned" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">Unassigned</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">released</span> <span class="pre">2000-12-18</span></span></em><span class="sig-paren">)</span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.Unassigned" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unassigned (released 2000-12-18)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.tcp.option.Option.WS">
-<span class="sig-name descname"><span class="pre">WS</span></span><em class="property"> <span class="pre">=</span> <span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.WS" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">WS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.tcp.option.Option.WS" title="Permalink to this definition">¶</a></dt>
 <dd><p>Window Scale [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7323.html"><strong>RFC 7323</strong></a>]</p>
 </dd></dl>
 

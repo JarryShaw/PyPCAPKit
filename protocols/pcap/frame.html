@@ -49,12 +49,12 @@ whose structure is described as below:</p>
 </div>
 <br /><span class="target" id="module-pcapkit.protocols.pcap.frame"></span><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.Frame">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.frame.</span></span><span class="sig-name descname"><span class="pre">Frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/frame.html#Frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.frame.</span></span><span class="sig-name descname"><span class="pre">Frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/frame.html#Frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol</span></code></a></p>
 <p>Per packet frame header extractor.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.Frame.__proto__">
-<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="pre">:</span> <span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame.__proto__" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame.__proto__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol index mapping for decoding next layer,
 c.f. <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
 &amp; <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
@@ -347,7 +347,7 @@ length (int): valid (<em>non-padding</em>) length</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.Frame.register">
-<em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/frame.html#Frame.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame.register" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/frame.html#Frame.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame.register" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register a new protocol class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -367,7 +367,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.Frame.length">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame.length" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame.length" title="Permalink to this definition">¶</a></dt>
 <dd><p>Header length of corresponding protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -378,7 +378,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.Frame.name">
-<em class="property"><span class="pre">property</span> </em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.frame.Frame.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of corresponding protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type</dt>
@@ -398,7 +398,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.frame.</span></span><span class="sig-name descname"><span class="pre">DataType_Frame</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.frame.</span></span><span class="sig-name descname"><span class="pre">DataType_Frame</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -407,55 +407,55 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <p>PCAP frame header.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.frame_info">
-<span class="sig-name descname"><span class="pre">frame_info</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo" title="pcapkit.protocols.pcap.frame.DataType_FrameInfo"><span class="pre">DataType_FrameInfo</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.frame_info" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">frame_info</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo" title="pcapkit.protocols.pcap.frame.DataType_FrameInfo"><span class="pre">DataType_FrameInfo</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.frame_info" title="Permalink to this definition">¶</a></dt>
 <dd><p>PCAP frame information</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.time">
-<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.time" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">time</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.10)"><span class="pre">datetime.datetime</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.time" title="Permalink to this definition">¶</a></dt>
 <dd><p>timestamp</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.number">
-<span class="sig-name descname"><span class="pre">number</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.number" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.number" title="Permalink to this definition">¶</a></dt>
 <dd><p>frame index number</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.time_epoch">
-<span class="sig-name descname"><span class="pre">time_epoch</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.time_epoch" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">time_epoch</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><span class="pre">float</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.time_epoch" title="Permalink to this definition">¶</a></dt>
 <dd><p>EPOCH timestamp</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.len">
-<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.len" title="Permalink to this definition">¶</a></dt>
 <dd><p>captured packet length</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.cap_len">
-<span class="sig-name descname"><span class="pre">cap_len</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.cap_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">cap_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.cap_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>actual packet length</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.packet" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.packet" title="Permalink to this definition">¶</a></dt>
 <dd><p>packet raw data</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.protocols">
-<span class="sig-name descname"><span class="pre">protocols</span></span><em class="property"><span class="pre">:</span> <a class="reference internal" href="../../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><span class="pre">pcapkit.corekit.protochain.ProtoChain</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.protocols" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">protocols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><span class="pre">pcapkit.corekit.protochain.ProtoChain</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.protocols" title="Permalink to this definition">¶</a></dt>
 <dd><p>protocol chain</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_Frame.error">
-<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="pre">:</span> <span class="pre">typing.Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.error" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">error</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">typing.Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_Frame.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>error message (optional)</p>
 </dd></dl>
 
@@ -463,7 +463,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_FrameInfo">
-<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.frame.</span></span><span class="sig-name descname"><span class="pre">DataType_FrameInfo</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.frame.</span></span><span class="sig-name descname"><span class="pre">DataType_FrameInfo</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -472,25 +472,25 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <p>Frame information.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_FrameInfo.ts_sec">
-<span class="sig-name descname"><span class="pre">ts_sec</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo.ts_sec" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ts_sec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo.ts_sec" title="Permalink to this definition">¶</a></dt>
 <dd><p>timestamp seconds</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_FrameInfo.ts_usec">
-<span class="sig-name descname"><span class="pre">ts_usec</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo.ts_usec" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">ts_usec</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo.ts_usec" title="Permalink to this definition">¶</a></dt>
 <dd><p>timestamp microseconds/nanoseconds</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_FrameInfo.incl_len">
-<span class="sig-name descname"><span class="pre">incl_len</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo.incl_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">incl_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo.incl_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>number of octets of packet saved in file</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.pcap.frame.DataType_FrameInfo.orig_len">
-<span class="sig-name descname"><span class="pre">orig_len</span></span><em class="property"><span class="pre">:</span> <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo.orig_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">orig_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.frame.DataType_FrameInfo.orig_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>actual length of packet</p>
 </dd></dl>
 
