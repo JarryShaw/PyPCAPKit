@@ -20,12 +20,11 @@ jobs:
           export PIPENV_SKIP_LOCK=1
           export PIPENV_VENV_IN_PROJECT=1
 
-          brew install pipenv
-          pipenv install --dev --python $(brew --prefix python@3.9)/bin/python3.9
-          pipenv run pip install -U pip setuptools wheel
-          pipenv run pip install -r doc/sphinx/requirements.txt
-          pipenv run pip install .
-          pipenv run make -C doc/sphinx html
+          brew install python@3.9 libmagic
+          python3.9 -m pip install -U pip setuptools wheel
+          python3.9 -m pip install -r doc/sphinx/requirements.txt
+          python3.9 -m pip install .
+          make -C doc/sphinx html
 
           # disable Jekyll
           touch doc/sphinx/build/html/.nojekyll
