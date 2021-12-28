@@ -15,7 +15,7 @@ jobs:
           brew install pipenv
           export PIPENV_SKIP_LOCK=1
           export PIPENV_VENV_IN_PROJECT=1
-          pipenv install --dev --python $(brew --prefix python@3.9)/bin/python3.9
+          pipenv install --dev --python $(brew --prefix pipenv)/libexec/bin/python
           while true; do
             echo '+ pipenv install --dev'
             pipenv install --dev && break
