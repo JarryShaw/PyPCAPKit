@@ -9,11 +9,16 @@ object whose payload is recursively
 
 """
 import io
+from typing import TYPE_CHECKING, overload
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.data.misc.null import NoPayload as NoPayloadData
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import Any, Optional, NoReturn, BinaryIO
+    from typing_extensions import Literal
 
 __all__ = ['NoPayload']
 
@@ -27,16 +32,13 @@ class NoPayload(Protocol):
 
     # name of current protocol
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['Null']
-        """
+    def name(self) -> 'Literal["Null"]':
+        """Name of current protocol."""
         return 'Null'
 
     # header length of current protocol
     @property
-    def length(self):
+    def length(self) -> 'NoReturn':
         """Header length of current protocol.
 
         Raises:
@@ -47,7 +49,7 @@ class NoPayload(Protocol):
 
     # name of next layer protocol
     @property
-    def protocol(self):
+    def protocol(self) -> 'NoReturn':
         """Name of next layer protocol.
 
         Raises:
@@ -60,38 +62,43 @@ class NoPayload(Protocol):
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'NoPayloadData':  # pylint: disable=unused-argument
         """Read (parse) packet data.
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            dict: Parsed packet data.
+            Parsed packet data.
 
         """
-        return dict()
+        return NoPayloadData()
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'bytes':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
-        return bytes()
+        return b''
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file=None, length=None, **kwargs):  # pylint: disable=unused-argument
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> None:  # pylint: disable=unused-argument
         """Post initialisation hook.
 
         Args:
@@ -112,10 +119,10 @@ class NoPayload(Protocol):
         #: pcapkit.protocols.null.NoPayload: Payload of current instance.
         self._next = self
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
-        self._protos = ProtoChain()
+        self._protos = None  # type: ignore[assignment]
 
     @classmethod
-    def __index__(cls):
+    def __index__(cls) -> 'NoReturn':
         """Numeral registry index of the protocol.
 
         Raises:
@@ -128,7 +135,7 @@ class NoPayload(Protocol):
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, *args, **kwargs):  # pylint: disable=signature-differs
+    def _decode_next_layer(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=signature-differs
         """Decode next layer protocol.
 
         Args:
@@ -143,7 +150,7 @@ class NoPayload(Protocol):
         """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
 
-    def _import_next_layer(self, *args, **kwargs):  # pylint: disable=signature-differs
+    def _import_next_layer(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=signature-differs
         """Import next layer extractor.
 
         Args:
