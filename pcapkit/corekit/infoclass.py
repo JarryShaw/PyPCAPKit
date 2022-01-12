@@ -91,6 +91,7 @@ class Info(collections.abc.Mapping):
             ns = {}  # type: dict[str, Any]
             exec(init_, None, ns)  # pylint: disable=exec-used # nosec
             cls.__init__ = ns['__create_fn__']()  # type: ignore[assignment]
+            cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
 
         self = super().__new__(cls)
         return self
