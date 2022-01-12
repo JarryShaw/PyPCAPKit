@@ -14,25 +14,30 @@ import enum
 import functools
 import importlib
 import io
-import numbers
 import os
-import re
 import shutil
 import string
 import struct
 import textwrap
-import urllib
+import urllib.parse
+from typing import TYPE_CHECKING, cast, overload
 
 import aenum
 import chardet
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.utilities.compat import cached_property
+from pcapkit.protocols.data.protocol import Packet
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, ProtocolUnbound,
-                                          StructError)
+from pcapkit.utilities.exceptions import ProtocolNotFound, ProtocolNotImplemented, StructError
 from pcapkit.utilities.logging import logger
+
+if TYPE_CHECKING:
+    from enum import IntEnum as StdlibEnum
+    from typing import Any, BinaryIO, DefaultDict, Dict, Optional, Type
+
+    from aenum import IntEnum as AenumEnum
+    from typing_extensions import Literal
 
 __all__ = ['Protocol']
 
@@ -43,19 +48,27 @@ readable = [ord(char) for char in filter(lambda char: not char.isspace(), string
 class Protocol(metaclass=abc.ABCMeta):
     """Abstract base class for all protocol family."""
 
+    # Internal data storage for cached properties.
+    __cached__ = {}  # type: Dict[str, Any]
+
     ##########################################################################
     # Defaults.
     ##########################################################################
 
-    #: Literal['Link', 'Internet', 'Transport', 'Application']: Layer of protocol.
-    #: Can be one of ``Link``, ``Internet``, ``Transport`` and ``Application``.
-    __layer__ = None
+    #: Layer of protocol, can be one of ``Link``, ``Internet``, ``Transport``
+    #: and ``Application``. For example, the layer of
+    #: :class:`~pcapkit.protocols.link.Ethernet` is ``Link``. However, certain
+    #: protocols are not in any layer, such as
+    # :class:`~pcapkit.protocols.raw.Raw`, and thus its layer is :obj:`None`.
+    __layer__: 'Optional[Literal["Link", "Internet", "Transport", "Application"]]' = None
 
-    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: Protocol index mapping for decoding next layer, c.f.
+    # :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name.
-    __proto__ = collections.defaultdict(lambda: ('pcapkit.protocols.raw', 'Raw'))
+    __proto__: 'DefaultDict[int, tuple[str, str]]' = collections.defaultdict(
+        lambda: ('pcapkit.protocols.raw', 'Raw'),
+    )
 
     ##########################################################################
     # Properties.
@@ -64,97 +77,93 @@ class Protocol(metaclass=abc.ABCMeta):
     # name of current protocol
     @property
     @abc.abstractmethod
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: str
-        """
+    def name(self) -> 'str':
+        """Name of current protocol."""
 
     # acronym of current protocol
     @property
-    def alias(self):
-        """Acronym of current protocol.
-
-        :rtype: str
-        """
+    def alias(self) -> 'str':
+        """Acronym of current protocol."""
         return self.__class__.__name__
+
+    # key name for the info dict
+    @property
+    def info_name(self) -> 'str':
+        """Key name of the :attr:`info` dict."""
+        return self.__class__.__name__.lower()
 
     # info dict of current instance
     @property
-    def info(self):
-        """Info dict of current instance.
-
-        :rtype: pcapkit.corekit.infoclass.Info
-        """
+    def info(self) -> 'Info':
+        """Info dict of current instance."""
         return self._info
 
     # binary packet data if current instance
     @property
-    def data(self):
-        """Binary packet data of current instance.
-
-        :rtype: bytes
-        """
+    def data(self) -> 'bytes':
+        """Binary packet data of current instance."""
         return self._data
 
     # header length of current protocol
     @property
     @abc.abstractmethod
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: int
-        """
+    def length(self) -> 'int':
+        """Header length of current protocol."""
 
     # payload of current instance
     @property
-    def payload(self):
-        """Payload of current instance.
-
-        :rtype: pcapkit.protocols.protocol.Protocol
-        """
+    def payload(self) -> 'Protocol':
+        """Payload of current instance."""
         return self._next
 
     # name of next layer protocol
     @property
-    def protocol(self):
-        """Name of next layer protocol (if any).
-
-        :rtype: Optional[str]
-        """
+    def protocol(self) -> 'Optional[str]':
+        """Name of next layer protocol (if any)."""
         with contextlib.suppress(IndexError):
             return self._protos[0]
+        return None
 
     # protocol chain of current instance
     @property
-    def protochain(self):
-        """Protocol chain of current instance.
-
-        :rtype: pcapkit.corekit.protochain.ProtoChain
-        """
+    def protochain(self) -> 'ProtoChain':
+        """Protocol chain of current instance."""
         return self._protos
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
+    @classmethod
+    def id(cls) -> 'tuple[str, ...]':
+        """Index ID of the protocol.
+
+        By default, it returns the name of the protocol. In certain cases, the
+        method may return multiple values.
+
+        See Also:
+            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
+
+        """
+        return (cls.__name__,)
+
     @abc.abstractmethod
-    def read(self, length=None, **kwargs):
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Info':
         """Read (parse) packet data.
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            dict: Parsed packet data.
+            Parsed packet data.
 
         """
 
     @abc.abstractmethod
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'bytes':
         """Make (construct) packet data.
 
         Keyword Args:
@@ -166,168 +175,197 @@ class Protocol(metaclass=abc.ABCMeta):
         """
 
     @staticmethod
-    def decode(byte, *, encoding=None, errors='strict'):
+    def decode(byte: bytes, *, encoding: 'Optional[str]' = None,
+               errors: 'Literal["strict", "ignore", "replace"]' = 'strict') -> 'str':
         """Decode :obj:`bytes` into :obj:`str`.
 
         Should decoding failed using ``encoding``, the method will try again decoding
-        the :obj:`bytes` as ``'unicode_escape'``.
+        the :obj:`bytes` as ``'unicode_escape'`` with ``'replace'`` for error handling.
 
         Args:
-            byte (bytes): Source bytestring.
+            byte: Source bytestring.
 
         Keyword Args:
-            encoding (Optional[str]): The encoding with which to decode the :obj:`bytes`.
+            encoding: The encoding with which to decode the :obj:`bytes`.
                 If not provided, :mod:`pcapkit` will first try detecting its encoding
                 using |chardet|_. The fallback encoding would is **UTF-8**.
-            errors (str): The error handling scheme to use for the handling of decoding errors.
+            errors: The error handling scheme to use for the handling of decoding errors.
                 The default is ``'strict'`` meaning that decoding errors raise a
                 :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
                 as well as any other name registered with :func:`codecs.register_error` that
                 can handle :exc:`UnicodeDecodeError`.
 
-        Returns:
-            str: Decoede string.
-
         See Also:
-            :meth:`bytes.decode`
+            The method is a wrapping function for :meth:`bytes.decode`.
 
         .. |chardet| replace:: ``chardet``
         .. _chardet: https://chardet.readthedocs.io
 
         """
-        charset = encoding or chardet.detect(byte)['encoding']
+        charset = encoding or chardet.detect(byte)['encoding'] or 'utf-8'
         try:
-            return byte.decode(charset or 'utf-8', errors=errors)
+            return byte.decode(charset, errors=errors)
         except UnicodeError:
-            return byte.decode('unicode_escape')
+            return byte.decode('unicode_escape', errors='replace')
 
     @staticmethod
-    def unquote(url, *, encoding='utf-8', errors='replace'):
+    def unquote(url: str, *, encoding : 'str' = 'utf-8',
+                errors: 'Literal["strict", "ignore", "replace"]' = 'replace') -> 'str':
         """Unquote URLs into readable format.
 
         Should decoding failed , the method will try again replacing ``'%'`` with ``'\\x'`` then
-        decoding the ``url`` as ``'unicode_escape'``.
+        decoding the ``url`` as ``'unicode_escape'`` with ``'replace'`` for error handling.
 
         Args:
-            url (str): URL string.
+            url: URL string.
 
         Keyword Args:
-            encoding (str): The encoding with which to decode the :obj:`bytes`.
-            errors (str): The error handling scheme to use for the handling of decoding errors.
+            encoding: The encoding with which to decode the :obj:`bytes`.
+            errors: The error handling scheme to use for the handling of decoding errors.
                 The default is ``'strict'`` meaning that decoding errors raise a
                 :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
                 as well as any other name registered with :func:`codecs.register_error` that
                 can handle :exc:`UnicodeDecodeError`.
 
-        Returns:
-            str: Unquoted string.
-
         See Also:
-            :func:`urllib.parse.unquote`
+            This method is a wrapper function for :func:`urllib.parse.unquote`.
 
         """
         try:
             return urllib.parse.unquote(url, encoding=encoding, errors=errors)
         except UnicodeError:
-            return url.replace('%', r'\x').encode().decode('unicode_escape')
+            return url.replace('%', r'\x').encode().decode('unicode_escape', errors='replace')
 
-    @classmethod
-    def id(cls):
-        """Index ID of the protocol.
+    @staticmethod
+    def expand_comp(value: 'str | Protocol | Type[Protocol]') -> 'tuple':
+        """Expand protocol class to protocol name.
 
-        By default, it returns the name of the protocol.
+        Args:
+            value: Protocol class or name.
 
-        Returns:
-            Union[str, Tuple[str]]: Index ID of the protocol.
+        The method is used to expand protocol class to protocol name, in the
+        following manner:
 
-        See Also:
-            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
+        1. If ``value`` is a protocol instance, the method will return the
+           protocol class, and the protocol names in upper case obtained from
+           :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
+        2. If ``value`` is a protocol class, the method will return the
+           protocol class itself, and the protocols names in upper case
+           obtained from :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
+        3. If ``value`` is :obj:`str`, the method will return the value itself.
 
         """
-        return cls.__name__
+        if isinstance(value, type) and issubclass(value, Protocol):
+            comp = (value, *(name.upper() for name in value.id()))
+        elif isinstance(value, Protocol):
+            comp = (type(value), *(name.upper() for name in value.id()))
+        else:
+            comp = (value.upper(),)
+        return comp
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, file=None, length=None, **kwargs):
+    @overload
+    def __init__(self, file: 'BinaryIO', length: 'int', **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __init__(self, **kwargs: 'Any') -> 'None': ...
+
+    def __init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Initialisation.
 
         Args:
-            file (Optional[io.BytesIO]): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
-            _error (bool): If the object is initiated after parsing errors
-                (:attr:`self._onerror <pcapkit.protocols.protocol.Protocol._onerror>`).
             _layer (str): Parse packet until ``_layer``
                 (:attr:`self._onerror <pcapkit.protocols.protocol.Protocol._exlayer>`).
-            _protocol (str): Parse packet until ``_protocol``
+            _protocol (str | Protocol | Type[Protocol]): Parse packet until ``_protocol``
                 (:attr:`self._onerror <pcapkit.protocols.protocol.Protocol._exproto>`).
             **kwargs: Arbitrary keyword arguments.
 
         """
         logger.debug(type(self).__name__)
 
-        #: bool: If the object is initiated  after parsing errors.
-        self._onerror = kwargs.pop('_error', False)
         #: str: Parse packet until such layer.
-        self._exlayer = kwargs.pop('_layer', str())
+        self._exlayer = kwargs.pop('_layer', None)  # type: Optional[str]
         #: str: Parse packet until such protocol.
-        self._exproto = kwargs.pop('_protocol', str())
+        self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | Protocol | Type[Protocol]]
 
         #: int: Initial offset of :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`
-        self._seekset = (file or io.BytesIO()).tell()
+        self._seekset = 0 if file is None else file.tell()
         #: bool: If terminate parsing next layer of protocol.
         self._sigterm = self._check_term_threshold()
 
         # post-init customisations
-        self.__post_init__(file, length, **kwargs)
+        self.__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
-    def __post_init__(self, file=None, length=None, **kwargs):
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'int', **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> None:
         """Post initialisation hook.
 
         Args:
-            file (Optional[io.BytesIO]): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction arguments, please refer to
+            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>`.
 
         """
         if file is None:
             _data = self.make(**kwargs)
         else:
-            _data = file.read(length)
+            _data = file.read(length)  # type: ignore[arg-type]
 
         #: bytes: Raw packet data.
         self._data = _data
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = Info(self.read(length, **kwargs))
+        self._info = self.read(length, **kwargs)
 
-    def __repr__(self):
+    def __repr__(self) -> 'str':
         """Returns representation of parsed protocol data.
 
         Example:
             >>> protocol
-            <Frame Info(..., ethernet=Info(...), protocols='Ethernet:IPv6:Raw')>
+            <Frame alias='...' frame=(..., packet=b'...', sethernet=..., protocols='Ethernet:IPv6:Raw')>
 
         """
-        repr_ = f"<{self.alias} {self._info!r}>"
+        if (cached := self.__cached__.get('__repr__')) is not None:
+            return cached
+
+        name = type(self).__name__
+        temp = []  # type: list[str]
+        for (key, value) in self._info.items():
+            if isinstance(value, Info):
+                temp.append(f'{key}=...')
+            else:
+                temp.append(f'{key}={value!r}')
+        args = ', '.join(temp)
+
+        # cache and return
+        repr_ = f'<{name} alias={self.alias!r} {self.info_name}=({args})>'
+
+        self.__cached__['__repr__'] = repr_
         return repr_
 
-    @cached_property
-    def __str__(self):
+    def __str__(self) -> 'str':
         """Returns formatted hex representation of source data stream.
 
         Example:
             >>> protocol
-            <Frame Info(..., packet=b"...", ethernet=Info(...), protocols='Ethernet:IPv6:Raw')>
+            Frame(..., packet=b"...", sethernet=..., protocols='Ethernet:IPv6:Raw')
             >>> print(protocol)
             00 00 00 00 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00     ..........'........
             00 00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00     .....|w..F.........
@@ -335,10 +373,11 @@ class Protocol(metaclass=abc.ABCMeta):
             5e 60 d9 6b 97                                               ^`.k.
 
         """
-        bytes_ = self._data
+        if (cached := self.__cached__.get('__str__')) is not None:
+            return cached
 
-        hexbuf = ' '.join(textwrap.wrap(bytes_.hex(), 2))
-        strbuf = ''.join(chr(char) if char in readable else '.' for char in bytes_)
+        hexbuf = ' '.join(textwrap.wrap(self._data.hex(), 2))
+        strbuf = ''.join(chr(char) if char in readable else '.' for char in self._data)
 
         number = shutil.get_terminal_size().columns // 4 - 1
         length = number * 3
@@ -346,126 +385,133 @@ class Protocol(metaclass=abc.ABCMeta):
         hexlst = textwrap.wrap(hexbuf, length)
         strlst = list(iter(functools.partial(io.StringIO(strbuf).read, number), ''))
 
+        # cache and return
         str_ = os.linesep.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))  # pylint: disable=zip-builtin-not-iterating
+
+        self.__cached__['__str__'] = str_
         return str_
 
-    def __bytes__(self):
+    def __bytes__(self) -> 'bytes':
         """Returns source data stream in :obj:`bytes`."""
         return self._data
 
-    @cached_property
-    def __len__(self):
+    def __len__(self) -> 'int':
         """Total length of corresponding protocol."""
-        return len(self._data)
+        if (cached := self.__cached__.get('__len__')) is not None:
+            return cached
 
-    def __length_hint__(self):
+        # cache and return
+        len_ = len(self._data)
+
+        self.__cached__['__len__'] = len_
+        return len_
+
+    def __length_hint__(self) -> 'Optional[int]':
         """Return an estimated length for the object."""
 
-    def __iter__(self):
+    def __iter__(self) -> 'BinaryIO':
         """Iterate through :attr:`self._data <pcapkit.protocols.protocol.Protocol._data>`."""
         return io.BytesIO(self._data)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: 'str | Protocol | Type[Protocol]') -> 'Protocol':
         """Subscription (``getitem``) support.
 
-        * If ``key`` is a :obj`slice` object, :exc:`~pcapkit.utilities.exceptions.ProtocolUnbound`
-          will be raised.
         * If ``key`` is a :class:`~pcapkit.protocols.protocol.Protocol` object,
           the method will fetch its indexes (:meth:`~pcapkit.protocols.protocol.Protocol.id`).
         * Later, search the packet's chain of protocols with the calculated ``key``.
         * If no matches, then raises :exc:`~pcapkit.utilities.exceptions.ProtocolNotFound`.
 
         Args:
-            key (Union[str, Protocol, Type[Protocol]]): Indexing key.
+            key: Indexing key.
 
         Returns:
-            pcapkit.protocols.protocol.Protocol: The sub-packet from the current packet of indexed protocol.
+            The sub-packet from the current packet of indexed protocol.
 
         Raises:
-            ProtocolUnbound: If ``key`` is a :obj:`slice` object.
             ProtocolNotFound: If ``key`` is not in the current packet.
 
+        See Also:
+            The method calls
+            :meth:`self.expand_comp <pcapkit.protocols.protocol.Protocol.expand_comp>`
+            to handle the ``key`` and expand it for robust searching.
+
         """
-        # if key is a slice, raise ProtocolUnbound
-        if isinstance(key, slice):
-            raise ProtocolUnbound('protocol slice unbound')
-
-        # if key is a protocol, then fetch protocol indexes
-        try:
-            flag = issubclass(key, Protocol)
-        except TypeError:
-            flag = issubclass(type(key), Protocol)
-        if flag or isinstance(key, Protocol):
-            key = key.id()
-
-        # make regex for tuple indexes
-        if isinstance(key, tuple):
-            key = r'|'.join(map(re.escape, key))
+        comp = self.expand_comp(key)
 
         # if it's itself
-        if re.fullmatch(key, self.__class__.__name__, re.IGNORECASE):
-            return self
+        test_comp = (type(self), *(name.upper() for name in self.id()))
+        for test in comp:
+            if test in test_comp:
+                return self
 
         # then check recursively
-        from pcapkit.protocols.null import NoPayload  # pylint: disable=import-outside-toplevel
+        from pcapkit.protocols.misc.null import NoPayload  # pylint: disable=import-outside-toplevel
 
         payload = self._next
         while not isinstance(payload, NoPayload):
-            if re.fullmatch(key, payload.__class__.__name__, re.IGNORECASE):
-                return payload
+            test_comp = (type(payload), *(name.upper() for name in payload.id()))
+            for test in comp:
+                if test in test_comp:
+                    return payload
             payload = payload.payload
         raise ProtocolNotFound(key)
 
-    def __contains__(self, name):
-        """Returns if ``name`` is in :attr:`self._info <pcapkit.protocols.protocol.Protocol._info>`.
+    def __contains__(self, name: 'str | Protocol | Type[Protocol]') -> 'bool':
+        """Returns if certain protocol is in the instance.
 
         Args:
-            name (Any): name to search
+            name: Name to search
 
-        Returns:
-            bool: if ``name`` exists
+        See Also:
+            The method calls
+            :meth:`self.expand_comp <pcapkit.protocols.protocol.Protocol.expand_comp>`
+            to handle the ``name`` and expand it for robust searching.
 
         """
-        return name in self._info
+        comp = self.expand_comp(name)
+
+        # if it's itself
+        test_comp = (type(self), *(name.upper() for name in self.id()))
+        for test in comp:
+            if test in test_comp:
+                return True
+
+        # then check recursively
+        from pcapkit.protocols.misc.null import NoPayload  # pylint: disable=import-outside-toplevel
+
+        payload = self._next
+        while not isinstance(payload, NoPayload):
+            test_comp = (type(payload), *(name.upper() for name in payload.id()))
+            for test in comp:
+                if test in test_comp:
+                    return True
+            payload = payload.payload
+        return False
 
     @classmethod
     @abc.abstractmethod
-    def __index__(cls):
-        """Numeral registry index of the protocol.
-
-        Returns:
-            enum.IntEnum: Numeral registry index of the protocol.
-
-        """
+    def __index__(cls) -> 'StdlibEnum | AenumEnum':
+        """Numeral registry index of the protocol."""
 
     @classmethod
-    def __eq__(cls, other):
+    def __eq__(cls, other: 'object') -> 'bool':
         """Returns if ``other`` is of the same protocol as the current object.
 
         Args:
-            other (Union[Protocol, Type[Protocol]]): Comparision against the object.
-
-        Returns:
-            bool: If ``other`` is of the same protocol as the current object.
+            other: Comparision against the object.
 
         """
-        try:
-            flag = issubclass(other, Protocol)
-        except TypeError:
-            flag = issubclass(type(other), Protocol)
+        if isinstance(other, type) and issubclass(other, Protocol):
+            return cls is other
+        if isinstance(other, Protocol):
+            return cls.id() == other.id()
 
-        if isinstance(other, Protocol) or flag:
-            return other.id() == cls.id()
+        if isinstance(other, str):
+            test_comp = cls.expand_comp(cls)
+            return other.upper() in test_comp
+        return False
 
-        try:
-            index = cls.id()
-            if isinstance(index, tuple):
-                return any(map(lambda x: re.fullmatch(other, x, re.IGNORECASE), index))
-            return bool(re.fullmatch(other, index, re.IGNORECASE))
-        except Exception:
-            return False
-
-    def __hash__(self):
+    def __hash__(self) -> 'int':
         """Return the hash value for :attr:`self._data <pcapkit.protocols.protocol.Protocol._data>`."""
         return hash(self._data)
 
@@ -473,22 +519,21 @@ class Protocol(metaclass=abc.ABCMeta):
     # Utilities.
     ##########################################################################
 
-    def _read_protos(self, size):  # pylint: disable=no-self-use, unused-argument
+    def _read_protos(self, size: int) -> 'Optional[StdlibEnum | AenumEnum]':  # pylint: disable=no-self-use, unused-argument
         """Read next layer protocol type.
 
-        Arguments:
-            size (int): buffer size
+        * If *succeed*, returns the enum of next layer protocol.
+        * If *fail*, returns :obj:`None`.
 
-        Returns:
-            * If *succeed*, returns the name of next layer protocol (:obj:`str`).
-            * If *fail*, returns ``None``.
+        Arguments:
+            size: buffer size
 
         """
 
-    def _read_fileng(self, *args, **kwargs):
+    def _read_fileng(self, *args: 'Any', **kwargs: 'Any') -> 'bytes':
         """Read file buffer (:attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`).
 
-        This method wraps the :meth:`file.read` call.
+        This method wraps the :meth:`file.read <io.BytesIO.read>` call.
 
         Args:
             *args: arbitrary positional arguments
@@ -502,19 +547,20 @@ class Protocol(metaclass=abc.ABCMeta):
         """
         return self._file.read(*args, **kwargs)
 
-    def _read_unpack(self, size=1, *, signed=False, lilendian=False, quiet=False):
+    def _read_unpack(self, size: 'int' = 1, *, signed: 'bool' = False,
+                     lilendian: 'bool' = False, quiet: 'bool' = False) -> 'int':
         """Read bytes and unpack for integers.
 
         Arguments:
-            size (int): buffer size
+            size: buffer size
 
         Keyword Arguments:
-            signed (bool): signed flag
-            lilendian (bool): little-endian flag
-            quiet (bool): quiet (no exception) flag
+            signed: signed flag
+            lilendian: little-endian flag
+            quiet: quiet (no exception) flag
 
         Returns:
-            Optional[int]: unpacked data upon success
+            Unpacked data upon success
 
         Raises:
             StructError: If unpack (:func:`struct.pack`) failed, and :exc:`struct.error` raised.
@@ -532,85 +578,93 @@ class Protocol(metaclass=abc.ABCMeta):
         else:               # do not unpack
             kind = None
 
+        mem = self._file.read(size)
         if kind is None:
-            mem = self._file.read(size)
-            end = 'little' if lilendian else 'big'
+            end = 'little' if lilendian else 'big'  # type: Literal['little', 'big']
             buf = int.from_bytes(mem, end, signed=signed)
         else:
+            fmt = f'{endian}{kind}'
             try:
-                fmt = f'{endian}{kind}'
-                mem = self._file.read(size)
-                buf = struct.unpack(fmt, mem)[0]
-            except struct.error:
+                buf = struct.unpack(fmt, mem)[0]  # pylint: disable=no-member
+            except struct.error as error:  # pylint: disable=no-member
                 if quiet:
-                    return None
-                raise StructError(f'{self.__class__.__name__}: unpack failed')
+                    end = 'little' if lilendian else 'big'
+                    buf = int.from_bytes(mem, end, signed=signed)
+                    return buf
+                raise StructError(f'{self.__class__.__name__}: unpack failed') from error
         return buf
 
-    def _read_binary(self, size=1):
+    def _read_binary(self, size: 'int' = 1) -> 'str':
         """Read bytes and convert into binaries.
 
         Arguments:
-            size (int): buffer size
+            size: buffer size
 
         Returns:
-            str: binary bits (``0``/``1``)
+            Binary bits (``0``/``1``).
 
         """
-        bin_ = ''
+        bin_ = []  # type: list[str]
         for _ in range(size):
             byte = self._file.read(1)
-            bin_ += bin(ord(byte))[2:].zfill(8)
-        return bin_
+            bin_.append(bin(ord(byte))[2:].zfill(8))
+        return ''.join(bin_)
+
+    @overload
+    def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'None' = ...) -> 'bytes': ...
+    @overload
+    def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'int',
+                     payload: 'Optional[int]' = ..., discard: 'Literal[True]' = ...) -> 'bytes': ...
+    @overload
+    def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'int',
+                     payload: 'Optional[int]' = ..., discard: 'Literal[False]' = ...) -> 'Packet': ...
 
     @seekset
-    def _read_packet(self, length=None, *, header=None, payload=None, discard=False):
+    def _read_packet(self, length: 'Optional[int]' = None, *, header: 'Optional[int]' = None,
+                     payload: 'Optional[int]' = None, discard: bool = False) -> 'bytes | Packet':
         """Read raw packet data.
 
         Arguments:
-            length (int): length of the packet
+            length: length of the packet
 
         Keyword Arguments:
-            header (Optional[int]): length of the packet header
-            payload (Optional[int]): length of the packet payload
-            discard (bool): flag if discard header data
+            header: length of the packet header
+            payload: length of the packet payload
+            discard: flag if discard header data
 
-        Returns:
-            * If ``header`` omits, returns the whole packet data in :obj:`bytes`.
-            * If ``discard`` is set as ``True``, returns the packet body (in :obj:`bytes`) only.
-            * Otherwise, returns the header and payload data as a :obj:`dict`::
-
-                class Packet(TypedDict):
-                    \"\"\"Header and payload data.\"\"\"
-
-                    #: packet header
-                    header: bytes
-                    #: packet payload
-                    payload: bytes
+        * If ``header`` omits, returns the whole packet data in :obj:`bytes`.
+        * If ``discard`` is set as :data:`True`, returns the packet body (in
+          :obj:`bytes`) only.
+        * Otherwise, returns the header and payload data as
+          :class:`~pcapkit.protocols.data.protocol.Packet` object.
 
         """
         if header is not None:
-            header = self._read_fileng(header)
-            payload = self._read_fileng(payload)
+            data_header = self._read_fileng(header)
+            data_payload = self._read_fileng(payload)
             if discard:
                 return payload
-            return dict(header=header, payload=payload)
+            return Packet(
+                header=data_header,
+                payload=data_payload
+            )
         return self._read_fileng(length)
 
     @classmethod
-    def _make_pack(cls, integer, *, size=1, signed=False, lilendian=False):
+    def _make_pack(cls, integer: 'int', *, size: 'int' = 1,
+                   signed: 'bool' = False, lilendian: 'bool' = False) -> 'bytes':
         """Pack integers to bytes.
 
         Arguments:
-            integer (int) integer to be packed
+            integer: integer to be packed
 
         Keyword arguments:
-            size (int): buffer size
-            signed (bool): signed flag
-            lilendian (bool): little-endian flag
+            size: buffer size
+            signed: signed flag
+            lilendian: little-endian flag
 
         Returns:
-            bytes: Packed data upon success.
+            Packed data upon success.
 
         Raises:
             StructError: If failed to pack the integer.
@@ -629,37 +683,78 @@ class Protocol(metaclass=abc.ABCMeta):
             kind = None
 
         if kind is None:
-            end = 'little' if lilendian else 'big'
+            end = 'little' if lilendian else 'big'  # type: Literal['little', 'big']
             buf = integer.to_bytes(size, end, signed=signed)
         else:
             try:
                 fmt = f'{endian}{kind}'
-                buf = struct.pack(fmt, integer)
-            except struct.error:
-                raise StructError(f'{cls.__name__}: pack failed') from None
+                buf = struct.pack(fmt, integer)  # pylint: disable=no-member
+            except struct.error as error:  # pylint: disable=no-member
+                raise StructError(f'{cls.__name__}: pack failed') from error
         return buf
 
+    @overload
     @classmethod
-    def _make_index(cls, name, default=None, *, namespace=None, reversed=False,  # pylint: disable=redefined-builtin
-                    pack=False, size=4, signed=False, lilendian=False):
+    def _make_index(cls, name: 'int | StdlibEnum | AenumEnum', *, pack: 'Literal[False]' = ...) -> 'int': ...
+    @overload
+    @classmethod
+    def _make_index(cls, name: 'int | StdlibEnum | AenumEnum', *, pack: 'Literal[True]',
+                    size: 'int' = ..., signed: 'bool' = ..., lilendian: 'bool' = ...) -> 'bytes': ...
+    @overload
+    @classmethod
+    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *,
+                    namespace: 'Type[StdlibEnum] | Type[AenumEnum]', pack: 'Literal[False]' = ...) -> 'int': ...
+    @overload
+    @classmethod
+    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *,
+                    namespace: 'Type[StdlibEnum] | Type[AenumEnum]', pack: 'Literal[True]',
+                    size: 'int' = ..., signed: 'bool' = ..., lilendian: 'bool' = ...) -> 'bytes': ...
+    @overload
+    @classmethod
+    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[int, str]',
+                    reversed: 'Literal[False]' = ...,  # pylint: disable=redefined-builtin
+                    pack: 'Literal[False]' = ...) -> 'int': ...
+    @overload
+    @classmethod
+    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[int, str]',
+                    reversed: 'Literal[False]' = ...,  # pylint: disable=redefined-builtin
+                    pack: 'Literal[True]', size: 'int' = ..., signed: 'bool' = ...,
+                    lilendian: 'bool' = ...) -> 'bytes': ...
+    @overload
+    @classmethod
+    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[str, int]',
+                    reversed: 'Literal[True]',  # pylint: disable=redefined-builtin
+                    pack: 'Literal[False]' = ...) -> 'int': ...
+    @overload
+    @classmethod
+    def _make_index(cls, name: 'str', default: 'Optional[int]' = ..., *, namespace: 'dict[str, int]',
+                    reversed: 'Literal[True]',  # pylint: disable=redefined-builtin
+                    pack: 'Literal[True]', size: 'int' = ..., signed: 'bool' = ...,
+                    lilendian: 'bool' = ...) -> 'bytes': ...
+
+    @classmethod
+    def _make_index(cls, name: 'str | int | StdlibEnum | AenumEnum', default: 'Optional[int]' = None, *,
+                    namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,
+                    reversed: 'bool' = False,  # pylint: disable=redefined-builtin
+                    pack: 'bool' = False, size: 'int' = 4, signed: 'bool' = False,
+                    lilendian: 'bool' = False) -> 'int | bytes':
         """Return first index of ``name`` from a :obj:`dict` or enumeration.
 
         Arguments:
-            name (Union[str, int, enum.IntEnum]): item to be indexed
-            default (int): default value
+            name: item to be indexed
+            default: default value
 
         Keyword arguments:
-            namespace (Union[dict, enum.EnumMeta]): namespace for item
-            reversed (bool): if namespace is ``str -> int`` pairs
-            pack (bool): if need :func:`struct.pack` to pack the result
-            size (int): buffer size
-            signed (bool): signed flag
-            lilendian (bool): little-endian flag
+            namespace: namespace for item
+            reversed: if namespace is ``str -> int`` pairs
+            pack: if need :func:`struct.pack` to pack the result
+            size: buffer size
+            signed: signed flag
+            lilendian: little-endian flag
 
         Returns:
-            Union[int, bytes]: Index of ``name`` from a dict or enumeration.
-            If ``packet`` is :data:`True`, returns :obj:`bytes`; otherwise,
-            returns :obj:`int`.
+            Index of ``name`` from a dict or enumeration. If ``pack`` is
+            :data:`True`, returns :obj:`bytes`; otherwise, returns :obj:`int`.
 
         Raises:
             ProtocolNotImplemented: If ``name`` is **NOT** in ``namespace``
@@ -667,96 +762,100 @@ class Protocol(metaclass=abc.ABCMeta):
 
         """
         if isinstance(name, (enum.IntEnum, aenum.IntEnum)):
-            index = name.value
-        elif isinstance(name, numbers.Integral):
+            index = cast('int', name.value)
+        elif isinstance(name, int):
             index = name
-        else:
+        else:  # name is str
             try:
-                if isinstance(namespace, (enum.EnumMeta, aenum.EnumMeta)):
-                    index = namespace[name]
-                elif isinstance(namespace, (dict, collections.UserDict, collections.abc.Mapping)):
+                if isinstance(namespace, type) and issubclass(namespace, (enum.IntEnum, aenum.IntEnum)):
+                    index = cast('int', namespace[name].value)
+                elif isinstance(namespace, dict):
                     if reversed:
+                        if TYPE_CHECKING:
+                            namespace = cast('dict[str, int]', namespace)
                         index = namespace[name]
                     else:
+                        if TYPE_CHECKING:
+                            namespace = cast('dict[int, str]', namespace)
                         index = {v: k for k, v in namespace.items()}[name]
                 else:
-                    raise KeyError
-            except KeyError:
+                    raise KeyError(name)
+            except KeyError as error:
                 if default is None:
-                    raise ProtocolNotImplemented(f'protocol {name!r} not implemented') from None
+                    raise ProtocolNotImplemented(f'protocol {name!r} not implemented') from error
                 index = default
+
         if pack:
             return cls._make_pack(index, size=size, signed=signed, lilendian=lilendian)
         return index
 
-    def _decode_next_layer(self, dict_, proto=None, length=None):
+    def _decode_next_layer(self, dict_: 'Info', proto: 'Optional[int]' = None,
+                           length: 'Optional[int]' = None) -> 'Info':
         """Decode next layer protocol.
 
         Arguments:
-            dict_ (dict): info buffer
-            proto (int): next layer protocol index
-            length (int): valid (*non-padding*) length
+            dict_: info buffer
+            proto: next layer protocol index
+            length: valid (*non-padding*) length
 
         Returns:
-            dict: current protocol with next layer extracted
+            Current protocol with next layer extracted
 
         """
-        if self._onerror:
-            next_ = beholder(self._import_next_layer)(self, proto, length)
-        else:
-            next_ = self._import_next_layer(proto, length)
+        next_ = self._import_next_layer(proto, length)
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
-        layer = next_.alias.lower()
+        layer = next_.info_name
         # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
-        dict_[layer] = info
+        dict_.__update__([(layer, info)])
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = ProtoChain(self.__class__, self.alias, basis=chain)  # pylint: disable=attribute-defined-outside-init
         return dict_
 
-    def _import_next_layer(self, proto, length=None):  # pylint: disable=unused-argument
+    @beholder
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None) -> 'Protocol':
         """Import next layer extractor.
 
         Arguments:
-            proto (int): next layer protocol index
-            length (int): valid (*non-padding*) length
+            proto: next layer protocol index
+            length: valid (*non-padding*) length
 
         Returns:
-            pcapkit.protocols.protocol.Protocol: instance of next layer
+            Instance of next layer.
 
         """
+        if TYPE_CHECKING:
+            protocol: 'Type[Protocol]'
+
         if length is not None and length == 0:
-            from pcapkit.protocols.null import \
-                NoPayload as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
         elif self._sigterm:
-            from pcapkit.protocols.raw import \
-                Raw as protocol  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
         else:
             module, name = self.__proto__[proto]
-            protocol = getattr(importlib.import_module(module), name)
+            protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
 
-        next_ = protocol(io.BytesIO(self._read_fileng(length)), length,
-                         layer=self._exlayer, protocol=self._exproto)
-
+        next_ = protocol(self._file, length, layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
         return next_
 
-    def _check_term_threshold(self):
-        """Check if reached termination threshold.
+    def _check_term_threshold(self) -> bool:
+        """Check if reached termination threshold."""
+        if self._exlayer is None or (layer := self.__layer__) is None:
+            layer_match = False
+        else:
+            layer_match = layer.upper() == self._exlayer.upper()
 
-        Returns:
-            bool: if reached termination threshold
+        if self._exproto is None:
+            protocol_match = False
+        else:
+            protocol_match = False
+            comp_test = [name.upper() for name in self.id()]
+            for test in self.expand_comp(self._exproto):
+                if test in comp_test:
+                    protocol_match = True
+                    break
 
-        """
-        index = self.id()
-        layer = self.__layer__ or ''
-
-        pattern = r'|'.join(index) if isinstance(index, tuple) else index
-        iterable = self._exproto if isinstance(self._exproto, tuple) else (self._exproto,)
-
-        layer_match = re.fullmatch(layer, self._exlayer, re.IGNORECASE)
-        protocol_match = filter(lambda string: re.fullmatch(pattern, string, re.IGNORECASE), iterable)  # pylint: disable=filter-builtin-not-iterating
-
-        return bool(list(protocol_match) or layer_match)
+        return layer_match or protocol_match
