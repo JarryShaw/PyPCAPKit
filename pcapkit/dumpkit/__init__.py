@@ -10,8 +10,8 @@ import sys
 
 import dictdumper
 
-from pcapkit.protocols.pcap.frame import Frame
-from pcapkit.protocols.pcap.header import Header
+from pcapkit.protocols.misc.pcap.frame import Frame
+from pcapkit.protocols.misc.pcap.header import Header
 
 __all__ = ['PCAPIO', 'NotImplementedIO']
 

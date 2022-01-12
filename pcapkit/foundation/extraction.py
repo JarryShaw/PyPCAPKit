@@ -26,8 +26,8 @@ import time
 import warnings
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.protocols.pcap.frame import Frame
-from pcapkit.protocols.pcap.header import Header
+from pcapkit.protocols.misc.pcap.frame import Frame
+from pcapkit.protocols.misc.pcap.header import Header
 from pcapkit.utilities.compat import pathlib
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)

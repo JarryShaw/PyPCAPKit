@@ -8,7 +8,7 @@ PCAP files, including global header
 (:class:`~pcapkit.protocols.pcap.frame.Frame`).
 
 """
-from pcapkit.protocols.pcap.frame import Frame
-from pcapkit.protocols.pcap.header import Header
+from pcapkit.protocols.misc.pcap.frame import Frame
+from pcapkit.protocols.misc.pcap.header import Header
 
 __all__ = ['Frame', 'Header']
