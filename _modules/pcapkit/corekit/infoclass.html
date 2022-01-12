@@ -70,8 +70,6 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
-
     <span class="c1">#: Mapping of name conflicts with builtin methods (original names to</span>
     <span class="c1">#: transformed names).</span>
     <span class="n">__map__</span><span class="p">:</span> <span class="s1">&#39;dict[str, str]&#39;</span>
@@ -81,38 +79,62 @@
     <span class="c1">#： List of builtin methods.</span>
     <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">&#39;set[str]&#39;</span>
 
-<div class="viewcode-block" id="Info.__new__"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__">[docs]</a>    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[dict[str, Any]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Info.__new__"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__">[docs]</a>    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
         <span class="sd">&quot;&quot;&quot;Create a new instance.</span>
 
+<span class="sd">        The class will try to automatically generate ``__init__`` method with</span>
+<span class="sd">        the same signature as specified in class variables&#39; type annotations,</span>
+<span class="sd">        which is inspired by :pep:`557` (:mod:`dataclasses`).</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            dict_: Source :obj:`dict` data.</span>
+<span class="sd">            *args: Arbitrary positional arguments.</span>
 
 <span class="sd">        Keyword Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
-<span class="sd">        Notes:</span>
-<span class="sd">            Keys with the same names as the class&#39;s builtin methods will be</span>
-<span class="sd">            renamed with the class name prefixed as mangled class variables</span>
-<span class="sd">            implicitly and internally. Such mapping information will be stored</span>
-<span class="sd">            within :attr:`__map__` attribute.</span>
-
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__map__</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__map_reverse__</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
             <span class="n">temp</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
         <span class="bp">cls</span><span class="o">.</span><span class="n">__builtin__</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
 
-        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dict_</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span>
+        <span class="c1"># NOTE: We only generate ``__init__`` method for subclasses of the</span>
+        <span class="c1"># ``Info`` class, rather than itself, plus that such class does not</span>
+        <span class="c1"># override the ``__init__`` method of the meta class.</span>
+        <span class="k">if</span> <span class="s1">&#39;__init__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">:</span>
+            <span class="n">args_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+            <span class="n">dict_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">:</span>
+                <span class="n">args_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">dict_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">args_</span><span class="p">,</span> <span class="n">dict_</span><span class="p">)</span>
+
+            <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
+            <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
+            <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;    def __init__(self, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;        self.__update__(</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
+            <span class="n">exec</span><span class="p">(</span><span class="n">init_</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>  <span class="c1"># pylint: disable=exec-used # nosec</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;__create_fn__&#39;</span><span class="p">]()</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
     <span class="k">def</span> <span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, Any] | Iterable[tuple[str, Any]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="c1"># NOTE: Keys with the same names as the class&#39;s builtin methods will be</span>
+        <span class="c1"># renamed with the class name prefixed as mangled class variables</span>
+        <span class="c1"># implicitly and internally. Such mapping information will be stored</span>
+        <span class="c1"># within: attr: `__map__` attribute.</span>
+
         <span class="vm">__name__</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 
         <span class="k">if</span> <span class="n">dict_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -182,7 +204,30 @@
     <span class="k">def</span> <span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">&quot;can&#39;t delete attribute&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Info.info2dict"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.info2dict">[docs]</a>    <span class="k">def</span> <span class="nf">info2dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Info.from_dict"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, Any] | Iterable[tuple[str, Any]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                  <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Create a new instance.</span>
+
+<span class="sd">        * If ``dict_`` is present and has a ``.keys()`` method, then does:</span>
+<span class="sd">          ``for k in dict_: self[k] = dict_[k]``.</span>
+<span class="sd">        * If ``dict_`` is present and has no ``.keys()`` method, then does:</span>
+<span class="sd">          ``for k, v in dict_: self[k] = v``.</span>
+<span class="sd">        * If ``dict_`` is not present, then does:</span>
+<span class="sd">          ``for k, v in kwargs.items(): self[k] = v``.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dict_: Source data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Info.to_dict"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Convert :class:`Info` into :obj:`dict`.</span>
 
 <span class="sd">        Important:</span>
@@ -197,13 +242,13 @@
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="n">out_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
-                <span class="n">dict_</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">info2dict</span><span class="p">()</span>
+                <span class="n">dict_</span><span class="p">[</span><span class="n">out_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
 
             <span class="c1">#elif isinstance(value, (tuple, list, set, frozenset)):</span>
             <span class="c1">#    temp = []  # type: list[Any]</span>
             <span class="c1">#    for item in value:</span>
             <span class="c1">#        if isinstance(item, Info):</span>
-            <span class="c1">#            temp.append(item.info2dict())</span>
+            <span class="c1">#            temp.append(item.to_dict())</span>
             <span class="c1">#        else:</span>
             <span class="c1">#            temp.append(item)</span>
             <span class="c1">#    dict_[out_key] = value.__class__(temp)</span>
