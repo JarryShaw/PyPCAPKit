@@ -253,12 +253,16 @@ class Frame(Protocol):
             self._data = self.make(**kwargs)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
-            #: pcapkit.corekit.infoclass.Info: Parsed packet data.
+            #: pcapkit.corekit.infoclass.Info: Parsed packet data. This is a lazy
+        #: attribute, which will be called only when accessed. Therefore, the
+        #: attribute is set to a :class:`lazy_object_proxy.Proxy` initially.
             self._info = Info(self.read())
         else:
             #: io.BytesIO: Source packet stream.
             self._file = file
-            #: pcapkit.corekit.infoclass.Info: Parsed packet data.
+            #: pcapkit.corekit.infoclass.Info: Parsed packet data. This is a lazy
+        #: attribute, which will be called only when accessed. Therefore, the
+        #: attribute is set to a :class:`lazy_object_proxy.Proxy` initially.
             self._info = Info(self.read())
 
             #: bytes: Raw packet data.
@@ -430,7 +434,7 @@ class Frame(Protocol):
         try:
             protocol = getattr(importlib.import_module(module), name)
         except (ImportError, AttributeError):
-            from pcapkit.protocols.raw import \
+            from pcapkit.protocols.misc.raw import \
                 Raw as protocol  # pylint: disable=import-outside-toplevel
 
         next_ = protocol(self._file, length, error=error,
