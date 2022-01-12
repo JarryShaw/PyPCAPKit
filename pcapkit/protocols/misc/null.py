@@ -17,7 +17,8 @@ from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, NoReturn, BinaryIO
+    from typing import Any, BinaryIO, NoReturn, Optional
+
     from typing_extensions import Literal
 
 __all__ = ['NoPayload']
