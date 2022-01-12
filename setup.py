@@ -43,11 +43,13 @@ attrs = dict(
         'pcapkit.foundation',
         'pcapkit.interface',
         'pcapkit.protocols',
-        'pcapkit.protocols.pcap',
-        'pcapkit.protocols.application',
-        'pcapkit.protocols.internet',
         'pcapkit.protocols.link',
+        'pcapkit.protocols.internet',
         'pcapkit.protocols.transport',
+        'pcapkit.protocols.application',
+        'pcapkit.protocols.misc',
+        'pcapkit.protocols.misc.pcap',
+        'pcapkit.protocols.data',
         'pcapkit.reassembly',
         'pcapkit.toolkit',
         'pcapkit.utilities',
@@ -159,7 +161,8 @@ attrs = dict(
         'vendor': ['requests[socks]', 'beautifulsoup4[html5lib]'],
     },
     setup_requires=[
-        'f2format; python_version < "3.6"',
+        'bpc-f2format; python_version < "3.6"',
+        'bpc-walrus; python_version < "3.8"',
         'pathlib2>=2.3.2; python_version == "3.4"',
     ]
 )
@@ -190,7 +193,7 @@ except ImportError:
 class build(build_py):
     """Add on-build backport code conversion."""
 
-    def run(self):
+    def run(self) -> 'None':
         if version_info < (3, 6):
             try:
                 subprocess.check_call(  # nosec
@@ -198,7 +201,17 @@ class build(build_py):
                 )
             except subprocess.CalledProcessError as error:
                 print('Failed to perform assignment expression backport compiling.'
-                      'Please consider manually install `f2format` and try again.', file=sys.stderr)
+                      'Please consider manually install `bpc-f2format` and try again.', file=sys.stderr)
+                sys.exit(error.returncode)
+
+        if version_info < (3, 8):
+            try:
+                subprocess.check_call(  # nosec
+                    [sys.executable, '-m', 'walrus', '--no-archive', 'pcapkit']
+                )
+            except subprocess.CalledProcessError as error:
+                print('Failed to perform assignment expression backport compiling.'
+                      'Please consider manually install `bpc-walrus` and try again.', file=sys.stderr)
                 sys.exit(error.returncode)
         build_py.run(self)
 
