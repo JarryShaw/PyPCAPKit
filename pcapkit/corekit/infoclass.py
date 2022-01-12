@@ -37,8 +37,6 @@ class Info(collections.abc.Mapping):
 
     """
 
-    __slots__ = ()
-
     #: Mapping of name conflicts with builtin methods (original names to
     #: transformed names).
     __map__: 'dict[str, str]'
@@ -48,38 +46,62 @@ class Info(collections.abc.Mapping):
     #： List of builtin methods.
     __builtin__: 'set[str]'
 
-    def __new__(cls, dict_: 'Optional[dict[str, Any]]' = None, **kwargs: 'Any') -> 'Info':
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Info':  # pylint: disable=unused-argument
         """Create a new instance.
 
+        The class will try to automatically generate ``__init__`` method with
+        the same signature as specified in class variables' type annotations,
+        which is inspired by :pep:`557` (:mod:`dataclasses`).
+
         Args:
-            dict_: Source :obj:`dict` data.
+            *args: Arbitrary positional arguments.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
-        Notes:
-            Keys with the same names as the class's builtin methods will be
-            renamed with the class name prefixed as mangled class variables
-            implicitly and internally. Such mapping information will be stored
-            within :attr:`__map__` attribute.
-
         """
         cls.__map__ = {}
+        cls.__map_reverse__ = {}
 
         temp = []  # type: list[str]
         for obj in cls.mro():
             temp.extend(dir(obj))
         cls.__builtin__ = set(temp)
 
-        self = super().__new__(cls)
-        if dict_ is not None:
-            self.__update__(dict_)
+        # NOTE: We only generate ``__init__`` method for subclasses of the
+        # ``Info`` class, rather than itself, plus that such class does not
+        # override the ``__init__`` method of the meta class.
+        if '__init__' not in cls.__dict__ and cls is not Info and cls.__annotations__:
+            args_ = []  # type: list[str]
+            dict_ = []  # type: list[str]
 
-        self.__update__(kwargs)
+            for key in cls.__annotations__:
+                args_.append(key)
+                dict_.append(f'{key}={key}')
+            print(args_, dict_)
+
+            # NOTE: The following code is to make the ``__init__`` method work.
+            # It is inspired from the :func:`dataclasses._create_fn` function.
+            init_ = (
+                f'def __create_fn__():\n'
+                f'    def __init__(self, {", ".join(args_)}):\n'
+                f'        self.__update__({", ".join(dict_)})\n'
+                f'    return __init__\n'
+            )
+            ns = {}  # type: dict[str, Any]
+            exec(init_, None, ns)  # pylint: disable=exec-used # nosec
+            cls.__init__ = ns['__create_fn__']()  # type: ignore[assignment]
+
+        self = super().__new__(cls)
         return self
 
     def __update__(self, dict_: 'Optional[Mapping[str, Any] | Iterable[tuple[str, Any]]]' = None,
                    **kwargs: 'Any') -> 'None':
+        # NOTE: Keys with the same names as the class's builtin methods will be
+        # renamed with the class name prefixed as mangled class variables
+        # implicitly and internally. Such mapping information will be stored
+        # within: attr: `__map__` attribute.
+
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
 
         if dict_ is None:
@@ -149,7 +171,30 @@ class Info(collections.abc.Mapping):
     def __delattr__(self, name: 'str') -> 'NoReturn':
         raise UnsupportedCall("can't delete attribute")
 
-    def info2dict(self) -> 'dict[str, Any]':
+    @classmethod
+    def from_dict(cls, dict_: 'Optional[Mapping[str, Any] | Iterable[tuple[str, Any]]]' = None,
+                  **kwargs: 'Any') -> 'Info':
+        """Create a new instance.
+
+        * If ``dict_`` is present and has a ``.keys()`` method, then does:
+          ``for k in dict_: self[k] = dict_[k]``.
+        * If ``dict_`` is present and has no ``.keys()`` method, then does:
+          ``for k, v in dict_: self[k] = v``.
+        * If ``dict_`` is not present, then does:
+          ``for k, v in kwargs.items(): self[k] = v``.
+
+        Args:
+            dict_: Source data.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        """
+        self = cls.__new__(cls)
+        self.__update__(dict_, **kwargs)
+        return self
+
+    def to_dict(self) -> 'dict[str, Any]':
         """Convert :class:`Info` into :obj:`dict`.
 
         Important:
@@ -164,13 +209,13 @@ class Info(collections.abc.Mapping):
         for (key, value) in self.__dict__.items():
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Info):
-                dict_[out_key] = value.info2dict()
+                dict_[out_key] = value.to_dict()
 
             #elif isinstance(value, (tuple, list, set, frozenset)):
             #    temp = []  # type: list[Any]
             #    for item in value:
             #        if isinstance(item, Info):
-            #            temp.append(item.info2dict())
+            #            temp.append(item.to_dict())
             #        else:
             #            temp.append(item)
             #    dict_[out_key] = value.__class__(temp)
