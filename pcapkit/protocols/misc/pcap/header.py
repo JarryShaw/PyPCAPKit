@@ -22,17 +22,31 @@ as below:
 
 """
 import io
+import operator
 import sys
+from typing import TYPE_CHECKING, overload
 
-from pcapkit.const.reg.linktype import LinkType as LINKTYPE
-from pcapkit.corekit.infoclass import Info
+from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
 from pcapkit.corekit.version import VersionInfo
+from pcapkit.protocols.data.misc.pcap.header import Header as DataType_Header
+from pcapkit.protocols.data.misc.pcap.header import MagicNumber as DataType_MagicNumber
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import EndianError, FileError, UnsupportedCall
 
+if TYPE_CHECKING:
+    from enum import IntEnum as StdlibEnum
+    from typing import Any, BinaryIO, NoReturn, Optional, Type
+
+    from aenum import IntEnum as AenumEnum
+    from typing_extensions import Literal
+
 __all__ = ['Header']
 
-#: Mapping of PCAP file magic numbers.
+#: dict[tuple[str, bool], bytes]: Mapping of PCAP file magic numbers. The key
+#: is a :obj:`tuple` of endianness (``big`` or ``little``) and nanosecond-
+#: timestamp resolution flag (:data:`True` refers to nanosecond-resolution
+#: timestamp, :data:`False` refers to microsecond-resolution timestamp); the
+#: value is the corresponding PCAP file magic number sequence.
 _MAGIC_NUM = {
     ('big', True):      b'\xa1\xb2\x3c\x4d',
     ('big', False):     b'\xa1\xb2\xc3\xd4',
@@ -43,36 +57,30 @@ _MAGIC_NUM = {
 class Header(Protocol):
     """PCAP file global header extractor."""
 
+    #: Parsed packet data.
+    _info: 'DataType_Header'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of corresponding protocol.
-
-        :rtype: Literal['Global Header']
-        """
+    def name(self) -> 'Literal["Global Header"]':
+        """Name of corresponding protocol."""
         return 'Global Header'
 
     @property
-    def length(self):
-        """Header length of corresponding protocol.
-
-        :rtype: Literal[24]
-        """
+    def length(self) -> 'Literal[24]':
+        """Header length of corresponding protocol."""
         return 24
 
     @property
-    def version(self):
-        """Version infomation of input PCAP file.
-
-        :rtype: pcapkit.corekit.version.VersionInfo
-        """
-        return VersionInfo(self._info.version_major, self._info.version_minor)  # pylint: disable=E1101
+    def version(self) -> 'VersionInfo':
+        """Version infomation of input PCAP file."""
+        return self._info.version
 
     @property
-    def payload(self):
+    def payload(self) -> 'NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -82,15 +90,12 @@ class Header(Protocol):
         raise UnsupportedCall("'Header' object has no attribute 'payload'")
 
     @property
-    def protocol(self):
-        """Data link type.
-
-        :rtype: pcapkit.const.reg.linktype.LinkType
-        """
-        return self._info.network  # pylint: disable=E1101
+    def protocol(self) -> 'RegType_LinkType':
+        """Data link type."""
+        return self._info.network
 
     @property
-    def protochain(self):
+    def protochain(self) -> 'NoReturn':
         """Protocol chain of current instance.
 
         Raises:
@@ -100,26 +105,20 @@ class Header(Protocol):
         raise UnsupportedCall("'Header' object has no attribute 'protochain'")
 
     @property
-    def byteorder(self):
-        """Header byte order.
-
-        :rtype: Literal['big', 'little']
-        """
+    def byteorder(self) -> 'Literal["big", "little"]':
+        """Header byte order."""
         return self._byte
 
     @property
-    def nanosecond(self):
-        """Nanosecond-resolution flag.
-
-        :rtype: bool
-        """
+    def nanosecond(self) -> bool:
+        """Nanosecond-resolution flag."""
         return self._nsec
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Header':  # pylint: disable=unused-argument
         """Read global header of PCAP file.
 
         Notes:
@@ -131,18 +130,21 @@ class Header(Protocol):
             * ``a1 b2 3c 4d`` -- Big-endian nano-timestamp PCAP file.
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_Header: Parsed packet data.
+            Parsed packet data.
 
         Raises:
             FileError: If the magic number is invalid.
 
         """
+        if TYPE_CHECKING:
+            self._byte: 'Literal["big", "little"]'
+
         _magn = self._read_fileng(4)
         if _magn == b'\xd4\xc3\xb2\xa1':
             lilendian = True
@@ -170,64 +172,66 @@ class Header(Protocol):
         _slen = self._read_unpack(4, lilendian=lilendian)
         _type = self._read_protos(4)
 
-        _byte = self._read_packet(24)
-        self._file = io.BytesIO(_byte)
-
-        header = dict(
-            magic_number=dict(
+        header = DataType_Header(
+            magic_number=DataType_MagicNumber(
                 data=_magn,
                 byteorder=self._byte,
                 nanosecond=self._nsec,
             ),
-            version_major=_vmaj,
-            version_minor=_vmin,
+            version=VersionInfo(_vmaj, _vmin),
             thiszone=_zone,
             sigfigs=_acts,
             snaplen=_slen,
             network=_type,
-            packet=_byte,
         )
 
         return header
 
-    def make(self, **kwargs):
+    def make(self, *, byteorder: 'Literal["big", "little"]' = sys.byteorder,  # pylint: disable=arguments-differ
+             lilendian: 'Optional[bool]' = None, bigendian: 'Optional[bool]' = None,
+             nanosecond: bool = False, version: 'tuple[int, int] | VersionInfo' = (2, 4),
+             version_major: int = 2, version_minor: int = 4,
+             thiszone: int = 0, sigfigs: int = 0, snaplen: int = 0x40_000,
+             network: 'RegType_LinkType | StdlibEnum | AenumEnum | str | int' = RegType_LinkType.NULL,
+             network_default: 'Optional[int]' = None,
+             network_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,
+             network_reversed: bool = False, **kwargs: 'Any') -> 'bytes':
         """Make (construct) packet data.
 
         Keyword Args:
-            byteorder (str): header byte order
-            lilendian (bool): little-endian flag
-            bigendian (bool): big-endian flag
-            nanosecond (bool): nanosecond-resolution file flag (default: :data:`False`)
-            version (Tuple[int, int]): version information (default: ``(2, 4)``)
-            version_major (int): major version number (default: ``2``)
-            version_minor (int): minor version number (default: ``4``)
-            thiszone (int): GMT to local correction (default: ``0``)
-            sigfigs (int): accuracy of timestamps (default: ``0``)
-            snaplen (int): max length of captured packets, in octets (default: ``262_144``)
-            network (Union[pcapkit.const.reg.linktype.LinkType, enum.IntEnum, str, int]): data link type
-                (default: :attr:`DLT_NULL <pcapkit.const.reg.linktype.LinkType.NULL>`)
-            network_default (int): default value for unknown data link type
-            network_namespace (Union[pcapkit.const.reg.linktype.LinkType, enum.IntEnum, Dict[str, int], Dict[int, str]): data link type namespace
-                (default: :class:`~pcapkit.const.reg.linktype.LinkType`)
-            network_reversed (bool): if namespace is ``str -> int`` pairs (default: :data:`False`)
+            byteorder: header byte order
+            lilendian: little-endian flag
+            bigendian: big-endian flag
+            nanosecond: nanosecond-resolution file flag
+            version: version information
+            version_major: major version number
+            version_minor: minor version number
+            thiszone: GMT to local correction
+            sigfigs: accuracy of timestamps
+            snaplen: max length of captured packets, in octets
+            network: data link type
+            network_default: default value for unknown data link type
+            network_namespace: data link type namespace
+            network_reversed: if namespace is ``str -> int`` pairs
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         # fetch values
-        magic_number, lilendian = self._make_magic(**kwargs)           # make magic number
+        magic_number, lilendian = self._make_magic(                    # make magic number
+            byteorder, lilendian, bigendian, nanosecond)
         version = kwargs.get('version', (2, 4))                        # version information
         version_major = kwargs.get('version_major', version[0])        # major version number
         version_minor = kwargs.get('version_minor', version[1])        # minor version number
         thiszone = kwargs.get('thiszone', 0)                           # GMT to local correction
         sigfigs = kwargs.get('sigfigs', 0)                             # accuracy of timestamps
         snaplen = kwargs.get('snaplen', 262144)                        # max length of cap. packets, in octets
-        network = kwargs.get('network', LINKTYPE['NULL'])              # data link type
+        network = kwargs.get('network', RegType_LinkType.NULL)                 # data link type
         network_default = kwargs.get('network_default')                # default val. for unknown data link type
         network_reversed = kwargs.get('network_reversed', False)       # if namespace is ``str -> int`` pairs
-        network_namespace = kwargs.get('network_namespace', LINKTYPE)  # data link type namespace
+        network_namespace = kwargs.get('network_namespace', RegType_LinkType)  # data link type namespace
 
         # make packet
         return b'%s%s%s%s%s%s%s' % (
@@ -237,7 +241,7 @@ class Header(Protocol):
             self._make_pack(thiszone, size=4, lilendian=lilendian),
             self._make_pack(sigfigs, size=4, lilendian=lilendian),
             self._make_pack(snaplen, size=4, lilendian=lilendian),
-            self._make_index(network, network_default, namespace=network_namespace,
+            self._make_index(network, network_default, namespace=network_namespace,  # type: ignore[call-overload]
                              reversed=network_reversed, pack=True, lilendian=lilendian),
         )
 
@@ -245,7 +249,12 @@ class Header(Protocol):
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file=None, length=None, **kwargs):  # pylint: disable=unused-argument
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> None:
         """Post initialisation hook.
 
         Args:
@@ -262,33 +271,27 @@ class Header(Protocol):
         if file is None:
             _data = self.make(**kwargs)
         else:
-            _data = file.read(self.__len__())
+            _data = file.read(operator.length_hint(self))
 
         #: bytes: Raw packet data.
         self._data = _data
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
-        if hasattr(file, 'name'):  # set back source filename
+        if file is not None and hasattr(file, 'name'):  # set back source filename
             self._file.name = file.name
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = Info(self.read())
+        self._info = self.read()
 
-    def __len__(self):
-        """Total length of corresponding protocol.
-
-        :rtype: Literal[24]
-        """
+    def __len__(self) -> 'Literal[24]':
+        """Total length of corresponding protocol."""
         return 24
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[24]
-        """
+    def __length_hint__(self) -> 'Literal[24]':
+        """Return an estimated length for the object."""
         return 24
 
     @classmethod
-    def __index__(cls):
+    def __index__(cls) -> 'NoReturn':
         """Numeral registry index of the protocol.
 
         Raises:
@@ -301,7 +304,7 @@ class Header(Protocol):
     # Utilities.
     ##########################################################################
 
-    def _read_protos(self, size):
+    def _read_protos(self, size: int) -> 'RegType_LinkType':
         """Read next layer protocol type.
 
         Arguments:
@@ -312,24 +315,24 @@ class Header(Protocol):
 
         """
         _byte = self._read_unpack(4, lilendian=True)
-        _prot = LINKTYPE.get(_byte)
+        _prot = RegType_LinkType.get(_byte)
         return _prot
 
-    def _make_magic(self, **kwargs):  # pylint: disable=no-self-use
+    def _make_magic(self, byteorder: 'Literal["big", "little"]' = sys.byteorder,  # pylint: disable=no-self-use
+                    lilendian: 'Optional[bool]' = None, bigendian: 'Optional[bool]' = None,
+                    nanosecond: bool = False) -> 'tuple[bytes, bool]':
         """Generate magic number.
 
-        Keyword Args:
-            **kwargs: Arbitrary keyword arguments.
+        Args:
+            byteorder: header byte order
+            lilendian: little-endian flag
+            bigendian: big-endian flag
+            nanosecond: nanosecond-resolution file flag
 
         Returns:
-            Tuple[bytes, bool]: Magic number and little-endian flag.
+            Magic number and little-endian flag.
 
         """
-        nanosecond = bool(kwargs.get('nanosecond', False))   # nanosecond-resolution file flag
-        byteorder = kwargs.get('byteorder', sys.byteorder)   # header byte order
-        lilendian = kwargs.get('lilendian')                  # little-endian flag
-        bigendian = kwargs.get('bigendian')                  # big-endian flag
-
         if lilendian is not None and bigendian is not None:
             if lilendian == bigendian:
                 raise EndianError('unresolved byte order')
@@ -338,13 +341,13 @@ class Header(Protocol):
             if lilendian:
                 return _MAGIC_NUM[('little', True)], True
 
-        if byteorder.lower() not in ('little', 'big'):
+        if byteorder not in ('little', 'big'):
             raise EndianError(f"unknown byte order: {byteorder!r}")
 
-        magic_number = _MAGIC_NUM[(byteorder.lower(), nanosecond)]
-        return magic_number, (byteorder.lower() == 'little')
+        magic_number = _MAGIC_NUM[(byteorder, nanosecond)]
+        return magic_number, (byteorder == 'little')
 
-    def _decode_next_layer(self, *args, **kwargs):  # pylint: disable=signature-differs
+    def _decode_next_layer(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=signature-differs
         """Decode next layer protocol.
 
         Args:
@@ -359,7 +362,7 @@ class Header(Protocol):
         """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
 
-    def _import_next_layer(self, *args, **kwargs):  # pylint: disable=signature-differs
+    def _import_next_layer(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=signature-differs
         """Import next layer extractor.
 
         Args:
