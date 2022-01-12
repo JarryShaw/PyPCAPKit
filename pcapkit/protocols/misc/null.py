@@ -12,7 +12,7 @@ import io
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.protocols.data.misc.null import NoPayload as NoPayloadData
+from pcapkit.protocols.data.misc.null import NoPayload as DataType_NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
@@ -63,7 +63,7 @@ class NoPayload(Protocol):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'NoPayloadData':  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_NoPayload':  # pylint: disable=unused-argument
         """Read (parse) packet data.
 
         Args:
@@ -76,7 +76,7 @@ class NoPayload(Protocol):
             Parsed packet data.
 
         """
-        return NoPayloadData()
+        return DataType_NoPayload()
 
     def make(self, **kwargs: 'Any') -> 'bytes':
         """Make (construct) packet data.

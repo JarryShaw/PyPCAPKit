@@ -12,9 +12,7 @@ with detailed implementation and methods.
 from pcapkit.protocols.protocol import Protocol
 
 # Utility Classes for Protocols
-from pcapkit.protocols.misc.raw import *
-from pcapkit.protocols.misc.null import *
-from pcapkit.protocols.misc.pcap import *
+from pcapkit.protocols.misc import *
 
 # Protocols & Macros
 from pcapkit.protocols.link import *
