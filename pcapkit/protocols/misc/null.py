@@ -11,7 +11,6 @@ object whose payload is recursively
 import io
 from typing import TYPE_CHECKING, overload
 
-from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.data.misc.null import NoPayload as DataType_NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
@@ -26,6 +25,9 @@ __all__ = ['NoPayload']
 
 class NoPayload(Protocol):
     """This class implements no-payload protocol."""
+
+    #: Parsed packet data.
+    _info: 'DataType_NoPayload'
 
     ##########################################################################
     # Properties.
@@ -114,8 +116,8 @@ class NoPayload(Protocol):
         self._data = bytes()
         #: io.BytesIO: Source data stream.
         self._file = io.BytesIO()
-        #: pcapkit.corekit.infoclass.Info: Info dict of current instance.
-        self._info = Info()
+        #: pcapkit.protocols.data.misc.null.NoPayload: Info dict of current instance.
+        self._info = self.read(length, **kwargs)
 
         #: pcapkit.protocols.null.NoPayload: Payload of current instance.
         self._next = self

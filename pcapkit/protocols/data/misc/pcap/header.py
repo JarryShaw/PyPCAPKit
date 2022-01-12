@@ -23,6 +23,9 @@ class MagicNumber(Info):
     #: Nanosecond-timestamp resolution flag.
     nanosecond: 'bool'
 
+    if TYPE_CHECKING:
+        def __init__(self, data: 'bytes', byteorder: 'Literal["big", "little"]', nanosecond: 'bool') -> None: ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
 
 class Header(Info):
     """Global header of PCAP file."""
@@ -39,3 +42,7 @@ class Header(Info):
     snaplen: 'int'
     #: Data link type.
     network: 'LinkType'
+
+    if TYPE_CHECKING:
+        def __init__(self, magic_number: 'MagicNumber', version: 'VersionInfo',  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+                     thiszone: 'int', sigfigs: 'int', snaplen: 'int', network: 'LinkType') -> None: ...  # pylint: disable=unused-argument

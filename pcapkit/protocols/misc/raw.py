@@ -27,6 +27,9 @@ __all__ = ['Raw']
 class Raw(Protocol):
     """This class implements universal unknown protocol."""
 
+    #: Parsed packet data.
+    _info: 'DataType_Raw'
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -135,7 +138,7 @@ class Raw(Protocol):
         self._data = _data
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
-        #: pcapkit.corekit.infoclass.Info: Parsed packet data.
+        #: pcapkit.protocols.data.misc.raw.Raw: Parsed packet data.
         self._info = self.read(length, **kwargs)
 
         #: pcapkit.protocols.null.NoPayload: Next layer (no payload).
