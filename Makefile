@@ -209,3 +209,6 @@ dist-devel: dist-pre git-upload
 
 # run distro process in master
 dist-master: dist-prep dist-post
+
+isort:
+	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
