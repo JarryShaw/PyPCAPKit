@@ -32,7 +32,7 @@ __all__ = [
     'FileNotFound',                                                 # FileNotFoundError
     'ProtocolNotFound',                                             # IndexError
     'VersionError', 'IndexNotFound', 'ProtocolError',               # ValueError
-    'EndianError',                                                  # ValueError
+    'EndianError', 'KeyExists',                                     # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
     'FragmentError', 'PacketError',                                 # KeyError
@@ -261,6 +261,10 @@ class ProtocolError(BaseError, ValueError):
 
 class EndianError(BaseError, ValueError):
     """Invalid endian (byte order)."""
+
+
+class KeyExists(BaseError, ValueError):
+    """Key already exists."""
 
 
 ##############################################################################

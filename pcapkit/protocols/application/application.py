@@ -10,7 +10,7 @@ and etc.
 
 """
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.null import NoPayload
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 

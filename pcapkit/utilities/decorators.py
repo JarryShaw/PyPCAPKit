@@ -112,7 +112,7 @@ def beholder(func):
         try:
             return func(proto, length, *args, **kwargs)
         except Exception as exc:
-            from pcapkit.protocols.raw import Raw  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel
             error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
             # error = traceback.format_exc()
 
@@ -152,7 +152,7 @@ def beholder_ng(func):
             return func(file, length, *args, **kwargs)
         except Exception as exc:
             # from pcapkit.foundation.analysis import analyse
-            from pcapkit.protocols.raw import Raw  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel
             error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
             # error = traceback.format_exc()
 

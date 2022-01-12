@@ -10,7 +10,7 @@ corresponding modules and functions to extract the attributes.
 import importlib
 import os
 
-from pcapkit.protocols.raw import Raw
+from pcapkit.protocols.misc.raw import Raw
 from pcapkit.utilities.decorators import seekset_ng
 from pcapkit.utilities.exceptions import ProtocolError
 

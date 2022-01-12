@@ -10,7 +10,7 @@ which is a base class for transport layer protocols, eg.
 
 """
 from pcapkit.const.reg.transtype import TransType as TP_PROTO
-from pcapkit.protocols.null import NoPayload
+from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.decorators import beholder_ng
 
@@ -60,7 +60,7 @@ class Transport(Protocol):  # pylint: disable=abstract-method
 
         """
         if self._exproto == 'null' and self._exlayer == 'None':
-            from pcapkit.protocols.raw import \
+            from pcapkit.protocols.misc.raw import \
                 Raw as protocol  # pylint: disable=import-outside-toplevel
         else:
             from pcapkit.foundation.analysis import \

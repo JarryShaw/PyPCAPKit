@@ -88,8 +88,8 @@ from pcapkit.interface import *
 from pcapkit.toolkit import *
 
 # Protocols
-from pcapkit.protocols.null import NoPayload
-from pcapkit.protocols.raw import Raw
+from pcapkit.protocols.misc.null import NoPayload
+from pcapkit.protocols.misc.raw import Raw
 from pcapkit.protocols.link.arp import ARP
 from pcapkit.protocols.link.ethernet import Ethernet
 from pcapkit.protocols.application.ftp import FTP
