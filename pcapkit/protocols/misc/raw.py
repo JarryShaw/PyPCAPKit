@@ -8,12 +8,18 @@ extractor for unknown protocol, and constructs a
 
 """
 import io
+from typing import TYPE_CHECKING, overload
 
-from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
+from pcapkit.protocols.data.misc.raw import Raw as DataType_Raw
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import Any, BinaryIO, NoReturn, Optional
+
+    from typing_extensions import Literal
 
 __all__ = ['Raw']
 
@@ -27,16 +33,13 @@ class Raw(Protocol):
 
     # name of current protocol
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['Unknown']
-        """
+    def name(self) -> 'Literal["Unknown"]':
+        """Name of current protocol."""
         return 'Unknown'
 
     # header length of current protocol
     @property
-    def length(self):
+    def length(self) -> 'NoReturn':
         """Header length of current protocol.
 
         Raises:
@@ -47,7 +50,7 @@ class Raw(Protocol):
 
     # name of next layer protocol
     @property
-    def protocol(self):
+    def protocol(self) -> 'NoReturn':
         """Name of next layer protocol.
 
         Raises:
@@ -60,31 +63,29 @@ class Raw(Protocol):
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, *, error=None, **kwargs):  # pylint: disable=arguments-differ,unused-argument
+    def read(self, length: 'Optional[int]' = None, *, error: 'Optional[Exception]' = None,  # pylint: disable=arguments-differ
+             **kwargs: 'Any') -> 'DataType_Raw':  # pylint: disable=unused-argument
         """Read raw packet data.
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
-            error (Optional[str]): Parsing errors if any.
+            error: Parsing errors if any.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_Raw: The parsed packet data.
+            The parsed packet data.
 
         """
-        if length is None:
-            length = len(self)
-
-        raw = dict(
-            packet=self._read_fileng(length),
-            error=error or None,
+        raw = DataType_Raw(
+            packet=self._data,
+            error=error,
         )
 
         return raw
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'bytes':
         """Make raw packet data.
 
         Keyword Args:
@@ -92,28 +93,34 @@ class Raw(Protocol):
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
-        return bytes(kwargs.get('packet'))
+        packet = kwargs.get('packet', b'')
+        return packet
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file, length=None, *, error=None, **kwargs):  # pylint: disable=arguments-differ
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> None:  # pylint: disable=unused-argument
         """Post initialisation hook.
 
         Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
-            error (Optional[str]): Parsing errors if any (for parsing).
+            error (Optional[Exception]): Parsing errors if any (for parsing).
             **kwargs: Arbitrary keyword arguments.
 
         Would :mod:`pcapkit` encounter malformed packets, the original parsing
-        error message will be provided as in ``error``.
+        error instance will be provided as in ``error``.
 
         See Also:
             For construction argument, please refer to :meth:`make`.
@@ -122,14 +129,14 @@ class Raw(Protocol):
         if file is None:
             _data = self.make(**kwargs)
         else:
-            _data = file.read(length)
+            _data = file.read(length)  # type: ignore[arg-type]
 
         #: bytes: Raw packet data.
         self._data = _data
         #: io.BytesIO: Source packet stream.
         self._file = io.BytesIO(self._data)
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = Info(self.read(length, error=error, **kwargs))
+        self._info = self.read(length, **kwargs)
 
         #: pcapkit.protocols.null.NoPayload: Next layer (no payload).
         self._next = NoPayload()
@@ -137,7 +144,7 @@ class Raw(Protocol):
         self._protos = ProtoChain(self.__class__, self.alias)
 
     @classmethod
-    def __index__(cls):
+    def __index__(cls) -> 'NoReturn':
         """Numeral registry index of the protocol.
 
         Raises:
