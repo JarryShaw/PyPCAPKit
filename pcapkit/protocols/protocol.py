@@ -614,7 +614,7 @@ class Protocol(metaclass=abc.ABCMeta):
     def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'None' = ...) -> 'bytes': ...
     @overload
     def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'int',
-                     payload: 'Optional[int]' = ..., discard: 'Literal[True]' = ...) -> 'bytes': ...
+                     payload: 'Optional[int]' = ..., discard: 'Literal[True]') -> 'bytes': ...
     @overload
     def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'int',
                      payload: 'Optional[int]' = ..., discard: 'Literal[False]' = ...) -> 'Packet': ...
@@ -643,7 +643,7 @@ class Protocol(metaclass=abc.ABCMeta):
             data_header = self._read_fileng(header)
             data_payload = self._read_fileng(payload)
             if discard:
-                return payload
+                return data_payload
             return Packet(
                 header=data_header,
                 payload=data_payload
