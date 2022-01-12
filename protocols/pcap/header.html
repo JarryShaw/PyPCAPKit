@@ -35,7 +35,7 @@
             
   <section id="global-header">
 <h1>Global Header<a class="headerlink" href="#global-header" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.pcap.header" title="pcapkit.protocols.pcap.header"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.pcap.header</span></code></a> contains
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.pcap.header</span></code> contains
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Header</span></code> only,
 which implements extractor for global headers
 <a class="footnote-reference brackets" href="#id2" id="id1">*</a> of PCAP, whose structure is described as
@@ -51,298 +51,7 @@ below:</p>
 <span class="p">}</span><span class="w"> </span><span class="n">pcap_hdr_t</span><span class="p">;</span><span class="w"></span>
 </pre></div>
 </div>
-<br /><span class="target" id="module-pcapkit.protocols.pcap.header"></span><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.header.</span></span><span class="sig-name descname"><span class="pre">Header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol</span></code></a></p>
-<p>PCAP file global header extractor.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.__index__">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.__index__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Numeral registry index of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol has no registry entry.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.__len__">
-<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.__len__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Total length of corresponding protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[24]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.__length_hint__">
-<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.__length_hint__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an estimated length for the object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[24]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.__post_init__">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.__post_init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post initialisation hook.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.10)"><em>io.BytesIO</em></a><em>]</em>) – Source packet stream.</p></li>
-<li><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – Length of packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.pcap.header.Header.make" title="pcapkit.protocols.pcap.header.Header.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header._decode_next_layer">
-<span class="sig-name descname"><span class="pre">_decode_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header._decode_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header._decode_next_layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decode next layer protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>*args</strong> – arbitrary positional arguments</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>**kwargs</strong> – arbitrary keyword arguments</p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.pcap.header.Header._decode_next_layer" title="pcapkit.protocols.pcap.header.Header._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header._import_next_layer">
-<span class="sig-name descname"><span class="pre">_import_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header._import_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header._import_next_layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Import next layer extractor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>*args</strong> – arbitrary positional arguments</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>**kwargs</strong> – arbitrary keyword arguments</p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.pcap.header.Header._import_next_layer" title="pcapkit.protocols.pcap.header.Header._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header._make_magic">
-<span class="sig-name descname"><span class="pre">_make_magic</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header._make_magic"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header._make_magic" title="Permalink to this definition">¶</a></dt>
-<dd><p>Generate magic number.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments</dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Magic number and little-endian flag.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Tuple[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)">bytes</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header._read_protos">
-<span class="sig-name descname"><span class="pre">_read_protos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header._read_protos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header._read_protos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read next layer protocol type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>link layer protocol enumeration</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType">pcapkit.const.reg.linktype.LinkType</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.make" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make (construct) packet data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>byteorder</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – header byte order</p></li>
-<li><p><strong>lilendian</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – little-endian flag</p></li>
-<li><p><strong>bigendian</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – big-endian flag</p></li>
-<li><p><strong>nanosecond</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – nanosecond-resolution file flag (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
-<li><p><strong>version</strong> (<em>Tuple</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – version information (default: <code class="docutils literal notranslate"><span class="pre">(2,</span> <span class="pre">4)</span></code>)</p></li>
-<li><p><strong>version_major</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – major version number (default: <code class="docutils literal notranslate"><span class="pre">2</span></code>)</p></li>
-<li><p><strong>version_minor</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – minor version number (default: <code class="docutils literal notranslate"><span class="pre">4</span></code>)</p></li>
-<li><p><strong>thiszone</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – GMT to local correction (default: <code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></li>
-<li><p><strong>sigfigs</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – accuracy of timestamps (default: <code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></li>
-<li><p><strong>snaplen</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – max length of captured packets, in octets (default: <code class="docutils literal notranslate"><span class="pre">262_144</span></code>)</p></li>
-<li><p><strong>network</strong> (<em>Union</em><em>[</em><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><em>pcapkit.const.reg.linktype.LinkType</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.10)"><em>enum.IntEnum</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – data link type
-(default: <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType.NULL" title="pcapkit.const.reg.linktype.LinkType.NULL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">DLT_NULL</span></code></a>)</p></li>
-<li><p><strong>network_default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – default value for unknown data link type</p></li>
-<li><p><strong>network_namespace</strong> (<em>Union</em><em>[</em><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><em>pcapkit.const.reg.linktype.LinkType</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.10)"><em>enum.IntEnum</em></a><em>, </em><em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>Dict</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – data link type namespace
-(default: <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a>)</p></li>
-<li><p><strong>network_reversed</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – if namespace is <code class="docutils literal notranslate"><span class="pre">str</span> <span class="pre">-&gt;</span> <span class="pre">int</span></code> pairs (default: <a class="reference external" href="https://docs.python.org/3/library/constants.html#False" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>)</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Constructed packet data.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)">bytes</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/pcap/header.html#Header.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read global header of PCAP file.</p>
-<div class="admonition-notes admonition">
-<p class="admonition-title">Notes</p>
-<p>PCAP file has <strong>four</strong> different valid magic numbers.</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">d4</span> <span class="pre">c3</span> <span class="pre">b2</span> <span class="pre">a1</span></code> – Little-endian microsecond-timestamp PCAP file.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">a1</span> <span class="pre">b2</span> <span class="pre">c3</span> <span class="pre">d4</span></code> – Big-endian microsecond-timestamp PCAP file.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">4d</span> <span class="pre">3c</span> <span class="pre">b2</span> <span class="pre">a1</span></code> – Little-endian nanosecond-timestamp PCAP file.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">a1</span> <span class="pre">b2</span> <span class="pre">3c</span> <span class="pre">4d</span></code> – Big-endian nano-timestamp PCAP file.</p></li>
-</ul>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – Length of packet data.</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Parsed packet data.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.pcap.header.DataType_Header" title="pcapkit.protocols.pcap.header.DataType_Header">DataType_Header</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FileError" title="pcapkit.utilities.exceptions.FileError"><strong>FileError</strong></a> – If the magic number is invalid.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.byteorder">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">byteorder</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.byteorder" title="Permalink to this definition">¶</a></dt>
-<dd><p>Header byte order.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘big’, ‘little’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.length">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.length" title="Permalink to this definition">¶</a></dt>
-<dd><p>Header length of corresponding protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[24]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Name of corresponding protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘Global Header’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.nanosecond">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nanosecond</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.nanosecond" title="Permalink to this definition">¶</a></dt>
-<dd><p>Nanosecond-resolution flag.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.payload">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">payload</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.payload" title="Permalink to this definition">¶</a></dt>
-<dd><p>Payload of current instance.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.pcap.header.Header.payload" title="pcapkit.protocols.pcap.header.Header.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.protochain">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protochain</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.protochain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol chain of current instance.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.pcap.header.Header.protochain" title="pcapkit.protocols.pcap.header.Header.protochain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protochain</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.protocol">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.protocol" title="Permalink to this definition">¶</a></dt>
-<dd><p>Data link type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType">pcapkit.const.reg.linktype.LinkType</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.Header.version">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">version</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.Header.version" title="Permalink to this definition">¶</a></dt>
-<dd><p>Version infomation of input PCAP file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../corekit/version.html#pcapkit.corekit.version.VersionInfo" title="pcapkit.corekit.version.VersionInfo">pcapkit.corekit.version.VersionInfo</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header._MAGIC_NUM">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.header.</span></span><span class="sig-name descname"><span class="pre">_MAGIC_NUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{('big',</span> <span class="pre">False):</span> <span class="pre">b'\xa1\xb2\xc3\xd4',</span> <span class="pre">('big',</span> <span class="pre">True):</span> <span class="pre">b'\xa1\xb2&lt;M',</span> <span class="pre">('little',</span> <span class="pre">False):</span> <span class="pre">b'\xd4\xc3\xb2\xa1',</span> <span class="pre">('little',</span> <span class="pre">True):</span> <span class="pre">b'M&lt;\xb2\xa1'}</span></em><a class="headerlink" href="#pcapkit.protocols.pcap.header._MAGIC_NUM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Mapping of PCAP file magic numbers.</p>
-</dd></dl>
-
-<section id="data-structure">
+<br /><section id="data-structure">
 <h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -350,8 +59,8 @@ below:</p>
 They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_Header">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.header.</span></span><span class="sig-name descname"><span class="pre">DataType_Header</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_Header" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_Header">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_Header</span></span><a class="headerlink" href="#DataType_Header" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
@@ -359,52 +68,52 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>PCAP global header.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_Header.magic_number">
-<span class="sig-name descname"><span class="pre">magic_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.pcap.header.DataType_MagicNumber" title="pcapkit.protocols.pcap.header.DataType_MagicNumber"><span class="pre">DataType_MagicNumber</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_Header.magic_number" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_Header.magic_number">
+<span class="sig-name descname"><span class="pre">magic_number</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#DataType_MagicNumber" title="DataType_MagicNumber"><span class="pre">DataType_MagicNumber</span></a></em><a class="headerlink" href="#DataType_Header.magic_number" title="Permalink to this definition">¶</a></dt>
 <dd><p>magic number</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_Header.version_major">
-<span class="sig-name descname"><span class="pre">version_major</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_Header.version_major" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_Header.version_major">
+<span class="sig-name descname"><span class="pre">version_major</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_Header.version_major" title="Permalink to this definition">¶</a></dt>
 <dd><p>major version number</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_Header.version_minor">
-<span class="sig-name descname"><span class="pre">version_minor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_Header.version_minor" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_Header.version_minor">
+<span class="sig-name descname"><span class="pre">version_minor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_Header.version_minor" title="Permalink to this definition">¶</a></dt>
 <dd><p>minor version number</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_Header.thiszone">
-<span class="sig-name descname"><span class="pre">thiszone</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_Header.thiszone" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_Header.thiszone">
+<span class="sig-name descname"><span class="pre">thiszone</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_Header.thiszone" title="Permalink to this definition">¶</a></dt>
 <dd><p>GMT to local correction</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_Header.sigfigs">
-<span class="sig-name descname"><span class="pre">sigfigs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_Header.sigfigs" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_Header.sigfigs">
+<span class="sig-name descname"><span class="pre">sigfigs</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_Header.sigfigs" title="Permalink to this definition">¶</a></dt>
 <dd><p>accuracy of timestamps</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_Header.snaplen">
-<span class="sig-name descname"><span class="pre">snaplen</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_Header.snaplen" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_Header.snaplen">
+<span class="sig-name descname"><span class="pre">snaplen</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_Header.snaplen" title="Permalink to this definition">¶</a></dt>
 <dd><p>max length of captured packets, in octets</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_Header.network">
-<span class="sig-name descname"><span class="pre">network</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">pcapkit.const.reg.linktype.LinkType</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_Header.network" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_Header.network">
+<span class="sig-name descname"><span class="pre">network</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">pcapkit.const.reg.linktype.LinkType</span></a></em><a class="headerlink" href="#DataType_Header.network" title="Permalink to this definition">¶</a></dt>
 <dd><p>data link type</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_MagicNumber">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.pcap.header.</span></span><span class="sig-name descname"><span class="pre">DataType_MagicNumber</span></span><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_MagicNumber" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_MagicNumber">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_MagicNumber</span></span><a class="headerlink" href="#DataType_MagicNumber" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
@@ -412,20 +121,20 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>PCAP magic number.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_MagicNumber.data">
-<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_MagicNumber.data" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_MagicNumber.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#DataType_MagicNumber.data" title="Permalink to this definition">¶</a></dt>
 <dd><p>original magic number</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_MagicNumber.byteorder">
-<span class="sig-name descname"><span class="pre">byteorder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_MagicNumber.byteorder" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_MagicNumber.byteorder">
+<span class="sig-name descname"><span class="pre">byteorder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#DataType_MagicNumber.byteorder" title="Permalink to this definition">¶</a></dt>
 <dd><p>byte order (<code class="docutils literal notranslate"><span class="pre">big</span></code> / <code class="docutils literal notranslate"><span class="pre">little</span></code>)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.pcap.header.DataType_MagicNumber.nanosecond">
-<span class="sig-name descname"><span class="pre">nanosecond</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.pcap.header.DataType_MagicNumber.nanosecond" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_MagicNumber.nanosecond">
+<span class="sig-name descname"><span class="pre">nanosecond</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#DataType_MagicNumber.nanosecond" title="Permalink to this definition">¶</a></dt>
 <dd><p>nanosecond-timestamp support</p>
 </dd></dl>
 

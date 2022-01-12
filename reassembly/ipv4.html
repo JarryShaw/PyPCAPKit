@@ -35,23 +35,23 @@
             
   <section id="ipv4-datagram-reassembly">
 <h1>IPv4 Datagram Reassembly<a class="headerlink" href="#ipv4-datagram-reassembly" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.reassembly.ipv4" title="pcapkit.reassembly.ipv4"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.reassembly.ipv4</span></code></a> contains
-<a class="reference internal" href="#pcapkit.reassembly.ipv4.IPv4_Reassembly" title="pcapkit.reassembly.ipv4.IPv4_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_Reassembly</span></code></a>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.reassembly.ipv4</span></code> contains
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4_Reassembly</span></code>
 only, which reconstructs fragmented IPv4 packets back to
 origin. Please refer to <a class="reference internal" href="ip.html"><span class="doc">IP Datagram Reassembly</span></a> for more information.</p>
 <section id="data-structure">
 <h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
 <dl class="glossary">
 <dt id="term-ipv4.packet">ipv4.packet<a class="headerlink" href="#term-ipv4.packet" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>IPv4 datagram reassembly</strong>
-(<a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reassembly()</span></code></a>)
+(<code class="xref py py-meth docutils literal notranslate"><span class="pre">reassembly()</span></code>)
 is as following:</p>
 </dd>
 <dt id="term-ipv4.datagram">ipv4.datagram<a class="headerlink" href="#term-ipv4.datagram" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>reassembled IPv4 datagram</strong> (element from
-<a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly.datagram" title="pcapkit.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code></a> <em>tuple</em>)
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">datagram</span></code> <em>tuple</em>)
 is as following:</p>
 </dd>
 <dt id="term-ipv4.buffer">ipv4.buffer<a class="headerlink" href="#term-ipv4.buffer" title="Permalink to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
-(<a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly._buffer" title="pcapkit.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code></a>) is as following:</p>
+(<code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code>) is as following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span> <span class="n">buffer</span> <span class="o">--&gt;</span> <span class="n">memory</span> <span class="n">buffer</span> <span class="k">for</span> <span class="n">reassembly</span>
  <span class="o">|--&gt;</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">)</span> <span class="n">BUFID</span> <span class="p">:</span> <span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
  <span class="o">|</span>     <span class="o">|--&gt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">src</span>       <span class="o">|</span>
@@ -73,49 +73,8 @@ is as following:</p>
 </dd>
 </dl>
 </section>
-<section id="module-pcapkit.reassembly.ipv4">
-<span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-pcapkit.reassembly.ipv4" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.reassembly.ipv4.IPv4_Reassembly">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.reassembly.ipv4.</span></span><span class="sig-name descname"><span class="pre">IPv4_Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ipv4.html#IPv4_Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ipv4.IPv4_Reassembly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="ip.html#pcapkit.reassembly.ip.IP_Reassembly" title="pcapkit.reassembly.ip.IP_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.reassembly.ip.IP_Reassembly</span></code></a></p>
-<p>Reassembly for IPv4 payload.</p>
-<div class="admonition-example admonition">
-<p class="admonition-title">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pcapkit.reassembly</span> <span class="kn">import</span> <span class="n">IPv4_Reassembly</span>
-<span class="go"># Initialise instance:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ipv4_reassembly</span> <span class="o">=</span> <span class="n">IPv4_Reassembly</span><span class="p">()</span>
-<span class="go"># Call reassembly:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ipv4_reassembly</span><span class="p">(</span><span class="n">packet_dict</span><span class="p">)</span>
-<span class="go"># Fetch result:</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">ipv4_reassembly</span><span class="o">.</span><span class="n">datagram</span>
-</pre></div>
-</div>
-</div>
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.reassembly.ipv4.IPv4_Reassembly.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.reassembly.ipv4.IPv4_Reassembly.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol of current packet.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘Internet Protocol version 4’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.reassembly.ipv4.IPv4_Reassembly.protocol">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><a class="headerlink" href="#pcapkit.reassembly.ipv4.IPv4_Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol of current reassembly object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘IPv4’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
 </section>
 </section>
 

@@ -70,90 +70,12 @@ application layer, with detailed implementation and methods.</p>
 <section id="base-protocol">
 <h2>Base Protocol<a class="headerlink" href="#base-protocol" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="#module-pcapkit.protocols.application.application" title="pcapkit.protocols.application.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.application</span></code></a> contains only
-<a class="reference internal" href="#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code>,
 which is a base class for application layer protocols, eg.
 <code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/1.*</span></code>,
 <code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/2</span></code>
 and etc.</p>
-<span class="target" id="module-pcapkit.protocols.application.application"></span><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.application.Application">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.application.</span></span><span class="sig-name descname"><span class="pre">Application</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol</span></code></a></p>
-<p>Abstract base class for transport layer protocol family.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.application.Application.__layer__">
-<span class="sig-name descname"><span class="pre">__layer__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Application'</span></em><a class="headerlink" href="#pcapkit.protocols.application.application.Application.__layer__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Layer of protocol.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.application.Application.__index__">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application.__index__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Numeral registry index of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.IntError" title="pcapkit.utilities.exceptions.IntError"><strong>IntError</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.application.application.Application.__index__" title="pcapkit.protocols.application.application.Application.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.application.Application.__post_init__">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application.__post_init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post initialisation hook.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.10)"><em>io.BytesIO</em></a><em>]</em>) – Source packet stream.</p></li>
-<li><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – Length of packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p>For construction argument, please refer to <code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code>.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.application.Application._decode_next_layer">
-<span class="sig-name descname"><span class="pre">_decode_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proto</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application._decode_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application._decode_next_layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decode next layer protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.application.application.Application._decode_next_layer" title="pcapkit.protocols.application.application.Application._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.application.Application._import_next_layer">
-<span class="sig-name descname"><span class="pre">_import_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/application.html#Application._import_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.application.Application._import_next_layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Import next layer extractor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol doesn’t support <a class="reference internal" href="#pcapkit.protocols.application.application.Application._import_next_layer" title="pcapkit.protocols.application.application.Application._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_import_next_layer()</span></code></a>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.application.Application.layer">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer</span></span><a class="headerlink" href="#pcapkit.protocols.application.application.Application.layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol layer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘Application’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
+<span class="target" id="module-pcapkit.protocols.application.application"></span></section>
 </section>
 
 

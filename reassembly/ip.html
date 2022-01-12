@@ -35,8 +35,8 @@
             
   <section id="ip-datagram-reassembly">
 <h1>IP Datagram Reassembly<a class="headerlink" href="#ip-datagram-reassembly" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.reassembly.ip" title="pcapkit.reassembly.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.reassembly.ip</span></code></a> contains
-<a class="reference internal" href="#pcapkit.reassembly.ip.IP_Reassembly" title="pcapkit.reassembly.ip.IP_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Reassembly</span></code></a>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.reassembly.ip</span></code> contains
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Reassembly</span></code>
 only, which reconstructs fragmented IP packets back to
 origin. The following algorithm implement is based on IP
 reassembly procedure introduced in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>, using
@@ -132,46 +132,8 @@ timer expires: {
 </pre></div>
 </div>
 </section>
-<section id="module-pcapkit.reassembly.ip">
-<span id="implementation"></span><h2>Implementation<a class="headerlink" href="#module-pcapkit.reassembly.ip" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.reassembly.ip.IP_Reassembly">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.reassembly.ip.</span></span><span class="sig-name descname"><span class="pre">IP_Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="reassembly.html#pcapkit.reassembly.reassembly.Reassembly" title="pcapkit.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.reassembly.reassembly.Reassembly</span></code></a></p>
-<p>Reassembly for IP payload.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.reassembly.ip.IP_Reassembly.reassembly">
-<span class="sig-name descname"><span class="pre">reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">info</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly.reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly.reassembly" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reassembly procedure.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>info</strong> (<a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><em>pcapkit.corekit.infoclass.Info</em></a>) – info dict of packets to be reassembled</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.reassembly.ip.IP_Reassembly.submit">
-<span class="sig-name descname"><span class="pre">submit</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">buf</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">checked</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/reassembly/ip.html#IP_Reassembly.submit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.reassembly.ip.IP_Reassembly.submit" title="Permalink to this definition">¶</a></dt>
-<dd><p>Submit reassembled payload.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>buf</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a>) – buffer dict of reassembled packets</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>bufid</strong> (<a class="reference internal" href="../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.tuple" title="pcapkit.corekit.protochain.ProtoChain.tuple"><em>tuple</em></a>) – buffer identifier</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>reassembled packets</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<section id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
 </section>
 </section>
 

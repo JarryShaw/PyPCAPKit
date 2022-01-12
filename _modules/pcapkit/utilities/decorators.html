@@ -145,7 +145,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="kn">from</span> <span class="nn">pcapkit.protocols.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
             <span class="n">error</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="c1"># error = traceback.format_exc()</span>
 
@@ -185,7 +185,7 @@
             <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="c1"># from pcapkit.foundation.analysis import analyse</span>
-            <span class="kn">from</span> <span class="nn">pcapkit.protocols.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+            <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
             <span class="n">error</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="c1"># error = traceback.format_exc()</span>
 

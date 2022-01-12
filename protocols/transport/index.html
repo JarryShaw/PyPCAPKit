@@ -81,55 +81,11 @@ transport layer, with detailed implementation and methods.</p>
 <section id="base-protocol">
 <h2>Base Protocol<a class="headerlink" href="#base-protocol" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="#module-pcapkit.protocols.transport.transport" title="pcapkit.protocols.transport.transport"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.transport</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.transport.transport.Transport" title="pcapkit.protocols.transport.transport.Transport"><code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code></a>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Transport</span></code>,
 which is a base class for transport layer protocols, eg.
 <code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> and
 <code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code>.</p>
-<span class="target" id="module-pcapkit.protocols.transport.transport"></span><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.transport.Transport">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.transport.</span></span><span class="sig-name descname"><span class="pre">Transport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/transport/transport.html#Transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol</span></code></a></p>
-<p>Abstract base class for transport layer protocol family.</p>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.transport.Transport.__layer__">
-<span class="sig-name descname"><span class="pre">__layer__</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Transport'</span></em><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport.__layer__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Layer of protocol.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.transport.Transport._import_next_layer">
-<span class="sig-name descname"><span class="pre">_import_next_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/transport/transport.html#Transport._import_next_layer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport._import_next_layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Import next layer extractor.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>proto</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – next layer protocol name</p></li>
-<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – valid (<em>non-padding</em>) length</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>instance of next layer</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">pcapkit.protocols.protocol.Protocol</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.transport.transport.Transport.layer">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer</span></span><a class="headerlink" href="#pcapkit.protocols.transport.transport.Transport.layer" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol layer.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘Transport’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
+<span class="target" id="module-pcapkit.protocols.transport.transport"></span></section>
 </section>
 
 

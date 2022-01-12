@@ -35,8 +35,8 @@
             
   <section id="http-1-hypertext-transfer-protocol">
 <h1>HTTP/1.* - Hypertext Transfer Protocol<a class="headerlink" href="#http-1-hypertext-transfer-protocol" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.application.httpv1" title="pcapkit.protocols.application.httpv1"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.application.httpv1.HTTPv1" title="pcapkit.protocols.application.httpv1.HTTPv1"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv1</span></code></a>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1</span></code> contains
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv1</span></code>
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/1.*) <a class="footnote-reference brackets" href="#id2" id="id1">*</a>, whose structure is described
 as below:</p>
@@ -53,164 +53,6 @@ as below:</p>
 <span class="o">&lt;</span><span class="n">body</span><span class="o">&gt;</span>                      <span class="o">:==</span><span class="p">:</span> <span class="n">RESPONSE</span> <span class="n">BODY</span> <span class="p">(</span><span class="n">optional</span><span class="p">)</span>
 </pre></div>
 </div>
-<span class="target" id="module-pcapkit.protocols.application.httpv1"></span><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTPv1">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">HTTPv1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv1.html#HTTPv1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTPv1" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="http.html#pcapkit.protocols.application.http.HTTP" title="pcapkit.protocols.application.http.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.http.HTTP</span></code></a></p>
-<p>This class implements Hypertext Transfer Protocol (HTTP/1.*).</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTPv1._read_http_body">
-<span class="sig-name descname"><span class="pre">_read_http_body</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv1.html#HTTPv1._read_http_body"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTPv1._read_http_body" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read HTTP/1.* body.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>body</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><em>bytes</em></a>) – HTTP body data.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Raw HTTP body.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTPv1._read_http_header">
-<span class="sig-name descname"><span class="pre">_read_http_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv1.html#HTTPv1._read_http_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTPv1._read_http_header" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read HTTP/1.* header.</p>
-<p>Structure of HTTP/1.* header [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7230.html"><strong>RFC 7230</strong></a>]:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">start</span><span class="o">-</span><span class="n">line</span>      <span class="o">:==</span><span class="p">:</span>    <span class="n">request</span><span class="o">-</span><span class="n">line</span> <span class="o">/</span> <span class="n">status</span><span class="o">-</span><span class="n">line</span>
-<span class="n">request</span><span class="o">-</span><span class="n">line</span>    <span class="o">:==</span><span class="p">:</span>    <span class="n">method</span> <span class="n">SP</span> <span class="n">request</span><span class="o">-</span><span class="n">target</span> <span class="n">SP</span> <span class="n">HTTP</span><span class="o">-</span><span class="n">version</span> <span class="n">CRLF</span>
-<span class="n">status</span><span class="o">-</span><span class="n">line</span>     <span class="o">:==</span><span class="p">:</span>    <span class="n">HTTP</span><span class="o">-</span><span class="n">version</span> <span class="n">SP</span> <span class="n">status</span><span class="o">-</span><span class="n">code</span> <span class="n">SP</span> <span class="n">reason</span><span class="o">-</span><span class="n">phrase</span> <span class="n">CRLF</span>
-<span class="n">header</span><span class="o">-</span><span class="n">field</span>    <span class="o">:==</span><span class="p">:</span>    <span class="n">field</span><span class="o">-</span><span class="n">name</span> <span class="s2">&quot;:&quot;</span> <span class="n">OWS</span> <span class="n">field</span><span class="o">-</span><span class="n">value</span> <span class="n">OWS</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>header</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><em>bytes</em></a>) – HTTP header data.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Parsed packet data.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Union[<a class="reference internal" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header" title="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header">DataType_HTTP_Request_Header</a>, <a class="reference internal" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header" title="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header">DataType_HTTP_Response_Header</a>]</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the packet is malformed.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTPv1.id">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv1.html#HTTPv1.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTPv1.id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Index ID of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Index ID of the protocol.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Literal[‘HTTPv1’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTPv1.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv1.html#HTTPv1.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTPv1.make" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make (construct) packet data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments</dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Constructed packet data.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)">bytes</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTPv1.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/application/httpv1.html#HTTPv1.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTPv1.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read Hypertext Transfer Protocol (HTTP/1.*).</p>
-<p>Structure of HTTP/1.* packet [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7230.html"><strong>RFC 7230</strong></a>]:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">HTTP</span><span class="o">-</span><span class="n">message</span>    <span class="o">:==</span><span class="p">:</span>    <span class="n">start</span><span class="o">-</span><span class="n">line</span>
-                        <span class="o">*</span><span class="p">(</span> <span class="n">header</span><span class="o">-</span><span class="n">field</span> <span class="n">CRLF</span> <span class="p">)</span>
-                        <span class="n">CRLF</span>
-                        <span class="p">[</span> <span class="n">message</span><span class="o">-</span><span class="n">body</span> <span class="p">]</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – Length of packet data.</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Parsed packet data.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.application.httpv1.DataType_HTTP" title="pcapkit.protocols.application.httpv1.DataType_HTTP">DataType_HTTP</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the packet is malformed.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTPv1._receipt">
-<span class="sig-name descname"><span class="pre">_receipt</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTPv1._receipt" title="Permalink to this definition">¶</a></dt>
-<dd><p>Type of HTTP receipt.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type</dt>
-<dd class="field-odd"><p>Literal[‘request’, ‘response’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTPv1.alias">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alias</span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTPv1.alias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acronym of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘HTTP/0.9’, ‘HTTP/1.0’, ‘HTTP/1.1’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.HTTP_METHODS">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">HTTP_METHODS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['GET',</span> <span class="pre">'HEAD',</span> <span class="pre">'POST',</span> <span class="pre">'PUT',</span> <span class="pre">'DELETE',</span> <span class="pre">'TRACE',</span> <span class="pre">'OPTIONS',</span> <span class="pre">'CONNECT',</span> <span class="pre">'PATCH']</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.HTTP_METHODS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Supported HTTP method.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1._RE_METHOD">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">_RE_METHOD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">re.compile(b'GET|HEAD|POST|PUT|DELETE|TRACE|OPTIONS|CONNECT|PATCH')</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1._RE_METHOD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Regular expression to match HTTP methods.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1._RE_STATUS">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">_RE_STATUS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">re.compile(b'\\d{3}')</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1._RE_STATUS" title="Permalink to this definition">¶</a></dt>
-<dd><p>Regular expression to match HTTP status code.</p>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1._RE_VERSION">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">_RE_VERSION</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">re.compile(b'HTTP/(?P&lt;version&gt;\\d\\.\\d)')</span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1._RE_VERSION" title="Permalink to this definition">¶</a></dt>
-<dd><p>Regular expression to match HTTP version string.</p>
-</dd></dl>
-
 <section id="data-structure">
 <h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
 <div class="admonition important">
@@ -219,43 +61,43 @@ as below:</p>
 They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">DataType_HTTP</span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP</span></span><a class="headerlink" href="#DataType_HTTP" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
-<p>Structure of HTTP/1.* packet [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7230.html"><strong>RFC 7230</strong></a>].</p>
+<p>Structure of HTTP/1.* packet [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7230.html"><strong>RFC 7230</strong></a>].</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP.receipt">
-<span class="sig-name descname"><span class="pre">receipt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'request'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'response'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP.receipt" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP.receipt">
+<span class="sig-name descname"><span class="pre">receipt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'request'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'response'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#DataType_HTTP.receipt" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP packet receipt.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP.header">
-<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header" title="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header"><span class="pre">DataType_HTTP_Request_Header</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header" title="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header"><span class="pre">DataType_HTTP_Response_Header</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP.header" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP.header">
+<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#DataType_HTTP_Request_Header" title="DataType_HTTP_Request_Header"><span class="pre">DataType_HTTP_Request_Header</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#DataType_HTTP_Response_Header" title="DataType_HTTP_Response_Header"><span class="pre">DataType_HTTP_Response_Header</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#DataType_HTTP.header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Parsed HTTP header data.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP.body">
-<span class="sig-name descname"><span class="pre">body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP.body" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP.body">
+<span class="sig-name descname"><span class="pre">body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#DataType_HTTP.body" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP body data.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP.raw">
-<span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Raw" title="pcapkit.protocols.application.httpv1.DataType_HTTP_Raw"><span class="pre">DataType_HTTP_Raw</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP.raw" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP.raw">
+<span class="sig-name descname"><span class="pre">raw</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#DataType_HTTP_Raw" title="DataType_HTTP_Raw"><span class="pre">DataType_HTTP_Raw</span></a></em><a class="headerlink" href="#DataType_HTTP.raw" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw HTTP packet data.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Raw">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">DataType_HTTP_Raw</span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Raw" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Raw">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Raw</span></span><a class="headerlink" href="#DataType_HTTP_Raw" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -263,28 +105,28 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>Raw HTTP packet data.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Raw.header">
-<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Raw.header" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Raw.header">
+<span class="sig-name descname"><span class="pre">header</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#DataType_HTTP_Raw.header" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw HTTP header data.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Raw.body">
-<span class="sig-name descname"><span class="pre">body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Raw.body" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Raw.body">
+<span class="sig-name descname"><span class="pre">body</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#DataType_HTTP_Raw.body" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw HTTP body data.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Raw.packet">
-<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Raw.packet" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Raw.packet">
+<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#DataType_HTTP_Raw.packet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Raw HTTP packet data.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">DataType_HTTP_Request_Header</span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Request_Header">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Request_Header</span></span><a class="headerlink" href="#DataType_HTTP_Request_Header" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -292,16 +134,16 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>HTTP request header.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header.request">
-<span class="sig-name descname"><span class="pre">request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta" title="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta"><span class="pre">DataType_HTTP_Request_Header_Meta</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header.request" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Request_Header.request">
+<span class="sig-name descname"><span class="pre">request</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#DataType_HTTP_Request_Header_Meta" title="DataType_HTTP_Request_Header_Meta"><span class="pre">DataType_HTTP_Request_Header_Meta</span></a></em><a class="headerlink" href="#DataType_HTTP_Request_Header.request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Request metadata.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">DataType_HTTP_Response_Header</span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Response_Header">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Response_Header</span></span><a class="headerlink" href="#DataType_HTTP_Response_Header" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -309,16 +151,16 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>HTTP response header.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header.response">
-<span class="sig-name descname"><span class="pre">response</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta" title="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta"><span class="pre">DataType_HTTP_Response_Header_Meta</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header.response" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Response_Header.response">
+<span class="sig-name descname"><span class="pre">response</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#DataType_HTTP_Response_Header_Meta" title="DataType_HTTP_Response_Header_Meta"><span class="pre">DataType_HTTP_Response_Header_Meta</span></a></em><a class="headerlink" href="#DataType_HTTP_Response_Header.response" title="Permalink to this definition">¶</a></dt>
 <dd><p>Response metadata.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">DataType_HTTP_Request_Header_Meta</span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Request_Header_Meta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Request_Header_Meta</span></span><a class="headerlink" href="#DataType_HTTP_Request_Header_Meta" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -326,28 +168,28 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>Request metadata.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta.method">
-<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta.method" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Request_Header_Meta.method">
+<span class="sig-name descname"><span class="pre">method</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#DataType_HTTP_Request_Header_Meta.method" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP request method.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta.target">
-<span class="sig-name descname"><span class="pre">target</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta.target" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Request_Header_Meta.target">
+<span class="sig-name descname"><span class="pre">target</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#DataType_HTTP_Request_Header_Meta.target" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP request target URI.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'0.9'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'1.0'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'1.1'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Request_Header_Meta.version" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Request_Header_Meta.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'0.9'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'1.0'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'1.1'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#DataType_HTTP_Request_Header_Meta.version" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP version string.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.application.httpv1.</span></span><span class="sig-name descname"><span class="pre">DataType_HTTP_Response_Header_Meta</span></span><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Response_Header_Meta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Response_Header_Meta</span></span><a class="headerlink" href="#DataType_HTTP_Response_Header_Meta" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -355,20 +197,20 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>Response metadata.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'0.9'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'1.0'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'1.1'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta.version" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Response_Header_Meta.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'0.9'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'1.0'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'1.1'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#DataType_HTTP_Response_Header_Meta.version" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP version string.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta.status">
-<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta.status" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Response_Header_Meta.status">
+<span class="sig-name descname"><span class="pre">status</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_HTTP_Response_Header_Meta.status" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP response status code.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta.phrase">
-<span class="sig-name descname"><span class="pre">phrase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.application.httpv1.DataType_HTTP_Response_Header_Meta.phrase" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_HTTP_Response_Header_Meta.phrase">
+<span class="sig-name descname"><span class="pre">phrase</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#DataType_HTTP_Response_Header_Meta.phrase" title="Permalink to this definition">¶</a></dt>
 <dd><p>HTTP response status reason.</p>
 </dd></dl>
 

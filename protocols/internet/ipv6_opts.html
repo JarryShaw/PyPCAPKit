@@ -36,7 +36,7 @@
   <section id="module-pcapkit.protocols.internet.ipv6_opts">
 <span id="ipv6-opts-destination-options-for-ipv6"></span><h1>IPv6-Opts - Destination Options for IPv6<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6_opts" title="Permalink to this headline">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_opts" title="pcapkit.protocols.internet.ipv6_opts"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_opts</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Opts</span></code></a>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Opts</span></code>
 only, which implements extractor for Destination Options
 for IPv6 (IPv6-Opts) <a class="footnote-reference brackets" href="#id2" id="id1">*</a>, whose structure is described
 as below:</p>
@@ -72,737 +72,7 @@ as below:</p>
 </tr>
 </tbody>
 </table>
-<br /><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">IPv6_Opts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.internet.Internet</span></code></a></p>
-<p>This class implements Destination Options for IPv6.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__index__">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__index__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Numeral registry index of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Numeral registry index of the
-protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType">pcapkit.const.reg.transtype.TransType</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__length_hint__">
-<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__length_hint__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an estimated length for the object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[2]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__post_init__">
-<span class="sig-name descname"><span class="pre">__post_init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts.__post_init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__post_init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Post initialisation hook.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file</strong> (<a class="reference external" href="https://docs.python.org/3/library/io.html#io.BytesIO" title="(in Python v3.10)"><em>io.BytesIO</em></a>) – Source packet stream.</p></li>
-<li><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – Length of packet data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – If the protocol is used as an IPv6 extension header.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.make" title="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>.</p>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_ipv6_opts_options">
-<span class="sig-name descname"><span class="pre">_read_ipv6_opts_options</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_ipv6_opts_options"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_ipv6_opts_options" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts options.</p>
-<dl class="simple">
-<dt>Positional arguments:</dt><dd><p>length (int): length of options</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Tuple[Tuple[pcapkit.const.ipv6.option.Option],
-Dict[str, DataType_Option]]: extracted IPv6-Opts options</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the threshold is <strong>NOT</strong> matching.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_calipso">
-<span class="sig-name descname"><span class="pre">_read_opt_calipso</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_calipso"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_calipso" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> option [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>------------------------------------------------------------
-| Next Header | Hdr Ext Len   | Option Type | Option Length|
-+-------------+---------------+-------------+--------------+
-|             CALIPSO Domain of Interpretation             |
-+-------------+---------------+-------------+--------------+
-| Cmpt Length |  Sens Level   |     Checksum (CRC-16)      |
-+-------------+---------------+-------------+--------------+
-|      Compartment Bitmap (Optional; variable length)      |
-+-------------+---------------+-------------+--------------+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO">DataType_Dest_Opt_CALIPSO</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the option is malformed.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_home">
-<span class="sig-name descname"><span class="pre">_read_opt_home</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_home"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_home" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts Home Address option.</p>
-<p>Structure of IPv6-Opts Home Address option [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                |  Option Type  | Option Length |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                                                               |
-+                                                               +
-|                                                               |
-+                          Home Address                         +
-|                                                               |
-+                                                               +
-|                                                               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Home" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Home">DataType_Dest_Opt_Home</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv6_opts.jumbo.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">16</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ilnp">
-<span class="sig-name descname"><span class="pre">_read_opt_ilnp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_ilnp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ilnp" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nonce option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nonce option [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6744.html"><strong>RFC 6744</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Next Header   | Hdr Ext Len   |  Option Type  | Option Length |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-/                         Nonce Value                           /
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_ILNP" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_ILNP">DataType_Dest_Opt_ILNP</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff">
-<span class="sig-name descname"><span class="pre">_read_opt_ip_dff</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_ip_dff"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ip_dff" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> option [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6971.html"><strong>RFC 6971</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                     1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Next Header  |  Hdr Ext Len  |  OptTypeDFF   | OptDataLenDFF |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|VER|D|R|0|0|0|0|        Sequence Number        |      Pad1     |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_IP_DFF" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_IP_DFF">DataType_Dest_Opt_IP_DFF</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv6_opts.ip_dff.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_jumbo">
-<span class="sig-name descname"><span class="pre">_read_opt_jumbo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_jumbo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_jumbo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts Jumbo Payload option.</p>
-<p>Structure of IPv6-Opts Jumbo Payload option [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2675.html"><strong>RFC 2675</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                |  Option Type  |  Opt Data Len |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                     Jumbo Payload Length                      |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Jumbo" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Jumbo">DataType_Dest_Opt_Jumbo</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv6_opts.jumbo.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_lio">
-<span class="sig-name descname"><span class="pre">_read_opt_lio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_lio"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_lio" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts Line-Identification option.</p>
-<p>Structure of IPv6-Opts Line-Identification option [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6788.html"><strong>RFC 6788</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                |  Option Type  | Option Length |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| LineIDLen     |     Line ID...
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_LIO" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_LIO">DataType_Dest_Opt_LIO</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_mpl">
-<span class="sig-name descname"><span class="pre">_read_opt_mpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_mpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_mpl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts <code class="docutils literal notranslate"><span class="pre">MPL</span></code> option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">MPL</span></code> option [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                |  Option Type  |  Opt Data Len |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| S |M|V|  rsv  |   sequence    |      seed-id (optional)       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL">DataType_Dest_Opt_MPL</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the option is malformed.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_none">
-<span class="sig-name descname"><span class="pre">_read_opt_none</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_none"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_none" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts unassigned options.</p>
-<p>Structure of IPv6-Opts unassigned options [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
-|  Option Type  |  Opt Data Len |  Option Data
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_None" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_None">DataType_Dest_Opt_None</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad">
-<span class="sig-name descname"><span class="pre">_read_opt_pad</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_pad"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pad" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts padding options.</p>
-<p>Structure of IPv6-Opts padding options [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>]:</p>
-<ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+
-|       0       |
-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-</li>
-<li><p><code class="docutils literal notranslate"><span class="pre">PadN</span></code> option:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
-|       1       |  Opt Data Len |  Option Data
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+- - - - - - - - -
-</pre></div>
-</div>
-</li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Union[<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Pad1" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Pad1">DataType_Dest_Opt_Pad1</a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_PadN" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_PadN">DataType_Dest_Opt_PadN</a>]</p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">0</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pdm">
-<span class="sig-name descname"><span class="pre">_read_opt_pdm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_pdm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_pdm" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PDM</span></code> option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PDM</span></code> option [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Option Type  | Option Length |    ScaleDTLR  |     ScaleDTLS |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   PSN This Packet             |  PSN Last Received            |
-|-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Delta Time Last Received    |  Delta Time Last Sent         |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_PDM" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_PDM">DataType_Dest_Opt_PDM</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv6_opts.pdm.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">10</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs">
-<span class="sig-name descname"><span class="pre">_read_opt_qs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_qs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_qs" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts Quick Start option.</p>
-<p>Structure of IPv6-Opts Quick-Start option [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4782.html"><strong>RFC 4782</strong></a>]:</p>
-<ul>
-<li><p>A Quick-Start Request:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Option      |  Length=6     | Func. | Rate  |   QS TTL      |
-|               |               | 0000  |Request|               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        QS Nonce                           | R |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-</li>
-<li><p>Report of Approved Rate:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|   Option      |  Length=6     | Func. | Rate  |   Not Used    |
-|               |               | 1000  | Report|               |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                        QS Nonce                           | R |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-</li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_QS" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_QS">DataType_Dest_Opt_QS</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the option is malformed.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra">
-<span class="sig-name descname"><span class="pre">_read_opt_ra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_ra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_ra" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts Router Alert option.</p>
-<p>Structure of IPv6-Opts Router Alert option [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2711.html"><strong>RFC 2711</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|0 0 0|0 0 1 0 1|0 0 0 0 0 0 1 0|        Value (2 octets)       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RA" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RA">DataType_Dest_Opt_RA</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv6_opts.tun.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl">
-<span class="sig-name descname"><span class="pre">_read_opt_rpl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_rpl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_rpl" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts <code class="docutils literal notranslate"><span class="pre">RPL</span></code> option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">RPL</span></code> option [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6553.html"><strong>RFC 6553</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-                                +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-                                |  Option Type  |  Opt Data Len |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|O|R|F|0|0|0|0|0| RPLInstanceID |          SenderRank           |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                         (sub-TLVs)                            |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RPL" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RPL">DataType_Dest_Opt_RPL</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv6_opts.rpl.length</span></code> is <strong>LESS THAN</strong> <code class="docutils literal notranslate"><span class="pre">4</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_smf_dpd">
-<span class="sig-name descname"><span class="pre">_read_opt_smf_dpd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_smf_dpd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_smf_dpd" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option.</p>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>]:</p>
-<ul>
-<li><p>IPv6 <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option header in <strong>I-DPD</strong> mode</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-               ...              |0|0|0|  01000  | Opt. Data Len |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|0|TidTy| TidLen|             TaggerID (optional) ...           |
-+-+-+-+-+-+-+-+-+               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|                               |            Identifier  ...
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-</li>
-<li><p>IPv6 <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option header in <strong>H-DPD</strong> mode</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
- 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-               ...              |0|0|0| OptType | Opt. Data Len |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|1|    Hash Assist Value (HAV) ...
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-</li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Union[<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_I_PDP" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_I_PDP">DataType_Dest_Opt_SMF_I_PDP</a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_H_PDP" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_H_PDP">DataType_Dest_Opt_SMF_H_PDP</a>]</p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If the option is malformed.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_tun">
-<span class="sig-name descname"><span class="pre">_read_opt_tun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desc</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_tun"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_tun" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read IPv6-Opts Tunnel Encapsulation Limit option.</p>
-<p>Structure of IPv6-Opts Tunnel Encapsulation Limit option [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2473.html"><strong>RFC 2473</strong></a>]:</p>
-<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-|  Next Header  |Hdr Ext Len = 0| Opt Type = 4  |Opt Data Len=1 |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-| Tun Encap Lim |PadN Opt Type=1|Opt Data Len=1 |       0       |
-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option type value</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>desc</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – option description</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>parsed option data</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_TUN" title="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_TUN">DataType_Dest_Opt_TUN</a></p>
-</dd>
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">ipv6_opts.tun.length</span></code> is <strong>NOT</strong> <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_type">
-<span class="sig-name descname"><span class="pre">_read_opt_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts._read_opt_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts._read_opt_type" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read option type field.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>kind</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – option kind value</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>extracted IPv6-Opts option type field</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts_Option_Type" title="pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts_Option_Type">DataType_IPv6_Opts_Option_Type</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.make" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make (construct) packet data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments</dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Constructed packet data.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)">bytes</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ipv6_opts.html#IPv6_Opts.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read Destination Options for IPv6.</p>
-<p>Structure of IPv6-Opts header [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>]:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="o">|</span>  <span class="n">Next</span> <span class="n">Header</span>  <span class="o">|</span>  <span class="n">Hdr</span> <span class="n">Ext</span> <span class="n">Len</span>  <span class="o">|</span>                               <span class="o">|</span>
-<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>                               <span class="o">+</span>
-<span class="o">|</span>                                                               <span class="o">|</span>
-<span class="o">.</span>                                                               <span class="o">.</span>
-<span class="o">.</span>                            <span class="n">Options</span>                            <span class="o">.</span>
-<span class="o">.</span>                                                               <span class="o">.</span>
-<span class="o">|</span>                                                               <span class="o">|</span>
-<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – Length of packet data.</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>extension</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a>) – If the packet is used as an IPv6 extension header.</p></li>
-<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
-</ul>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Parsed packet data.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts" title="pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts">DataType_IPv6_Opts</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.alias">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alias</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.alias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acronym of corresponding protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘IPv6-Opts’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.length">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.length" title="Permalink to this definition">¶</a></dt>
-<dd><p>Header length of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Name of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘Destination Options for IPv6’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.payload">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">payload</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.payload" title="Permalink to this definition">¶</a></dt>
-<dd><p>Payload of current instance.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – if the protocol is used as an IPv6 extension header</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">pcapkit.protocols.protocol.Protocol</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.protocol">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.protocol" title="Permalink to this definition">¶</a></dt>
-<dd><p>Name of next layer protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType">pcapkit.const.reg.transtype.TransType</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="py data">
+<br /><dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.pcapkit.protocols.internet.ipv6_opts._IPv6_Opts_ACT">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_opts.</span></span><span class="sig-name descname"><span class="pre">_IPv6_Opts_ACT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.pcapkit.protocols.internet.ipv6_opts._IPv6_Opts_ACT" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPv6-Opts unknown option actions.</p>
@@ -861,77 +131,77 @@ pointing to the unrecognized Option Type</p></td>
 <tr class="row-even"><td><p>0x00</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pad</span></code></p></td>
 <td><p>Pad1</p></td>
-<td><p>[<span class="target" id="index-16"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>] 0</p></td>
+<td><p>[<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>] 0</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x01</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pad</span></code></p></td>
 <td><p>PadN</p></td>
-<td><p>[<span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p></td>
 </tr>
 <tr class="row-even"><td><p>0x04</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">tun</span></code></p></td>
 <td><p>Tunnel Encapsulation Limit</p></td>
-<td><p>[<span class="target" id="index-18"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2473.html"><strong>RFC 2473</strong></a>] 1</p></td>
+<td><p>[<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2473.html"><strong>RFC 2473</strong></a>] 1</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x05</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ra</span></code></p></td>
 <td><p>Router Alert</p></td>
-<td><p>[<span class="target" id="index-19"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2711.html"><strong>RFC 2711</strong></a>] 2</p></td>
+<td><p>[<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2711.html"><strong>RFC 2711</strong></a>] 2</p></td>
 </tr>
 <tr class="row-even"><td><p>0x07</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">calipso</span></code></p></td>
 <td><p>Common Architecture Label IPv6 Security Option</p></td>
-<td><p>[<span class="target" id="index-20"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-4"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x08</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">smf_dpd</span></code></p></td>
 <td><p>Simplified Multicast Forwarding</p></td>
-<td><p>[<span class="target" id="index-21"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6621.html"><strong>RFC 6621</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-5"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6621.html"><strong>RFC 6621</strong></a>]</p></td>
 </tr>
 <tr class="row-even"><td><p>0x0F</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">pdm</span></code></p></td>
 <td><p>Performance and Diagnostic Metrics</p></td>
-<td><p>[<span class="target" id="index-22"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>] 10</p></td>
+<td><p>[<span class="target" id="index-6"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>] 10</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x26</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">qs</span></code></p></td>
 <td><p>Quick-Start</p></td>
-<td><p>[<span class="target" id="index-23"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4782.html"><strong>RFC 4782</strong></a>][<a class="reference external" href="https://www.rfc-editor.org/errata_search.php?eid=2034">RFC Errata 2034</a>] 6</p></td>
+<td><p>[<span class="target" id="index-7"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4782.html"><strong>RFC 4782</strong></a>][<a class="reference external" href="https://www.rfc-editor.org/errata_search.php?eid=2034">RFC Errata 2034</a>] 6</p></td>
 </tr>
 <tr class="row-even"><td><p>0x63</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">rpl</span></code></p></td>
 <td><p>Routing Protocol for Low-Power and Lossy Networks</p></td>
-<td><p>[<span class="target" id="index-24"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6553.html"><strong>RFC 6553</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-8"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6553.html"><strong>RFC 6553</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x6D</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">mpl</span></code></p></td>
 <td><p>Multicast Protocol for Low-Power and Lossy Networks</p></td>
-<td><p>[<span class="target" id="index-25"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-9"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>]</p></td>
 </tr>
 <tr class="row-even"><td><p>0x8B</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ilnp</span></code></p></td>
 <td><p>Identifier-Locator Network Protocol Nonce</p></td>
-<td><p>[<span class="target" id="index-26"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6744.html"><strong>RFC 6744</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-10"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6744.html"><strong>RFC 6744</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x8C</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">lio</span></code></p></td>
 <td><p>Line-Identification Option</p></td>
-<td><p>[<span class="target" id="index-27"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6788.html"><strong>RFC 6788</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-11"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6788.html"><strong>RFC 6788</strong></a>]</p></td>
 </tr>
 <tr class="row-even"><td><p>0xC2</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">jumbo</span></code></p></td>
 <td><p>Jumbo Payload</p></td>
-<td><p>[<span class="target" id="index-28"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2675.html"><strong>RFC 2675</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-12"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2675.html"><strong>RFC 2675</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0xC9</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">home</span></code></p></td>
 <td><p>Home Address</p></td>
-<td><p>[<span class="target" id="index-29"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-13"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p></td>
 </tr>
 <tr class="row-even"><td><p>0xEE</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ip_dff</span></code></p></td>
 <td><p>Depth-First Forwarding</p></td>
-<td><p>[<span class="target" id="index-30"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6971.html"><strong>RFC 6971</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-14"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6971.html"><strong>RFC 6971</strong></a>]</p></td>
 </tr>
 </tbody>
 </table>
@@ -956,23 +226,23 @@ pointing to the unrecognized Option Type</p></td>
 <tbody>
 <tr class="row-even"><td><p>0x1E</p></td>
 <td><p>RFC3692-style Experiment</p></td>
-<td><p>[<span class="target" id="index-31"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-15"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x3E</p></td>
 <td><p>RFC3692-style Experiment</p></td>
-<td><p>[<span class="target" id="index-32"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-16"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
 </tr>
 <tr class="row-even"><td><p>0x4D</p></td>
 <td><p>Deprecated</p></td>
-<td><p>[<span class="target" id="index-33"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-17"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x5E</p></td>
 <td><p>RFC3692-style Experiment</p></td>
-<td><p>[<span class="target" id="index-34"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-18"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
 </tr>
 <tr class="row-even"><td><p>0x7E</p></td>
 <td><p>RFC3692-style Experiment</p></td>
-<td><p>[<span class="target" id="index-35"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-19"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0x8A</p></td>
 <td><p>Endpoint Identification</p></td>
@@ -980,19 +250,19 @@ pointing to the unrecognized Option Type</p></td>
 </tr>
 <tr class="row-even"><td><p>0x9E</p></td>
 <td><p>RFC3692-style Experiment</p></td>
-<td><p>[<span class="target" id="index-36"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-20"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0xBE</p></td>
 <td><p>RFC3692-style Experiment</p></td>
-<td><p>[<span class="target" id="index-37"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-21"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
 </tr>
 <tr class="row-even"><td><p>0xDE</p></td>
 <td><p>RFC3692-style Experiment</p></td>
-<td><p>[<span class="target" id="index-38"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-22"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
 </tr>
 <tr class="row-odd"><td><p>0xFE</p></td>
 <td><p>RFC3692-style Experiment</p></td>
-<td><p>[<span class="target" id="index-39"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
+<td><p>[<span class="target" id="index-23"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p></td>
 </tr>
 </tbody>
 </table>
@@ -1013,7 +283,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts header [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>].</p>
+<p>Structure of IPv6-Opts header [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts.next">
 <span class="sig-name descname"><span class="pre">next</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">pcapkit.const.reg.transtype.TransType</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts.next" title="Permalink to this definition">¶</a></dt>
@@ -1028,7 +298,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts.options">
-<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><span class="pre">pcapkit.const.ipv6.option.Option</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts.options" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">options</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">pcapkit.const.ipv6.option.Option</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts.options" title="Permalink to this definition">¶</a></dt>
 <dd><p>Array of option acronyms.</p>
 </dd></dl>
 
@@ -1076,7 +346,7 @@ rather the <em>total</em> length of the current option.</p>
 
 <section id="ipv6-opts-option-type">
 <h3>IPv6-Opts Option Type<a class="headerlink" href="#ipv6-opts-option-type" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts option type field as described in <span class="target" id="index-41"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>,
+<p>For IPv6-Opts option type field as described in <span class="target" id="index-25"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1118,7 +388,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
-<p>Structure of option type field [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>].</p>
+<p>Structure of option type field [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts_Option_Type.value">
 <span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts_Option_Type.value" title="Permalink to this definition">¶</a></dt>
@@ -1142,7 +412,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-unassigned-options">
 <h3>IPv6-Opts Unassigned Options<a class="headerlink" href="#ipv6-opts-unassigned-options" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts unassigned options as described in <span class="target" id="index-43"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>,
+<p>For IPv6-Opts unassigned options as described in <span class="target" id="index-27"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1199,7 +469,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts unassigned options [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>].</p>
+<p>Structure of IPv6-Opts unassigned options [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_None.data">
 <span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_None.data" title="Permalink to this definition">¶</a></dt>
@@ -1213,7 +483,7 @@ its structure is described as below:</p>
 <h3>IPv6-Opts Padding Options<a class="headerlink" href="#ipv6-opts-padding-options" title="Permalink to this headline">¶</a></h3>
 <section id="pad1-option">
 <h4><code class="docutils literal notranslate"><span class="pre">Pad1</span></code> Option<a class="headerlink" href="#pad1-option" title="Permalink to this headline">¶</a></h4>
-<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option as described in <span class="target" id="index-45"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>,
+<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option as described in <span class="target" id="index-29"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1260,7 +530,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts padding options [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>].</p>
+<p>Structure of IPv6-Opts padding options [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Pad1.length">
 <span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Pad1.length" title="Permalink to this definition">¶</a></dt>
@@ -1272,7 +542,7 @@ its structure is described as below:</p>
 </section>
 <section id="padn-option">
 <h4><code class="docutils literal notranslate"><span class="pre">PadN</span></code> Option<a class="headerlink" href="#padn-option" title="Permalink to this headline">¶</a></h4>
-<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option as described in <span class="target" id="index-47"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>,
+<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PadN</span></code> option as described in <span class="target" id="index-31"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1329,7 +599,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts padding options [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>].</p>
+<p>Structure of IPv6-Opts padding options [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8200.html"><strong>RFC 8200</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_PadN.padding">
 <span class="sig-name descname"><span class="pre">padding</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_PadN.padding" title="Permalink to this definition">¶</a></dt>
@@ -1342,7 +612,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-tunnel-encapsulation-limit-option">
 <h3>IPv6-Opts Tunnel Encapsulation Limit Option<a class="headerlink" href="#ipv6-opts-tunnel-encapsulation-limit-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts Tunnel Encapsulation Limit option as described in <span class="target" id="index-49"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2473.html"><strong>RFC 2473</strong></a>,
+<p>For IPv6-Opts Tunnel Encapsulation Limit option as described in <span class="target" id="index-33"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2473.html"><strong>RFC 2473</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1399,7 +669,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts Tunnel Encapsulation Limit option [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2473.html"><strong>RFC 2473</strong></a>].</p>
+<p>Structure of IPv6-Opts Tunnel Encapsulation Limit option [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2473.html"><strong>RFC 2473</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_TUN.limit">
 <span class="sig-name descname"><span class="pre">limit</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_TUN.limit" title="Permalink to this definition">¶</a></dt>
@@ -1411,7 +681,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-router-alert-option">
 <h3>IPv6-Opts Router Alert Option<a class="headerlink" href="#ipv6-opts-router-alert-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts Router Alert option as described in <span class="target" id="index-51"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2711.html"><strong>RFC 2711</strong></a>,
+<p>For IPv6-Opts Router Alert option as described in <span class="target" id="index-35"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2711.html"><strong>RFC 2711</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1468,7 +738,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts Router Alert option [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2711.html"><strong>RFC 2711</strong></a>].</p>
+<p>Structure of IPv6-Opts Router Alert option [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2711.html"><strong>RFC 2711</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RA.value">
 <span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RA.value" title="Permalink to this definition">¶</a></dt>
@@ -1486,7 +756,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-calipso-option">
 <h3>IPv6-Opts <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> Option<a class="headerlink" href="#ipv6-opts-calipso-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> option as described in <span class="target" id="index-53"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>,
+<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> option as described in <span class="target" id="index-37"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1563,7 +833,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> option [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>].</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">CALIPSO</span></code> option [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO.domain">
 <span class="sig-name descname"><span class="pre">domain</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO.domain" title="Permalink to this definition">¶</a></dt>
@@ -1601,7 +871,7 @@ its structure is described as below:</p>
 <h3>IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> Option<a class="headerlink" href="#ipv6-opts-smf-dpd-option" title="Permalink to this headline">¶</a></h3>
 <section id="i-dpd-mode">
 <h4>I-DPD Mode<a class="headerlink" href="#i-dpd-mode" title="Permalink to this headline">¶</a></h4>
-<p>For IPv6 <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option header in I-DPD mode as described in <span class="target" id="index-55"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>,
+<p>For IPv6 <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option header in I-DPD mode as described in <span class="target" id="index-39"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1678,7 +948,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option in <strong>I-DPD</strong> mode [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>].</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option in <strong>I-DPD</strong> mode [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_I_PDP.dpd_type">
 <span class="sig-name descname"><span class="pre">dpd_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'I-DPD'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_I_PDP.dpd_type" title="Permalink to this definition">¶</a></dt>
@@ -1687,7 +957,7 @@ its structure is described as below:</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_I_PDP.tid_type">
-<span class="sig-name descname"><span class="pre">tid_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.tagger_id.TaggerID" title="pcapkit.const.ipv6.tagger_id.TaggerID"><span class="pre">pcapkit.const.ipv6.tagger_id.TaggerID</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_I_PDP.tid_type" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">tid_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.const.ipv6.tagger_id.TaggerID</span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_I_PDP.tid_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>TaggerID type.</p>
 </dd></dl>
 
@@ -1714,7 +984,7 @@ its structure is described as below:</p>
 </section>
 <section id="h-dpd-mode">
 <h4>H-DPD Mode<a class="headerlink" href="#h-dpd-mode" title="Permalink to this headline">¶</a></h4>
-<p>For IPv6 <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option header in H-DPD mode as described in <span class="target" id="index-57"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>,
+<p>For IPv6 <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option header in H-DPD mode as described in <span class="target" id="index-41"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1776,7 +1046,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option in <strong>H-DPD</strong> mode [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>].</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code> option in <strong>H-DPD</strong> mode [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc5570.html"><strong>RFC 5570</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_H_PDP.dpd_type">
 <span class="sig-name descname"><span class="pre">dpd_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'H-DPD'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_SMF_H_PDP.dpd_type" title="Permalink to this definition">¶</a></dt>
@@ -1795,7 +1065,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-pdm-option">
 <h3>IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PDM</span></code> Option<a class="headerlink" href="#ipv6-opts-pdm-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PDM</span></code> option as described in <span class="target" id="index-59"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>,
+<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PDM</span></code> option as described in <span class="target" id="index-43"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1877,7 +1147,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PDM</span></code> option [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>].</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">PDM</span></code> option [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_PDM.scaledtlr">
 <span class="sig-name descname"><span class="pre">scaledtlr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.10)"><span class="pre">datetime.timedelta</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_PDM.scaledtlr" title="Permalink to this definition">¶</a></dt>
@@ -1919,7 +1189,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-quick-start-option">
 <h3>IPv6-Opts Quick Start Option<a class="headerlink" href="#ipv6-opts-quick-start-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts Quick Start option as described in <span class="target" id="index-61"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4782.html"><strong>RFC 4782</strong></a>,
+<p>For IPv6-Opts Quick Start option as described in <span class="target" id="index-45"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4782.html"><strong>RFC 4782</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -1996,10 +1266,10 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts Quick Start option [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>].</p>
+<p>Structure of IPv6-Opts Quick Start option [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc8250.html"><strong>RFC 8250</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_QS.func">
-<span class="sig-name descname"><span class="pre">func</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.qs_function.QSFunction" title="pcapkit.const.ipv6.qs_function.QSFunction"><span class="pre">pcapkit.const.ipv6.qs_function.QSFunction</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_QS.func" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">func</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.const.ipv6.qs_function.QSFunction</span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_QS.func" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function.</p>
 </dd></dl>
 
@@ -2026,7 +1296,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-rpl-option">
 <h3>IPv6-Opts <code class="docutils literal notranslate"><span class="pre">RPL</span></code> Option<a class="headerlink" href="#ipv6-opts-rpl-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">RPL</span></code> option as described in <span class="target" id="index-63"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6553.html"><strong>RFC 6553</strong></a>,
+<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">RPL</span></code> option as described in <span class="target" id="index-47"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6553.html"><strong>RFC 6553</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -2113,7 +1383,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">RPL</span></code> option [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6553.html"><strong>RFC 6553</strong></a>].</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">RPL</span></code> option [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6553.html"><strong>RFC 6553</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RPL.flags">
 <span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.internet.ipv6_opts.DataType_RPL_Flags" title="pcapkit.protocols.internet.ipv6_opts.DataType_RPL_Flags"><span class="pre">DataType_RPL_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RPL.flags" title="Permalink to this definition">¶</a></dt>
@@ -2172,7 +1442,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-mpl-option">
 <h3>IPv6-Opts <code class="docutils literal notranslate"><span class="pre">MPL</span></code> Option<a class="headerlink" href="#ipv6-opts-mpl-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">MPL</span></code> option as described in <span class="target" id="index-65"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>,
+<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">MPL</span></code> option as described in <span class="target" id="index-49"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -2259,10 +1529,10 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">MPL</span></code> option [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>].</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">MPL</span></code> option [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7731.html"><strong>RFC 7731</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL.seed_len">
-<span class="sig-name descname"><span class="pre">seed_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ipv6.html#pcapkit.const.ipv6.seed_id.SeedID" title="pcapkit.const.ipv6.seed_id.SeedID"><span class="pre">pcapkit.const.ipv6.seed_id.SeedID</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL.seed_len" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">seed_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.const.ipv6.seed_id.SeedID</span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL.seed_len" title="Permalink to this definition">¶</a></dt>
 <dd><p>Seed-ID length.</p>
 </dd></dl>
 
@@ -2312,7 +1582,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-ilnp-nounce-option">
 <h3>IPv6-Opts <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nounce Option<a class="headerlink" href="#ipv6-opts-ilnp-nounce-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nounce option as described in <span class="target" id="index-67"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6744.html"><strong>RFC 6744</strong></a>,
+<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nounce option as described in <span class="target" id="index-51"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6744.html"><strong>RFC 6744</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -2369,7 +1639,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nonce option [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6744.html"><strong>RFC 6744</strong></a>].</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">ILNP</span></code> Nonce option [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6744.html"><strong>RFC 6744</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_ILNP.value">
 <span class="sig-name descname"><span class="pre">value</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_ILNP.value" title="Permalink to this definition">¶</a></dt>
@@ -2381,7 +1651,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-line-identification-option">
 <h3>IPv6-Opts Line-Identification Option<a class="headerlink" href="#ipv6-opts-line-identification-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts Line-Identification option as described in <span class="target" id="index-69"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6788.html"><strong>RFC 6788</strong></a>,
+<p>For IPv6-Opts Line-Identification option as described in <span class="target" id="index-53"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6788.html"><strong>RFC 6788</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -2443,7 +1713,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts Line-Identification option [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6788.html"><strong>RFC 6788</strong></a>].</p>
+<p>Structure of IPv6-Opts Line-Identification option [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6788.html"><strong>RFC 6788</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_LIO.lid_len">
 <span class="sig-name descname"><span class="pre">lid_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_LIO.lid_len" title="Permalink to this definition">¶</a></dt>
@@ -2461,7 +1731,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-jumbo-payload-option">
 <h3>IPv6-Opts Jumbo Payload Option<a class="headerlink" href="#ipv6-opts-jumbo-payload-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts Jumbo Payload option as described in <span class="target" id="index-71"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2675.html"><strong>RFC 2675</strong></a>,
+<p>For IPv6-Opts Jumbo Payload option as described in <span class="target" id="index-55"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2675.html"><strong>RFC 2675</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -2518,7 +1788,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts Jumbo Payload option [<span class="target" id="index-72"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2675.html"><strong>RFC 2675</strong></a>].</p>
+<p>Structure of IPv6-Opts Jumbo Payload option [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2675.html"><strong>RFC 2675</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Jumbo.payload_len">
 <span class="sig-name descname"><span class="pre">payload_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Jumbo.payload_len" title="Permalink to this definition">¶</a></dt>
@@ -2530,7 +1800,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-home-address-option">
 <h3>IPv6-Opts Home Address Option<a class="headerlink" href="#ipv6-opts-home-address-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts Home Address option as described in <span class="target" id="index-73"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>,
+<p>For IPv6-Opts Home Address option as described in <span class="target" id="index-57"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -2587,7 +1857,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts Home Address option [<span class="target" id="index-74"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>].</p>
+<p>Structure of IPv6-Opts Home Address option [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6275.html"><strong>RFC 6275</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Home.ip">
 <span class="sig-name descname"><span class="pre">ip</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv6Address</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_Home.ip" title="Permalink to this definition">¶</a></dt>
@@ -2599,7 +1869,7 @@ its structure is described as below:</p>
 </section>
 <section id="ipv6-opts-ip-dff-option">
 <h3>IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> Option<a class="headerlink" href="#ipv6-opts-ip-dff-option" title="Permalink to this headline">¶</a></h3>
-<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> option as described in <span class="target" id="index-75"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6971.html"><strong>RFC 6971</strong></a>,
+<p>For IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> option as described in <span class="target" id="index-59"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6971.html"><strong>RFC 6971</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
 <colgroup>
@@ -2681,7 +1951,7 @@ its structure is described as below:</p>
 <dd class="field-odd"><p>DataType_Option</p>
 </dd>
 </dl>
-<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> option [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6971.html"><strong>RFC 6971</strong></a>].</p>
+<p>Structure of IPv6-Opts <code class="docutils literal notranslate"><span class="pre">IP_DFF</span></code> option [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc6971.html"><strong>RFC 6971</strong></a>].</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_IP_DFF.version">
 <span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_IP_DFF.version" title="Permalink to this definition">¶</a></dt>

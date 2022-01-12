@@ -35,62 +35,13 @@
             
   <section id="ip-internet-protocol">
 <h1>IP - Internet Protocol<a class="headerlink" href="#ip-internet-protocol" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.internet.ip" title="pcapkit.protocols.internet.ip"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ip</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.internet.ip.IP" title="pcapkit.protocols.internet.ip.IP"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> only,
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ip</span></code> contains
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code> only,
 which is a base class for Internet Protocol (IP)
 protocol family <a class="footnote-reference brackets" href="#id2" id="id1">*</a>, eg.
-<a class="reference internal" href="ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>,
-<a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>, and
-<a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>.</p>
-<span class="target" id="module-pcapkit.protocols.internet.ip"></span><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ip.IP">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ip.</span></span><span class="sig-name descname"><span class="pre">IP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ip.html#IP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ip.IP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.internet.Internet</span></code></a></p>
-<p>This class implements all protocols in IP family.</p>
-<ul class="simple">
-<li><p>Internet Protocol version 4 (<a class="reference internal" href="ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code></a>) [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc791.html"><strong>RFC 791</strong></a>]</p></li>
-<li><p>Internet Protocol version 6 (<a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>) [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc2460.html"><strong>RFC 2460</strong></a>]</p></li>
-<li><p>Authentication Header (<a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a>) [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4302.html"><strong>RFC 4302</strong></a>]</p></li>
-<li><p>Encapsulating Security Payload (<code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code>) [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc4303.html"><strong>RFC 4303</strong></a>]</p></li>
-</ul>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ip.IP.id">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/internet/ip.html#IP.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.ip.IP.id" title="Permalink to this definition">¶</a></dt>
-<dd><p>Index ID of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Index ID of the protocol.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Tuple[Literal[‘IPv4’], Literal[‘IPv6’]]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ip.IP.dst">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dst</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ip.IP.dst" title="Permalink to this definition">¶</a></dt>
-<dd><p>Destination IP address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Union[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)">ipaddress.IPv4Address</a>, <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.10)">ipaddress.IPv6Address</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.internet.ip.IP.src">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">src</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ip.IP.src" title="Permalink to this definition">¶</a></dt>
-<dd><p>Source IP address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Union[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)">ipaddress.IPv4Address</a>, <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.10)">ipaddress.IPv6Address</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4</span></code>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code>, and
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code>.</p>
 <hr /><dl class="footnote brackets">
 <dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
 <dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Internet_Protocol">https://en.wikipedia.org/wiki/Internet_Protocol</a></p>

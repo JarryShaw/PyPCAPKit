@@ -35,8 +35,8 @@
             
   <section id="vlan-802-1q-customer-vlan-tag-type">
 <h1>VLAN - 802.1Q Customer VLAN Tag Type<a class="headerlink" href="#vlan-802-1q-customer-vlan-tag-type" title="Permalink to this headline">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.link.vlan" title="pcapkit.protocols.link.vlan"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.vlan</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code></a>
+<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.vlan</span></code> contains
+<code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code>
 only, which implements extractor for 802.1Q
 Customer VLAN Tag Type <a class="footnote-reference brackets" href="#id2" id="id1">*</a>, whose structure is
 described as below:</p>
@@ -82,117 +82,7 @@ described as below:</p>
 </tr>
 </tbody>
 </table>
-<br /><span class="target" id="module-pcapkit.protocols.link.vlan"></span><dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.vlan.</span></span><span class="sig-name descname"><span class="pre">VLAN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/link/vlan.html#VLAN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.link.link.Link</span></code></a></p>
-<p>This class implements 802.1Q Customer VLAN Tag Type.</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.__index__">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/link/vlan.html#VLAN.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.__index__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Numeral registry index of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Raises</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol has no registry entry.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.__length_hint__">
-<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/link/vlan.html#VLAN.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.__length_hint__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an estimated length for the object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[4]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.make">
-<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/link/vlan.html#VLAN.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.make" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make (construct) packet data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments</dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Constructed packet data.</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)">bytes</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/link/vlan.html#VLAN.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.read" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read 802.1Q Customer VLAN Tag Type.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>length</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – Length of packet data.</p>
-</dd>
-<dt class="field-even">Keyword Arguments</dt>
-<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
-</dd>
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Parsed packet data.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.link.vlan.DataType_VLAN" title="pcapkit.protocols.link.vlan.DataType_VLAN">DataType_VLAN</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.alias">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alias</span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.alias" title="Permalink to this definition">¶</a></dt>
-<dd><p>Acronym of corresponding protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘802.1Q’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.length">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.length" title="Permalink to this definition">¶</a></dt>
-<dd><p>Header length of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[4]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.name" title="Permalink to this definition">¶</a></dt>
-<dd><p>Name of current protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>Literal[‘802.1Q Customer VLAN Tag Type’]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.protocol">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.protocol" title="Permalink to this definition">¶</a></dt>
-<dd><p>Name of next layer protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType">pcapkit.const.reg.ethertype.EtherType</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<section id="data-structure">
+<br /><section id="data-structure">
 <h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -200,8 +90,8 @@ described as below:</p>
 They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../pcapkit.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.DataType_VLAN">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.vlan.</span></span><span class="sig-name descname"><span class="pre">DataType_VLAN</span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.DataType_VLAN" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_VLAN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_VLAN</span></span><a class="headerlink" href="#DataType_VLAN" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -209,22 +99,22 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>IEEE 802.1Q customer VLAN tag type [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://tools.ietf.org/html/rfc7042.html"><strong>RFC 7042</strong></a>].</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.DataType_VLAN.tci">
-<span class="sig-name descname"><span class="pre">tci</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.link.vlan.DataType_TCI" title="pcapkit.protocols.link.vlan.DataType_TCI"><span class="pre">DataType_TCI</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.vlan.DataType_VLAN.tci" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_VLAN.tci">
+<span class="sig-name descname"><span class="pre">tci</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#DataType_TCI" title="DataType_TCI"><span class="pre">DataType_TCI</span></a></em><a class="headerlink" href="#DataType_VLAN.tci" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tag control information.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.DataType_VLAN.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><span class="pre">pcapkit.const.reg.ethertype.EtherType</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.vlan.DataType_VLAN.type" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_VLAN.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><span class="pre">pcapkit.const.reg.ethertype.EtherType</span></a></em><a class="headerlink" href="#DataType_VLAN.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol (internet layer).</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.DataType_TCI">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.vlan.</span></span><span class="sig-name descname"><span class="pre">DataType_TCI</span></span><a class="headerlink" href="#pcapkit.protocols.link.vlan.DataType_TCI" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_TCI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_TCI</span></span><a class="headerlink" href="#DataType_TCI" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases</dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -232,20 +122,20 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>Tag control information.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.DataType_TCI.pcp">
-<span class="sig-name descname"><span class="pre">pcp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/vlan.html#pcapkit.const.vlan.priority_level.PriorityLevel" title="pcapkit.const.vlan.priority_level.PriorityLevel"><span class="pre">pcapkit.const.vlan.priority_level.PriorityLevel</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.vlan.DataType_TCI.pcp" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_TCI.pcp">
+<span class="sig-name descname"><span class="pre">pcp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.const.vlan.priority_level.PriorityLevel</span></em><a class="headerlink" href="#DataType_TCI.pcp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Priority code point.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.DataType_TCI.dei">
-<span class="sig-name descname"><span class="pre">dei</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.vlan.DataType_TCI.dei" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_TCI.dei">
+<span class="sig-name descname"><span class="pre">dei</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#DataType_TCI.dei" title="Permalink to this definition">¶</a></dt>
 <dd><p>Drop eligible indicator.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.DataType_TCI.vid">
-<span class="sig-name descname"><span class="pre">vid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.vlan.DataType_TCI.vid" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="DataType_TCI.vid">
+<span class="sig-name descname"><span class="pre">vid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_TCI.vid" title="Permalink to this definition">¶</a></dt>
 <dd><p>VLAN identifier.</p>
 </dd></dl>
 
