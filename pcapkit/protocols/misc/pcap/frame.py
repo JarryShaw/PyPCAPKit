@@ -25,10 +25,10 @@ import time
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
-from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as DataType_FrameInfo
 from pcapkit.protocols.data.misc.pcap.frame import Frame as DataType_Frame
+from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as DataType_FrameInfo
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.utilities.exceptions import UnsupportedCall, StructError
+from pcapkit.utilities.exceptions import StructError, UnsupportedCall
 
 if TYPE_CHECKING:
     from decimal import Decimal
