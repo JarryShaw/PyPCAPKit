@@ -41,13 +41,16 @@ from typing import TYPE_CHECKING
 from pcapkit.const.arp.hardware import Hardware as RegType_Hardware
 from pcapkit.const.arp.operation import Operation as RegType_Operation
 from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
-from pcapkit.protocols.data.link.arp import Address as DataType_Address, Type as DataType_Type, ARP as DataType_ARP
+from pcapkit.protocols.data.link.arp import ARP as DataType_ARP
+from pcapkit.protocols.data.link.arp import Address as DataType_Address
+from pcapkit.protocols.data.link.arp import Type as DataType_Type
 from pcapkit.protocols.link.link import Link
 from pcapkit.utilities.compat import cached_property
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, Dict, List, Optional, Union, NoReturn
+    from typing import Any, NoReturn, Optional
+
     from typing_extensions import Literal
 
 __all__ = ['ARP']

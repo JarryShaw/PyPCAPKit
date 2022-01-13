@@ -28,10 +28,10 @@ import chardet
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.protocol import Packet
+from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import ProtocolNotFound, ProtocolNotImplemented, StructError
 from pcapkit.utilities.logging import logger
-from pcapkit.utilities.compat import cached_property
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
