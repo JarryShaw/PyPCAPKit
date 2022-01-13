@@ -31,6 +31,7 @@ from pcapkit.protocols.data.protocol import Packet
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import ProtocolNotFound, ProtocolNotImplemented, StructError
 from pcapkit.utilities.logging import logger
+from pcapkit.utilities.compat import cached_property
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -129,6 +130,12 @@ class Protocol(metaclass=abc.ABCMeta):
     def protochain(self) -> 'ProtoChain':
         """Protocol chain of current instance."""
         return self._protos
+
+    # packet data
+    @cached_property
+    def packet(self) -> 'Packet':
+        """Packet data of the protocol."""
+        return self._read_packet(header=self.length)
 
     ##########################################################################
     # Methods.
@@ -293,9 +300,6 @@ class Protocol(metaclass=abc.ABCMeta):
         self._exlayer = kwargs.pop('_layer', None)  # type: Optional[str]
         #: str: Parse packet until such protocol.
         self._exproto = kwargs.pop('_protocol', None)  # type: Optional[str | Protocol | Type[Protocol]]
-
-        #: int: Initial offset of :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`
-        self._seekset = 0 if file is None else file.tell()
         #: bool: If terminate parsing next layer of protocol.
         self._sigterm = self._check_term_threshold()
 
@@ -614,11 +618,9 @@ class Protocol(metaclass=abc.ABCMeta):
     @overload
     def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'None' = ...) -> 'bytes': ...
     @overload
-    def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'int',
-                     payload: 'Optional[int]' = ..., discard: 'Literal[True]') -> 'bytes': ...
+    def _read_packet(self, *, header: 'int', payload: 'Optional[int]' = ..., discard: 'Literal[True]') -> 'bytes': ...
     @overload
-    def _read_packet(self, length: 'Optional[int]' = ..., *, header: 'int',
-                     payload: 'Optional[int]' = ..., discard: 'Literal[False]' = ...) -> 'Packet': ...
+    def _read_packet(self, *, header: 'int', payload: 'Optional[int]' = ..., discard: 'Literal[False]' = ...) -> 'Packet': ...  # pylint: disable=line-too-long
 
     @seekset
     def _read_packet(self, length: 'Optional[int]' = None, *, header: 'Optional[int]' = None,
