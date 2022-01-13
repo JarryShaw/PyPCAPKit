@@ -190,7 +190,7 @@ class Header(Protocol):
     def make(self, *, byteorder: 'Literal["big", "little"]' = sys.byteorder,  # pylint: disable=arguments-differ
              lilendian: 'Optional[bool]' = None, bigendian: 'Optional[bool]' = None,
              nanosecond: bool = False, version: 'tuple[int, int] | VersionInfo' = (2, 4),
-             version_major: int = 2, version_minor: int = 4,
+             version_major: 'Optional[int]' = None, version_minor: 'Optional[int]' = None,
              thiszone: int = 0, sigfigs: int = 0, snaplen: int = 0x40_000,
              network: 'RegType_LinkType | StdlibEnum | AenumEnum | str | int' = RegType_LinkType.NULL,
              network_default: 'Optional[int]' = None,
@@ -219,19 +219,13 @@ class Header(Protocol):
             Constructed packet data.
 
         """
-        # fetch values
         magic_number, lilendian = self._make_magic(                    # make magic number
             byteorder, lilendian, bigendian, nanosecond)
-        version = kwargs.get('version', (2, 4))                        # version information
-        version_major = kwargs.get('version_major', version[0])        # major version number
-        version_minor = kwargs.get('version_minor', version[1])        # minor version number
-        thiszone = kwargs.get('thiszone', 0)                           # GMT to local correction
-        sigfigs = kwargs.get('sigfigs', 0)                             # accuracy of timestamps
-        snaplen = kwargs.get('snaplen', 262144)                        # max length of cap. packets, in octets
-        network = kwargs.get('network', RegType_LinkType.NULL)                 # data link type
-        network_default = kwargs.get('network_default')                # default val. for unknown data link type
-        network_reversed = kwargs.get('network_reversed', False)       # if namespace is ``str -> int`` pairs
-        network_namespace = kwargs.get('network_namespace', RegType_LinkType)  # data link type namespace
+
+        if version_major is None:
+            version_major = version[0]
+        if version_minor is None:
+            version_minor = version[1]
 
         # make packet
         return b'%s%s%s%s%s%s%s' % (
@@ -254,7 +248,7 @@ class Header(Protocol):
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> None:
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:

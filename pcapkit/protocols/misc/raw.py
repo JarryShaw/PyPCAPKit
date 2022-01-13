@@ -111,7 +111,8 @@ class Raw(Protocol):
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> None:  # pylint: disable=unused-argument
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None,
+                      length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:

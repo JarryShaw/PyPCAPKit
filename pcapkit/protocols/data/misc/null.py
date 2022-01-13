@@ -11,5 +11,5 @@ class NoPayload(Info):
     # NOTE: We add this method for both type annotation and to mark that this
     # class accepts no arguments at runtime, since :class:`Info` explicitly
     # skipped those whose :attr:`__annotations__` is empty :obj:`dict`.
-    def __init__(self) -> None:  # pylint: disable=super-init-not-called
+    def __init__(self) -> 'None':  # pylint: disable=super-init-not-called
         pass

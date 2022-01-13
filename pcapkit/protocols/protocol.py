@@ -307,7 +307,8 @@ class Protocol(metaclass=abc.ABCMeta):
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> None:
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None,
+                      length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
