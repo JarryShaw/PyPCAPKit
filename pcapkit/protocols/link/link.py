@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=bad-whitespace
 """root link layer protocol
 
 :mod:`pcapkit.protocols.link.link` contains :class:`~pcapkit.protocols.link.link.Link`,
@@ -9,36 +8,67 @@ which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.
 
 """
 import collections
-import importlib
+from typing import TYPE_CHECKING
 
-from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
-from pcapkit.const.reg.linktype import LinkType as LINKTYPE
+from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
 from pcapkit.protocols.protocol import Protocol
 
-__all__ = ['Link', 'LINKTYPE']
+if TYPE_CHECKING:
+    from typing_extensions import Literal
+
+__all__ = ['Link']
 
 
 class Link(Protocol):  # pylint: disable=abstract-method
-    """Abstract base class for link layer protocol family."""
+    """Abstract base class for link layer protocol family.
+
+    This class currently supports parsing of the following protocols, which are
+    registered in the :attr:`self.__proto__ <pcapkit.protocols.link.Link.__proto__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Index
+         - Protocol
+       * - 0x0806
+         - :class:`~pcapkit.protocols.link.arp.ARP`
+       * - 0x8035
+         - :class:`~pcapkit.protocols.link.rarp.RARP`
+       * - 0x8100
+         - :class:`~pcapkit.protocols.link.vlan.VLAN`
+       * - 0x0800
+         - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
+       * - 0x86DD
+         - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+       * - 0x8137
+         - :class:`~pcapkit.protocols.internet.ipx.IPX`
+
+    """
 
     ##########################################################################
     # Defaults.
     ##########################################################################
 
     #: Layer of protocol.
-    __layer__ = 'Link'
+    __layer__: 'Literal["Link"]' = 'Link'
 
-    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.link.link.Link._import_next_layer>`.
-    __proto__ = collections.defaultdict(lambda: ('pcapkit.protocols.raw', 'Raw'), {
-        0x0806: ('pcapkit.protocols.link.arp',      'ARP'),
-        0x8035: ('pcapkit.protocols.link.rarp',     'RARP'),
-        0x8100: ('pcapkit.protocols.link.vlan',     'VLAN'),
-        0x0800: ('pcapkit.protocols.internet.ipv4', 'IPv4'),
-        0x86DD: ('pcapkit.protocols.internet.ipv6', 'IPv6'),
-        0x8137: ('pcapkit.protocols.internet.ipx',  'IPX'),
-    })
+    __proto__ = collections.defaultdict(
+        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        {
+            RegType_EtherType.Address_Resolution_Protocol:         ('pcapkit.protocols.link.arp',      'ARP'),
+            RegType_EtherType.Reverse_Address_Resolution_Protocol: ('pcapkit.protocols.link.rarp',     'RARP'),
+            RegType_EtherType.Customer_VLAN_Tag_Type:              ('pcapkit.protocols.link.vlan',     'VLAN'),
+            RegType_EtherType.Internet_Protocol_version_4:         ('pcapkit.protocols.internet.ipv4', 'IPv4'),
+            RegType_EtherType.Internet_Protocol_version_6:         ('pcapkit.protocols.internet.ipv6', 'IPv6'),
+
+            # c.f., https://en.wikipedia.org/wiki/EtherType#Values
+            0x8137: ('pcapkit.protocols.internet.ipx',  'IPX'),
+        },
+    )
 
     ##########################################################################
     # Properties.
@@ -46,11 +76,8 @@ class Link(Protocol):  # pylint: disable=abstract-method
 
     # protocol layer
     @property
-    def layer(self):
-        """Protocol layer.
-
-        :rtype: Literal['Link']
-        """
+    def layer(self) -> 'Literal["Link"]':
+        """Protocol layer."""
         return self.__layer__
 
     ##########################################################################
@@ -58,13 +85,13 @@ class Link(Protocol):  # pylint: disable=abstract-method
     ##########################################################################
 
     @classmethod
-    def register(cls, code, module, class_):
+    def register(cls, code: 'RegType_EtherType', module: str, class_: str) -> 'None':
         """Register a new protocol class.
 
         Arguments:
-            code (int): protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
-            module (str): module name
-            class_ (str): class name
+            code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
+            module: module name
+            class_: class name
 
         Notes:
             The full qualified class name of the new protocol class
@@ -77,68 +104,16 @@ class Link(Protocol):  # pylint: disable=abstract-method
     # Utilities.
     ##########################################################################
 
-    def _read_protos(self, size):
+    def _read_protos(self, size: int) -> 'RegType_EtherType':
         """Read next layer protocol type.
 
         Arguments:
-            size (int): buffer size
+            size buffer size
 
         Returns:
-            pcapkit.const.reg.ethertype.EtherType: next layer's protocol enumeration
+            Internet layer protocol enumeration.
 
         """
         _byte = self._read_unpack(size)
-        _prot = ETHERTYPE.get(_byte)
+        _prot = RegType_EtherType.get(_byte)
         return _prot
-
-    def _import_next_layer(self, proto, length=None):
-        """Import next layer extractor.
-
-        This method currently supports following protocols as registered in
-        :data:`~pcapkit.const.reg.ethertype.EtherType`:
-
-        .. list-table::
-           :header-rows: 1
-
-           * - ``proto``
-             - Protocol
-           * - 0x0806
-             - :class:`~pcapkit.protocols.link.arp.ARP`
-           * - 0x8035
-             - :class:`~pcapkit.protocols.link.rarp.RARP`
-           * - 0x8100
-             - :class:`~pcapkit.protocols.link.vlan.VLAN`
-           * - 0x0800
-             - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
-           * - 0x86DD
-             - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
-           * - 0x8137
-             - :class:`~pcapkit.protocols.internet.ipx.IPX`
-
-
-        Arguments:
-            proto (int): next layer protocol index
-            length (int): valid (*non-padding*) length
-
-        Returns:
-            pcapkit.protocols.protocol.Protocol: instance of next layer
-
-        """
-        if length == 0:
-            from pcapkit.protocols.misc.null import \
-                NoPayload as protocol  # pylint: disable=import-outside-toplevel
-        elif self._sigterm:
-            from pcapkit.protocols.misc.raw import \
-                Raw as protocol  # pylint: disable=import-outside-toplevel
-        else:
-            module, name = self.__proto__[proto]
-            try:
-                protocol = getattr(importlib.import_module(module), name)
-            except (ImportError, AttributeError):
-                from pcapkit.protocols.misc.raw import \
-                    Raw as protocol  # pylint: disable=import-outside-toplevel
-
-        next_ = protocol(self._file, length, error=self._onerror,
-                         layer=self._exlayer, protocol=self._exproto)
-
-        return next_
