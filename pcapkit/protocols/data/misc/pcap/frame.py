@@ -42,12 +42,10 @@ class Frame(Info):
     len: 'int'
     #: Actual length of packet.
     cap_len: 'int'
-    #: Data of packet.
-    packet: 'bytes'
 
     if TYPE_CHECKING:
         #: Protocol chain.
         protocols: 'str'
 
         def __init__(self, frame_info: 'FrameInfo', time: 'datetime', number: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called
-                     time_epoch: 'Decimal', len: 'int', cap_len: 'int', packet: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,redefined-builtin
+                     time_epoch: 'Decimal', len: 'int', cap_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,redefined-builtin

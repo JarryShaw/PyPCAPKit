@@ -41,8 +41,7 @@ if TYPE_CHECKING:
 __all__ = ['Frame']
 
 # check Python version
-version_info = sys.version_info
-py37 = (version_info.major >= 3 and version_info.minor >= 7)
+py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
 
 
 class Frame(Protocol):
@@ -172,7 +171,6 @@ class Frame(Protocol):
         else:
             _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000
         _time = datetime.datetime.fromtimestamp(float(_epch))
-        _data = self._read_fileng(_ilen)
 
         frame = DataType_Frame(
             frame_info=DataType_FrameInfo(
@@ -186,19 +184,17 @@ class Frame(Protocol):
             time_epoch=_epch,
             len=_ilen,
             cap_len=_olen,
-            packet=_data,
         )
 
         if hasattr(self, '_data'):
             # move backward to the beginning of the packet
-            self._file.seek(-frame.len, io.SEEK_CUR)
+            self._file.seek(-self.length, io.SEEK_CUR)
         else:
             # NOTE: We create a copy of the frame packet data here for parsing
             # scenarios to keep the original packet data intact.
 
             # move backward to the beginning of the frame
-            length = self.length + frame.len
-            self._file.seek(-length, io.SEEK_CUR)
+            self._file.seek(-self.length, io.SEEK_CUR)
 
             #: bytes: Raw packet data.
             self._data = self._read_fileng(length)
