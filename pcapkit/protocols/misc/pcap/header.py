@@ -247,7 +247,8 @@ class Header(Protocol):
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
-    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None,
+                      length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
@@ -301,10 +302,10 @@ class Header(Protocol):
         """Read next layer protocol type.
 
         Arguments:
-            size (int) buffer size
+            size buffer size
 
         Returns:
-            pcapkit.const.reg.linktype.LinkType: link layer protocol enumeration
+            Link layer protocol enumeration.
 
         """
         _byte = self._read_unpack(4, lilendian=True)

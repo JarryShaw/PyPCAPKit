@@ -110,13 +110,13 @@ class Frame(Protocol):
     ##########################################################################
 
     @classmethod
-    def register(cls, code: int, module: str, class_: str) -> 'None':
+    def register(cls, code: 'RegType_LinkType', module: str, class_: str) -> 'None':
         """Register a new protocol class.
 
         Arguments:
-            code (int): protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-            module (str): module name
-            class_ (str): class name
+            code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
+            module: module name
+            class_: class name
 
         Notes:
             The full qualified class name of the new protocol class
