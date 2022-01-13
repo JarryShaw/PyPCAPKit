@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#: pylint: disable=line-too-long
 """global header
 
 :mod:`pcapkit.protocols.pcap.header` contains
