@@ -3,7 +3,10 @@
 """data models for protocols"""
 
 # Base Class for Protocols
-from pcapkit.protocols.protocol import Packet
+from pcapkit.protocols.data.protocol import Packet
+
+# Link Layer Protocols
+from pcapkit.protocols.data.link import *
 
 # Utility Classes for Protocols
 from pcapkit.protocols.data.misc import *
@@ -14,6 +17,9 @@ __all__ = [
 
     # PCAP file headers
     'Header', 'Frame',
+
+    # Address Resolution Protocol
+    'Address', 'Type', 'ARP',
 
     # No Payload
     'NoPayload',
