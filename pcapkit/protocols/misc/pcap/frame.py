@@ -18,18 +18,25 @@ whose structure is described as below:
 """
 import collections
 import datetime
-import importlib
+import decimal
 import io
-import os
 import sys
 import time
-import traceback
+from typing import TYPE_CHECKING, overload
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
+from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as DataType_FrameInfo
+from pcapkit.protocols.data.misc.pcap.frame import Frame as DataType_Frame
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.utilities.compat import cached_property
-from pcapkit.utilities.decorators import beholder
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.exceptions import UnsupportedCall, StructError
+
+if TYPE_CHECKING:
+    from decimal import Decimal
+    from typing import Any, BinaryIO, Optional, Type
+
+    from typing_extensions import Literal
+
+    from pcapkit.protocols.data.misc.pcap.header import Header as DataType_Header
 
 __all__ = ['Frame']
 
@@ -39,48 +46,71 @@ py37 = (version_info.major >= 3 and version_info.minor >= 7)
 
 
 class Frame(Protocol):
-    """Per packet frame header extractor."""
+    """Per packet frame header extractor.
+
+    This class currently supports parsing of the following protocols, which are
+    registered in the :attr:`self.__proto__ <pcapkit.protocols.misc.pcap.frame.Frame.__proto__>`
+    attribute:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Index
+         - Protocol
+       * - 1
+         - :class:`~pcapkit.protocols.link.ethernet.Ethernet`
+       * - 228
+         - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
+       * - 229
+         - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+
+    """
+
+    #: Parsed packet data.
+    _info: 'DataType_Frame'
 
     ##########################################################################
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name.
-    __proto__ = collections.defaultdict(lambda: ('pcapkit.protocols.raw', 'Raw'), {
-        1:   ('pcapkit.protocols.link', 'Ethernet'),
-        228: ('pcapkit.protocols.internet', 'IPv4'),
-        229: ('pcapkit.protocols.internet', 'IPv6'),
-    })
+    __proto__ = collections.defaultdict(
+        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        {
+            RegType_LinkType.ETHERNET: ('pcapkit.protocols.link', 'Ethernet'),
+            RegType_LinkType.IPV4:     ('pcapkit.protocols.internet', 'IPv4'),
+            RegType_LinkType.IPV6:     ('pcapkit.protocols.internet', 'IPv6'),
+        },
+    )
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of corresponding protocol.
-
-        :rtype: str
-        """
+    def name(self) -> 'str':
+        """Name of corresponding protocol."""
         return f'Frame {self._fnum}'
 
     @property
-    def length(self):
-        """Header length of corresponding protocol.
-
-        :rtype: Literal[16]
-        """
+    def length(self) -> 'Literal[16]':
+        """Header length of corresponding protocol."""
         return 16
+
+    @property
+    def header(self) -> 'DataType_Header':
+        """Global header of the PCAP file."""
+        return self._ghdr
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
     @classmethod
-    def register(cls, code, module, class_):
+    def register(cls, code: int, module: str, class_: str) -> 'None':
         """Register a new protocol class.
 
         Arguments:
@@ -95,14 +125,14 @@ class Frame(Protocol):
         """
         cls.__proto__[code] = (module, class_)
 
-    def index(self, name):
+    def index(self, name: 'str | Protocol | Type[Protocol]') -> 'int':
         """Call :meth:`ProtoChain.index <pcapkit.corekit.protochain.ProtoChain.index>`.
 
         Args:
-            name (Union[str, Protocol, Type[Protocol]]): ``name`` to be searched
+            name: ``name`` to be searched
 
         Returns:
-            int: first index of ``name``
+            First index of ``name``.
 
         Raises:
             IndexNotFound: if ``name`` is not present
@@ -110,7 +140,7 @@ class Frame(Protocol):
         """
         return self._protos.index(name)
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Frame':
         """Read each block after global header.
 
         Args:
@@ -127,9 +157,10 @@ class Frame(Protocol):
 
         """
         # _scur = self._file.tell()
-        _temp = self._read_unpack(4, lilendian=True, quiet=True)
-        if _temp is None:
-            raise EOFError
+        try:
+            _temp = self._read_unpack(4, lilendian=True)
+        except StructError:
+            raise EOFError from None
 
         _tsss = _temp
         _tsus = self._read_unpack(4, lilendian=True)
@@ -137,13 +168,14 @@ class Frame(Protocol):
         _olen = self._read_unpack(4, lilendian=True)
 
         if self._nsec:
-            _epch = _tsss + _tsus / 1000000000
+            _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000_000
         else:
-            _epch = _tsss + _tsus / 1000000
-        _time = datetime.datetime.fromtimestamp(_epch)
+            _epch = _tsss + decimal.Decimal(_tsus) / 1_000_000
+        _time = datetime.datetime.fromtimestamp(float(_epch))
+        _data = self._read_fileng(_ilen)
 
-        frame = dict(
-            frame_info=dict(
+        frame = DataType_Frame(
+            frame_info=DataType_FrameInfo(
                 ts_sec=_tsss,
                 ts_usec=_tsus,
                 incl_len=_ilen,
@@ -154,47 +186,56 @@ class Frame(Protocol):
             time_epoch=_epch,
             len=_ilen,
             cap_len=_olen,
+            packet=_data,
         )
 
-        # load packet data
-        length = frame['len']
-        bytes_ = self._file.read(length)
+        if hasattr(self, '_data'):
+            # move backward to the beginning of the packet
+            self._file.seek(-frame.len, io.SEEK_CUR)
+        else:
+            # NOTE: We create a copy of the frame packet data here for parsing
+            # scenarios to keep the original packet data intact.
 
-        # record file pointer
-        if self._mpkt and self._mpfp:
-            # print(self._fnum, 'ready')
-            self._mpfp.put(self._file.tell())
-            self._mpkt.pool += 1
+            # move backward to the beginning of the frame
+            length = self.length + frame.len
+            self._file.seek(-length, io.SEEK_CUR)
 
-        # make BytesIO from frame packet data
-        frame['packet'] = bytes_
-        self._file = io.BytesIO(bytes_)
-        # frame['packet'] = self._read_packet(header=0, payload=length, discard=True)
+            #: bytes: Raw packet data.
+            self._data = self._read_fileng(length)
+            #: io.BytesIO: Source packet stream.
+            self._file = io.BytesIO(self._data)
 
-        return self._decode_next_layer(frame, length)
+            # move forward to the beginning of the packet
+            self._file.seek(self.length, io.SEEK_CUR)
 
-    def make(self, **kwargs):
+        return self._decode_next_layer(frame, self._ghdr.network, frame.len)
+
+    def make(self, *, timestamp: 'Optional[float | Decimal]' = None,  # type: ignore[override] # pylint: disable=arguments-differ
+             ts_sec: 'Optional[int]' = None, ts_usec: 'Optional[int]' = None,
+             incl_len: 'Optional[int]' = None, orig_len: 'Optional[int]' = None,
+             packet: 'bytes', nanosecond: 'bool' = False, **kwargs: 'Any') -> 'bytes':
         """Make frame packet data.
 
         Keyword Args:
-            timestamp (float): UNIX-Epoch timestamp
-            ts_sec (int): timestamp seconds
-            ts_usec (int): timestamp microseconds
-            incl_len (int): number of octets of packet saved in file
-            orig_len (int): actual length of packet
-            packet (bytes): raw packet data (default: ``b''``)
-            nanosecond (bool): nanosecond-resolution file flag (default: :data:`False`)
+            timestamp: UNIX-Epoch timestamp
+            ts_sec: timestamp seconds
+            ts_usec: timestamp microseconds
+            incl_len: number of octets of packet saved in file
+            orig_len: actual length of packet
+            packet: raw packet data
+            nanosecond: nanosecond-resolution file flag
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
-        # fetch values
-        ts_sec, ts_usec = self._make_timestamp(**kwargs)
-        packet = kwargs.get('packet', bytes())                   # raw packet data
-        incl_len = kwargs.get('incl_len', len(packet))           # number of octets of packet saved in file
-        orig_len = kwargs.get('orig_len', len(packet))           # actual length of packet
+        ts_sec, ts_usec = self._make_timestamp(timestamp, ts_sec, ts_usec, nanosecond)
+
+        if incl_len is None:
+            incl_len = min(len(packet), self._ghdr.snaplen)
+        if orig_len is None:
+            orig_len = len(packet)
 
         # make packet
         return b'%s%s%s%s%s' % (
@@ -202,35 +243,32 @@ class Frame(Protocol):
             self._make_pack(ts_usec, size=4, lilendian=True),
             self._make_pack(incl_len, size=4, lilendian=True),
             self._make_pack(orig_len, size=4, lilendian=True),
-            packet,
+            packet[:incl_len],
         )
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file=None, length=None, *, num, proto, nanosecond, **kwargs):  # pylint: disable=arguments-differ
+    @overload  # type: ignore[override]
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      num: 'int', header: 'DataType_Header', **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, *, num: 'int', header: 'DataType_Header',  # pylint: disable=arguments-differ
+                      **kwargs: 'Any') -> 'None': ...
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      num: 'int', header: 'DataType_Header', **kwargs: 'Any') -> 'None':
         """Initialisation.
 
         Args:
-            file (Optional[io.BytesIO]): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
-            num (int): Frame index number
-                (:attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`).
-            proto (pcapkit.const.reg.linktype.LinkType): Next layer protocol index
-                (:attr:`self._prot <pcapkit.protocols.pcap.frame.Frame._prot>`).
-            nanosecond (bool): Nanosecond-timestamp PCAP flag
-                (:attr:`self._nsec <pcapkit.protocols.pcap.frame.Frame._nsec>`).
-            mpfdp (multiprocessing.Queue): Multiprocessing file descriptor queue
-                (:attr:`self._mpfp <pcapkit.protocols.pcap.frame.Frame._mpfp>`).
-            mpkit (multiprocessing.Namespace): Multiprocessing auxiliaries
-                (:attr:`self._mpkt <pcapkit.protocols.pcap.frame.Frame._mpkt>`).
+            num: Frame index number.
+            header: Global header of the PCAP file.
             **kwargs: Arbitrary keyword arguments.
-
-        For *multiprocessing* related parameters, please refer to
-        :class:`pcapkit.foundation.extration.Extrator` for more information.
 
         See Also:
             For construction argument, please refer to :meth:`make`.
@@ -238,82 +276,37 @@ class Frame(Protocol):
         """
         #: int: frame index number
         self._fnum = num
-        #: pcapkit.const.reg.linktype.LinkType: next layer protocol index
-        self._prot = proto
-        #: bool: nanosecond-timestamp PCAP flag
-        self._nsec = nanosecond
+        #: pcapkit.protocols.pcap.header.Header: Global header of the PCAP file.
+        self._ghdr = header
 
-        #: multiprocessing.Queue: multiprocessing file descriptor queue (*not available after initialisation*)
-        self._mpfp = kwargs.pop('mpfdp', None)
-        #: multiprocessing.Namespace: multiprocessing auxiliaries (*not available after initialisation*)
-        self._mpkt = kwargs.pop('mpkit', None)
+        #: pcapkit.const.reg.linktype.LinkType: next layer protocol index
+        self._prot = header.network
+        #: bool: nanosecond-timestamp PCAP flag
+        self._nsec = header.magic_number.nanosecond
 
         if file is None:
             #: bytes: Raw packet data.
             self._data = self.make(**kwargs)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
-            #: pcapkit.corekit.infoclass.Info: Parsed packet data. This is a lazy
-        #: attribute, which will be called only when accessed. Therefore, the
-        #: attribute is set to a :class:`lazy_object_proxy.Proxy` initially.
-            self._info = Info(self.read())
         else:
             #: io.BytesIO: Source packet stream.
-            self._file = file
-            #: pcapkit.corekit.infoclass.Info: Parsed packet data. This is a lazy
-        #: attribute, which will be called only when accessed. Therefore, the
-        #: attribute is set to a :class:`lazy_object_proxy.Proxy` initially.
-            self._info = Info(self.read())
+            self._file = file  # type: ignore[assignment]
 
-            #: bytes: Raw packet data.
-            self._data = self._read_packet(self._info.len)  # pylint: disable=no-member
-            #: io.BytesIO: Source packet stream.
-            self._file = io.BytesIO(self._data)
+        #: pcapkit.corekit.infoclass.Info: Parsed packet data.
+        self._info = self.read()
 
-        # remove temporary multiprocessing support attributes
-        [delattr(self, attr) for attr in filter(lambda attr: attr.startswith('_mp'), dir(self))]  # pylint: disable=expression-not-assigned
-
-    @cached_property
-    def __len__(self):
-        """Total length of corresponding protocol."""
-        return self._info.len  # pylint: disable=no-member
-
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[16]
-        """
+    def __length_hint__(self) -> 'Literal[16]':
+        """Return an estimated length for the object."""
         return 16
 
-    def __getitem__(self, key):
-        """Subscription (``getitem``) support.
-
-        This method fist checks if ``key`` exists in
-        :attr:`self._info <pcapkit.protocols.pcap.frame.Frame._info>`.
-        If so, returns the corresponding value, else calls the original
-        :meth:`~pcapkit.protocols.protocol.Protocol.__getitem__` method.
-
-        Args:
-            key (Union[str, Protocol, Type[Protocol]]): Indexing key.
+    # NOTE: This is a hack to make the ``__index__`` method work both as a
+    # class method and an instance method.
+    def __index__(self: 'Optional[Frame]' = None) -> 'int':  # type: ignore[override]
+        """Index of the frame.
 
         Returns:
-            * If ``key`` exists in :attr:`self._info <pcapkit.protocols.pcap.frame.Frame._info>`,
-              returns the value of the ``key``;
-            * else returns the sub-packet from the current packet of indexed protocol.
-
-        """
-        # if requested attributes in info dict,
-        # else call the original function
-        try:
-            return self._info[key]
-        except KeyError:
-            return super().__getitem__(key)
-
-    def __index__(self=None):
-        """Index of the protocol.
-
-        Returns:
-            int: If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`
+            If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`
             exists, returns the frame index number of itself; else raises :exc:`UnsupportedCall`.
 
         Raises:
@@ -321,122 +314,68 @@ class Frame(Protocol):
 
         """
         if self is None:
-            return 'Frame'
-        if getattr(self, '_fnum', None) is None:
             raise UnsupportedCall("'Frame' object cannot be interpreted as an integer")
         return self._fnum
-
-    def __contains__(self, name):
-        """Returns if ``name`` is in :attr:`self._info <pcapkit.protocols.protocol.Protocol._info>`
-        or in the frame packet :attr:`self._protos <pcapkit.protocols.protocol.Protocol._protos>`.
-
-        Args:
-            name (Any): name to search
-
-        Returns:
-            bool: if ``name`` exists
-
-        """
-        if isinstance(name, type) and issubclass(name, Protocol):
-            name = name.id()
-        if isinstance(name, tuple):
-            for item in name:
-                if item in self._protos:
-                    return True
-            return False
-        return (name in self._info) or (name in self._protos)
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _make_timestamp(self, **kwargs):  # pylint: disable=no-self-use
+    def _make_timestamp(self, timestamp: 'Optional[float | Decimal]' = None, ts_sec: 'Optional[int]' = None,  # pylint: disable=no-self-use
+                        ts_usec: 'Optional[int]' = None, nanosecond: 'bool' = False) -> 'tuple[int, int]':
         """Make timestamp.
 
-        Keyword Args:
-            **kwargs: Arbitrary keyword arguments.
+        Args:
+            timestamp: UNIX-Epoch timestamp
+            ts_sec: timestamp seconds
+            ts_usec: timestamp microseconds
+            nanosecond: nanosecond-resolution file flag
 
         Returns:
             Tuple[int, int]: Second and microsecond/nanosecond value of timestamp.
 
         """
-        nanosecond = kwargs.get('nanosecond', False)         # nanosecond-resolution file flag
-        timestamp = kwargs.get('timestamp', time.time())     # timestamp
-        ts_sec = kwargs.get('ts_sec', int(timestamp))        # timestamp seconds
-        if py37 and nanosecond:
-            _default_ts_usec = time.time_ns() % 1000000000
+        if timestamp is None:
+            if py37 and nanosecond:
+                timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
+            else:
+                timestamp = decimal.Decimal(time.time())
         else:
-            _default_ts_usec = int((timestamp - ts_sec) * (1000000000 if nanosecond else 1000000))
-        ts_usec = kwargs.get('ts_usec', _default_ts_usec)    # timestamp microseconds
+            timestamp = decimal.Decimal(timestamp)
+
+        if ts_sec is None:
+            ts_sec = int(timestamp)
+
+        if ts_usec is None:
+            ts_usec = int(timestamp - ts_sec) * (1_000_000_000 if nanosecond else 1_000_000)
+
         return ts_sec, ts_usec
 
-    def _decode_next_layer(self, data, length=None):  # pylint: disable=arguments-differ
+    def _decode_next_layer(self, dict_: 'DataType_Frame', proto: 'Optional[int]' = None,  # type: ignore[override]
+                           length: 'Optional[int]' = None) -> 'DataType_Frame':  # pylint: disable=arguments-differ
         """Decode next layer protocol.
 
         Positional arguments:
-            data (dict): info buffer
-            length (int): valid (*non-padding*) length
+            data: info buffer
+            proto: next layer protocol index
+            length: valid (*non-padding*) length
 
         Returns:
             dict: current protocol with packet extracted
 
         """
-        seek_cur = self._file.tell()
-        try:
-            next_ = self._import_next_layer(self._prot, length)
-        except Exception:
-            data['error'] = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
-            self._file.seek(seek_cur, os.SEEK_SET)
-            next_ = beholder(self._import_next_layer)(self, self._prot, length, error=True)
+        next_ = self._import_next_layer(proto, length)
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
-        layer = next_.alias.lower()
+        layer = next_.info_name
         # proto = next_.__class__.__name__
 
         # write info and protocol chain into dict
+        dict_.__update__([
+            (layer, info),
+            ('protocols', chain.chain),
+        ])
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         self._protos = chain  # pylint: disable=attribute-defined-outside-init
-        data[layer] = info
-        data['protocols'] = self._protos.chain
-        return data
-
-    def _import_next_layer(self, proto, length, error=False):  # pylint: disable=arguments-differ
-        """Import next layer extractor.
-
-        This method currently supports following protocols as registered in
-        :data:`~pcapkit.const.reg.linktype.LinkType`:
-
-        .. list-table::
-           :header-rows: 1
-
-           * - ``proto``
-             - Protocol
-           * - 1
-             - :class:`~pcapkit.protocols.link.ethernet.Ethernet`
-           * - 228
-             - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
-           * - 229
-             - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
-
-        Arguments:
-            proto (pcapkit.const.reg.linktype.LinkType): next layer protocol index
-            length (int): valid (*non-padding*) length
-
-        Keyword arguments:
-            error (bool): if function called on error
-
-        Returns:
-            pcapkit.protocols.protocol.Protocol: instance of next layer
-
-        """
-        module, name = self.__proto__[int(proto)]
-        try:
-            protocol = getattr(importlib.import_module(module), name)
-        except (ImportError, AttributeError):
-            from pcapkit.protocols.misc.raw import \
-                Raw as protocol  # pylint: disable=import-outside-toplevel
-
-        next_ = protocol(self._file, length, error=error,
-                         layer=self._exlayer, protocol=self._exproto)
-        return next_
+        return dict_

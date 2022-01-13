@@ -6,12 +6,14 @@
 from pcapkit.protocols.protocol import Packet
 
 # Utility Classes for Protocols
-from pcapkit.protocols.data.misc.raw import *
-from pcapkit.protocols.data.misc.null import *
+from pcapkit.protocols.data.misc import *
 
 __all__ = [
     # Packet data
     'Packet',
+
+    # PCAP file headers
+    'Header', 'Frame',
 
     # No Payload
     'NoPayload',
