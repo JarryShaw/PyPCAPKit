@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """data modules for no-payload packet"""
+
 from pcapkit.corekit.infoclass import Info
 
 __all__ = ['NoPayload']

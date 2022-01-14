@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """data modules for raw protocol data"""
+
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info

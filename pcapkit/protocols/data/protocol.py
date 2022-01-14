@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """data modules for root protocol"""
+
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info

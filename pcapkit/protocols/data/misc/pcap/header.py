@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """data modules for global header of PCAP file"""
+
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info

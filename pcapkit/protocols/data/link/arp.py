@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """data models for address resolution protocol family"""
+
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info
