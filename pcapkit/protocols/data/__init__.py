@@ -8,6 +8,9 @@ from pcapkit.protocols.data.protocol import Packet
 # Link Layer Protocols
 from pcapkit.protocols.data.link import *
 
+# Internet Layer Protocols
+from pcapkit.protocols.data.internet import *
+
 # Utility Classes for Protocols
 from pcapkit.protocols.data.misc import *
 

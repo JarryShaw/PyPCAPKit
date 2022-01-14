@@ -20,68 +20,68 @@ below:
 .. [*] https://en.wikipedia.org/wiki/Ethernet
 
 """
+import sys
 import textwrap
+from typing import TYPE_CHECKING
 
+from pcapkit.protocols.data.link.ethernet import Ethernet as DataType_Ethernet
 from pcapkit.protocols.link.link import Link
-from pcapkit.utilities.exceptions import UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import Any, NoReturn, Optional
+
+    from typing_extensions import Literal
+
+    from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
 
 __all__ = ['Ethernet']
+
+# check Python version
+py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 
 class Ethernet(Link):
     """This class implements Ethernet Protocol."""
+
+    #: Parsed packet data.
+    _info: 'DataType_Ethernet'
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['Ethernet Protocol']
-        """
+    def name(self) -> 'Literal["Ethernet Protocol"]':
+        """Name of current protocol."""
         return 'Ethernet Protocol'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: Literal[14]
-        """
+    def length(self) -> 'Literal[14]':
+        """Header length of current protocol."""
         return 14
 
     @property
-    def protocol(self):
-        """Name of next layer protocol.
-
-        :rtype: pcapkit.const.reg.ethertype.EtherType
-        """
-        return self._info.type  # pylint: disable=E1101
+    def protocol(self) -> 'RegType_EtherType':
+        """Name of next layer protocol."""
+        return self._info.type
 
     # source mac address
     @property
-    def src(self):
-        """Source mac address.
-
-        :rtype: str
-        """
-        return self._info.src  # pylint: disable=E1101
+    def src(self) -> 'str':
+        """Source mac address."""
+        return self._info.src
 
     # destination mac address
     @property
-    def dst(self):
-        """Destination mac address.
-
-        :rtype: str
-        """
-        return self._info.dst  # pylint: disable=E1101
+    def dst(self) -> 'str':
+        """Destination mac address."""
+        return self._info.dst
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Ethernet':  # pylint: disable=unused-argument
         """Read Ethernet Protocol [:rfc:`7042`].
 
         Args:
@@ -101,25 +101,21 @@ class Ethernet(Link):
         _srcm = self._read_mac_addr()
         _type = self._read_protos(2)
 
-        ethernet = dict(
+        ethernet = DataType_Ethernet(
             dst=_dstm,
             src=_srcm,
             type=_type,
         )
+        return self._decode_next_layer(ethernet, _type, length - self.length)  # type: ignore[return-value]
 
-        length -= 14
-        ethernet['packet'] = self._read_packet(header=14, payload=length)
-
-        return self._decode_next_layer(ethernet, _type, length)
-
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
@@ -128,34 +124,24 @@ class Ethernet(Link):
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[14]
-        """
+    def __length_hint__(self) -> 'Literal[14]':
+        """Return an estimated length for the object."""
         return 14
-
-    @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
-        """Numeral registry index of the protocol.
-
-        Raises:
-            UnsupportedCall: This protocol has no registry entry.
-
-        """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_mac_addr(self):
+    def _read_mac_addr(self) -> 'str':
         """Read MAC address.
 
         Returns:
-            str: Colon (``:``) seperated *hex* encoded MAC address.
+            Colon (``:``) seperated *hex* encoded MAC address.
 
         """
         _byte = self._read_fileng(6)
-        _addr = ':'.join(textwrap.wrap(_byte.hex(), 2))
+        if py38:
+            _addr = _byte.hex(':')
+        else:
+            _addr = ':'.join(textwrap.wrap(_byte.hex(), 2))
         return _addr
