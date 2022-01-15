@@ -71,6 +71,11 @@ class ARP(Link):
     #: Parsed packet data.
     _info: 'DataType_ARP'
 
+    #: Name of corresponding protocol.
+    _name: 'Literal["Address Resolution Protocol", "Inverse Address Resolution Protocol", "Reverse Address Resolution Protocol", "Dynamic Reverse Address Resolution Protocol"]'  # pylint: disable=line-too-long
+    #: Acronym of corresponding protocol.
+    _acnm: 'Literal["ARP", "InARP", "RARP", "DRARP"]'
+
     ##########################################################################
     # Properties.
     ##########################################################################
@@ -127,10 +132,6 @@ class ARP(Link):
             Parsed packet data.
 
         """
-        if TYPE_CHECKING:
-            self._name: 'Literal["Dynamic Reverse Address Resolution Protocol", "Inverse Address Resolution Protocol", "Reverse Address Resolution Protocol", "Address Resolution Protocol"]'  # pylint: disable=line-too-long
-            self._acnm: 'Literal["ARP", "InARP", "RARP", "DRARP"]'
-
         if length is None:
             length = self.__len__()
 
