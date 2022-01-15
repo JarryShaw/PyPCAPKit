@@ -19,10 +19,16 @@ __all__ = [
     'Packet',
 
     # PCAP file headers
-    'Header', 'Frame',
+    'PCAP_Header', 'PCAP_Frame',
 
     # Address Resolution Protocol
-    'Address', 'Type', 'ARP',
+    'ARP', 'ARP_Address', 'ARP_Type',
+
+    # Ethernet Protocol
+    'Ethernet',
+
+    # Open Shortest Path First
+    'OSPF', 'OSPF_CrytographicAuthentication',
 
     # No Payload
     'NoPayload',

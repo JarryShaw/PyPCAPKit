@@ -7,6 +7,7 @@ from pcapkit.corekit.infoclass import Info
 
 if TYPE_CHECKING:
     from typing import Optional
+
     from pcapkit.const.l2tp.type import Type
     from pcapkit.const.reg.ethertype import EtherType
 

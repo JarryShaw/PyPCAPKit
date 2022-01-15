@@ -49,11 +49,13 @@ as below:
 from typing import TYPE_CHECKING
 
 from pcapkit.const.l2tp.type import Type as RegType_Type
-from pcapkit.protocols.data.link.l2tp import Flags as DataType_Flags, L2TP as DataType_L2TP
+from pcapkit.protocols.data.link.l2tp import L2TP as DataType_L2TP
+from pcapkit.protocols.data.link.l2tp import Flags as DataType_Flags
 from pcapkit.protocols.link.link import Link
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, NoReturn
+    from typing import Any, NoReturn, Optional
+
     from typing_extensions import Literal
 
 __all__ = ['L2TP']
