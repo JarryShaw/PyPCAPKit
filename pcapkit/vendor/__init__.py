@@ -16,6 +16,7 @@ from pcapkit.vendor.http import *
 from pcapkit.vendor.ipv4 import *
 from pcapkit.vendor.ipv6 import *
 from pcapkit.vendor.ipx import *
+from pcapkit.vendor.l2tp import *
 from pcapkit.vendor.mh import *
 from pcapkit.vendor.ospf import *
 from pcapkit.vendor.tcp import *
@@ -44,6 +45,8 @@ __all__ = [
     'IPv6_SeedID', 'IPv6_TaggerID',
     # IPX
     'IPX_Packet', 'IPX_Socket',
+    # L2TP
+    'L2TP_Type',
     # MH
     'MH_Packet',
     # OSPF

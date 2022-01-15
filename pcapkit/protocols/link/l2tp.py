@@ -28,7 +28,7 @@ as below:
 +--------+-------+-----------------------+--------------------------------------------+
 | 1      |     8 |                       | Reserved (must be zero ``\\x00``)          |
 +--------+-------+-----------------------+--------------------------------------------+
-| 1      |    12 | ``l2tp.ver``          | Version (``2``)                            |
+| 1      |    12 | ``l2tp.version``      | Version (``2``)                            |
 +--------+-------+-----------------------+--------------------------------------------+
 | 2      |    16 | ``l2tp.length``       | Length (optional by ``len``)               |
 +--------+-------+-----------------------+--------------------------------------------+
@@ -46,8 +46,15 @@ as below:
 .. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol
 
 """
+from typing import TYPE_CHECKING
+
+from pcapkit.const.l2tp.type import Type as RegType_Type
+from pcapkit.protocols.data.link.l2tp import Flags as DataType_Flags, L2TP as DataType_L2TP
 from pcapkit.protocols.link.link import Link
-from pcapkit.utilities.exceptions import UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import Any, Optional, NoReturn
+    from typing_extensions import Literal
 
 __all__ = ['L2TP']
 
@@ -55,39 +62,33 @@ __all__ = ['L2TP']
 class L2TP(Link):
     """This class implements Layer Two Tunnelling Protocol."""
 
+    #: Parsed packet data.
+    _info: 'DataType_L2TP'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['Layer 2 Tunnelling Protocol']
-        """
+    def name(self) -> 'Literal["Layer 2 Tunnelling Protocol"]':
+        """Name of current protocol."""
         return 'Layer 2 Tunnelling Protocol'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: int
-        """
-        return self._info.hdr_len  # pylint: disable=E1101
+    def length(self) -> 'int':
+        """Header length of current protocol."""
+        return self._info.hdr_len
 
     @property
-    def type(self):
-        """L2TP type.
-
-        :rtype: Literal['Control', 'Data']
-        """
-        return self._info.flags.type  # pylint: disable=E1101
+    def type(self) -> 'Literal["control", "data"]':
+        """L2TP type."""
+        return self._info.flags.type
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_L2TP':  # pylint: disable=unused-argument
         """Read Layer Two Tunnelling Protocol.
 
         Structure of L2TP header [:rfc:`2661`]::
@@ -105,36 +106,39 @@ class L2TP(Link):
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_L2TP: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
             length = len(self)
 
         _flag = self._read_binary(1)
+
+        flags = DataType_Flags(
+            type=RegType_Type(int(_flag[0])),
+            len=bool(int(_flag[1])),
+            seq=bool(int(_flag[4])),
+            offset=bool(int(_flag[6])),
+            prio=bool(int(_flag[7])),
+        )
+
         _vers = self._read_fileng(1).hex()[1]
-        _hlen = self._read_unpack(2) if int(_flag[1]) else None
+        _hlen = self._read_unpack(2) if flags.len else None
         _tnnl = self._read_unpack(2)
         _sssn = self._read_unpack(2)
-        _nseq = self._read_unpack(2) if int(_flag[4]) else None
-        _nrec = self._read_unpack(2) if int(_flag[4]) else None
-        _size = self._read_unpack(2) if int(_flag[6]) else 0
+        _nseq = self._read_unpack(2) if flags.seq else None
+        _nrec = self._read_unpack(2) if flags.seq else None
+        _size = self._read_unpack(2) if flags.offset else 0
 
-        l2tp = dict(
-            flags=dict(
-                type='Control' if int(_flag[0]) else 'Data',
-                len=bool(int(_flag[1])),
-                seq=bool(int(_flag[4])),
-                offset=bool(int(_flag[6])),
-                prio=bool(int(_flag[7])),
-            ),
-            ver=int(_vers, base=16),
+        l2tp = DataType_L2TP(
+            flags=flags,
+            version=int(_vers, base=16),
             length=_hlen,
             tunnelid=_tnnl,
             sessionid=_sssn,
@@ -144,16 +148,15 @@ class L2TP(Link):
         )
 
         hdr_len = _hlen or (6 + 2*(int(_flag[1]) + 2*int(_flag[4]) + int(_flag[6])))
-        l2tp['hdr_len'] = hdr_len + _size * 8
+        l2tp.__update__([
+            ('hdr_len', hdr_len + _size * 8),
+        ])
         # if _size:
         #     l2tp['padding'] = self._read_fileng(_size * 8)
 
-        length -= l2tp['hdr_len']
-        l2tp['packet'] = self._read_packet(header=l2tp['hdr_len'], payload=length)
+        return self._decode_next_layer(l2tp, length - l2tp.hdr_len)  # type: ignore[return-value]
 
-        return self._decode_next_layer(l2tp, length)
-
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=unused-argument
         """Make (construct) packet data.
 
         Keyword Args:
@@ -169,19 +172,6 @@ class L2TP(Link):
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[16]
-        """
+    def __length_hint__(self) -> 'Literal[16]':
+        """Return an estimated length for the object."""
         return 16
-
-    @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
-        """Numeral registry index of the protocol.
-
-        Raises:
-            UnsupportedCall: This protocol has no registry entry.
-
-        """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
