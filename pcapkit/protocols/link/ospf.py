@@ -31,11 +31,20 @@ as below:
 
 """
 import ipaddress
+from typing import TYPE_CHECKING
 
-from pcapkit.const.ospf.authentication import Authentication as AUTH
-from pcapkit.const.ospf.packet import Packet as TYPE
+from pcapkit.const.ospf.authentication import Authentication as RegType_Authentication
+from pcapkit.const.ospf.packet import Packet as RegType_Packet
+from pcapkit.protocols.data.link.ospf import OSPF as DataType_OSPF
+from pcapkit.protocols.data.link.ospf import \
+    CrytographicAuthentication as DataType_CrytographicAuthentication
 from pcapkit.protocols.link.link import Link
-from pcapkit.utilities.exceptions import UnsupportedCall
+
+if TYPE_CHECKING:
+    from ipaddress import IPv4Address
+    from typing import Any, NoReturn, Optional
+
+    from typing_extensions import Literal
 
 __all__ = ['OSPF']
 
@@ -43,47 +52,38 @@ __all__ = ['OSPF']
 class OSPF(Link):
     """This class implements Open Shortest Path First."""
 
+    #: Parsed packet data.
+    _info: 'DataType_OSPF'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: str
-        """
-        return f'Open Shortest Path First version {self._info.version}'  # pylint: disable=E1101
+    def name(self) -> 'str':
+        """Name of current protocol."""
+        return f'Open Shortest Path First version {self._info.version}'
 
     @property
-    def alias(self):
-        """Acronym of current protocol.
-
-        :rtype: str
-        """
-        return f'OSPFv{self._info.version}'  # pylint: disable=E1101
+    def alias(self) -> 'str':
+        """Acronym of current protocol."""
+        return f'OSPFv{self._info.version}'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: Literal[24]
-        """
+    def length(self) -> 'Literal[24]':
+        """Header length of current protocol."""
         return 24
 
     @property
-    def type(self):
-        """OSPF packet type.
-
-        :rtype: pcapkit.const.ospf.packet.Packet
-        """
-        return self._info.type  # pylint: disable=E1101
+    def type(self) -> 'RegType_Packet':
+        """OSPF packet type."""
+        return self._info.type
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_OSPF':
         """Read Open Shortest Path First.
 
         Structure of OSPF header [:rfc:`2328`]::
@@ -105,13 +105,13 @@ class OSPF(Link):
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_OSPF: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -125,27 +125,27 @@ class OSPF(Link):
         _csum = self._read_fileng(2)
         _autp = self._read_unpack(2)
 
-        ospf = dict(
+        ospf = DataType_OSPF(
             version=_vers,
-            type=TYPE.get(_type),
+            type=RegType_Packet.get(_type),
             len=_tlen,
             router_id=_rtid,
             area_id=_area,
             chksum=_csum,
-            autype=AUTH.get(_autp) or 'Reserved',
+            autype=RegType_Authentication.get(_autp),
         )
 
-        if _autp == 2:
-            ospf['auth'] = self._read_encrypt_auth()
+        if ospf.autype == RegType_Authentication.Cryptographic_authentication:
+            ospf.__update__([
+                ('auth', self._read_encrypt_auth()),
+            ])
         else:
-            ospf['auth'] = self._read_fileng(8)
+            ospf.__update__([
+                ('auth', self._read_fileng(8)),
+            ])
+        return self._decode_next_layer(ospf, length - self.length)  # type: ignore[return-value]
 
-        length = ospf['len'] - 24
-        ospf['packet'] = self._read_packet(header=24, payload=length)
-
-        return self._decode_next_layer(ospf, length)
-
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
@@ -161,39 +161,26 @@ class OSPF(Link):
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[24]
-        """
+    def __length_hint__(self) -> 'Literal[24]':
+        """Return an estimated length for the object."""
         return 24
-
-    @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
-        """Numeral registry index of the protocol.
-
-        Raises:
-            UnsupportedCall: This protocol has no registry entry.
-
-        """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_id_numbers(self):
+    def _read_id_numbers(self) -> 'IPv4Address':
         """Read router and area IDs.
 
         Returns:
-            IPv4Address: Parsed IDs as an IPv4 address.
+            Parsed IDs as an IPv4 address.
 
         """
         #_byte = self._read_fileng(4)
         #_addr = '.'.join(str(_) for _ in _byte)
         return ipaddress.ip_address(self._read_fileng(4))
 
-    def _read_encrypt_auth(self):
+    def _read_encrypt_auth(self) -> 'DataType_CrytographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,
         i.e. :attr:`~OSPF.autype` is ``2``.
 
@@ -208,20 +195,10 @@ class OSPF(Link):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (int): packet length
+            length: packet length
 
         Returns:
-            DataType_Auth: Parsed packet data.
-
-                class Auth(TypedDict):
-                    \"\"\"Cryptographic  authentication.\"\"\"
-
-                    #: key ID
-                    key_id: int
-                    #: authentication data length
-                    len: int
-                    #: cryptographic sequence number
-                    seq: int
+            Parsed packet data.
 
         """
         _resv = self._read_fileng(2)
@@ -229,10 +206,9 @@ class OSPF(Link):
         _alen = self._read_unpack(1)
         _seqn = self._read_unpack(4)
 
-        auth = dict(
+        auth = DataType_CrytographicAuthentication(
             key_id=_keys,
             len=_alen,
             seq=_seqn,
         )
-
         return auth
