@@ -20,9 +20,19 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/IEEE_802.1Q
 
 """
-from pcapkit.const.vlan.priority_level import PriorityLevel as _PCP
+from typing import TYPE_CHECKING
+
+from pcapkit.const.vlan.priority_level import PriorityLevel as RegType_PriorityLevel
+from pcapkit.protocols.data.link.vlan import TCI as DataType_TCI
+from pcapkit.protocols.data.link.vlan import VLAN as DataType_VLAN
 from pcapkit.protocols.link.link import Link
-from pcapkit.utilities.exceptions import UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import Any, NoReturn, Optional
+
+    from typing_extensions import Literal
+
+    from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
 
 __all__ = ['VLAN']
 
@@ -30,57 +40,48 @@ __all__ = ['VLAN']
 class VLAN(Link):
     """This class implements 802.1Q Customer VLAN Tag Type."""
 
+    #: Parsed packet data.
+    _info: 'DataType_VLAN'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['802.1Q Customer VLAN Tag Type']
-        """
+    def name(self) -> 'Literal["802.1Q Customer VLAN Tag Type"]':
+        """Name of current protocol."""
         return '802.1Q Customer VLAN Tag Type'
 
     @property
-    def alias(self):
-        """Acronym of corresponding protocol.
-
-        :rtype: Literal['802.1Q']
-        """
+    def alias(self) -> 'Literal["802.1Q"]':
+        """Acronym of corresponding protocol."""
         return '802.1Q'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: Literal[4]
-        """
+    def length(self) -> 'Literal[4]':
+        """Header length of current protocol."""
         return 4
 
     @property
-    def protocol(self):
-        """Name of next layer protocol.
-
-        :rtype: pcapkit.const.reg.ethertype.EtherType
-        """
-        return self._info.type  # pylint: disable=E1101
+    def protocol(self) -> 'RegType_EtherType':
+        """Name of next layer protocol."""
+        return self._info.type
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_VLAN':  # pylint: disable=unused-argument
         """Read 802.1Q Customer VLAN Tag Type.
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_VLAN: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -89,28 +90,24 @@ class VLAN(Link):
         _tcif = self._read_binary(2)
         _type = self._read_protos(2)
 
-        vlan = dict(
-            tci=dict(
-                pcp=_PCP.get(int(_tcif[:3], base=2)),
+        vlan = DataType_VLAN(
+            tci=DataType_TCI(
+                pcp=RegType_PriorityLevel.get(int(_tcif[:3], base=2)),
                 dei=bool(_tcif[3]),
                 vid=int(_tcif[4:], base=2),
             ),
             type=_type,
         )
+        return self._decode_next_layer(vlan, _type, length - self.length)  # type: ignore[return-value]
 
-        length -= 4
-        vlan['packet'] = self._read_packet(header=4, payload=length)
-
-        return self._decode_next_layer(vlan, _type, length)
-
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
@@ -119,19 +116,6 @@ class VLAN(Link):
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[4]
-        """
+    def __length_hint__(self) -> 'Literal[4]':
+        """Return an estimated length for the object."""
         return 4
-
-    @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
-        """Numeral registry index of the protocol.
-
-        Raises:
-            UnsupportedCall: This protocol has no registry entry.
-
-        """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
