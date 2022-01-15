@@ -24,8 +24,13 @@ Octets      Bits        Name                    Description
 .. [*] http://en.wikipedia.org/wiki/Address_Resolution_Protocol
 
 """
-from pcapkit.const.reg.ethertype import EtherType
+from typing import TYPE_CHECKING
+
+from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
 from pcapkit.protocols.link.arp import ARP
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 __all__ = ['RARP']
 
@@ -33,26 +38,13 @@ __all__ = ['RARP']
 class RARP(ARP):  # pylint: disable=abstract-method
     """This class implements Reverse Address Resolution Protocol."""
 
-    #: Acronym of corresponding protocol.
-    _acnm = 'RARP'
-    #: Name of corresponding protocol.
-    _name = 'Reverse Address Resolution Protocol'
-
     ##########################################################################
     # Methods.
     ##########################################################################
 
     @classmethod
-    def id(cls):  # pylint: disable=invalid-index-returned
-        """Index ID of the protocol.
-
-        Returns:
-            Tuple[Literal['RARP'], Literal['DRARP']]: Index ID of the protocol.
-
-        See Also:
-            :meth:`pcapkit.protocols.protocol.Protocol.__getitem__`
-
-        """
+    def id(cls) -> 'tuple[Literal["RARP"], Literal["DRARP"]]':  # type: ignore[override]
+        """Index ID of the protocol."""
         return ('RARP', 'DRARP')
 
     ##########################################################################
@@ -60,14 +52,13 @@ class RARP(ARP):  # pylint: disable=abstract-method
     ##########################################################################
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_EtherType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.ethertype.EtherType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml
 
         """
-        return EtherType(0x8035)
+        return RegType_EtherType.Reverse_Address_Resolution_Protocol  # type: ignore[return-value]
