@@ -20,7 +20,7 @@ from pcapkit.protocols.link.rarp import RARP
 from pcapkit.protocols.link.vlan import VLAN
 
 # Link-Layer Header Type Values
-from pcapkit.protocols.link.link import LINKTYPE
+from pcapkit.const.reg.linktype import LinkType as LINKTYPE
 
 InARP = ARP
 DRARP = RARP

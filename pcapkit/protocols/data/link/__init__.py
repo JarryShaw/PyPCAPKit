@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
 """data models for link layer protocols"""
 
-from pcapkit.protocols.data.link.arp import ARP, Address as ARP_Address, Type as ARP_Type
+# Address Resolution Protocol
+from pcapkit.protocols.data.link.arp import ARP
+from pcapkit.protocols.data.link.arp import Address as ARP_Address
+from pcapkit.protocols.data.link.arp import Type as ARP_Type
+
+# Ethernet Protocol
 from pcapkit.protocols.data.link.ethernet import Ethernet
-from pcapkit.protocols.data.link.ospf import OSPF, CrytographicAuthentication as OSPF_CrytographicAuthentication
+
+# Open Shortest Path First
+from pcapkit.protocols.data.link.ospf import OSPF
+from pcapkit.protocols.data.link.ospf import \
+    CrytographicAuthentication as OSPF_CrytographicAuthentication
 
 __all__ = [
     # Address Resolution Protocol
