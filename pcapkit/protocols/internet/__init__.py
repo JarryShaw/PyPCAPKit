@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import,fixme
 """internet layer protocols
 
 `pcapkit.protocols.internet` is collection of all protocols
@@ -26,7 +27,7 @@ from pcapkit.protocols.internet.ipv6_route import IPv6_Route
 from pcapkit.protocols.internet.mh import MH
 
 # Ethertype IEEE 802 Numbers
-from pcapkit.protocols.internet.internet import ETHERTYPE
+from pcapkit.const.reg.ethertype import EtherType as ETHERTYPE
 
 # Deprecated / Base Classes
 from pcapkit.protocols.internet.ip import IP
