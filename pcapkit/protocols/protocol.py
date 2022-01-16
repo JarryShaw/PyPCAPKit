@@ -802,7 +802,7 @@ class Protocol(metaclass=abc.ABCMeta):
             length: valid (*non-padding*) length
 
         Returns:
-            Current protocol with next layer extracted
+            Current protocol with next layer extracted.
 
         """
         next_ = self._import_next_layer(proto, length)
