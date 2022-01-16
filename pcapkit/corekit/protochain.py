@@ -5,9 +5,9 @@
 collection class :class:`~pcapkit.corekit.protochain.ProtoChain`.
 
 """
-import collections
 import collections.abc
-from typing import TYPE_CHECKING, cast, overload
+import copy
+from typing import TYPE_CHECKING, overload
 
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.exceptions import IndexNotFound
@@ -121,10 +121,12 @@ class ProtoChain(collections.abc.Sequence):
         """
         from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
         if isinstance(proto, Protocol):
+            if alias is None:
+                alias = proto.alias
             proto = type(proto)
 
         if alias is None:
-            alias = cast('str', proto.alias)
+            alias = proto.__name__
 
         temp_data = [(alias, proto)]
         if basis is not None:
@@ -201,3 +203,17 @@ class ProtoChain(collections.abc.Sequence):
 
         """
         return len(self.__data__)
+
+    def __add__(self, other: 'ProtoChain') -> 'ProtoChain':
+        """Merge protocol chain by appending protocols from ``other``.
+
+        Args:
+            other: Protocol chain to be merged.
+
+        Returns:
+            Merged protocol chain.
+
+        """
+        new = copy.copy(self)
+        new.__data__ += other.__data__
+        return new
