@@ -33,6 +33,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
+    from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['AH']
@@ -68,7 +69,31 @@ class AH(IPsec):
         """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
-        return self._next
+        return super().payload
+
+    @property
+    def protocol(self) -> 'Optional[str] | NoReturn':
+        """Name of next layer protocol (if any).
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        return super().protocol
+
+    @property
+    def protochain(self) -> 'ProtoChain | NoReturn':
+        """Protocol chain of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protochain'")
+        return super().protochain
 
     ##########################################################################
     # Methods.
@@ -141,7 +166,6 @@ class AH(IPsec):
                 raise ProtocolError(f'{self.alias}: invalid format')
 
         if extension:
-            self._protos = None  # type: ignore[assignment]
             return ah
         return self._decode_next_layer(ah, _next, length - ah.length)  # type: ignore[return-value]
 
