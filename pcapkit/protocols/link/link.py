@@ -54,7 +54,7 @@ class Link(Protocol):  # pylint: disable=abstract-method
     ##########################################################################
 
     #: Layer of protocol.
-    __layer__: 'Literal["Link"]' = 'Link'
+    __layer__ = 'Link'  # type: Literal['Link']
 
     #: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
