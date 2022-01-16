@@ -33,6 +33,9 @@ __all__ = [
     # 802.1Q Customer VLAN Tag Type
     'VLAN', 'VLAN_TCI',
 
+    # Authentication Header
+    'AH',
+
     # No Payload
     'NoPayload',
 

@@ -21,9 +21,19 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/IPsec
 
 """
-from pcapkit.const.reg.transtype import TransType
+from typing import TYPE_CHECKING, overload
+
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.protocols.data.internet.ah import AH as DataType_AH
 from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall, VersionError
+
+if TYPE_CHECKING:
+    from typing import Any, BinaryIO, NoReturn, Optional
+
+    from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['AH']
 
@@ -31,52 +41,41 @@ __all__ = ['AH']
 class AH(IPsec):
     """This class implements Authentication Header."""
 
+    #: Parsed packet data.
+    _info: 'DataType_AH'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of corresponding protocol.
-
-        :rtype: Literal['Authentication Header']
-        """
+    def name(self) -> 'Literal["Authentication Header"]':
+        """Name of corresponding protocol."""
         return 'Authentication Header'
 
     @property
-    def length(self):
-        """Info dict of current instance.
-
-        :rtype: int
-        """
-        return self._info.length  # pylint: disable=E1101
+    def length(self) -> 'int':
+        """Info dict of current instance."""
+        return self._info.length
 
     @property
-    def payload(self):
+    def payload(self) -> 'Protocol | NoReturn':
         """Payload of current instance.
 
         Raises:
             UnsupportedCall: if the protocol is used as an IPv6 extension header
 
-        :rtype: pcapkit.protocols.protocol.Protocol
         """
         if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
         return self._next
 
-    @property
-    def protocol(self):
-        """Name of next layer protocol.
-
-        :rtype: pcapkit.const.reg.transtype.TransType
-        """
-        return self._info.next  # pylint: disable=E1101
-
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, *, version=4, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
+    def read(self, length: 'Optional[int]' = None, *, version: 'Literal[4, 6]',  # type: ignore[override] # pylint: disable=arguments-differ
+             extension: bool = False, **kwargs: 'Any') -> 'DataType_AH':  # pylint: disable=unused-argument
         """Read Authentication Header.
 
         Structure of AH header [:rfc:`4302`]::
@@ -96,15 +95,15 @@ class AH(IPsec):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
-            version (Literal[4, 6]): IP protocol version.
-            extension (bool): If the protocol is used as an IPv6 extension header.
+            version: IP protocol version.
+            extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_AH: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -121,7 +120,7 @@ class AH(IPsec):
         _vlen = _tlen - 12
         _chkv = self._read_fileng(_vlen)
 
-        ah = dict(
+        ah = DataType_AH(
             next=_next,
             length=_tlen,
             spi=_scpi,
@@ -138,53 +137,49 @@ class AH(IPsec):
 
         if _plen:   # explicit padding in need
             padding = self._read_binary(_plen)
-            if any((int(bit, base=2) for bit in padding)):
+            if int(padding, base=2) != 0:  # check padding (all zero)
                 raise ProtocolError(f'{self.alias}: invalid format')
 
-        length -= ah['length']
-        ah['packet'] = self._read_packet(header=ah['length'], payload=length)
-
         if extension:
-            self._protos = None
+            self._protos = None  # type: ignore[assignment]
             return ah
-        return self._decode_next_layer(ah, _next, length)
+        return self._decode_next_layer(ah, _next, length - ah.length)  # type: ignore[return-value]
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
-
-    @classmethod
-    def id(cls):
-        """Index ID of the protocol.
-
-        Returns:
-           Literal['AH']: Index ID of the protocol.
-
-        """
-        return cls.__name__
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file, length=None, *, version=4, extension=False, **kwargs):  # pylint: disable=arguments-differ
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      version: 'Optional[Literal[4, 6]]' = ..., extension: 'bool' = ...,
+                      **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      version: 'Optional[Literal[4, 6]]' = None, extension: 'bool' = False,
+                      **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
-            version (Literal[4, 6]): IP protocol version.
-            extension (bool): If the protocol is used as an IPv6 extension header.
+            version: IP protocol version.
+            extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
@@ -195,24 +190,20 @@ class AH(IPsec):
         self._extf = extension
 
         # call super __post_init__
-        super().__post_init__(file, length, version=version, extension=extension, **kwargs)
+        super().__post_init__(file, length, version=version, extension=extension, **kwargs)  # type: ignore[arg-type]
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[20]
-        """
+    def __length_hint__(self) -> 'Literal[20]':
+        """Return an estimated length for the object."""
         return 20
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TransType(51)
+        return RegType_TransType.AH  # type: ignore[return-value]
