@@ -58,6 +58,11 @@ class VLAN(Link):
         return '802.1Q'
 
     @property
+    def info_name(self) -> 'Literal["c_tag"]':
+        """Key name of the :attr:`info` dict."""
+        return 'c_tag'
+
+    @property
     def length(self) -> 'Literal[4]':
         """Header length of current protocol."""
         return 4
