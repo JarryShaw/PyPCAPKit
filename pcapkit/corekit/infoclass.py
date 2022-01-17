@@ -75,10 +75,23 @@ class Info(collections.abc.Mapping):
             args_ = []  # type: list[str]
             dict_ = []  # type: list[str]
 
-            for key in cls.__annotations__:
-                args_.append(key)
-                dict_.append(f'{key}={key}')
-            print(args_, dict_)
+            for cls_ in cls.mro():
+                # NOTE: We skip the ``Info`` class itself, to avoid superclass
+                # type annotations being considered.
+                if cls_ is Info:
+                    break
+
+                # NOTE: We iterate in reversed order to ensure that the type
+                # annotations of the superclasses are considered first.
+                for key in reversed(cls_.__annotations__):
+                    args_.append(key)
+                    dict_.append(f'{key}={key}')
+
+            # NOTE: We reverse the two lists such that the order of the
+            # arguments is the same as the order of the type annotations, i.e.,
+            # from the most base class to the most derived class.
+            args_.reverse()
+            dict_.reverse()
 
             # NOTE: The following code is to make the ``__init__`` method work.
             # It is inspired from the :func:`dataclasses._create_fn` function.
