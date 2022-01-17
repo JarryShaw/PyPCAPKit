@@ -68,7 +68,7 @@
     <span class="s1">&#39;EndianError&#39;</span><span class="p">,</span> <span class="s1">&#39;KeyExists&#39;</span><span class="p">,</span>                                     <span class="c1"># ValueError</span>
     <span class="s1">&#39;ProtocolNotImplemented&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorNotImplemented&#39;</span><span class="p">,</span>               <span class="c1"># NotImplementedError</span>
     <span class="s1">&#39;StructError&#39;</span><span class="p">,</span>                                                  <span class="c1"># struct.error</span>
-    <span class="s1">&#39;FragmentError&#39;</span><span class="p">,</span> <span class="s1">&#39;PacketError&#39;</span><span class="p">,</span>                                 <span class="c1"># KeyError</span>
+    <span class="s1">&#39;MissingKeyError&#39;</span><span class="p">,</span> <span class="s1">&#39;FragmentError&#39;</span><span class="p">,</span> <span class="s1">&#39;PacketError&#39;</span><span class="p">,</span>              <span class="c1"># KeyError</span>
     <span class="s1">&#39;ModuleNotFound&#39;</span><span class="p">,</span>                                               <span class="c1"># ModuleNotFoundError</span>
 <span class="p">]</span>
 
@@ -325,6 +325,10 @@
 <span class="c1">##############################################################################</span>
 <span class="c1"># KeyError session.</span>
 <span class="c1">##############################################################################</span>
+
+
+<div class="viewcode-block" id="MissingKeyError"><a class="viewcode-back" href="../../../utilities/exceptions.html#pcapkit.utilities.exceptions.MissingKeyError">[docs]</a><span class="k">class</span> <span class="nc">MissingKeyError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Key not found.&quot;&quot;&quot;</span></div>
 
 
 <div class="viewcode-block" id="FragmentError"><a class="viewcode-back" href="../../../utilities/exceptions.html#pcapkit.utilities.exceptions.FragmentError">[docs]</a><span class="k">class</span> <span class="nc">FragmentError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>

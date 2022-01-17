@@ -108,10 +108,23 @@
             <span class="n">args_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
             <span class="n">dict_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
 
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">:</span>
-                <span class="n">args_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-                <span class="n">dict_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">args_</span><span class="p">,</span> <span class="n">dict_</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">cls_</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">mro</span><span class="p">():</span>
+                <span class="c1"># NOTE: We skip the ``Info`` class itself, to avoid superclass</span>
+                <span class="c1"># type annotations being considered.</span>
+                <span class="k">if</span> <span class="n">cls_</span> <span class="ow">is</span> <span class="n">Info</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="c1"># NOTE: We iterate in reversed order to ensure that the type</span>
+                <span class="c1"># annotations of the superclasses are considered first.</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">):</span>
+                    <span class="n">args_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">dict_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="c1"># NOTE: We reverse the two lists such that the order of the</span>
+            <span class="c1"># arguments is the same as the order of the type annotations, i.e.,</span>
+            <span class="c1"># from the most base class to the most derived class.</span>
+            <span class="n">args_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+            <span class="n">dict_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
 
             <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
             <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
