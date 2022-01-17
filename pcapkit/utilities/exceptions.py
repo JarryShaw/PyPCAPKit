@@ -35,7 +35,7 @@ __all__ = [
     'EndianError', 'KeyExists',                                     # ValueError
     'ProtocolNotImplemented', 'VendorNotImplemented',               # NotImplementedError
     'StructError',                                                  # struct.error
-    'FragmentError', 'PacketError',                                 # KeyError
+    'MissingKeyError', 'FragmentError', 'PacketError',              # KeyError
     'ModuleNotFound',                                               # ModuleNotFoundError
 ]
 
@@ -292,6 +292,10 @@ class StructError(BaseError, struct.error):
 ##############################################################################
 # KeyError session.
 ##############################################################################
+
+
+class MissingKeyError(BaseError, KeyError):
+    """Key not found."""
 
 
 class FragmentError(BaseError, KeyError):

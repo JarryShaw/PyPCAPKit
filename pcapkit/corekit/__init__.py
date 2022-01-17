@@ -10,7 +10,9 @@ and protocol collection class :class:`~pcapkit.corekit.protochain.ProtoChain`.
 
 """
 from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.corekit.version import VersionInfo
 
-__all__ = ['Info', 'ProtoChain', 'VersionInfo']
+__all__ = ['Info', 'ProtoChain', 'VersionInfo',
+           'MultiDict', 'OrderedMultiDict']
