@@ -2,12 +2,13 @@
 """multi-mapping dictionary"""
 
 import copy
-from typing import TYPE_CHECKING, TypeVar, Generic, cast, overload
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
 from pcapkit.utilities.exceptions import MissingKeyError, UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, Iterable, Iterator, Mapping, SupportsIndex, NoReturn
+    from typing import Any, Iterable, Iterator, Mapping, NoReturn, Optional, SupportsIndex
+
     from typing_extensions import Literal
 
 __all__ = ['MultiDict', 'OrderedMultiDict']
