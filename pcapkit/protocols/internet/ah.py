@@ -99,7 +99,7 @@ class AH(IPsec):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, *, version: 'Literal[4, 6]',  # type: ignore[override] # pylint: disable=arguments-differ
+    def read(self, length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,  # pylint: disable=arguments-differ
              extension: bool = False, **kwargs: 'Any') -> 'DataType_AH':  # pylint: disable=unused-argument
         """Read Authentication Header.
 
@@ -187,13 +187,13 @@ class AH(IPsec):
 
     @overload
     def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
-                      version: 'Optional[Literal[4, 6]]' = ..., extension: 'bool' = ...,
+                      version: 'Literal[4, 6]' = ..., extension: 'bool' = ...,
                       **kwargs: 'Any') -> 'None': ...
     @overload
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
     def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
-                      version: 'Optional[Literal[4, 6]]' = None, extension: 'bool' = False,
+                      version: 'Literal[4, 6]' = 4, extension: 'bool' = False,
                       **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 

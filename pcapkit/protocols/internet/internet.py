@@ -54,6 +54,8 @@ class Internet(Protocol):  # pylint: disable=abstract-method
          - :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
        * - 51
          - :class:`~pcapkit.protocols.internet.ah.AH`
+       * - 59
+         - :class:`~pcapkit.protocols.misc.raw.Raw`
        * - 60
          - :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
        * - 111
@@ -86,7 +88,7 @@ class Internet(Protocol):  # pylint: disable=abstract-method
             RegType_TransType.IPv6_Route:      ('pcapkit.protocols.internet.ipv6_route', 'IPv6_Route'),
             RegType_TransType.IPv6_Frag:       ('pcapkit.protocols.internet.ipv6_frag',  'IPv6_Frag'),
             RegType_TransType.AH:              ('pcapkit.protocols.internet.ah',         'AH'),
-            RegType_TransType.IPv6_NoNxt:      ('pcapkit.protocols.misc.null',           'NoPayload'),
+            RegType_TransType.IPv6_NoNxt:      ('pcapkit.protocols.misc.raw',            'Raw'),
             RegType_TransType.IPv6_Opts:       ('pcapkit.protocols.internet.ipv6_opts',  'IPv6_Opts'),
             RegType_TransType.IPX_in_IP:       ('pcapkit.protocols.internet.ipx',        'IPX'),
             RegType_TransType.Mobility_Header: ('pcapkit.protocols.internet.mh',         'MH'),
@@ -143,8 +145,7 @@ class Internet(Protocol):  # pylint: disable=abstract-method
         return _prot
 
     def _decode_next_layer(self, dict_: 'Info', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
-                           length: 'Optional[int]' = None, *,
-                           version: 'Optional[Literal[4, 6]]' = None,
+                           length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,
                            ipv6_exthdr: 'Optional[ProtoChain]' = None) -> 'Info':
         """Decode next layer extractor.
 
@@ -178,7 +179,7 @@ class Internet(Protocol):  # pylint: disable=abstract-method
 
     @beholder
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
-                           version: 'Optional[Literal[4, 6]]' = None, extension: 'bool' = False) -> 'Protocol':
+                           version: 'Literal[4, 6]' = 4, extension: 'bool' = False) -> 'Protocol':
         """Import next layer extractor.
 
         Arguments:
