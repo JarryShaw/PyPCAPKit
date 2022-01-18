@@ -27,30 +27,122 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/Host_Identity_Protocol
 
 """
-import collections
+import datetime
 import ipaddress
+import warnings
+from typing import TYPE_CHECKING, overload
 
-from pcapkit.const.hip.certificate import Certificate as _CERT_TYPE
-from pcapkit.const.hip.cipher import Cipher as _CIPHER_ID
-from pcapkit.const.hip.di import DITypes as _DI_TYPE
-from pcapkit.const.hip.ecdsa_curve import ECDSACurve as _ECDSA_CURVE
-from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as _ECDSA_LOW_CURVE
-from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as _ESP_SUITE_ID
-from pcapkit.const.hip.group import Group as _GROUP_ID
-from pcapkit.const.hip.hi_algorithm import HIAlgorithm as _HI_ALGORITHM
-from pcapkit.const.hip.hit_suite import HITSuite as _HIT_SUITE_ID
-from pcapkit.const.hip.nat_traversal import NATTraversal as _MODE_ID
-from pcapkit.const.hip.notify_message import NotifyMessage as _NOTIFICATION_TYPE
-from pcapkit.const.hip.packet import Packet as _HIP_TYPES
-from pcapkit.const.hip.parameter import Parameter as _HIP_PARA
-from pcapkit.const.hip.registration import Registration as _REG_TYPE
-from pcapkit.const.hip.registration_failure import RegistrationFailure as _REG_FAILURE_TYPE
-from pcapkit.const.hip.suite import Suite as _SUITE_ID
-from pcapkit.const.hip.transport import Transport as _TP_MODE_ID
-from pcapkit.const.reg.transtype import TransType as TP_PROTO
-from pcapkit.corekit.infoclass import Info
+from pcapkit.const.hip.certificate import Certificate as RegType_Certificate
+from pcapkit.const.hip.cipher import Cipher as RegType_Cipher
+from pcapkit.const.hip.di import DITypes as RegType_DITypes
+from pcapkit.const.hip.ecdsa_curve import ECDSACurve as RegType_ECDSACurve
+from pcapkit.const.hip.ecdsa_low_curve import ECDSALowCurve as RegType_ECDSALowCurve
+from pcapkit.const.hip.esp_transform_suite import ESPTransformSuite as RegType_ESPTransformSuite
+from pcapkit.const.hip.group import Group as RegType_Group
+from pcapkit.const.hip.hi_algorithm import HIAlgorithm as RegType_HIAlgorithm
+from pcapkit.const.hip.hit_suite import HITSuite as RegType_HITSuite
+from pcapkit.const.hip.nat_traversal import NATTraversal as RegType_NATTraversal
+from pcapkit.const.hip.notify_message import NotifyMessage as RegType_NotifyMessage
+from pcapkit.const.hip.packet import Packet as RegType_Packet
+from pcapkit.const.hip.parameter import Parameter as RegType_Parameter
+from pcapkit.const.hip.registration import Registration as RegType_Registration
+from pcapkit.const.hip.registration_failure import \
+    RegistrationFailure as RegType_RegistrationFailure
+from pcapkit.const.hip.suite import Suite as RegType_Suite
+from pcapkit.const.hip.transport import Transport as RegType_Transport
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.protocols.data.internet.hip import HIP as DataType_HIP
+from pcapkit.protocols.data.internet.hip import AckDataParameter as DataType_AckDataParameter
+from pcapkit.protocols.data.internet.hip import ACKParameter as DataType_ACKParameter
+from pcapkit.protocols.data.internet.hip import CertParameter as DataType_CertParameter
+from pcapkit.protocols.data.internet.hip import Control as DataType_Control
+from pcapkit.protocols.data.internet.hip import \
+    DeffieHellmanParameter as DataType_DeffieHellmanParameter
+from pcapkit.protocols.data.internet.hip import \
+    DHGroupListParameter as DataType_DHGroupListParameter
+from pcapkit.protocols.data.internet.hip import \
+    EchoRequestSignedParameter as DataType_EchoRequestSignedParameter
+from pcapkit.protocols.data.internet.hip import \
+    EchoRequestUnsignedParameter as DataType_EchoRequestUnsignedParameter
+from pcapkit.protocols.data.internet.hip import \
+    EchoResponseSignedParameter as DataType_EchoResponseSignedParameter
+from pcapkit.protocols.data.internet.hip import \
+    EchoResponseUnsignedParameter as DataType_EchoResponseUnsignedParameter
+from pcapkit.protocols.data.internet.hip import EncryptedParameter as DataType_EncryptedParameter
+from pcapkit.protocols.data.internet.hip import ESPInfoParameter as DataType_ESPInfoParameter
+from pcapkit.protocols.data.internet.hip import \
+    ESPTransformParameter as DataType_ESPTransformParameter
+from pcapkit.protocols.data.internet.hip import Flags as DataType_Flags
+from pcapkit.protocols.data.internet.hip import FromParameter as DataType_FromParameter
+from pcapkit.protocols.data.internet.hip import HIPCipherParameter as DataType_HIPCipherParameter
+from pcapkit.protocols.data.internet.hip import HIPMAC2Parameter as DataType_HIPMAC2Parameter
+from pcapkit.protocols.data.internet.hip import HIPMACParameter as DataType_HIPMACParameter
+from pcapkit.protocols.data.internet.hip import \
+    HIPSignature2Parameter as DataType_HIPSignature2Parameter
+from pcapkit.protocols.data.internet.hip import \
+    HIPSignatureParameter as DataType_HIPSignatureParameter
+from pcapkit.protocols.data.internet.hip import \
+    HIPTransformParameter as DataType_HIPTransformParameter
+from pcapkit.protocols.data.internet.hip import \
+    HIPTransportModeParameter as DataType_HIPTransportModeParameter
+from pcapkit.protocols.data.internet.hip import HITSuiteListParameter as DataType_HITSuiteParameter
+from pcapkit.protocols.data.internet.hip import HostIdentity as DataType_HostIdentity
+from pcapkit.protocols.data.internet.hip import HostIDParameter as DataType_HostIDParameter
+from pcapkit.protocols.data.internet.hip import Lifetime as DataType_Lifetime
+from pcapkit.protocols.data.internet.hip import Locator as DataType_Locator
+from pcapkit.protocols.data.internet.hip import LocatorData as DataType_LocatorData
+from pcapkit.protocols.data.internet.hip import LocatorSetParameter as DataType_LocatorSetParameter
+from pcapkit.protocols.data.internet.hip import \
+    NATTraversalModeParameter as DataType_NATTraversalModeParameter
+from pcapkit.protocols.data.internet.hip import \
+    NotificationParameter as DataType_NotificationParameter
+from pcapkit.protocols.data.internet.hip import OverlayIDParameter as DataType_OverlayIDParameter
+from pcapkit.protocols.data.internet.hip import OverlayTTLParameter as DataType_OverlayTTLParameter
+from pcapkit.protocols.data.internet.hip import PayloadMICParameter as DataType_PayloadMICParameter
+from pcapkit.protocols.data.internet.hip import PuzzleParameter as DataType_PuzzleParameter
+from pcapkit.protocols.data.internet.hip import R1CounterParameter as DataType_R1CounterParameter
+from pcapkit.protocols.data.internet.hip import RegFailedParameter as DataType_RegFailedParameter
+from pcapkit.protocols.data.internet.hip import RegFromParameter as DataType_RegFromParameter
+from pcapkit.protocols.data.internet.hip import RegInfoParameter as DataType_RegInfoParameter
+from pcapkit.protocols.data.internet.hip import RegRequestParameter as DataType_RegRequestParameter
+from pcapkit.protocols.data.internet.hip import \
+    RegResponseParameter as DataType_RegResponseParameter
+from pcapkit.protocols.data.internet.hip import RelayFromParameter as DataType_RelayFromParameter
+from pcapkit.protocols.data.internet.hip import RelayHMACParameter as DataType_RelayHMACParameter
+from pcapkit.protocols.data.internet.hip import RelayToParameter as DataType_RelayToParameter
+from pcapkit.protocols.data.internet.hip import RouteDstParameter as DataType_RouteDstParameter
+from pcapkit.protocols.data.internet.hip import RouteViaParameter as DataType_RouteViaParameter
+from pcapkit.protocols.data.internet.hip import RVSHMACParameter as DataType_RVSHMACParameter
+from pcapkit.protocols.data.internet.hip import SeqDataParameter as DataType_SeqDataParameter
+from pcapkit.protocols.data.internet.hip import SEQParameter as DataType_SEQParameter
+from pcapkit.protocols.data.internet.hip import SolutionParameter as DataType_SolutionParameter
+from pcapkit.protocols.data.internet.hip import \
+    TransactionIDParameter as DataType_TransactionIDParameter
+from pcapkit.protocols.data.internet.hip import \
+    TransactionPacingParameter as DataType_TransactionPacingParameter
+from pcapkit.protocols.data.internet.hip import \
+    TransportFormatListParameter as DataType_TransportFormatListParameter
+from pcapkit.protocols.data.internet.hip import UnassignedParameter as DataType_UnassignedParameter
+from pcapkit.protocols.data.internet.hip import ViaRVSParameter as DataType_ViaRVSParameter
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.warnings import ProtocolWarning
+
+if TYPE_CHECKING:
+    from ipaddress import IPv4Address, IPv6Address
+    from typing import Any, BinaryIO, Callable, NoReturn, Optional
+
+    from mypy_extensions import NamedArg
+    from typing_extensions import Literal
+
+    from pcapkit.corekit.protochain import ProtoChain
+    from pcapkit.protocols.data.internet.hip import Parameter as DataType_Parameter
+    from pcapkit.protocols.protocol import Protocol
+
+    Parameter = OrderedMultiDict[RegType_Parameter, DataType_Parameter]
+    ParameterParser = Callable[[int, bool, int, NamedArg(RegType_Parameter, 'desc'), NamedArg(int, 'length'), NamedArg(int, 'version'),  # pylint: disable=line-too-long
+                                NamedArg(Parameter, 'options')], DataType_Parameter]  # pylint: disable=line-too-long
 
 __all__ = ['HIP']
 
@@ -58,38 +150,30 @@ __all__ = ['HIP']
 class HIP(Internet):
     """This class implements Host Identity Protocol."""
 
+    #: Parsed packet data.
+    _info: 'DataType_HIP'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['Host Identity Protocol', 'Host Identity Protocol Version 2']
-        """
-        if self._info.version == 2:  # pylint: disable=E1101
-            return 'Host Identity Protocol Version 2'
+    def name(self) -> 'Literal["Host Identity Protocol"]':
+        """Name of current protocol."""
         return 'Host Identity Protocol'
 
     @property
-    def alias(self):
-        """Acronym of corresponding protocol.
-
-        :rtype: str
-        """
-        return f'HIPv{self._info.version}'  # pylint: disable=E1101
+    def alias(self) -> 'str':
+        """Acronym of corresponding protocol."""
+        return f'HIPv{self._info.version}'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: int
-        """
-        return self._info.length  # pylint: disable=E1101
+    def length(self) -> 'int':
+        """Header length of current protocol."""
+        return self._info.length
 
     @property
-    def payload(self):
+    def payload(self) -> 'Protocol | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -102,18 +186,34 @@ class HIP(Internet):
         return self._next
 
     @property
-    def protocol(self):
-        """Name of next layer protocol.
+    def protocol(self) -> 'Optional[str] | NoReturn':
+        """Name of next layer protocol (if any).
 
-        :rtype: pcapkit.const.reg.transtype.TransType
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
         """
-        return self._info.next  # pylint: disable=E1101
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        return super().protocol
+
+    @property
+    def protochain(self) -> 'ProtoChain | NoReturn':
+        """Protocol chain of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protochain'")
+        return super().protochain
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
+    def read(self, length: 'Optional[int]' = None, *, extension: bool = False, **kwargs: 'Any') -> 'DataType_HIP':  # pylint: disable=arguments-differ,unused-argument
         """Read Host Identity Protocol.
 
         Structure of HIP header [:rfc:`5201`][:rfc:`7401`]:
@@ -144,14 +244,14 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
-            extension (bool): If the packet is used as an IPv6 extension header.
+            extension: If the packet is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_HIP: Parsed packet data.
+            Parsed packet data.
 
         Raises:
             ProtocolError: If the packet is malformed.
@@ -173,13 +273,13 @@ class HIP(Internet):
         _shit = self._read_unpack(16)
         _rhit = self._read_unpack(16)
 
-        hip = dict(
+        hip = DataType_HIP(
             next=_next,
             length=(_hlen + 1) * 8,
-            type=_HIP_TYPES.get(int(_type[1:], base=2)),
+            type=RegType_Packet.get(int(_type[1:], base=2)),
             version=int(_vers[:4], base=2),
             chksum=_csum,
-            control=dict(
+            control=DataType_Control(
                 anonymous=bool(int(_ctrl[15], base=2)),
             ),
             shit=_shit,
@@ -188,26 +288,22 @@ class HIP(Internet):
 
         _prml = _hlen - 38
         if _prml:
-            parameters = self._read_hip_para(_prml, version=hip['version'])
-            hip['parameters'] = parameters[0]   # tuple of parameter acronyms
-            hip.update(parameters[1])           # merge parameters info to buffer
-
-        length -= hip['length']
-        hip['packet'] = self._read_packet(header=hip['length'], payload=length)
+            hip.__update__([
+                ('parameters', self._read_hip_param(_prml, version=hip.version)),
+            ])
 
         if extension:
-            self._protos = None
             return hip
-        return self._decode_next_layer(hip, _next, length)
+        return self._decode_next_layer(hip, _next, length - hip.length)  # type: ignore[return-value]
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
@@ -216,15 +312,23 @@ class HIP(Internet):
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
+
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      extension: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
-            extension (bool): If the protocol is used as an IPv6 extension header.
+            extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
@@ -235,52 +339,46 @@ class HIP(Internet):
         self._extf = extension
 
         # call super __post_init__
-        super().__post_init__(file, length, extension=extension, **kwargs)
+        super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[40]
-        """
+    def __length_hint__(self) -> 'Literal[40]':
+        """Return an estimated length for the object."""
         return 40
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TP_PROTO(139)
+        return RegType_TransType.HIP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_hip_para(self, length, *, version):
+    def _read_hip_param(self, length: 'int', *, version: 'int') -> 'Parameter':  # pylint: disable=line-too-long
         """Read HIP parameters.
 
         Arguments:
-            length (int): length of parameters
+            length: length of parameters
 
         Keyword arguments:
-            version (Litreal[1, 2]): HIP version
+            version: HIP version
 
         Returns:
-            Tuple[Tuple[pcapkit.const.hip.parameter.Parameter], DataType_Parameter]:
-            extracted HIP parameters
+            Extracted HIP parameters.
 
         Raises:
             ProtocolError: if packet length threshold check failed
 
         """
-        counter = 0         # length of read parameters
-        optkind = list()    # parameter type list
-        options = dict()    # dict of parameter data
+        counter = 0                   # length of read parameters
+        options = OrderedMultiDict()  # type: Parameter
 
         while counter < length:
             # break when eol triggered
@@ -293,33 +391,29 @@ class HIP(Internet):
             cbit = bool(int(kind[15], base=2))
 
             # get parameter length
-            clen = self._read_unpack(2)
-            plen = 11 + clen - (clen + 3) % 8
+            clen = self._read_unpack(2)        # Length of the Contents, in bytes, excluding Type,Length, and Padding
+            plen = 11 + clen - (clen + 3) % 8  # Total Length = 11 + Length - (Length + 3) % 8
 
             # extract parameter
-            dscp = _HIP_PARA.get(code)
-            meth_name = f'_read_para_{dscp.name.split(" [")[0].lower()}'
-            meth = getattr(self, meth_name, '_read_para_unassigned')
-            data = meth(self, code, cbit, clen, desc=dscp, length=plen, version=version)
+            dscp = RegType_Parameter.get(code)
+            meth_name = f'_read_param_{dscp.name.lower()}'
+            meth = getattr(self, meth_name, self._read_param_unassigned)  # type: ParameterParser
+            data = meth(self, code, cbit, clen, desc=dscp, length=plen,  # type: ignore[arg-type]
+                        version=version, options=options)  # type: ignore[misc]
 
             # record parameter data
             counter += plen
-            if dscp in optkind:
-                if isinstance(options[dscp], tuple):
-                    options[dscp] += (Info(data),)
-                else:
-                    options[dscp] = (Info(options[dscp]), Info(data))
-            else:
-                optkind.append(dscp)
-                options[dscp] = data
+            options.add(dscp, data)
 
         # check threshold
         if counter != length:
             raise ProtocolError(f'HIPv{version}: invalid format')
 
-        return tuple(optkind), options
+        return options
 
-    def _read_para_unassigned(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_unassigned(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'DataType_UnassignedParameter':  # pylint: disable=unused-argument
         """Read HIP unassigned parameters.
 
         Structure of HIP unassigned parameters [:rfc:`5201`][:rfc:`7401`]:
@@ -338,20 +432,21 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Unassigned: Parsed parameter data.
+            Parsed parameter data.
 
         """
-        unassigned = dict(
+        unassigned = DataType_UnassignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -364,7 +459,9 @@ class HIP(Internet):
 
         return unassigned
 
-    def _read_para_esp_info(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_esp_info(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'DataType_ESPInfoParameter':  # pylint: disable=unused-argument
         """Read HIP ``ESP_INFO`` parameter.
 
         Structure of HIP ``ESP_INFO`` parameter [:rfc:`7402`]:
@@ -384,17 +481,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_ESP_Info: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``12``.
@@ -408,7 +506,7 @@ class HIP(Internet):
         _olds = self._read_unpack(2)
         _news = self._read_unpack(2)
 
-        esp_info = dict(
+        esp_info = DataType_ESPInfoParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -419,7 +517,9 @@ class HIP(Internet):
 
         return esp_info
 
-    def _read_para_r1_counter(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_r1_counter(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'DataType_R1CounterParameter':  # pylint: disable=unused-argument
         """Read HIP ``R1_COUNTER`` parameter.
 
         Structure of HIP ``R1_COUNTER`` parameter [:rfc:`5201`][:rfc:`7401`]:
@@ -438,17 +538,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_R1_Counter: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``12`` or the parameter is **NOT** used in HIPv1.
@@ -462,16 +563,18 @@ class HIP(Internet):
         _resv = self._read_fileng(4)
         _genc = self._read_unpack(8)
 
-        r1_counter = dict(
+        r1_counter = DataType_R1CounterParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            count=_genc,
+            counter=_genc,
         )
 
         return r1_counter
 
-    def _read_para_locator_set(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_locator_set(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                                desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'DataType_LocatorSetParameter':  # pylint: disable=unused-argument
         """Read HIP ``LOCATOR_SET`` parameter.
 
         Structure of HIP ``LOCATOR_SET`` parameter [:rfc:`8046`]:
@@ -506,23 +609,24 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Locator_Set: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If locator data is malformed.
 
         """
-        def _read_locator(kind, size):
+        def _read_locator(kind: 'int', size: 'int') -> 'DataType_LocatorData | IPv4Address':
             """Parse locator data.
 
             Args:
@@ -533,7 +637,7 @@ class HIP(Internet):
                 * If ``kind`` is ``0`` and ``size`` is ``16``,
                   returns an :class:`~ipaddress.IPv4Address` object.
                 * If ``kind`` is ``1`` and ``size`` is ``20``,
-                  returns a :class:`locator <DataType_Locator_Dict>` object.
+                  returns a :class:`~pcapkit.protocols.data.internet.hip.Locator` object.
 
             Raises:
                 ProtocolError: in other cases
@@ -542,14 +646,16 @@ class HIP(Internet):
             if kind == 0 and size == 16:
                 return ipaddress.ip_address(self._read_fileng(16))
             if kind == 1 and size == 20:
-                return dict(
+                return DataType_LocatorData(
                     spi=self._read_unpack(4),
                     ip=ipaddress.ip_address(self._read_fileng(16)),
                 )
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _size = 0           # length of read locators
-        _locs = list()      # list of locators
+        # length of read locators
+        _size = 0
+        # list of locators
+        _locs = []  # type: list[DataType_Locator]
 
         while _size < clen:
             _traf = self._read_unpack(1)
@@ -559,25 +665,27 @@ class HIP(Internet):
             _life = self._read_unpack(4)
             _lobj = _read_locator(_loct, _locl)
 
-            _locs.append(Info(
+            _locs.append(DataType_Locator(
                 traffic=_traf,
                 type=_loct,
                 length=_locl,
-                preferred=int(_resp[7], base=2),
-                lifetime=_life,
-                object=_lobj,
+                preferred=bool(int(_resp[7], base=2)),
+                lifetime=datetime.timedelta(seconds=_life),
+                locator=_lobj,
             ))
 
-        locator_set = dict(
+        locator_set = DataType_LocatorSetParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            locator=tuple(_locs),
+            locator_set=tuple(_locs),
         )
 
         return locator_set
 
-    def _read_para_puzzle(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_puzzle(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                           desc: 'RegType_Parameter', length: 'int', version: 'int',
+                           options: 'Parameter') -> 'DataType_PuzzleParameter':  # pylint: disable=unused-argument
         """Read HIP ``PUZZLE`` parameter.
 
         Structure of HIP ``PUZZLE`` parameter [:rfc:`5201`][:rfc:`7401`]:
@@ -596,17 +704,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Puzzle: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: The parameter is **ONLY** supported in HIPv1.
@@ -618,14 +727,14 @@ class HIP(Internet):
         _numk = self._read_unpack(1)
         _time = self._read_unpack(1)
         _opak = self._read_fileng(2)
-        _rand = self._read_unpack(clen-4)
+        _rand = self._read_unpack(clen - 4)  # Length (clen) = 4 + RHASH_len / 8
 
-        puzzle = dict(
+        puzzle = DataType_PuzzleParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            number=_numk,
-            lifetime=2 ** (_time - 32),
+            index=_numk,
+            lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
             opaque=_opak,
             random=_rand,
         )
@@ -636,7 +745,9 @@ class HIP(Internet):
 
         return puzzle
 
-    def _read_para_solution(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_solution(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                             desc: 'RegType_Parameter', length: 'int', version: 'int',
+                             options: 'Parameter') -> 'DataType_SolutionParameter':  # pylint: disable=unused-argument
         """Read HIP ``SOLUTION`` parameter.
 
         Structure of HIP ``SOLUTION`` parameter [:rfc:`5201`][:rfc:`7401`]:
@@ -658,17 +769,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Solution: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: The parameter is **ONLY** supported in HIPv1.
@@ -679,18 +791,20 @@ class HIP(Internet):
         if (clen - 4) % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
+        _rlen = (clen - 4) * 4  # Length (clen) = 4 + RHASH_len / 4
+
         _numk = self._read_unpack(1)
         _time = self._read_unpack(1)
         _opak = self._read_fileng(2)
-        _rand = self._read_unpack((clen-4)//2)
-        _solv = self._read_unpack((clen-4)//2)
+        _rand = self._read_unpack(_rlen // 8)
+        _solv = self._read_unpack(_rlen // 8)
 
-        solution = dict(
+        solution = DataType_SolutionParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            number=_numk,
-            lifetime=2 ** (_time - 32),
+            index=_numk,
+            lifetime=datetime.timedelta(seconds=2 ** (_time - 32)),
             opaque=_opak,
             random=_rand,
             solution=_solv,
@@ -702,7 +816,9 @@ class HIP(Internet):
 
         return solution
 
-    def _read_para_seq(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_seq(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                        desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                        options: 'Parameter') -> 'DataType_SEQParameter':  # pylint: disable=unused-argument
         """Read HIP ``SEQ`` parameter.
 
         Structure of HIP ``SEQ`` parameter [:rfc:`7401`]:
@@ -718,17 +834,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_SEQ: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``4``.
@@ -739,7 +856,7 @@ class HIP(Internet):
 
         _upid = self._read_unpack(4)
 
-        seq = dict(
+        seq = DataType_SEQParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -748,7 +865,9 @@ class HIP(Internet):
 
         return seq
 
-    def _read_para_ack(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_ack(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                        desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                        options: 'Parameter') -> 'DataType_ACKParameter':  # pylint: disable=unused-argument
         """Read HIP ``ACK`` parameter.
 
         Structure of HIP ``ACK`` parameter [:rfc:`7401`]:
@@ -766,17 +885,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_ACK: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``4`` modulo.
@@ -785,20 +905,22 @@ class HIP(Internet):
         if clen % 4 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _upid = list()
+        _upid = []  # type: list[int]
         for _ in range(clen // 4):
             _upid.append(self._read_unpack(4))
 
-        ack = dict(
+        ack = DataType_ACKParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id=tuple(_upid),
+            update_id=tuple(_upid),
         )
 
         return ack
 
-    def _read_para_dh_group_list(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_dh_group_list(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                  desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                  options: 'Parameter') -> 'DataType_DHGroupListParameter':  # pylint: disable=unused-argument
         """Read HIP ``DH_GROUP_LIST`` parameter.
 
         Structure of HIP ``DH_GROUP_LIST`` parameter [:rfc:`7401`]:
@@ -816,28 +938,29 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_DH_Group_List: Parsed parameter data.
+            Parsed parameter data.
 
         """
-        _dhid = list()
+        _dhid = []  # type: list[RegType_Group]
         for _ in range(clen):
-            _dhid.append(_GROUP_ID.get(self._read_unpack(1)))
+            _dhid.append(RegType_Group.get(self._read_unpack(1)))
 
-        dh_group_list = dict(
+        dh_group_list = DataType_DHGroupListParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id=tuple(_dhid),
+            group_id=tuple(_dhid),
         )
 
         _plen = length - clen
@@ -846,7 +969,9 @@ class HIP(Internet):
 
         return dh_group_list
 
-    def _read_para_diffie_hellman(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_diffie_hellman(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                   desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'DataType_DeffieHellmanParameter':  # pylint: disable=unused-argument
         """Read HIP ``DIFFIE_HELLMAN`` parameter.
 
         Structure of HIP ``DIFFIE_HELLMAN`` parameter [:rfc:`7401`]:
@@ -866,28 +991,29 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Diffie_Hellman: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _gpid = self._read_unpack(1)
         _vlen = self._read_unpack(2)
         _pval = self._read_fileng(_vlen)
 
-        diffie_hellman = dict(
+        diffie_hellman = DataType_DeffieHellmanParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id=_GROUP_ID.get(_gpid),
+            group_id=RegType_Group.get(_gpid),
             pub_len=_vlen,
             pub_val=_pval,
         )
@@ -898,7 +1024,9 @@ class HIP(Internet):
 
         return diffie_hellman
 
-    def _read_para_hip_transform(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_hip_transform(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                                  desc: 'RegType_Parameter', length: 'int', version: 'int',
+                                  options: 'Parameter') -> 'DataType_HIPTransformParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_TRANSFORM`` parameter.
 
         Structure of HIP ``HIP_TRANSFORM`` parameter [:rfc:`5201`]:
@@ -916,17 +1044,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Transform: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: The parameter is **ONLY** supported in HIPv1.
@@ -937,15 +1066,15 @@ class HIP(Internet):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _stid = list()
+        _stid = []  # type: list[RegType_Suite]
         for _ in range(clen // 2):
-            _stid.append(_SUITE_ID.get(self._read_unpack(2)))
+            _stid.append(RegType_Suite.get(self._read_unpack(2)))
 
-        hip_transform = dict(
+        hip_transform = DataType_HIPTransformParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id=tuple(_stid),
+            suite_id=tuple(_stid),
         )
 
         _plen = length - clen
@@ -954,7 +1083,9 @@ class HIP(Internet):
 
         return hip_transform
 
-    def _read_para_hip_cipher(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_hip_cipher(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                               desc: 'RegType_Parameter', length: 'int', version: 'int',
+                               options: 'Parameter') -> 'DataType_HIPCipherParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_CIPHER`` parameter.
 
         Structure of HIP ``HIP_CIPHER`` parameter [:rfc:`7401`]:
@@ -972,17 +1103,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Cipher: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** a ``2`` modulo.
@@ -991,15 +1123,20 @@ class HIP(Internet):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _cpid = list()
-        for _ in range(clen // 2):
-            _cpid.append(_CIPHER_ID.get(self._read_unpack(2)))
+        _cpid = []  # type: list[RegType_Cipher]
+        for index, _ in enumerate(range(clen // 2)):
+            # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
+            # more than six (6) Cipher IDs in one HIP_CIPHER parameter. [:rfc:`7401#section-5.2.8`]
+            if index > 5:
+                warnings.warn(f'HIPv{version}: [ParamNo {code}] invalid format', ProtocolWarning)
+                # raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+            _cpid.append(RegType_Cipher.get(self._read_unpack(2)))
 
-        hip_cipher = dict(
+        hip_cipher = DataType_HIPCipherParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id=_cpid,
+            cipher_id=tuple(_cpid),
         )
 
         _plen = length - clen
@@ -1008,7 +1145,9 @@ class HIP(Internet):
 
         return hip_cipher
 
-    def _read_para_nat_traversal_mode(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_nat_traversal_mode(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                       desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'DataType_NATTraversalModeParameter':  # pylint: disable=unused-argument,line-too-long
         """Read HIP ``NAT_TRAVERSAL_MODE`` parameter.
 
         Structure of HIP ``NAT_TRAVERSAL_MODE`` parameter [:rfc:`5770`]:
@@ -1028,17 +1167,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_NET_Traversal_Mode: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** a ``2`` modulo.
@@ -1048,15 +1188,15 @@ class HIP(Internet):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _resv = self._read_fileng(2)
-        _mdid = list()
+        _mdid = []  # type: list[RegType_NATTraversal]
         for _ in range((clen - 2) // 2):
-            _mdid.append(_MODE_ID.get(self._read_unpack(2)))
+            _mdid.append(RegType_NATTraversal.get(self._read_unpack(2)))
 
-        nat_traversal_mode = dict(
+        nat_traversal_mode = DataType_NATTraversalModeParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id=tuple(_mdid),
+            mode_id=tuple(_mdid),
         )
 
         _plen = length - clen
@@ -1065,7 +1205,9 @@ class HIP(Internet):
 
         return nat_traversal_mode
 
-    def _read_para_transaction_pacing(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_transaction_pacing(self, code: 'int', cbit: 'bool', clen: 'int', *,
+                                       desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'DataType_TransactionPacingParameter':  # pylint: disable=unused-argument,line-too-long
         """Read HIP ``TRANSACTION_PACING`` parameter.
 
         Structure of HIP ``TRANSACTION_PACING`` parameter [:rfc:`5770`]:
@@ -1081,17 +1223,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Transaction_Pacing: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``4``.
@@ -1102,7 +1245,7 @@ class HIP(Internet):
 
         _data = self._read_unpack(4)
 
-        transaction_pacing = dict(
+        transaction_pacing = DataType_TransactionPacingParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1111,7 +1254,9 @@ class HIP(Internet):
 
         return transaction_pacing
 
-    def _read_para_encrypted(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_encrypted(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                              desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'DataType_EncryptedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ENCRYPTED`` parameter.
 
         Structure of HIP ``ENCRYPTED`` parameter [:rfc:`7401`]:
@@ -1136,23 +1281,24 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Encrypted: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _resv = self._read_fileng(4)
         _data = self._read_fileng(clen-4)
 
-        encrypted = dict(
+        encrypted = DataType_EncryptedParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1165,7 +1311,9 @@ class HIP(Internet):
 
         return encrypted
 
-    def _read_para_host_id(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_host_id(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                            desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'DataType_HostIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``HOST_ID`` parameter.
 
         Structure of HIP ``HOST_ID`` parameter [:rfc:`7401`]:
@@ -1187,58 +1335,60 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Host_ID: Parsed parameter data.
+            Parsed parameter data.
 
         """
-        def _read_host_identifier(length, code):
+        def _read_host_identity(length: 'int', code: 'int') -> 'tuple[RegType_HIAlgorithm, DataType_HostIdentity | bytes]':  # pylint: disable=line-too-long
             """Read host identity.
 
             Args:
-                length (int): length of host identity
-                code (int): host identity type
+                length: length of host identity
+                code: host identity type
 
             Returns:
-                Tuple[pcapkit.const.hip.hi_algorithm.HIAlgorithm, Union[bytes, DataType_Host_ID_ECDSA_Curve,
-                DataType_Host_ID_ECDSA_LOW_Curve]]: Parsed host identity data.
+                Parsed host identity data.
 
             """
-            algorithm = _HI_ALGORITHM.get(code)
-            if algorithm == _HI_ALGORITHM.ECDSA:
-                host_id = dict(
-                    curve=_ECDSA_CURVE.get(self._read_unpack(2)),
+            if TYPE_CHECKING:
+                host_id: 'DataType_HostIdentity | bytes'
+
+            algorithm = RegType_HIAlgorithm.get(code)
+            if algorithm == RegType_HIAlgorithm.ECDSA:
+                host_id = DataType_HostIdentity(
+                    curve=RegType_ECDSACurve.get(self._read_unpack(2)),
                     pubkey=self._read_fileng(length-2),
                 )
-            elif algorithm == _HI_ALGORITHM.ECDSA_LOW:
-                host_id = dict(
-                    curve=_ECDSA_LOW_CURVE.get(self._read_unpack(2)),
+            elif algorithm == RegType_HIAlgorithm.ECDSA_LOW:
+                host_id = DataType_HostIdentity(
+                    curve=RegType_ECDSALowCurve.get(self._read_unpack(2)),
                     pubkey=self._read_fileng(length-2),
                 )
             else:
                 host_id = self._read_fileng(length)
             return algorithm, host_id
 
-        def _read_domain_identifier(di_data):
+        def _read_domain_identifier(di_data: 'str') -> 'tuple[RegType_DITypes, int, bytes]':
             """Read domain identifier.
 
             Args:
                 di_data (str): bit string of DI information byte
 
             Returns:
-                Tuple[pcapkit.const.hip.di_type.DIType, int, bytes]: A :data:`tuple` of
-                DI type enumeration, DI content length and DI data.
+                A :data:`tuple` of DI type enumeration, DI content length and DI data.
 
             """
-            di_type = _DI_TYPE.get(int(di_data[:4], base=2))
+            di_type = RegType_DITypes.get(int(di_data[:4], base=2))
             di_len = int(di_data[4:], base=2)
             domain_id = self._read_fileng(di_len)
             return di_type, di_len, domain_id
@@ -1246,19 +1396,19 @@ class HIP(Internet):
         _hlen = self._read_unpack(2)
         _didt = self._read_binary(2)
         _algo = self._read_unpack(2)
-        _hidf = _read_host_identifier(_hlen, _algo)
+        _hidf = _read_host_identity(_hlen, _algo)
         _didf = _read_domain_identifier(_didt)
 
-        host_id = dict(
+        host_id = DataType_HostIDParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id_len=_hlen,
+            hi_len=_hlen,
             di_type=_didf[0],
             di_len=_didf[1],
             algorithm=_hidf[0],
-            host_id=_hidf[1],
-            domain_id=_didf[2],
+            hi=_hidf[1],
+            di=_didf[2],
         )
 
         _plen = length - clen
@@ -1267,7 +1417,9 @@ class HIP(Internet):
 
         return host_id
 
-    def _read_para_hit_suite_list(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_hit_suite_list(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                   desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'DataType_HITSuiteParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIT_SUITE_LIST`` parameter.
 
         Structure of HIP ``HIT_SUITE_LIST`` parameter [:rfc:`7401`]:
@@ -1285,28 +1437,29 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_HIT_Suite_List: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _hsid = list()
         for _ in range(clen):
-            _hsid.append(_HIT_SUITE_ID.get(self._read_unpack(1)))
+            _hsid.append(RegType_HITSuite.get(self._read_unpack(1)))
 
-        hit_suite_list = dict(
+        hit_suite_list = DataType_HITSuiteParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id=tuple(_hsid),
+            suite_id=tuple(_hsid),
         )
 
         _plen = length - clen
@@ -1315,7 +1468,9 @@ class HIP(Internet):
 
         return hit_suite_list
 
-    def _read_para_cert(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_cert(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                         desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                         options: 'Parameter') -> 'DataType_CertParameter':  # pylint: disable=unused-argument
         """Read HIP ``CERT`` parameter.
 
         Structure of HIP ``CERT`` parameter [:rfc:`7401`]:
@@ -1335,17 +1490,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Cert: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _ctgp = self._read_unpack(1)
@@ -1354,15 +1510,15 @@ class HIP(Internet):
         _cttp = self._read_unpack(1)
         _ctdt = self._read_fileng(clen-4)
 
-        cert = dict(
+        cert = DataType_CertParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            group=_GROUP_ID.get(_ctgp),
-            count=_ctct,
-            id=_ctid,
-            cert_type=_CERT_TYPE.get(_cttp),
-            certificate=_ctdt,
+            cert_group=RegType_Group.get(_ctgp),
+            cert_count=_ctct,
+            cert_id=_ctid,
+            cert_type=RegType_Certificate.get(_cttp),
+            cert=_ctdt,
         )
 
         _plen = length - clen
@@ -1371,7 +1527,9 @@ class HIP(Internet):
 
         return cert
 
-    def _read_para_notification(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_notification(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                 desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                 options: 'Parameter') -> 'DataType_NotificationParameter':  # pylint: disable=unused-argument
         """Read HIP ``NOTIFICATION`` parameter.
 
         Structure of HIP ``NOTIFICATION`` parameter [:rfc:`7401`]:
@@ -1392,47 +1550,32 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Notification: Parsed parameter data.
-
-        Raises:
-            ProtocolError: Unregistered notify message type.
+            Parsed parameter data.
 
         """
         _resv = self._read_fileng(2)
         _code = self._read_unpack(2)
         _data = self._read_fileng(clen - 4)
 
-        _type = _NOTIFICATION_TYPE.get(_code)
-        if _type is None:
-            if 1 <= _code <= 50:
-                _type = 'Unassigned (IETF Review)'
-            elif 51 <= _code <= 8191:
-                _type = 'Unassigned (Specification Required; Error Message)'
-            elif 8192 <= _code <= 16383:
-                _type = 'Unassigned (Reserved for Private Use; Error Message)'
-            elif 16384 <= _code <= 40959:
-                _type = 'Unassigned (Specification Required; Status Message)'
-            elif 40960 <= _code <= 65535:
-                _type = 'Unassigned (Reserved for Private Use; Status Message)'
-            else:
-                raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+        _type = RegType_NotifyMessage.get(_code)
 
-        notification = dict(
+        notification = DataType_NotificationParameter(
             type=desc,
             critical=cbit,
             length=clen,
             msg_type=_type,
-            data=_data,
+            msg=_data,
         )
 
         _plen = length - clen
@@ -1441,7 +1584,9 @@ class HIP(Internet):
 
         return notification
 
-    def _read_para_echo_request_signed(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_echo_request_signed(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                        desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                        options: 'Parameter') -> 'DataType_EchoRequestSignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_REQUEST_SIGNED`` parameter.
 
         Structure of HIP ``ECHO_REQUEST_SIGNED`` parameter [:rfc:`7401`]:
@@ -1457,26 +1602,27 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Echo_Request_Signed: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _data = self._read_fileng(clen)
 
-        echo_request_signed = dict(
+        echo_request_signed = DataType_EchoRequestSignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            data=_data,
+            opaque=_data,
         )
 
         _plen = length - clen
@@ -1485,7 +1631,9 @@ class HIP(Internet):
 
         return echo_request_signed
 
-    def _read_para_reg_info(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_reg_info(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'DataType_RegInfoParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_INFO`` parameter.
 
         Structure of HIP ``REG_INFO`` parameter [:rfc:`8003`]:
@@ -1505,43 +1653,40 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Reg_Info: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If the registration type is invalid.
 
         """
-        _life = collections.namedtuple('Lifetime', ('min', 'max'))
         _mint = self._read_unpack(1)
         _maxt = self._read_unpack(1)
-        _type = list()
+
+        _type = []  # type: list[RegType_Registration]
         for _ in range(clen-2):
             _code = self._read_unpack(1)
-            _kind = _REG_TYPE.get(_code)
-            if _kind is None:
-                if 0 <= _code <= 200:
-                    _kind = 'Unassigned (IETF Review)'
-                elif 201 <= _code <= 255:
-                    _kind = 'Unassigned (Reserved for Private Use)'
-                else:
-                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+            _kind = RegType_Registration.get(_code)
             _type.append(_kind)
 
-        reg_info = dict(
+        reg_info = DataType_RegInfoParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            lifetime=_life(_mint, _maxt),
+            lifetime=DataType_Lifetime(
+                min=datetime.timedelta(seconds=_mint),
+                max=datetime.timedelta(seconds=_maxt),
+            ),
             reg_type=tuple(_type),
         )
 
@@ -1551,7 +1696,9 @@ class HIP(Internet):
 
         return reg_info
 
-    def _read_para_reg_request(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_reg_request(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'DataType_RegRequestParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_REQUEST`` parameter.
 
         Structure of HIP ``REG_REQUEST`` parameter [:rfc:`8003`]:
@@ -1571,43 +1718,40 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Reg_Request: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If the registration type is invalid.
 
         """
-        _life = collections.namedtuple('Lifetime', ('min', 'max'))
         _mint = self._read_unpack(1)
         _maxt = self._read_unpack(1)
-        _type = list()
+
+        _type = []  # type: list[RegType_Registration]
         for _ in range(clen-2):
             _code = self._read_unpack(1)
-            _kind = _REG_TYPE.get(_code)
-            if _kind is None:
-                if 0 <= _code <= 200:
-                    _kind = 'Unassigned (IETF Review)'
-                elif 201 <= _code <= 255:
-                    _kind = 'Unassigned (Reserved for Private Use)'
-                else:
-                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+            _kind = RegType_Registration.get(_code)
             _type.append(_kind)
 
-        reg_request = dict(
+        reg_request = DataType_RegRequestParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            lifetime=_life(_mint, _maxt),
+            lifetime=DataType_Lifetime(
+                min=datetime.timedelta(seconds=_mint),
+                max=datetime.timedelta(seconds=_maxt),
+            ),
             reg_type=tuple(_type),
         )
 
@@ -1617,7 +1761,9 @@ class HIP(Internet):
 
         return reg_request
 
-    def _read_para_reg_response(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_reg_response(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                 desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                 options: 'Parameter') -> 'DataType_RegResponseParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_RESPONSE`` parameter.
 
         Structure of HIP ``REG_RESPONSE`` parameter [:rfc:`8003`]:
@@ -1637,43 +1783,40 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Reg_Response: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If the registration type is invalid.
 
         """
-        _life = collections.namedtuple('Lifetime', ('min', 'max'))
         _mint = self._read_unpack(1)
         _maxt = self._read_unpack(1)
-        _type = list()
+
+        _type = []  # type: list[RegType_Registration]
         for _ in range(clen-2):
             _code = self._read_unpack(1)
-            _kind = _REG_TYPE.get(_code)
-            if _kind is None:
-                if 0 <= _code <= 200:
-                    _kind = 'Unassigned (IETF Review)'
-                elif 201 <= _code <= 255:
-                    _kind = 'Unassigned (Reserved for Private Use)'
-                else:
-                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+            _kind = RegType_Registration.get(_code)
             _type.append(_kind)
 
-        reg_response = dict(
+        reg_response = DataType_RegResponseParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            lifetime=_life(_mint, _maxt),
+            lifetime=DataType_Lifetime(
+                min=datetime.timedelta(seconds=_mint),
+                max=datetime.timedelta(seconds=_maxt),
+            ),
             reg_type=tuple(_type),
         )
 
@@ -1683,7 +1826,9 @@ class HIP(Internet):
 
         return reg_response
 
-    def _read_para_reg_failed(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_reg_failed(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'DataType_RegFailedParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_FAILED`` parameter.
 
         Structure of HIP ``REG_FAILED`` parameter [:rfc:`8003`]:
@@ -1703,43 +1848,40 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Reg_Failed: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If the registration type is invalid.
 
         """
-        _life = collections.namedtuple('Lifetime', ('min', 'max'))
         _mint = self._read_unpack(1)
         _maxt = self._read_unpack(1)
-        _type = list()
+
+        _type = []  # type: list[RegType_RegistrationFailure]
         for _ in range(clen-2):
             _code = self._read_unpack(1)
-            _kind = _REG_FAILURE_TYPE.get(_code)
-            if _kind is None:
-                if 0 <= _code <= 200:
-                    _kind = 'Unassigned (IETF Review)'
-                elif 201 <= _code <= 255:
-                    _kind = 'Unassigned (Reserved for Private Use)'
-                else:
-                    raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
+            _kind = RegType_RegistrationFailure.get(_code)
             _type.append(_kind)
 
-        reg_failed = dict(
+        reg_failed = DataType_RegFailedParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            lifetime=_life(_mint, _maxt),
+            lifetime=DataType_Lifetime(
+                min=datetime.timedelta(seconds=_mint),
+                max=datetime.timedelta(seconds=_maxt),
+            ),
             reg_type=tuple(_type),
         )
 
@@ -1749,7 +1891,9 @@ class HIP(Internet):
 
         return reg_failed
 
-    def _read_para_reg_from(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_reg_from(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'DataType_RegFromParameter':  # pylint: disable=unused-argument
         """Read HIP ``REG_FROM`` parameter.
 
         Structure of HIP ``REG_FROM`` parameter [:rfc:`5770`]:
@@ -1770,17 +1914,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Reg_From: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``20``.
@@ -1790,22 +1935,24 @@ class HIP(Internet):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _port = self._read_unpack(2)
-        _ptcl = self._read_unpack(1)
+        _ptcl = self._read_protos(1)
         _resv = self._read_fileng(1)
         _addr = self._read_fileng(16)
 
-        reg_from = dict(
+        reg_from = DataType_RegFromParameter(
             type=desc,
             critical=cbit,
             length=clen,
             port=_port,
-            protocol=TP_PROTO.get(_ptcl),
-            ip=ipaddress.ip_address(_addr),
+            protocol=_ptcl,
+            address=ipaddress.ip_address(_addr),
         )
 
         return reg_from
 
-    def _read_para_echo_response_signed(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_echo_response_signed(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                         desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                         options: 'Parameter') -> 'DataType_EchoResponseSignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_RESPONSE_SIGNED`` parameter.
 
         Structure of HIP ``ECHO_RESPONSE_SIGNED`` parameter [:rfc:`7401`]:
@@ -1821,26 +1968,27 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Echo_Response_Signed: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _data = self._read_fileng(clen)
 
-        echo_response_signed = dict(
+        echo_response_signed = DataType_EchoResponseSignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            data=_data,
+            opaque=_data,
         )
 
         _plen = length - clen
@@ -1849,7 +1997,9 @@ class HIP(Internet):
 
         return echo_response_signed
 
-    def _read_para_transport_format_list(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_transport_format_list(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                          desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                          options: 'Parameter') -> 'DataType_TransportFormatListParameter':  # pylint: disable=unused-argument
         """Read HIP ``TRANSPORT_FORMAT_LIST`` parameter.
 
         Structure of HIP ``TRANSPORT_FORMAT_LIST`` parameter [:rfc:`7401`]:
@@ -1867,17 +2017,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Transform_Format_List: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``2`` modulo.
@@ -1886,11 +2037,11 @@ class HIP(Internet):
         if clen % 2 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _tfid = list()
+        _tfid = []  # type: list[int]
         for _ in range(clen // 2):
             _tfid.append(self._read_unpack(2))
 
-        transport_format_list = dict(
+        transport_format_list = DataType_TransportFormatListParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -1903,7 +2054,9 @@ class HIP(Internet):
 
         return transport_format_list
 
-    def _read_para_esp_transform(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_esp_transform(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                  desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                  options: 'Parameter') -> 'DataType_ESPTransformParameter':  # pylint: disable=unused-argument
         """Read HIP ``ESP_TRANSFORM`` parameter.
 
         Structure of HIP ``ESP_TRANSFORM`` parameter [:rfc:`7402`]:
@@ -1923,17 +2076,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Transform_Format_List: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``2`` modulo.
@@ -1943,15 +2097,16 @@ class HIP(Internet):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _resv = self._read_fileng(2)
-        _stid = list()
+        _stid = []  # type: list[RegType_ESPTransformSuite]
         for _ in range((clen - 2) // 2):
-            _stid.append(_ESP_SUITE_ID.get(self._read_unpack(2)))
+            _code = self._read_unpack(2)
+            _stid.append(RegType_ESPTransformSuite.get(_code))
 
-        esp_transform = dict(
+        esp_transform = DataType_ESPTransformParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            id=tuple(_stid),
+            suite_id=tuple(_stid),
         )
 
         _plen = length - clen
@@ -1960,7 +2115,9 @@ class HIP(Internet):
 
         return esp_transform
 
-    def _read_para_seq_data(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_seq_data(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'DataType_SeqDataParameter':  # pylint: disable=unused-argument
         """Read HIP ``SEQ_DATA`` parameter.
 
         Structure of HIP ``SEQ_DATA`` parameter [:rfc:`6078`]:
@@ -1976,17 +2133,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_SEQ_Data: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``4``.
@@ -1997,7 +2155,7 @@ class HIP(Internet):
 
         _seqn = self._read_unpack(4)
 
-        seq_data = dict(
+        seq_data = DataType_SeqDataParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2006,7 +2164,9 @@ class HIP(Internet):
 
         return seq_data
 
-    def _read_para_ack_data(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_ack_data(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'DataType_AckDataParameter':  # pylint: disable=unused-argument
         """Read HIP ``ACK_DATA`` parameter.
 
         Structure of HIP ``ACK_DATA`` parameter [:rfc:`6078`]:
@@ -2023,17 +2183,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_ACK_Data: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``4`` modulo.
@@ -2042,11 +2203,11 @@ class HIP(Internet):
         if clen % 4 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _ackn = list()
+        _ackn = []  # type: list[int]
         for _ in range(clen // 4):
             _ackn.append(self._read_unpack(4))
 
-        ack_data = dict(
+        ack_data = DataType_AckDataParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2055,7 +2216,9 @@ class HIP(Internet):
 
         return ack_data
 
-    def _read_para_payload_mic(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_payload_mic(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'DataType_PayloadMICParameter':  # pylint: disable=unused-argument
         """Read HIP ``PAYLOAD_MIC`` parameter.
 
         Structure of HIP ``PAYLOAD_MIC`` parameter [:rfc:`6078`]:
@@ -2078,31 +2241,32 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Payload_MIC: Parsed parameter data.
+            Parsed parameter data.
 
         """
-        _next = self._read_unpack(1)
+        _next = self._read_protos(1)
         _resv = self._read_fileng(3)
         _data = self._read_fileng(4)
         _micv = self._read_fileng(clen-8)
 
-        payload_mic = dict(
+        payload_mic = DataType_PayloadMICParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            next=TP_PROTO.get(_next),
-            data=_data,
-            value=_micv,
+            next=_next,
+            payload=_data,
+            mic=_micv,
         )
 
         _plen = length - clen
@@ -2111,7 +2275,9 @@ class HIP(Internet):
 
         return payload_mic
 
-    def _read_para_transaction_id(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_transaction_id(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                   desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                   options: 'Parameter') -> 'DataType_TransactionIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``TRANSACTION_ID`` parameter.
 
         Structure of HIP ``TRANSACTION_ID`` parameter [:rfc:`6078`]:
@@ -2129,22 +2295,23 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Transaction_ID: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _tsid = self._read_unpack(clen)
 
-        transaction_id = dict(
+        transaction_id = DataType_TransactionIDParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2157,7 +2324,9 @@ class HIP(Internet):
 
         return transaction_id
 
-    def _read_para_overlay_id(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_overlay_id(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'DataType_OverlayIDParameter':  # pylint: disable=unused-argument
         """Read HIP ``OVERLAY_ID`` parameter.
 
         Structure of HIP ``OVERLAY_ID`` parameter [:rfc:`6079`]:
@@ -2175,22 +2344,23 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Overlay_ID: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _olid = self._read_unpack(clen)
 
-        overlay_id = dict(
+        overlay_id = DataType_OverlayIDParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2203,7 +2373,9 @@ class HIP(Internet):
 
         return overlay_id
 
-    def _read_para_route_dst(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_route_dst(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                              desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'DataType_RouteDstParameter':  # pylint: disable=unused-argument
         """Read HIP ``ROUTE_DST`` parameter.
 
         Structure of HIP ``ROUTE_DST`` parameter [:rfc:`6028`]:
@@ -2232,17 +2404,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Route_Dst: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If the parameter is malformed.
@@ -2253,24 +2426,27 @@ class HIP(Internet):
 
         _flag = self._read_binary(2)
         _resv = self._read_fileng(2)
-        _addr = list()
+
+        _addr = []  # type: list[IPv6Address]
         for _ in range((clen - 4) // 16):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))
 
-        route_dst = dict(
+        route_dst = DataType_RouteDstParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            flags=dict(
+            flags=DataType_Flags(
                 symmetric=bool(int(_flag[0], base=2)),
                 must_follow=bool(int(_flag[1], base=2)),
             ),
-            ip=tuple(_addr),
+            hit=tuple(_addr),
         )
 
         return route_dst
 
-    def _read_para_hip_transport_mode(self, code, cbit, clen, *, desc, length, version):
+    def _read_param_hip_transport_mode(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                       desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                       options: 'Parameter') -> 'DataType_HIPTransportModeParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_TRANSPORT_MODE`` parameter.
 
         Structure of HIP ``HIP_TRANSPORT_MODE`` parameter [:rfc:`6261`]:
@@ -2290,17 +2466,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Transport_Mode: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``2`` modulo.
@@ -2310,16 +2487,18 @@ class HIP(Internet):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _port = self._read_unpack(2)
-        _mdid = list()
-        for _ in range((clen - 2) // 2):
-            _mdid.append(_TP_MODE_ID.get(self._read_unpack(2)))
 
-        hip_transport_mode = dict(
+        _mdid = []  # type: list[RegType_Transport]
+        for _ in range((clen - 2) // 2):
+            _code = self._read_unpack(2)
+            _mdid.append(RegType_Transport.get(_code))
+
+        hip_transport_mode = DataType_HIPTransportModeParameter(
             type=desc,
             critical=cbit,
             length=clen,
             port=_port,
-            id=tuple(_mdid),
+            mode_id=tuple(_mdid),
         )
 
         _plen = length - clen
@@ -2328,7 +2507,9 @@ class HIP(Internet):
 
         return hip_transport_mode
 
-    def _read_para_hip_mac(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_hip_mac(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                            desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'DataType_HIPMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_MAC`` parameter.
 
         Structure of HIP ``HIP_MAC`` parameter [:rfc:`7401`]:
@@ -2348,22 +2529,23 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_HMAC: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _hmac = self._read_fileng(clen)
 
-        hip_mac = dict(
+        hip_mac = DataType_HIPMACParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2376,7 +2558,9 @@ class HIP(Internet):
 
         return hip_mac
 
-    def _read_para_hip_mac_2(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_hip_mac_2(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                              desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'DataType_HIPMAC2Parameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_MAC_2`` parameter.
 
         Structure of HIP ``HIP_MAC_2`` parameter [:rfc:`7401`]:
@@ -2396,22 +2580,23 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_HMAC_2: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _hmac = self._read_fileng(clen)
 
-        hip_mac_2 = dict(
+        hip_mac_2 = DataType_HIPMAC2Parameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2424,7 +2609,9 @@ class HIP(Internet):
 
         return hip_mac_2
 
-    def _read_para_hip_signature_2(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_hip_signature_2(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                    desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                    options: 'Parameter') -> 'DataType_HIPSignature2Parameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_SIGNATURE_2`` parameter.
 
         Structure of HIP ``HIP_SIGNATURE_2`` parameter [:rfc:`7401`]:
@@ -2442,27 +2629,28 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Signature_2: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _algo = self._read_unpack(2)
         _sign = self._read_fileng(clen-2)
 
-        hip_signature_2 = dict(
+        hip_signature_2 = DataType_HIPSignature2Parameter(
             type=desc,
             critical=cbit,
             length=clen,
-            algorithm=_HI_ALGORITHM.get(_algo),
+            algorithm=RegType_HIAlgorithm.get(_algo),
             signature=_sign,
         )
 
@@ -2472,7 +2660,9 @@ class HIP(Internet):
 
         return hip_signature_2
 
-    def _read_para_hip_signature(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_hip_signature(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                  desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                  options: 'Parameter') -> 'DataType_HIPSignatureParameter':  # pylint: disable=unused-argument
         """Read HIP ``HIP_SIGNATURE`` parameter.
 
         Structure of HIP ``HIP_SIGNATURE`` parameter [:rfc:`7401`]:
@@ -2490,27 +2680,28 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Signature: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _algo = self._read_unpack(2)
         _sign = self._read_fileng(clen-2)
 
-        hip_signature = dict(
+        hip_signature = DataType_HIPSignatureParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            algorithm=_HI_ALGORITHM.get(_algo),
+            algorithm=RegType_HIAlgorithm.get(_algo),
             signature=_sign,
         )
 
@@ -2520,7 +2711,9 @@ class HIP(Internet):
 
         return hip_signature
 
-    def _read_para_echo_request_unsigned(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_echo_request_unsigned(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                          desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                          options: 'Parameter') -> 'DataType_EchoRequestUnsignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_REQUEST_UNSIGNED`` parameter.
 
         Structure of HIP ``ECHO_REQUEST_UNSIGNED`` parameter [:rfc:`7401`]:
@@ -2536,26 +2729,27 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Echo_Request_Unsigned: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _data = self._read_fileng(clen)
 
-        echo_request_unsigned = dict(
+        echo_request_unsigned = DataType_EchoRequestUnsignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            data=_data,
+            opaque=_data,
         )
 
         _plen = length - clen
@@ -2564,7 +2758,9 @@ class HIP(Internet):
 
         return echo_request_unsigned
 
-    def _read_para_echo_response_unsigned(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_echo_response_unsigned(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                           desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                           options: 'Parameter') -> 'DataType_EchoResponseUnsignedParameter':  # pylint: disable=unused-argument
         """Read HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
 
         Structure of HIP ``ECHO_RESPONSE_UNSIGNED`` parameter [:rfc:`7401`]:
@@ -2580,26 +2776,27 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Echo_Response_Unsigned: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _data = self._read_fileng(clen)
 
-        echo_response_unsigned = dict(
+        echo_response_unsigned = DataType_EchoResponseUnsignedParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            data=_data,
+            opaque=_data,
         )
 
         _plen = length - clen
@@ -2608,7 +2805,9 @@ class HIP(Internet):
 
         return echo_response_unsigned
 
-    def _read_para_relay_from(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_relay_from(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'DataType_RelayFromParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_FROM`` parameter.
 
         Structure of HIP ``RELAY_FROM`` parameter [:rfc:`5770`]:
@@ -2629,17 +2828,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Relay_From: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``20``.
@@ -2649,22 +2849,24 @@ class HIP(Internet):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _port = self._read_unpack(2)
-        _ptcl = self._read_unpack(1)
+        _ptcl = self._read_protos(1)
         _resv = self._read_fileng(1)
         _addr = self._read_fileng(16)
 
-        relay_from = dict(
+        relay_from = DataType_RelayFromParameter(
             type=desc,
             critical=cbit,
             length=clen,
             port=_port,
-            protocol=TP_PROTO.get(_ptcl),
-            ip=ipaddress.ip_address(_addr),
+            protocol=_ptcl,
+            address=ipaddress.ip_address(_addr),
         )
 
         return relay_from
 
-    def _read_para_relay_to(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_relay_to(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'DataType_RelayToParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_TO`` parameter.
 
         Structure of HIP ``RELAY_TO`` parameter [:rfc:`5770`]:
@@ -2685,17 +2887,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Relay_To: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``20``.
@@ -2705,22 +2908,24 @@ class HIP(Internet):
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
         _port = self._read_unpack(2)
-        _ptcl = self._read_unpack(1)
+        _ptcl = self._read_protos(1)
         _resv = self._read_fileng(1)
         _addr = self._read_fileng(16)
 
-        relay_to = dict(
+        relay_to = DataType_RelayToParameter(
             type=desc,
             critical=cbit,
             length=clen,
             port=_port,
-            protocol=TP_PROTO.get(_ptcl),
-            ip=ipaddress.ip_address(_addr),
+            protocol=_ptcl,
+            address=ipaddress.ip_address(_addr),
         )
 
         return relay_to
 
-    def _read_para_overlay_ttl(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_overlay_ttl(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                                desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                                options: 'Parameter') -> 'DataType_OverlayTTLParameter':  # pylint: disable=unused-argument
         """Read HIP ``OVERLAY_TTL`` parameter.
 
         Structure of HIP ``OVERLAY_TTL`` parameter [:rfc:`6078`]:
@@ -2736,17 +2941,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Relay_To: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``4``.
@@ -2757,16 +2963,18 @@ class HIP(Internet):
 
         _ttln = self._read_unpack(2)
 
-        overlay_ttl = dict(
+        overlay_ttl = DataType_OverlayTTLParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            ttl=_ttln,
+            ttl=datetime.timedelta(seconds=_ttln),
         )
 
         return overlay_ttl
 
-    def _read_para_route_via(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_route_via(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                              desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                              options: 'Parameter') -> 'DataType_RouteViaParameter':  # pylint: disable=unused-argument
         """Read HIP ``ROUTE_VIA`` parameter.
 
         Structure of HIP ``ROUTE_VIA`` parameter [:rfc:`6028`]:
@@ -2795,17 +3003,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Route_Via: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If the parameter is malformed.
@@ -2816,24 +3025,27 @@ class HIP(Internet):
 
         _flag = self._read_binary(2)
         _resv = self._read_fileng(2)
-        _addr = list()
+
+        _addr = []  # type: list[IPv6Address]
         for _ in range((clen - 4) // 16):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))
 
-        route_via = dict(
+        route_via = DataType_RouteViaParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            flags=dict(
+            flags=DataType_Flags(
                 symmetric=bool(int(_flag[0], base=2)),
                 must_follow=bool(int(_flag[1], base=2)),
             ),
-            ip=tuple(_addr),
+            hit=tuple(_addr),
         )
 
         return route_via
 
-    def _read_para_from(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_from(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                         desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                         options: 'Parameter') -> 'DataType_FromParameter':  # pylint: disable=unused-argument
         """Read HIP ``FROM`` parameter.
 
         Structure of HIP ``FROM`` parameter [:rfc:`8004`]:
@@ -2852,17 +3064,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_From: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``16``.
@@ -2873,16 +3086,18 @@ class HIP(Internet):
 
         _addr = self._read_fileng(16)
 
-        from_ = dict(
+        from_ = DataType_FromParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            ip=ipaddress.ip_address(_addr),
+            address=ipaddress.ip_address(_addr),
         )
 
         return from_
 
-    def _read_para_rvs_hmac(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_rvs_hmac(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                             desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                             options: 'Parameter') -> 'DataType_RVSHMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``RVS_HMAC`` parameter.
 
         Structure of HIP ``RVS_HMAC`` parameter [:rfc:`8004`]:
@@ -2900,22 +3115,23 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_RVS_HMAC: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _hmac = self._read_fileng(clen)
 
-        rvs_hmac = dict(
+        rvs_hmac = DataType_RVSHMACParameter(
             type=desc,
             critical=cbit,
             length=clen,
@@ -2928,7 +3144,9 @@ class HIP(Internet):
 
         return rvs_hmac
 
-    def _read_para_via_rvs(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_via_rvs(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                            desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                            options: 'Parameter') -> 'DataType_ViaRVSParameter':  # pylint: disable=unused-argument
         """Read HIP ``VIA_RVS`` parameter.
 
         Structure of HIP ``VIA_RVS`` parameter [:rfc:`6028`]:
@@ -2955,17 +3173,18 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Route_Via: Parsed parameter data.
+            Parsed parameter data.
 
         Raises:
             ProtocolError: If ``clen`` is **NOT** ``16`` modulo.
@@ -2974,20 +3193,22 @@ class HIP(Internet):
         if clen % 16 != 0:
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
-        _addr = list()
+        _addr = []  # type: list[IPv6Address]
         for _ in range(clen // 16):
             _addr.append(ipaddress.ip_address(self._read_fileng(16)))
 
-        via_rvs = dict(
+        via_rvs = DataType_ViaRVSParameter(
             type=desc,
             critical=cbit,
             length=clen,
-            ip=tuple(_addr),
+            address=tuple(_addr),
         )
 
         return via_rvs
 
-    def _read_para_relay_hmac(self, code, cbit, clen, *, desc, length, version):  # pylint: disable=unused-argument
+    def _read_param_relay_hmac(self, code: 'int', cbit: 'bool', clen: 'int', *,  # pylint: disable=unused-argument
+                               desc: 'RegType_Parameter', length: 'int', version: 'int',  # pylint: disable=unused-argument
+                               options: 'Parameter') -> 'DataType_RelayHMACParameter':  # pylint: disable=unused-argument
         """Read HIP ``RELAY_HMAC`` parameter.
 
         Structure of HIP ``RELAY_HMAC`` parameter [:rfc:`5770`]:
@@ -3005,22 +3226,23 @@ class HIP(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            code (int): parameter code
-            cbit (bool): critical bit
-            clen (int): length of contents
+            code: parameter code
+            cbit: critical bit
+            clen: length of contents
 
         Keyword Args:
-            desc (pcapkit.const.hip.parameter.Parameter): parameter type
-            length (int): remaining packet length
-            version (Literal[1, 2]): HIP protocol version
+            desc: parameter type
+            length: remaining packet length
+            version: HIP protocol version
+            options: parsed HIP parameters
 
         Returns:
-            DataType_Param_Relay_HMAC: Parsed parameter data.
+            Parsed parameter data.
 
         """
         _hmac = self._read_fileng(clen)
 
-        relay_hmac = dict(
+        relay_hmac = DataType_RelayHMACParameter(
             type=desc,
             critical=cbit,
             length=clen,
