@@ -56,6 +56,16 @@ __all__ = [
     'HIP_RelayToParameter', 'HIP_RouteViaParameter', 'HIP_FromParameter',
     'HIP_RVSHMACParameter', 'HIP_RelayHMACParameter',
 
+    # Hop-by-Hop Options
+    'HOPOPT',
+    'HOPOPT_RPLFlags', 'HOPOPT_MPLFlags', 'HOPOPT_DFFFlags',
+    'HOPOPT_UnassignedOption', 'HOPOPT_PadOption', 'HOPOPT_TunnelEncapsulationLimitOption',
+    'HOPOPT_RouterAlterOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
+    'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartOption',
+    'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
+    'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
+    'HOPOPT_IPDFFOption',
+
     # No Payload
     'NoPayload',
 

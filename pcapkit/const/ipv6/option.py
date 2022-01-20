@@ -10,29 +10,29 @@ __all__ = ['Option']
 class Option(IntEnum):
     """[Option] Destination Options and Hop-by-Hop Options"""
 
-    #: PAD [IPV6]
-    PAD = 0x00
+    #: Pad1 [IPV6]
+    Pad1 = 0x00
 
-    #: PADN [IPV6]
-    PADN = 0x01
+    #: PadN [IPV6]
+    PadN = 0x01
 
-    #: JUMBO [:rfc:`2675`]
-    JUMBO = 0xC2
+    #: Jumbo Payload [:rfc:`2675`]
+    Jumbo_Payload = 0xC2
 
-    #: RPL Option [RFC-ietf-roll-useofrplinfo-31]
+    #: RPL Option [:rfc:`9008`]
     RPL_Option_0x23 = 0x23
 
-    #: RPL [:rfc:`6553`][RFC-ietf-roll-useofrplinfo-31]
-    RPL_0x63 = 0x63
+    #: RPL Option (DEPRECATED) [:rfc:`6553`][:rfc:`9008`]
+    RPL_Option_0x63 = 0x63
 
-    #: TUN [:rfc:`2473`]
-    TUN = 0x04
+    #: Tunnel Encapsulation Limit [:rfc:`2473`]
+    Tunnel_Encapsulation_Limit = 0x04
 
-    #: RA [:rfc:`2711`]
-    RA = 0x05
+    #: Router Alert [:rfc:`2711`]
+    Router_Alert = 0x05
 
-    #: QS [:rfc:`4782`][RFC Errata            2034]
-    QS = 0x26
+    #: Quick-Start [:rfc:`4782`][RFC Errata 2034]
+    Quick_Start = 0x26
 
     #: CALIPSO [:rfc:`5570`]
     CALIPSO = 0x07
@@ -40,41 +40,41 @@ class Option(IntEnum):
     #: SMF_DPD [:rfc:`6621`]
     SMF_DPD = 0x08
 
-    #: HOME [:rfc:`6275`]
-    HOME = 0xC9
+    #: Home Address [:rfc:`6275`]
+    Home_Address = 0xC9
 
-    #: DEPRECATED [CHARLES LYNN]
-    DEPRECATED = 0x8A
+    #: Endpoint Identification (DEPRECATED) [CHARLES LYNN]
+    Endpoint_Identification = 0x8A
 
-    #: ILNP [:rfc:`6744`]
-    ILNP = 0x8B
+    #: ILNP Nonce [:rfc:`6744`]
+    ILNP_Nonce = 0x8B
 
-    #: LIO [:rfc:`6788`]
-    LIO = 0x8C
+    #: Line-Identification Option [:rfc:`6788`]
+    Line_Identification_Option = 0x8C
 
     #: Deprecated [:rfc:`7731`]
     Deprecated = 0x4D
 
-    #: MPL [:rfc:`7731`]
-    MPL = 0x6D
+    #: MPL Option [:rfc:`7731`]
+    MPL_Option = 0x6D
 
     #: IP_DFF [:rfc:`6971`]
     IP_DFF = 0xEE
 
-    #: PDM [:rfc:`8250`]
+    #: Performance and Diagnostic Metrics (PDM) [:rfc:`8250`]
     PDM = 0x0F
 
-    #: Path MTU Record Option  TEMPORARY - registered 2019-09-03, expires
-    #: 2020-09-03 [draft-ietf-6man-mtu-option]
-    Path_MTU_Record_Option_TEMPORARY_registered_2019_09_03_expires_2020_09_03 = 0x30
+    #: Path MTU Record Option (TEMPORARY - registered 2019-09-03, extension
+    #: registered 2021-08-12, expires 2022-09-03) [draft-ietf-6man-mtu-option-06]
+    Path_MTU_Record_Option = 0x30
 
-    #: IOAM  TEMPORARY - registered 2020-04-16, expires 2021-04-16 [draft-ietf-
-    #: ippm-ioam-ipv6-options]
-    IOAM_TEMPORARY_registered_2020_04_16_expires_2021_04_16_0x11 = 0x11
+    #: IOAM (TEMPORARY - registered 2020-04-16, extension registered 2021-03-15,
+    #: expires 2022-04-16) [draft-ietf-ippm-ioam-ipv6-options-05]
+    IOAM_0x11 = 0x11
 
-    #: IOAM  TEMPORARY - registered 2020-04-16, expires 2021-04-16 [draft-ietf-
-    #: ippm-ioam-ipv6-options]
-    IOAM_TEMPORARY_registered_2020_04_16_expires_2021_04_16_0x31 = 0x31
+    #: IOAM (TEMPORARY - registered 2020-04-16, extension registered 2021-03-15,
+    #: expires 2022-04-16) [draft-ietf-ippm-ioam-ipv6-options-05]
+    IOAM_0x31 = 0x31
 
     #: RFC3692-style Experiment [:rfc:`4727`]
     RFC3692_style_Experiment_0x1E = 0x1E
