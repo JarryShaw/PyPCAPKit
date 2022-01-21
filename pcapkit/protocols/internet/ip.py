@@ -12,7 +12,12 @@ protocol family [*]_, eg.
 .. [*] https://en.wikipedia.org/wiki/Internet_Protocol
 
 """
+from typing import TYPE_CHECKING
+
 from pcapkit.protocols.internet.internet import Internet
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 __all__ = ['IP']
 
@@ -26,38 +31,17 @@ class IP(Internet):  # pylint: disable=abstract-method
     - Encapsulating Security Payload (:class:`~pcapkit.protocols.internet.esp.ESP`) [:rfc:`4303`]
 
     """
-    ##########################################################################
-    # Properties.
-    ##########################################################################
-
-    # source IP address
-    @property
-    def src(self):
-        """Source IP address.
-
-        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
-        """
-        return self._info.src  # pylint: disable=E1101
-
-    # destination IP address
-    @property
-    def dst(self):
-        """Destination IP address.
-
-        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
-        """
-        return self._info.dst  # pylint: disable=E1101
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
     @classmethod
-    def id(cls):
+    def id(cls) -> 'tuple[Literal["IPv4"], Literal["IPv6"]]':
         """Index ID of the protocol.
 
         Returns:
-            Tuple[Literal['IPv4'], Literal['IPv6']]: Index ID of the protocol.
+            Index ID of the protocol.
 
         """
         return ('IPv4', 'IPv6')

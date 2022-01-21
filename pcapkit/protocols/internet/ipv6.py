@@ -63,6 +63,24 @@ class IPv6(IP):
         """
         return self._info.protocol  # pylint: disable=E1101
 
+    # source IP address
+    @property
+    def src(self):
+        """Source IP address.
+
+        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
+        """
+        return self._info.src  # pylint: disable=E1101
+
+    # destination IP address
+    @property
+    def dst(self):
+        """Destination IP address.
+
+        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
+        """
+        return self._info.dst  # pylint: disable=E1101
+
     ##########################################################################
     # Methods.
     ##########################################################################
