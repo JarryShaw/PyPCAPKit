@@ -321,7 +321,7 @@ class HOPOPT(Internet):
             if not code:
                 break
 
-            # get options type
+            # get option type
             kind = RegType_Option.get(code)
             acts, cflg = self._read_opt_type(code)
 
@@ -334,7 +334,7 @@ class HOPOPT(Internet):
                 meth = name
             data = meth(self, kind, acts, cflg, options=options)  # type: ignore[arg-type,misc]
 
-            # record parameter data
+            # record option data
             counter += data.length
             options.add(kind, data)
 
@@ -846,14 +846,18 @@ class HOPOPT(Internet):
         _nonr = self._read_binary(4)
         _qsnn = int(_nonr[:30], base=2)
 
+        _qsfn = RegType_QSFunction.get(_func)
+        if _qsfn not in (RegType_QSFunction.Quick_Start_Request, RegType_QSFunction.Report_of_Approved_Rate):
+            raise ProtocolError(f'{self.alias}: [OptNo {code}] invalid format')
+
         data = DataType_QuickStartOption(
             type=code,
             action=acts,
             change=cflg,
             length=_size + 2,
-            func=RegType_QSFunction.get(_func),
+            func=_qsfn,
             rate=40000 * (2 ** _rate) / 1000,
-            ttl=None if _func else datetime.timedelta(seconds=_rate),
+            ttl=None if _func != RegType_QSFunction.Quick_Start_Request else datetime.timedelta(seconds=_ttlv),
             nounce=_qsnn,
         )
 
