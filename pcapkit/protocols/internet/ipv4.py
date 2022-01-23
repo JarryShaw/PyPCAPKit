@@ -33,136 +33,104 @@ Octets      Bits        Name                    Description
 """
 import datetime
 import ipaddress
+from typing import TYPE_CHECKING
 
-from pcapkit.const.ipv4.classification_level import ClassificationLevel as _CLASSIFICATION_LEVEL
-from pcapkit.const.ipv4.option_class import OptionClass as opt_class
-from pcapkit.const.ipv4.option_number import OptionNumber as OPT_TYPE
-from pcapkit.const.ipv4.protection_authority import ProtectionAuthority as _PROTECTION_AUTHORITY
-from pcapkit.const.ipv4.qs_function import QSFunction as QS_FUNC
-from pcapkit.const.ipv4.router_alert import RouterAlert as _ROUTER_ALERT
-from pcapkit.const.ipv4.tos_del import ToSDelay as TOS_DEL
-from pcapkit.const.ipv4.tos_ecn import ToSECN as TOS_ECN
-from pcapkit.const.ipv4.tos_pre import ToSPrecedence as TOS_PRE
-from pcapkit.const.ipv4.tos_rel import ToSReliability as TOS_REL
-from pcapkit.const.ipv4.tos_thr import ToSThroughput as TOS_THR
-from pcapkit.const.reg.transtype import TransType
-from pcapkit.corekit.infoclass import Info
+from pcapkit.const.ipv4.classification_level import \
+    ClassificationLevel as RegType_ClassificationLevel
+from pcapkit.const.ipv4.option_class import OptionClass as RegType_OptionClass
+from pcapkit.const.ipv4.option_number import OptionNumber as RegType_OptionNumber
+from pcapkit.const.ipv4.protection_authority import \
+    ProtectionAuthority as RegType_ProtectionAuthority
+from pcapkit.const.ipv4.qs_function import QSFunction as RegType_QSFunction
+from pcapkit.const.ipv4.router_alert import RouterAlert as RegType_RouterAlert
+from pcapkit.const.ipv4.tos_del import ToSDelay as RegType_ToSDelay
+from pcapkit.const.ipv4.tos_ecn import ToSECN as RegType_ToSECN
+from pcapkit.const.ipv4.tos_pre import ToSPrecedence as RegType_ToSPrecedence
+from pcapkit.const.ipv4.tos_rel import ToSReliability as RegType_ToSReliability
+from pcapkit.const.ipv4.tos_thr import ToSThroughput as RegType_ToSThroughput
+from pcapkit.const.ipv4.ts_flag import TSFlag as RegType_TSFlag
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.protocols.data.internet.ipv4 import EOOLOption as DataType_EOOLOption
+from pcapkit.protocols.data.internet.ipv4 import ESECOption as DataType_ESECOption
+from pcapkit.protocols.data.internet.ipv4 import Flags as DataType_Flags
+from pcapkit.protocols.data.internet.ipv4 import IPv4 as DataType_IPv4
+from pcapkit.protocols.data.internet.ipv4 import LSROption as DataType_LSROption
+from pcapkit.protocols.data.internet.ipv4 import MTUPOption as DataType_MTUPOption
+from pcapkit.protocols.data.internet.ipv4 import MTUROption as DataType_MTUROption
+from pcapkit.protocols.data.internet.ipv4 import NOPOption as DataType_NOPOption
+from pcapkit.protocols.data.internet.ipv4 import OptionType as DataType_OptionType
+from pcapkit.protocols.data.internet.ipv4 import QSOption as DataType_QSOption
+from pcapkit.protocols.data.internet.ipv4 import RROption as DataType_RROption
+from pcapkit.protocols.data.internet.ipv4 import RTRALTOption as DataType_RTRALTOption
+from pcapkit.protocols.data.internet.ipv4 import SECOption as DataType_SECOption
+from pcapkit.protocols.data.internet.ipv4 import SIDOption as DataType_SIDOption
+from pcapkit.protocols.data.internet.ipv4 import SSROption as DataType_SSROption
+from pcapkit.protocols.data.internet.ipv4 import ToSField as DataType_ToSField
+from pcapkit.protocols.data.internet.ipv4 import TROption as DataType_TROption
+from pcapkit.protocols.data.internet.ipv4 import TSOption as DataType_TSOption
+from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as DataType_UnassignedOption
 from pcapkit.protocols.internet.ip import IP
 from pcapkit.utilities.exceptions import ProtocolError
 
+if TYPE_CHECKING:
+    from datetime import datetime as dt_type
+    from ipaddress import IPv4Address
+    from typing import Any, Callable, NoReturn, Optional
+
+    from mypy_extensions import NamedArg
+    from typing_extensions import Literal
+
+    from pcapkit.protocols.data.internet.ipv4 import Option as DataType_Option
+
+    Option = OrderedMultiDict[RegType_OptionNumber, DataType_Option]
+    OptionParser = Callable[[RegType_OptionNumber, NamedArg(Option, 'options')], DataType_Option]
+
 __all__ = ['IPv4']
-
-T = True
-F = False
-
-# pylint: disable=protected-access
-process_opt = {
-    0: lambda self, size, kind: self._read_mode_donone(size, kind),    # do nothing
-    1: lambda self, size, kind: self._read_mode_unpack(size, kind),    # unpack according to size
-    2: lambda self, size, kind: self._read_mode_route(size, kind),     # route data
-    3: lambda self, size, kind: self._read_mode_qs(size, kind),        # Quick-Start
-    4: lambda self, size, kind: self._read_mode_ts(size, kind),        # Time Stamp
-    5: lambda self, size, kind: self._read_mode_tr(size, kind),        # Traceroute
-    6: lambda self, size, kind: self._read_mode_sec(size, kind),       # (Extended) Security
-    7: lambda self, size, kind: self._read_mode_rsralt(size, kind),    # Router Alert
-}
-
-IPv4_OPT = {                 # # copy  class  number  kind  length  process          name
-    0:    (F, 'eool'),       # #   0     0       0      0      -       -     [RFC 791] End of Option List
-    1:    (F, 'nop'),        # #   0     0       1      1      -       -     [RFC 791] No-Operation
-    7:    (T, 'rr', 2),      # #   0     0       7      7      N       2     [RFC 791] Record Route
-    11:   (T, 'mtup', 1),    # #   0     0      11     11      4       1     [RFC 1063][RFC 1191] MTU Probe
-    12:   (T, 'mtur', 1),    # #   0     0      12     12      4       1     [RFC 1063][RFC 1191] MTU Reply
-    25:   (T, 'qs', 3),      # #   0     0      25     25      8       3     [RFC 4782] Quick-Start
-    68:   (T, 'ts', 4),      # #   0     2       4     68      N       4     [RFC 791] Time Stamp
-    82:   (T, 'tr', 5),      # #   0     2      18     82      N       5     [RFC 1393][RFC 6814] Traceroute
-    130:  (T, 'sec', 6),     # #   1     0       2    130      N       6     [RFC 1108] Security
-    131:  (T, 'lsr', 2),     # #   1     0       3    131      N       2     [RFC 791] Loose Source Route
-    133:  (T, 'esec', 6),    # #   1     0       5    133      N       6     [RFC 1108] Extended Security
-    136:  (T, 'sid', 1),     # #   1     0       8    136      4       1     [RFC 791][RFC 6814] Stream ID
-    137:  (T, 'ssr', 2),     # #   1     0       9    137      N       2     [RFC 791] Strict Source Route
-    145:  (T, 'eip', 0),     # #   1     0      17    145      N       0     [RFC 1385][RFC 6814] Ext. Inet. Protocol
-    148:  (T, 'rtralt', 7),  # #   1     0      20    148      4       7     [RFC 2113] Router Alert
-}
-"""IPv4 Option Utility Table
-
-T | F
-    bool, short of True / False
-
-IPv4_OPT
-    dict, IPv4 option dict.
-    Value is a tuple which contains:
-        |--> bool, if length greater than 1
-        |       |--> T - True
-        |       |--> F - False
-        |--> str, description string, also attribute name
-        |--> (optional) int, process that data bytes need (when length greater than 2)
-                |--> 0: do nothing
-                |--> 1: unpack according to size
-                |--> 2: unpack route data options then add to dict
-                |--> 3: unpack Quick-Start then add to dict
-                |--> 4: unpack Time Stamp then add to dict
-                |--> 5: unpack Traceroute then add to dict
-                |--> 6: unpack (Extended) Security then add tot dict
-                |--> 7: unpack Router Alert then add to dict
-
-"""
 
 
 class IPv4(IP):
     """This class implements Internet Protocol version 4."""
+
+    #: Parsed packet data.
+    _info: 'DataType_IPv4'
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of corresponding protocol.
-
-        :rtype: Literal['Internet Protocol version 4']
-        """
+    def name(self) -> 'Literal["Internet Protocol version 4"]':
+        """Name of corresponding protocol."""
         return 'Internet Protocol version 4'
 
     @property
-    def length(self):
-        """Header length of corresponding protocol.
-
-        :rtype: int
-        """
-        return self._info.hdr_len  # pylint: disable=E1101
+    def length(self) -> 'int':
+        """Header length of corresponding protocol."""
+        return self._info.hdr_len
 
     @property
-    def protocol(self):
-        """Name of next layer protocol.
-
-        :rtype: pcapkit.const.reg.transtype.TransType
-        """
-        return self._info.proto  # pylint: disable=E110
+    def protocol(self) -> 'RegType_TransType':
+        """Name of next layer protocol."""
+        return self._info.protocol
 
     # source IP address
     @property
-    def src(self):
-        """Source IP address.
-
-        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
-        """
-        return self._info.src  # pylint: disable=E1101
+    def src(self) -> 'IPv4Address':
+        """Source IP address."""
+        return self._info.src
 
     # destination IP address
     @property
-    def dst(self):
-        """Destination IP address.
-
-        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
-        """
-        return self._info.dst  # pylint: disable=E1101
+    def dst(self) -> 'IPv4Address':
+        """Destination IP address."""
+        return self._info.dst
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_IPv4':  # pylint: disable=unused-argument
         """Read Internet Protocol version 4 (IPv4).
 
         Structure of IPv4 header [:rfc:`791`]::
@@ -184,13 +152,13 @@ class IPv4(IP):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_IPv4: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -207,292 +175,339 @@ class IPv4(IP):
         _srca = self._read_ipv4_addr()
         _dsta = self._read_ipv4_addr()
 
-        ipv4 = dict(
-            version=int(_vihl[0]),
+        _vers = int(_vihl[0], base=16)
+        if _vers != 4:
+            raise ProtocolError(f'[IPv4] invalid version: {_vers}')
+
+        ipv4 = DataType_IPv4(
+            version=_vers,  # type: ignore[arg-type]
             hdr_len=int(_vihl[1], base=16) * 4,
-            dsfield=dict(
-                dscp={
-                    'pre': TOS_PRE.get(int(_dscp[:3], base=2)),
-                    'del': TOS_DEL.get(int(_dscp[3], base=2)),
-                    'thr': TOS_THR.get(int(_dscp[4], base=2)),
-                    'rel': TOS_REL.get(int(_dscp[5], base=2)),
-                },
-                ecn=TOS_ECN.get(int(_dscp[-2:], base=2)),
-            ),
+            tos=DataType_ToSField.from_dict({  # type: ignore[arg-type]
+                'pre': RegType_ToSPrecedence.get(int(_dscp[:3], base=2)),
+                'del': RegType_ToSDelay.get(int(_dscp[3], base=2)),
+                'thr': RegType_ToSThroughput.get(int(_dscp[4], base=2)),
+                'rel': RegType_ToSReliability.get(int(_dscp[5], base=2)),
+                'ecn': RegType_ToSECN.get(int(_dscp[6:], base=2)),
+            }),
             len=_tlen,
             id=_iden,
-            flags=dict(
+            flags=DataType_Flags(
                 df=bool(int(_frag[1])),
                 mf=bool(int(_frag[2])),
             ),
-            frag_offset=int(_frag[3:], base=2) * 8,
-            ttl=_ttol,
-            proto=_prot,
+            offset=int(_frag[3:], base=2) * 8,
+            ttl=datetime.timedelta(seconds=_ttol),
+            protocol=_prot,
             checksum=_csum,
             src=_srca,
             dst=_dsta,
         )
 
-        _optl = ipv4['hdr_len'] - 20
+        _optl = ipv4.hdr_len - 20
         if _optl:
-            options = self._read_ipv4_options(_optl)
-            ipv4['opt'] = options[0]    # tuple of option acronyms
-            ipv4.update(options[1])     # merge option info to buffer
-            # ipv4['opt'] = self._read_fileng(_optl) or None
+            ipv4.__update__([
+                ('options', self._read_ipv4_options(_optl)),
+            ])
 
-        hdr_len = ipv4['hdr_len']
-        raw_len = ipv4['len'] - hdr_len
-        ipv4['packet'] = self._read_packet(header=hdr_len, payload=raw_len)
+        return self._decode_next_layer(ipv4, _prot, ipv4.len - ipv4.hdr_len)  # type: ignore[return-value]
 
-        return self._decode_next_layer(ipv4, _prot, raw_len)
-
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
-
-    @classmethod
-    def id(cls):
-        """Index ID of the protocol.
-
-        Returns:
-           Literal['IPv4']: Index ID of the protocol.
-
-        """
-        return cls.__name__
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[20]
-        """
+    def __length_hint__(self) -> 'Literal[20]':
+        """Return an estimated length for the object."""
         return 20
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TransType(4)
+        return RegType_TransType.IPv4  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_ipv4_addr(self):
+    def _read_ipv4_addr(self) -> 'IPv4Address':
         """Read IP address.
 
         Returns:
-            ipaddress.IPv4Address: Parsed IP address.
+            Parsed IP address.
 
         """
-        # _byte = self._read_fileng(4)
+        _byte = self._read_fileng(4)
         # _addr = '.'.join([str(_) for _ in _byte])
         # return _addr
-        return ipaddress.ip_address(self._read_fileng(4))
+        return ipaddress.ip_address(_byte)
 
-    def _read_opt_type(self, kind):  # pylint: disable=no-self-use
+    def _read_ipv4_opt_type(self, code: 'int') -> 'DataType_OptionType':  # pylint: disable=no-self-use
         """Read option type field.
 
         Arguments:
-            kind (int): option kind value
+            code: option kind value
 
         Returns:
-            DataType_IPv4_Option_Type: extracted IPv4 option
+            Extracted IPv4 option type, as an object of the option flag (copied
+            flag), option class, and option number.
 
         """
-        bin_ = bin(kind)[2:].zfill(8)
+        bin_ = bin(code)[2:].zfill(8)
 
-        type_ = {
-            'copy': bool(int(bin_[0], base=2)),
-            'class': opt_class.get(int(bin_[1:3], base=2)),
-            'number': int(bin_[3:], base=2),
-        }
+        oflg = bool(int(bin_[0], base=2))
+        ocls = RegType_OptionClass.get(int(bin_[1:3], base=2))
+        onum = int(bin_[3:], base=2)
 
-        return type_
+        return DataType_OptionType.from_dict({
+            'change': oflg,
+            'class': ocls,
+            'number': onum,
+        })  # type: ignore[return-value]
 
-    def _read_ipv4_options(self, size=None):
+    def _read_ipv4_options(self, length: 'int') -> 'Option':
         """Read IPv4 option list.
 
         Arguments:
-            size (Optional[int]): buffer size
+            length: length of options
 
         Returns:
-            Tuple[Tuple[pcapkit.const.ipv4.option_number.OptionNumber],
-            Dict[str, Union[DataType_Opt, Tuple[DataType_Opt]]]]: IPv4
-            option list and extracted IPv4 options
+            Extracted IPv4 options.
+
+        Raises:
+            ProtocolError: If the threshold is **NOT** matching.
 
         """
-        counter = 0         # length of read option list
-        optkind = list()    # option kind list
-        options = dict()    # dict of option data
+        counter = 0                   # length of read option list
+        options = OrderedMultiDict()  # type: Option
 
-        while counter < size:
-            # get option kind
-            kind = self._read_unpack(1)
-
-            # fetch corresponding option tuple
-            opts = IPv4_OPT.get(kind)
-            if opts is None:
-                len_ = size - counter
-                counter = size
-                options['Unknown'] = self._read_fileng(len_)
+        while counter < length:
+            # break when eol triggerred
+            code = self._read_unpack(1)
+            if not code:
                 break
 
-            # extract option
-            dscp = OPT_TYPE.get(kind)
-            desc = dscp.name
-            if opts[0]:
-                byte = self._read_unpack(1)
-                if byte:    # check option process mode
-                    data = process_opt[opts[2]](self, byte, kind)
-                else:       # permission options (length is 2)
-                    data = dict(
-                        kind=kind,                          # option kind
-                        type=self._read_opt_type(kind),     # option type info
-                        length=2,                           # option length
-                        flag=True,                          # permission flag
-                    )
-            else:           # 1-byte options
-                byte = 1
+            # get options type
+            kind = RegType_OptionNumber.get(code)
 
-                data = dict(
-                    kind=kind,                          # option kind
-                    type=self._read_opt_type(kind),     # option type info
-                    length=1,                           # option length
-                )
+            # extract option data
+            meth_name = f'_read_opt_{kind.name.lower()}'
+            meth = getattr(self, meth_name, self._read_opt_unassigned)  # type: OptionParser
+            data = meth(self, kind, options=options)  # type: ignore[arg-type,misc]
 
             # record option data
-            counter += byte
-            if dscp in optkind:
-                if isinstance(options[desc], tuple):
-                    options[desc] += (Info(data),)
-                else:
-                    options[desc] = (Info(options[desc]), Info(data))
-            else:
-                optkind.append(dscp)
-                options[desc] = data
+            counter += data.length
+            options.add(kind, data)
 
-            # break when eol triggered
-            if not kind:
+            # break when End of Option List (EOOL) triggered
+            if kind == RegType_OptionNumber.EOOL:
                 break
 
         # get padding
-        if counter < size:
-            len_ = size - counter
-            self._read_binary(len_)
+        if counter < length:
+            self._read_binary(length - counter)
 
-        return tuple(optkind), options
+        return options
 
-    def _read_mode_donone(self, size, kind):
-        """Read options require no process.
+    def _read_opt_unassigned(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_UnassignedOption':  # pylint: disable=unused-argument
+        """Read IPv4 unassigned options.
+
+        Structure of IPv4 unassigned options [:rfc:`791`]:
+
+        .. code-block:: text
+
+             0                   1                   2                   3
+             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+            |     type      |    length     |         option data ...
+            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Arguments:
-            size (int): length of option
-            kind (int): option kind value
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
 
         Returns:
-            DataType_Opt_Do_None: extracted option
+            Parsed option data.
 
         Raises:
             ProtocolError: If ``size`` is **LESS THAN** ``3``.
 
         """
+        size = self._read_unpack(1)
         if size < 3:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = dict(
-            kind=kind,
-            type=self._read_opt_type(kind),
+        data = DataType_UnassignedOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
             length=size,
             data=self._read_fileng(size),
         )
 
         return data
 
-    def _read_mode_unpack(self, size, kind):
-        """Read options require unpack process.
+    def _read_opt_eool(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_EOOLOption':  # pylint: disable=unused-argument
+        """Read IPv4 End of Option List (``EOOL``) option.
+
+        Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`719`]:
+
+        .. code-block:: text
+
+           +--------+
+           |00000000|
+           +--------+
+             Type=0
 
         Arguments:
-            size (int): length of option
-            kind (int): option kind value
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
 
         Returns:
-            DataType_Opt_Unpack: extracted option
+            Parsed option data.
+
+        """
+        data = DataType_EOOLOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=1,
+        )
+
+        return data
+
+    def _read_opt_nop(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_NOPOption':  # pylint: disable=unused-argument
+        """Read IPv4 No Operation (``NOP``) option.
+
+        Structure of IPv4 No Operation (``NOP``) option [:rfc:`719`]:
+
+        .. code-block:: text
+
+           +--------+
+           |00000001|
+           +--------+
+             Type=1
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        """
+        data = DataType_NOPOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=1,
+        )
+
+        return data
+
+    def _read_opt_sec(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_SECOption':  # pylint: disable=unused-argument
+        """Read IPv4 Security (``SEC``) option.
+
+        Structure of IPv4 Security (``SEC``) option [:rfc:`1108`]:
+
+        .. code-block:: text
+
+           +------------+------------+------------+-------------//----------+
+           |  10000010  |  XXXXXXXX  |  SSSSSSSS  |  AAAAAAA[1]    AAAAAAA0 |
+           |            |            |            |         [0]             |
+           +------------+------------+------------+-------------//----------+
+             TYPE = 130     LENGTH   CLASSIFICATION         PROTECTION
+                                          LEVEL              AUTHORITY
+                                                               FLAGS
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
 
         Raises:
             ProtocolError: If ``size`` is **LESS THAN** ``3``.
 
         """
+        size = self._read_unpack(1)
         if size < 3:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = dict(
-            kind=kind,
-            type=self._read_opt_type(kind),
+        _clvl = self._read_unpack(1)
+
+        if size > 3:
+            _data = OrderedMultiDict()  # type: OrderedMultiDict[RegType_ProtectionAuthority, bool]
+            for counter in range(3, size):
+                _flag = self._read_binary(1)
+                if (counter < size - 1 and int(_flag[7], base=2) != 1) \
+                        or (counter == size - 1 and int(_flag[7], base=2) != 0):
+                    raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+                for (index, bit) in enumerate(_flag):
+                    _auth = RegType_ProtectionAuthority.get(index)
+                    _data.add(_auth, bool(int(bit, base=2)))
+        else:
+            _data = None  # type: ignore[assignment]
+
+        data = DataType_SECOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
             length=size,
-            data=self._read_unpack(size),
+            level=RegType_ClassificationLevel.get(_clvl),
+            flags=_data,
         )
 
         return data
 
-    def _read_mode_route(self, size, kind):
-        """Read options with route data.
+    def _read_opt_lsr(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_LSROption':  # pylint: disable=unused-argument
+        """Read IPv4 Loose Source Route (``LSR``) option.
 
-        Structure of these options [:rfc:`791`]:
+        Structure of IPv4 Loose Source Route (``LSR``) option [:rfc:`791`]:
 
-        * Loose Source Route
+        .. code-block:: text
 
-          .. code-block:: text
-
-             +--------+--------+--------+---------//--------+
-             |10000011| length | pointer|     route data    |
-             +--------+--------+--------+---------//--------+
-
-        * Strict Source Route
-
-          .. code-block:: text
-
-             +--------+--------+--------+---------//--------+
-             |10001001| length | pointer|     route data    |
-             +--------+--------+--------+---------//--------+
-
-        * Record Route
-
-          .. code-block:: text
-
-             +--------+--------+--------+---------//--------+
-             |00000111| length | pointer|     route data    |
-             +--------+--------+--------+---------//--------+
+           +--------+--------+--------+---------//--------+
+           |10000011| length | pointer|     route data    |
+           +--------+--------+--------+---------//--------+
 
         Arguments:
-            size (int): length of option
-            kind (Literal[7, 131, 137]): option kind value (RR/LSR/SSR)
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
 
         Returns:
-            DataType_Opt_Route_Data: extracted option with route data
+            Parsed option data.
 
         Raises:
-            ProtocolError: If the option is malformed.
+            ProtocolError: If option is malformed.
 
         """
+        size = self._read_unpack(1)
         if size < 3 or (size - 3) % 4 != 0:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
@@ -500,27 +515,467 @@ class IPv4(IP):
         if _rptr < 4:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = dict(
-            kind=kind,
-            type=self._read_opt_type(kind),
-            length=size,
-            pointer=_rptr,
-        )
-
         counter = 4
-        address = list()
+        address = []  # type: list[IPv4Address]
         endpoint = min(_rptr, size)
         while counter < endpoint:
             counter += 4
             address.append(self._read_ipv4_addr())
-        data['data'] = tuple(address) or None
+
+        data = DataType_LSROption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            pointer=_rptr,
+            route=tuple(address) or None,
+        )
 
         return data
 
-    def _read_mode_qs(self, size, kind):
-        """Read Quick Start option.
+    def _read_opt_ts(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_TSOption':  # pylint: disable=unused-argument
+        """Read IPv4 Time Stamp (``TS``) option.
 
-        Structure of Quick-Start (QS) option [:rfc:`4782`]:
+        Structure of IPv4 Time Stamp (``TS``) option [:rfc:`791`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+
+           |01000100| length | pointer|oflw|flg|
+           +--------+--------+--------+--------+
+           |         internet address          |
+           +--------+--------+--------+--------+
+           |             timestamp             |
+           +--------+--------+--------+--------+
+           |                 .                 |
+                             .
+                             .
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If the option is malformed.
+
+        """
+        size = self._read_unpack(1)
+        if size > 40 or size < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        _tptr = self._read_unpack(1)
+        _oflg = self._read_binary(1)
+        _oflw = int(_oflg[:4], base=2)
+        _tflg = int(_oflg[4:], base=2)
+
+        if _tptr < 5:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        _flag = RegType_TSFlag.get(_tflg)
+
+        endpoint = min(_tptr, size)
+        if _flag == RegType_TSFlag.Timestamp_Only:
+            if (size - 4) % 4 != 0:
+                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+            counter = 5
+
+            _tsls = []  # type: list[dt_type]
+            while counter < endpoint:
+                counter += 4
+                time = self._read_unpack(4, lilendian=True)
+                _tsls.append(datetime.datetime.fromtimestamp(time))
+            timestamp = tuple(_tsls) or None
+        elif _flag in (RegType_TSFlag.IP_with_Timestamp, RegType_TSFlag.Prespecified_IP_with_Timestamp):
+            if (size - 4) % 8 != 0:
+                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+            counter = 5
+            _tsdt = OrderedMultiDict()  # type: OrderedMultiDict[IPv4Address, dt_type]
+            while counter < endpoint:
+                counter += 8
+                ip = self._read_ipv4_addr()
+                time = self._read_unpack(4, lilendian=True)
+                _tsdt.add(ip, datetime.datetime.fromtimestamp(time))
+            timestamp = _tsdt or None  # type: ignore[assignment]
+        else:
+            timestamp = self._read_fileng(size - 4) or None  # type: ignore[assignment]
+
+        data = DataType_TSOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            pointer=_tptr,
+            overflow=_oflw,
+            flag=_flag,
+            timestamp=timestamp,
+        )
+
+        return data
+
+    def _read_opt_esec(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_ESECOption':  # pylint: disable=unused-argument
+        """Read IPv4 Extended Security (``ESEC``) option.
+
+        Structure of IPv4 Extended Security (``ESEC``) option [:rfc:`1108`]:
+
+        .. code-block:: text
+
+           +------------+------------+------------+-------//-------+
+           |  10000101  |  000LLLLL  |  AAAAAAAA  |  add sec info  |
+           +------------+------------+------------+-------//-------+
+            TYPE = 133      LENGTH     ADDITIONAL      ADDITIONAL
+                                      SECURITY INFO     SECURITY
+                                       FORMAT CODE        INFO
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``size`` is **LESS THAN** ``3``.
+
+        """
+        size = self._read_unpack(1)
+        if size < 3:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        _clvl = self._read_unpack(1)
+
+        if size > 3:
+            _data = OrderedMultiDict()  # type: OrderedMultiDict[RegType_ProtectionAuthority, bool]
+            for counter in range(3, size):
+                _flag = self._read_binary(1)
+                if (counter < size - 1 and int(_flag[7], base=2) != 1) \
+                        or (counter == size - 1 and int(_flag[7], base=2) != 0):
+                    raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+                for (index, bit) in enumerate(_flag):
+                    _auth = RegType_ProtectionAuthority.get(index)
+                    _data.add(_auth, bool(int(bit, base=2)))
+        else:
+            _data = None  # type: ignore[assignment]
+
+        data = DataType_ESECOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            level=RegType_ClassificationLevel.get(_clvl),
+            flags=_data,
+        )
+
+        return data
+
+    def _read_opt_rr(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_RROption':  # pylint: disable=unused-argument
+        """Read IPv4 Record Route (``RR``) option.
+
+        Structure of IPv4 Record Route (``RR``) option [:rfc:`791`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+---------//--------+
+           |00000111| length | pointer|     route data    |
+           +--------+--------+--------+---------//--------+
+             Type=7
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If option is malformed.
+
+        """
+        size = self._read_unpack(1)
+        if size < 3 or (size - 3) % 4 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        _rptr = self._read_unpack(1)
+        if _rptr < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        counter = 4
+        address = []  # type: list[IPv4Address]
+        endpoint = min(_rptr, size)
+        while counter < endpoint:
+            counter += 4
+            address.append(self._read_ipv4_addr())
+
+        data = DataType_RROption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            pointer=_rptr,
+            route=tuple(address) or None,
+        )
+
+        return data
+
+    def _read_opt_sid(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_SIDOption':  # pylint: disable=unused-argument
+        """Read IPv4 Stream ID (``SID``) option.
+
+        Structure of IPv4 Stream ID (``SID``) option [:rfc:`791`][:rfc:`6814`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+
+           |10001000|00000010|    Stream ID    |
+           +--------+--------+--------+--------+
+            Type=136 Length=4
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``size`` is **NOT** ``4``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        data = DataType_SIDOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            sid=self._read_unpack(size),
+        )
+
+        return data
+
+    def _read_opt_ssr(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_SSROption':  # pylint: disable=unused-argument
+        """Read IPv4 Strict Source Route (``SSR``) option.
+
+        Structure of IPv4 Strict Source Route (``SSR``) option [:rfc:`791`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+---------//--------+
+           |10001001| length | pointer|     route data    |
+           +--------+--------+--------+---------//--------+
+            Type=137
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If option is malformed.
+
+        """
+        size = self._read_unpack(1)
+        if size < 3 or (size - 3) % 4 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        _rptr = self._read_unpack(1)
+        if _rptr < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        counter = 4
+        address = []  # type: list[IPv4Address]
+        endpoint = min(_rptr, size)
+        while counter < endpoint:
+            counter += 4
+            address.append(self._read_ipv4_addr())
+
+        data = DataType_SSROption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            pointer=_rptr,
+            route=tuple(address) or None,
+        )
+
+        return data
+
+    def _read_opt_mtup(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_MTUPOption':  # pylint: disable=unused-argument
+        """Read IPv4 MTU Probe (``MTUP``) option.
+
+        Structure of IPv4 MTU Probe (``MTUP``) option [:rfc:`1063`][:rfc:`1191`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+
+           |00001011|00000100|   2 octet value |
+           +--------+--------+--------+--------+
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``size`` is **NOT** ``4``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        data = DataType_MTUPOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            mtu=self._read_unpack(size),
+        )
+
+        return data
+
+    def _read_opt_mtur(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_MTUROption':  # pylint: disable=unused-argument
+        """Read IPv4 MTU Reply (``MTUR``) option.
+
+        Structure of IPv4 MTU Reply (``MTUR``) option [:rfc:`1063`][:rfc:`1191`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+
+           |00001100|00000100|   2 octet value |
+           +--------+--------+--------+--------+
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``size`` is **NOT** ``4``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        data = DataType_MTUROption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            mtu=self._read_unpack(size),
+        )
+
+        return data
+
+    def _read_opt_tr(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_TROption':  # pylint: disable=unused-argument
+        """Read IPv4 Traceroute (``TR``) option.
+
+        Structure of IPv4 Traceroute (``TR``) option [:rfc:`1393`][:rfc:`6814`]:
+
+        .. code-block:: text
+
+             0               8              16              24
+            +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
+            |F| C |  Number |    Length     |          ID Number            |
+            +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
+            |      Outbound Hop Count       |       Return Hop Count        |
+            +---------------+---------------+---------------+---------------+
+            |                     Originator IP Address                     |
+            +---------------+---------------+---------------+---------------+
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``size`` is **NOT** ``12``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 12:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        _idnm = self._read_unpack(2)
+        _ohcn = self._read_unpack(2)
+        _rhcn = self._read_unpack(2)
+        _ipad = self._read_ipv4_addr()
+
+        data = DataType_TROption.from_dict({
+            'code': kind,
+            'type': self._read_ipv4_opt_type(kind),
+            'length': size,
+            'id': _idnm,
+            'outbound': _ohcn,
+            'return': _rhcn,
+            'originator': _ipad,
+        })
+
+        return data  # type: ignore[return-value]
+
+    def _read_opt_rsralt(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_RTRALTOption':  # pylint: disable=unused-argument
+        """Read IPv4 Router Alert (``RTRALT``) option.
+
+        Structure of IPv4 Router Alert (``RTRALT``) option [:rfc:`2113`]:
+
+            +--------+--------+--------+--------+
+            |10010100|00000100|  2 octet value  |
+            +--------+--------+--------+--------+
+
+        Arguments:
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If ``size`` is **NOT** ``4``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
+
+        _code = self._read_unpack(2)
+
+        data = DataType_RTRALTOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
+            length=size,
+            alert=RegType_RouterAlert.get(_code),
+        )
+
+        return data
+
+    def _read_opt_qs(self, kind: 'RegType_OptionNumber', *, options: 'Option') -> 'DataType_QSOption':  # pylint: disable=unused-argument
+        """Read IPv4 Quick Start (``QS``) option.
+
+        Structure of IPv4 Quick Start (``QS``) option [:rfc:`4782`]:
 
         * A Quick-Start Request
 
@@ -549,20 +1004,22 @@ class IPv4(IP):
              +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Arguments:
-            size (int): length of option
-            kind (Literal[25]): option kind value (QS)
+            kind: option type code
+
+        Keyword Args:
+            options: extracted IPv4 options
 
         Returns:
-            DataType_Opt_QuickStart: extracted Quick Start option
+            Parsed option data.
 
         Raises:
             ProtocolError: If the option is malformed.
 
         """
+        size = self._read_unpack(1)
         if size != 8:
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        _type = self._read_opt_type(kind)
         _fcrr = self._read_binary(1)
         _func = int(_fcrr[:4], base=2)
         _rate = int(_fcrr[4:], base=2)
@@ -570,232 +1027,18 @@ class IPv4(IP):
         _nonr = self._read_binary(4)
         _qsnn = int(_nonr[:30], base=2)
 
-        if _func not in (0, 8):
+        _qsfn = RegType_QSFunction.get(_func)
+        if _qsfn not in (RegType_QSFunction.Quick_Start_Request, RegType_QSFunction.Report_of_Approved_Rate):
             raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
 
-        data = dict(
-            kind=kind,
-            type=_type,
+        data = DataType_QSOption(
+            code=kind,
+            type=self._read_ipv4_opt_type(kind),
             length=size,
-            func=QS_FUNC.get(_func),
+            func=_qsfn,
             rate=40000 * (2 ** _rate) / 1000,
-            ttl=None if _func else _rate,
+            ttl=None if _func != RegType_QSFunction.Quick_Start_Request else datetime.timedelta(seconds=_ttlv),
             nounce=_qsnn,
-        )
-
-        return data
-
-    def _read_mode_ts(self, size, kind):
-        """Read Time Stamp option.
-
-        Structure of Timestamp (TS) option [:rfc:`791`]::
-
-            +--------+--------+--------+--------+
-            |01000100| length | pointer|oflw|flg|
-            +--------+--------+--------+--------+
-            |         internet address          |
-            +--------+--------+--------+--------+
-            |             timestamp             |
-            +--------+--------+--------+--------+
-            |                 .                 |
-                              .
-                              .
-
-        Arguments:
-            size (int): length of option
-            kind (Literal[68]): option kind value (TS)
-
-        Returns:
-            DataType_Opt_TimeStamp: extracted Time Stamp option
-
-        Raises:
-            ProtocolError: If the option is malformed.
-
-        """
-        if size > 40 or size < 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        _tptr = self._read_unpack(1)
-        _oflg = self._read_binary(1)
-        _oflw = int(_oflg[:4], base=2)
-        _flag = int(_oflg[4:], base=2)
-
-        if _tptr < 5:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        data = dict(
-            kind=kind,
-            type=self._read_opt_type(kind),
-            length=size,
-            pointer=_tptr,
-            overflow=_oflw,
-            flag=_flag,
-        )
-
-        endpoint = min(_tptr, size)
-        if _flag == 0:
-            if (size - 4) % 4 != 0:
-                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-            counter = 5
-            timestamp = list()
-            while counter < endpoint:
-                counter += 4
-                time = self._read_unpack(4, lilendian=True)
-                timestamp.append(datetime.datetime.fromtimestamp(time))
-            data['timestamp'] = timestamp or None
-        elif _flag in (1, 3):
-            if (size - 4) % 8 != 0:
-                raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-            counter = 5
-            ipaddress = list()  # pylint: disable=redefined-outer-name
-            timestamp = list()
-            while counter < endpoint:
-                counter += 8
-                ipaddress.append(self._read_ipv4_addr())
-                time = self._read_unpack(4, lilendian=True)
-                timestamp.append(datetime.datetime.fromtimestamp(time))
-            data['ip'] = tuple(ipaddress) or None
-            data['timestamp'] = tuple(timestamp) or None
-        else:
-            data['data'] = self._read_fileng(size - 4) or None
-
-        return data
-
-    def _read_mode_tr(self, size, kind):
-        """Read Traceroute option.
-
-        Structure of Traceroute (TR) option [:rfc:`6814`]::
-
-             0               8              16              24
-            +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
-            |F| C |  Number |    Length     |          ID Number            |
-            +-+-+-+-+-+-+-+-+---------------+---------------+---------------+
-            |      Outbound Hop Count       |       Return Hop Count        |
-            +---------------+---------------+---------------+---------------+
-            |                     Originator IP Address                     |
-            +---------------+---------------+---------------+---------------+
-
-        Arguments:
-            size (int): length of option
-            kind (Literal[82]): option kind value (TR)
-
-        Returns:
-            DataType_Opt_Traceroute: extracted Traceroute option
-
-        Raises:
-            ProtocolError: If ``size`` is **NOT** ``12``.
-
-        """
-        if size != 12:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        _idnm = self._read_unpack(2)
-        _ohcn = self._read_unpack(2)
-        _rhcn = self._read_unpack(2)
-        _ipad = self._read_ipv4_addr()
-
-        data = dict(
-            kind=kind,
-            type=self._read_opt_type(kind),
-            length=size,
-            id=_idnm,
-            ohc=_ohcn,
-            rhc=_rhcn,
-            ip=_ipad,
-        )
-
-        return data
-
-    def _read_mode_sec(self, size, kind):
-        """Read options with security info.
-
-        Structure of these options [:rfc:`1108`]:
-
-        * Security (SEC)
-
-          .. code-block:: text
-
-             +------------+------------+------------+-------------//----------+
-             |  10000010  |  XXXXXXXX  |  SSSSSSSS  |  AAAAAAA[1]    AAAAAAA0 |
-             |            |            |            |         [0]             |
-             +------------+------------+------------+-------------//----------+
-               TYPE = 130     LENGTH   CLASSIFICATION         PROTECTION
-                                            LEVEL              AUTHORITY
-                                                                 FLAGS
-        * Extended Security (ESEC)
-
-          .. code-block:: text
-
-             +------------+------------+------------+-------//-------+
-             |  10000101  |  000LLLLL  |  AAAAAAAA  |  add sec info  |
-             +------------+------------+------------+-------//-------+
-              TYPE = 133      LENGTH     ADDITIONAL      ADDITIONAL
-                                        SECURITY INFO     SECURITY
-                                         FORMAT CODE        INFO
-
-        c
-
-        """
-        if size < 3:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        _clvl = self._read_unpack(1)
-
-        data = dict(
-            kind=kind,
-            type=self._read_opt_type(kind),
-            length=size,
-            level=_CLASSIFICATION_LEVEL.get(_clvl, _clvl),
-        )
-
-        if size > 3:
-            _list = list()
-            for counter in range(3, size):
-                _flag = self._read_binary(1)
-                if (counter < size - 1 and not int(_flag[7], base=2)) \
-                        or (counter == size - 1 and int(_flag[7], base=2)):
-                    raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-                _dict = dict()
-                for (index, bit) in enumerate(_flag[:5]):
-                    _auth = _PROTECTION_AUTHORITY.get(index)
-                    _dict[_auth] = bool(int(bit, base=2))
-                _list.append(Info(_dict))
-            data['flags'] = tuple(_list)
-
-        return data
-
-    def _read_mode_rsralt(self, size, kind):
-        """Read Router Alert option.
-
-        Structure of Router Alert (RTRALT) option [:rfc:`2113`]::
-
-            +--------+--------+--------+--------+
-            |10010100|00000100|  2 octet value  |
-            +--------+--------+--------+--------+
-
-        Arguments:
-            size (int): length of option
-            kind (Literal[140]): option kind value (RTRALT)
-
-        Returns:
-            DataType_Opt_RouterAlert: extracted option with security info
-
-        Raises:
-            ProtocolError: If ``size`` is **NOT** ``4``.
-
-        """
-        if size != 4:
-            raise ProtocolError(f'{self.alias}: [OptNo {kind}] invalid format')
-
-        _code = self._read_unpack(2)
-
-        data = dict(
-            kind=kind,
-            type=self._read_opt_type(kind),
-            length=size,
-            alert=_ROUTER_ALERT.get(_code),
-            code=_code,
         )
 
         return data

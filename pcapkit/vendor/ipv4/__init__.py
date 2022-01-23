@@ -13,7 +13,8 @@ from pcapkit.vendor.ipv4.tos_ecn import ToSECN as IPv4_ToSECN
 from pcapkit.vendor.ipv4.tos_pre import ToSPrecedence as IPv4_ToSPrecedence
 from pcapkit.vendor.ipv4.tos_rel import ToSReliability as IPv4_ToSReliability
 from pcapkit.vendor.ipv4.tos_thr import ToSThroughput as IPv4_ToSThroughput
+from pcapkit.vendor.ipv4.ts_flag import TSFlag as IPv4_TSFlag
 
 __all__ = ['IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
            'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToSDelay', 'IPv4_ToSECN', 'IPv4_ToSPrecedence',
-           'IPv4_ToSReliability', 'IPv4_ToSThroughput']
+           'IPv4_ToSReliability', 'IPv4_ToSThroughput', 'IPv4_TSFlag']

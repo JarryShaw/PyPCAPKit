@@ -39,7 +39,7 @@ __all__ = [
     # IPv4
     'IPv4_ClassificationLevel', 'IPv4_OptionClass', 'IPv4_OptionNumber', 'IPv4_ProtectionAuthority',
     'IPv4_QSFunction', 'IPv4_RouterAlert', 'IPv4_ToSDelay', 'IPv4_ToSECN', 'IPv4_ToSPrecedence',
-    'IPv4_ToSReliability', 'IPv4_ToSThroughput',
+    'IPv4_ToSReliability', 'IPv4_ToSThroughput', 'IPv4_TSFlag',
     # IPv6
     'IPv6_ExtensionHeader', 'IPv6_Option', 'IPv6_QSFunction', 'IPv6_RouterAlert', 'IPv6_Routing',
     'IPv6_SeedID', 'IPv6_SMFDPDMode', 'IPv6_TaggerID',

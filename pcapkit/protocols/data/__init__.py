@@ -66,6 +66,16 @@ __all__ = [
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
     'HOPOPT_IPDFFOption',
 
+    # Internet Protocol version 4
+    'IPv4',
+    'IPv4_ToSField', 'IPv4_Flags',
+    'IPv4_OptionType',
+    'IPv4_UnassignedOption', 'IPv4_EOOLOption', 'IPv4_NOPOption',
+    'IPv4_SECOption', 'IPv4_LSROption', 'IPv4_TSOption',
+    'IPv4_ESECOption', 'IPv4_RROption', 'IPv4_SIDOption',
+    'IPv4_SSROption', 'IPv4_MTUPOption', 'IPv4_MTUROption',
+    'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
+
     # No Payload
     'NoPayload',
 
