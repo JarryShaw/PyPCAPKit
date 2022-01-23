@@ -21,9 +21,18 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/IPv6_packet#Fragment
 
 """
-from pcapkit.const.reg.transtype import TransType
+from typing import TYPE_CHECKING, overload
+
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as DataType_IPv6_Frag
+
+if TYPE_CHECKING:
+    from typing import Any, Optional, NoReturn, BinaryIO
+    from typing_extensions import Literal
+    from pcapkit.protocols.protocol import Protocol
+    from pcapkit.corekit.protochain import ProtoChain
 
 __all__ = ['IPv6_Frag']
 
@@ -36,31 +45,22 @@ class IPv6_Frag(Internet):
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['Fragment Header for IPv6']
-        """
+    def name(self) -> 'Literal["Fragment Header for IPv6"]':
+        """Name of current protocol."""
         return 'Fragment Header for IPv6'
 
     @property
-    def alias(self):
-        """Acronym of corresponding protocol.
-
-        :rtype: Literal['IPv6-Frag']
-        """
+    def alias(self) -> 'Literal["IPv6-Frag"]':
+        """Acronym of corresponding protocol."""
         return 'IPv6-Frag'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: int
-        """
-        return self._info.length  # pylint: disable=E1101
+    def length(self) -> 'Literal[8]':
+        """Header length of current protocol."""
+        return 8
 
     @property
-    def payload(self):
+    def payload(self) -> 'Protocol | NoReturn':
         """Payload of current instance.
 
         Raises:
@@ -73,37 +73,56 @@ class IPv6_Frag(Internet):
         return self._next
 
     @property
-    def protocol(self):
-        """Name of next layer protocol.
+    def protocol(self) -> 'Optional[str] | NoReturn':
+        """Name of next layer protocol (if any).
 
-        :rtype: pcapkit.const.reg.transtype.TransType
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
         """
-        return self._info.next  # pylint: disable=E1101
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        return super().protocol
+
+    @property
+    def protochain(self) -> 'ProtoChain | NoReturn':
+        """Protocol chain of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protochain'")
+        return super().protochain
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
+    def read(self, length: 'Optional[int]' = None, *, extension: 'bool' = False,  # pylint: disable=arguments-differ
+             **kwargs: 'Any') -> 'DataType_IPv6_Frag':  # pylint: disable=unused-argument
         """Read Fragment Header for IPv6.
 
-        Structure of IPv6-Frag header [:rfc:`8200`]::
+        Structure of IPv6-Frag header [:rfc:`8200`]:
 
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |  Next Header  |   Reserved    |      Fragment Offset    |Res|M|
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                         Identification                        |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        .. code-block:: text
+
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |  Next Header  |   Reserved    |      Fragment Offset    |Res|M|
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                         Identification                        |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
-            extension (bool): If the packet is used as an IPv6 extension header.
+            extension: If the packet is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_IPv6_Frag: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -114,30 +133,25 @@ class IPv6_Frag(Internet):
         _offm = self._read_binary(2)
         _ipid = self._read_unpack(4)
 
-        ipv6_frag = dict(
+        ipv6_frag = DataType_IPv6_Frag(
             next=_next,
-            length=8,
             offset=int(_offm[:13], base=2),
             mf=bool(int(_offm[15], base=2)),
             id=_ipid,
         )
 
-        length -= ipv6_frag['length']
-        ipv6_frag['packet'] = self._read_packet(header=8, payload=length)
-
         if extension:
-            self._protos = None
             return ipv6_frag
-        return self._decode_next_layer(ipv6_frag, _next, length)
+        return self._decode_next_layer(ipv6_frag, _next, length - self.length)  # type: ignore[return-value]
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
@@ -146,15 +160,22 @@ class IPv6_Frag(Internet):
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      extension: 'bool' = ..., **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      extension: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
-            extension (bool): If the protocol is used as an IPv6 extension header.
+            extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
@@ -165,24 +186,20 @@ class IPv6_Frag(Internet):
         self._extf = extension
 
         # call super __post_init__
-        super().__post_init__(file, length, extension=extension, **kwargs)
+        super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[8]
-        """
+    def __length_hint__(self) -> 'Literal[8]':
+        """Return an estimated length for the object."""
         return 8
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TransType(44)
+        return RegType_TransType.IPv6_Frag  # type: ignore[return-value]

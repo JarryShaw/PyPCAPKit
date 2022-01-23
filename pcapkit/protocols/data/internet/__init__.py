@@ -115,6 +115,9 @@ from pcapkit.protocols.data.internet.ipv4 import TROption as IPv4_TROption
 from pcapkit.protocols.data.internet.ipv4 import TSOption as IPv4_TSOption
 from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as IPv4_UnassignedOption
 
+# IPv6 Fragment Header
+from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag
+
 __all__ = [
     # Authentication Header
     'AH',
@@ -158,4 +161,7 @@ __all__ = [
     'IPv4_ESECOption', 'IPv4_RROption', 'IPv4_SIDOption',
     'IPv4_SSROption', 'IPv4_MTUPOption', 'IPv4_MTUROption',
     'IPv4_TROption', 'IPv4_RTRALTOption', 'IPv4_QSOption',
+
+    # IPv6 Fragment Header
+    'IPv6_Frag',
 ]
