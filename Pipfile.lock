@@ -28,12 +28,12 @@
     "default": {
         "aenum": {
             "hashes": [
-                "sha256:2ebad8590b6a0183c0d9893523b458edce987ae4533339c5ac185cfac32daf1a",
-                "sha256:7db6e790434baece9e14a97da69118edc89ade821f36590ce32a295f1e500e89",
-                "sha256:d50b9f8aa3e75c179056182820227eb09485e0bd07f968983744dfbd11958350"
+                "sha256:07ea89f43d78b3d5997b32b8d5b0ec3e5be17b3e05b7bac0154b8c484a4aeff5",
+                "sha256:859fe994719e6b5e39f15f73acd84e08b4e57dc642373b177a5fa6646798706a",
+                "sha256:8dbe15f446eb8264b788dfeca163fb0a043d408d212152397dc11377b851e4ae"
             ],
             "index": "tuna",
-            "version": "==3.1.5"
+            "version": "==3.1.8"
         },
         "chardet": {
             "hashes": [
@@ -70,12 +70,12 @@
     "develop": {
         "aenum": {
             "hashes": [
-                "sha256:2ebad8590b6a0183c0d9893523b458edce987ae4533339c5ac185cfac32daf1a",
-                "sha256:7db6e790434baece9e14a97da69118edc89ade821f36590ce32a295f1e500e89",
-                "sha256:d50b9f8aa3e75c179056182820227eb09485e0bd07f968983744dfbd11958350"
+                "sha256:07ea89f43d78b3d5997b32b8d5b0ec3e5be17b3e05b7bac0154b8c484a4aeff5",
+                "sha256:859fe994719e6b5e39f15f73acd84e08b4e57dc642373b177a5fa6646798706a",
+                "sha256:8dbe15f446eb8264b788dfeca163fb0a043d408d212152397dc11377b851e4ae"
             ],
             "index": "tuna",
-            "version": "==3.1.5"
+            "version": "==3.1.8"
         },
         "alabaster": {
             "hashes": [
@@ -83,6 +83,14 @@
                 "sha256:a661d72d58e6ea8a57f7a86e37d86716863ee5e92788398526d58b26a4e4dc02"
             ],
             "version": "==0.7.12"
+        },
+        "appnope": {
+            "hashes": [
+                "sha256:93aa393e9d6c54c5cd570ccadd8edad61ea0c4b9ea7a01409020c9aa019eb442",
+                "sha256:dd83cd4b5b460958838f6eb3000c660b1f9caf2a5b1de4264e941512f603258a"
+            ],
+            "markers": "sys_platform == 'darwin'",
+            "version": "==0.1.2"
         },
         "astroid": {
             "hashes": [
@@ -333,7 +341,7 @@
                 "sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7",
                 "sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951"
             ],
-            "markers": "python_version < '4' and python_full_version >= '3.6.1'",
+            "markers": "python_version < '4.0' and python_full_version >= '3.6.1'",
             "version": "==5.10.1"
         },
         "jedi": {
@@ -655,10 +663,10 @@
         },
         "pure-eval": {
             "hashes": [
-                "sha256:0f04483b16c9429532d2c0ddc96e2b3bb6b2dc37a2bfb0e986248dbfd0b78873",
-                "sha256:94eeb505a88721bec7bb21a4ac49758b8b1a01530da1a70d4ffc1d9937689d71"
+                "sha256:01eaab343580944bc56080ebe0a674b39ec44a945e6d09ba7db3cb8cec289350",
+                "sha256:2b45320af6dfaa1750f543d714b6d1c520a1688dec6fd24d339063ce0aaa9ac3"
             ],
-            "version": "==0.2.1"
+            "version": "==0.2.2"
         },
         "py": {
             "hashes": [
@@ -783,10 +791,6 @@
             ],
             "index": "tuna",
             "version": "==3.3.1"
-        },
-        "sanitized-package": {
-            "editable": true,
-            "path": "."
         },
         "scapy": {
             "hashes": [
@@ -950,7 +954,7 @@
                 "sha256:000ca7f471a233c2251c6c7023ee85305721bfdf18621ebff4fd17a8653427ed",
                 "sha256:0e7c33d9a63e7ddfcb86780aac87befc2fbddf46c58dbb487e0855f7ceec283c"
             ],
-            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'",
+            "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4.0'",
             "version": "==1.26.8"
         },
         "wcwidth": {
