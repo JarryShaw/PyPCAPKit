@@ -93,7 +93,6 @@ from pcapkit.protocols.data.internet.hopopt import \
 from pcapkit.protocols.data.internet.hopopt import \
     TunnelEncapsulationLimitOption as HOPOPT_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.hopopt import UnassignedOption as HOPOPT_UnassignedOption
-
 # Internet Protocol version 4
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as IPv4_EOOLOption
 from pcapkit.protocols.data.internet.ipv4 import ESECOption as IPv4_ESECOption
@@ -117,6 +116,35 @@ from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as IPv4_Unassi
 
 # IPv6 Fragment Header
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag
+
+# IPv6 Destination Options
+from pcapkit.protocols.data.internet.ipv6_opts import CALIPSOOption as IPv6_Opts_CALIPSOOption
+from pcapkit.protocols.data.internet.ipv6_opts import DFFFlags as IPv6_Opts_DFFFlags
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    HomeAddressOption as IPv6_Opts_HomeAddressOption
+from pcapkit.protocols.data.internet.ipv6_opts import ILNPOption as IPv6_Opts_ILNPOption
+from pcapkit.protocols.data.internet.ipv6_opts import IPDFFOption as IPv6_Opts_IPDFFOption
+from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    JumboPayloadOption as IPv6_Opts_JumboPayloadOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    LineIdentificationOption as IPv6_Opts_LineIdentificationOption
+from pcapkit.protocols.data.internet.ipv6_opts import MPLFlags as IPv6_Opts_MPLFlags
+from pcapkit.protocols.data.internet.ipv6_opts import MPLOption as IPv6_Opts_MPLOption
+from pcapkit.protocols.data.internet.ipv6_opts import PadOption as IPv6_Opts_PadOption
+from pcapkit.protocols.data.internet.ipv6_opts import PDMOption as IPv6_Opts_PDMOption
+from pcapkit.protocols.data.internet.ipv6_opts import QuickStartOption as IPv6_Opts_QuickStartOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    RouterAlterOption as IPv6_Opts_RouterAlterOption
+from pcapkit.protocols.data.internet.ipv6_opts import RPLFlags as IPv6_Opts_RPLFlags
+from pcapkit.protocols.data.internet.ipv6_opts import RPLOption as IPv6_Opts_RPLOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    SMFHashBasedDPDOption as IPv6_Opts_SMFHashBasedDPDOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    SMFIdentificationBasedDPDOption as IPv6_Opts_SMFIdentificationBasedDPDOption
+from pcapkit.protocols.data.internet.ipv6_opts import \
+    TunnelEncapsulationLimitOption as IPv6_Opts_TunnelEncapsulationLimitOption
+from pcapkit.protocols.data.internet.ipv6_opts import UnassignedOption as IPv6_Opts_UnassignedOption
 
 __all__ = [
     # Authentication Header
@@ -164,4 +192,14 @@ __all__ = [
 
     # IPv6 Fragment Header
     'IPv6_Frag',
+
+    # IPv6 Destination Options Header
+    'IPv6_Opts',
+    'IPv6_Opts_RPLFlags', 'IPv6_Opts_MPLFlags', 'IPv6_Opts_DFFFlags',
+    'IPv6_Opts_UnassignedOption', 'IPv6_Opts_PadOption', 'IPv6_Opts_TunnelEncapsulationLimitOption',
+    'IPv6_Opts_RouterAlterOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',
+    'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartOption',
+    'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
+    'IPv6_Opts_LineIdentificationOption', 'IPv6_Opts_JumboPayloadOption', 'IPv6_Opts_HomeAddressOption',
+    'IPv6_Opts_IPDFFOption',
 ]
