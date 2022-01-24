@@ -2,6 +2,7 @@
 """data models for IPv6 Fragment Header"""
 
 from typing import TYPE_CHECKING
+
 from pcapkit.corekit.infoclass import Info
 
 if TYPE_CHECKING:

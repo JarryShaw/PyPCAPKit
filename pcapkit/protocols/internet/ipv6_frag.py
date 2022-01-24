@@ -24,21 +24,26 @@ Octets      Bits        Name                    Description
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as DataType_IPv6_Frag
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import UnsupportedCall
-from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag as DataType_IPv6_Frag
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, NoReturn, BinaryIO
+    from typing import Any, BinaryIO, NoReturn, Optional
+
     from typing_extensions import Literal
-    from pcapkit.protocols.protocol import Protocol
+
     from pcapkit.corekit.protochain import ProtoChain
+    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['IPv6_Frag']
 
 
 class IPv6_Frag(Internet):
     """This class implements Fragment Header for IPv6."""
+
+    #: Parsed packet data.
+    _info: 'DataType_IPv6_Frag'
 
     ##########################################################################
     # Properties.
