@@ -93,7 +93,9 @@ class L2TP(Link):
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_L2TP':  # pylint: disable=unused-argument
         """Read Layer Two Tunnelling Protocol.
 
-        Structure of L2TP header [:rfc:`2661`]::
+        Structure of L2TP header [:rfc:`2661`]:
+
+        .. code-block:: text
 
             0                   1                   2                   3
             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1

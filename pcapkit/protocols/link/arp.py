@@ -33,7 +33,6 @@ below:
 
 """
 import ipaddress
-import re
 import sys
 import textwrap
 from typing import TYPE_CHECKING
@@ -120,7 +119,27 @@ class ARP(Link):
         return ('ARP', 'InARP')
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_ARP':  # pylint: disable=unused-argument
-        """Read Address Resolution Protocol [:rfc:`826`].
+        """Read Address Resolution Protocol.
+
+        Data structure of ARP Request header [:rfc:`826`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Hdr Type             |         Proto Type            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |    Hdr Len    |   Proto Len   |          Operation            |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           \                       Sender Hdr Addr                         \
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           \                      Sender Proto Addr                        \
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           \                       Target Hdr Addr                         \
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           \                      Target Proto Addr                        \
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             length: Length of packet data.
@@ -159,10 +178,7 @@ class ARP(Link):
             self._name = 'Address Resolution Protocol'
 
         _htype = RegType_Hardware.get(_hwty)
-        if re.match(r'.*Ethernet.*', _htype.name, re.IGNORECASE):
-            _ptype = RegType_EtherType.get(_ptty)
-        else:
-            _ptype = f'Unknown [{_ptty}]'
+        _ptype = RegType_EtherType.get(_ptty)
 
         arp = DataType_ARP(
             htype=_htype,

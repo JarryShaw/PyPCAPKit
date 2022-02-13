@@ -79,6 +79,20 @@ class VLAN(Link):
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_VLAN':  # pylint: disable=unused-argument
         """Read 802.1Q Customer VLAN Tag Type.
 
+        Structure of 802.1Q Customer VLAN Tag Type [`IEEE 802.1Q <https://standards.ieee.org/ieee/802.1Q/6844/>`__]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |              TCI              |                               |
+           |-------------------------------|                               |
+           |  P  |D|                       |             Type              |
+           |  C  |E|          VID          |                               |
+           |  P  |I|                       |                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
         Args:
             length: Length of packet data.
 

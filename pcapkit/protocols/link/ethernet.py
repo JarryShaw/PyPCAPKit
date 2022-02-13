@@ -82,7 +82,23 @@ class Ethernet(Link):
     ##########################################################################
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Ethernet':  # pylint: disable=unused-argument
-        """Read Ethernet Protocol [:rfc:`7042`].
+        """Read Ethernet Protocol.
+
+        Structure of Ethernet header [:rfc:`7042`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                         Dst MAC Addr                          |
+           +                               +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                               |                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+                               +
+           |                         Src MAC Addr                          |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |          Ether Type           |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             length (Optional[int]): Length of packet data.

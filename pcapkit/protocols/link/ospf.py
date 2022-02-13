@@ -86,7 +86,9 @@ class OSPF(Link):
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_OSPF':
         """Read Open Shortest Path First.
 
-        Structure of OSPF header [:rfc:`2328`]::
+        Structure of OSPF header [:rfc:`2328`]:
+
+        .. code-block:: text
 
             0                   1                   2                   3
             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
