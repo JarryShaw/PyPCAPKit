@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
 """Link-Layer Header Type Values"""
 
+import collections
 import re
+from typing import TYPE_CHECKING
+
+import bs4
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
+
+    from bs4.element import Tag
 
 __all__ = ['LinkType']
 
@@ -16,49 +25,50 @@ class LinkType(Vendor):
     #: Link to registry.
     LINK = 'http://www.tcpdump.org/linktypes.html'
 
-    def count(self, data):
+    def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records."""
+        return collections.Counter()
 
-    def request(self, text):  # pylint: disable=signature-differs
+    def request(self, text: 'str') -> 'list[Tag]':  # type: ignore[override] # pylint: disable=signature-differs
         """Fetch registry table.
 
         Args:
-            text (str): Context from :attr:`~LinkType.LINK`.
+            text: Context from :attr:`~LinkType.LINK`.
 
         Returns:
-            List[str]: Rows (``tr``) from registry table (``table``).
+            Rows (``tr``) from registry table (``table``).
 
         """
-        table = re.split(r'\<[/]*table.*\>', text)[1]
-        return re.split(r'\<tr valign=top\>', table)[1:]
+        soup = bs4.BeautifulSoup(text, 'html5lib')
+        table = soup.select('table.linktypedlt')[0]
+        return table.select('tr')[1:]
 
-    def process(self, data):
+    def process(self, data: 'list[Tag]') -> 'tuple[list[str], list[str]]':
         """Process registry data.
 
         Args:
-            data (List[str]): Registry data.
+            data: Registry data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
-        enum = list()
+        enum = []  # type: list[str]
         miss = [
             "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
         ]
         for content in data:
-            item = content.strip().split('<td>')
-            name = item[1].strip('</td>')[9:]
-            temp = item[2].strip('</td>')
-            desc = item[3].strip('</td>')
+            name = content.select('td.symbol')[0].text.strip()[9:]
+            temp = content.select('td.number')[0].text.strip()
+            desc = content.select('td.symbol')[1].text.strip()
+            cmmt = re.sub(r'\s+', ' ', content.select('td')[3].text.strip())
 
             try:
                 code, _ = temp, int(temp)
 
                 pres = f"{name} = {code}"
-                sufs = f"#: ``{desc}``"
+                sufs = '#: %s' % self.wrap_comment(f"[``{desc}``] {cmmt}")
 
                 # if len(pres) > 74:
                 #     sufs = f"\n{' '*80}{sufs}"
@@ -66,13 +76,13 @@ class LinkType(Vendor):
                 # enum.append(f'{pres.ljust(76)}{sufs}')
                 enum.append(f'{sufs}\n    {pres}')
             except ValueError:
-                start, stop = map(int, temp.split('-'))
+                start, stop = map(int, temp.split('–'))
                 for code in range(start, stop+1):
-                    name = f'USER_{code-start}'
-                    desc = f'DLT_USER_{code-start}'
+                    name = f'USER{code-start}'
+                    desc = f'DLT_USER{code-start}'
 
                     pres = f"{name} = {code}"
-                    sufs = f"#: ``{desc}``"
+                    sufs = f"#: %s" % self.wrap_comment(f"[``{desc}``] {cmmt}")
 
                     # if len(pres) > 74:
                     #     sufs = f"\n{' '*80}{sufs}"

@@ -10,25 +10,25 @@ __all__ = ['Parameter']
 class Parameter(IntEnum):
     """[Parameter] HIP Parameter Types"""
 
-    #: ESP_INFO [:rfc:`7402`] 12
+    #: ESP_INFO [:rfc:`7402`] (Length: 12)
     ESP_INFO = 65
 
-    #: R1_Counter [:rfc:`5201`] 12 (v1 only)
+    #: R1_Counter (v1 only) [:rfc:`5201`] (Length: 12)
     R1_Counter = 128
 
-    #: R1_COUNTER [:rfc:`7401`] 12
+    #: R1_COUNTER [:rfc:`7401`] (Length: 12)
     R1_COUNTER = 129
 
     #: LOCATOR_SET [:rfc:`8046`]
     LOCATOR_SET = 193
 
-    #: PUZZLE [:rfc:`7401`] 12
+    #: PUZZLE [:rfc:`7401`] (Length: 12)
     PUZZLE = 257
 
-    #: SOLUTION [:rfc:`7401`] 20
+    #: SOLUTION [:rfc:`7401`] (Length: 20)
     SOLUTION = 321
 
-    #: SEQ [:rfc:`7401`] 4
+    #: SEQ [:rfc:`7401`] (Length: 4)
     SEQ = 385
 
     #: ACK [:rfc:`7401`]
@@ -43,7 +43,7 @@ class Parameter(IntEnum):
     #: DIFFIE_HELLMAN [:rfc:`7401`]
     DIFFIE_HELLMAN = 513
 
-    #: HIP_TRANSFORM [:rfc:`5201`] (v1 only)
+    #: HIP_TRANSFORM (v1 only) [:rfc:`5201`]
     HIP_TRANSFORM = 577
 
     #: Unassigned
@@ -58,7 +58,7 @@ class Parameter(IntEnum):
     #: Unassigned
     Unassigned_609 = 609
 
-    #: TRANSACTION_PACING [:rfc:`5770`] 4
+    #: TRANSACTION_PACING [:rfc:`5770`] (Length: 4)
     TRANSACTION_PACING = 610
 
     #: ENCRYPTED [:rfc:`7401`]
@@ -100,7 +100,7 @@ class Parameter(IntEnum):
     #: REG_FAILED [:rfc:`8003`]
     REG_FAILED = 936
 
-    #: REG_FROM [:rfc:`5770`] 20
+    #: REG_FROM [:rfc:`5770`] (Length: 20)
     REG_FROM = 950
 
     #: ECHO_RESPONSE_SIGNED [:rfc:`7401`]
@@ -112,7 +112,7 @@ class Parameter(IntEnum):
     #: ESP_TRANSFORM [:rfc:`7402`]
     ESP_TRANSFORM = 4095
 
-    #: SEQ_DATA [:rfc:`6078`] 4
+    #: SEQ_DATA [:rfc:`6078`] (Length: 4)
     SEQ_DATA = 4481
 
     #: ACK_DATA [:rfc:`6078`]
@@ -129,6 +129,21 @@ class Parameter(IntEnum):
 
     #: ROUTE_DST [:rfc:`6028`]
     ROUTE_DST = 4601
+
+    #: RELAYED_ADDRESS [:rfc:`9028`] (Length: 20)
+    RELAYED_ADDRESS = 4650
+
+    #: MAPPED_ADDRESS [:rfc:`9028`] (Length: 20)
+    MAPPED_ADDRESS = 4660
+
+    #: PEER_PERMISSION [:rfc:`9028`] (Length: 48)
+    PEER_PERMISSION = 4680
+
+    #: CANDIDATE_PRIORITY [:rfc:`9028`] (Length: 4)
+    CANDIDATE_PRIORITY = 4700
+
+    #: NOMINATE [:rfc:`9028`] (Length: 4)
+    NOMINATE = 4710
 
     #: HIP_TRANSPORT_MODE [:rfc:`6261`]
     HIP_TRANSPORT_MODE = 7680
@@ -151,19 +166,19 @@ class Parameter(IntEnum):
     #: ECHO_RESPONSE_UNSIGNED [:rfc:`7401`]
     ECHO_RESPONSE_UNSIGNED = 63425
 
-    #: RELAY_FROM [:rfc:`5770`] 20
+    #: RELAY_FROM [:rfc:`5770`] (Length: 20)
     RELAY_FROM = 63998
 
-    #: RELAY_TO [:rfc:`5770`] 20
+    #: RELAY_TO [:rfc:`5770`] (Length: 20)
     RELAY_TO = 64002
 
-    #: OVERLAY_TTL [:rfc:`6079`] 4
+    #: OVERLAY_TTL [:rfc:`6079`] (Length: 4)
     OVERLAY_TTL = 64011
 
     #: ROUTE_VIA [:rfc:`6028`]
     ROUTE_VIA = 64017
 
-    #: FROM [:rfc:`8004`] 16
+    #: FROM [:rfc:`8004`] (Length: 16)
     FROM = 65498
 
     #: Unassigned
@@ -182,16 +197,16 @@ class Parameter(IntEnum):
     RELAY_HMAC = 65520
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Parameter':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Parameter(key)
         if key not in Parameter._member_map_:  # pylint: disable=no-member
             extend_enum(Parameter, key, default)
-        return Parameter[key]
+        return Parameter[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Parameter':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
@@ -303,7 +318,27 @@ class Parameter(IntEnum):
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
-        if 4602 <= value <= 7679:
+        if 4602 <= value <= 4649:
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls(value)
+        if 4651 <= value <= 4659:
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls(value)
+        if 4661 <= value <= 4679:
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls(value)
+        if 4681 <= value <= 4699:
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls(value)
+        if 4701 <= value <= 4709:
+            #: Unassigned
+            extend_enum(cls, 'Unassigned_%d' % value, value)
+            return cls(value)
+        if 4711 <= value <= 7679:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)

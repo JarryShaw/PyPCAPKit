@@ -11,7 +11,7 @@ class Suite(IntEnum):
     """[Suite] Suite IDs"""
 
     #: Reserved [:rfc:`5201`]
-    Reserved = 0
+    Reserved_0 = 0
 
     #: AES-CBC with HMAC-SHA1 [:rfc:`5201`]
     AES_CBC_with_HMAC_SHA1 = 1
@@ -32,16 +32,16 @@ class Suite(IntEnum):
     NULL_ENCRYPT_with_HMAC_MD5 = 6
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Suite':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Suite(key)
         if key not in Suite._member_map_:  # pylint: disable=no-member
             extend_enum(Suite, key, default)
-        return Suite[key]
+        return Suite[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Suite':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

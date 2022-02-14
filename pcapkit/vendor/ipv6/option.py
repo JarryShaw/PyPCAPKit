@@ -4,8 +4,12 @@
 import collections
 import csv
 import re
+from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
 
 __all__ = ['Option']
 
@@ -18,35 +22,34 @@ class Option(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-2.csv'
 
-    def count(self, data):
+    def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records.
 
         Args:
-            data (List[str]): CSV data.
+            data: Registry data.
 
         Returns:
-            Counter: Field recordings.
+            Field recordings.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
         return collections.Counter(map(lambda item: self.safe_name(item[4]), reader))  # pylint: disable=map-builtin-not-iterating
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
+        enum = []  # type: list[str]
         miss = [
             "extend_enum(cls, 'Unassigned_0x%s' % hex(value)[2:].upper().zfill(2), value)",
             'return cls(value)'
@@ -59,7 +62,7 @@ class Option(Vendor):
             dscp = item[4]
             rfcs = item[5]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if re.match(r'\d+', rfc):
                     continue

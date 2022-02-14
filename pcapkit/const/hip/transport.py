@@ -11,7 +11,7 @@ class Transport(IntEnum):
     """[Transport] HIP Transport Modes"""
 
     #: RESERVED [:rfc:`6261`]
-    RESERVED = 0
+    RESERVED_0 = 0
 
     #: DEFAULT [:rfc:`6261`]
     DEFAULT = 1
@@ -23,16 +23,16 @@ class Transport(IntEnum):
     ESP_TCP = 3
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Transport':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Transport(key)
         if key not in Transport._member_map_:  # pylint: disable=no-member
             extend_enum(Transport, key, default)
-        return Transport[key]
+        return Transport[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Transport':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 3):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

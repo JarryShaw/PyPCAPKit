@@ -11,7 +11,7 @@ class NotifyMessage(IntEnum):
     """[NotifyMessage] Notify Message Types"""
 
     #: Reserved [:rfc:`7401`]
-    Reserved = 0
+    Reserved_0 = 0
 
     #: UNSUPPORTED_CRITICAL_PARAMETER_TYPE [:rfc:`7401`]
     UNSUPPORTED_CRITICAL_PARAMETER_TYPE = 1
@@ -103,6 +103,12 @@ class NotifyMessage(IntEnum):
     #: MESSAGE_NOT_RELAYED [:rfc:`5770`]
     MESSAGE_NOT_RELAYED = 62
 
+    #: SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED [:rfc:`9028`]
+    SERVER_REFLEXIVE_CANDIDATE_ALLOCATION_FAILED = 63
+
+    #: RVS_HMAC_PROHIBITED_WITH_RELAY [:rfc:`9028`]
+    RVS_HMAC_PROHIBITED_WITH_RELAY = 64
+
     #: OVERLAY_TTL_EXCEEDED [:rfc:`6079`]
     OVERLAY_TTL_EXCEEDED = 70
 
@@ -115,17 +121,20 @@ class NotifyMessage(IntEnum):
     #: I2_ACKNOWLEDGEMENT [:rfc:`7401`]
     I2_ACKNOWLEDGEMENT = 16384
 
+    #: NAT_KEEPALIVE [:rfc:`9028`]
+    NAT_KEEPALIVE = 16385
+
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'NotifyMessage':
         """Backport support for original codes."""
         if isinstance(key, int):
             return NotifyMessage(key)
         if key not in NotifyMessage._member_map_:  # pylint: disable=no-member
             extend_enum(NotifyMessage, key, default)
-        return NotifyMessage[key]
+        return NotifyMessage[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'NotifyMessage':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
@@ -153,7 +162,7 @@ class NotifyMessage(IntEnum):
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
-        if 63 <= value <= 69:
+        if 65 <= value <= 69:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
@@ -173,7 +182,7 @@ class NotifyMessage(IntEnum):
             #: Reserved for Private Use [:rfc:`7401`]
             extend_enum(cls, 'Reserved_for_Private_Use_%d' % value, value)
             return cls(value)
-        if 16385 <= value <= 40959:
+        if 16386 <= value <= 40959:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)

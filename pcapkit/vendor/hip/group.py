@@ -17,22 +17,21 @@ class Group(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-parameters-5.csv'
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             long = item[1]
             rfcs = item[2]
@@ -40,19 +39,19 @@ class Group(Vendor):
             split = long.split(' (')
             if len(split) == 2:
                 name = split[0]
-                cmmt = f' {split[1][:-1]}'
+                cmmt = f' ({split[1][:-1]})'
             else:
                 name, cmmt = long, ''
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            tmp1 = f" {''.join(temp)}" if rfcs else ''
-            desc = self.wrap_comment(f"{name}{tmp1}{cmmt}")
+            tmp1 = ' %s' % ''.join(temp) if rfcs else ''
+            desc = self.wrap_comment(f'{name}{cmmt}{tmp1}')
 
             try:
                 code, _ = item[0], int(item[0])
@@ -70,7 +69,7 @@ class Group(Vendor):
                 start, stop = item[0].split('-')
 
                 miss.append(f'if {start} <= value <= {stop}:')
-                miss.append(f'    #: {desc}')
+                miss.append(f'    # {desc}')
                 miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
                 miss.append('    return cls(value)')
         return enum, miss

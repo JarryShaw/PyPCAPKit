@@ -84,8 +84,8 @@ update-pipenv:
 # update const scripts
 .ONESHELL:
 update-const:
-	set -ex
-	for file in src/vendor/*/*.py ; do \
+	for file in pcapkit/vendor/*/*.py ; do \
+		echo "+ $${file}"; \
 	    pipenv run python3 $${file} ; \
 	done
 

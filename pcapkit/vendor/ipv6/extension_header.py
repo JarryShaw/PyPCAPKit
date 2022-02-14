@@ -4,8 +4,13 @@
 import collections
 import csv
 import re
+from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
+    from typing import Callable
 
 __all__ = ['ExtensionHeader']
 
@@ -25,14 +30,14 @@ class {NAME}(IntEnum):
     {ENUM}
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> '{NAME}':
         """Backport support for original codes."""
         if isinstance(key, int):
             return {NAME}(key)
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
             extend_enum({NAME}, key, default)
-        return {NAME}[key]
-'''
+        return {NAME}[key]  # type: ignore[misc]
+'''  # type: Callable[[str, str, str], str]
 
 
 class ExtensionHeader(Vendor):
@@ -41,14 +46,14 @@ class ExtensionHeader(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'
 
-    def count(self, data):
+    def count(self, data: 'list[str]') -> 'Counter[str]':  # pylint: disable=no-self-use
         """Count field records.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            Counter: Field recordings.
+            Field recordings.
 
         """
         reader = csv.reader(data)
@@ -56,22 +61,21 @@ class ExtensionHeader(Vendor):
         return collections.Counter(map(lambda item: self.safe_name(item[1] or item[2]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             flag = item[3]
             if flag != 'Y':
@@ -80,7 +84,7 @@ class ExtensionHeader(Vendor):
             name = item[1]
             rfcs = item[4]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
@@ -98,9 +102,11 @@ class ExtensionHeader(Vendor):
             else:
                 name, cmmt = name, ''  # pylint: disable=self-assigning-variable
 
-            if not name:
+            if name:
+                tmp1 = f',{tmp1}' if tmp1 else ''
+            else:
                 name, tmp1 = item[2], ''
-            desc = self.wrap_comment(f'{name}{lrfc}{tmp1}{cmmt}')
+            desc = self.wrap_comment(f'{name}{tmp1}{lrfc}{cmmt}')
 
             try:
                 code, _ = item[0], int(item[0])
@@ -123,10 +129,19 @@ class ExtensionHeader(Vendor):
                 miss.append(f'    #: {desc}')
                 miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_%d' % value, value)")
                 miss.append('    return cls(value)')
-        return enum
+        return enum, miss
 
-    def context(self, data):
-        enum = self.process(data)
+    def context(self, data: 'list[str]') -> 'str':
+        """Generate constant context.
+
+        Args:
+            data: CSV data.
+
+        Returns:
+            Constant context.
+
+        """
+        enum, _ = self.process(data)
         ENUM = '\n\n    '.join(map(lambda s: s.rstrip(), enum))
         return LINE(self.NAME, self.DOCS, ENUM)
 

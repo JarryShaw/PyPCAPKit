@@ -27,16 +27,16 @@ class MPTCPOption(IntEnum):
     MP_FASTCLOSE = 7
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'MPTCPOption':
         """Backport support for original codes."""
         if isinstance(key, int):
             return MPTCPOption(key)
         if key not in MPTCPOption._member_map_:  # pylint: disable=no-member
             extend_enum(MPTCPOption, key, default)
-        return MPTCPOption[key]
+        return MPTCPOption[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'MPTCPOption':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

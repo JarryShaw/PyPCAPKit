@@ -4,8 +4,12 @@
 import collections
 import csv
 import re
+from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
 
 __all__ = ['OptionNumber']
 
@@ -18,14 +22,14 @@ class OptionNumber(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ip-parameters/ip-parameters-1.csv'
 
-    def count(self, data):
+    def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records.
 
         Args:
-            data (List[str]): CSV data.
+            data: Registry data.
 
         Returns:
-            Counter: Field recordings.
+            Field recordings.
 
         """
         reader = csv.reader(data)
@@ -33,21 +37,20 @@ class OptionNumber(Vendor):
         return collections.Counter(map(lambda item: self.safe_name(item[4]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[3].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
+        enum = []  # type: list[str]
         miss = [
             "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
@@ -57,7 +60,7 @@ class OptionNumber(Vendor):
             dscp = item[4]
             rfcs = item[5]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if re.match(r'\d+', rfc):
                     continue
@@ -68,13 +71,17 @@ class OptionNumber(Vendor):
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             tmp1 = f" {''.join(temp)}" if rfcs else ''
 
-            abbr, name = re.split(r'\W+-\W+', dscp)
-            tmp2 = re.sub(r'\[\d+\]', '', name)
-            name = f'{" - " if abbr else ""}{tmp2}' if tmp2 else ''
+            abbr, name = [s.strip() for s in dscp.split('- ')]
+            tmp2 = re.sub(r'\[\d+\]', '', name).strip()
 
-            desc = self.wrap_comment(f'{abbr}{name}{tmp1}')
+            if abbr:
+                name = f', {tmp2}' if tmp2 else ''
+                desc = self.wrap_comment(f'``{abbr}``{name}{tmp1}')
+            else:
+                name = tmp2 or ''
+                desc = self.wrap_comment(f'{name}{tmp1}')
 
-            renm = self.rename(abbr or f'Unassigned_{code}', code, original=dscp)
+            renm = self.rename(abbr or 'Unassigned', code, original=dscp)
             pres = f"{renm} = {code}"
             sufs = f'#: {desc}'
 

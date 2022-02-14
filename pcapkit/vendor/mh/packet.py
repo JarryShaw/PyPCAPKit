@@ -17,21 +17,20 @@ class Packet(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/mobility-parameters/mobility-parameters-1.csv'
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
+        enum = []  # type: list[str]
         miss = [
             "extend_enum(cls, 'Unassigned_%d' % value, value)",
             'return cls(value)'
@@ -40,7 +39,7 @@ class Packet(Vendor):
             long = item[1]
             rfcs = item[2]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
@@ -55,7 +54,7 @@ class Packet(Vendor):
                 cmmt = f" ({split[1]}"
             else:
                 name, cmmt = long, ''
-            desc = self.wrap_comment(f'{name}{tmp1}{cmmt}')
+            desc = self.wrap_comment(f'{name}{cmmt}{tmp1}')
 
             code, _ = item[0], int(item[0])
             renm = self.rename(name, code, original=long)

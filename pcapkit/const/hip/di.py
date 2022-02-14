@@ -20,16 +20,16 @@ class DITypes(IntEnum):
     NAI = 2
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'DITypes':
         """Backport support for original codes."""
         if isinstance(key, int):
             return DITypes(key)
         if key not in DITypes._member_map_:  # pylint: disable=no-member
             extend_enum(DITypes, key, default)
-        return DITypes[key]
+        return DITypes[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'DITypes':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 15):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

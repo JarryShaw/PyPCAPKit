@@ -17,34 +17,35 @@ class RouterAlert(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ipv6-routeralert-values/ipv6-routeralert-values-1.csv'
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             name = item[1]
             rfcs = item[2]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f"{name} {''.join(temp) if rfcs else ''}", re.MULTILINE))
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '%s %s' % (
+                name, ''.join(temp) if rfcs else '',
+            ), re.MULTILINE))
 
             try:
                 code, _ = item[0], int(item[0])
@@ -63,9 +64,9 @@ class RouterAlert(Vendor):
 
                 if 'Level' in name:
                     base = name.rstrip('s 0-31')
-                    for code in range(start, stop+1):
-                        renm = self.safe_name(f'{base}_{code-start}')
-                        pres = f"{renm} = {code}"
+                    for tmp_code in range(start, stop+1):
+                        renm = self.safe_name(f'{base}_{tmp_code-start}')
+                        pres = f"{renm} = {tmp_code}"
 
                         #if len(pres) > 74:
                         #    sufs = f"\n{' '*80}{sufs}"
@@ -80,5 +81,5 @@ class RouterAlert(Vendor):
         return enum, miss
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     RouterAlert()

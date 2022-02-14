@@ -10,7 +10,7 @@ __all__ = ['Command']
 class defaultInfo(Info):
     """Extended :class:`~pcapkit.corekit.infoclass.Info` with default values."""
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: 'str') -> 'Info':
         """Missing keys as specified in :rfc:`3659`."""
         try:
             return super().__getitem__(key)
@@ -57,7 +57,7 @@ Command = defaultInfo(
         name='ALGS',
         feat=None,
         desc='FTP64 ALG status',
-        type=(None,),
+        type=None,
         conf='optional',
         note=('RFC 6384',),
     ),
@@ -555,5 +555,5 @@ Command = defaultInfo(
         type=('service execution',),
         conf='historic',
         note=('RFC 775', 'RFC 1123'),
-    )
+    ),
 )

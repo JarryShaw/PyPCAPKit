@@ -19,16 +19,16 @@ class SeedID(IntEnum):
     SEEDID_128_BIT_UNSIGNED_INTEGER = 0b11
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'SeedID':
         """Backport support for original codes."""
         if isinstance(key, int):
             return SeedID(key)
         if key not in SeedID._member_map_:  # pylint: disable=no-member
             extend_enum(SeedID, key, default)
-        return SeedID[key]
+        return SeedID[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'SeedID':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0b00 <= value <= 0b11):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

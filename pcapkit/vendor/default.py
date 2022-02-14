@@ -12,11 +12,16 @@ import tempfile
 import textwrap
 import warnings
 import webbrowser
+from typing import TYPE_CHECKING
 
 import requests
 
 from pcapkit.utilities.exceptions import VendorNotImplemented
 from pcapkit.utilities.warnings import VendorRequestWarning
+
+if TYPE_CHECKING:
+    from collections import Counter
+    from typing import Callable, Optional
 
 __all__ = ['Vendor']
 
@@ -37,25 +42,25 @@ class {NAME}(IntEnum):
     {ENUM}
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> '{NAME}':
         """Backport support for original codes."""
         if isinstance(key, int):
             return {NAME}(key)
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
             extend_enum({NAME}, key, default)
-        return {NAME}[key]
+        return {NAME}[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> '{NAME}':
         """Lookup function used when value is not found."""
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {MISS}
         {'' if '        return cls(value)' in MISS.splitlines()[-1:] else 'return super()._missing_(value)'}
-'''.strip()
+'''.strip()  # type: Callable[[str, str, str, str, str], str]
 
 
-def get_proxies():
+def get_proxies() -> 'dict[str, str]':
     """Get proxy for blocked sites.
 
     The function will read :envvar:`PCAPKIT_HTTP_PROXY`
@@ -66,7 +71,7 @@ def get_proxies():
     .. _requests: https://requests.readthedocs.io
 
     Returns:
-        Dict[str, str]: Proxy settings for |requests|_.
+        Proxy settings for |requests|_.
 
     """
     HTTP_PROXY = os.getenv('PCAPKIT_HTTP_PROXY')
@@ -91,24 +96,26 @@ class Vendor(metaclass=abc.ABCMeta):
     # Macros
     ###############
 
-    # NAME = None
-    # DOCS = None
+    #: str: Name of constant enumeration.
+    NAME: 'str'
+    #: str: Docstring of constant enumeration.
+    DOCS: 'str'
 
     #: str: Value limit checker.
-    FLAG = None
+    FLAG: 'str' = None  # type: ignore[assignment]
     #: str: Link to registry.
-    LINK = None
+    LINK: 'str' = None  # type: ignore[assignment]
 
     ###############
     # Processors
     ###############
 
     @staticmethod
-    def wrap_comment(text):
+    def wrap_comment(text: 'str') -> 'str':
         """Wraps long-length text to shorter lines of comments.
 
         Args:
-            text (str): Source text.
+            text: Source text.
 
         Returns:
             Wrapped comments.
@@ -116,14 +123,14 @@ class Vendor(metaclass=abc.ABCMeta):
         """
         return '\n    #: '.join(textwrap.wrap(text.strip(), 76))
 
-    def safe_name(self, name):
+    def safe_name(self, name: 'str') -> 'str':
         """Convert enumeration name to :class:`enum.Enum` friendly.
 
         Args:
-            name (str): original enumeration name
+            name: original enumeration name
 
         Returns:
-            str: Converted enumeration name.
+            Converted enumeration name.
 
         """
         temp = '_'.join(
@@ -146,18 +153,18 @@ class Vendor(metaclass=abc.ABCMeta):
             return temp
         return f'{self.NAME}_{temp}'
 
-    def rename(self, name, code, *, original=None):  # pylint: disable=redefined-outer-name
+    def rename(self, name: 'str', code: 'str', *, original: 'Optional[str]' = None) -> 'str':  # pylint: disable=redefined-outer-name
         """Rename duplicated fields.
 
         Args:
-            name (str): Field name.
-            code (int): Field code.
+            name: Field name.
+            code: Field code.
 
         Keyword Args:
-            original (str): Original field name (extracted from CSV records).
+            original: Original field name (extracted from CSV records).
 
         Returns:
-            str: Revised field name.
+            Revised field name.
 
         Example:
             If ``name`` has multiple occurrences in the source registry,
@@ -167,38 +174,39 @@ class Vendor(metaclass=abc.ABCMeta):
 
         """
         index = original or name
-        if self.record[self.safe_name(index)] > 1:
+        if self.record[self.safe_name(index)] > 1 or self.safe_name(index).upper() in ['RESERVED', 'UNASSIGNED']:
             name = f'{name}_{code}'
         return self.safe_name(name)
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             name = item[1]
             rfcs = item[2]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f"{name} {''.join(temp) if rfcs else ''}", re.MULTILINE))
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '%s %s' % (
+                name, ''.join(temp) if rfcs else '',
+            ), re.MULTILINE))
 
             try:
                 code, _ = item[0], int(item[0])
@@ -221,14 +229,14 @@ class Vendor(metaclass=abc.ABCMeta):
                 miss.append('    return cls(value)')
         return enum, miss
 
-    def count(self, data):  # pylint: disable=no-self-use
+    def count(self, data: 'list[str]') -> 'Counter[str]':  # pylint: disable=no-self-use
         """Count field records.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            Counter: Field recordings.
+            Field recordings.
 
         """
         reader = csv.reader(data)
@@ -236,14 +244,14 @@ class Vendor(metaclass=abc.ABCMeta):
         return collections.Counter(map(lambda item: self.safe_name(item[1]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
-    def context(self, data):
+    def context(self, data: 'list[str]') -> 'str':
         """Generate constant context.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            str: Constant context.
+            Constant context.
 
         """
         enum, miss = self.process(data)
@@ -253,25 +261,25 @@ class Vendor(metaclass=abc.ABCMeta):
 
         return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, MISS)
 
-    def request(self, text=None):  # pylint: disable=no-self-use
+    def request(self, text: 'Optional[str]' = None) -> 'list[str]':  # pylint: disable=no-self-use
         """Fetch CSV file.
 
         Args:
-            text (str): Context from :attr:`~Vendor.LINK`.
+            text: Context from :attr:`~Vendor.LINK`.
 
         Returns:
-            List[str]: CSV data.
+            CSV data.
 
         """
         if text is None:
-            return list()
+            return []
         return text.strip().split('\r\n')
 
     ###############
     # Defaults
     ###############
 
-    def __new__(cls):
+    def __new__(cls) -> 'Vendor':
         """Subclassing checkpoint.
 
         Raises:
@@ -282,17 +290,17 @@ class Vendor(metaclass=abc.ABCMeta):
             raise VendorNotImplemented('cannot initiate Vendor instance')
         return super().__new__(cls)
 
-    def __init__(self):
+    def __init__(self) -> 'None':
         """Generate new constant files."""
         #: str: Name of constant enumeration.
         self.NAME = type(self).__name__
         #: str: Docstring of constant enumeration.
-        self.DOCS = type(self).__doc__
+        self.DOCS = type(self).__doc__  # type: ignore[assignment]
 
         data = self._request()
         self.record = self.count(data)
 
-        temp_ctx = list()
+        temp_ctx = []  # type: list[str]
         orig_ctx = self.context(data)
         for line in orig_ctx.splitlines():
             if line:
@@ -309,7 +317,7 @@ class Vendor(metaclass=abc.ABCMeta):
         with open(os.path.join(ROOT, '..', 'const', STEM, FILE), 'w') as file:
             print(context, file=file)
 
-    def _request(self):
+    def _request(self) -> 'list[str]':
         """Fetch CSV data from :attr:`~Vendor.LINK`.
 
         This is the low-level call of :meth:`~Vendor.request`.
@@ -333,7 +341,7 @@ class Vendor(metaclass=abc.ABCMeta):
         it provides.
 
         Returns:
-            List[str]: CSV data.
+            CSV data.
 
         Warns:
             VendorRequestWarning: If connection failed with and/or without proxies.
@@ -343,7 +351,7 @@ class Vendor(metaclass=abc.ABCMeta):
 
         """
         if self.LINK is None:
-            return self.request()
+            return self.request()  # type: ignore[unreachable]
 
         try:
             page = requests.get(self.LINK)

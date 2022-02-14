@@ -9,11 +9,18 @@ import sys
 path = sys.path.pop(0)
 ###############################################################################
 
+import collections
 import re
+from typing import TYPE_CHECKING
 
 import bs4
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
+
+    from bs4 import BeautifulSoup
 
 ###############################################################################
 sys.path.insert(0, path)
@@ -30,38 +37,46 @@ class Socket(Vendor):
     #: Link to registry.
     LINK = 'https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#Socket_number'
 
-    def count(self, data):
-        """Count field records."""
+    def count(self, data: 'BeautifulSoup') -> 'Counter[str]':
+        """Count field records.
 
-    def request(self, text):  # pylint: disable=signature-differs
+        Args:
+            data: Registry data.
+
+        Returns:
+            Field recordings.
+
+        """
+        return collections.Counter()
+
+    def request(self, text: 'str') -> 'BeautifulSoup':  # type: ignore[override] # pylint: disable=signature-differs
         """Fetch HTML source.
 
         Args:
-            text (str): Context from :attr:`~Vendor.LINK`.
+            text: Context from :attr:`~Vendor.LINK`.
 
         Returns:
-            bs4.BeautifulSoup: Parsed HTML source.
+            Parsed HTML source.
 
         """
         return bs4.BeautifulSoup(text, 'html5lib')
 
-    def process(self, soup):  # pylint: disable=arguments-differ
+    def process(self, soup: 'BeautifulSoup') -> 'tuple[list[str], list[str]]':  # pylint: disable=arguments-differ
         """Process HTML source.
 
         Args:
-            data (bs4.BeautifulSoup): Parsed HTML source.
+            data: Parsed HTML source.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         table = soup.find_all('table', class_='wikitable')[3]
         content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
         next(content)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in content:
             line = item.find_all('td')
 
@@ -75,7 +90,7 @@ class Socket(Vendor):
                 name, desc = dscp, ''
             renm = self.safe_name(name)
 
-            tmp1 = f' - {desc}' if desc else ''
+            tmp1 = f', {desc}' if desc else ''
             desc = self.wrap_comment(f'{name}{tmp1}')
 
             try:

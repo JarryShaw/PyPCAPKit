@@ -394,6 +394,9 @@ class EtherType(IntEnum):
     #: General Switch Management Protocol (GSMP) [:rfc:`7042`]
     General_Switch_Management_Protocol = 0x880C
 
+    #: Ethernet NIC hardware and software testing [Wind River]
+    Ethernet_NIC_hardware_and_software_testing = 0x8822
+
     #: MPLS [:rfc:`5332`]
     MPLS = 0x8847
 
@@ -406,7 +409,7 @@ class EtherType(IntEnum):
     #: PPP over Ethernet (PPPoE) Discovery Stage [:rfc:`2516`]
     PPP_over_Ethernet_Discovery_Stage = 0x8863
 
-    #: PPP over Ethernet (PPPoE) Session Stage [:rfc:`2516`]
+    #: PPP over Ethernet (PPPoE) Session Stage [:rfc:`2516`][:rfc:`8822`]
     PPP_over_Ethernet_Session_Stage = 0x8864
 
     #: IEEE Std 802.1X - Port-based network access control [IEEE]
@@ -484,10 +487,10 @@ class EtherType(IntEnum):
     #: LoWPAN encapsulation [:rfc:`7973`]
     LoWPAN_encapsulation = 0xA0ED
 
-    #: The Ethertype will be used to identify a "Channel"          in which control
-    #: messages are encapsulated as payload of GRE packets.          When a GRE
-    #: packet tagged with the Ethertype is received, the payload          will be
-    #: handed to the network processor for processing. [:rfc:`8157`]
+    #: The Ethertype will be used to identify a "Channel" in which control messages
+    #: are encapsulated as payload of GRE packets. When a GRE packet tagged with
+    #: the Ethertype is received, the payload will be handed to the network
+    #: processor for processing. [:rfc:`8157`]
     The_Ethertype_will_be_used_to_identify_a_Channel_in_which_control_messages_are_encapsulated_as_payload_of_GRE_packets_When_a_GRE_packet_tagged_with_the_Ethertype_is_received_the_payload_will_be_handed_to_the_network_processor_for_processing = 0xB7EA
 
     #: BBN VITAL-LanBridge cache [Neil Sembower]
@@ -497,16 +500,16 @@ class EtherType(IntEnum):
     Reserved = 0xFFFF
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'EtherType':
         """Backport support for original codes."""
         if isinstance(key, int):
             return EtherType(key)
         if key not in EtherType._member_map_:  # pylint: disable=no-member
             extend_enum(EtherType, key, default)
-        return EtherType[key]
+        return EtherType[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'EtherType':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

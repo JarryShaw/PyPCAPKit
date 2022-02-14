@@ -2,8 +2,12 @@
 """IPv6 Seed-ID Types"""
 
 import collections
+from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
 
 __all__ = ['SeedID']
 
@@ -13,7 +17,7 @@ DATA = {
     0b01: '16-Bit Unsigned Integer',               # [RFC 7731]
     0b10: '64-Bit Unsigned Integer',               # [RFC 7731]
     0b11: '128-Bit Unsigned Integer',              # [RFC 7731]
-}
+}  # type: dict[int, str]
 
 
 class SeedID(Vendor):
@@ -22,47 +26,46 @@ class SeedID(Vendor):
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b00 <= value <= 0b11'
 
-    def request(self):  # pylint: disable=arguments-differ
+    def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.
 
         Returns:
-            Dict[int, str]: Registry data (:attr:`~pcapkit.vendor.ipv6.seed_id.DATA`).
+            Registry data (:attr:`~pcapkit.vendor.ipv6.seed_id.DATA`).
 
         """
         return DATA
 
-    def count(self, data):
+    def count(self, data: 'dict[int, str]') -> 'Counter[str]':  # type: ignore[override]
         """Count field records.
 
         Args:
-            data (Dict[int, str]): Registry data.
+            data: Registry data.
 
         Returns:
-            Counter: Field recordings.
+            Field recordings.
 
         """
         return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
-    def process(self, data):
+    def process(self, data: 'dict[int, str]') -> 'tuple[list[str], list[str]]':  # type: ignore[override]
         """Process registry data.
 
         Args:
-            data (Dict[int, str]): Registry data.
+            data: Registry data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
-        enum = list()
+        enum = []  # type: list[str]
         miss = [
             "extend_enum(cls, 'Unassigned_0b%s' % bin(value)[2:].zfill(2), value)",
             'return cls(value)'
         ]
         for code, name in data.items():
-            code = f'0b{bin(code)[2:].zfill(2)}'
-            renm = self.rename(name, code).upper()
-            enum.append(f"{renm} = {code}".ljust(76))
+            bncd = f'0b{bin(code)[2:].zfill(2)}'
+            renm = self.rename(name, bncd).upper()
+            enum.append(f"{renm} = {bncd}".ljust(76))
         return enum, miss
 
 

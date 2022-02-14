@@ -11,12 +11,12 @@ class Group(IntEnum):
     """[Group] Group IDs"""
 
     #: Reserved [:rfc:`7401`]
-    Reserved = 0
+    Reserved_0 = 0
 
-    #: 384-bit group [:rfc:`5201`] DEPRECATED
+    #: 384-bit group (DEPRECATED) [:rfc:`5201`]
     Group_384_bit_group = 1
 
-    #: OAKLEY well known group 1 [:rfc:`5201`] DEPRECATED
+    #: OAKLEY well known group 1 (DEPRECATED) [:rfc:`5201`]
     OAKLEY_well_known_group_1 = 2
 
     #: 1536-bit MODP group [:rfc:`7401`]
@@ -25,10 +25,10 @@ class Group(IntEnum):
     #: 3072-bit MODP group [:rfc:`7401`]
     Group_3072_bit_MODP_group = 4
 
-    #: 6144-bit MODP group [:rfc:`5201`] DEPRECATED
+    #: 6144-bit MODP group (DEPRECATED) [:rfc:`5201`]
     Group_6144_bit_MODP_group = 5
 
-    #: 8192-bit MODP group [:rfc:`5201`] DEPRECATED
+    #: 8192-bit MODP group (DEPRECATED) [:rfc:`5201`]
     Group_8192_bit_MODP_group = 6
 
     #: NIST P-256 [:rfc:`7401`]
@@ -47,21 +47,21 @@ class Group(IntEnum):
     Group_2048_bit_MODP_group = 11
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Group':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Group(key)
         if key not in Group._member_map_:  # pylint: disable=no-member
             extend_enum(Group, key, default)
-        return Group[key]
+        return Group[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Group':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 12 <= value <= 255:
-            #: Unassigned
+            # Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
         return super()._missing_(value)

@@ -92,16 +92,16 @@ class Operation(IntEnum):
     Reserved_65535 = 65535
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Operation':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Operation(key)
         if key not in Operation._member_map_:  # pylint: disable=no-member
             extend_enum(Operation, key, default)
-        return Operation[key]
+        return Operation[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Operation':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

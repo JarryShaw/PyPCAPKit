@@ -37,21 +37,25 @@ class RegistrationFailure(IntEnum):
     #: Unknown CA [:rfc:`8003`]
     Unknown_CA = 8
 
+    #: Simultaneous Rendezvous and Control Relay Service usage prohibited
+    #: [:rfc:`9028`]
+    Simultaneous_Rendezvous_and_Control_Relay_Service_usage_prohibited = 9
+
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'RegistrationFailure':
         """Backport support for original codes."""
         if isinstance(key, int):
             return RegistrationFailure(key)
         if key not in RegistrationFailure._member_map_:  # pylint: disable=no-member
             extend_enum(RegistrationFailure, key, default)
-        return RegistrationFailure[key]
+        return RegistrationFailure[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'RegistrationFailure':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 9 <= value <= 200:
+        if 10 <= value <= 200:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)

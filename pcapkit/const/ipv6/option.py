@@ -10,10 +10,10 @@ __all__ = ['Option']
 class Option(IntEnum):
     """[Option] Destination Options and Hop-by-Hop Options"""
 
-    #: Pad1 [IPV6]
+    #: Pad1 [:rfc:`2460`]
     Pad1 = 0x00
 
-    #: PadN [IPV6]
+    #: PadN [:rfc:`2460`]
     PadN = 0x01
 
     #: Jumbo Payload [:rfc:`2675`]
@@ -101,16 +101,16 @@ class Option(IntEnum):
     RFC3692_style_Experiment_0xFE = 0xFE
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Option':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Option(key)
         if key not in Option._member_map_:  # pylint: disable=no-member
             extend_enum(Option, key, default)
-        return Option[key]
+        return Option[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Option':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0x00 <= value <= 0xFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

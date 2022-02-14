@@ -11,7 +11,7 @@ class HITSuite(IntEnum):
     """[HITSuite] HIT Suite ID"""
 
     #: RESERVED [:rfc:`7401`]
-    RESERVED = 0
+    RESERVED_0 = 0
 
     #: RSA,DSA/SHA-256 [:rfc:`7401`]
     RSA_DSA_SHA_256 = 1
@@ -23,16 +23,16 @@ class HITSuite(IntEnum):
     ECDSA_LOW_SHA_1 = 3
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'HITSuite':
         """Backport support for original codes."""
         if isinstance(key, int):
             return HITSuite(key)
         if key not in HITSuite._member_map_:  # pylint: disable=no-member
             extend_enum(HITSuite, key, default)
-        return HITSuite[key]
+        return HITSuite[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'HITSuite':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 15):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

@@ -9,7 +9,7 @@ from pcapkit.vendor.default import Vendor
 __all__ = ['Frame']
 
 
-def hexlify(code):
+def hexlify(code: 'int') -> 'str':
     """Convert code to hex form."""
     return f'0x{hex(code)[2:].upper().zfill(2)}'
 
@@ -22,38 +22,39 @@ class Frame(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/http2-parameters/frame-type.csv'
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             name = item[1]
             rfcs = item[2]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', f"{name} {''.join(temp) if rfcs else ''}", re.MULTILINE))
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '``%s`` %s' % (
+                name, ''.join(temp) if rfcs else '',
+            ), re.MULTILINE))
 
             try:
-                temp = int(item[0], base=16)
-                code = hexlify(temp)
+                tmp1 = int(item[0], base=16)
+                code = hexlify(tmp1)
                 renm = self.rename(name, code)
 
                 pres = f"{renm} = {code}"

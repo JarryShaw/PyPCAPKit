@@ -19,13 +19,13 @@ class Socket(IntEnum):
     #: Error Handling Packet
     Error_Handling_Packet = 0x0003
 
-    #: NetWare Core Protocol - NCP – used by Novell NetWare servers
+    #: NetWare Core Protocol, NCP – used by Novell NetWare servers
     NetWare_Core_Protocol = 0x0451
 
-    #: Service Advertising Protocol - SAP
+    #: Service Advertising Protocol, SAP
     Service_Advertising_Protocol = 0x0452
 
-    #: Routing Information Protocol - RIP
+    #: Routing Information Protocol, RIP
     Routing_Information_Protocol = 0x0453
 
     #: NetBIOS
@@ -34,7 +34,7 @@ class Socket(IntEnum):
     #: Diagnostic Packet
     Diagnostic_Packet = 0x0456
 
-    #: Serialization Packet - used for NCP as well
+    #: Serialization Packet, used for NCP as well
     Serialization_Packet = 0x0457
 
     #: Used by Novell NetWare Client
@@ -49,20 +49,20 @@ class Socket(IntEnum):
     #: UDP over IPXF
     UDP_over_IPXF = 0x9092
 
-    #: IPXF - IPX Fragmentation Protocol
+    #: IPXF, IPX Fragmentation Protocol
     IPXF = 0x9093
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Socket':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Socket(key)
         if key not in Socket._member_map_:  # pylint: disable=no-member
             extend_enum(Socket, key, default)
-        return Socket[key]
+        return Socket[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Socket':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

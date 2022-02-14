@@ -2,8 +2,12 @@
 """IPv4 ToS ECN Field"""
 
 import collections
+from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
 
 __all__ = ['ToSECN']
 
@@ -13,7 +17,7 @@ DATA = {
     0b01: 'ECT(1)',
     0b10: 'ECT(0)',
     0b11: 'CE',
-}
+}  # type: dict[int, str]
 
 
 class ToSECN(Vendor):
@@ -22,54 +26,53 @@ class ToSECN(Vendor):
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0b00 <= value <= 0b11'
 
-    def request(self):  # pylint: disable=arguments-differ
+    def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.
 
         Returns:
-            Dict[int, str]: Registry data (:data:`~pcapkit.vendor.ipv4.tos_ecn.DATA`).
+            Registry data (:data:`~pcapkit.vendor.ipv4.tos_ecn.DATA`).
 
         """
         return DATA
 
-    def count(self, data):
+    def count(self, data: 'dict[int, str]') -> 'Counter[str]':  # type: ignore[override]
         """Count field records.
 
         Args:
-            data (Dict[int, str]): Registry data.
+            data: Registry data.
 
         Returns:
-            Counter: Field recordings.
+            Field recordings.
 
         """
         return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
-    def rename(self, name, code):  # pylint: disable=arguments-differ
+    def rename(self, name: 'str', code: 'int') -> 'str':  # type: ignore[override] # pylint: disable=arguments-differ
         """Rename duplicated fields.
 
         Args:
-            name (str): Field name.
-            code (int): Field code.
+            name: Field name.
+            code: Field code.
 
         Returns:
-            str: Revised field name.
+            Revised field name.
 
         """
-        if self.record[self.safe_name(name)] > 1:
+        if self.record[self.safe_name(name)] > 1 or self.safe_name(name).upper() in ['UNASSIGNED', 'RESERVED']:
             name = f'{name} [0b{bin(code)[2:].zfill(2)}]'
         return self.safe_name(name)
 
-    def process(self, data):
+    def process(self, data: 'dict[int, str]') -> 'tuple[list[str], list[str]]':  # type: ignore[override]
         """Process registry data.
 
         Args:
-            data (Dict[int, str]): Registry data.
+            data: Registry data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
-        enum = list()
+        enum = []  # type: list[str]
         miss = [
             "extend_enum(cls, 'Unassigned_0b%s' % bin(value)[2:].zfill(2), value)",
             'return cls(value)'

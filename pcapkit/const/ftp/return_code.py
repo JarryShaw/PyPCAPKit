@@ -14,7 +14,7 @@ KIND = {
     '4': 'Transient Negative Completion',
     '5': 'Permanent Negative Completion',
     '6': 'Protected',
-}
+}  # type: dict[str, str]
 
 #: Grouping information.
 INFO = {
@@ -24,7 +24,7 @@ INFO = {
     '3': 'Authentication and accounting',
     '4': 'Unspecified',                     # [RFC 959]
     '5': 'File system',
-}
+}  # type: dict[str, str]
 
 
 class ReturnCode(IntEnum):
@@ -139,7 +139,7 @@ class ReturnCode(IntEnum):
     CODE_451 = 451
 
     #: Requested action not taken. Insufficient storage space in system. File
-    #: unavailable (e. g. , file busy).
+    #: unavailable (e.g., file busy).
     CODE_452 = 452
 
     #: Syntax error in parameters or arguments.
@@ -163,7 +163,7 @@ class ReturnCode(IntEnum):
     #: Could Not Connect to Server - Policy Requires SSL
     CODE_534 = 534
 
-    #: Requested action not taken. File unavailable (e. g. , file not found, no
+    #: Requested action not taken. File unavailable (e.g., file not found, no
     #: access).
     CODE_550 = 550
 
@@ -187,16 +187,16 @@ class ReturnCode(IntEnum):
     CODE_633 = 633
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'ReturnCode':
         """Backport support for original codes."""
         if isinstance(key, int):
             return ReturnCode(key)
         if key not in ReturnCode._member_map_:  # pylint: disable=no-member
             extend_enum(ReturnCode, key, default)
-        return ReturnCode[key]
+        return ReturnCode[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'ReturnCode':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 100 <= value <= 659):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

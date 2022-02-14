@@ -17,22 +17,21 @@ class Routing(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters-3.csv'
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             long = item[1]
             rfcs = item[2]
@@ -40,11 +39,11 @@ class Routing(Vendor):
             split = long.split(' (')
             if len(split) == 2:
                 name = re.sub(r'\[\d+\]', '', split[0]).strip()
-                cmmt = f' {split[1][:-1]}'
+                cmmt = f' ({split[1][:-1]})'
             else:
                 name, cmmt = re.sub(r'\[\d+\]', '', long).strip(), ''
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
@@ -52,11 +51,11 @@ class Routing(Vendor):
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             lrfc = f" {''.join(temp)}" if rfcs else ''
-            desc = self.wrap_comment(f'{name}{lrfc}{cmmt}')
+            desc = self.wrap_comment(f'{name}{cmmt}{lrfc}')
 
             try:
                 code = int(item[0])
-                renm = self.rename(name, code)
+                renm = self.rename(name, code)  # type: ignore[arg-type]
 
                 pres = f"{renm} = {code}"
                 sufs = f"#: {desc}"

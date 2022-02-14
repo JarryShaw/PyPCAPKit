@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 """VLAN priority levels defined in IEEE 802.1p."""
 
+import collections
 import re
+from typing import TYPE_CHECKING
 
 import bs4
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
+
+    from bs4 import BeautifulSoup
 
 __all__ = ['PriorityLevel']
 
@@ -18,37 +25,37 @@ class PriorityLevel(Vendor):
     #: Link to registry.
     LINK = 'https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels'
 
-    def request(self, text):  # pylint: disable=signature-differs
-        """Fetch CSV file.
+    def request(self, text: 'str') -> 'BeautifulSoup':  # type: ignore[override] # pylint: disable=signature-differs
+        """Fetch registry table.
 
         Args:
-            text (str): Context from :attr:`~PriorityLevel.LINK`.
+            text: Context from :attr:`~LinkType.LINK`.
 
         Returns:
-            bs4.BeautifulSoup: Parsed HTML source.
+            Parsed HTML source.
 
         """
         return bs4.BeautifulSoup(text, 'html5lib')
 
-    def count(self, soup):  # pylint: disable=arguments-differ
+    def count(self, soup: 'BeautifulSoup') -> 'Counter[str]':  # pylint: disable=signature-differs
         """Count field records."""
+        return collections.Counter()
 
-    def process(self, soup):  # pylint: disable=arguments-differ
+    def process(self, soup: 'BeautifulSoup') -> 'tuple[list[str], list[str]]':  # pylint: disable=arguments-differ
         """Process HTML data.
 
         Args:
-            data (bs4.BeautifulSoup): Parsed HTML source.
+            data: Parsed HTML source.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         table = soup.find_all('table', class_='wikitable')[0]
         content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
         next(content)  # header
 
-        enum = list()
+        enum = []  # type: list[str]
         miss = [
             "extend_enum(cls, 'Unassigned [0b%s]' % bin(value)[2:].zfill(3), value)",
             'return cls(value)'
@@ -62,10 +69,10 @@ class PriorityLevel(Vendor):
             desc = ' '.join(line[3].stripped_strings)
 
             match = re.match(r'(\d) *(\(.*\))*', prio)
-            group = match.groups()
+            group = match.groups()  # type: ignore[union-attr]
 
             code = f'0b{bin(int(pval))[2:].zfill(3)}'
-            tmp1 = self.wrap_comment(f"``{group[0]}`` - {desc} {group[1] or ''}")
+            tmp1 = self.wrap_comment(f"{desc} {group[1] or ''}")
 
             pres = f"{abbr} = {code}"
             sufs = f"#: {tmp1}"

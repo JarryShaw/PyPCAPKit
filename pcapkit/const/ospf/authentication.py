@@ -23,16 +23,16 @@ class Authentication(IntEnum):
     Cryptographic_Authentication_with_Extended_Sequence_Numbers = 3
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Authentication':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Authentication(key)
         if key not in Authentication._member_map_:  # pylint: disable=no-member
             extend_enum(Authentication, key, default)
-        return Authentication[key]
+        return Authentication[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Authentication':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

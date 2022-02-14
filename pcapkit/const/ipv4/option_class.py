@@ -19,16 +19,16 @@ class OptionClass(IntEnum):
     reserved_for_future_use_3 = 3
 
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'OptionClass':
         """Backport support for original codes."""
         if isinstance(key, int):
             return OptionClass(key)
         if key not in OptionClass._member_map_:  # pylint: disable=no-member
             extend_enum(OptionClass, key, default)
-        return OptionClass[key]
+        return OptionClass[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'OptionClass':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 3):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))

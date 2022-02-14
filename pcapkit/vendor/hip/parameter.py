@@ -17,35 +17,34 @@ class Parameter(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/hip-parameters/hip-parameters-4.csv'
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             long = item[1]
             plen = item[2]
             rfcs = item[3]
 
             match = re.match(r'(\w*) *(\(.*\))*', long)
-            group = match.groups()
+            group = match.groups()  # type: ignore[union-attr]
 
             name = group[0]
             cmmt = f' {group[1]}' if group[1] else ''
-            plen = f' {plen}' if re.match(r'\d+', plen) else ''
+            plen = f' (Length: {plen})' if re.match(r'\d+', plen) else ''
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
@@ -53,7 +52,7 @@ class Parameter(Vendor):
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             tmp1 = f" {''.join(temp)}" if rfcs else ''
-            desc = self.wrap_comment(f"{name}{tmp1}{plen}{cmmt}")
+            desc = self.wrap_comment(f"{name}{cmmt}{tmp1}{plen}")
 
             try:
                 code, _ = item[0], int(item[0])

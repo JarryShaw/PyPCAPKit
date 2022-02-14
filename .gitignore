@@ -19,6 +19,7 @@ out
 *.dat
 *~orig*
 
+src
 !requirements.txt
 
 sample/test

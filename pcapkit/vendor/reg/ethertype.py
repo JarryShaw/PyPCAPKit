@@ -4,8 +4,13 @@
 import collections
 import csv
 import re
+from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
+    from typing import Optional
 
 __all__ = ['EtherType']
 
@@ -18,14 +23,14 @@ class EtherType(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers-1.csv'
 
-    def count(self, data):
+    def count(self, data: 'list[str]') -> 'Counter[str]':  # pylint: disable=no-self-use
         """Count field records.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            Counter: Field recordings.
+            Field recordings.
 
         """
         reader = csv.reader(data)
@@ -33,45 +38,44 @@ class EtherType(Vendor):
         return collections.Counter(map(lambda item: self.safe_name(item[4]),  # pylint: disable=map-builtin-not-iterating
                                        filter(lambda item: len(item[1].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
 
-    def rename(self, name, code):  # pylint: disable=arguments-differ
+    def rename(self, name: 'str', code: 'str', *, original: 'Optional[str]' = None) -> 'str':  # pylint: disable=redefined-outer-name
         """Rename duplicated fields.
 
         Args:
-            name (str): Field name.
-            code (str): Field code (hex).
+            name: Field name.
+            code: Field code.
 
         Keyword Args:
-            original (str): Original field name (extracted from CSV records).
+            original: Original field name (extracted from CSV records).
 
         Returns:
-            str: Revised field name.
+            Revised field name.
 
         """
         if self.record[self.safe_name(name)] > 1:
             name = f'{name}_0x{code}'
         return self.safe_name(name)
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             name = item[4]
             rfcs = item[5]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')

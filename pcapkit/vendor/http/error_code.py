@@ -9,7 +9,7 @@ from pcapkit.vendor.default import Vendor
 __all__ = ['ErrorCode']
 
 
-def hexlify(code):
+def hexlify(code: 'int') -> 'str':
     """Convert code to hex form."""
     # temp = hex(code)[2:].upper().zfill(8)
     # return f'0x{temp[:4]}_{temp[4:]}'
@@ -24,28 +24,27 @@ class ErrorCode(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/http2-parameters/error-code.csv'
 
-    def process(self, data):
+    def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.
 
         Args:
-            data (List[str]): CSV data.
+            data: CSV data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         reader = csv.reader(data)
         next(reader)  # header
 
-        enum = list()
-        miss = list()
+        enum = []  # type: list[str]
+        miss = []  # type: list[str]
         for item in reader:
             name = item[1]
             dscp = item[2]
             rfcs = item[3]
 
-            temp = list()
+            temp = []  # type: list[str]
             for rfc in filter(None, re.split(r'\[|\]', rfcs)):
                 if 'RFC' in rfc and re.match(r'\d+', rfc[3:]):
                     #temp.append(f'[{rfc[:3]} {rfc[3:]}]')
@@ -53,16 +52,16 @@ class ErrorCode(Vendor):
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             tmp1 = f" {''.join(temp)}" if rfcs else ''
-            dscp = f' {dscp}' if dscp else ''
-            desc = f'{name}{tmp1}{dscp}'
+            dscp = f', {dscp}' if dscp else ''
+            desc = self.wrap_comment(f'{name}{dscp}{tmp1}')
 
             try:
-                temp = int(item[0], base=16)
-                code = hexlify(temp)
+                tmp2 = int(item[0], base=16)
+                code = hexlify(tmp2)
                 renm = self.rename(name, code)
 
-                pres = f"{renm} = {code}"
-                sufs = f'#: desc'
+                pres = f'{renm} = {code}'
+                sufs = f'#: {desc}'
 
                 #if len(pres) > 74:
                 #    sufs = f"\n{' '*80}{sufs}"

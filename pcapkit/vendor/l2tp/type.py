@@ -2,8 +2,12 @@
 """L2TP Type"""
 
 import collections
+from typing import TYPE_CHECKING
 
 from pcapkit.vendor.default import Vendor
+
+if TYPE_CHECKING:
+    from collections import Counter
 
 __all__ = ['Type']
 
@@ -11,7 +15,7 @@ __all__ = ['Type']
 DATA = {
     0:  'Control',
     1:  'Data',
-}
+}  # type: dict[int, str]
 
 
 class Type(Vendor):
@@ -20,36 +24,35 @@ class Type(Vendor):
     #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 1'
 
-    def request(self):  # pylint: disable=arguments-differ
+    def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Fetch registry data.
 
         Returns:
-            Dict[int, str]: TCP checksum options, i.e. :data:`~pcapkit.vendor.tcp.checksum.DATA`.
+            TCP checksum options, i.e. :data:`~pcapkit.vendor.tcp.checksum.DATA`.
 
         """
         return DATA
 
-    def count(self, data):
+    def count(self, data: 'dict[int, str]') -> 'Counter[str]':  # type: ignore[override]
         """Count field records.
 
         Args:
-            data (Dict[int, str]): Registry data.
+            data: Registry data.
 
         Returns:
-            Counter: Field recordings.
+            Field recordings.
 
         """
         return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
 
-    def process(self, data):
+    def process(self, data: 'dict[int, str]') -> 'tuple[list[str], list[str]]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Process CSV data.
 
         Args:
-            data (Dict[int, str]): Registry data.
+            data: Registry data.
 
         Returns:
-            List[str]: Enumeration fields.
-            List[str]: Missing fields.
+            Enumeration fields and missing fields.
 
         """
         enum = list()
@@ -58,7 +61,7 @@ class Type(Vendor):
             'return cls(value)'
         ]
         for code, name in data.items():
-            renm = self.rename(name, code)
+            renm = self.rename(name, code)  # type: ignore[arg-type]
             enum.append(f"{renm} = {code}".ljust(76))
         return enum, miss
 

@@ -11,7 +11,7 @@ class Registration(IntEnum):
     """[Registration] Registration Types"""
 
     #: Unassigned
-    Unassigned = 0
+    Unassigned_0 = 0
 
     #: RENDEZVOUS [:rfc:`8004`]
     RENDEZVOUS = 1
@@ -19,21 +19,27 @@ class Registration(IntEnum):
     #: RELAY_UDP_HIP [:rfc:`5770`]
     RELAY_UDP_HIP = 2
 
+    #: RELAY_UDP_ESP [:rfc:`9028`]
+    RELAY_UDP_ESP = 3
+
+    #: CANDIDATE_DISCOVERY [:rfc:`9028`]
+    CANDIDATE_DISCOVERY = 4
+
     @staticmethod
-    def get(key, default=-1):
+    def get(key: 'int | str', default: 'int' = -1) -> 'Registration':
         """Backport support for original codes."""
         if isinstance(key, int):
             return Registration(key)
         if key not in Registration._member_map_:  # pylint: disable=no-member
             extend_enum(Registration, key, default)
-        return Registration[key]
+        return Registration[key]  # type: ignore[misc]
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: 'int') -> 'Registration':
         """Lookup function used when value is not found."""
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
-        if 3 <= value <= 200:
+        if 5 <= value <= 200:
             #: Unassigned
             extend_enum(cls, 'Unassigned_%d' % value, value)
             return cls(value)
