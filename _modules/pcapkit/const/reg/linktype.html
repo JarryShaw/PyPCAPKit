@@ -43,401 +43,632 @@
 <div class="viewcode-block" id="LinkType"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.linktype.LinkType">[docs]</a><span class="k">class</span> <span class="nc">LinkType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;[LinkType] Link-Layer Header Type Values&quot;&quot;&quot;</span>
 
-    <span class="c1">#: ``DLT_NULL``</span>
+    <span class="c1">#: [``DLT_NULL``] BSD loopback encapsulation; the link layer header is a 4-byte</span>
+    <span class="c1">#: field, in host byte order, containing a value of 2 for IPv4 packets, a value</span>
+    <span class="c1">#: of either 24, 28, or 30 for IPv6 packets, a value of 7 for OSI packets, or a</span>
+    <span class="c1">#: value of 23 for IPX packets. All of the IPv6 values correspond to IPv6</span>
+    <span class="c1">#: packets; code reading files should check for all of them. Note that ``host</span>
+    <span class="c1">#: byte order&#39;&#39; is the byte order of the machine on which the packets are</span>
+    <span class="c1">#: captured; if a live capture is being done, ``host byte order&#39;&#39; is the byte</span>
+    <span class="c1">#: order of the machine capturing the packets, but if a ``savefile&#39;&#39; is being</span>
+    <span class="c1">#: read, the byte order is not necessarily that of the machine reading the</span>
+    <span class="c1">#: capture file.</span>
     <span class="n">NULL</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1">#: ``DLT_EN10MB``</span>
+    <span class="c1">#: [``DLT_EN10MB``] IEEE 802.3 Ethernet (10Mb, 100Mb, 1000Mb, and up); the 10MB</span>
+    <span class="c1">#: in the DLT_ name is historical.</span>
     <span class="n">ETHERNET</span> <span class="o">=</span> <span class="mi">1</span>
 
-    <span class="c1">#: ``DLT_AX25``</span>
+    <span class="c1">#: [``DLT_AX25``] AX.25 packet, with nothing preceding it.</span>
     <span class="n">AX25</span> <span class="o">=</span> <span class="mi">3</span>
 
-    <span class="c1">#: ``DLT_IEEE802``</span>
+    <span class="c1">#: [``DLT_IEEE802``] IEEE 802.5 Token Ring; the IEEE802, without _5, in the</span>
+    <span class="c1">#: DLT_ name is historical.</span>
     <span class="n">IEEE802_5</span> <span class="o">=</span> <span class="mi">6</span>
 
-    <span class="c1">#: ``DLT_ARCNET``</span>
+    <span class="c1">#: [``DLT_ARCNET``] ARCNET Data Packets, as described by the ARCNET Trade</span>
+    <span class="c1">#: Association standard ATA 878.1-1999, but without the Starting Delimiter,</span>
+    <span class="c1">#: Information Length, or Frame Check Sequence fields, and with only the first</span>
+    <span class="c1">#: ISU of the Destination Identifier. For most packet types, ARCNET Trade</span>
+    <span class="c1">#: Association draft standard ATA 878.2 is also used. See also RFC 1051 and RFC</span>
+    <span class="c1">#: 1201; for RFC 1051 frames, ATA 878.2 is not used.</span>
     <span class="n">ARCNET_BSD</span> <span class="o">=</span> <span class="mi">7</span>
 
-    <span class="c1">#: ``DLT_SLIP``</span>
+    <span class="c1">#: [``DLT_SLIP``] SLIP, encapsulated with a LINKTYPE_SLIP header.</span>
     <span class="n">SLIP</span> <span class="o">=</span> <span class="mi">8</span>
 
-    <span class="c1">#: ``DLT_PPP``</span>
+    <span class="c1">#: [``DLT_PPP``] PPP, as per RFC 1661 and RFC 1662; if the first 2 bytes are</span>
+    <span class="c1">#: 0xff and 0x03, it&#39;s PPP in HDLC-like framing, with the PPP header following</span>
+    <span class="c1">#: those two bytes, otherwise it&#39;s PPP without framing, and the packet begins</span>
+    <span class="c1">#: with the PPP header. The data in the frame is not octet-stuffed or bit-</span>
+    <span class="c1">#: stuffed.</span>
     <span class="n">PPP</span> <span class="o">=</span> <span class="mi">9</span>
 
-    <span class="c1">#: ``DLT_FDDI``</span>
+    <span class="c1">#: [``DLT_FDDI``] FDDI, as specified by ANSI INCITS 239-1994.</span>
     <span class="n">FDDI</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="c1">#: ``DLT_PPP_SERIAL``</span>
+    <span class="c1">#: [``DLT_PPP_SERIAL``] PPP in HDLC-like framing, as per RFC 1662, or Cisco PPP</span>
+    <span class="c1">#: with HDLC framing, as per section 4.3.1 of RFC 1547; the first byte will be</span>
+    <span class="c1">#: 0xFF for PPP in HDLC-like framing, and will be 0x0F or 0x8F for Cisco PPP</span>
+    <span class="c1">#: with HDLC framing. The data in the frame is not octet-stuffed or bit-</span>
+    <span class="c1">#: stuffed.</span>
     <span class="n">PPP_HDLC</span> <span class="o">=</span> <span class="mi">50</span>
 
-    <span class="c1">#: ``DLT_PPP_ETHER``</span>
+    <span class="c1">#: [``DLT_PPP_ETHER``] PPPoE; the packet begins with a PPPoE header, as per RFC</span>
+    <span class="c1">#: 2516.</span>
     <span class="n">PPP_ETHER</span> <span class="o">=</span> <span class="mi">51</span>
 
-    <span class="c1">#: ``DLT_ATM_RFC1483``</span>
+    <span class="c1">#: [``DLT_ATM_RFC1483``] RFC 1483 LLC/SNAP-encapsulated ATM; the packet begins</span>
+    <span class="c1">#: with an ISO 8802-2 (formerly known as IEEE 802.2) LLC header.</span>
     <span class="n">ATM_RFC1483</span> <span class="o">=</span> <span class="mi">100</span>
 
-    <span class="c1">#: ``DLT_RAW``</span>
+    <span class="c1">#: [``DLT_RAW``] Raw IP; the packet begins with an IPv4 or IPv6 header, with</span>
+    <span class="c1">#: the version field of the header indicating whether it&#39;s an IPv4 or IPv6</span>
+    <span class="c1">#: header.</span>
     <span class="n">RAW</span> <span class="o">=</span> <span class="mi">101</span>
 
-    <span class="c1">#: ``DLT_C_HDLC``</span>
+    <span class="c1">#: [``DLT_C_HDLC``] Cisco PPP with HDLC framing, as per section 4.3.1 of RFC</span>
+    <span class="c1">#: 1547.</span>
     <span class="n">C_HDLC</span> <span class="o">=</span> <span class="mi">104</span>
 
-    <span class="c1">#: ``DLT_IEEE802_11``</span>
+    <span class="c1">#: [``DLT_IEEE802_11``] IEEE 802.11 wireless LAN.</span>
     <span class="n">IEEE802_11</span> <span class="o">=</span> <span class="mi">105</span>
 
-    <span class="c1">#: ``DLT_FRELAY``</span>
+    <span class="c1">#: [``DLT_FRELAY``] Frame Relay LAPF frames, beginning with a ITU-T</span>
+    <span class="c1">#: Recommendation Q.922 LAPF header starting with the address field, and</span>
+    <span class="c1">#: without an FCS at the end of the frame.</span>
     <span class="n">FRELAY</span> <span class="o">=</span> <span class="mi">107</span>
 
-    <span class="c1">#: ``DLT_LOOP``</span>
+    <span class="c1">#: [``DLT_LOOP``] OpenBSD loopback encapsulation; the link-layer header is a</span>
+    <span class="c1">#: 4-byte field, in network byte order, containing a value of 2 for IPv4</span>
+    <span class="c1">#: packets, a value of either 24, 28, or 30 for IPv6 packets, a value of 7 for</span>
+    <span class="c1">#: OSI packets, or a value of 23 for IPX packets. All of the IPv6 values</span>
+    <span class="c1">#: correspond to IPv6 packets; code reading files should check for all of them.</span>
     <span class="n">LOOP</span> <span class="o">=</span> <span class="mi">108</span>
 
-    <span class="c1">#: ``DLT_LINUX_SLL``</span>
+    <span class="c1">#: [``DLT_LINUX_SLL``] Linux &quot;cooked&quot; capture encapsulation.</span>
     <span class="n">LINUX_SLL</span> <span class="o">=</span> <span class="mi">113</span>
 
-    <span class="c1">#: ``DLT_LTALK``</span>
+    <span class="c1">#: [``DLT_LTALK``] Apple LocalTalk; the packet begins with an AppleTalk</span>
+    <span class="c1">#: LocalTalk Link Access Protocol header, as described in chapter 1 of Inside</span>
+    <span class="c1">#: AppleTalk, Second Edition.</span>
     <span class="n">LTALK</span> <span class="o">=</span> <span class="mi">114</span>
 
-    <span class="c1">#: ``DLT_PFLOG``</span>
+    <span class="c1">#: [``DLT_PFLOG``] OpenBSD pflog; the link-layer header contains a struct</span>
+    <span class="c1">#: pfloghdr structure, as defined by the host on which the file was saved.</span>
+    <span class="c1">#: (This differs from operating system to operating system and release to</span>
+    <span class="c1">#: release; there is nothing in the file to indicate what the layout of that</span>
+    <span class="c1">#: structure is.)</span>
     <span class="n">PFLOG</span> <span class="o">=</span> <span class="mi">117</span>
 
-    <span class="c1">#: ``DLT_PRISM_HEADER``</span>
+    <span class="c1">#: [``DLT_PRISM_HEADER``] Prism monitor mode information followed by an 802.11</span>
+    <span class="c1">#: header.</span>
     <span class="n">IEEE802_11_PRISM</span> <span class="o">=</span> <span class="mi">119</span>
 
-    <span class="c1">#: ``DLT_IP_OVER_FC``</span>
+    <span class="c1">#: [``DLT_IP_OVER_FC``] RFC 2625 IP-over-Fibre Channel, with the link-layer</span>
+    <span class="c1">#: header being the Network_Header as described in that RFC.</span>
     <span class="n">IP_OVER_FC</span> <span class="o">=</span> <span class="mi">122</span>
 
-    <span class="c1">#: ``DLT_SUNATM``</span>
+    <span class="c1">#: [``DLT_SUNATM``] ATM traffic, encapsulated as per the scheme used by SunATM</span>
+    <span class="c1">#: devices.</span>
     <span class="n">SUNATM</span> <span class="o">=</span> <span class="mi">123</span>
 
-    <span class="c1">#: ``DLT_IEEE802_11_RADIO``</span>
+    <span class="c1">#: [``DLT_IEEE802_11_RADIO``] Radiotap link-layer information followed by an</span>
+    <span class="c1">#: 802.11 header.</span>
     <span class="n">IEEE802_11_RADIOTAP</span> <span class="o">=</span> <span class="mi">127</span>
 
-    <span class="c1">#: ``DLT_ARCNET_LINUX``</span>
+    <span class="c1">#: [``DLT_ARCNET_LINUX``] ARCNET Data Packets, as described by the ARCNET Trade</span>
+    <span class="c1">#: Association standard ATA 878.1-1999, but without the Starting Delimiter,</span>
+    <span class="c1">#: Information Length, or Frame Check Sequence fields, with only the first ISU</span>
+    <span class="c1">#: of the Destination Identifier, and with an extra two-ISU offset field</span>
+    <span class="c1">#: following the Destination Identifier. For most packet types, ARCNET Trade</span>
+    <span class="c1">#: Association draft standard ATA 878.2 is also used; however, no exception</span>
+    <span class="c1">#: frames are supplied, and reassembled frames, rather than fragments, are</span>
+    <span class="c1">#: supplied. See also RFC 1051 and RFC 1201; for RFC 1051 frames, ATA 878.2 is</span>
+    <span class="c1">#: not used.</span>
     <span class="n">ARCNET_LINUX</span> <span class="o">=</span> <span class="mi">129</span>
 
-    <span class="c1">#: ``DLT_APPLE_IP_OVER_IEEE1394``</span>
+    <span class="c1">#: [``DLT_APPLE_IP_OVER_IEEE1394``] Apple IP-over-IEEE 1394 cooked header.</span>
     <span class="n">APPLE_IP_OVER_IEEE1394</span> <span class="o">=</span> <span class="mi">138</span>
 
-    <span class="c1">#: ``DLT_MTP2_WITH_PHDR``</span>
+    <span class="c1">#: [``DLT_MTP2_WITH_PHDR``] Signaling System 7 Message Transfer Part Level 2,</span>
+    <span class="c1">#: as specified by ITU-T Recommendation Q.703, preceded by a pseudo-header.</span>
     <span class="n">MTP2_WITH_PHDR</span> <span class="o">=</span> <span class="mi">139</span>
 
-    <span class="c1">#: ``DLT_MTP2``</span>
+    <span class="c1">#: [``DLT_MTP2``] Signaling System 7 Message Transfer Part Level 2, as</span>
+    <span class="c1">#: specified by ITU-T Recommendation Q.703.</span>
     <span class="n">MTP2</span> <span class="o">=</span> <span class="mi">140</span>
 
-    <span class="c1">#: ``DLT_MTP3``</span>
+    <span class="c1">#: [``DLT_MTP3``] Signaling System 7 Message Transfer Part Level 3, as</span>
+    <span class="c1">#: specified by ITU-T Recommendation Q.704, with no MTP2 header preceding the</span>
+    <span class="c1">#: MTP3 packet.</span>
     <span class="n">MTP3</span> <span class="o">=</span> <span class="mi">141</span>
 
-    <span class="c1">#: ``DLT_SCCP``</span>
+    <span class="c1">#: [``DLT_SCCP``] Signaling System 7 Signalling Connection Control Part, as</span>
+    <span class="c1">#: specified by ITU-T Recommendation Q.711, ITU-T Recommendation Q.712, ITU-T</span>
+    <span class="c1">#: Recommendation Q.713, and ITU-T Recommendation Q.714, with no MTP3 or MTP2</span>
+    <span class="c1">#: headers preceding the SCCP packet.</span>
     <span class="n">SCCP</span> <span class="o">=</span> <span class="mi">142</span>
 
-    <span class="c1">#: ``DLT_DOCSIS``</span>
+    <span class="c1">#: [``DLT_DOCSIS``] DOCSIS MAC frames, as described by the DOCSIS 3.1 MAC and</span>
+    <span class="c1">#: Upper Layer Protocols Interface Specification or earlier specifications for</span>
+    <span class="c1">#: MAC frames.</span>
     <span class="n">DOCSIS</span> <span class="o">=</span> <span class="mi">143</span>
 
-    <span class="c1">#: ``DLT_LINUX_IRDA``</span>
+    <span class="c1">#: [``DLT_LINUX_IRDA``] Linux-IrDA packets, with a LINKTYPE_LINUX_IRDA header,</span>
+    <span class="c1">#: with the payload for IrDA frames beginning with by the IrLAP header as</span>
+    <span class="c1">#: defined by IrDA Data Specifications, including the IrDA Link Access Protocol</span>
+    <span class="c1">#: specification.</span>
     <span class="n">LINUX_IRDA</span> <span class="o">=</span> <span class="mi">144</span>
 
-    <span class="c1">#: ``DLT_USER_0``</span>
-    <span class="n">USER_0</span> <span class="o">=</span> <span class="mi">147</span>
+    <span class="c1">#: [``DLT_USER0``] Reserved for private use; see above.</span>
+    <span class="n">USER0</span> <span class="o">=</span> <span class="mi">147</span>
 
-    <span class="c1">#: ``DLT_USER_1``</span>
-    <span class="n">USER_1</span> <span class="o">=</span> <span class="mi">148</span>
+    <span class="c1">#: [``DLT_USER1``] Reserved for private use; see above.</span>
+    <span class="n">USER1</span> <span class="o">=</span> <span class="mi">148</span>
 
-    <span class="c1">#: ``DLT_USER_2``</span>
-    <span class="n">USER_2</span> <span class="o">=</span> <span class="mi">149</span>
+    <span class="c1">#: [``DLT_USER2``] Reserved for private use; see above.</span>
+    <span class="n">USER2</span> <span class="o">=</span> <span class="mi">149</span>
 
-    <span class="c1">#: ``DLT_USER_3``</span>
-    <span class="n">USER_3</span> <span class="o">=</span> <span class="mi">150</span>
+    <span class="c1">#: [``DLT_USER3``] Reserved for private use; see above.</span>
+    <span class="n">USER3</span> <span class="o">=</span> <span class="mi">150</span>
 
-    <span class="c1">#: ``DLT_USER_4``</span>
-    <span class="n">USER_4</span> <span class="o">=</span> <span class="mi">151</span>
+    <span class="c1">#: [``DLT_USER4``] Reserved for private use; see above.</span>
+    <span class="n">USER4</span> <span class="o">=</span> <span class="mi">151</span>
 
-    <span class="c1">#: ``DLT_USER_5``</span>
-    <span class="n">USER_5</span> <span class="o">=</span> <span class="mi">152</span>
+    <span class="c1">#: [``DLT_USER5``] Reserved for private use; see above.</span>
+    <span class="n">USER5</span> <span class="o">=</span> <span class="mi">152</span>
 
-    <span class="c1">#: ``DLT_USER_6``</span>
-    <span class="n">USER_6</span> <span class="o">=</span> <span class="mi">153</span>
+    <span class="c1">#: [``DLT_USER6``] Reserved for private use; see above.</span>
+    <span class="n">USER6</span> <span class="o">=</span> <span class="mi">153</span>
 
-    <span class="c1">#: ``DLT_USER_7``</span>
-    <span class="n">USER_7</span> <span class="o">=</span> <span class="mi">154</span>
+    <span class="c1">#: [``DLT_USER7``] Reserved for private use; see above.</span>
+    <span class="n">USER7</span> <span class="o">=</span> <span class="mi">154</span>
 
-    <span class="c1">#: ``DLT_USER_8``</span>
-    <span class="n">USER_8</span> <span class="o">=</span> <span class="mi">155</span>
+    <span class="c1">#: [``DLT_USER8``] Reserved for private use; see above.</span>
+    <span class="n">USER8</span> <span class="o">=</span> <span class="mi">155</span>
 
-    <span class="c1">#: ``DLT_USER_9``</span>
-    <span class="n">USER_9</span> <span class="o">=</span> <span class="mi">156</span>
+    <span class="c1">#: [``DLT_USER9``] Reserved for private use; see above.</span>
+    <span class="n">USER9</span> <span class="o">=</span> <span class="mi">156</span>
 
-    <span class="c1">#: ``DLT_USER_10``</span>
-    <span class="n">USER_10</span> <span class="o">=</span> <span class="mi">157</span>
+    <span class="c1">#: [``DLT_USER10``] Reserved for private use; see above.</span>
+    <span class="n">USER10</span> <span class="o">=</span> <span class="mi">157</span>
 
-    <span class="c1">#: ``DLT_USER_11``</span>
-    <span class="n">USER_11</span> <span class="o">=</span> <span class="mi">158</span>
+    <span class="c1">#: [``DLT_USER11``] Reserved for private use; see above.</span>
+    <span class="n">USER11</span> <span class="o">=</span> <span class="mi">158</span>
 
-    <span class="c1">#: ``DLT_USER_12``</span>
-    <span class="n">USER_12</span> <span class="o">=</span> <span class="mi">159</span>
+    <span class="c1">#: [``DLT_USER12``] Reserved for private use; see above.</span>
+    <span class="n">USER12</span> <span class="o">=</span> <span class="mi">159</span>
 
-    <span class="c1">#: ``DLT_USER_13``</span>
-    <span class="n">USER_13</span> <span class="o">=</span> <span class="mi">160</span>
+    <span class="c1">#: [``DLT_USER13``] Reserved for private use; see above.</span>
+    <span class="n">USER13</span> <span class="o">=</span> <span class="mi">160</span>
 
-    <span class="c1">#: ``DLT_USER_14``</span>
-    <span class="n">USER_14</span> <span class="o">=</span> <span class="mi">161</span>
+    <span class="c1">#: [``DLT_USER14``] Reserved for private use; see above.</span>
+    <span class="n">USER14</span> <span class="o">=</span> <span class="mi">161</span>
 
-    <span class="c1">#: ``DLT_USER_15``</span>
-    <span class="n">USER_15</span> <span class="o">=</span> <span class="mi">162</span>
+    <span class="c1">#: [``DLT_USER15``] Reserved for private use; see above.</span>
+    <span class="n">USER15</span> <span class="o">=</span> <span class="mi">162</span>
 
-    <span class="c1">#: ``DLT_IEEE802_11_RADIO_AVS``</span>
+    <span class="c1">#: [``DLT_IEEE802_11_RADIO_AVS``] AVS monitor mode information followed by an</span>
+    <span class="c1">#: 802.11 header.</span>
     <span class="n">IEEE802_11_AVS</span> <span class="o">=</span> <span class="mi">163</span>
 
-    <span class="c1">#: ``DLT_BACNET_MS_TP``</span>
+    <span class="c1">#: [``DLT_BACNET_MS_TP``] BACnet MS/TP frames, as specified by section 9.3</span>
+    <span class="c1">#: MS/TP Frame Format of ANSI/ASHRAE Standard 135, BACnet® - A Data</span>
+    <span class="c1">#: Communication Protocol for Building Automation and Control Networks,</span>
+    <span class="c1">#: including the preamble and, if present, the Data CRC.</span>
     <span class="n">BACNET_MS_TP</span> <span class="o">=</span> <span class="mi">165</span>
 
-    <span class="c1">#: ``DLT_PPP_PPPD``</span>
+    <span class="c1">#: [``DLT_PPP_PPPD``] PPP in HDLC-like encapsulation, like LINKTYPE_PPP_HDLC,</span>
+    <span class="c1">#: but with the 0xff address byte replaced by a direction indication—0x00 for</span>
+    <span class="c1">#: incoming and 0x01 for outgoing.</span>
     <span class="n">PPP_PPPD</span> <span class="o">=</span> <span class="mi">166</span>
 
-    <span class="c1">#: ``DLT_GPRS_LLC``</span>
+    <span class="c1">#: [``DLT_GPRS_LLC``] General Packet Radio Service Logical Link Control, as</span>
+    <span class="c1">#: defined by 3GPP TS 04.64.</span>
     <span class="n">GPRS_LLC</span> <span class="o">=</span> <span class="mi">169</span>
 
-    <span class="c1">#: ``DLT_GPF_T``</span>
+    <span class="c1">#: [``DLT_GPF_T``] Transparent-mapped generic framing procedure, as specified</span>
+    <span class="c1">#: by ITU-T Recommendation G.7041/Y.1303.</span>
     <span class="n">GPF_T</span> <span class="o">=</span> <span class="mi">170</span>
 
-    <span class="c1">#: ``DLT_GPF_F``</span>
+    <span class="c1">#: [``DLT_GPF_F``] Frame-mapped generic framing procedure, as specified by</span>
+    <span class="c1">#: ITU-T Recommendation G.7041/Y.1303.</span>
     <span class="n">GPF_F</span> <span class="o">=</span> <span class="mi">171</span>
 
-    <span class="c1">#: ``DLT_LINUX_LAPD``</span>
+    <span class="c1">#: [``DLT_LINUX_LAPD``] Link Access Procedures on the D Channel (LAPD) frames,</span>
+    <span class="c1">#: as specified by ITU-T Recommendation Q.920 and ITU-T Recommendation Q.921,</span>
+    <span class="c1">#: captured via vISDN, with a LINKTYPE_LINUX_LAPD header, followed by the Q.921</span>
+    <span class="c1">#: frame, starting with the address field.</span>
     <span class="n">LINUX_LAPD</span> <span class="o">=</span> <span class="mi">177</span>
 
-    <span class="c1">#: ``DLT_MFR``</span>
+    <span class="c1">#: [``DLT_MFR``] FRF.16.1 Multi-Link Frame Relay frames, beginning with an</span>
+    <span class="c1">#: FRF.12 Interface fragmentation format fragmentation header.</span>
     <span class="n">MFR</span> <span class="o">=</span> <span class="mi">182</span>
 
-    <span class="c1">#: ``DLT_BLUETOOTH_HCI_H4``</span>
+    <span class="c1">#: [``DLT_BLUETOOTH_HCI_H4``] Bluetooth HCI UART transport layer; the frame</span>
+    <span class="c1">#: contains an HCI packet indicator byte, as specified by the UART Transport</span>
+    <span class="c1">#: Layer portion of the most recent Bluetooth Core specification, followed by</span>
+    <span class="c1">#: an HCI packet of the specified packet type, as specified by the Host</span>
+    <span class="c1">#: Controller Interface Functional Specification portion of the most recent</span>
+    <span class="c1">#: Bluetooth Core Specification.</span>
     <span class="n">BLUETOOTH_HCI_H4</span> <span class="o">=</span> <span class="mi">187</span>
 
-    <span class="c1">#: ``DLT_USB_LINUX``</span>
+    <span class="c1">#: [``DLT_USB_LINUX``] USB packets, beginning with a Linux USB header, as</span>
+    <span class="c1">#: specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt</span>
+    <span class="c1">#: file in the Linux source tree. Only the first 48 bytes of that header are</span>
+    <span class="c1">#: present. All fields in the header are in host byte order. When performing a</span>
+    <span class="c1">#: live capture, the host byte order is the byte order of the machine on which</span>
+    <span class="c1">#: the packets are captured. When reading a pcap file, the byte order is the</span>
+    <span class="c1">#: byte order for the file, as specified by the file&#39;s magic number; when</span>
+    <span class="c1">#: reading a pcapng file, the byte order is the byte order for the section of</span>
+    <span class="c1">#: the pcapng file, as specified by the Section Header Block.</span>
     <span class="n">USB_LINUX</span> <span class="o">=</span> <span class="mi">189</span>
 
-    <span class="c1">#: ``DLT_PPI``</span>
+    <span class="c1">#: [``DLT_PPI``] Per-Packet Information information, as specified by the Per-</span>
+    <span class="c1">#: Packet Information Header Specification, followed by a packet with the</span>
+    <span class="c1">#: LINKTYPE_ value specified by the pph_dlt field of that header.</span>
     <span class="n">PPI</span> <span class="o">=</span> <span class="mi">192</span>
 
-    <span class="c1">#: ``DLT_IEEE802_15_4_WITHFCS``</span>
+    <span class="c1">#: [``DLT_IEEE802_15_4_WITHFCS``] IEEE 802.15.4 Low-Rate Wireless Networks,</span>
+    <span class="c1">#: with each packet having the FCS at the end of the frame.</span>
     <span class="n">IEEE802_15_4_WITHFCS</span> <span class="o">=</span> <span class="mi">195</span>
 
-    <span class="c1">#: ``DLT_SITA``</span>
+    <span class="c1">#: [``DLT_SITA``] Various link-layer types, with a pseudo-header, for SITA.</span>
     <span class="n">SITA</span> <span class="o">=</span> <span class="mi">196</span>
 
-    <span class="c1">#: ``DLT_ERF``</span>
+    <span class="c1">#: [``DLT_ERF``] Various link-layer types, with a pseudo-header, for Endace DAG</span>
+    <span class="c1">#: cards; encapsulates Endace ERF records.</span>
     <span class="n">ERF</span> <span class="o">=</span> <span class="mi">197</span>
 
-    <span class="c1">#: ``DLT_BLUETOOTH_HCI_H4_WITH_PHDR``</span>
+    <span class="c1">#: [``DLT_BLUETOOTH_HCI_H4_WITH_PHDR``] Bluetooth HCI UART transport layer; the</span>
+    <span class="c1">#: frame contains a 4-byte direction field, in network byte order (big-endian),</span>
+    <span class="c1">#: the low-order bit of which is set if the frame was sent from the host to the</span>
+    <span class="c1">#: controller and clear if the frame was received by the host from the</span>
+    <span class="c1">#: controller, followed by an HCI packet indicator byte, as specified by the</span>
+    <span class="c1">#: UART Transport Layer portion of the most recent Bluetooth Core</span>
+    <span class="c1">#: specification, followed by an HCI packet of the specified packet type, as</span>
+    <span class="c1">#: specified by the Host Controller Interface Functional Specification portion</span>
+    <span class="c1">#: of the most recent Bluetooth Core Specification.</span>
     <span class="n">BLUETOOTH_HCI_H4_WITH_PHDR</span> <span class="o">=</span> <span class="mi">201</span>
 
-    <span class="c1">#: ``DLT_AX25_KISS``</span>
+    <span class="c1">#: [``DLT_AX25_KISS``] AX.25 packet, with a 1-byte KISS header containing a</span>
+    <span class="c1">#: type indicator.</span>
     <span class="n">AX25_KISS</span> <span class="o">=</span> <span class="mi">202</span>
 
-    <span class="c1">#: ``DLT_LAPD``</span>
+    <span class="c1">#: [``DLT_LAPD``] Link Access Procedures on the D Channel (LAPD) frames, as</span>
+    <span class="c1">#: specified by ITU-T Recommendation Q.920 and ITU-T Recommendation Q.921,</span>
+    <span class="c1">#: starting with the address field, with no pseudo-header.</span>
     <span class="n">LAPD</span> <span class="o">=</span> <span class="mi">203</span>
 
-    <span class="c1">#: ``DLT_PPP_WITH_DIR``</span>
+    <span class="c1">#: [``DLT_PPP_WITH_DIR``] PPP, as per RFC 1661 and RFC 1662, preceded with a</span>
+    <span class="c1">#: one-byte pseudo-header with a zero value meaning &quot;received by this host&quot; and</span>
+    <span class="c1">#: a non-zero value meaning &quot;sent by this host&quot;; if the first 2 bytes are 0xff</span>
+    <span class="c1">#: and 0x03, it&#39;s PPP in HDLC-like framing, with the PPP header following those</span>
+    <span class="c1">#: two bytes, otherwise it&#39;s PPP without framing, and the packet begins with</span>
+    <span class="c1">#: the PPP header. The data in the frame is not octet-stuffed or bit-stuffed.</span>
     <span class="n">PPP_WITH_DIR</span> <span class="o">=</span> <span class="mi">204</span>
 
-    <span class="c1">#: ``DLT_C_HDLC_WITH_DIR``</span>
+    <span class="c1">#: [``DLT_C_HDLC_WITH_DIR``] Cisco PPP with HDLC framing, as per section 4.3.1</span>
+    <span class="c1">#: of RFC 1547, preceded with a one-byte pseudo-header with a zero value</span>
+    <span class="c1">#: meaning &quot;received by this host&quot; and a non-zero value meaning &quot;sent by this</span>
+    <span class="c1">#: host&quot;.</span>
     <span class="n">C_HDLC_WITH_DIR</span> <span class="o">=</span> <span class="mi">205</span>
 
-    <span class="c1">#: ``DLT_FRELAY_WITH_DIR``</span>
+    <span class="c1">#: [``DLT_FRELAY_WITH_DIR``] Frame Relay LAPF frames, beginning with a one-byte</span>
+    <span class="c1">#: pseudo-header with a zero value meaning &quot;received by this host&quot; (DCE-&gt;DTE)</span>
+    <span class="c1">#: and a non-zero value meaning &quot;sent by this host&quot; (DTE-&gt;DCE), followed by an</span>
+    <span class="c1">#: ITU-T Recommendation Q.922 LAPF header starting with the address field, and</span>
+    <span class="c1">#: without an FCS at the end of the frame.</span>
     <span class="n">FRELAY_WITH_DIR</span> <span class="o">=</span> <span class="mi">206</span>
 
-    <span class="c1">#: ``DLT_LAPB_WITH_DIR``</span>
+    <span class="c1">#: [``DLT_LAPB_WITH_DIR``] Link Access Procedure, Balanced (LAPB), as specified</span>
+    <span class="c1">#: by ITU-T Recommendation X.25, preceded with a one-byte pseudo-header with a</span>
+    <span class="c1">#: zero value meaning &quot;received by this host&quot; (DCE-&gt;DTE) and a non-zero value</span>
+    <span class="c1">#: meaning &quot;sent by this host&quot; (DTE-&gt;DCE).</span>
     <span class="n">LAPB_WITH_DIR</span> <span class="o">=</span> <span class="mi">207</span>
 
-    <span class="c1">#: ``DLT_IPMB_LINUX``</span>
+    <span class="c1">#: [``DLT_IPMB_LINUX``] IPMB over an I2C circuit, with a Linux-specific pseudo-</span>
+    <span class="c1">#: header.</span>
     <span class="n">IPMB_LINUX</span> <span class="o">=</span> <span class="mi">209</span>
 
-    <span class="c1">#: ``DLT_IEEE802_15_4_NONASK_PHY``</span>
+    <span class="c1">#: [``DLT_FLEXRAY``] FlexRay automotive bus frames or symbols, preceded by a</span>
+    <span class="c1">#: pseudo-header.</span>
+    <span class="n">FLEXRAY</span> <span class="o">=</span> <span class="mi">210</span>
+
+    <span class="c1">#: [``DLT_LIN``] Local Interconnect Network (LIN) automotive bus, preceded by a</span>
+    <span class="c1">#: pseudo-header.</span>
+    <span class="n">LIN</span> <span class="o">=</span> <span class="mi">212</span>
+
+    <span class="c1">#: [``DLT_IEEE802_15_4_NONASK_PHY``] IEEE 802.15.4 Low-Rate Wireless Networks,</span>
+    <span class="c1">#: with each packet having the FCS at the end of the frame, and with the PHY-</span>
+    <span class="c1">#: level data for the O-QPSK, BPSK, GFSK, MSK, and RCC DSS BPSK PHYs (4 octets</span>
+    <span class="c1">#: of 0 as preamble, one octet of SFD, one octet of frame length + reserved</span>
+    <span class="c1">#: bit) preceding the MAC-layer data (starting with the frame control field).</span>
     <span class="n">IEEE802_15_4_NONASK_PHY</span> <span class="o">=</span> <span class="mi">215</span>
 
-    <span class="c1">#: ``DLT_USB_LINUX_MMAPPED``</span>
+    <span class="c1">#: [``DLT_USB_LINUX_MMAPPED``] USB packets, beginning with a Linux USB header,</span>
+    <span class="c1">#: as specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt</span>
+    <span class="c1">#: file in the Linux source tree. All 64 bytes of the header are present. All</span>
+    <span class="c1">#: fields in the header are in host byte order. When performing a live capture,</span>
+    <span class="c1">#: the host byte order is the byte order of the machine on which the packets</span>
+    <span class="c1">#: are captured. When reading a pcap file, the byte order is the byte order for</span>
+    <span class="c1">#: the file, as specified by the file&#39;s magic number; when reading a pcapng</span>
+    <span class="c1">#: file, the byte order is the byte order for the section of the pcapng file,</span>
+    <span class="c1">#: as specified by the Section Header Block. For isochronous transfers, the</span>
+    <span class="c1">#: ndesc field specifies the number of isochronous descriptors that follow.</span>
     <span class="n">USB_LINUX_MMAPPED</span> <span class="o">=</span> <span class="mi">220</span>
 
-    <span class="c1">#: ``DLT_FC_2``</span>
+    <span class="c1">#: [``DLT_FC_2``] Fibre Channel FC-2 frames, beginning with a Frame_Header.</span>
     <span class="n">FC_2</span> <span class="o">=</span> <span class="mi">224</span>
 
-    <span class="c1">#: ``DLT_FC_2_WITH_FRAME_DELIMS``</span>
+    <span class="c1">#: [``DLT_FC_2_WITH_FRAME_DELIMS``] Fibre Channel FC-2 frames, beginning an</span>
+    <span class="c1">#: encoding of the SOF, followed by a Frame_Header, and ending with an encoding</span>
+    <span class="c1">#: of the SOF. The encodings represent the frame delimiters as 4-byte sequences</span>
+    <span class="c1">#: representing the corresponding ordered sets, with K28.5 represented as 0xBC,</span>
+    <span class="c1">#: and the D symbols as the corresponding byte values; for example, SOFi2,</span>
+    <span class="c1">#: which is K28.5 - D21.5 - D1.2 - D21.2, is represented as 0xBC 0xB5 0x55</span>
+    <span class="c1">#: 0x55.</span>
     <span class="n">FC_2_WITH_FRAME_DELIMS</span> <span class="o">=</span> <span class="mi">225</span>
 
-    <span class="c1">#: ``DLT_IPNET``</span>
+    <span class="c1">#: [``DLT_IPNET``] Solaris ipnet pseudo-header, followed by an IPv4 or IPv6</span>
+    <span class="c1">#: datagram.</span>
     <span class="n">IPNET</span> <span class="o">=</span> <span class="mi">226</span>
 
-    <span class="c1">#: ``DLT_CAN_SOCKETCAN``</span>
+    <span class="c1">#: [``DLT_CAN_SOCKETCAN``] CAN (Controller Area Network) frames, with a pseudo-</span>
+    <span class="c1">#: header followed by the frame payload.</span>
     <span class="n">CAN_SOCKETCAN</span> <span class="o">=</span> <span class="mi">227</span>
 
-    <span class="c1">#: ``DLT_IPV4``</span>
+    <span class="c1">#: [``DLT_IPV4``] Raw IPv4; the packet begins with an IPv4 header.</span>
     <span class="n">IPV4</span> <span class="o">=</span> <span class="mi">228</span>
 
-    <span class="c1">#: ``DLT_IPV6``</span>
+    <span class="c1">#: [``DLT_IPV6``] Raw IPv6; the packet begins with an IPv6 header.</span>
     <span class="n">IPV6</span> <span class="o">=</span> <span class="mi">229</span>
 
-    <span class="c1">#: ``DLT_IEEE802_15_4_NOFCS``</span>
+    <span class="c1">#: [``DLT_IEEE802_15_4_NOFCS``] IEEE 802.15.4 Low-Rate Wireless Network,</span>
+    <span class="c1">#: without the FCS at the end of the frame.</span>
     <span class="n">IEEE802_15_4_NOFCS</span> <span class="o">=</span> <span class="mi">230</span>
 
-    <span class="c1">#: ``DLT_DBUS``</span>
+    <span class="c1">#: [``DLT_DBUS``] Raw D-Bus messages, starting with the endianness flag,</span>
+    <span class="c1">#: followed by the message type, etc., but without the authentication handshake</span>
+    <span class="c1">#: before the message sequence.</span>
     <span class="n">DBUS</span> <span class="o">=</span> <span class="mi">231</span>
 
-    <span class="c1">#: ``DLT_DVB_CI``</span>
+    <span class="c1">#: [``DLT_DVB_CI``] DVB-CI (DVB Common Interface for communication between a PC</span>
+    <span class="c1">#: Card module and a DVB receiver), with the message format specified by the</span>
+    <span class="c1">#: PCAP format for DVB-CI specification.</span>
     <span class="n">DVB_CI</span> <span class="o">=</span> <span class="mi">235</span>
 
-    <span class="c1">#: ``DLT_MUX27010``</span>
+    <span class="c1">#: [``DLT_MUX27010``] Variant of 3GPP TS 27.010 multiplexing protocol (similar</span>
+    <span class="c1">#: to, but not the same as, 27.010).</span>
     <span class="n">MUX27010</span> <span class="o">=</span> <span class="mi">236</span>
 
-    <span class="c1">#: ``DLT_STANAG_5066_D_PDU``</span>
+    <span class="c1">#: [``DLT_STANAG_5066_D_PDU``] D_PDUs as described by NATO standard STANAG</span>
+    <span class="c1">#: 5066, starting with the synchronization sequence, and including both header</span>
+    <span class="c1">#: and data CRCs. The current version of STANAG 5066 is backwards-compatible</span>
+    <span class="c1">#: with the 1.0.2 version, although newer versions are classified.</span>
     <span class="n">STANAG_5066_D_PDU</span> <span class="o">=</span> <span class="mi">237</span>
 
-    <span class="c1">#: ``DLT_NFLOG``</span>
+    <span class="c1">#: [``DLT_NFLOG``] Linux netlink NETLINK NFLOG socket log messages.</span>
     <span class="n">NFLOG</span> <span class="o">=</span> <span class="mi">239</span>
 
-    <span class="c1">#: ``DLT_NETANALYZER``</span>
+    <span class="c1">#: [``DLT_NETANALYZER``] Pseudo-header for Hilscher Gesellschaft für</span>
+    <span class="c1">#: Systemautomation mbH netANALYZER devices, followed by an Ethernet frame,</span>
+    <span class="c1">#: beginning with the MAC header and ending with the FCS.</span>
     <span class="n">NETANALYZER</span> <span class="o">=</span> <span class="mi">240</span>
 
-    <span class="c1">#: ``DLT_NETANALYZER_TRANSPARENT``</span>
+    <span class="c1">#: [``DLT_NETANALYZER_TRANSPARENT``] Pseudo-header for Hilscher Gesellschaft</span>
+    <span class="c1">#: für Systemautomation mbH netANALYZER devices, followed by an Ethernet frame,</span>
+    <span class="c1">#: beginning with the preamble, SFD, and MAC header, and ending with the FCS.</span>
     <span class="n">NETANALYZER_TRANSPARENT</span> <span class="o">=</span> <span class="mi">241</span>
 
-    <span class="c1">#: ``DLT_IPOIB``</span>
+    <span class="c1">#: [``DLT_IPOIB``] IP-over-InfiniBand, as specified by RFC 4391 section 6.</span>
     <span class="n">IPOIB</span> <span class="o">=</span> <span class="mi">242</span>
 
-    <span class="c1">#: ``DLT_MPEG_2_TS``</span>
+    <span class="c1">#: [``DLT_MPEG_2_TS``] MPEG-2 Transport Stream transport packets, as specified</span>
+    <span class="c1">#: by ISO 13818-1/ITU-T Recommendation H.222.0 (see table 2-2 of section</span>
+    <span class="c1">#: 2.4.3.2 &quot;Transport Stream packet layer&quot;).</span>
     <span class="n">MPEG_2_TS</span> <span class="o">=</span> <span class="mi">243</span>
 
-    <span class="c1">#: ``DLT_NG40``</span>
+    <span class="c1">#: [``DLT_NG40``] Pseudo-header for ng4T GmbH&#39;s UMTS Iub/Iur-over-ATM and</span>
+    <span class="c1">#: Iub/Iur-over-IP format as used by their ng40 protocol tester, followed by</span>
+    <span class="c1">#: frames for the Frame Protocol as specified by 3GPP TS 25.427 for dedicated</span>
+    <span class="c1">#: channels and 3GPP TS 25.435 for common/shared channels in the case of ATM</span>
+    <span class="c1">#: AAL2 or UDP traffic, by SSCOP packets as specified by ITU-T Recommendation</span>
+    <span class="c1">#: Q.2110 for ATM AAL5 traffic, and by NBAP packets for SCTP traffic.</span>
     <span class="n">NG40</span> <span class="o">=</span> <span class="mi">244</span>
 
-    <span class="c1">#: ``DLT_NFC_LLCP``</span>
+    <span class="c1">#: [``DLT_NFC_LLCP``] Pseudo-header for NFC LLCP packet captures, followed by</span>
+    <span class="c1">#: frame data for the LLCP Protocol as specified by NFCForum-TS-LLCP_1.1.</span>
     <span class="n">NFC_LLCP</span> <span class="o">=</span> <span class="mi">245</span>
 
-    <span class="c1">#: ``DLT_INFINIBAND``</span>
+    <span class="c1">#: [``DLT_INFINIBAND``] Raw InfiniBand frames, starting with the Local Routing</span>
+    <span class="c1">#: Header, as specified in Chapter 5 &quot;Data packet format&quot; of InfiniBand™</span>
+    <span class="c1">#: Architectural Specification Release 1.2.1 Volume 1 - General Specifications.</span>
     <span class="n">INFINIBAND</span> <span class="o">=</span> <span class="mi">247</span>
 
-    <span class="c1">#: ``DLT_SCTP``</span>
+    <span class="c1">#: [``DLT_SCTP``] SCTP packets, as defined by RFC 4960, with no lower-level</span>
+    <span class="c1">#: protocols such as IPv4 or IPv6.</span>
     <span class="n">SCTP</span> <span class="o">=</span> <span class="mi">248</span>
 
-    <span class="c1">#: ``DLT_USBPCAP``</span>
+    <span class="c1">#: [``DLT_USBPCAP``] USB packets, beginning with a USBPcap header.</span>
     <span class="n">USBPCAP</span> <span class="o">=</span> <span class="mi">249</span>
 
-    <span class="c1">#: ``DLT_RTAC_SERIAL``</span>
+    <span class="c1">#: [``DLT_RTAC_SERIAL``] Serial-line packet header for the Schweitzer</span>
+    <span class="c1">#: Engineering Laboratories &quot;RTAC&quot; product, followed by a payload for one of a</span>
+    <span class="c1">#: number of industrial control protocols.</span>
     <span class="n">RTAC_SERIAL</span> <span class="o">=</span> <span class="mi">250</span>
 
-    <span class="c1">#: ``DLT_BLUETOOTH_LE_LL``</span>
+    <span class="c1">#: [``DLT_BLUETOOTH_LE_LL``] Bluetooth Low Energy air interface Link Layer</span>
+    <span class="c1">#: packets, in the format described in section 2.1 &quot;PACKET FORMAT&quot; of volume 6</span>
+    <span class="c1">#: of the Bluetooth Specification Version 4.0 (see PDF page 2200), but without</span>
+    <span class="c1">#: the Preamble.</span>
     <span class="n">BLUETOOTH_LE_LL</span> <span class="o">=</span> <span class="mi">251</span>
 
-    <span class="c1">#: ``DLT_NETLINK``</span>
+    <span class="c1">#: [``DLT_NETLINK``] Linux Netlink capture encapsulation.</span>
     <span class="n">NETLINK</span> <span class="o">=</span> <span class="mi">253</span>
 
-    <span class="c1">#: ``DLT_BLUETOOTH_LINUX_MONITOR``</span>
+    <span class="c1">#: [``DLT_BLUETOOTH_LINUX_MONITOR``] Bluetooth Linux Monitor encapsulation of</span>
+    <span class="c1">#: traffic for the BlueZ stack.</span>
     <span class="n">BLUETOOTH_LINUX_MONITOR</span> <span class="o">=</span> <span class="mi">254</span>
 
-    <span class="c1">#: ``DLT_BLUETOOTH_BREDR_BB``</span>
+    <span class="c1">#: [``DLT_BLUETOOTH_BREDR_BB``] Bluetooth Basic Rate and Enhanced Data Rate</span>
+    <span class="c1">#: baseband packets.</span>
     <span class="n">BLUETOOTH_BREDR_BB</span> <span class="o">=</span> <span class="mi">255</span>
 
-    <span class="c1">#: ``DLT_BLUETOOTH_LE_LL_WITH_PHDR``</span>
+    <span class="c1">#: [``DLT_BLUETOOTH_LE_LL_WITH_PHDR``] Bluetooth Low Energy link-layer packets.</span>
     <span class="n">BLUETOOTH_LE_LL_WITH_PHDR</span> <span class="o">=</span> <span class="mi">256</span>
 
-    <span class="c1">#: ``DLT_PROFIBUS_DL``</span>
+    <span class="c1">#: [``DLT_PROFIBUS_DL``] PROFIBUS data link layer packets, as specified by IEC</span>
+    <span class="c1">#: standard 61158-4-3, beginning with the start delimiter, ending with the end</span>
+    <span class="c1">#: delimiter, and including all octets between them.</span>
     <span class="n">PROFIBUS_DL</span> <span class="o">=</span> <span class="mi">257</span>
 
-    <span class="c1">#: ``DLT_PKTAP``</span>
+    <span class="c1">#: [``DLT_PKTAP``] Apple PKTAP capture encapsulation.</span>
     <span class="n">PKTAP</span> <span class="o">=</span> <span class="mi">258</span>
 
-    <span class="c1">#: ``DLT_EPON``</span>
+    <span class="c1">#: [``DLT_EPON``] Ethernet-over-passive-optical-network packets, starting with</span>
+    <span class="c1">#: the last 6 octets of the modified preamble as specified by 65.1.3.2</span>
+    <span class="c1">#: &quot;Transmit&quot; in Clause 65 of Section 5 of IEEE 802.3, followed immediately by</span>
+    <span class="c1">#: an Ethernet frame.</span>
     <span class="n">EPON</span> <span class="o">=</span> <span class="mi">259</span>
 
-    <span class="c1">#: ``DLT_IPMI_HPM_2``</span>
+    <span class="c1">#: [``DLT_IPMI_HPM_2``] IPMI trace packets, as specified by Table 3-20 &quot;Trace</span>
+    <span class="c1">#: Data Block Format&quot; in the PICMG HPM.2 specification. The time stamps for</span>
+    <span class="c1">#: packets in this format must match the time stamps in the Trace Data Blocks.</span>
     <span class="n">IPMI_HPM_2</span> <span class="o">=</span> <span class="mi">260</span>
 
-    <span class="c1">#: ``DLT_ZWAVE_R1_R2``</span>
+    <span class="c1">#: [``DLT_ZWAVE_R1_R2``] Z-Wave RF profile R1 and R2 packets, as specified by</span>
+    <span class="c1">#: ITU-T Recommendation G.9959, with some MAC layer fields moved.</span>
     <span class="n">ZWAVE_R1_R2</span> <span class="o">=</span> <span class="mi">261</span>
 
-    <span class="c1">#: ``DLT_ZWAVE_R3``</span>
+    <span class="c1">#: [``DLT_ZWAVE_R3``] Z-Wave RF profile R3 packets, as specified by ITU-T</span>
+    <span class="c1">#: Recommendation G.9959, with some MAC layer fields moved.</span>
     <span class="n">ZWAVE_R3</span> <span class="o">=</span> <span class="mi">262</span>
 
-    <span class="c1">#: ``DLT_WATTSTOPPER_DLM``</span>
+    <span class="c1">#: [``DLT_WATTSTOPPER_DLM``] Formats for WattStopper Digital Lighting</span>
+    <span class="c1">#: Management (DLM) and Legrand Nitoo Open protocol common packet structure</span>
+    <span class="c1">#: captures.</span>
     <span class="n">WATTSTOPPER_DLM</span> <span class="o">=</span> <span class="mi">263</span>
 
-    <span class="c1">#: ``DLT_ISO_14443``</span>
+    <span class="c1">#: [``DLT_ISO_14443``] Messages between ISO 14443 contactless smartcards</span>
+    <span class="c1">#: (Proximity Integrated Circuit Card, PICC) and card readers (Proximity</span>
+    <span class="c1">#: Coupling Device, PCD), with the message format specified by the PCAP format</span>
+    <span class="c1">#: for ISO14443 specification.</span>
     <span class="n">ISO_14443</span> <span class="o">=</span> <span class="mi">264</span>
 
-    <span class="c1">#: ``DLT_RDS``</span>
+    <span class="c1">#: [``DLT_RDS``] Radio data system (RDS) groups, as per IEC 62106, encapsulated</span>
+    <span class="c1">#: in this form.</span>
     <span class="n">RDS</span> <span class="o">=</span> <span class="mi">265</span>
 
-    <span class="c1">#: ``DLT_USB_DARWIN``</span>
+    <span class="c1">#: [``DLT_USB_DARWIN``] USB packets, beginning with a Darwin (macOS, etc.) USB</span>
+    <span class="c1">#: header.</span>
     <span class="n">USB_DARWIN</span> <span class="o">=</span> <span class="mi">266</span>
 
-    <span class="c1">#: ``DLT_SDLC``</span>
+    <span class="c1">#: [``DLT_SDLC``] SDLC packets, as specified by Chapter 1, &quot;DLC Links&quot;, section</span>
+    <span class="c1">#: &quot;Synchronous Data Link Control (SDLC)&quot; of Systems Network Architecture</span>
+    <span class="c1">#: Formats, GA27-3136-20, without the flag fields, zero-bit insertion, or Frame</span>
+    <span class="c1">#: Check Sequence field, containing SNA path information units (PIUs) as the</span>
+    <span class="c1">#: payload.</span>
     <span class="n">SDLC</span> <span class="o">=</span> <span class="mi">268</span>
 
-    <span class="c1">#: ``DLT_LORATAP``</span>
+    <span class="c1">#: [``DLT_LORATAP``] LoRaTap pseudo-header, followed by the payload, which is</span>
+    <span class="c1">#: typically the PHYPayload from the LoRaWan specification.</span>
     <span class="n">LORATAP</span> <span class="o">=</span> <span class="mi">270</span>
 
-    <span class="c1">#: ``DLT_VSOCK``</span>
+    <span class="c1">#: [``DLT_VSOCK``] Protocol for communication between host and guest machines</span>
+    <span class="c1">#: in VMware and KVM hypervisors.</span>
     <span class="n">VSOCK</span> <span class="o">=</span> <span class="mi">271</span>
 
-    <span class="c1">#: ``DLT_NORDIC_BLE``</span>
+    <span class="c1">#: [``DLT_NORDIC_BLE``] Messages to and from a Nordic Semiconductor nRF Sniffer</span>
+    <span class="c1">#: for Bluetooth LE packets, beginning with a pseudo-header.</span>
     <span class="n">NORDIC_BLE</span> <span class="o">=</span> <span class="mi">272</span>
 
-    <span class="c1">#: ``DLT_DOCSIS31_XRA31``</span>
+    <span class="c1">#: [``DLT_DOCSIS31_XRA31``] DOCSIS packets and bursts, preceded by a pseudo-</span>
+    <span class="c1">#: header giving metadata about the packet.</span>
     <span class="n">DOCSIS31_XRA31</span> <span class="o">=</span> <span class="mi">273</span>
 
-    <span class="c1">#: ``DLT_ETHERNET_MPACKET``</span>
+    <span class="c1">#: [``DLT_ETHERNET_MPACKET``] mPackets, as specified by IEEE 802.3br Figure</span>
+    <span class="c1">#: 99-4, starting with the preamble and always ending with a CRC field.</span>
     <span class="n">ETHERNET_MPACKET</span> <span class="o">=</span> <span class="mi">274</span>
 
-    <span class="c1">#: ``DLT_DISPLAYPORT_AUX``</span>
+    <span class="c1">#: [``DLT_DISPLAYPORT_AUX``] DisplayPort AUX channel monitoring data as</span>
+    <span class="c1">#: specified by VESA DisplayPort (DP) Standard preceded by a pseudo-header.</span>
     <span class="n">DISPLAYPORT_AUX</span> <span class="o">=</span> <span class="mi">275</span>
 
-    <span class="c1">#: ``DLT_LINUX_SLL2``</span>
+    <span class="c1">#: [``DLT_LINUX_SLL2``] Linux &quot;cooked&quot; capture encapsulation v2.</span>
     <span class="n">LINUX_SLL2</span> <span class="o">=</span> <span class="mi">276</span>
 
-    <span class="c1">#: ``DLT_OPENVIZSLA``</span>
+    <span class="c1">#: [``DLT_OPENVIZSLA``] Openvizsla FPGA-based USB sniffer.</span>
     <span class="n">OPENVIZSLA</span> <span class="o">=</span> <span class="mi">278</span>
 
-    <span class="c1">#: ``DLT_EBHSCR``</span>
+    <span class="c1">#: [``DLT_EBHSCR``] Elektrobit High Speed Capture and Replay (EBHSCR) format.</span>
     <span class="n">EBHSCR</span> <span class="o">=</span> <span class="mi">279</span>
 
-    <span class="c1">#: ``DLT_VPP_DISPATCH``</span>
+    <span class="c1">#: [``DLT_VPP_DISPATCH``] Records in traces from the http://fd.io VPP graph</span>
+    <span class="c1">#: dispatch tracer, in the the graph dispatcher trace format.</span>
     <span class="n">VPP_DISPATCH</span> <span class="o">=</span> <span class="mi">280</span>
 
-    <span class="c1">#: ``DLT_DSA_TAG_BRCM``</span>
+    <span class="c1">#: [``DLT_DSA_TAG_BRCM``] Ethernet frames, with a switch tag inserted between</span>
+    <span class="c1">#: the source address field and the type/length field in the Ethernet header.</span>
     <span class="n">DSA_TAG_BRCM</span> <span class="o">=</span> <span class="mi">281</span>
 
-    <span class="c1">#: ``DLT_DSA_TAG_BRCM_PREPEND``</span>
+    <span class="c1">#: [``DLT_DSA_TAG_BRCM_PREPEND``] Ethernet frames, with a switch tag inserted</span>
+    <span class="c1">#: before the destination address in the Ethernet header.</span>
     <span class="n">DSA_TAG_BRCM_PREPEND</span> <span class="o">=</span> <span class="mi">282</span>
 
-    <span class="c1">#: ``DLT_IEEE802_15_4_TAP``</span>
+    <span class="c1">#: [``DLT_IEEE802_15_4_TAP``] IEEE 802.15.4 Low-Rate Wireless Networks, with a</span>
+    <span class="c1">#: pseudo-header containing TLVs with metadata preceding the 802.15.4 header.</span>
     <span class="n">IEEE802_15_4_TAP</span> <span class="o">=</span> <span class="mi">283</span>
 
-    <span class="c1">#: ``DLT_DSA_TAG_DSA``</span>
+    <span class="c1">#: [``DLT_DSA_TAG_DSA``] Ethernet frames, with a switch tag inserted between</span>
+    <span class="c1">#: the source address field and the type/length field in the Ethernet header.</span>
     <span class="n">DSA_TAG_DSA</span> <span class="o">=</span> <span class="mi">284</span>
 
-    <span class="c1">#: ``DLT_DSA_TAG_EDSA``</span>
+    <span class="c1">#: [``DLT_DSA_TAG_EDSA``] Ethernet frames, with a programmable Ethernet type</span>
+    <span class="c1">#: switch tag inserted between the source address field and the type/length</span>
+    <span class="c1">#: field in the Ethernet header.</span>
     <span class="n">DSA_TAG_EDSA</span> <span class="o">=</span> <span class="mi">285</span>
 
-    <span class="c1">#: ``DLT_ELEE``</span>
+    <span class="c1">#: [``DLT_ELEE``] Payload of lawful intercept packets using the ELEE protocol.</span>
+    <span class="c1">#: The packet begins with the ELEE header; it does not include any transport-</span>
+    <span class="c1">#: layer or lower-layer headers for protcols used to transport ELEE packets.</span>
     <span class="n">ELEE</span> <span class="o">=</span> <span class="mi">286</span>
 
-    <span class="c1">#: ``DLT_Z_WAVE_SERIAL``</span>
+    <span class="c1">#: [``DLT_Z_WAVE_SERIAL``] Serial frames transmitted between a host and a</span>
+    <span class="c1">#: Z-Wave chip over an RS-232 or USB serial connection, as described in section</span>
+    <span class="c1">#: 5 of the Z-Wave Serial API Host Application Programming Guide.</span>
     <span class="n">Z_WAVE_SERIAL</span> <span class="o">=</span> <span class="mi">287</span>
 
-    <span class="c1">#: ``DLT_USB_2_0``</span>
+    <span class="c1">#: [``DLT_USB_2_0``] USB 2.0, 1.1, or 1.0 packet, beginning with a PID, as</span>
+    <span class="c1">#: described by Chapter 8 &quot;Protocol Layer&quot; of the the Universal Serial Bus</span>
+    <span class="c1">#: Specification Revision 2.0.</span>
     <span class="n">USB_2_0</span> <span class="o">=</span> <span class="mi">288</span>
 
-    <span class="c1">#: ``DLT_ATSC_ALP``</span>
+    <span class="c1">#: [``DLT_ATSC_ALP``] ATSC Link-Layer Protocol frames, as described in section</span>
+    <span class="c1">#: 5 of the A/330 Link-Layer Protocol specification, found at the ATSC 3.0</span>
+    <span class="c1">#: standards page, beginning with a Base Header.</span>
     <span class="n">ATSC_ALP</span> <span class="o">=</span> <span class="mi">289</span>
 
+    <span class="c1">#: [``DLT_ETW``] Event Tracing for Windows messages, beginning with a pseudo-</span>
+    <span class="c1">#: header.</span>
+    <span class="n">ETW</span> <span class="o">=</span> <span class="mi">290</span>
+
+    <span class="c1">#: [``DLT_ZBOSS_NCP``] Serial NCP (Network Co-Processor) protocol for Zigbee</span>
+    <span class="c1">#: stack ZBOSS by DSR. ZBOSS NCP protocol, beginning with a header.</span>
+    <span class="n">ZBOSS_NCP</span> <span class="o">=</span> <span class="mi">292</span>
+
 <div class="viewcode-block" id="LinkType.get"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.linktype.LinkType.get">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="o">=-</span><span class="mi">1</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Backport support for original codes.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">LinkType</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">LinkType</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
             <span class="n">extend_enum</span><span class="p">(</span><span class="n">LinkType</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">LinkType</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="n">LinkType</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
 
 <div class="viewcode-block" id="LinkType._missing_"><a class="viewcode-back" href="../../../../const/reg.html#pcapkit.const.reg.linktype.LinkType._missing_">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mh">0x00000000</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mh">0xFFFFFFFF</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
