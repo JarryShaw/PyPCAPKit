@@ -89,6 +89,10 @@ __all__ = [
     'IPv6_Opts_LineIdentificationOption', 'IPv6_Opts_JumboPayloadOption', 'IPv6_Opts_HomeAddressOption',
     'IPv6_Opts_IPDFFOption',
 
+    # IPv6 Routing Header
+    'IPv6_Route',
+    'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
+
     # No Payload
     'NoPayload',
 

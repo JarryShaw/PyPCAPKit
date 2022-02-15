@@ -93,11 +93,12 @@ from pcapkit.protocols.data.internet.hopopt import \
 from pcapkit.protocols.data.internet.hopopt import \
     TunnelEncapsulationLimitOption as HOPOPT_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.hopopt import UnassignedOption as HOPOPT_UnassignedOption
+
 # Internet Protocol version 4
+from pcapkit.protocols.data.internet.ipv4 import IPv4
 from pcapkit.protocols.data.internet.ipv4 import EOOLOption as IPv4_EOOLOption
 from pcapkit.protocols.data.internet.ipv4 import ESECOption as IPv4_ESECOption
 from pcapkit.protocols.data.internet.ipv4 import Flags as IPv4_Flags
-from pcapkit.protocols.data.internet.ipv4 import IPv4
 from pcapkit.protocols.data.internet.ipv4 import LSROption as IPv4_LSROption
 from pcapkit.protocols.data.internet.ipv4 import MTUPOption as IPv4_MTUPOption
 from pcapkit.protocols.data.internet.ipv4 import MTUROption as IPv4_MTUROption
@@ -118,13 +119,13 @@ from pcapkit.protocols.data.internet.ipv4 import UnassignedOption as IPv4_Unassi
 from pcapkit.protocols.data.internet.ipv6_frag import IPv6_Frag
 
 # IPv6 Destination Options
+from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.data.internet.ipv6_opts import CALIPSOOption as IPv6_Opts_CALIPSOOption
 from pcapkit.protocols.data.internet.ipv6_opts import DFFFlags as IPv6_Opts_DFFFlags
 from pcapkit.protocols.data.internet.ipv6_opts import \
     HomeAddressOption as IPv6_Opts_HomeAddressOption
 from pcapkit.protocols.data.internet.ipv6_opts import ILNPOption as IPv6_Opts_ILNPOption
 from pcapkit.protocols.data.internet.ipv6_opts import IPDFFOption as IPv6_Opts_IPDFFOption
-from pcapkit.protocols.data.internet.ipv6_opts import IPv6_Opts
 from pcapkit.protocols.data.internet.ipv6_opts import \
     JumboPayloadOption as IPv6_Opts_JumboPayloadOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
@@ -145,6 +146,13 @@ from pcapkit.protocols.data.internet.ipv6_opts import \
 from pcapkit.protocols.data.internet.ipv6_opts import \
     TunnelEncapsulationLimitOption as IPv6_Opts_TunnelEncapsulationLimitOption
 from pcapkit.protocols.data.internet.ipv6_opts import UnassignedOption as IPv6_Opts_UnassignedOption
+
+# IPv6 Routing Header
+from pcapkit.protocols.data.internet.ipv6_route import IPv6_Route
+from pcapkit.protocols.data.internet.ipv6_route import UnknownType as IPv6_Route_UnknownType
+from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as IPv6_Route_SourceRoute
+from pcapkit.protocols.data.internet.ipv6_route import Type2 as IPv6_Route_Type2
+from pcapkit.protocols.data.internet.ipv6_route import RPL as IPv6_Route_RPL
 
 __all__ = [
     # Authentication Header
@@ -202,4 +210,8 @@ __all__ = [
     'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
     'IPv6_Opts_LineIdentificationOption', 'IPv6_Opts_JumboPayloadOption', 'IPv6_Opts_HomeAddressOption',
     'IPv6_Opts_IPDFFOption',
+
+    # IPv6 Routing Header
+    'IPv6_Route',
+    'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
 ]
