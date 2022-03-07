@@ -132,11 +132,11 @@
         },
         "bandit": {
             "hashes": [
-                "sha256:3ce9b4e6a4f7f41aa966c9543e635dd35e52a793a47e746f0c55c7ecfc69d7e8",
-                "sha256:58772ca951bf1129dda8a280d351547de832720bf7b5c29fac3103927980b8a6"
+                "sha256:2d63a8c573417bae338962d4b9b06fbc6080f74ecd955a092849e1e65c717bd2",
+                "sha256:412d3f259dab4077d0e7f0c11f50f650cc7d10db905d98f6520a95a18049658a"
             ],
             "index": "tuna",
-            "version": "==1.7.3"
+            "version": "==1.7.4"
         },
         "beautifulsoup4": {
             "extras": [
@@ -308,11 +308,11 @@
         },
         "ipython": {
             "hashes": [
-                "sha256:42c23e90b2deaae631266885de1656a517a1673d7e1db57e8eb3a4bb6cd5ce1b",
-                "sha256:7bfeb6f298b2d7f3859c4f3e134082015cf34de90f89f5020e107a5a762ef6db"
+                "sha256:6f56bfaeaa3247aa3b9cd3b8cbab3a9c0abf7428392f97b21902d12b2f42a381",
+                "sha256:8138762243c9b3a3ffcf70b37151a2a35c23d3a29f9743878c33624f4207be3d"
             ],
             "index": "tuna",
-            "version": "==8.1.0"
+            "version": "==8.1.1"
         },
         "isort": {
             "hashes": [
