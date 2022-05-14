@@ -49,6 +49,28 @@ class ProtoChain(collections.abc.Sequence):
     # Methods.
     ##########################################################################
 
+    @classmethod
+    def from_list(cls, data: 'list[Protocol | Type[Protocol]]') -> 'ProtoChain':
+        """Create a protocol chain from a list.
+
+        Args:
+            data: Protocol chain list.
+
+        """
+        from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
+
+        temp_data = []
+        for proto in data:
+            if isinstance(proto, Protocol):
+                alias = proto.alias
+                proto = type(proto)
+
+            temp_data.append((alias, proto))
+
+        obj = cls.__new__(cls)
+        obj.__data__ = tuple(temp_data)
+        return obj
+
     def index(self, value: 'str | Protocol | Type[Protocol]',
               start: 'Optional[int]' = None, stop: 'Optional[int]' = None) -> 'int':
         """First index of ``value``.
@@ -82,7 +104,6 @@ class ProtoChain(collections.abc.Sequence):
                     return start + idx
         raise IndexNotFound(f'{value!r} is not in {self.__class__.__name__!r}')
 
-
     def count(self, value: 'str | Protocol | Type[Protocol]') -> int:
         """Number of occurrences of ``value``.
 
@@ -104,7 +125,7 @@ class ProtoChain(collections.abc.Sequence):
         return cnt
 
     ##########################################################################
-    # Data modules.
+    # Data models.
     ##########################################################################
 
     def __init__(self, proto: 'Protocol | Type[Protocol]', alias: 'Optional[str]' = None, *,
