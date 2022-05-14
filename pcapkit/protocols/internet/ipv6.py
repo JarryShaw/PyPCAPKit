@@ -24,10 +24,18 @@ Octets      Bits        Name                    Description
 
 """
 import ipaddress
+from typing import TYPE_CHECKING
 
-from pcapkit.const.ipv6.extension_header import ExtensionHeader as EXT_HDR
-from pcapkit.const.reg.transtype import TransType
+from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_ExtensionHeader
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.internet.ip import IP
+from pcapkit.protocols.data.internet.ipv6 import IPv6 as DataType_IPv6
+
+if TYPE_CHECKING:
+    from typing import NoReturn, Optional, Any
+    from ipaddress import IPv6Address
+    from typing_extensions import Literal
 
 __all__ = ['IPv6']
 
@@ -35,93 +43,83 @@ __all__ = ['IPv6']
 class IPv6(IP):
     """This class implements Internet Protocol version 6."""
 
+    #: Parsed packet data.
+    _info: 'DataType_IPv6'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of corresponding protocol.
-
-        :rtype: Literal['Internet Protocol version 6']
-        """
+    def name(self) -> 'Literal["Internet Protocol version 6"]':
+        """Name of corresponding protocol."""
         return 'Internet Protocol version 6'
 
     @property
-    def length(self):
-        """Header length of corresponding protocol.
-
-        :rtype: int
-        """
-        return self._info.hdr_len  # pylint: disable=E1101
+    def length(self) -> 'Literal[40]':
+        """Header length of corresponding protocol."""
+        return 40
 
     @property
-    def protocol(self):
-        """Name of next layer protocol.
-
-        :rtype: pcapkit.const.reg.transtype.TransType
-        """
-        return self._info.protocol  # pylint: disable=E1101
+    def protocol(self) -> 'RegType_TransType':
+        """Name of next layer protocol."""
+        return self._info.next
 
     # source IP address
     @property
-    def src(self):
-        """Source IP address.
-
-        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
-        """
-        return self._info.src  # pylint: disable=E1101
+    def src(self) -> 'IPv6Address':
+        """Source IP address."""
+        return self._info.src
 
     # destination IP address
     @property
-    def dst(self):
-        """Destination IP address.
-
-        :rtype: Union[ipaddress.IPv4Address, ipaddress.IPv6Address]
-        """
-        return self._info.dst  # pylint: disable=E1101
+    def dst(self) -> 'IPv6Address':
+        """Destination IP address."""
+        return self._info.dst
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_IPv6':  # pylint: disable=unused-argument
         """Read Internet Protocol version 6 (IPv6).
 
-        Structure of IPv6 header [:rfc:`2460`]::
+        Structure of IPv6 header [:rfc:`2460`]:
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |Version| Traffic Class |           Flow Label                  |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |         Payload Length        |  Next Header  |   Hop Limit   |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            +                                                               +
-            |                                                               |
-            +                         Source Address                        +
-            |                                                               |
-            +                                                               +
-            |                                                               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                                                               |
-            +                                                               +
-            |                                                               |
-            +                      Destination Address                      +
-            |                                                               |
-            +                                                               +
-            |                                                               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |Version| Traffic Class |           Flow Label                  |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |         Payload Length        |  Next Header  |   Hop Limit   |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                         Source Address                        +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +                      Destination Address                      +
+           |                                                               |
+           +                                                               +
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_IPv6: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -134,7 +132,7 @@ class IPv6(IP):
         _srca = self._read_ip_addr()
         _dsta = self._read_ip_addr()
 
-        ipv6 = {
+        ipv6 = DataType_IPv6.from_dict({  # type: ignore[assignment]
             'version': _htet[0],
             'class': _htet[1],
             'label': _htet[2],
@@ -143,70 +141,52 @@ class IPv6(IP):
             'limit': _hlmt,
             'src': _srca,
             'dst': _dsta,
-        }
+        })  # type: DataType_IPv6
 
-        hdr_len = 40
-        raw_len = ipv6['payload']
-        ipv6['packet'] = self._read_packet(header=hdr_len, payload=raw_len)
+        return self._decode_next_layer(ipv6, _next, ipv6.payload)
 
-        return self._decode_next_layer(ipv6, _next, raw_len)
-
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
-
-    @classmethod
-    def id(cls):
-        """Index ID of the protocol.
-
-        Returns:
-           Literal['IPv6']: Index ID of the protocol.
-
-        """
-        return cls.__name__
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[40]
-        """
+    def __length_hint__(self) -> 'Literal[40]':
+        """Return an estimated length for the object."""
         return 40
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TransType(41)
+        return RegType_TransType.IPv6  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_ip_hextet(self):
+    def _read_ip_hextet(self) -> 'tuple[int, int, int]':
         """Read first four hextets of IPv6.
 
         Returns:
-            Tuple[int, int, int]: Parsed hextets data, including version number,
-            traffic class and flow label.
+            Parsed hextets data, including version number, traffic class and
+            flow label.
 
         """
         _htet = self._read_fileng(4).hex()
@@ -216,36 +196,39 @@ class IPv6(IP):
 
         return (_vers, _tcls, _flow)
 
-    def _read_ip_addr(self):
+    def _read_ip_addr(self) -> 'IPv6Address':
         """Read IP address.
 
         Returns:
-            ipaddress.IPv6Address: Parsed IP address.
+            Parsed IP address.
 
         """
-        return ipaddress.ip_address(self._read_fileng(16))
+        return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
 
-    def _decode_next_layer(self, ipv6, proto=None, length=None):  # pylint: disable=arguments-differ
+    def _decode_next_layer(self, ipv6: 'DataType_IPv6', proto: 'Optional[int]' = None,  # type: ignore[override] # pylint: disable=arguments-differ
+                           length: 'Optional[int]' = None) -> 'DataType_IPv6':  # pylint: disable=arguments-differ
         """Decode next layer extractor.
 
         Arguments:
-            ipv6 (DataType_IPv6): info buffer
-            proto (str): next layer protocol name
-            length (int): valid (*not padding*) length
+            ipv6: info buffer
+            proto: next layer protocol name
+            length: valid (*not padding*) length
 
         Returns:
-            DataType_IPv6: current protocol with next layer extracted
+            Current protocol with next layer extracted.
 
         """
-        hdr_len = 40                # header length
-        raw_len = ipv6['payload']   # payload length
-        _protos = list()            # ProtoChain buffer
+        hdr_len = self.length       # header length
+        raw_len = ipv6.payload      # payload length
+        _protos = []                # ProtoChain buffer
 
         # traverse if next header is an extensive header
-        while proto in EXT_HDR:
+        while proto in RegType_ExtensionHeader:  # type: ignore[operator]
             # keep original data after fragment header
-            if proto.value == 44:
-                ipv6['fragment'] = self._read_packet(header=hdr_len, payload=raw_len)
+            if proto == RegType_ExtensionHeader.IPv6_Frag:
+                ipv6.__update__({
+                    'fragment': self._read_packet(header=hdr_len, payload=raw_len),
+                })
 
             # # directly break when No Next Header occurs
             # if proto.name == 'IPv6-NoNxt':
@@ -256,21 +239,27 @@ class IPv6(IP):
             next_ = self._import_next_layer(proto, version=6, extension=True)
             info = next_.info
             name = next_.alias.lstrip('IPv6-').lower()
-            ipv6[name] = info
+            ipv6.__update__({
+                name: info,
+            })
 
             # record protocol name
             # self._protos = ProtoChain(name, chain, alias)
             _protos.append(next_)
-            proto = info.next  # pylint: disable=E1101
+            proto = info.next
 
             # update header & payload length
-            hdr_len += info.length  # pylint: disable=E1101
-            raw_len -= info.length  # pylint: disable=E1101
+            hdr_len += info.length
+            raw_len -= info.length
 
         # record real header & payload length (headers exclude)
-        ipv6['hdr_len'] = hdr_len
-        ipv6['raw_len'] = raw_len
+        ipv6.__update__({
+            'hdr_len': hdr_len,
+            'raw_len': raw_len,
 
-        # update next header
-        ipv6['protocol'] = proto
-        return super()._decode_next_layer(ipv6, proto, raw_len, ipv6_exthdr=_protos)
+            # update next header
+            'protocol': proto,
+        })
+
+        ipv6_exthdr = ProtoChain.from_list(_protos)
+        return super()._decode_next_layer(ipv6, proto, raw_len, ipv6_exthdr=ipv6_exthdr)  # type: ignore[return-value]

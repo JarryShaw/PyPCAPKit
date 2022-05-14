@@ -34,8 +34,6 @@ class {NAME}(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return {NAME}(key)
-        if key not in {NAME}._member_map_:  # pylint: disable=no-member
-            extend_enum({NAME}, key, default)
         return {NAME}[key]  # type: ignore[misc]
 '''  # type: Callable[[str, str, str], str]
 

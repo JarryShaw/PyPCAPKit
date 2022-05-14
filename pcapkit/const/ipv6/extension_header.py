@@ -48,6 +48,4 @@ class ExtensionHeader(IntEnum):
         """Backport support for original codes."""
         if isinstance(key, int):
             return ExtensionHeader(key)
-        if key not in ExtensionHeader._member_map_:  # pylint: disable=no-member
-            extend_enum(ExtensionHeader, key, default)
         return ExtensionHeader[key]  # type: ignore[misc]
