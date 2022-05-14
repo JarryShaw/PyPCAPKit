@@ -56,7 +56,7 @@ class ToSField(Info):
 
        .. note::
 
-          This is field is conflict with ``del`` keyword. To access this field,
+          This field is conflict with ``del`` keyword. To access this field,
           directly use :func:`getattr` instead.
 
     """
@@ -135,7 +135,7 @@ class OptionType(Info):
 
        .. note::
 
-          This is field is conflict with ``class`` keyword. To access this field,
+          This field is conflict with ``class`` keyword. To access this field,
           directly use :func:`getattr` instead.
 
     """
@@ -307,7 +307,7 @@ class TROption(Option):
 
        .. note::
 
-          This is field is conflict with ``return`` keyword. To access this field,
+          This field is conflict with ``return`` keyword. To access this field,
           directly use :func:`getattr` instead.
 
     """
