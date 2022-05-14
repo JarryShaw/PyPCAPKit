@@ -331,6 +331,5 @@
         "wght",
         "Xcode"
     ],
-    "restructuredtext.confPath": "${workspaceFolder}/docs/conf.py",
-    "python.pythonPath": ".venv/bin/python"
+    "esbonio.sphinx.confDir": "${workspaceFolder}/doc/sphinx/source"
 }
