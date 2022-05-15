@@ -27,7 +27,7 @@ import chardet
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.data.protocol import Packet
+from pcapkit.protocols.data.protocol import Packet as DataType_Packet
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import ProtocolNotFound, ProtocolNotImplemented, StructError
@@ -133,8 +133,8 @@ class Protocol(metaclass=abc.ABCMeta):
 
     # packet data
     @cached_property
-    def packet(self) -> 'Packet':
-        """Packet data of the protocol."""
+    def packet(self) -> 'DataType_Packet':
+        """DataType_Packet data of the protocol."""
         return self._read_packet(header=self.length)
 
     ##########################################################################
@@ -620,11 +620,11 @@ class Protocol(metaclass=abc.ABCMeta):
     @overload
     def _read_packet(self, *, header: 'int', payload: 'Optional[int]' = ..., discard: 'Literal[True]') -> 'bytes': ...
     @overload
-    def _read_packet(self, *, header: 'int', payload: 'Optional[int]' = ..., discard: 'Literal[False]' = ...) -> 'Packet': ...  # pylint: disable=line-too-long
+    def _read_packet(self, *, header: 'int', payload: 'Optional[int]' = ..., discard: 'Literal[False]' = ...) -> 'DataType_Packet': ...  # pylint: disable=line-too-long
 
     @seekset
     def _read_packet(self, length: 'Optional[int]' = None, *, header: 'Optional[int]' = None,
-                     payload: 'Optional[int]' = None, discard: bool = False) -> 'bytes | Packet':
+                     payload: 'Optional[int]' = None, discard: bool = False) -> 'bytes | DataType_Packet':
         """Read raw packet data.
 
         Arguments:
@@ -639,7 +639,7 @@ class Protocol(metaclass=abc.ABCMeta):
         * If ``discard`` is set as :data:`True`, returns the packet body (in
           :obj:`bytes`) only.
         * Otherwise, returns the header and payload data as
-          :class:`~pcapkit.protocols.data.protocol.Packet` object.
+          :class:`~pcapkit.protocols.data.protocol.DataType_Packet` object.
 
         """
         if header is not None:
@@ -647,7 +647,7 @@ class Protocol(metaclass=abc.ABCMeta):
             data_payload = self._read_fileng(payload)
             if discard:
                 return data_payload
-            return Packet(
+            return DataType_Packet(
                 header=data_header,
                 payload=data_payload
             )
