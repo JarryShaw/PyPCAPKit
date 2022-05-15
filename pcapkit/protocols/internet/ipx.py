@@ -22,11 +22,18 @@ Octets      Bits        Name                    Description
 
 """
 import textwrap
+from typing import TYPE_CHECKING
 
-from pcapkit.const.ipx.packet import Packet as TYPE
-from pcapkit.const.ipx.socket import Socket as SOCK
-from pcapkit.const.reg.transtype import TransType
+from pcapkit.const.ipx.packet import Packet as RegType_Packet
+from pcapkit.const.ipx.socket import Socket as RegType_Socket
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
 from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.data.internet.ipx import IPX as DataType_IPX, Address as DataType_Address
+
+if TYPE_CHECKING:
+    from typing import Any, Optional, NoReturn
+
+    from typing_extensions import Literal
 
 __all__ = ['IPX']
 
@@ -34,55 +41,43 @@ __all__ = ['IPX']
 class IPX(Internet):
     """This class implements Internetwork Packet Exchange."""
 
+    #: Parsed packet data.
+    _info: 'DataType_IPX'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of corresponding protocol.
-
-        :rtype: Literal['Internetwork Packet Exchange']
-        """
+    def name(self) -> 'Literal["Internetwork Packet Exchange"]':
+        """Name of corresponding protocol."""
         return 'Internetwork Packet Exchange'
 
     @property
-    def length(self):
-        """Header length of corresponding protocol.
-
-        :rtype: Literal[30]
-        """
+    def length(self) -> 'Literal[30]':
+        """Header length of corresponding protocol."""
         return 30
 
     @property
-    def protocol(self):
-        """Name of next layer protocol.
-
-        :rtype: pcapkit.const.reg.transtype.TransType
-        """
-        return self._info.type  # pylint: disable=E1101
+    def protocol(self) -> 'RegType_TransType':
+        """Name of next layer protocol."""
+        return self._info.type
 
     @property
-    def src(self):
-        """Source IPX address.
-
-        :rtype: str
-        """
-        return self._info.src.addr  # pylint: disable=E1101
+    def src(self) -> 'str':
+        """Source IPX address."""
+        return self._info.src.addr
 
     @property
-    def dst(self):
-        """Destination IPX address.
-
-        :rtype: str
-        """
-        return self._info.dst.addr  # pylint: disable=E1101
+    def dst(self) -> 'str':
+        """Destination IPX address."""
+        return self._info.dst.addr
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_IPX':
         """Read Internetwork Packet Exchange.
 
          Args:
@@ -105,22 +100,19 @@ class IPX(Internet):
         _dsta = self._read_ipx_address()
         _srca = self._read_ipx_address()
 
-        ipx = dict(
-            chksum=_csum,
-            len=_tlen,
-            count=_ctrl,
-            type=TYPE.get(_type),
-            dst=_dsta,
-            src=_srca,
-        )
-
-        proto = ipx['type']
+        ipx = DataType_IPX.from_dict({  # type: ignore[assignment]
+            'chksum': _csum,
+            'len': _tlen,
+            'count': _ctrl,
+            'type': RegType_Packet.get(_type),
+            'dst': _dsta,
+            'src': _srca,
+        })  # type: DataType_IPX
         length = ipx['len'] - 30
-        ipx['packet'] = self._read_packet(header=30, payload=length)
 
-        return self._decode_next_layer(ipx, proto, length)
+        return self._decode_next_layer(ipx, ipx.type, length)  # type: ignore[return-value]
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
@@ -136,35 +128,31 @@ class IPX(Internet):
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[30]
-        """
+    def __length_hint__(self) -> 'Literal[30]':
+        """Return an estimated length for the object."""
         return 30
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TransType(111)
+        return RegType_TransType.IPX_in_IP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_ipx_address(self):
+    def _read_ipx_address(self) -> 'DataType_Address':
         """Read IPX address field.
 
         Returns:
-            DataType_IPX_Address: Parsed IPX address field.
+            Parsed IPX address field.
 
         """
         # Address Number
@@ -183,11 +171,11 @@ class IPX(Internet):
         _list = [_ntwk, _node, _sock.hex()]
         _addr = ':'.join(_list)
 
-        addr = dict(
-            network=_ntwk,
-            node=_maca,
-            socket=SOCK.get(int(_sock.hex(), base=16)) or _sock,
-            addr=_addr,
-        )
+        addr = DataType_Address.from_dict({
+            'network': _ntwk,
+            'node': _maca,
+            'socket': RegType_Socket.get(int(_sock.hex(), base=16)),
+            'addr': _addr,
+        })
 
-        return addr
+        return addr  # type: ignore[return-value]
