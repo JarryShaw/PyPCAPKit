@@ -18,8 +18,16 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/User_Datagram_Protocol
 
 """
-from pcapkit.const.reg.transtype import TransType
+from typing import TYPE_CHECKING
+
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.protocols.data.transport.udp import UDP as DataType_UDP
 from pcapkit.protocols.transport.transport import Transport
+
+if TYPE_CHECKING:
+    from typing import Any, NoReturn, Optional
+
+    from typing_extensions import Literal
 
 __all__ = ['UDP']
 
@@ -27,62 +35,55 @@ __all__ = ['UDP']
 class UDP(Transport):
     """This class implements User Datagram Protocol."""
 
+    #: Parsed packet data.
+    _info: 'DataType_UDP'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['User Datagram Protocol']
-        """
+    def name(self) -> 'Literal["User Datagram Protocol"]':
+        """Name of current protocol."""
         return 'User Datagram Protocol'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: Literal[8]
-        """
+    def length(self) -> 'Literal[8]':
+        """Header length of current protocol."""
         return 8
 
     @property
-    def src(self):
-        """Source port.
-
-        :rtype: int
-        """
-        return self._info.src  # pylint: disable=E1101
+    def src(self) -> 'int':
+        """Source port."""
+        return self._info.src
 
     @property
-    def dst(self):
-        """Destination port.
-
-        :rtype: int
-        """
-        return self._info.dst  # pylint: disable=E1101
+    def dst(self) -> 'int':
+        """Destination port."""
+        return self._info.dst
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_UDP':  # pylint: disable=unused-argument
         """Read User Datagram Protocol (UDP).
 
-        Structure of UDP header [:rfc:`768`]::
+        Structure of UDP header [:rfc:`768`]:
 
-             0      7 8     15 16    23 24    31
-            +--------+--------+--------+--------+
-            |     Source      |   Destination   |
-            |      Port       |      Port       |
-            +--------+--------+--------+--------+
-            |                 |                 |
-            |     Length      |    Checksum     |
-            +--------+--------+--------+--------+
-            |
-            |          data octets ...
-            +---------------- ...
+        .. code-block:: text
+
+            0      7 8     15 16    23 24    31
+           +--------+--------+--------+--------+
+           |     Source      |   Destination   |
+           |      Port       |      Port       |
+           +--------+--------+--------+--------+
+           |                 |                 |
+           |     Length      |    Checksum     |
+           +--------+--------+--------+--------+
+           |
+           |          data octets ...
+           +---------------- ...
 
         Args:
             length (Optional[int]): Length of packet data.
@@ -102,26 +103,23 @@ class UDP(Transport):
         _tlen = self._read_unpack(2)
         _csum = self._read_fileng(2)
 
-        udp = dict(
+        udp = DataType_UDP(
             srcport=_srcp,
             dstport=_dstp,
             len=_tlen,
             checksum=_csum,
         )
 
-        length = udp['len'] - 8
-        udp['packet'] = self._read_packet(header=8, payload=length)
+        return self._decode_next_layer(udp, None, udp.len - 8)
 
-        return self._decode_next_layer(udp, None, length)
-
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
@@ -130,22 +128,18 @@ class UDP(Transport):
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[8]
-        """
+    def __length_hint__(self) -> 'Literal[8]':
+        """Return an estimated length for the object."""
         return 8
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TransType(17)
+        return RegType_TransType.UDP  # type: ignore[return-value]

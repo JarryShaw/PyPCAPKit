@@ -11,6 +11,9 @@ from pcapkit.protocols.data.link import *
 # Internet Layer Protocols
 from pcapkit.protocols.data.internet import *
 
+# Transport Layer Protocols
+from pcapkit.protocols.data.transport import *
+
 # Utility Classes for Protocols
 from pcapkit.protocols.data.misc import *
 
@@ -98,10 +101,13 @@ __all__ = [
 
     # Internetwork Packet Exchange
     'IPX',
-    'Address',
+    'IPX_Address',
 
     # Mobility Header
     'MH',
+
+    # User Datagram Protocol
+    'UDP',
 
     # No Payload
     'NoPayload',
