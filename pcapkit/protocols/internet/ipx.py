@@ -27,11 +27,12 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ipx.packet import Packet as RegType_Packet
 from pcapkit.const.ipx.socket import Socket as RegType_Socket
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.protocols.data.internet.ipx import IPX as DataType_IPX
+from pcapkit.protocols.data.internet.ipx import Address as DataType_Address
 from pcapkit.protocols.internet.internet import Internet
-from pcapkit.protocols.data.internet.ipx import IPX as DataType_IPX, Address as DataType_Address
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, NoReturn
+    from typing import Any, NoReturn, Optional
 
     from typing_extensions import Literal
 

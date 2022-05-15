@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.infoclass import Info
 
 if TYPE_CHECKING:
-    from typing import Any
     from ipaddress import IPv6Address
+    from typing import Any
 
     from typing_extensions import Literal
 

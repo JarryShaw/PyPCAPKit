@@ -29,12 +29,13 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.internet.ip import IP
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as DataType_IPv6
+from pcapkit.protocols.internet.ip import IP
 
 if TYPE_CHECKING:
-    from typing import NoReturn, Optional, Any
     from ipaddress import IPv6Address
+    from typing import Any, NoReturn, Optional
+
     from typing_extensions import Literal
 
 __all__ = ['IPv6']
