@@ -63,7 +63,7 @@ class IPv6(IP):
     @property
     def protocol(self) -> 'RegType_TransType':
         """Name of next layer protocol."""
-        return self._info.next
+        return self._info.protocol
 
     # source IP address
     @property

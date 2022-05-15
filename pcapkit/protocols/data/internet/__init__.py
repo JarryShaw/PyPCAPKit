@@ -154,6 +154,12 @@ from pcapkit.protocols.data.internet.ipv6_route import SourceRoute as IPv6_Route
 from pcapkit.protocols.data.internet.ipv6_route import Type2 as IPv6_Route_Type2
 from pcapkit.protocols.data.internet.ipv6_route import RPL as IPv6_Route_RPL
 
+# Internet Protocol version 6
+from pcapkit.protocols.data.internet.ipv6 import IPv6
+
+# Internetwork Packet Exchange
+from pcapkit.protocols.data.internet.ipx import IPX
+
 __all__ = [
     # Authentication Header
     'AH',
@@ -214,4 +220,11 @@ __all__ = [
     # IPv6 Routing Header
     'IPv6_Route',
     'IPv6_Route_UnknownType', 'IPv6_Route_SourceRoute', 'IPv6_Route_Type2', 'IPv6_Route_RPL',
+
+    # Internet Protocol version 6
+    'IPv6',
+
+    # Internetwork Packet Exchange
+    'IPX',
+    'Address',
 ]

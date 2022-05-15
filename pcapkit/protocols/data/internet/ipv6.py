@@ -53,6 +53,9 @@ class IPv6(Info):
 
     if TYPE_CHECKING:
         fragment: 'Info'
+        protocol: 'TransType'
+        hdr_len: 'int'
+        raw_len: 'int'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
         self = super().__new__(*args, **kwargs)
