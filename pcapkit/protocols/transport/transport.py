@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=bad-whitespace
 """root transport layer protocol
 
 :mod:`pcapkit.protocols.transport.transport` contains
@@ -9,16 +8,18 @@ which is a base class for transport layer protocols, eg.
 :class:`~pcapkit.protocols.transport.transport.udp.UDP`.
 
 """
-from pcapkit.const.reg.transtype import TransType as TP_PROTO
-from pcapkit.protocols.misc.null import NoPayload
+from typing import TYPE_CHECKING
+
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.utilities.decorators import beholder_ng
+from pcapkit.utilities.decorators import beholder, beholder_ng
+from pcapkit.utilities.exceptions import UnsupportedCall
 
-###############################################################################
-# from pcapkit.fundation.analysis import analyse
-###############################################################################
+if TYPE_CHECKING:
+    from typing import NoReturn, Optional, Type
 
-__all__ = ['Transport', 'TP_PROTO']
+    from typing_extensions import Literal
+
+__all__ = ['Transport']
 
 
 class Transport(Protocol):  # pylint: disable=abstract-method
@@ -29,7 +30,7 @@ class Transport(Protocol):  # pylint: disable=abstract-method
     ##########################################################################
 
     #: Layer of protocol.
-    __layer__ = 'Transport'
+    __layer__ = 'Transport'  # type: Literal['Transport']
 
     ##########################################################################
     # Properties.
@@ -37,39 +38,50 @@ class Transport(Protocol):  # pylint: disable=abstract-method
 
     # protocol layer
     @property
-    def layer(self):
-        """Protocol layer.
-
-        :rtype: Literal['Transport']
-        """
+    def layer(self) -> 'Literal["Transport"]':
+        """Protocol layer."""
         return self.__layer__
+
+    ##########################################################################
+    # Data models.
+    ##########################################################################
+
+    @classmethod
+    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _import_next_layer(self, proto, length=None):
+    @beholder
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None) -> 'Protocol':
         """Import next layer extractor.
 
         Arguments:
-            proto (str): next layer protocol name
-            length (int): valid (*non-padding*) length
+            proto: next layer protocol index
+            length: valid (*non-padding*) length
 
         Returns:
-            pcapkit.protocols.protocol.Protocol: instance of next layer
+            Instance of next layer.
 
         """
-        if self._exproto == 'null' and self._exlayer == 'None':
-            from pcapkit.protocols.misc.raw import \
-                Raw as protocol  # pylint: disable=import-outside-toplevel
-        else:
-            from pcapkit.foundation.analysis import \
-                analyse as protocol  # pylint: disable=import-outside-toplevel
+        if TYPE_CHECKING:
+            protocol: 'Type[Protocol]'
 
-        if length == 0:
-            next_ = NoPayload()
-        elif self._onerror:
-            next_ = beholder_ng(protocol)(self._file, length, termination=self._sigterm)
+        if length is not None and length == 0:
+            from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+        elif self._sigterm:
+            from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
         else:
-            next_ = protocol(self._file, length, termination=self._sigterm)
+            from pcapkit.foundation.analysis import analyse as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
+            protocol = beholder_ng(protocol)
+
+        next_ = protocol(self._file, length, layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
         return next_
