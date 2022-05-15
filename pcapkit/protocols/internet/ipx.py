@@ -101,17 +101,16 @@ class IPX(Internet):
         _dsta = self._read_ipx_address()
         _srca = self._read_ipx_address()
 
-        ipx = DataType_IPX.from_dict({  # type: ignore[assignment]
-            'chksum': _csum,
-            'len': _tlen,
-            'count': _ctrl,
-            'type': RegType_Packet.get(_type),
-            'dst': _dsta,
-            'src': _srca,
-        })  # type: DataType_IPX
-        length = ipx['len'] - 30
+        ipx = DataType_IPX(
+            chksum=_csum,
+            len=_tlen,
+            count=_ctrl,
+            type=RegType_Packet.get(_type),
+            dst=_dsta,
+            src=_srca,
+        )
 
-        return self._decode_next_layer(ipx, ipx.type, length)  # type: ignore[return-value]
+        return self._decode_next_layer(ipx, ipx.type, ipx.len - 30)  # type: ignore[return-value]
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
@@ -172,11 +171,11 @@ class IPX(Internet):
         _list = [_ntwk, _node, _sock.hex()]
         _addr = ':'.join(_list)
 
-        addr = DataType_Address.from_dict({
-            'network': _ntwk,
-            'node': _maca,
-            'socket': RegType_Socket.get(int(_sock.hex(), base=16)),
-            'addr': _addr,
-        })
+        addr = DataType_Address(
+            network=_ntwk,
+            node=_maca,
+            socket=RegType_Socket.get(int(_sock.hex(), base=16)),
+            addr=_addr,
+        )
 
-        return addr  # type: ignore[return-value]
+        return addr
