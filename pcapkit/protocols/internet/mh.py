@@ -23,10 +23,21 @@ Octets      Bits        Name                    Description
 """
 # TODO: Implements extractor for message data of all MH types.
 
-from pcapkit.const.mh.packet import Packet as _MOBILITY_TYPE
-from pcapkit.const.reg.transtype import TransType
+from typing import TYPE_CHECKING, overload
+
+from pcapkit.const.mh.packet import Packet as RegType_Packet
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.protocols.data.internet.mh import MH as DataType_MH
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import Any, BinaryIO, NoReturn, Optional
+
+    from typing_extensions import Literal
+
+    from pcapkit.corekit.protochain import ProtoChain
+    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['MH']
 
@@ -34,55 +45,70 @@ __all__ = ['MH']
 class MH(Internet):
     """This class implements Mobility Header."""
 
+    #: Parsed packet data.
+    _info: 'DataType_MH'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['Mobility Header']
-        """
+    def name(self) -> 'Literal["Mobility Header"]':
+        """Name of current protocol."""
         return 'Mobility Header'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: int
-        """
-        return self._info.length  # pylint: disable=E1101
+    def length(self) -> 'int':
+        """Header length of current protocol."""
+        return self._info.length
 
     @property
-    def payload(self):
+    def payload(self) -> 'Protocol | NoReturn':
         """Payload of current instance.
 
         Raises:
             UnsupportedCall: if the protocol is used as an IPv6 extension header
 
-        :rtype: pcapkit.protocols.protocol.Protocol
         """
-        if self.extension:  # pylint: disable=E1101
+        if self._extf:
             raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'payload'")
-        return self._next
+        return super().payload
 
     @property
-    def protocol(self):
-        """Name of next layer protocol.
+    def protocol(self) -> 'Optional[str] | NoReturn':
+        """Name of next layer protocol (if any).
 
-        :rtype: pcapkit.const.reg.transtype.TransType
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
         """
-        return self._info.next  # pylint: disable=E1101
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protocol'")
+        return super().protocol
+
+    @property
+    def protochain(self) -> 'ProtoChain | NoReturn':
+        """Protocol chain of current instance.
+
+        Raises:
+            UnsupportedCall: if the protocol is used as an IPv6 extension header
+
+        """
+        if self._extf:
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'protochain'")
+        return super().protochain
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ,unused-argument
+    def read(self, length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,  # pylint: disable=arguments-differ
+             extension: bool = False, **kwargs: 'Any') -> 'DataType_MH':  # pylint: disable=unused-argument
         """Read Mobility Header.
 
-        Structure of MH header [:rfc:`6275`]::
+        Structure of MH header [:rfc:`6275`]:
+
+        .. code-block:: text
 
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
             | Payload Proto |  Header Len   |   MH Type     |   Reserved    |
@@ -97,14 +123,15 @@ class MH(Internet):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
-            extension (bool): If the packet is used as an IPv6 extension header.
+            version: IP protocol version.
+            extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_MH: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -117,30 +144,26 @@ class MH(Internet):
         _csum = self._read_fileng(2)
         _data = self._read_fileng((_hlen+1)*8)
 
-        mh = dict(
+        mh = DataType_MH(
             next=_next,
             length=(_hlen + 1) * 8,
-            type=_MOBILITY_TYPE.get(_type),
+            type=RegType_Packet.get(_type),
             chksum=_csum,
             data=_data,
         )
 
-        length -= mh['length']
-        mh['packet'] = self._read_packet(header=mh['length'], payload=length)
-
         if extension:
-            self._protos = None
             return mh
-        return self._decode_next_layer(mh, _next, length)
+        return self._decode_next_layer(mh, _next, length - mh.length)  # type: ignore[return-value]
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
@@ -149,15 +172,25 @@ class MH(Internet):
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file, length=None, *, extension=False, **kwargs):  # pylint: disable=arguments-differ
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., *,  # pylint: disable=arguments-differ
+                      version: 'Literal[4, 6]' = ..., extension: 'bool' = ...,
+                      **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
+                      version: 'Literal[4, 6]' = 4, extension: 'bool' = False,
+                      **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
-            file (io.BytesIO): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
-            extension (bool): If the protocol is used as an IPv6 extension header.
+            version: IP protocol version.
+            extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
@@ -168,24 +201,20 @@ class MH(Internet):
         self._extf = extension
 
         # call super __post_init__
-        super().__post_init__(file, length, extension=extension, **kwargs)
+        super().__post_init__(file, length, extension=extension, **kwargs)  # type: ignore[arg-type]
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[6]
-        """
+    def __length_hint__(self) -> 'Literal[6]':
+        """Return an estimated length for the object."""
         return 6
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'RegType_TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TransType(135)
+        return RegType_TransType.Mobility_Header  # type: ignore[return-value]

@@ -100,6 +100,9 @@ __all__ = [
     'IPX',
     'Address',
 
+    # Mobility Header
+    'MH',
+
     # No Payload
     'NoPayload',
 

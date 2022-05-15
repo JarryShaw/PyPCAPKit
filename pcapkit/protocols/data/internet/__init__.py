@@ -160,6 +160,9 @@ from pcapkit.protocols.data.internet.ipv6 import IPv6
 # Internetwork Packet Exchange
 from pcapkit.protocols.data.internet.ipx import IPX
 
+# Mobility Header
+from pcapkit.protocols.data.internet.mh import MH
+
 __all__ = [
     # Authentication Header
     'AH',
@@ -227,4 +230,7 @@ __all__ = [
     # Internetwork Packet Exchange
     'IPX',
     'Address',
+
+    # Mobility Header
+    'MH',
 ]
