@@ -11,11 +11,10 @@ which is a base class for transport layer protocols, eg.
 from typing import TYPE_CHECKING
 
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.utilities.decorators import beholder, beholder_ng
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import NoReturn, Optional, Type
+    from typing import NoReturn
 
     from typing_extensions import Literal
 
@@ -43,6 +42,34 @@ class Transport(Protocol):  # pylint: disable=abstract-method
         return self.__layer__
 
     ##########################################################################
+    # Methods.
+    ##########################################################################
+
+    @classmethod
+    def register(cls, code: 'int', module: str, class_: str) -> 'None':
+        """Register a new protocol class.
+
+        Important:
+            This method must be called from a non-abstract class, as the
+            protocol map should be associated directly with specific
+            transport layer protocol type.
+
+        Arguments:
+            code: port number
+            module: module name
+            class_: class name
+
+        Notes:
+            The full qualified class name of the new protocol class
+            should be as ``{module}.{class_}``.
+
+        """
+        if cls is Transport:
+            raise UnsupportedCall(f'{cls.__name__} is an abstract class')
+
+        cls.__proto__[code] = (module, class_)
+
+    ##########################################################################
     # Data models.
     ##########################################################################
 
@@ -55,33 +82,3 @@ class Transport(Protocol):  # pylint: disable=abstract-method
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    @beholder
-    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None) -> 'Protocol':
-        """Import next layer extractor.
-
-        Arguments:
-            proto: next layer protocol index
-            length: valid (*non-padding*) length
-
-        Returns:
-            Instance of next layer.
-
-        """
-        if TYPE_CHECKING:
-            protocol: 'Type[Protocol]'
-
-        if length is not None and length == 0:
-            from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
-        elif self._sigterm:
-            from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
-        else:
-            from pcapkit.foundation.analysis import analyse as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
-            protocol = beholder_ng(protocol)
-
-        next_ = protocol(self._file, length, layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
-        return next_
