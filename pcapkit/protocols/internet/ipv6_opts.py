@@ -1189,7 +1189,7 @@ class IPv6_Opts(Internet):
             action=acts,
             change=cflg,
             length=_size + 2,
-            address=ipaddress.ip_address(_addr),
+            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
         )
 
         return opt
