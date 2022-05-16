@@ -122,6 +122,8 @@ class IPv4(Info):
     dst: 'IPv4Address'
 
     if TYPE_CHECKING:
+        options: 'OrderedMultiDict[OptionNumber, Option]'
+
         def __init__(self, version: 'Literal[4]', hdr_len: 'int', tos: 'ToSField', len: 'int', id: 'int', flags: 'Flags', offset: 'int', ttl: 'timedelta', protocol: 'TransType', checksum: 'bytes', src: 'IPv4Address', dst: 'IPv4Address') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 

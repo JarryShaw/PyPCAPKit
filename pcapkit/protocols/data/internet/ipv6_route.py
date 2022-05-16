@@ -44,7 +44,7 @@ class UnknownType(Info):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, data: 'bytes') -> None: ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, data: 'bytes') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 class SourceRoute(Info):
@@ -54,7 +54,7 @@ class SourceRoute(Info):
     ip: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, ip: 'tuple[IPv6Address, ...]') -> None: ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 class Type2(Info):
@@ -64,7 +64,7 @@ class Type2(Info):
     ip: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, ip: 'IPv6Address') -> None: ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, ip: 'IPv6Address') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 class RPL(Info):
@@ -80,4 +80,4 @@ class RPL(Info):
     ip: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, cmpr_i: 'int', cmpr_e: 'int', pad: 'int', ip: 'tuple[IPv6Address, ...]') -> None: ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, cmpr_i: 'int', cmpr_e: 'int', pad: 'int', ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long

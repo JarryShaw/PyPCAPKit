@@ -22,4 +22,4 @@ class Ethernet(Info):
     type: 'EtherType'
 
     if TYPE_CHECKING:
-        def __init__(self, dst: 'str', src: 'str', type: 'EtherType') -> None: ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements
+        def __init__(self, dst: 'str', src: 'str', type: 'EtherType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,redefined-builtin,multiple-statements

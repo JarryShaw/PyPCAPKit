@@ -88,10 +88,10 @@ class IPv6_Opts(Internet):
     ##########################################################################
 
     #: DefaultDict[RegType_Option, str | OptionParser]: Option code to method
-    #: mapping, c.f. :meth:`_read_ipv6_opts_options`. Method names are expected
-    #: to be referred to the class by ``_read_opt_${name}``, and if such name
-    #: not found, the value should then be a method that can parse the option
-    #: by itself.
+    #: mapping, c.f. :meth:`_read_ipv6_opts`. Method names are expected to be
+    #: referred to the class by ``_read_opt_${name}``, and if such name not
+    #: found, the value should then be a method that can parse the option by
+    #: itself.
     __option__ = collections.defaultdict(
         lambda: 'none',
         {
@@ -212,7 +212,7 @@ class IPv6_Opts(Internet):
         ipv6_opts = DataType_IPv6_Opts(
             next=_next,
             length=(_hlen + 1) * 8,
-            options=self._read_ipv6_opts_options(_hlen * 8 + 6),
+            options=self._read_ipv6_opts(_hlen * 8 + 6),
         )
 
         if extension:
@@ -231,7 +231,8 @@ class IPv6_Opts(Internet):
         """
         raise NotImplementedError
 
-    def register_option(self, code: 'RegType_Option', meth: 'str | OptionParser') -> 'None':
+    @classmethod
+    def register_option(cls, code: 'RegType_Option', meth: 'str | OptionParser') -> 'None':
         """Register an option parser.
 
         Args:
@@ -239,7 +240,7 @@ class IPv6_Opts(Internet):
             meth: Method name or callable to parse the option.
 
         """
-        self.__option__[code] = meth
+        cls.__option__[code] = meth
 
     ##########################################################################
     # Data models.
@@ -308,7 +309,7 @@ class IPv6_Opts(Internet):
         bin_ = bin(kind)[2:].zfill(8)
         return int(bin_[:2], base=2), bool(int(bin_[2], base=2))
 
-    def _read_ipv6_opts_options(self, length: 'int') -> 'Option':
+    def _read_ipv6_opts(self, length: 'int') -> 'Option':
         """Read IPv6-Opts options.
 
         Positional arguments:
@@ -337,7 +338,7 @@ class IPv6_Opts(Internet):
             # extract option data
             name = self.__option__[kind]  # type: str | OptionParser
             if isinstance(name, str):
-                meth_name = f'_read_opt_{kind.name.lower()}'
+                meth_name = f'_read_opt_{name.lower()}'
                 meth = getattr(self, meth_name, self._read_opt_none)  # type: OptionParser
             else:
                 meth = name

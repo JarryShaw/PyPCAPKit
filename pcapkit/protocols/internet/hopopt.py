@@ -222,7 +222,8 @@ class HOPOPT(Internet):
         """
         raise NotImplementedError
 
-    def register_option(self, code: 'RegType_Option', meth: 'str | OptionParser') -> 'None':
+    @classmethod
+    def register_option(cls, code: 'RegType_Option', meth: 'str | OptionParser') -> 'None':
         """Register an option parser.
 
         Args:
@@ -230,7 +231,7 @@ class HOPOPT(Internet):
             meth: Method name or callable to parse the option.
 
         """
-        self.__option__[code] = meth
+        cls.__option__[code] = meth
 
     ##########################################################################
     # Data models.

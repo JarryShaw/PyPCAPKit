@@ -205,7 +205,8 @@ class IPv6_Route(Internet):
         """
         raise NotImplementedError
 
-    def register_type(self, code: 'RegType_Routing', meth: 'str | TypeParser') -> 'None':
+    @classmethod
+    def register_type(cls, code: 'RegType_Routing', meth: 'str | TypeParser') -> 'None':
         """Register an routing data parser.
 
         Args:
@@ -213,7 +214,7 @@ class IPv6_Route(Internet):
             meth: Method name or callable to parse the data.
 
         """
-        self.__routing__[code] = meth
+        cls.__routing__[code] = meth
 
     ##########################################################################
     # Data models.

@@ -14,8 +14,6 @@ from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
-    from typing import NoReturn
-
     from typing_extensions import Literal
 
 __all__ = ['Transport']
@@ -68,17 +66,3 @@ class Transport(Protocol):  # pylint: disable=abstract-method
             raise UnsupportedCall(f'{cls.__name__} is an abstract class')
 
         cls.__proto__[code] = (module, class_)
-
-    ##########################################################################
-    # Data models.
-    ##########################################################################
-
-    @classmethod
-    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
-        """Numeral registry index of the protocol.
-
-        Raises:
-            UnsupportedCall: This protocol has no registry entry.
-
-        """
-        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
