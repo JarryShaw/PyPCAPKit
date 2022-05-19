@@ -259,7 +259,7 @@ class IPv4(IP):
         _byte = self._read_fileng(4)
         # _addr = '.'.join([str(_) for _ in _byte])
         # return _addr
-        return ipaddress.ip_address(_byte)
+        return ipaddress.ip_address(_byte)  # type: ignore[return-value]
 
     def _read_ipv4_opt_type(self, code: 'int') -> 'DataType_OptionType':  # pylint: disable=no-self-use
         """Read option type field.
@@ -324,7 +324,7 @@ class IPv4(IP):
 
         # get padding
         if counter < length:
-            self._read_binary(length - counter)
+            self._read_fileng(length - counter)
 
         return options
 
