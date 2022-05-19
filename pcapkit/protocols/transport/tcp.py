@@ -34,169 +34,166 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/Transmission_Control_Protocol
 
 """
+import collections
 import datetime
 import ipaddress
-import struct
+import sys
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.transtype import TransType
-from pcapkit.const.tcp.checksum import Checksum as chksum_opt
-from pcapkit.const.tcp.mp_tcp_option import MPTCPOption
-from pcapkit.const.tcp.option import Option as OPT_TYPE
-from pcapkit.corekit.infoclass import Info
+from pcapkit.const.tcp.checksum import Checksum as RegType_Checksum
+from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as RegType_MPTCPOption
+from pcapkit.const.tcp.option import Option as RegType_Option
+from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.protocols.data.transport.tcp import CC as DataType_CC
+from pcapkit.protocols.data.transport.tcp import MPTCP as DataType_MPTCP
+from pcapkit.protocols.data.transport.tcp import MPTCPDSS as DataType_MPTCPDSS
+from pcapkit.protocols.data.transport.tcp import SACK as DataType_SACK
+from pcapkit.protocols.data.transport.tcp import TCP as DataType_TCP
+from pcapkit.protocols.data.transport.tcp import \
+    AlternateChecksumData as DataType_AlternateChecksumData
+from pcapkit.protocols.data.transport.tcp import \
+    AlternateChecksumRequest as DataType_AlternateChecksumRequest
+from pcapkit.protocols.data.transport.tcp import Authentication as DataType_Authentication
+from pcapkit.protocols.data.transport.tcp import CCEcho as DataType_CCEcho
+from pcapkit.protocols.data.transport.tcp import CCNew as DataType_CCNew
+from pcapkit.protocols.data.transport.tcp import Echo as DataType_Echo
+from pcapkit.protocols.data.transport.tcp import EchoReply as DataType_EchoReply
+from pcapkit.protocols.data.transport.tcp import EndOfOptionList as DataType_EndOfOptionList
+from pcapkit.protocols.data.transport.tcp import FastOpenCookie as DataType_FastOpenCookie
+from pcapkit.protocols.data.transport.tcp import Flags as DataType_Flags
+from pcapkit.protocols.data.transport.tcp import MaximumSegmentSize as DataType_MaximumSegmentSize
+from pcapkit.protocols.data.transport.tcp import MD5Signature as DataType_MD5Signature
+from pcapkit.protocols.data.transport.tcp import MPTCPAddAddress as DataType_MPTCPAddAddress
+from pcapkit.protocols.data.transport.tcp import MPTCPCapable as DataType_MPTCPCapable
+from pcapkit.protocols.data.transport.tcp import MPTCPCapableFlag as DataType_MPTCPCapableFlag
+from pcapkit.protocols.data.transport.tcp import MPTCPDSSFlag as DataType_MPTCPDSSFlag
+from pcapkit.protocols.data.transport.tcp import MPTCPFallback as DataType_MPTCPFallback
+from pcapkit.protocols.data.transport.tcp import MPTCPFastclose as DataType_MPTCPFastclose
+from pcapkit.protocols.data.transport.tcp import MPTCPJoin as DataType_MPTCPJoin
+from pcapkit.protocols.data.transport.tcp import MPTCPJoinACK as DataType_MPTCPJoinACK
+from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYN as DataType_MPTCPJoinSYN
+from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYNACK as DataType_MPTCPJoinSYNACK
+from pcapkit.protocols.data.transport.tcp import MPTCPPriority as DataType_MPTCPPriority
+from pcapkit.protocols.data.transport.tcp import MPTCPRemoveAddress as DataType_MPTCPRemoveAddress
+from pcapkit.protocols.data.transport.tcp import MPTCPUnknown as DataType_MPTCPUnknown
+from pcapkit.protocols.data.transport.tcp import NoOperation as DataType_NoOperation
+from pcapkit.protocols.data.transport.tcp import \
+    PartialOrderConnectionPermitted as DataType_PartialOrderConnectionPermitted
+from pcapkit.protocols.data.transport.tcp import \
+    PartialOrderConnectionProfile as DataType_PartialOrderConnectionProfile
+from pcapkit.protocols.data.transport.tcp import QuickStartResponse as DataType_QuickStartResponse
+from pcapkit.protocols.data.transport.tcp import SACKPermitted as DataType_SACKPermitted
+from pcapkit.protocols.data.transport.tcp import Timestamp as DataType_Timestamp
+from pcapkit.protocols.data.transport.tcp import UnassignedOption as DataType_UnassignedOption
+from pcapkit.protocols.data.transport.tcp import UserTimeout as DataType_UserTimeout
+from pcapkit.protocols.data.transport.tcp import WindowScale as DataType_WindowScale
 from pcapkit.protocols.transport.transport import Transport
 from pcapkit.utilities.exceptions import ProtocolError
 
+if TYPE_CHECKING:
+    from typing import Any, Callable, DefaultDict, NoReturn, Optional
+
+    from mypy_extensions import NamedArg
+    from typing_extensions import Literal
+
+    from pcapkit.protocols.data.transport.tcp import Option as DataType_Option
+
+    Option = OrderedMultiDict[RegType_Option, DataType_Option]
+    OptionParser = Callable[[RegType_Option, NamedArg(Option, 'options')], DataType_Option]
+    MPOptionParser = Callable[[RegType_MPTCPOption, int, str, NamedArg(Option, 'options')], DataType_MPTCP]
+
+
 __all__ = ['TCP']
-
-T = True
-F = False
-
-nm_len = lambda n: n - 2
-op_len = lambda n: n * 8
-
-# pylint: disable=protected-access
-mptcp_opt = {   # [RFC 6824]
-    0: lambda self, bits, size, kind: self._read_mptcp_capable(bits, size, kind),      # MP_CAPABLE
-    1: lambda self, bits, size, kind: self._read_mptcp_join(bits, size, kind),         # MP_JOIN
-    2: lambda self, bits, size, kind: self._read_mptcp_dss(bits, size, kind),          # DSS
-    3: lambda self, bits, size, kind: self._read_mptcp_add(bits, size, kind),          # ADD_ADDR
-    4: lambda self, bits, size, kind: self._read_mptcp_remove(bits, size, kind),       # REMOVE_ADDR
-    5: lambda self, bits, size, kind: self._read_mptcp_prio(bits, size, kind),         # MP_PRIO
-    6: lambda self, bits, size, kind: self._read_mptcp_fail(bits, size, kind),         # MP_FAIL
-    7: lambda self, bits, size, kind: self._read_mptcp_fastclose(bits, size, kind),    # MP_FASTCLOSE
-}
-
-# pylint: disable=protected-access
-process_opt = {
-    0: lambda self, size, kind: self._read_mode_donone(size, kind),    # do nothing
-    1: lambda self, size, kind: self._read_mode_unpack(size, kind),    # unpack according to size
-    2: lambda self, size, kind: self._read_mode_tsopt(size, kind),     # Timestamps
-    3: lambda self, size, kind: self._read_mode_pocsp(size, kind),     # POC Service Profile
-    4: lambda self, size, kind: self._read_mode_acopt(size, kind),     # Alternate Checksum Request
-    5: lambda self, size, kind: self._read_mode_qsopt(size, kind),     # Quick-Start Response
-    6: lambda self, size, kind: self._read_mode_utopt(size, kind),     # User Timeout Option
-    7: lambda self, size, kind: self._read_mode_tcpao(size, kind),     # TCP Authentication Option
-    8: lambda self, size, kind: self._read_mode_mptcp(size, kind),     # Multipath TCP
-}
-
-TCP_OPT = {                          # # kind  length  type  process  comment            name
-    0:  (F, 'eool'),                 # #   0      -      -      -                [RFC 793] End of Option List
-    1:  (F, 'nop'),                  # #   1      -      -      -                [RFC 793] No-Operation
-    2:  (T, 'mss', nm_len, 1),       # #   2      4      H      1                [RFC 793] Maximum Segment Size
-    3:  (T, 'ws', nm_len, 1),        # #   3      3      B      1                [RFC 7323] Window Scale
-    4:  (T, 'sackpmt', nm_len),      # #   4      2      ?      -       True     [RFC 2018] SACK Permitted
-    5:  (T, 'sack', op_len, 0),      # #   5      N      P      0      2+8*N     [RFC 2018] SACK
-    6:  (T, 'echo', nm_len, 0),      # #   6      6      P      0                [RFC 1072][RFC 6247] Echo
-    7:  (T, 'echore', nm_len, 0),    # #   7      6      P      0                [RFC 1072][RFC 6247] Echo Reply
-    8:  (T, 'ts', nm_len, 2),        # #   8     10     II      2                [RFC 7323] Timestamps
-    9:  (T, 'poc', nm_len),          # #   9      2      ?      -       True     [RFC 1693][RFC 6247] POC Permitted
-    10: (T, 'pocsp', nm_len, 3),     # #  10      3    ??P      3                [RFC 1693][RFC 6247] POC-Serv Profile
-    11: (T, 'cc', nm_len, 0),        # #  11      6      P      0                [RFC 1693][RFC 6247] Connection Count
-    12: (T, 'ccnew', nm_len, 0),     # #  12      6      P      0                [RFC 1693][RFC 6247] CC.NEW
-    13: (T, 'ccecho', nm_len, 0),    # #  13      6      P      0                [RFC 1693][RFC 6247] CC.ECHO
-    14: (T, 'chkreq', nm_len, 4),    # #  14      3      B      4                [RFC 1146][RFC 6247] Alt-Chksum Request
-    15: (T, 'chksum', nm_len, 0),    # #  15      N      P      0                [RFC 1146][RFC 6247] Alt-Chksum Data
-    19: (T, 'sig', nm_len, 0),       # #  19     18      P      0                [RFC 2385] MD5 Signature Option
-    27: (T, 'qs', nm_len, 5),        # #  27      8      P      5                [RFC 4782] Quick-Start Response
-    28: (T, 'timeout', nm_len, 6),   # #  28      4      P      6                [RFC 5482] User Timeout Option
-    29: (T, 'ao', nm_len, 7),        # #  29      N      P      7                [RFC 5925] TCP Authentication Option
-    30: (T, 'mp', nm_len, 8),        # #  30      N      P      8                [RFC 6824] Multipath TCP
-    34: (T, 'fastopen', nm_len, 0),  # #  34      N      P      0                [RFC 7413] Fast Open
-}
-"""TCP Option Utility Table
-
-T | F
-    bool, short of True / False
-
-nm_len | op_len
-    function, length of data bytes
-
-chksum_opt
-    dict, checksum algorithm
-
-mptcp_opt
-    dict, Multipath TCP option subtype dict
-
-TCP_OPT
-    dict, TCP option dict.
-    Value is a tuple which contains:
-        |--> bool, if length greater than 1
-        |       |--> T - True
-        |       |--> F - False
-        |--> str, description string, also attribute name
-        |--> (optional) function, length of data bytes
-        |       |--> nm_len - default length calculation
-        |       |--> op_len - optional length calculation (indicates in comment)
-        |--> (optional) int, process that data bytes need (when length greater than 2)
-                |--> 0: do nothing
-                |--> 1: unpack according to size
-                |--> 2: unpack TSopt then add to dict
-                |--> 3: unpack POC-SP then add to dict
-                |--> 4: unpack ACopt then fetch algorithm
-                |           |--> TCP checksum
-                |           |--> 8-bit Fletcher's algorithm
-                |           |--> 16-bit Fletcher's algorithm
-                |           |--> Redundant Checksum Avoidance
-                |--> 5: unpack QSopt then add to dict
-                |--> 6: unpack UTopt then add to dict
-                |--> 7: unpack TCP-AO then add tot dict
-                |--> 8: unpack MPTCP then add to dict
-                            |--> extract subtype MP_CAPABLE
-                            |--> extract subtype MP_JOIN (SYN | SYN/ACK | ACK)
-                            |--> extract subtype DSS
-                            |--> extract subtype ADD_ADDR
-                            |--> extract subtype REMOVE_ADDR
-                            |--> extract subtype MP_PRIO
-                            |--> extract subtype MP_FAIL
-                            |--> extract subtype MP_FASTCLOSE
-
-"""
 
 
 class TCP(Transport):
     """This class implements Transmission Control Protocol."""
+
+    #: Parsed packet data.
+    _info: 'DataType_TCP'
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: DefaultDict[RegType_Option, str | OptionParser]: Option code to method
+    #: mapping, c.f. :meth:`_read_tcp_options`. Method names are expected to be
+    #: referred to the class by ``_read_mode_${name}``, and if such name not
+    #: found, the value should then be a method that can parse the option by
+    #: itself.
+    __option__ = collections.defaultdict(
+        lambda: 'donone',
+        {
+            RegType_Option.End_of_Option_List: 'eool',                 # [RFC 793] End of Option List
+            RegType_Option.No_Operation: 'nop',                        # [RFC 793] No-Operation
+            RegType_Option.Maximum_Segment_Size: 'mss',                # [RFC 793] Maximum Segment Size
+            RegType_Option.Window_Scale: 'ws',                         # [RFC 7323] Window Scale
+            RegType_Option.SACK_Permitted: 'sackpmt',                  # [RFC 2018] SACK Permitted
+            RegType_Option.SACK: 'sack',                               # [RFC 2018] SACK
+            RegType_Option.Echo: 'echo',                               # [RFC 1072] Echo
+            RegType_Option.Echo_Reply: 'echore',                       # [RFC 1072] Echo Reply
+            RegType_Option.Timestamp: 'ts',                            # [RFC 7323] Timestamps
+            RegType_Option.Partial_Order_Connection_Permitted: 'poc',  # [RFC 1693] POC Permitted
+            RegType_Option.Partial_Order_Connection_Profile: 'pocsp',  # [RFC 1693] POC-Serv Profile
+            RegType_Option.CC: 'cc',                                   # [RFC 1644] Connection Count
+            RegType_Option.CC_NEW: 'ccnew',                            # [RFC 1644] CC.NEW
+            RegType_Option.CC_ECHO: 'ccecho',                          # [RFC 1644] CC.ECHO
+            RegType_Option.TCP_Alternate_Checksum_Request: 'chkreq',   # [RFC 1146] Alt-Chksum Request
+            RegType_Option.TCP_Alternate_Checksum_Data: 'chksum',      # [RFC 1146] Alt-Chksum Data
+            RegType_Option.MD5_Signature_Option: 'sig',                # [RFC 2385] MD5 Signature Option
+            RegType_Option.Quick_Start_Response: 'qs',                 # [RFC 4782] Quick-Start Response
+            RegType_Option.User_Timeout_Option: 'timeout',             # [RFC 5482] User Timeout Option
+            RegType_Option.TCP_Authentication_Option: 'ao',            # [RFC 5925] TCP Authentication Option
+            RegType_Option.Multipath_TCP: 'mp',                        # [RFC 6824] Multipath TCP
+            RegType_Option.TCP_Fast_Open_Cookie: 'fastopen',           # [RFC 7413] Fast Open
+        },
+    )  # type: DefaultDict[int, str | OptionParser]
+
+    #: DefaultDict[RegType_MPTCPOption, str | MPOptionParser]: Option code to length mapping,
+    __mp_option__ = collections.defaultdict(
+        lambda: 'unknown',
+        {
+            RegType_MPTCPOption.MP_CAPABLE: 'capable',
+            RegType_MPTCPOption.MP_JOIN: 'join',
+            RegType_MPTCPOption.DSS: 'dss',
+            RegType_MPTCPOption.ADD_ADDR: 'addaddr',
+            RegType_MPTCPOption.REMOVE_ADDR: 'removeaddr',
+            RegType_MPTCPOption.MP_PRIO: 'prio',
+            RegType_MPTCPOption.MP_FAIL: 'fail',
+            RegType_MPTCPOption.MP_FASTCLOSE: 'fastclose',
+        },
+    )  # type: DefaultDict[int, str | MPOptionParser]
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['Transmission Control Protocol']
-        """
+    def name(self) -> 'Literal["Transmission Control Protocol"]':
+        """Name of current protocol."""
         return 'Transmission Control Protocol'
 
     @property
-    def length(self):
-        """Header length of current protocol.
-
-        :rtype: int
-        """
-        return self._info.hdr_len  # pylint: disable=E1101
+    def length(self) -> 'int':
+        """Header length of current protocol."""
+        return self._info.hdr_len
 
     @property
-    def src(self):
-        """Source port.
-
-        :rtype: int
-        """
-        return self._info.srcport  # pylint: disable=E1101
+    def src(self) -> 'int':
+        """Source port."""
+        return self._info.srcport
 
     @property
-    def dst(self):
-        """Destination port.
-
-        :rtype: int
-        """
-        return self._info.dstport  # pylint: disable=E1101
+    def dst(self) -> 'int':
+        """Destination port."""
+        return self._info.dstport
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_TCP':  # pylint: disable=unused-argument
         """Read Transmission Control Protocol (TCP).
 
         Structure of TCP header [:rfc:`793`]::
@@ -244,13 +241,13 @@ class TCP(Transport):
         _csum = self._read_fileng(2)
         _urgp = self._read_unpack(2)
 
-        tcp = dict(
+        tcp = DataType_TCP(
             srcport=_srcp,
             dstport=_dstp,
             seq=_seqn,
             ack=_ackn,
             hdr_len=int(_lenf[:4], base=2) * 4,
-            flags=dict(
+            flags=DataType_Flags(
                 ns=bool(int(_lenf[7])),
                 cwr=bool(int(_flag[0])),
                 ece=bool(int(_flag[1])),
@@ -267,280 +264,804 @@ class TCP(Transport):
         )
 
         # packet type flags
-        self._syn = bool(int(_flag[6]))
-        self._ack = bool(int(_flag[3]))
+        self._syn = tcp.flags.syn
+        self._ack = tcp.flags.ack
+        self._fin = tcp.flags.fin
 
-        _hlen = tcp['hdr_len']
-        _optl = _hlen - 20
+        _optl = tcp.hdr_len - 20
         if _optl:
-            options = self._read_tcp_options(_optl)
-            tcp['opt'] = options[0]     # tuple of option acronyms
-            tcp.update(options[1])      # merge option info to buffer
+            tcp.__update__({
+                'options': self._read_tcp_options(_optl),
+            })
 
-        length -= _hlen
-        tcp['packet'] = self._read_packet(header=_hlen, payload=length)
+        return self._decode_next_layer(tcp, None, length - tcp.hdr_len)  # type: ignore[return-value]
 
-        return self._decode_next_layer(tcp, None, length)
-
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
+
+    @classmethod
+    def register_option(cls, code: 'RegType_Option', meth: 'str | OptionParser') -> 'None':
+        """Register an option parser.
+
+        Args:
+            code: TCP option code.
+            meth: Method name or callable to parse the option.
+
+        """
+        cls.__option__[code] = meth
+
+    @classmethod
+    def register_mp_option(cls, code: 'RegType_MPTCPOption', meth: 'str | MPOptionParser') -> 'None':
+        """Register an MPTCP option parser.
+
+        Args:
+            code: MPTCP option code.
+            meth: Method name or callable to parse the option.
+
+        """
+        cls.__mp_option__[code] = meth
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __length_hint__(self):
-        """Return an estimated length for the object.
-
-        :rtype: Literal[20]
-        """
+    def __length_hint__(self) -> 'Literal[20]':
+        """Return an estimated length for the object."""
         return 20
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'TransType':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Returns:
-            pcapkit.const.reg.transtype.TransType: Numeral registry index of the
-            protocol in `IANA`_.
+            Numeral registry index of the protocol in `IANA`_.
 
         .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml
 
         """
-        return TransType(6)
+        return TransType.TCP  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_tcp_options(self, size):
+    def _read_tcp_options(self, size: 'int') -> 'Option':
         """Read TCP option list.
 
         Arguments:
-            size (int): length of option list
+            size: length of option list
 
         Returns:
-            Tuple[Tuple[pcapkit.const.tcp.option.Option], DataType_TCP_Opt]:
-            Tuple of TCP option list and extracted TCP options.
+            Extracted TCP options.
+
+        Raises:
+            ProtocolError: If the threshold is **NOT** matching.
 
         """
-        counter = 0         # length of read option list
-        optkind = list()    # option kind list
-        options = dict()    # dict of option data
+        # length of read option list
+        counter = 0
+        # dict of option data
+        options = OrderedMultiDict()  # type: Option
 
         while counter < size:
             # get option kind
-            kind = self._read_unpack(1)
-
-            # fetch corresponding option tuple
-            opts = TCP_OPT.get(kind)
-            enum = OPT_TYPE.get(kind)
-            if opts is None:
-                len_ = size - counter
-                counter = size
-                optkind.append(enum)
-                options[enum.name] = self._read_fileng(len_)
+            code = self._read_unpack(1)
+            if not code:
                 break
 
-            # extract option
-            dscp = opts[1]
-            if opts[0]:
-                len_ = self._read_unpack(1)
-                byte = opts[2](len_)
-                if byte:    # check option process mode
-                    data = process_opt[opts[3]](self, byte, kind)
-                else:       # permission options (length is 2)
-                    data = dict(
-                        kind=kind,      # option kind
-                        length=2,       # option length
-                        flag=True,      # permission flag
-                    )
-            else:           # 1-bytes options
-                len_ = 1
-                data = dict(
-                    kind=kind,      # option kind
-                    length=1,       # option length
-                )
+            # fetch corresponding option
+            kind = RegType_Option.get(code)
+
+            # extract option data
+            name = self.__option__[code]  # type: str | OptionParser
+            if isinstance(name, str):
+                meth_name = f'_read_mode_{name}'
+                meth = getattr(self, meth_name, self._read_mode_donone)  # type: OptionParser
+            else:
+                meth = name
+            data = meth(self, kind, options=options)  # type: ignore[arg-type,misc]
 
             # record option data
-            counter += len_
-            if enum in optkind:
-                if isinstance(options[dscp], tuple):
-                    options[dscp] += (Info(data),)
-                else:
-                    options[dscp] = (Info(options[dscp]), Info(data))
-            else:
-                optkind.append(enum)
-                options[dscp] = data
+            counter += data.length
+            options.add(kind, data)
 
             # break when eol triggered
-            if not kind:
+            if kind == RegType_Option.End_of_Option_List:
                 break
 
         # get padding
         if counter < size:
-            len_ = size - counter
-            options['padding'] = self._read_fileng(len_)
+            plen = size - counter
+            self._read_fileng(plen)
 
-        return tuple(optkind), options
+        return options
 
-    def _read_mode_donone(self, size, kind):
+    def _read_mode_donone(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_UnassignedOption':
         """Read options request no process.
 
         Arguments:
-            size (int): length of option
-            kind (int): option kind value
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_DONONE: Extracted option with no operation.
+            Parsed option data.
 
         """
-        data = dict(
+        size = self._read_unpack(1)
+        data = self._read_fileng(size - 2)
+
+        option = DataType_UnassignedOption(
             kind=kind,
             length=size,
-            data=self._read_fileng(size),
+            data=data,
+        )
+        return option
+
+    def _read_mode_eool(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EndOfOptionList':
+        """Read TCP End of Option List option.
+
+        Structure of TCP end of option list option [:rfc:`793`]:
+
+        .. code-block:: text
+
+           +--------+
+           |00000000|
+           +--------+
+            Kind=0
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        """
+        return DataType_EndOfOptionList(
+            kind=kind,
+            length=1,
+        )
+
+    def _read_mode_nop(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_NoOperation':
+        """Read TCP No Operation option.
+
+        Structure of TCP maximum segment size option [:rfc:`793`]:
+
+        .. code-block:: text
+
+           +--------+
+           |00000001|
+           +--------+
+            Kind=1
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        """
+        return DataType_NoOperation(
+            kind=kind,
+            length=1,
+        )
+
+    def _read_mode_mss(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MaximumSegmentSize':
+        """Read TCP max segment size option.
+
+        Structure of TCP maximum segment size option [:rfc:`793`]:
+
+        .. code-block:: text
+
+           +--------+--------+---------+--------+
+           |00000010|00000100|   max seg size   |
+           +--------+--------+---------+--------+
+            Kind=2   Length=4
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``4``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        mss = self._read_unpack(size - 2)
+
+        data = DataType_MaximumSegmentSize(
+            kind=kind,
+            length=size,
+            mss=mss,
         )
         return data
 
-    def _read_mode_unpack(self, size, kind):
-        """Read options request unpack process.
+    def _read_mode_ws(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_WindowScale':
+        """Read TCP windows scale option.
+
+        Structure of TCP window scale option [:rfc:`7323`]:
+
+        .. code-block:: text
+
+           +---------+---------+---------+
+           | Kind=3  |Length=3 |shift.cnt|
+           +---------+---------+---------+
+                1         1         1
 
         Arguments:
-            size (int): length of option
-            kind (int): option kind value
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_UNPACK: Extracted option which unpacked.
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``3``.
 
         """
-        data = dict(
+        size = self._read_unpack(1)
+        if size != 3:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        scnt = self._read_unpack(size - 2)
+
+        data = DataType_WindowScale(
             kind=kind,
             length=size,
-            data=self._read_unpack(size),
+            shift=scnt,
         )
         return data
 
-    def _read_mode_tsopt(self, size, kind):
-        """Read Timestamps option.
+    def _read_mode_sackpmt(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_SACKPermitted':
+        """Read TCP SACK permitted option.
 
-        Structure of TCP ``TSopt`` [:rfc:`7323`]::
+        Structure of TCP SACK permitted option [:rfc:`2018`]:
 
-            +-------+-------+---------------------+---------------------+
-            |Kind=8 |  10   |   TS Value (TSval)  |TS Echo Reply (TSecr)|
-            +-------+-------+---------------------+---------------------+
-                1       1              4                     4
+        .. code-block:: text
+
+           +---------+---------+
+           | Kind=4  | Length=2|
+           +---------+---------+
 
         Arguments:
-            size (int): length of option
-            kind (Literal[8]): option kind value (Timestamps)
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_TS: extracted Timestamps (``TS``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``2``.
 
         """
-        temp = struct.unpack('>II', self._read_fileng(size))
-        data = dict(
+        size = self._read_unpack(1)
+        if size != 2:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
+        return DataType_SACKPermitted(
             kind=kind,
             length=size,
-            val=temp[0],
-            ecr=temp[1],
+        )
+
+    def _read_mode_sack(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_SACK':
+        """Read TCP SACK option.
+
+        Structure of TCP SACK option [:rfc:`2018`]:
+
+        .. code-block:: text
+
+                             +--------+--------+
+                             | Kind=5 | Length |
+           +--------+--------+--------+--------+
+           |      Left Edge of 1st Block       |
+           +--------+--------+--------+--------+
+           |      Right Edge of 1st Block      |
+           +--------+--------+--------+--------+
+           |                                   |
+           /            . . .                  /
+           |                                   |
+           +--------+--------+--------+--------+
+           |      Left Edge of nth Block       |
+           +--------+--------+--------+--------+
+           |      Right Edge of nth Block      |
+           +--------+--------+--------+--------+
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``8``.
+
+        """
+        size = self._read_unpack(1)
+        sack = []  # type: list[int]
+
+        for _ in range(size):
+            sack.append(self._read_unpack(8))
+
+        data = DataType_SACK(
+            kind=kind,
+            length=size * 8 + 2,
+            sack=tuple(sack),
         )
         return data
 
-    def _read_mode_pocsp(self, size, kind):
-        """Read Partial Order Connection Service Profile option.
+    def _read_mode_echo(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Echo':
+        """Read TCP echo option.
 
-        Structure of TCP ``POC-SP`` Option [:rfc:`1693`][:rfc:`6247`]::
+        Structure of TCP echo option [:rfc:`1072`]:
 
-                                      1 bit        1 bit    6 bits
-            +----------+----------+------------+----------+--------+
-            |  Kind=10 | Length=3 | Start_flag | End_flag | Filler |
-            +----------+----------+------------+----------+--------+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+--------+--------+
+           | Kind=6 | Length |   4 bytes of info to be echoed    |
+           +--------+--------+--------+--------+--------+--------+
 
         Arguments:
-            size (int): length of option
-            kind (Literal[10]): option kind value (POC-Serv Profile)
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_POCSP: extracted Partial Order Connection Service Profile (``POC-SP``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``6``.
 
         """
+        size = self._read_unpack(1)
+        if size != 6:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        echo = self._read_fileng(4)
+
+        data = DataType_Echo(
+            kind=kind,
+            length=size,
+            data=echo,
+        )
+        return data
+
+    def _read_mode_echore(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EchoReply':
+        """Read TCP echo reply option.
+
+        Structure of TCP echo reply option [:rfc:`1072`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+--------+--------+
+           | Kind=7 | Length |    4 bytes of echoed info         |
+           +--------+--------+--------+--------+--------+--------+
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``6``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 6:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        echo = self._read_fileng(4)
+
+        data = DataType_EchoReply(
+            kind=kind,
+            length=size,
+            data=echo,
+        )
+        return data
+
+    def _read_mode_ts(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Timestamp':
+        """Read TCP timestamps option.
+
+        Structure of TCP timestamp option [:rfc:`7323`]:
+
+        .. code-block:: text
+
+           +-------+-------+---------------------+---------------------+
+           |Kind=8 |  10   |   TS Value (TSval)  |TS Echo Reply (TSecr)|
+           +-------+-------+---------------------+---------------------+
+               1       1              4                     4
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``10``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 10:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        tsval = self._read_unpack(4)
+        tsecr = self._read_fileng(4)
+
+        data = DataType_Timestamp(
+            kind=kind,
+            length=size,
+            timestamp=tsval,
+            echo=tsecr,
+        )
+        return data
+
+    def _read_mode_poc(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_PartialOrderConnectionPermitted':
+        """Read TCP partial order connection service profile option.
+
+        Structure of TCP ``POC-Permitted`` option [:rfc:`1693`][:rfc:`6247`]:
+
+        .. code-block:: text
+
+           +-----------+-------------+
+           |  Kind=9   |  Length=2   |
+           +-----------+-------------+
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``2``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 2:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
+        return DataType_PartialOrderConnectionPermitted(
+            kind=kind,
+            length=size,
+        )
+
+    def _read_mode_pocsp(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_PartialOrderConnectionProfile':
+        """Read TCP partial order connection service profile option.
+
+        Structure of TCP ``POC-SP`` option [:rfc:`1693`][:rfc:`6247`]:
+
+        .. code-block:: text
+
+                                     1 bit        1 bit    6 bits
+           +----------+----------+------------+----------+--------+
+           |  Kind=10 | Length=3 | Start_flag | End_flag | Filler |
+           +----------+----------+------------+----------+--------+
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``3``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 3:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         temp = self._read_binary(size)
 
-        data = dict(
+        data = DataType_PartialOrderConnectionProfile(
             kind=kind,
             length=size,
             start=bool(int(temp[0])),
             end=bool(int(temp[1])),
-            filler=bytes(chr(int(temp[2:], base=2)), encoding='utf-8'),
         )
 
         return data
 
-    def _read_mode_acopt(self, size, kind):
-        """Read Alternate Checksum Request option.
+    def _read_mode_cc(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CC':
+        """Read TCP connection count option.
 
-        Structure of TCP ``CHKSUM-REQ`` [:rfc:`1146`][:rfc:`6247`]::
+        Structure of TCP ``CC`` option [:rfc:`1644`]:
 
-            +----------+----------+----------+
-            |  Kind=14 | Length=3 |  chksum  |
-            +----------+----------+----------+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+--------+--------+
+           |00001011|00000110|    Connection Count:  SEG.CC      |
+           +--------+--------+--------+--------+--------+--------+
+            Kind=11  Length=6
 
         Arguments:
-            size (int): length of option
-            kind (Literal[14]): option kind value (Alt-Chksum Request)
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_ACOPT: extracted Alternate Checksum Request (``CHKSUM-REQ``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``6``.
 
         """
-        temp = self._read_unpack(size)
-        algo = chksum_opt.get(temp)
+        size = self._read_unpack(1)
+        if size != 6:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        cc = self._read_unpack(4)
 
-        data = dict(
+        data = DataType_CC(
             kind=kind,
             length=size,
-            ac=algo,
+            cc=cc,
+        )
+        return data
+
+    def _read_mode_ccnew(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CCNew':
+        """Read TCP connection count (new) option.
+
+        Structure of TCP ``CC.NEW`` option [:rfc:`1644`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+--------+--------+
+           |00001100|00000110|    Connection Count:  SEG.CC      |
+           +--------+--------+--------+--------+--------+--------+
+            Kind=12  Length=6
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``6``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 6:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        cc = self._read_unpack(4)
+
+        data = DataType_CCNew(
+            kind=kind,
+            length=size,
+            cc=cc,
+        )
+        return data
+
+    def _read_mode_ccecho(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CCEcho':
+        """Read TCP connection count (echo) option.
+
+        Structure of TCP ``CC.ECHO`` option [:rfc:`1644`]:
+
+        .. code-block:: text
+
+           +--------+--------+--------+--------+--------+--------+
+           |00001101|00000110|    Connection Count:  SEG.CC      |
+           +--------+--------+--------+--------+--------+--------+
+            Kind=13  Length=6
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``6``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 6:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        cc = self._read_unpack(4)
+
+        data = DataType_CCEcho(
+            kind=kind,
+            length=size,
+            cc=cc,
+        )
+        return data
+
+    def _read_mode_chkreq(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_AlternateChecksumRequest':
+        """Read Alternate Checksum Request option.
+
+        Structure of TCP ``CHKSUM-REQ`` [:rfc:`1146`][:rfc:`6247`]:
+
+        .. code-block:: text
+
+           +----------+----------+----------+
+           |  Kind=14 | Length=3 |  chksum  |
+           +----------+----------+----------+
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``3``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 3:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        algo = RegType_Checksum.get(self._read_unpack(1))
+
+        data = DataType_AlternateChecksumRequest(
+            kind=kind,
+            length=size,
+            chksum=algo,
         )
 
         return data
 
-    def _read_mode_qsopt(self, size, kind):
-        """Read Quick-Start Response option.
+    def _read_mode_chksum(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_AlternateChecksumData':
+        """Read Alternate Checksum Data option.
 
-        Structure of TCP ``QSopt`` [:rfc:`4782`]::
+        Structure of TCP ``CHKSUM`` [:rfc:`1146`][:rfc:`6247`]:
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |     Kind      |  Length=8     | Resv. | Rate  |   TTL Diff    |
-            |               |               |       |Request|               |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                   QS Nonce                                | R |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        .. code-block:: text
+
+           +---------+---------+---------+     +---------+
+           | Kind=15 |Length=N |  data   | ... |  data   |
+           +---------+---------+---------+     +---------+
 
         Arguments:
-            size (int): length of option
-            kind (Literal[27]): option kind value (Quick-Start Response)
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_QSOPT: extracted Quick-Start Response (``QS``) option
+            Parsed option data.
 
         """
+        size = self._read_unpack(1)
+        csum = self._read_fileng(size - 2)
+
+        data = DataType_AlternateChecksumData(
+            kind=kind,
+            length=size,
+            data=csum,
+        )
+
+        return data
+
+    def _read_mode_sig(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MD5Signature':
+        """Read MD5 Signature option.
+
+        Structure of TCP ``SIG`` option [:rfc:`2385`]:
+
+        .. code-block:: text
+
+           +---------+---------+-------------------+
+           | Kind=19 |Length=18|   MD5 digest...   |
+           +---------+---------+-------------------+
+           |                                       |
+           +---------------------------------------+
+           |                                       |
+           +---------------------------------------+
+           |                                       |
+           +-------------------+-------------------+
+           |                   |
+           +-------------------+
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``18``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 18:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        sig = self._read_fileng(16)
+
+        data = DataType_MD5Signature(
+            kind=kind,
+            length=size,
+            digest=sig,
+        )
+        return data
+
+    def _read_mode_qs(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_QuickStartResponse':
+        """Read Quick-Start Response option.
+
+        Structure of TCP ``QSopt`` [:rfc:`4782`]:
+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |     Kind      |  Length=8     | Resv. | Rate  |   TTL Diff    |
+           |               |               |       |Request|               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                   QS Nonce                                | R |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``8``.
+
+        """
+        size = self._read_unpack(1)
+        if size != 8:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         rvrr = self._read_binary(1)
         ttld = self._read_unpack(1)
         noun = self._read_binary(4)
 
-        data = dict(
+        data = DataType_QuickStartResponse(
             kind=kind,
             length=size,
             req_rate=int(rvrr[4:], base=2),
@@ -550,427 +1071,502 @@ class TCP(Transport):
 
         return data
 
-    def _read_mode_utopt(self, size, kind):
+    def _read_mode_timeout(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_UserTimeout':
         """Read User Timeout option.
 
-        Structure of TCP ``TIMEOUT`` [:rfc:`5482`]::
+        Structure of TCP ``TIMEOUT`` [:rfc:`5482`]:
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |   Kind = 28   |   Length = 4  |G|        User Timeout         |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |   Kind = 28   |   Length = 4  |G|        User Timeout         |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Arguments:
-            size (int): length of option
-            kind (Literal[28]): option kind value (User Timeout Option)
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_UTOPT: extracted User Timeout (``TIMEOUT``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``4``.
 
         """
-        temp = self._read_fileng(size)
-        if int(temp[0]):
+        size = self._read_unpack(1)
+        if size != 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
+        temp = self._read_binary(size)
+        if temp[0] == '1':
             time = datetime.timedelta(minutes=int(temp[0:], base=2))
         else:
             time = datetime.timedelta(seconds=int(temp[0:], base=2))
 
-        data = dict(
+        data = DataType_UserTimeout(
             kind=kind,
             length=size,
-            granularity='minutes' if int(temp[0]) else 'seconds',
             timeout=time,
         )
 
         return data
 
-    def _read_mode_tcpao(self, size, kind):
+    def _read_mode_ao(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Authentication':
         """Read Authentication option.
 
-        Structure of TCP ``AOopt`` [:rfc:`5925`]::
+        Structure of TCP ``AOopt`` [:rfc:`5925`]:
 
-            +------------+------------+------------+------------+
-            |  Kind=29   |   Length   |   KeyID    | RNextKeyID |
-            +------------+------------+------------+------------+
-            |                     MAC           ...
-            +-----------------------------------...
+        .. code-block:: text
 
-            ...-----------------+
-            ...  MAC (con't)    |
-            ...-----------------+
+           +------------+------------+------------+------------+
+           |  Kind=29   |   Length   |   KeyID    | RNextKeyID |
+           +------------+------------+------------+------------+
+           |                     MAC           ...
+           +-----------------------------------...
+
+           ...-----------------+
+           ...  MAC (con't)    |
+           ...-----------------+
 
         Arguments:
-            size (int): length of option
-            kind (Literal[29]): option kind value (TCP Authentication Option)
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_TCPAO: extracted Authentication (``AO``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** larger than or equal to ``4``.
 
         """
+        size = self._read_unpack(1)
+        if size < 4:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         key_ = self._read_unpack(1)
         rkey = self._read_unpack(1)
-        mac_ = self._read_fileng(size - 2)
+        mac_ = self._read_fileng(size - 4)
 
-        data = dict(
+        data = DataType_Authentication(
             kind=kind,
             length=size,
             key_id=key_,
-            r_next_key_id=rkey,
+            next_key_id=rkey,
             mac=mac_,
         )
 
         return data
 
-    def _read_mode_mptcp(self, size, kind):
+    def _read_mode_mp(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MPTCP':
         """Read Multipath TCP option.
 
-        Structure of ``MP-TCP`` [:rfc:`6824`]::
+        Structure of ``MP-TCP`` [:rfc:`6824`]:
 
-                                 1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+-----------------------+
-            |     Kind      |    Length     |Subtype|                       |
-            +---------------+---------------+-------+                       |
-            |                     Subtype-specific data                     |
-            |                       (variable length)                       |
-            +---------------------------------------------------------------+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----------------------+
+           |     Kind      |    Length     |Subtype|                       |
+           +---------------+---------------+-------+                       |
+           |                     Subtype-specific data                     |
+           |                       (variable length)                       |
+           +---------------------------------------------------------------+
 
         Arguments:
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_MPTCP: extracted Multipath TCP (``MP-TCP``) option
+            Parsed option data.
 
         """
+        size = self._read_unpack(1)
         bins = self._read_binary(1)
         subt = int(bins[:4], base=2)    # subtype number
         bits = bins[4:]                 # 4-bit data
-        dlen = size - 1                 # length of remaining data
+        dlen = size - 3                 # length of remaining data
 
         # fetch subtype-specific data
-        func = mptcp_opt.get(subt)
-        if func is None:    # if subtype not exist, directly read all data
-            temp = self._read_fileng(dlen)
-            data = dict(
-                kind=kind,
-                length=size,
-                subtype=MPTCPOption.get(subt),
-                data=bytes(chr(int(bits[:4], base=2)), encoding='utf-8') + temp,
-            )
-        else:               # fetch corresponding subtype data dict
-            data = func(self, bits, dlen, kind)
+        subtype = RegType_MPTCPOption.get(subt)
+        name = self.__mp_option__[subt]  # type: str | MPOptionParser
+        if isinstance(name, str):
+            meth_name = f'_read_mptcp_{name}'
+            meth = getattr(self, meth_name, cast('MPOptionParser', self._read_mptcp_unknown))  # type: MPOptionParser
+        else:
+            meth = name
+        data = meth(subtype, dlen, bits, options=options)
+
         return data
 
-    def _read_mptcp_capable(self, bits, size, kind):
-        """Read Multipath Capable option.
-
-        Structure of ``MP_CAPABLE`` [:rfc:`6824`]::
-
-                                 1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+-------+---------------+
-            |     Kind      |    Length     |Subtype|Version|A|B|C|D|E|F|G|H|
-            +---------------+---------------+-------+-------+---------------+
-            |                   Option Sender's Key (64 bits)               |
-            |                                                               |
-            |                                                               |
-            +---------------------------------------------------------------+
-            |                  Option Receiver's Key (64 bits)              |
-            |                     (if option Length == 20)                  |
-            |                                                               |
-            +---------------------------------------------------------------+
+    def _read_mptcp_unknown(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPUnknown':
+        """Read unknown MPTCP subtype.
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_MP_CAPABLE: extracted Multipath Capable (``MP_CAPABLE``) option
+            Parsed option data.
 
         """
+        data = DataType_MPTCPUnknown(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
+            data=int(bits[:4], base=2).to_bytes(1, sys.byteorder) + self._read_fileng(dlen),
+        )
+        return data
+
+    def _read_mptcp_capable(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPCapable':
+        """Read Multipath Capable option.
+
+        Structure of ``MP_CAPABLE`` [:rfc:`6824`]:
+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-------+---------------+
+           |     Kind      |    Length     |Subtype|Version|A|B|C|D|E|F|G|H|
+           +---------------+---------------+-------+-------+---------------+
+           |                   Option Sender's Key (64 bits)               |
+           |                                                               |
+           |                                                               |
+           +---------------------------------------------------------------+
+           |                  Option Receiver's Key (64 bits)              |
+           |                     (if option Length == 20)                  |
+           |                                                               |
+           +---------------------------------------------------------------+
+
+        Arguments:
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``20`` or ``32``.
+
+        """
+        if dlen != 17 and dlen != 29:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
         vers = int(bits, base=2)
         bins = self._read_binary(1)
         skey = self._read_unpack(8)
-        rkey = self._read_unpack(8) if size == 17 else None
+        rkey = self._read_unpack(8) if dlen == 17 else None
 
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(0),
-            capable=dict(
-                version=vers,
-                flags=dict(
-                    req=bool(int(bins[0])),
-                    ext=bool(int(bins[1])),
-                    res=tuple(bool(int(bit)) for bit in bits[2:7]),
-                    hsa=bool(int(bins[7])),
-                ),
-                skey=skey,
-                rkey=rkey,
+        data = DataType_MPTCPCapable(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
+            version=vers,
+            flags=DataType_MPTCPCapableFlag(
+                req=bool(int(bins[0])),
+                ext=bool(int(bins[1])),
+                hsa=bool(int(bins[7])),
             ),
+            skey=skey,
+            rkey=rkey,
         )
 
         return data
 
-    def _read_mptcp_join(self, bits, size, kind):
+    def _read_mptcp_join(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPJoin':
         """Read Join Connection option.
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_MP_JOIN: extracted Join Connection (``MP_JOIN``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If the option is not given on a valid SYN/ACK packet.
 
         """
-        if self._syn and self._ack:      # MP_JOIN-SYN/ACK
-            return self._read_join_synack(bits, size, kind)
         if self._syn and not self._ack:  # MP_JOIN-SYN
-            return self._read_join_syn(bits, size, kind)
+            return self._read_join_syn(kind, dlen, bits, options=options)
+        if self._syn and self._ack:      # MP_JOIN-SYN/ACK
+            return self._read_join_synack(kind, dlen, bits, options=options)
         if not self._syn and self._ack:  # MP_JOIN-ACK
-            return self._read_join_ack(bits, size, kind)
+            return self._read_join_ack(kind, dlen, bits, options=options)
+        raise ProtocolError(f'{self.alias}: : [OptNo {kind.value}] invalid flags combination')
 
-        temp = self._read_fileng(size)   # illegal MP_JOIN occurred
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(1),
-            connection=None,
-            join=dict(
-                data=bytes(chr(int(bits[:4], base=2)), encoding='utf-8') + temp,
-            ),
-        )
-        return data
-
-    def _read_join_syn(self, bits, size, kind):
+    def _read_join_syn(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinSYN':
         """Read Join Connection option for Initial SYN.
 
-        Structure of ``MP_JOIN-SYN`` [:rfc:`6824`]::
+        Structure of ``MP_JOIN-SYN`` [:rfc:`6824`]:
 
-                                 1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+-----+-+---------------+
-            |     Kind      |  Length = 12  |Subtype|     |B|   Address ID  |
-            +---------------+---------------+-------+-----+-+---------------+
-            |                   Receiver's Token (32 bits)                  |
-            +---------------------------------------------------------------+
-            |                Sender's Random Number (32 bits)               |
-            +---------------------------------------------------------------+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----+-+---------------+
+           |     Kind      |  Length = 12  |Subtype|     |B|   Address ID  |
+           +---------------+---------------+-------+-----+-+---------------+
+           |                   Receiver's Token (32 bits)                  |
+           +---------------------------------------------------------------+
+           |                Sender's Random Number (32 bits)               |
+           +---------------------------------------------------------------+
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_MP_JOIN_SYN: extracted Join Connection (``MP_JOIN-SYN``) option for Initial SYN
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``12``.
 
         """
+        if dlen != 9:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
         adid = self._read_unpack(1)
-        rtkn = self._read_unpack(4)
+        rtkn = self._read_fileng(4)
         srno = self._read_unpack(4)
 
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(1),
+        data = DataType_MPTCPJoinSYN(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
             connection='SYN',
-            join=dict(
-                syn=dict(
-                    backup=bool(int(bits[3])),
-                    addr_id=adid,
-                    token=rtkn,
-                    rand_num=srno,
-                ),
-            ),
+            backup=bool(int(bits[3])),
+            addr_id=adid,
+            token=rtkn,
+            nounce=srno,
         )
 
         return data
 
-    def _read_join_synack(self, bits, size, kind):
+    def _read_join_synack(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinSYNACK':
         """Read Join Connection option for Responding SYN/ACK.
 
-        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`]::
+        Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`]:
 
-                                 1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+-----+-+---------------+
-            |     Kind      |  Length = 16  |Subtype|     |B|   Address ID  |
-            +---------------+---------------+-------+-----+-+---------------+
-            |                                                               |
-            |                Sender's Truncated HMAC (64 bits)              |
-            |                                                               |
-            +---------------------------------------------------------------+
-            |                Sender's Random Number (32 bits)               |
-            +---------------------------------------------------------------+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----+-+---------------+
+           |     Kind      |  Length = 16  |Subtype|     |B|   Address ID  |
+           +---------------+---------------+-------+-----+-+---------------+
+           |                                                               |
+           |                Sender's Truncated HMAC (64 bits)              |
+           |                                                               |
+           +---------------------------------------------------------------+
+           |                Sender's Random Number (32 bits)               |
+           +---------------------------------------------------------------+
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_MP_JOIN_SYNACK: extracted Join Connection (``MP_JOIN-SYN/ACK``)
-            option for Responding SYN/ACK
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``20``.
 
         """
+        if dlen != 17:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
         adid = self._read_unpack(1)
         hmac = self._read_fileng(8)
         srno = self._read_unpack(4)
 
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(1),
+        data = DataType_MPTCPJoinSYNACK(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
             connection='SYN/ACK',
-            join=dict(
-                synack=dict(
-                    backup=bool(int(bits[3])),
-                    addr_id=adid,
-                    hmac=hmac,
-                    rand_num=srno,
-                ),
-            ),
+            backup=bool(int(bits[3])),
+            addr_id=adid,
+            hmac=hmac,
+            nounce=srno,
         )
 
         return data
 
-    def _read_join_ack(self, bits, size, kind):  # pylint: disable=unused-argument
+    def _read_join_ack(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinACK':
         """Read Join Connection option for Third ACK.
 
-        Structure of ``MP_JOIN-ACK`` [:rfc:`6824`]::
+        Structure of ``MP_JOIN-ACK`` [:rfc:`6824`]:
 
-                                 1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+-----------------------+
-            |     Kind      |  Length = 24  |Subtype|      (reserved)       |
-            +---------------+---------------+-------+-----------------------+
-            |                                                               |
-            |                                                               |
-            |                   Sender's HMAC (160 bits)                    |
-            |                                                               |
-            |                                                               |
-            +---------------------------------------------------------------+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----------------------+
+           |     Kind      |  Length = 24  |Subtype|      (reserved)       |
+           +---------------+---------------+-------+-----------------------+
+           |                                                               |
+           |                                                               |
+           |                   Sender's HMAC (160 bits)                    |
+           |                                                               |
+           |                                                               |
+           +---------------------------------------------------------------+
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_MP_JOIN_ACK: extracted Join Connection (``MP_JOIN-ACK``)
-            option for Third ACK
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** ``24``.
 
         """
+        if dlen != 21:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
         temp = self._read_fileng(20)
 
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(1),
+        data = DataType_MPTCPJoinACK(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
             connection='ACK',
-            join=dict(
-                ack=dict(
-                    hmac=temp,
-                ),
-            ),
+            hmac=temp,
         )
 
         return data
 
-    def _read_mptcp_dss(self, bits, size, kind):
+    def _read_mptcp_dss(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPDSS':
         """Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.
 
-        Structure of ``DSS`` [:rfc:`6824`]::
+        Structure of ``DSS`` [:rfc:`6824`]:
 
-                                 1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+----------------------+
-            |     Kind      |    Length     |Subtype| (reserved) |F|m|M|a|A|
-            +---------------+---------------+-------+----------------------+
-            |                                                              |
-            |           Data ACK (4 or 8 octets, depending on flags)       |
-            |                                                              |
-            +--------------------------------------------------------------+
-            |                                                              |
-            |   Data sequence number (4 or 8 octets, depending on flags)   |
-            |                                                              |
-            +--------------------------------------------------------------+
-            |              Subflow Sequence Number (4 octets)              |
-            +-------------------------------+------------------------------+
-            |  Data-Level Length (2 octets) |      Checksum (2 octets)     |
-            +-------------------------------+------------------------------+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+----------------------+
+           |     Kind      |    Length     |Subtype| (reserved) |F|m|M|a|A|
+           +---------------+---------------+-------+----------------------+
+           |                                                              |
+           |           Data ACK (4 or 8 octets, depending on flags)       |
+           |                                                              |
+           +--------------------------------------------------------------+
+           |                                                              |
+           |   Data sequence number (4 or 8 octets, depending on flags)   |
+           |                                                              |
+           +--------------------------------------------------------------+
+           |              Subflow Sequence Number (4 octets)              |
+           +-------------------------------+------------------------------+
+           |  Data-Level Length (2 octets) |      Checksum (2 octets)     |
+           +-------------------------------+------------------------------+
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_DSS: extracted Data Sequence Signal (``DSS``) option
+            Parsed option data.
 
         """
-        bits = self._read_binary(1)
-        mflg = 8 if int(bits[4]) else 4
-        Mflg = bool(int(bits[5]))
-        aflg = 8 if int(bits[6]) else 4
-        Aflg = bool(int(bits[7]))
+        flag = self._read_binary(1)
+        mflg = 8 if int(flag[4]) else 4
+        Mflg = bool(int(flag[5]))
+        aflg = 8 if int(flag[6]) else 4
+        Aflg = bool(int(flag[7]))
         ack_ = self._read_unpack(aflg) if Aflg else None
         dsn_ = self._read_unpack(mflg) if Mflg else None
         ssn_ = self._read_unpack(4) if Mflg else None
         dll_ = self._read_unpack(2) if Mflg else None
         chk_ = self._read_fileng(2) if Mflg else None
 
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(2),
-            dss=dict(
-                flags=dict(
-                    fin=bool(int(bits[3])),
-                    dsn_len=mflg,
-                    data_pre=Mflg,
-                    ack_len=aflg,
-                    ack_pre=Aflg,
-                ),
-                ack=ack_,
-                dsn=dsn_,
-                ssn=ssn_,
-                dl_len=dll_,
-                checksum=chk_,
+        data = DataType_MPTCPDSS(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
+            flags=DataType_MPTCPDSSFlag(
+                data_fin=bool(int(flag[3])),
+                dsn_oct=bool(int(flag[4])),
+                data_pre=Mflg,
+                ack_oct=bool(int(flag[6])),
+                ack_pre=Aflg,
             ),
+            ack=ack_,
+            dsn=dsn_,
+            ssn=ssn_,
+            dl_len=dll_,
+            checksum=chk_,
         )
 
         return data
 
-    def _read_mptcp_add(self, bits, size, kind):
+    def _read_mptcp_addaddr(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPAddAddress':
         """Read Add Address option.
 
-        Structure of ``ADD_ADDR`` [:rfc:`6824`]::
+        Structure of ``ADD_ADDR`` [:rfc:`6824`]:
 
-                                 1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+-------+---------------+
-            |     Kind      |     Length    |Subtype| IPVer |  Address ID   |
-            +---------------+---------------+-------+-------+---------------+
-            |          Address (IPv4 - 4 octets / IPv6 - 16 octets)         |
-            +-------------------------------+-------------------------------+
-            |   Port (2 octets, optional)   |
-            +-------------------------------+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-------+---------------+
+           |     Kind      |     Length    |Subtype| IPVer |  Address ID   |
+           +---------------+---------------+-------+-------+---------------+
+           |          Address (IPv4 - 4 octets / IPv6 - 16 octets)         |
+           +-------------------------------+-------------------------------+
+           |   Port (2 octets, optional)   |
+           +-------------------------------+
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_ADD_ADDR: extracted Add Address (``ADD_ADDR``) option
+            Parsed option data.
 
         Raises:
-            ProtocolError: If the option is malformed.
+            ProtocolError: Invalid IP version and/or addresses.
 
         """
         vers = int(bits, base=2)
@@ -979,31 +1575,31 @@ class TCP(Transport):
         elif vers == 6:
             ip_l = 16
         else:
-            raise ProtocolError('[MP_TCP ADD_ADDR] malformed option')
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
 
         adid = self._read_unpack(1)
         ipad = self._read_fileng(ip_l)
-        pt_l = size - 1 - ip_l
+        pt_l = dlen - 1 - ip_l
         port = self._read_unpack(2) if pt_l else None
 
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(3),
-            add_addr=dict(
-                ip_ver=vers,
-                addrid=adid,
-                addr=ipaddress.ip_address(ipad),
-                port=port,
-            ),
+        data = DataType_MPTCPAddAddress(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
+            version=vers,
+            addr_id=adid,
+            addr=ipaddress.ip_address(ipad),
+            port=port,
         )
 
         return data
 
-    def _read_mptcp_remove(self, bits, size, kind):  # pylint: disable=unused-argument
+    def _read_mptcp_remove(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPRemoveAddress':
         """Read Remove Address option.
 
-        Structure of ``REMOVE_ADDR`` [:rfc:`6824`]::
+        Structure of ``REMOVE_ADDR`` [:rfc:`6824`]:
+
+        .. code-block:: text
 
                                  1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -1013,135 +1609,209 @@ class TCP(Transport):
                                        (followed by n-1 Address IDs, if required)
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_REMOVE_ADDR: extracted Remove Address (``REMOVE_ADDR``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If the length is smaller than **3**.
 
         """
-        adid = []
-        for _ in size:
+        if dlen <= 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
+        adid = []  # type: list[int]
+        for _ in range(dlen):
             adid.append(self._read_unpack(1))
 
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(4),
-            removeaddr=dict(
-                addr_id=tuple(adid),
-            ),
+        data = DataType_MPTCPRemoveAddress(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
+            addr_id=tuple(adid),
         )
 
         return data
 
-    def _read_mptcp_prio(self, bits, size, kind):
+    def _read_mptcp_prio(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPPriority':
         """Read Change Subflow Priority option.
 
-        Structure of ``MP_PRIO`` [RFC 6824]::
+        Structure of ``MP_PRIO`` [RFC 6824]:
 
-                                  1                   2                   3
-              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+-----+-+--------------+
-            |     Kind      |     Length    |Subtype|     |B| AddrID (opt) |
-            +---------------+---------------+-------+-----+-+--------------+
-
-        Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
-
-        Returns:
-            DataType_TCP_Opt_REMOVE_ADDR: extracted Change Subflow Priority (``MP_PRIO``) option
-
-        """
-        temp = self._read_unpack(1) if size else None
-
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(4),
-            prio=dict(
-                backup=bool(int(bits[3])),
-                addr_id=temp,
-            ),
-        )
-
-        return data
-
-    def _read_mptcp_fail(self, bits, size, kind):  # pylint: disable=unused-argument
-        """Read Fallback option.
-
-        Structure of ``MP_FAIL`` [:rfc:`6824`]::
+        .. code-block:: text
 
                                  1                   2                   3
              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+----------------------+
-            |     Kind      |   Length=12   |Subtype|      (reserved)      |
-            +---------------+---------------+-------+----------------------+
-            |                                                              |
-            |                 Data Sequence Number (8 octets)              |
-            |                                                              |
-            +--------------------------------------------------------------+
+           +---------------+---------------+-------+-----+-+--------------+
+           |     Kind      |     Length    |Subtype|     |B| AddrID (opt) |
+           +---------------+---------------+-------+-----+-+--------------+
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_MP_FAIL: extracted Fallback (``MP_FAIL``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If the length is smaller than **3**.
 
         """
+        if dlen < 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        temp = self._read_unpack(1) if dlen else None
+
+        data = DataType_MPTCPPriority(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
+            backup=bool(int(bits[3])),
+            addr_id=temp,
+        )
+
+        return data
+
+    def _read_mptcp_fail(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPFallback':
+        """Read Fallback option.
+
+        Structure of ``MP_FAIL`` [:rfc:`6824`]:
+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+----------------------+
+           |     Kind      |   Length=12   |Subtype|      (reserved)      |
+           +---------------+---------------+-------+----------------------+
+           |                                                              |
+           |                 Data Sequence Number (8 octets)              |
+           |                                                              |
+           +--------------------------------------------------------------+
+
+        Arguments:
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If the length is **NOT** 12.
+
+        """
+        if dlen != 9:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
         resv = self._read_fileng(1)  # pylint: disable=unused-variable
         dsn_ = self._read_unpack(8)
 
-        data = dict(
-            kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(6),
-            fail=dict(
-                dsn=dsn_,
-            ),
+        data = DataType_MPTCPFallback(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
+            dsn=dsn_,
         )
 
         return data
 
-    def _read_mptcp_fastclose(self, bits, size, kind):  # pylint: disable=unused-argument
+    def _read_mptcp_fastclose(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPFastclose':
         """Read Fast Close option.
 
-        Structure of ``MP_FASTCLOSE`` [RFC 6824]::
+        Structure of ``MP_FASTCLOSE`` [RFC 6824]:
 
-                                 1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +---------------+---------------+-------+-----------------------+
-            |     Kind      |    Length     |Subtype|      (reserved)       |
-            +---------------+---------------+-------+-----------------------+
-            |                      Option Receiver's Key                    |
-            |                            (64 bits)                          |
-            |                                                               |
-            +---------------------------------------------------------------+
+        .. code-block:: text
+
+                                1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +---------------+---------------+-------+-----------------------+
+           |     Kind      |    Length     |Subtype|      (reserved)       |
+           +---------------+---------------+-------+-----------------------+
+           |                      Option Receiver's Key                    |
+           |                            (64 bits)                          |
+           |                                                               |
+           +---------------------------------------------------------------+
 
         Arguments:
-            bits (str): 4-bit data (after subtype)
-            size (int): length of option
-            kind (Literal[30]): option kind value (Multipath TCP)
+            kind: option kind value
+            dlen: length of remaining data
+            bits: 4-bit data
+
+        Keyword Args:
+            options: extracted TCP options
 
         Returns:
-            DataType_TCP_Opt_MP_FAIL: extracted Fast Close (``MP_FASTCLOSE``) option
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If the length is **NOT** 16.
 
         """
+        if dlen != 13:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+
         resv = self._read_fileng(1)  # pylint: disable=unused-variable
         rkey = self._read_fileng(8)
 
-        data = dict(
+        data = DataType_MPTCPFastclose(
+            kind=RegType_Option.Multipath_TCP,  # type: ignore[arg-type]
+            length=dlen + 3,
+            subtype=kind,
+            rkey=rkey,
+        )
+
+        return data
+
+    def _read_mode_fastopen(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_FastOpenCookie':
+        """Read Fast Open option.
+
+        Structure of TCP ``FASTOPEN`` [:rfc:`7413`]:
+
+        .. code-block:: text
+
+                                           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                           |      Kind     |    Length     |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                                                               |
+           ~                            Cookie                             ~
+           |                                                               |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+        Arguments:
+            kind: option kind value
+
+        Keyword Args:
+            options: extracted TCP options
+
+        Returns:
+            Parsed option data.
+
+        Raises:
+            ProtocolError: If length is **NOT** valid.
+
+        """
+        size = self._read_unpack(1)
+        if not (6 <= size <= 18) and size % 2 != 0:
+            raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
+        cookie = self._read_fileng(size - 2)
+
+        data = DataType_FastOpenCookie(
             kind=kind,
-            length=size + 1,
-            subtype=MPTCPOption(7),
-            fastclose=dict(
-                rkey=rkey,
-            ),
+            length=4,
+            cookie=cookie,
         )
 
         return data
