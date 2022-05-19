@@ -9,10 +9,19 @@ which is a base class for application layer protocols, eg.
 and etc.
 
 """
+from typing import TYPE_CHECKING, overload
+
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.misc.null import NoPayload
 from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import Any, BinaryIO, NoReturn, Optional
+
+    from typing_extensions import Literal
+
+    from pcapkit.corekit.infoclass import Info
 
 __all__ = ['Application']
 
@@ -25,7 +34,7 @@ class Application(Protocol):  # pylint: disable=abstract-method
     ##########################################################################
 
     #: Layer of protocol.
-    __layer__ = 'Application'
+    __layer__ = 'Application'  # type: Literal['Application']
 
     ##########################################################################
     # Properties.
@@ -33,33 +42,37 @@ class Application(Protocol):  # pylint: disable=abstract-method
 
     # protocol layer
     @property
-    def layer(self):
-        """Protocol layer.
-
-        :rtype: Literal['Application']
-        """
+    def layer(self) -> 'Literal["Application"]':
+        """Protocol layer."""
         return self.__layer__
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __post_init__(self, file=None, length=None, **kwargs):
+    @overload
+    def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
+    @overload
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...
+
+    def __post_init__(self, file: 'Optional[BinaryIO]' = None,
+                      length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
         Args:
-            file (Optional[io.BytesIO]): Source packet stream.
-            length (Optional[int]): Length of packet data.
+            file: Source packet stream.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction arguments, please refer to
+            :meth:`self.make <pcapkit.protocols.protocol.Protocol.make>`.
 
         """
         # call super post-init
-        super().__post_init__(file, length, **kwargs)
+        super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
         #: pcapkit.protocols.null.NoPayload: Payload of current instance.
         self._next = NoPayload()
@@ -67,7 +80,7 @@ class Application(Protocol):  # pylint: disable=abstract-method
         self._protos = ProtoChain(self.__class__, self.alias)
 
     @classmethod
-    def __index__(cls):  # pylint: disable=invalid-index-returned
+    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
         """Numeral registry index of the protocol.
 
         Raises:
@@ -80,7 +93,8 @@ class Application(Protocol):  # pylint: disable=abstract-method
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, dict_, proto=None, length=None):
+    def _decode_next_layer(self, dict_: 'Info', proto: 'Optional[int]' = None,
+                           length: 'Optional[int]' = None) -> 'NoReturn':
         """Decode next layer protocol.
 
         Raises:
@@ -89,7 +103,7 @@ class Application(Protocol):  # pylint: disable=abstract-method
         """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
 
-    def _import_next_layer(self, proto, length=None):
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None) -> 'NoReturn':
         """Import next layer extractor.
 
         Raises:
