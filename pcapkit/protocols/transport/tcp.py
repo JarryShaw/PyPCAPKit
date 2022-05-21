@@ -117,6 +117,17 @@ class TCP(Transport):
     # Defaults.
     ##########################################################################
 
+    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.link.Link._import_next_layer>`.
+    __proto__ = collections.defaultdict(
+        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        {
+            21: ('pcapkit.protocols.ftp', 'FTP'),    # FTP
+            80: ('pcapkit.protocols.http', 'HTTP'),  # HTTP
+        },
+    )
+
     #: DefaultDict[RegType_Option, str | OptionParser]: Option code to method
     #: mapping, c.f. :meth:`_read_tcp_options`. Method names are expected to be
     #: referred to the class by ``_read_mode_${name}``, and if such name not
@@ -133,9 +144,9 @@ class TCP(Transport):
             RegType_Option.SACK: 'sack',                               # [RFC 2018] SACK
             RegType_Option.Echo: 'echo',                               # [RFC 1072] Echo
             RegType_Option.Echo_Reply: 'echore',                       # [RFC 1072] Echo Reply
-            RegType_Option.Timestamp: 'ts',                            # [RFC 7323] Timestamps
+            RegType_Option.Timestamps: 'ts',                           # [RFC 7323] Timestamps
             RegType_Option.Partial_Order_Connection_Permitted: 'poc',  # [RFC 1693] POC Permitted
-            RegType_Option.Partial_Order_Connection_Profile: 'pocsp',  # [RFC 1693] POC-Serv Profile
+            RegType_Option.Partial_Order_Service_Profile: 'pocsp',     # [RFC 1693] POC-Serv Profile
             RegType_Option.CC: 'cc',                                   # [RFC 1644] Connection Count
             RegType_Option.CC_NEW: 'ccnew',                            # [RFC 1644] CC.NEW
             RegType_Option.CC_ECHO: 'ccecho',                          # [RFC 1644] CC.ECHO
@@ -219,13 +230,13 @@ class TCP(Transport):
             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_TCP: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:

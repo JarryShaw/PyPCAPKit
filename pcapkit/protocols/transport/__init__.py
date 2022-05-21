@@ -16,10 +16,9 @@ from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.protocols.transport.udp import UDP
 
 # Transport Layer Protocol Numbers
-from pcapkit.protocols.transport.transport import TP_PROTO
-
+from pcapkit.const.reg.transtype import TransType as TRANSTYPE
 
 __all__ = [
-    'TP_PROTO',     # Protocol Numbers
+    'TRANSTYPE',     # Protocol Numbers
     'TCP', 'UDP',   # Transport Layer Protocols
 ]

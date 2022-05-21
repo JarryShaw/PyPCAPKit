@@ -18,6 +18,7 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/User_Datagram_Protocol
 
 """
+import collections
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
@@ -39,6 +40,20 @@ class UDP(Transport):
     _info: 'DataType_UDP'
 
     ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
+    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.link.Link._import_next_layer>`.
+    __proto__ = collections.defaultdict(
+        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        {
+            80: ('pcapkit.protocols.http', 'HTTP'),  # HTTP
+        },
+    )
+
+    ##########################################################################
     # Properties.
     ##########################################################################
 
@@ -55,12 +70,12 @@ class UDP(Transport):
     @property
     def src(self) -> 'int':
         """Source port."""
-        return self._info.src
+        return self._info.srcport
 
     @property
     def dst(self) -> 'int':
         """Destination port."""
-        return self._info.dst
+        return self._info.dstport
 
     ##########################################################################
     # Methods.
@@ -86,13 +101,13 @@ class UDP(Transport):
            +---------------- ...
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_UDP: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -110,7 +125,7 @@ class UDP(Transport):
             checksum=_csum,
         )
 
-        return self._decode_next_layer(udp, None, udp.len - 8)
+        return self._decode_next_layer(udp, None, udp.len - 8)  # type: ignore[return-value]
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

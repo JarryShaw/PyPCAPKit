@@ -35,6 +35,7 @@ from pcapkit.protocols.data.transport.tcp import MPTCPPriority as TCP_MPTCPPrior
 from pcapkit.protocols.data.transport.tcp import MPTCPRemoveAddress as TCP_MPTCPRemoveAddress
 from pcapkit.protocols.data.transport.tcp import MPTCPUnknown as TCP_MPTCPUnknown
 from pcapkit.protocols.data.transport.tcp import NoOperation as TCP_NoOperation
+from pcapkit.protocols.data.transport.tcp import Option as TCP_Option
 from pcapkit.protocols.data.transport.tcp import \
     PartialOrderConnectionPermitted as TCP_PartialOrderConnectionPermitted
 from pcapkit.protocols.data.transport.tcp import \

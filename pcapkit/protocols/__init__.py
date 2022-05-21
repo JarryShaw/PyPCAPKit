@@ -27,7 +27,7 @@ from pcapkit.protocols.application.http import HTTP
 
 __all__ = [
     # Protocol Numbers
-    'LINKTYPE', 'ETHERTYPE', 'TP_PROTO',
+    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
 
     # PCAP Headers
     'Header', 'Frame',
