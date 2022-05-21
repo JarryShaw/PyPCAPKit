@@ -5,27 +5,39 @@
 :class:`~pcapkit.protocols.application.httpv1.HTTPv1`
 only, which implements extractor for Hypertext Transfer
 Protocol (HTTP/1.*) [*]_, whose structure is described
-as below::
+as below:
 
-    METHOD URL HTTP/VERSION\\r\\n :==: REQUEST LINE
-    <key> : <value>\\r\\n         :==: REQUEST HEADER
-    ............  (Ellipsis)      :==: REQUEST HEADER
-    \\r\\n                        :==: REQUEST SEPARATOR
-    <body>                        :==: REQUEST BODY (optional)
+.. code-block:: text
 
-    HTTP/VERSION CODE DESP \\r\\n :==: RESPONSE LINE
-    <key> : <value>\\r\\n         :==: RESPONSE HEADER
-    ............  (Ellipsis)      :==: RESPONSE HEADER
-    \\r\\n                        :==: RESPONSE SEPARATOR
-    <body>                        :==: RESPONSE BODY (optional)
+   METHOD URL HTTP/VERSION\\r\\n :==: REQUEST LINE
+   <key> : <value>\\r\\n         :==: REQUEST HEADER
+   ............  (Ellipsis)      :==: REQUEST HEADER
+   \\r\\n                        :==: REQUEST SEPARATOR
+   <body>                        :==: REQUEST BODY (optional)
+
+   HTTP/VERSION CODE DESP \\r\\n :==: RESPONSE LINE
+   <key> : <value>\\r\\n         :==: RESPONSE HEADER
+   ............  (Ellipsis)      :==: RESPONSE HEADER
+   \\r\\n                        :==: RESPONSE SEPARATOR
+   <body>                        :==: RESPONSE BODY (optional)
 
 .. [*] https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol
 
 """
 import re
+from typing import TYPE_CHECKING
 
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP
+from pcapkit.protocols.data.application.httpv1 import HTTP as DataType_HTTP, \
+    RequestHeader as DataType_RequestHeader, \
+    ResponseHeader as DataType_ResponseHeader, Header as DataType_Header
 from pcapkit.utilities.exceptions import ProtocolError
+
+if TYPE_CHECKING:
+    from typing import Any, Optional, NoReturn
+
+    from typing_extensions import Literal
 
 __all__ = ['HTTPv1']
 
@@ -47,6 +59,9 @@ _RE_STATUS = re.compile(rb'\d{3}')
 class HTTPv1(HTTP):
     """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
 
+    #: Parsed packet data.
+    _info: 'DataType_HTTP'
+
     ##########################################################################
     # Defaults.
     ##########################################################################
@@ -59,36 +74,40 @@ class HTTPv1(HTTP):
     ##########################################################################
 
     @property
-    def alias(self):
-        """Acronym of current protocol.
+    def alias(self) -> 'Literal["HTTP/0.9", "HTTP/1.0", "HTTP/1.1"]':
+        """Acronym of current protocol."""
+        return f'HTTP/{self.version}'  # type: ignore[return-value]
 
-        :rtype: Literal['HTTP/0.9', 'HTTP/1.0', 'HTTP/1.1']
-        """
-        return f'HTTP/{self._info.header[self._receipt].version}'  # pylint: disable=E1101
+    @property
+    def version(self) -> 'Literal["0.9", "1.0", "1.1"]':
+        """Version of current protocol."""
+        return self._info.receipt.version  # type: ignore[attr-defined]
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_HTTP':  # pylint: disable=unused-argument
         """Read Hypertext Transfer Protocol (HTTP/1.*).
 
-        Structure of HTTP/1.* packet [:rfc:`7230`]::
+        Structure of HTTP/1.* packet [:rfc:`7230`]:
 
-            HTTP-message    :==:    start-line
-                                    *( header-field CRLF )
-                                    CRLF
-                                    [ message-body ]
+        .. code-block:: text
+
+           HTTP-message    :==:    start-line
+                                   *( header-field CRLF )
+                                   CRLF
+                                   [ message-body ]
 
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_HTTP: Parsed packet data.
+            Parsed packet data.
 
         Raises:
             ProtocolError: If the packet is malformed.
@@ -103,64 +122,61 @@ class HTTPv1(HTTP):
         except ValueError:
             raise ProtocolError('HTTP: invalid format', quiet=True)
 
-        header_unpacked, http_receipt = self._read_http_header(header)
+        header_line, header_unpacked = self._read_http_header(header)
         body_unpacked = self._read_http_body(body) or None
 
-        http = dict(
-            receipt=http_receipt,
+        http = DataType_HTTP(
+            receipt=header_line,
             header=header_unpacked,
             body=body_unpacked,
-            raw=dict(
-                header=header,
-                body=body,
-                packet=self._read_packet(length),
-            ),
         )
-        self._receipt = http_receipt
+        self._receipt = header_line.type
 
         return http
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError
 
     @classmethod
-    def id(cls):
+    def id(cls) -> 'tuple[Literal["HTTPv1"]]':  # type: ignore[override]
         """Index ID of the protocol.
 
         Returns:
-            Literal['HTTPv1']: Index ID of the protocol.
+            Index ID of the protocol.
 
         """
-        return cls.__name__
+        return (cls.__name__,)  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.
     ##########################################################################
 
-    def _read_http_header(self, header):
+    def _read_http_header(self, header: 'bytes') -> 'tuple[DataType_Header, OrderedMultiDict[str, str]]':
         """Read HTTP/1.* header.
 
-        Structure of HTTP/1.* header [:rfc:`7230`]::
+        Structure of HTTP/1.* header [:rfc:`7230`]:
 
-            start-line      :==:    request-line / status-line
-            request-line    :==:    method SP request-target SP HTTP-version CRLF
-            status-line     :==:    HTTP-version SP status-code SP reason-phrase CRLF
-            header-field    :==:    field-name ":" OWS field-value OWS
+        .. code-block:: text
+
+           start-line      :==:    request-line / status-line
+           request-line    :==:    method SP request-target SP HTTP-version CRLF
+           status-line     :==:    HTTP-version SP status-code SP reason-phrase CRLF
+           header-field    :==:    field-name ":" OWS field-value OWS
 
         Args:
-            header (bytes): HTTP header data.
+            header: HTTP header data.
 
         Returns:
-            Union[DataType_HTTP_Request_Header, DataType_HTTP_Response_Header]: Parsed packet data.
+            Parsed packet data.
 
         Raises:
             ProtocolError: If the packet is malformed.
@@ -174,55 +190,49 @@ class HTTPv1(HTTP):
         except ValueError:
             raise ProtocolError('HTTP: invalid format', quiet=True)
 
+        if TYPE_CHECKING:
+            header_line: 'DataType_Header'
+
         match1 = re.match(_RE_METHOD, para1)
         match2 = re.match(_RE_VERSION, para3)
         match3 = re.match(_RE_VERSION, para1)
         match4 = re.match(_RE_STATUS, para2)
         if match1 and match2:
-            receipt = 'request'
-            header = dict(
-                request=dict(
-                    method=self.decode(para1),
-                    target=self.decode(para2),
-                    version=self.decode(match2.group('version')),
-                ),
+            header_line = DataType_RequestHeader(
+                type='request',
+                method=self.decode(para1),
+                uri=self.decode(para2),
+                version=self.decode(match2.group('version')),
             )
         elif match3 and match4:
-            receipt = 'response'
-            header = dict(
-                response=dict(
-                    version=self.decode(match3.group('version')),
-                    status=int(para2),
-                    phrase=self.decode(para3),
-                ),
+            header_line = DataType_ResponseHeader(
+                type='response',
+                version=self.decode(match3.group('version')),
+                status=int(para2),
+                message=self.decode(para3),
             )
         else:
             raise ProtocolError('HTTP: invalid format', quiet=True)
 
+        header_fields = OrderedMultiDict()  # type: OrderedMultiDict[str, str]
         try:
             for item in lists:
-                key = self.decode(item[0].strip()).replace(receipt, f'{receipt}_field')
+                key = self.decode(item[0].strip())
                 value = self.decode(item[1].strip())
-                if key in header:
-                    if isinstance(header[key], tuple):
-                        header[key] += (value,)
-                    else:
-                        header[key] = (header[key], value)
-                else:
-                    header[key] = value
+                header_fields.add(key, value)
         except IndexError:
             raise ProtocolError('HTTP: invalid format', quiet=True)
 
-        return header, receipt
+        return header_line, header_fields
 
-    def _read_http_body(self, body):  # pylint: disable=no-self-use
+    def _read_http_body(self, body: 'bytes') -> 'bytes':  # pylint: disable=no-self-use
         """Read HTTP/1.* body.
 
         Args:
-            body (bytes): HTTP body data.
+            body: HTTP body data.
 
         Returns:
-            str: Raw HTTP body.
+            Raw HTTP body.
 
         """
         return body
