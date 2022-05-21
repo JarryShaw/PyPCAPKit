@@ -9,7 +9,7 @@ in :pep:`557`.
 """
 import collections.abc
 import itertools
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.utilities.exceptions import KeyExists, UnsupportedCall
 
@@ -18,8 +18,10 @@ if TYPE_CHECKING:
 
 __all__ = ['Info']
 
+VT = TypeVar('VT')
 
-class Info(collections.abc.Mapping):
+
+class Info(collections.abc.Mapping[str, VT], Generic[VT]):
     """Turn dictionaries into :obj:`object` like instances.
 
     * :class:`Info` objects inherit from :obj:`dict` type
@@ -46,7 +48,7 @@ class Info(collections.abc.Mapping):
     #： List of builtin methods.
     __builtin__: 'set[str]'
 
-    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Info':  # pylint: disable=unused-argument
+    def __new__(cls, *args: 'VT', **kwargs: 'VT') -> 'Info':  # pylint: disable=unused-argument
         """Create a new instance.
 
         The class will try to automatically generate ``__init__`` method with
@@ -109,8 +111,8 @@ class Info(collections.abc.Mapping):
         self = super().__new__(cls)
         return self
 
-    def __update__(self, dict_: 'Optional[Mapping[str, Any] | Iterable[tuple[str, Any]]]' = None,
-                   **kwargs: 'Any') -> 'None':
+    def __update__(self, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
+                   **kwargs: 'VT') -> 'None':
         # NOTE: Keys with the same names as the class's builtin methods will be
         # renamed with the class name prefixed as mangled class variables
         # implicitly and internally. Such mapping information will be stored
@@ -175,19 +177,19 @@ class Info(collections.abc.Mapping):
         for key in self.__dict__:
             yield self.__map_reverse__.get(key, key)
 
-    def __getitem__(self, key: 'str') -> 'Any':
+    def __getitem__(self, key: 'str') -> 'VT':
         key = self.__map__.get(key, key)
         return self.__dict__[key]
 
-    def __setattr__(self, name: 'str', value: 'Any') -> 'NoReturn':
+    def __setattr__(self, name: 'str', value: 'VT') -> 'NoReturn':
         raise UnsupportedCall("can't set attribute")
 
     def __delattr__(self, name: 'str') -> 'NoReturn':
         raise UnsupportedCall("can't delete attribute")
 
     @classmethod
-    def from_dict(cls, dict_: 'Optional[Mapping[str, Any] | Iterable[tuple[str, Any]]]' = None,
-                  **kwargs: 'Any') -> 'Info':
+    def from_dict(cls, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
+                  **kwargs: 'VT') -> 'Info':
         """Create a new instance.
 
         * If ``dict_`` is present and has a ``.keys()`` method, then does:
@@ -208,7 +210,7 @@ class Info(collections.abc.Mapping):
         self.__update__(dict_, **kwargs)
         return self
 
-    def to_dict(self) -> 'dict[str, Any]':
+    def to_dict(self) -> 'dict[str, VT]':
         """Convert :class:`Info` into :obj:`dict`.
 
         Important:
