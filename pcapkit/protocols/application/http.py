@@ -15,10 +15,10 @@ import contextlib
 from typing import TYPE_CHECKING
 
 from pcapkit.protocols.application.application import Application
-from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import Any, NoReturn, Optional, Type
+    from typing import Any, Optional, Type
 
     from typing_extensions import Literal
 
@@ -41,19 +41,19 @@ class HTTP(Application):
     ##########################################################################
 
     @property
+    def alias(self) -> 'Literal["HTTP/0.9", "HTTP/1.0", "HTTP/1.1", "HTTP/2"]':
+        """Acronym of current protocol."""
+        return f'HTTP/{self.version}'  # type: ignore[return-value]
+
+    @property
     def name(self) -> 'Literal["Hypertext Transfer Protocol"]':
         """Name of current protocol."""
         return 'Hypertext Transfer Protocol'
 
     @property
-    def length(self) -> 'NoReturn':
-        """Header length of current protocol.
-
-        Raises:
-            UnsupportedCall: This protocol doesn't support :attr:`length`.
-
-        """
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'length'")
+    def length(self) -> 'int':
+        """Header length of current protocol."""
+        return self._length
 
     @property
     def version(self) -> 'Literal["0.9", "1.0", "1.1", "2"]':
@@ -101,6 +101,7 @@ class HTTP(Application):
 
         http = protocol(self._file, length, **kwargs)  # type: ignore[abstract]
         self._version = http.version  # type: ignore[attr-defined]
+        self._length = http.length
         return http.info
 
     def make(self, *, version: 'Literal[1, 2]', **kwargs: 'Any') -> 'bytes':  # type: ignore[override]
@@ -126,6 +127,7 @@ class HTTP(Application):
 
         http = protocol(**kwargs)  # type: ignore[abstract]
         self._version = http.version  # type: ignore[attr-defined]
+        self._length = http.length
         return http.data
 
     ##########################################################################
