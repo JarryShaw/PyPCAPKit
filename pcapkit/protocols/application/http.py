@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.corekit.infoclass import Info
+    from pcapkit.protocols.data.application.http import HTTP as DataType_HTTP
     from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['HTTP']
@@ -35,6 +35,9 @@ class HTTP(Application):
     - Hypertext Transfer Protocol version 2 (HTTP/2) [:rfc:`7540`]
 
     """
+
+    #: Parsed packet data.
+    _info: 'DataType_HTTP'
 
     ##########################################################################
     # Properties.
@@ -69,8 +72,7 @@ class HTTP(Application):
         """Index ID of the protocol."""
         return ('HTTPv1', 'HTTPv2')
 
-    def read(self, length: 'Optional[int]' = None, *, version: 'Optional[Literal[1, 2]]' = None,
-             **kwargs: 'Any') -> 'Info':
+    def read(self, length: 'Optional[int]' = None, *, version: 'Optional[Literal[1, 2]]' = None, **kwargs: 'Any') -> 'DataType_HTTP':
         """Read (parse) packet data.
 
         Args:
@@ -85,7 +87,7 @@ class HTTP(Application):
 
         """
         if TYPE_CHECKING:
-            protocol: 'Type[Protocol]'
+            protocol: 'Type[HTTP]'
 
         if length is None:
             length = len(self)
@@ -99,10 +101,10 @@ class HTTP(Application):
         else:
             raise ProtocolError(f"invalid HTTP version: {version}")
 
-        http = protocol(self._file, length, **kwargs)  # type: ignore[abstract]
-        self._version = http.version  # type: ignore[attr-defined]
+        http = protocol(self._file, length, **kwargs)
+        self._version = http.version
         self._length = http.length
-        return http.info
+        return http.info  # type: ignore[return-value]
 
     def make(self, *, version: 'Literal[1, 2]', **kwargs: 'Any') -> 'bytes':  # type: ignore[override]
         """Make (construct) packet data.
@@ -116,7 +118,7 @@ class HTTP(Application):
 
         """
         if TYPE_CHECKING:
-            protocol: 'Type[Protocol]'
+            protocol: 'Type[HTTP]'
 
         if version == 1:
             from pcapkit.protocols.application.httpv1 import HTTPv1 as protocol  # type: ignore[no-redef] # isort: skip
@@ -125,8 +127,8 @@ class HTTP(Application):
         else:
             raise ProtocolError(f"invalid HTTP version: {version}")
 
-        http = protocol(**kwargs)  # type: ignore[abstract]
-        self._version = http.version  # type: ignore[attr-defined]
+        http = protocol(**kwargs)
+        self._version = http.version
         self._length = http.length
         return http.data
 
