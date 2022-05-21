@@ -10,11 +10,20 @@ which implements extractor for File Transfer Protocol
 
 """
 import re
+from typing import TYPE_CHECKING
 
 from pcapkit.const.ftp.command import Command
 from pcapkit.const.ftp.return_code import ReturnCode
 from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.data.application.ftp import FTP as DataType_FTP
+from pcapkit.protocols.data.application.ftp import Request as DataType_Request
+from pcapkit.protocols.data.application.ftp import Response as DataType_Response
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
+
+if TYPE_CHECKING:
+    from typing import Any, NoReturn, Optional
+
+    from typing_extensions import Literal
 
 __all__ = ['FTP']
 
@@ -22,20 +31,20 @@ __all__ = ['FTP']
 class FTP(Application):
     """This class implements File Transfer Protocol."""
 
+    #: Parsed packet data.
+    _info: 'DataType_FTP'
+
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def name(self):
-        """Name of current protocol.
-
-        :rtype: Literal['File Transfer Protocol']
-        """
+    def name(self) -> 'Literal["File Transfer Protocol"]':
+        """Name of current protocol."""
         return 'File Transfer Protocol'
 
     @property
-    def length(self):
+    def length(self) -> 'NoReturn':
         """Header length of current protocol.
 
         Raises:
@@ -48,17 +57,17 @@ class FTP(Application):
     # Methods.
     ##########################################################################
 
-    def read(self, length=None, **kwargs):  # pylint: disable=unused-argument
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_FTP':  # pylint: disable=unused-argument
         """Read File Transfer Protocol (FTP).
 
         Args:
-            length (Optional[int]): Length of packet data.
+            length: Length of packet data.
 
         Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            Union[DataType_FTP_Request, DataType_FTP_Response]: Parsed packet data.
+            Parsed packet data.
 
         Raises:
             ProtocolError: If the packet is malformed.
@@ -72,6 +81,10 @@ class FTP(Application):
             raise ProtocolError('FTP: invalid format', quiet=True)
         text = self.decode(byte.strip())
 
+        if TYPE_CHECKING:
+            pref: 'int | str'
+            ftp: 'DataType_Request | DataType_Response'
+
         if re.match(r'^\d{3}', text):
             pref = int(text[:3])
             try:
@@ -81,7 +94,7 @@ class FTP(Application):
             suff = text[4:] or None
 
             code = ReturnCode.get(pref)
-            ftp = dict(
+            ftp = DataType_Response(
                 type='response',
                 code=code,
                 arg=suff,
@@ -95,8 +108,8 @@ class FTP(Application):
             else:
                 pref, suff = text, None
 
-            cmmd = Command.get(pref)
-            ftp = dict(
+            cmmd = Command[pref]
+            ftp = DataType_Request(
                 type='request',
                 command=cmmd,
                 arg=suff,
@@ -105,14 +118,14 @@ class FTP(Application):
 
         return ftp
 
-    def make(self, **kwargs):
+    def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
         Keyword Args:
-            **kwargs: Arbitrary keyword arguments.
+            Arbitrary keyword arguments.
 
         Returns:
-            bytes: Constructed packet data.
+            Constructed packet data.
 
         """
         raise NotImplementedError

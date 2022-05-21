@@ -29,7 +29,7 @@ CONF = {
 #: Command entry template.
 make = lambda cmmd, feat, desc, kind, conf, rfcs, cmmt: f'''\
     # {cmmt}
-    {cmmd}=Info(
+    {cmmd}=CommandType(
         name={cmmd!r},
         feat={feat!r},
         desc={desc!r},
@@ -45,15 +45,40 @@ LINE = lambda NAME, DOCS, INFO, MISS: f'''\
 # pylint: disable=line-too-long
 """{DOCS}"""
 
+from typing import TYPE_CHECKING
+
 from pcapkit.corekit.infoclass import Info
+
+if TYPE_CHECKING:
+    from typing import Optional
 
 __all__ = ['{NAME}']
 
 
-class defaultInfo(Info):
+class CommandType(Info):
+    """FTP command type."""
+
+    #: Name of command.
+    name: 'str'
+    #: Feature of command.
+    feat: 'Optional[str]'
+    #: Description of command.
+    desc: 'Optional[str]'
+    #: Type of command.
+    type: 'Optional[tuple[str, ...]]'
+    #: Conformance of command.
+    conf: 'Optional[str]'
+    #: Note of command.
+    note: 'Optional[tuple[str, ...]]'
+
+    if TYPE_CHECKING:
+        def __init__(self, name: 'str', feat: 'Optional[str]', desc: 'Optional[str]', type: 'Optional[tuple[str, ...]]', conf: 'Optional[str]', note: 'Optional[tuple[str, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+class defaultInfo(Info[CommandType]):
     """Extended :class:`~pcapkit.corekit.infoclass.Info` with default values."""
 
-    def __getitem__(self, key: 'str') -> 'Info':
+    def __getitem__(self, key: 'str') -> 'CommandType':
         """Missing keys as specified in :rfc:`3659`."""
         try:
             return super().__getitem__(key)
@@ -109,7 +134,7 @@ class Command(Vendor):
             cmmt = self.wrap_comment('%s %s' % (cmmd, ''.join(temp)))
 
             if cmmd == '-N/A-':
-                MISS = '\n'.ljust(25).join(("Info(name='%s' % key,",
+                MISS = '\n'.ljust(25).join(("CommandType(name='%s' % key,",
                                             f'feat={feat!r},',
                                             f'desc={desc!r},',
                                             f'type={kind!r},',

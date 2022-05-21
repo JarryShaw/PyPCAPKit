@@ -14,6 +14,9 @@ from pcapkit.protocols.data.internet import *
 # Transport Layer Protocols
 from pcapkit.protocols.data.transport import *
 
+# Application Layer Protocols
+from pcapkit.protocols.data.application import *
+
 # Utility Classes for Protocols
 from pcapkit.protocols.data.misc import *
 
@@ -124,6 +127,10 @@ __all__ = [
 
     # User Datagram Protocol
     'UDP',
+
+    # File Transfer Protocol
+    'FTP',
+    'FTP_Request', 'FTP_Response',
 
     # No Payload
     'NoPayload',

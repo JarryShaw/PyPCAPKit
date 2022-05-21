@@ -2,31 +2,56 @@
 # pylint: disable=line-too-long
 """FTP Command"""
 
+from typing import TYPE_CHECKING
+
 from pcapkit.corekit.infoclass import Info
+
+if TYPE_CHECKING:
+    from typing import Optional
 
 __all__ = ['Command']
 
 
-class defaultInfo(Info):
+class CommandType(Info):
+    """FTP command type."""
+
+    #: Name of command.
+    name: 'str'
+    #: Feature of command.
+    feat: 'Optional[str]'
+    #: Description of command.
+    desc: 'Optional[str]'
+    #: Type of command.
+    type: 'Optional[tuple[str, ...]]'
+    #: Conformance of command.
+    conf: 'Optional[str]'
+    #: Note of command.
+    note: 'Optional[tuple[str, ...]]'
+
+    if TYPE_CHECKING:
+        def __init__(self, name: 'str', feat: 'Optional[str]', desc: 'Optional[str]', type: 'Optional[tuple[str, ...]]', conf: 'Optional[str]', note: 'Optional[tuple[str, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
+
+
+class defaultInfo(Info[CommandType]):
     """Extended :class:`~pcapkit.corekit.infoclass.Info` with default values."""
 
-    def __getitem__(self, key: 'str') -> 'Info':
+    def __getitem__(self, key: 'str') -> 'CommandType':
         """Missing keys as specified in :rfc:`3659`."""
         try:
             return super().__getitem__(key)
         except KeyError:
-            return Info(name='%s' % key,
-                        feat='TVFS',
-                        desc='Trivial Virtual File Store',
-                        type=('parameter setting',),
-                        conf='optional',
-                        note=('RFC 3659',))
+            return CommandType(name='%s' % key,
+                               feat='TVFS',
+                               desc='Trivial Virtual File Store',
+                               type=('parameter setting',),
+                               conf='optional',
+                               note=('RFC 3659',))
 
 
 #: FTP Command
 Command = defaultInfo(
     # ABOR [:rfc:`959`]
-    ABOR=Info(
+    ABOR=CommandType(
         name='ABOR',
         feat='base',
         desc='Abort',
@@ -35,7 +60,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # ACCT [:rfc:`959`]
-    ACCT=Info(
+    ACCT=CommandType(
         name='ACCT',
         feat='base',
         desc='Account',
@@ -44,7 +69,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # ADAT [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
-    ADAT=Info(
+    ADAT=CommandType(
         name='ADAT',
         feat='secu',
         desc='Authentication/Security Data',
@@ -53,7 +78,7 @@ Command = defaultInfo(
         note=('RFC 2228', 'RFC 2773', 'RFC 4217'),
     ),
     # ALGS [:rfc:`6384`][Section 11]
-    ALGS=Info(
+    ALGS=CommandType(
         name='ALGS',
         feat=None,
         desc='FTP64 ALG status',
@@ -62,7 +87,7 @@ Command = defaultInfo(
         note=('RFC 6384',),
     ),
     # ALLO [:rfc:`959`]
-    ALLO=Info(
+    ALLO=CommandType(
         name='ALLO',
         feat='base',
         desc='Allocate',
@@ -71,7 +96,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # APPE [:rfc:`959`]
-    APPE=Info(
+    APPE=CommandType(
         name='APPE',
         feat='base',
         desc='Append (with create)',
@@ -80,7 +105,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # AUTH [2][:rfc:`2773`][:rfc:`4217`]
-    AUTH=Info(
+    AUTH=CommandType(
         name='AUTH',
         feat='AUTH',
         desc='Authentication/Security Mechanism',
@@ -89,7 +114,7 @@ Command = defaultInfo(
         note=('RFC 2773', 'RFC 4217'),
     ),
     # CCC [:rfc:`2228`]
-    CCC=Info(
+    CCC=CommandType(
         name='CCC',
         feat='secu',
         desc='Clear Command Channel',
@@ -98,7 +123,7 @@ Command = defaultInfo(
         note=('RFC 2228',),
     ),
     # CDUP [:rfc:`959`]
-    CDUP=Info(
+    CDUP=CommandType(
         name='CDUP',
         feat='base',
         desc='Change to Parent Directory',
@@ -107,7 +132,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # CONF [:rfc:`2228`]
-    CONF=Info(
+    CONF=CommandType(
         name='CONF',
         feat='secu',
         desc='Confidentiality Protected Command',
@@ -116,7 +141,7 @@ Command = defaultInfo(
         note=('RFC 2228',),
     ),
     # CWD [:rfc:`959`]
-    CWD=Info(
+    CWD=CommandType(
         name='CWD',
         feat='base',
         desc='Change Working Directory',
@@ -125,7 +150,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # DELE [:rfc:`959`]
-    DELE=Info(
+    DELE=CommandType(
         name='DELE',
         feat='base',
         desc='Delete File',
@@ -134,7 +159,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # ENC [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
-    ENC=Info(
+    ENC=CommandType(
         name='ENC',
         feat='secu',
         desc='Privacy Protected Command',
@@ -143,7 +168,7 @@ Command = defaultInfo(
         note=('RFC 2228', 'RFC 2773', 'RFC 4217'),
     ),
     # EPRT [:rfc:`2428`]
-    EPRT=Info(
+    EPRT=CommandType(
         name='EPRT',
         feat='nat6',
         desc='Extended Port',
@@ -152,7 +177,7 @@ Command = defaultInfo(
         note=('RFC 2428',),
     ),
     # EPSV [:rfc:`2428`]
-    EPSV=Info(
+    EPSV=CommandType(
         name='EPSV',
         feat='nat6',
         desc='Extended Passive Mode',
@@ -161,7 +186,7 @@ Command = defaultInfo(
         note=('RFC 2428',),
     ),
     # FEAT [:rfc:`2389`]
-    FEAT=Info(
+    FEAT=CommandType(
         name='FEAT',
         feat='feat',
         desc='Feature Negotiation',
@@ -170,7 +195,7 @@ Command = defaultInfo(
         note=('RFC 2389',),
     ),
     # HELP [:rfc:`959`]
-    HELP=Info(
+    HELP=CommandType(
         name='HELP',
         feat='base',
         desc='Help',
@@ -179,7 +204,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # HOST [:rfc:`7151`]
-    HOST=Info(
+    HOST=CommandType(
         name='HOST',
         feat='HOST',
         desc='Hostname',
@@ -188,7 +213,7 @@ Command = defaultInfo(
         note=('RFC 7151',),
     ),
     # LANG [:rfc:`2640`]
-    LANG=Info(
+    LANG=CommandType(
         name='LANG',
         feat='UTF8',
         desc='Language (for Server Messages)',
@@ -197,7 +222,7 @@ Command = defaultInfo(
         note=('RFC 2640',),
     ),
     # LIST [:rfc:`959`][:rfc:`1123`]
-    LIST=Info(
+    LIST=CommandType(
         name='LIST',
         feat='base',
         desc='List',
@@ -206,7 +231,7 @@ Command = defaultInfo(
         note=('RFC 959', 'RFC 1123'),
     ),
     # LPRT [:rfc:`1545`][:rfc:`1639`]
-    LPRT=Info(
+    LPRT=CommandType(
         name='LPRT',
         feat='hist',
         desc='Data Port',
@@ -215,7 +240,7 @@ Command = defaultInfo(
         note=('RFC 1545', 'RFC 1639'),
     ),
     # LPSV [:rfc:`1545`][:rfc:`1639`]
-    LPSV=Info(
+    LPSV=CommandType(
         name='LPSV',
         feat='hist',
         desc='Passive Mode',
@@ -224,7 +249,7 @@ Command = defaultInfo(
         note=('RFC 1545', 'RFC 1639'),
     ),
     # MDTM [:rfc:`3659`]
-    MDTM=Info(
+    MDTM=CommandType(
         name='MDTM',
         feat='MDTM',
         desc='File Modification Time',
@@ -233,7 +258,7 @@ Command = defaultInfo(
         note=('RFC 3659',),
     ),
     # MIC [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]
-    MIC=Info(
+    MIC=CommandType(
         name='MIC',
         feat='secu',
         desc='Integrity Protected Command',
@@ -242,7 +267,7 @@ Command = defaultInfo(
         note=('RFC 2228', 'RFC 2773', 'RFC 4217'),
     ),
     # MKD [:rfc:`959`]
-    MKD=Info(
+    MKD=CommandType(
         name='MKD',
         feat='base',
         desc='Make Directory',
@@ -251,7 +276,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # MLSD [:rfc:`3659`]
-    MLSD=Info(
+    MLSD=CommandType(
         name='MLSD',
         feat='MLST',
         desc='List Directory (for machine)',
@@ -260,7 +285,7 @@ Command = defaultInfo(
         note=('RFC 3659',),
     ),
     # MLST [:rfc:`3659`]
-    MLST=Info(
+    MLST=CommandType(
         name='MLST',
         feat='MLST',
         desc='List Single Object',
@@ -269,7 +294,7 @@ Command = defaultInfo(
         note=('RFC 3659',),
     ),
     # MODE [:rfc:`959`]
-    MODE=Info(
+    MODE=CommandType(
         name='MODE',
         feat='base',
         desc='Transfer Mode',
@@ -278,7 +303,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # NLST [:rfc:`959`][:rfc:`1123`]
-    NLST=Info(
+    NLST=CommandType(
         name='NLST',
         feat='base',
         desc='Name List',
@@ -287,7 +312,7 @@ Command = defaultInfo(
         note=('RFC 959', 'RFC 1123'),
     ),
     # NOOP [:rfc:`959`]
-    NOOP=Info(
+    NOOP=CommandType(
         name='NOOP',
         feat='base',
         desc='No-Op',
@@ -296,7 +321,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # OPTS [:rfc:`2389`]
-    OPTS=Info(
+    OPTS=CommandType(
         name='OPTS',
         feat='feat',
         desc='Options',
@@ -305,7 +330,7 @@ Command = defaultInfo(
         note=('RFC 2389',),
     ),
     # PASS [:rfc:`959`]
-    PASS=Info(
+    PASS=CommandType(
         name='PASS',
         feat='base',
         desc='Password',
@@ -314,7 +339,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # PASV [:rfc:`959`][:rfc:`1123`]
-    PASV=Info(
+    PASV=CommandType(
         name='PASV',
         feat='base',
         desc='Passive Mode',
@@ -323,7 +348,7 @@ Command = defaultInfo(
         note=('RFC 959', 'RFC 1123'),
     ),
     # PBSZ [:rfc:`4217`]
-    PBSZ=Info(
+    PBSZ=CommandType(
         name='PBSZ',
         feat='PBSZ',
         desc='Protection Buffer Size',
@@ -332,7 +357,7 @@ Command = defaultInfo(
         note=('RFC 4217',),
     ),
     # PORT [:rfc:`959`]
-    PORT=Info(
+    PORT=CommandType(
         name='PORT',
         feat='base',
         desc='Data Port',
@@ -341,7 +366,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # PROT [:rfc:`4217`]
-    PROT=Info(
+    PROT=CommandType(
         name='PROT',
         feat='PROT',
         desc='Data Channel Protection Level',
@@ -350,7 +375,7 @@ Command = defaultInfo(
         note=('RFC 4217',),
     ),
     # PWD [:rfc:`959`]
-    PWD=Info(
+    PWD=CommandType(
         name='PWD',
         feat='base',
         desc='Print Directory',
@@ -359,7 +384,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # QUIT [:rfc:`959`]
-    QUIT=Info(
+    QUIT=CommandType(
         name='QUIT',
         feat='base',
         desc='Logout',
@@ -368,7 +393,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # REIN [:rfc:`959`]
-    REIN=Info(
+    REIN=CommandType(
         name='REIN',
         feat='base',
         desc='Reinitialize',
@@ -377,7 +402,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # REST [3][:rfc:`3659`]
-    REST=Info(
+    REST=CommandType(
         name='REST',
         feat='REST',
         desc='Restart (for STREAM mode)',
@@ -386,7 +411,7 @@ Command = defaultInfo(
         note=('RFC 3659',),
     ),
     # RETR [:rfc:`959`]
-    RETR=Info(
+    RETR=CommandType(
         name='RETR',
         feat='base',
         desc='Retrieve',
@@ -395,7 +420,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # RMD [:rfc:`959`]
-    RMD=Info(
+    RMD=CommandType(
         name='RMD',
         feat='base',
         desc='Remove Directory',
@@ -404,7 +429,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # RNFR [:rfc:`959`]
-    RNFR=Info(
+    RNFR=CommandType(
         name='RNFR',
         feat='base',
         desc='Rename From',
@@ -413,7 +438,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # RNTO [:rfc:`959`]
-    RNTO=Info(
+    RNTO=CommandType(
         name='RNTO',
         feat='base',
         desc='Rename From',
@@ -422,7 +447,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # SITE [:rfc:`959`][:rfc:`1123`]
-    SITE=Info(
+    SITE=CommandType(
         name='SITE',
         feat='base',
         desc='Site Parameters',
@@ -431,7 +456,7 @@ Command = defaultInfo(
         note=('RFC 959', 'RFC 1123'),
     ),
     # SIZE [:rfc:`3659`]
-    SIZE=Info(
+    SIZE=CommandType(
         name='SIZE',
         feat='SIZE',
         desc='File Size',
@@ -440,7 +465,7 @@ Command = defaultInfo(
         note=('RFC 3659',),
     ),
     # SMNT [:rfc:`959`]
-    SMNT=Info(
+    SMNT=CommandType(
         name='SMNT',
         feat='base',
         desc='Structure Mount',
@@ -449,7 +474,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # STAT [:rfc:`959`]
-    STAT=Info(
+    STAT=CommandType(
         name='STAT',
         feat='base',
         desc='Status',
@@ -458,7 +483,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # STOR [:rfc:`959`]
-    STOR=Info(
+    STOR=CommandType(
         name='STOR',
         feat='base',
         desc='Store',
@@ -467,7 +492,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # STOU [:rfc:`959`][:rfc:`1123`]
-    STOU=Info(
+    STOU=CommandType(
         name='STOU',
         feat='base',
         desc='Store Unique',
@@ -476,7 +501,7 @@ Command = defaultInfo(
         note=('RFC 959', 'RFC 1123'),
     ),
     # STRU [:rfc:`959`]
-    STRU=Info(
+    STRU=CommandType(
         name='STRU',
         feat='base',
         desc='File Structure',
@@ -485,7 +510,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # SYST [:rfc:`959`]
-    SYST=Info(
+    SYST=CommandType(
         name='SYST',
         feat='base',
         desc='System',
@@ -494,7 +519,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # TYPE [4][:rfc:`959`]
-    TYPE=Info(
+    TYPE=CommandType(
         name='TYPE',
         feat='base',
         desc='Representation Type',
@@ -503,7 +528,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # USER [:rfc:`959`]
-    USER=Info(
+    USER=CommandType(
         name='USER',
         feat='base',
         desc='User Name',
@@ -512,7 +537,7 @@ Command = defaultInfo(
         note=('RFC 959',),
     ),
     # XCUP [:rfc:`775`][:rfc:`1123`]
-    XCUP=Info(
+    XCUP=CommandType(
         name='XCUP',
         feat='hist',
         desc=None,
@@ -521,7 +546,7 @@ Command = defaultInfo(
         note=('RFC 775', 'RFC 1123'),
     ),
     # XCWD [:rfc:`775`][:rfc:`1123`]
-    XCWD=Info(
+    XCWD=CommandType(
         name='XCWD',
         feat='hist',
         desc=None,
@@ -530,7 +555,7 @@ Command = defaultInfo(
         note=('RFC 775', 'RFC 1123'),
     ),
     # XMKD [:rfc:`775`][:rfc:`1123`]
-    XMKD=Info(
+    XMKD=CommandType(
         name='XMKD',
         feat='hist',
         desc=None,
@@ -539,7 +564,7 @@ Command = defaultInfo(
         note=('RFC 775', 'RFC 1123'),
     ),
     # XPWD [:rfc:`775`][:rfc:`1123`]
-    XPWD=Info(
+    XPWD=CommandType(
         name='XPWD',
         feat='hist',
         desc=None,
@@ -548,7 +573,7 @@ Command = defaultInfo(
         note=('RFC 775', 'RFC 1123'),
     ),
     # XRMD [:rfc:`775`][:rfc:`1123`]
-    XRMD=Info(
+    XRMD=CommandType(
         name='XRMD',
         feat='hist',
         desc=None,
