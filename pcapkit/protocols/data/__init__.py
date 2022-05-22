@@ -132,6 +132,23 @@ __all__ = [
     'FTP',
     'FTP_Request', 'FTP_Response',
 
+    # Hypertext Transfer Protocol
+    'HTTP',
+
+    # Hypertext Transfer Protocol (HTTP/1.*)
+    'HTTPv1',
+    'HTTPv1_Header',
+    'HTTPv1_RequestHeader', 'HTTPv1_ResponseHeader',
+
+    # Hypertext Transfer Protocol (HTTP/2)
+    'HTTPv2',
+    'HTTPv2_Flags',
+    'HTTPv2_DataFrameFlags', 'HTTPv2_HeadersFrameFlags', 'HTTPv2_SettingsFrameFlags',
+    'HTTPv2_PushPromiseFrameFlags', 'HTTPv2_PingFrameFlags', 'HTTPv2_ContinuationFrameFlags',
+    'HTTPv2_UnassignedFrame', 'HTTPv2_DataFrame', 'HTTPv2_HeadersFrame', 'HTTPv2_PriorityFrame',
+    'HTTPv2_RstStreamFrame', 'HTTPv2_SettingsFrame', 'HTTPv2_PushPromiseFrame', 'HTTPv2_PingFrame',
+    'HTTPv2_GoawayFrame', 'HTTPv2_WindowUpdateFrame', 'HTTPv2_ContinuationFrame',
+
     # No Payload
     'NoPayload',
 
