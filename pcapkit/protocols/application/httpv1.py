@@ -29,13 +29,14 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP
-from pcapkit.protocols.data.application.httpv1 import HTTP as DataType_HTTP, \
-    RequestHeader as DataType_RequestHeader, \
-    ResponseHeader as DataType_ResponseHeader, Header as DataType_Header
+from pcapkit.protocols.data.application.httpv1 import HTTP as DataType_HTTP
+from pcapkit.protocols.data.application.httpv1 import Header as DataType_Header
+from pcapkit.protocols.data.application.httpv1 import RequestHeader as DataType_RequestHeader
+from pcapkit.protocols.data.application.httpv1 import ResponseHeader as DataType_ResponseHeader
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
-    from typing import Any, Optional, NoReturn
+    from typing import Any, NoReturn, Optional
 
     from typing_extensions import Literal
 

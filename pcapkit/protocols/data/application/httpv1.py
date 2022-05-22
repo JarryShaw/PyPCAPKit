@@ -2,8 +2,8 @@
 """data model for HTTP/1.* protocol"""
 
 from typing import TYPE_CHECKING
-from pcapkit.corekit.infoclass import Info
 
+from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.data.application.http import HTTP as DataType_HTTP
 
 if TYPE_CHECKING:
