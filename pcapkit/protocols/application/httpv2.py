@@ -60,7 +60,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    FrameParser = Callable[[RegType_Frame, int, str, int], DataType_HTTP]
+    FrameParser = Callable[['HTTPv2', RegType_Frame, int, str, int], DataType_HTTP]
 
 __all__ = ['HTTPv2']
 
@@ -166,10 +166,10 @@ class HTTPv2(HTTP):
         name = self.__frame__[http_type]  # type: str | FrameParser
         if isinstance(name, str):
             meth_name = f'_read_http_{name}'
-            meth = getattr(self, meth_name, self._read_http_none)  # type: FrameParser
+            meth = getattr(self, meth_name, self._read_http_none)  # type: Callable[[RegType_Frame, int, str, int], DataType_HTTP]
+            http = meth(http_type, length, _flag, http_sid)
         else:
-            meth = name
-        http = meth(self, http_type, length, _flag, http_sid)  # type: ignore[call-arg,arg-type]
+            http = name(self, http_type, length, _flag, http_sid)
 
         return http
 

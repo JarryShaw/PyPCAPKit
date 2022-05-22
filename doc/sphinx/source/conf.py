@@ -14,11 +14,13 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import datetime
+
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyPCAPKit'
-copyright = '2018-2020, Jarry Shaw'  # pylint: disable=redefined-builtin
+copyright = f'2018-{datetime.date.today().year}, Jarry Shaw'  # pylint: disable=redefined-builtin
 author = 'Jarry Shaw'
 
 # The full version, including alpha/beta/rc tags

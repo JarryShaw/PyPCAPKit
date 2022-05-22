@@ -39,11 +39,11 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.corekit.infoclass import Info
     from pcapkit.corekit.protochain import ProtoChain
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.protocols.data.internet.ipv6_route import RoutingType as DataType_RoutingType
 
-    TypeParser = Callable[[int], Info]
+    TypeParser = Callable[['IPv6_Route', int], DataType_RoutingType]
 
 __all__ = ['IPv6_Route']
 
@@ -180,14 +180,11 @@ class IPv6_Route(Internet):
             _name = self.__routing__[ipv6_route.type]  # type: str | TypeParser
             if isinstance(_name, str):
                 _name = f'_read_data_type_{_name.lower()}'
-                _meth = getattr(self, _name, self._read_data_type_none)  # type: TypeParser
+                _meth = getattr(self, _name, self._read_data_type_none)  # type: Callable[[int], DataType_RoutingType]
+                _data = _meth(_dlen)
             else:
-                _meth = _name
-            _data = _meth(self, _dlen)  # type: ignore[call-arg,arg-type]
-
-            ipv6_route.__update__({
-                'data': _data,
-            })
+                _data = _name(self, _dlen)
+            ipv6_route.__update__(**_data)
 
         if extension:
             return ipv6_route
@@ -206,7 +203,7 @@ class IPv6_Route(Internet):
         raise NotImplementedError
 
     @classmethod
-    def register_type(cls, code: 'RegType_Routing', meth: 'str | TypeParser') -> 'None':
+    def register_routing(cls, code: 'RegType_Routing', meth: 'str | TypeParser') -> 'None':
         """Register an routing data parser.
 
         Args:
@@ -352,7 +349,7 @@ class IPv6_Route(Internet):
         _resv = self._read_fileng(4)
         _addr = []  # type: list[IPv6Address]
         for _ in range((length - 4) // 16):
-            _addr.append(ipaddress.ip_address(self._read_fileng(16)))
+            _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
 
         data = DataType_SourceRoute(
             ip=tuple(_addr),
@@ -398,7 +395,7 @@ class IPv6_Route(Internet):
         _home = self._read_fileng(16)
 
         data = DataType_Type2(
-            ip=ipaddress.ip_address(_home),
+            ip=ipaddress.ip_address(_home),  # type: ignore[arg-type]  # type: ignore[arg-type]
         )
 
         return data
@@ -447,8 +444,8 @@ class IPv6_Route(Internet):
 
         _addr = []  # type: list[IPv6Address]
         for _ in range(((length - 4) - _elen - _plen) // _ilen):
-            _addr.append(ipaddress.ip_address(self._read_fileng(_ilen)))
-        _addr.append(ipaddress.ip_address(self._read_fileng(_elen)))
+            _addr.append(ipaddress.ip_address(self._read_fileng(_ilen)))  # type: ignore[arg-type]
+        _addr.append(ipaddress.ip_address(self._read_fileng(_elen)))  # type: ignore[arg-type]
 
         _pads = self._read_fileng(_plen)
 

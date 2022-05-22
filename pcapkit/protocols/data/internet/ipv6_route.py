@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 __all__ = [
     'IPv6_Route',
 
+    'RoutingType',
     'UnknownType', 'SourceRoute', 'Type2', 'RPL',
 ]
 
@@ -31,13 +32,14 @@ class IPv6_Route(Info):
     seg_left: 'int'
 
     if TYPE_CHECKING:
-        #: Type-specific data.
-        data: 'UnknownType'
-
         def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int'): ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
-class UnknownType(Info):
+class RoutingType(Info):
+    """Data model for Routing Type."""
+
+
+class UnknownType(RoutingType):
     """Data model for IPv6-Route unknown type."""
 
     #: Data.
@@ -47,7 +49,7 @@ class UnknownType(Info):
         def __init__(self, data: 'bytes') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
-class SourceRoute(Info):
+class SourceRoute(RoutingType):
     """Data model for IPv6-Route Source Route data type."""
 
     #: Source addresses.
@@ -57,7 +59,7 @@ class SourceRoute(Info):
         def __init__(self, ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
-class Type2(Info):
+class Type2(RoutingType):
     """Data model for IPv6-Route Type 2 data type."""
 
     #: Address.
@@ -67,7 +69,7 @@ class Type2(Info):
         def __init__(self, ip: 'IPv6Address') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
-class RPL(Info):
+class RPL(RoutingType):
     """Data model for RPL Source data type."""
 
     #: CmprI.

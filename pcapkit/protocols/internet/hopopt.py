@@ -69,7 +69,7 @@ if TYPE_CHECKING:
     from pcapkit.protocols.protocol import Protocol
 
     Option = OrderedMultiDict[RegType_Option, DataType_Option]
-    OptionParser = Callable[[RegType_Option, int, bool, NamedArg(Option, 'options')], DataType_Option]
+    OptionParser = Callable[['HOPOPT', RegType_Option, int, bool, NamedArg(Option, 'options')], DataType_Option]
 
 __all__ = ['HOPOPT']
 
@@ -330,10 +330,10 @@ class HOPOPT(Internet):
             name = self.__option__[kind]  # type: str | OptionParser
             if isinstance(name, str):
                 meth_name = f'_read_opt_{kind.name.lower()}'
-                meth = getattr(self, meth_name, self._read_opt_none)  # type: OptionParser
+                meth = getattr(self, meth_name, self._read_opt_none)  # type: Callable[[RegType_Option, int, bool, NamedArg(Option, 'options')], DataType_Option]
+                data = meth(kind, acts, cflg, options=options)
             else:
-                meth = name
-            data = meth(self, kind, acts, cflg, options=options)  # type: ignore[arg-type,misc]
+                data = name(self, kind, acts, cflg, options=options)
 
             # record option data
             counter += data.length
@@ -1180,7 +1180,7 @@ class HOPOPT(Internet):
             action=acts,
             change=cflg,
             length=_size + 2,
-            address=ipaddress.ip_address(_addr),
+            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
         )
 
         return opt

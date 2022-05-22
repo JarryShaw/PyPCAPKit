@@ -100,8 +100,8 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.transport.tcp import Option as DataType_Option
 
     Option = OrderedMultiDict[RegType_Option, DataType_Option]
-    OptionParser = Callable[[RegType_Option, NamedArg(Option, 'options')], DataType_Option]
-    MPOptionParser = Callable[[RegType_MPTCPOption, int, str, NamedArg(Option, 'options')], DataType_MPTCP]
+    OptionParser = Callable[['TCP', RegType_Option, NamedArg(Option, 'options')], DataType_Option]
+    MPOptionParser = Callable[['TCP', RegType_MPTCPOption, int, str, NamedArg(Option, 'options')], DataType_MPTCP]
 
 
 __all__ = ['TCP']
@@ -376,10 +376,10 @@ class TCP(Transport):
             name = self.__option__[code]  # type: str | OptionParser
             if isinstance(name, str):
                 meth_name = f'_read_mode_{name}'
-                meth = getattr(self, meth_name, self._read_mode_donone)  # type: OptionParser
+                meth = getattr(self, meth_name, self._read_mode_donone)  # type: Callable[[RegType_Option, NamedArg(Option, 'options')], DataType_Option]
+                data = meth(kind, options=options)
             else:
-                meth = name
-            data = meth(self, kind, options=options)  # type: ignore[arg-type,misc]
+                data = name(self, kind, options=options)
 
             # record option data
             counter += data.length
@@ -1210,10 +1210,10 @@ class TCP(Transport):
         name = self.__mp_option__[subt]  # type: str | MPOptionParser
         if isinstance(name, str):
             meth_name = f'_read_mptcp_{name}'
-            meth = getattr(self, meth_name, cast('MPOptionParser', self._read_mptcp_unknown))  # type: MPOptionParser
+            meth = getattr(self, meth_name, self._read_mptcp_unknown)  # type: Callable[[RegType_MPTCPOption, int, str, NamedArg(Option, 'options')], DataType_MPTCP]
+            data = meth(subtype, dlen, bits, options=options)
         else:
-            meth = name
-        data = meth(subtype, dlen, bits, options=options)
+            data = name(self, subtype, dlen, bits, options=options)
 
         return data
 
