@@ -30,7 +30,8 @@ from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.protocol import Packet as DataType_Packet
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
-from pcapkit.utilities.exceptions import ProtocolNotFound, ProtocolNotImplemented, StructError
+from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, StructError,
+                                          UnsupportedCall)
 from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
@@ -135,7 +136,13 @@ class Protocol(metaclass=abc.ABCMeta):
     @cached_property
     def packet(self) -> 'DataType_Packet':
         """DataType_Packet data of the protocol."""
-        return self._read_packet(header=self.length)
+        try:
+            return self._read_packet(header=self.length)
+        except UnsupportedCall:
+            return DataType_Packet(
+                header=b'',
+                payload=self._read_packet(),
+            )
 
     ##########################################################################
     # Methods.
