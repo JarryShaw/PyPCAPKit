@@ -751,7 +751,7 @@ class Extractor:
                 return self._read_frame()
             except (EOFError, StopIteration) as error:
                 self._cleanup()
-                raise error from None
+                raise error
         raise CallableError("'Extractor(auto=True)' object is not callable")
 
     def __enter__(self):

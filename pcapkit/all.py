@@ -37,11 +37,10 @@ __all__ = [
 
     # pcapkit.foundation
     'Extractor',                                            # Extraction
-    'analyse2',                                             # Analysis
     'TraceFlow',                                            # Trace Flow
 
     # pcapkit.interface
-    'extract', 'analyse', 'reassemble', 'trace',            # Interface Functions
+    'extract', 'reassemble', 'trace',                       # Interface Functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',

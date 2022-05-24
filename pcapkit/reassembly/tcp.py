@@ -193,7 +193,6 @@ import io
 import sys
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.foundation.analysis import analyse
 from pcapkit.reassembly.reassembly import Reassembly
 
 __all__ = ['TCP_Reassembly']

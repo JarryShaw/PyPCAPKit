@@ -10,7 +10,6 @@ foundation classes from :mod:`pcapkit.foundation`.
 import io
 import sys
 
-from pcapkit.foundation.analysis import analyse as analyse2
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.protocols.protocol import Protocol
@@ -21,7 +20,7 @@ from pcapkit.utilities.exceptions import FormatError
 from pcapkit.utilities.validations import bool_check, int_check, io_check, str_check
 
 __all__ = [
-    'extract', 'analyse', 'reassemble', 'trace',            # interface functions
+    'extract', 'reassemble', 'trace',                       # interface functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
     'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',
@@ -112,26 +111,6 @@ def extract(fin=None, fout=None, format=None,                           # basic 
                      ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, strict=strict,
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond)
-
-
-def analyse(file, length=None):
-    """Analyse application layer packets.
-
-    Arguments:
-        file (Union[bytes, io.BytesIO]): packet to be analysed
-        length (Optional[int]): length of the analysing packet
-
-    Returns:
-        Analysis: an :class:`~pcapkit.foundation.analysis.Analysis` object
-
-    """
-    if isinstance(file, bytes):
-        file = io.BytesIO(file)
-
-    io_check(file)
-    int_check(length or sys.maxsize)
-
-    return analyse2(file, length)
 
 
 def reassemble(protocol, strict=False):

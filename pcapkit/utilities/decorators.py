@@ -16,7 +16,7 @@ from pcapkit.utilities.logging import logger
 
 ###############################################################################
 # from pcapkit.foundation.analysis import analyse
-# from pcapkit.protocols.raw import Raw
+# from pcapkit.protocols.misc.raw import Raw
 ###############################################################################
 
 __all__ = ['seekset', 'seekset_ng', 'beholder', 'beholder_ng']
@@ -94,7 +94,7 @@ def beholder(func):
     :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`, then
     try to call the decorated function. Should any exception raised, it will
     re-parse the :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`
-    as :class:`~pcapkit.protocols.raw.Raw` protocol.
+    as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.
 
     Note:
         The decorated function should have following signature::
@@ -110,7 +110,7 @@ def beholder(func):
     def behold(self, proto, length, *args, **kwargs):
         seek_cur = self._file.tell()
         try:
-            return func(proto, length, *args, **kwargs)
+            return func(self, proto, length, *args, **kwargs)
         except Exception as exc:
             from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel
             error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
@@ -133,7 +133,7 @@ def beholder_ng(func):
 
     This decorate first keep the current offset of ``file``, then try to call
     the decorated function. Should any exception raised, it will re-parse the
-    ``file`` as :class:`~pcapkit.protocols.raw.Raw` protocol.
+    ``file`` as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.
 
     Note:
         The decorated function should have following signature::

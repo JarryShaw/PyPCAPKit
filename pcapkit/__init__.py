@@ -114,7 +114,7 @@ from pcapkit.protocols.transport.udp import UDP
 from pcapkit.protocols.application.http import HTTP
 
 __all__ = [
-    'extract', 'analyse', 'reassemble', 'trace',            # Interface Functions
+    'extract', 'reassemble', 'trace',                       # Interface Functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',

@@ -270,7 +270,7 @@ class TraceFlow:
             if ext is None:
                 warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
-                raise FileExists(*error.args).with_traceback(error.__traceback__) from None
+                raise FileExists(*error.args).with_traceback(error.__traceback__)
 
         class DictDumper(output):  # type: ignore[valid-type,misc]
             """Customised :class:`~dictdumper.dumper.Dumper` object."""
