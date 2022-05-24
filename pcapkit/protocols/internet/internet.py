@@ -9,11 +9,11 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
 """
 import collections
 import importlib
-from typing import TYPE_CHECKING, cast, Generic
+from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import Protocol, PT
+from pcapkit.protocols.protocol import PT, Protocol
 from pcapkit.utilities.decorators import beholder
 
 if TYPE_CHECKING:
@@ -78,7 +78,7 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.link.Link._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
             RegType_TransType.HOPOPT:          ('pcapkit.protocols.internet.hopopt',     'HOPOPT'),
             RegType_TransType.IPv4:            ('pcapkit.protocols.internet.ipv4',       'IPv4'),

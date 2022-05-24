@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """raw packet data
 
-:mod:`pcapkit.protocols.raw` contains
-:class:`~pcapkit.protocols.raw.Raw` only, which implements
+:mod:`pcapkit.protocols.misc.raw` contains
+:class:`~pcapkit.protocols.misc.raw.Raw` only, which implements
 extractor for unknown protocol, and constructs a
 :class:`~pcapkit.protocols.protocol.Protocol` like object.
 

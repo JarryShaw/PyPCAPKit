@@ -14,8 +14,8 @@ Security (IPsec) protocol family [*]_, eg.
 """
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.protocols.protocol import PT
 from pcapkit.protocols.internet.internet import Internet
+from pcapkit.protocols.protocol import PT
 
 if TYPE_CHECKING:
     from typing_extensions import Literal

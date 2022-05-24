@@ -11,7 +11,7 @@ import collections
 from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
-from pcapkit.protocols.protocol import Protocol, PT
+from pcapkit.protocols.protocol import PT, Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -60,7 +60,7 @@ class Link(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.link.link.Link._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
             RegType_EtherType.Address_Resolution_Protocol:         ('pcapkit.protocols.link.arp',      'ARP'),
             RegType_EtherType.Reverse_Address_Resolution_Protocol: ('pcapkit.protocols.link.rarp',     'RARP'),

@@ -14,8 +14,9 @@ and :class:`HTTP/2 <pcapkit.protocols.application.application.httpv2>`.
 import contextlib
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.protocols.protocol import PT
 from pcapkit.protocols.application.application import Application
+from pcapkit.protocols.data.application.http import HTTP as DataType_HTTP
+from pcapkit.protocols.protocol import PT
 from pcapkit.utilities.exceptions import ProtocolError
 
 if TYPE_CHECKING:
@@ -23,7 +24,6 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.protocols.data.application.http import HTTP as DataType_HTTP
     from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['HTTP']

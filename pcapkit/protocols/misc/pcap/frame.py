@@ -74,7 +74,7 @@ class Frame(Protocol[DataType_Frame]):
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
             RegType_LinkType.ETHERNET: ('pcapkit.protocols.link', 'Ethernet'),
             RegType_LinkType.IPV4:     ('pcapkit.protocols.internet', 'IPv4'),

@@ -10,7 +10,7 @@ which is a base class for transport layer protocols, eg.
 """
 from typing import TYPE_CHECKING, Generic
 
-from pcapkit.protocols.protocol import Protocol, PT
+from pcapkit.protocols.protocol import PT, Protocol
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:

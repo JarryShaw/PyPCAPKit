@@ -20,7 +20,7 @@ import string
 import struct
 import textwrap
 import urllib.parse
-from typing import TYPE_CHECKING, cast, overload, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
 
 import aenum
 import chardet
@@ -66,7 +66,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     #: and ``Application``. For example, the layer of
     #: :class:`~pcapkit.protocols.link.Ethernet` is ``Link``. However, certain
     #: protocols are not in any layer, such as
-    # :class:`~pcapkit.protocols.raw.Raw`, and thus its layer is :obj:`None`.
+    # :class:`~pcapkit.protocols.misc.raw.Raw`, and thus its layer is :obj:`None`.
     __layer__: 'Optional[Literal["Link", "Internet", "Transport", "Application"]]' = None
 
     #: Protocol index mapping for decoding next layer, c.f.
@@ -74,7 +74,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: The values should be a tuple representing the module name and class name.
     __proto__: 'DefaultDict[int, tuple[str, str]]' = collections.defaultdict(
-        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
     )
 
     ##########################################################################

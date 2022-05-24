@@ -162,7 +162,7 @@ class Protocol(builtins.object)
 
 > described in [`src/protocols/raw.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/raw.py)
 
-&emsp; `pcapkit.protocols.raw` contains `Raw` only, which implements extractor for unknown protocol, and constructs a [`Protocol`](#protocol) like object.
+&emsp; `pcapkit.protocols.misc.raw` contains `Raw` only, which implements extractor for unknown protocol, and constructs a [`Protocol`](#protocol) like object.
 
 ```python
 class Raw(pcapkit.protocols.protocol.Protocol)

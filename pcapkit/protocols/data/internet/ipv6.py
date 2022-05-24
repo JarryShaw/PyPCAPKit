@@ -58,7 +58,7 @@ class IPv6(Info):
         raw_len: 'int'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
-        self = super().__new__(*args, **kwargs)
+        self = super().__new__(cls, *args, **kwargs)
 
         # NOTE: We cannot define ``class`` due to preserved keyword conflict.
         # Thus, we directly inject the information into the annotations.

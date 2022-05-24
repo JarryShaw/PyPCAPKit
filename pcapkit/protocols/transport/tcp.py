@@ -118,7 +118,7 @@ class TCP(Transport[DataType_TCP]):
     #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.link.Link._import_next_layer>`.
     __proto__ = collections.defaultdict(
-        lambda: ('pcapkit.protocols.raw', 'Raw'),
+        lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
             21: ('pcapkit.protocols.ftp', 'FTP'),    # FTP
             80: ('pcapkit.protocols.http', 'HTTP'),  # HTTP

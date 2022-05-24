@@ -72,7 +72,7 @@ class ToSField(Info):
     ecn: 'ToSECN'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'ToSField':
-        self = super().__new__(*args, **kwargs)
+        self = super().__new__(cls, *args, **kwargs)
 
         # NOTE: We cannot define ``del`` due to preserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
@@ -149,7 +149,7 @@ class OptionType(Info):
     number: 'int'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'OptionType':
-        self = super().__new__(*args, **kwargs)
+        self = super().__new__(cls, *args, **kwargs)
 
         # NOTE: We cannot define ``class`` due to preserved keyword conflict.
         # Thus, we directly inject the information into the annotations.
@@ -322,7 +322,7 @@ class TROption(Option):
     originator: 'IPv4Address'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'TROption':
-        self = super().__new__(*args, **kwargs)
+        self = super().__new__(cls, *args, **kwargs)
 
         # NOTE: We cannot define ``return`` due to preserved keyword conflict.
         # Thus, we directly inject the information into the annotations.

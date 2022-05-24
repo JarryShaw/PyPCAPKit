@@ -9,11 +9,11 @@ which is a base class for application layer protocols, eg.
 and etc.
 
 """
-from typing import TYPE_CHECKING, overload, Generic
+from typing import TYPE_CHECKING, Generic, overload
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.protocol import Protocol, PT
+from pcapkit.protocols.protocol import PT, Protocol
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
 if TYPE_CHECKING:
