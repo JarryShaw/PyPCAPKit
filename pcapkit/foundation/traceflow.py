@@ -7,7 +7,8 @@ TCP flows from a series of packets and connections.
 
 .. note::
 
-    This was implemented as the demand of my mate @gousaiyang.
+   This was implemented as the demand of my mate
+   `@gousaiyang <https://github.com/gousaiyang>`__.
 
 Glossary
 --------
@@ -32,11 +33,13 @@ trace.packet
            timestamp=frame.info.time_epoch,        # frame timestamp
        )
 
+    .. seealso:: :class:`pcapkit.foundation.traceflow.Packet`
+
 trace.buffer
     Data structure for internal buffering when performing flow tracing algorithms
     (:attr:`~pcapkit.foundation.traceflow.TraceFlow._buffer`) is as following:
 
-    .. code-block:: python
+    .. code-block:: text
 
        (dict) buffer --> memory buffer for reassembly
         |--> (tuple) BUFID : (dict)
@@ -50,12 +53,14 @@ trace.buffer
         |                        |--> 'label': (str) flow label generated from ``BUFID``
         |--> (tuple) BUFID ...
 
+    .. seealso:: :class:`pcapkit.foundation.traceflow.Buffer`
+
 trace.index
     Data structure for **TCP flow tracing** (element from
     :attr:`~pcapkit.foundation.traceflow.TraceFlow.index` *tuple*)
     is as following:
 
-    .. code-block:: python
+    .. code-block:: text
 
        (tuple) index
         |--> (Info) data
@@ -65,17 +70,34 @@ trace.index
         |     |--> 'label': (str) flow label generated from ``BUFID``
         |--> (Info) data ...
 
+    .. seealso:: :class:`pcapkit.foundation.traceflow.Index`
+
 """
-import ipaddress
+import collections
+import importlib
 import pathlib
 import sys
 import warnings
+from typing import TYPE_CHECKING, overload
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.compat import pathlib
 from pcapkit.utilities.exceptions import FileExists, stacklevel
-from pcapkit.utilities.validations import pkt_check
 from pcapkit.utilities.warnings import FileWarning, FormatWarning
+
+if TYPE_CHECKING:
+    from decimal import Decimal
+    from ipaddress import IPv4Address, IPv6Address
+    from typing import Any, DefaultDict, Optional, TextIO, Type
+
+    from dictdumper.dumper import Dumper
+    from typing_extensions import Literal
+
+    from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
+    from pcapkit.protocols.data.misc.pcap.frame import Frame as DataType_Frame
+
+    IPAddress = IPv4Address | IPv6Address
+    BufferID = tuple[IPAddress, int, IPAddress, int]
 
 ###############################################################################
 # from dictdumper import JSON, PLIST, XML, JavaScript, Tree
@@ -85,38 +107,148 @@ from pcapkit.utilities.warnings import FileWarning, FormatWarning
 __all__ = ['TraceFlow']
 
 
+class Packet(Info):
+    """Data structure for **TCP flow tracing**.
+
+    See Also:
+        * :meth:`pcapkit.foundation.traceflow.TraceFlow.dump`
+        * :term:`trace.packet`
+
+    """
+
+    #: Data link type from global header.
+    protocol: 'RegType_LinkType'
+    #: Frame number.
+    index: 'int'
+    #: Extracted frame info.
+    frame: 'DataType_Frame'
+    #: TCP synchronise (SYN) flag.
+    syn: 'bool'
+    #: TCP finish (FIN) flag.
+    fin: 'bool'
+    #: Source IP.
+    src: 'IPAddress'
+    #: Destination IP.
+    dst: 'IPAddress'
+    #: TCP source port.
+    srcport: 'int'
+    #: TCP destination port.
+    dstport: 'int'
+    #: Frame timestamp.
+    timestamp: 'Decimal'
+
+    if TYPE_CHECKING:
+        def __init__(self, protocol: 'RegType_LinkType', index: 'int', frame: 'DataType_Frame', syn: 'bool', fin: 'bool', src: 'IPAddress', dst: 'IPAddress', srcport: 'int', dstport: 'int', timestamp: 'Decimal') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class Buffer(Info):
+    """Data structure for **TCP flow tracing**.
+
+    See Also:
+        * :attr:`pcapkit.foundation.traceflow.TraceFlow.index`
+        * :term:`trace.buffer`
+
+    """
+
+    #: Output dumper object.
+    fpout: 'Dumper'
+    #: List of frame index.
+    index: 'list[int]'
+    #: Flow label generated from ``BUFID``.
+    label: 'str'
+
+    if TYPE_CHECKING:
+        def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+
+class Index(Info):
+    """Data structure for **TCP flow tracing**.
+
+    See Also:
+        * element from :attr:`pcapkit.foundation.traceflow.TraceFlow.index`
+          *tuple*
+        * :term:`trace.index`
+
+    """
+
+    #: Output filename if exists.
+    fpout: 'Optional[str]'
+    #: Tuple of frame index.
+    index: 'tuple[int, ...]'
+    #: Flow label generated from ``BUFID``.
+    label: 'str'
+
+    if TYPE_CHECKING:
+        def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
 class TraceFlow:
     """Trace TCP flows."""
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: DefaultDict[str, tuple[str, str, str | None]]: Format dumper mapping for
+    #: writing output files. The values should be a tuple representing the
+    #: module name, class name and file extension.
+    __output__ = collections.defaultdict(
+        lambda: ('pcapkit.dumpkit', 'NotImplementedIO', ''),
+        {
+            'pcap': ('pcapkit.dumpkit', 'PCAPIO', '.pcap'),
+            'cap': ('pcapkit.dumpkit', 'PCAPIO', '.pcap'),
+            'plist': ('dictdumper', 'PLIST', '.plist'),
+            'xml': ('dictdumper', 'PLIST', '.plist'),
+            'json': ('dictdumper', 'JSON', '.json'),
+            'tree': ('dictdumper', 'Tree', '.txt'),
+            'text': ('dictdumper', 'Text', '.txt'),
+            'txt': ('dictdumper', 'Tree', '.txt'),
+        }
+    )  # type: DefaultDict[str, tuple[str, str, str | None]]
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
-    def index(self):
-        """Index table for traced flow.
-
-        :rtype: Tuple[Info]
-        """
-        if self._newflg:
-            return self.submit()
+    def index(self) -> 'tuple[Index, ...]':
+        """Index table for traced flow."""
+        if self._buffer:
+            return tuple(self.submit())
         return tuple(self._stream)
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    @staticmethod
-    def make_fout(fout='./tmp', fmt='pcap'):
+    @classmethod
+    def register(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':
+        """Register a new protocol class.
+
+        Arguments:
+            format: format name
+            module: module name
+            class_: class name
+            ext: file extension
+
+        Notes:
+            The full qualified class name of the new protocol class
+            should be as ``{module}.{class_}``.
+
+        """
+        cls.__output__[format] = (module, class_, ext)
+
+    @classmethod
+    def make_fout(cls, fout: 'str' = './tmp', fmt: 'str' = 'pcap') -> 'tuple[Type[Dumper], str | None]':
         """Make root path for output.
 
-        Positional arguments:
-            fout (str): root path for output
-            fmt (str): output format
+        Args:
+            fout: root path for output
+            fmt: output format
 
         Returns:
-            Tuple[Type[dictdumper.dumper.Dumper], str]: dumper of specified format and file
-            extension of output file
+            Dumper of specified format and file extension of output file.
 
         Warns:
             FormatWarning: If ``fmt`` is not supported.
@@ -126,55 +258,41 @@ class TraceFlow:
             FileExists: If ``fout`` exists and ``fmt`` is **NOT** :data:`None`.
 
         """
-        if fout is None:
-            fout = './tmp'
-
-        if fmt == 'pcap':       # output PCAP file
-            from pcapkit.dumpkit import PCAPIO as output
-        elif fmt == 'plist':    # output PLIST file
-            from dictdumper import PLIST as output
-        elif fmt == 'json':     # output JSON file
-            from dictdumper import JSON as output
-        elif fmt == 'tree':     # output treeview text file
-            from dictdumper import Tree as output
-            fmt = 'txt'
-        elif fmt == 'html':     # output JavaScript file
-            from dictdumper import VueJS as output
-            fmt = 'js'
-        elif fmt == 'xml':      # output XML file
-            from dictdumper import XML as output
-        else:                   # no output file
-            from pcapkit.dumpkit import NotImplementedIO as output
-            if fmt is not None:
-                warnings.warn(f'Unsupported output format: {fmt}; disabled file output feature',
-                              FormatWarning, stacklevel=stacklevel())
-            return output, ''
+        module, class_, ext = cls.__output__[fmt]
+        if ext is not None and module == 'pcapkit.dumpkit' and class_ == 'NotImplementedIO':
+            warnings.warn(f'Unsupported output format: {fmt}; disabled file output feature',
+                          FormatWarning, stacklevel=stacklevel())
+        output = getattr(importlib.import_module(module), class_)  # type: Type[Dumper]
 
         try:
             pathlib.Path(fout).mkdir(parents=True, exist_ok=True)
         except FileExistsError as error:
-            if fmt is None:
+            if ext is None:
                 warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
                 raise FileExists(*error.args).with_traceback(error.__traceback__) from None
 
-        class DictDumper(output):
+        class DictDumper(output):  # type: ignore[valid-type,misc]
             """Customised :class:`~dictdumper.dumper.Dumper` object."""
 
-            def object_hook(self, o):
+            def object_hook(self, o: 'Any') -> 'Any':
                 """Convert content for function call.
 
                 Args:
-                    o (:obj:`Any`): object to convert
+                    o: object to convert
 
                 Returns:
-                    :obj:`Any`: the converted object
+                    Converted object.
 
                 """
-                import enum
+                import enum  # isort: skip
+                import aenum  # isort: skip
+                import ipaddress  # isort: skip
 
-                import aenum
-
+                if isinstance(o, Info):
+                    return o.to_dict()
+                if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
+                    return str(o)
                 if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
                     return dict(
                         enum=type(o).__name__,
@@ -182,17 +300,13 @@ class TraceFlow:
                         name=o.name,
                         value=o.value,
                     )
-                if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
-                    return str(o)
-                if isinstance(o, Info):
-                    return o.info2dict()
-                return super().object_hook(o)
+                return super().object_hook(o)  # type: ignore[unreachable]
 
-            def default(self, o):
+            def default(self, o: 'Any') -> 'Literal["fallback"]':
                 """Check content type for function call."""
                 return 'fallback'
 
-            def _append_fallback(self, value, file):
+            def _append_fallback(self, value: 'Any', file: 'TextIO') -> 'None':
                 if hasattr(value, '__slots__'):
                     new_value = {key: getattr(value, key) for key in value.__slots__}
                 else:
@@ -201,9 +315,9 @@ class TraceFlow:
                 func = self._encode_func(new_value)
                 func(new_value, file)
 
-        return DictDumper, fmt
+        return DictDumper, ext
 
-    def dump(self, packet):
+    def dump(self, packet: 'Packet') -> 'None':
         """Dump frame to output files.
 
         Arguments:
@@ -211,44 +325,45 @@ class TraceFlow:
 
         """
         # fetch flow label
-        output = self.trace(packet, check=False, output=True)
+        output = self.trace(packet, output=True)
 
         # dump files
-        output(packet['frame'], name=f"Frame {packet['index']}")
+        output(packet.frame, name=f'Frame {packet.index}')
 
-    def trace(self, packet, *, check=True, output=False):
+    @overload
+    def trace(self, packet: 'Packet', *, output: 'Literal[True]' = ...) -> 'Dumper': ...
+    @overload
+    def trace(self, packet: 'Packet', *, output: 'Literal[False]' = ...) -> 'str': ...
+
+    def trace(self, packet: 'Packet', *, output: 'bool' = False) -> 'Dumper | str':
         """Trace packets.
 
         Arguments:
-            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)
+            packet: a flow packet (:term:`trace.packet`)
 
         Keyword Arguments:
-            check (bool): flag if run validations
-            output (bool): flag if has formatted dumper
+            output: flag if has formatted dumper
 
         Returns:
-            Union[dictdumper.dumper.Dumper, str]: If ``output`` is :data:`True`,
-            returns the initiated :class:`~dictdumper.dumper.Dumper` object, which
-            will dump data to the output file named after the flow label;
-            otherwise, returns the flow label itself.
+            If ``output`` is :data:`True`, returns the initiated
+            :class:`~dictdumper.dumper.Dumper` object, which will dump data to
+            the output file named after the flow label; otherwise, returns the
+            flow label itself.
 
         Notes:
-            The flow label is formatted as following::
+            The flow label is formatted as following:
 
-                f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'
+            .. code-block:: python
+
+               f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'
 
         """
         self._newflg = True
-        if check:
-            pkt_check(packet)
-        info = Info(packet)
 
         # Buffer Identifier
-        BUFID = tuple(sorted([str(info.src), str(info.srcport),    # pylint: disable=E1101
-                              str(info.dst), str(info.dstport)]))  # pylint: disable=E1101
-        # SYN = info.syn      # Synchronise Flag (Establishment)
-        # Finish Flag (Termination)
-        FIN = info.fin        # pylint: disable=E1101
+        BUFID = (packet.src, packet.srcport, packet.dst, packet.dstport)  # type: BufferID
+        # SYN = packet.syn  # Synchronise Flag (Establishment)
+        FIN = packet.fin  # Finish Flag (Termination)
 
         # # when SYN is set, reset buffer of this seesion
         # if SYN and BUFID in self._buffer:
@@ -259,73 +374,70 @@ class TraceFlow:
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            label = f'{info.src}_{info.srcport}-{info.dst}_{info.dstport}-{info.timestamp}'  # pylint: disable=E1101
-            self._buffer[BUFID] = dict(
-                fpout=self._foutio(fname=f'{self._fproot}/{label}.{self._fdpext}', protocol=info.protocol,  # pylint: disable=E1101
+            label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
+            self._buffer[BUFID] = Buffer(
+                fpout=self._foutio(fname=f'{self._fproot}/{label}{self._fdpext or ""}', protocol=packet.protocol,
                                    byteorder=self._endian, nanosecond=self._nnsecd),
-                index=list(),
+                index=[],
                 label=label,
             )
 
         # trace frame record
-        self._buffer[BUFID]['index'].append(info.index)  # pylint: disable=E1101
-        fpout = self._buffer[BUFID]['fpout']
-        label = self._buffer[BUFID]['label']
+        self._buffer[BUFID].index.append(packet.index)
+        fpout = self._buffer[BUFID].fpout
+        label = self._buffer[BUFID].label
 
         # when FIN is set, submit buffer of this session
         if FIN:
             buf = self._buffer.pop(BUFID)
             # fpout, label = buf['fpout'], buf['label']
-            if self._fdpext:
-                buf['fpout'] = f'{self._fproot}/{label}.{self._fdpext}'
-            else:
-                buf['fpout'] = NotImplemented
-            buf['index'] = tuple(buf['index'])
-            self._stream.append(Info(buf))
+            self._stream.append(Index(
+                fpout=f'{self._fproot}/{label}{self._fdpext}' if self._fdpext is not None else None,
+                index=tuple(buf.index),
+                label=label,
+            ))
 
         # return label or output object
         return fpout if output else label
 
-    def submit(self):
+    def submit(self) -> 'list[Index]':
         """Submit traced TCP flows.
 
         Returns:
-            Tuple[Info]: traced TCP flow (:term:`trace.buffer`)
+            Traced TCP flow (:term:`trace.index`).
 
         """
-        self._newflg = False
-        ret = list()
+        ret = []  # type: list[Index]
         for buf in self._buffer.values():
-            lbl = buf['label']
-            ret.append(Info(fpout=f"{self._fproot}/{lbl}.{self._fdpext}" if self._fdpext else NotImplemented,
-                            index=tuple(buf['index']),
-                            label=lbl,))
-        ret += self._stream
-        return tuple(ret)
+            ret.append(Index(fpout=f"{self._fproot}/{buf.label}{self._fdpext}" if self._fdpext else None,
+                             index=tuple(buf.index),
+                             label=buf.label,))
+        ret.extend(self._stream)
+        return ret
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    def __init__(self, fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):  # pylint: disable=redefined-builtin
+    def __init__(self, fout: 'str' = './tmp', format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
+                 byteorder: 'Literal["little", "big"]' = sys.byteorder,
+                 nanosecond: bool = False) -> 'None':
         """Initialise instance.
 
         Arguments:
-            fout (Optional[str]): output path
-            format (Optional[str]): output format
-            byteorder (str): output file byte order
-            nanosecond (bool): output nanosecond-resolution file flag
+            fout: output path
+            format: output format
+            byteorder: output file byte order
+            nanosecond: output nanosecond-resolution file flag
 
         """
-        #: bool: New packet flag.
-        self._newflg = False
         #: str: Output root path.
         self._fproot = fout
 
-        #: dict: Buffer field (:term:`trace.buffer`).
-        self._buffer = dict()
-        #: list: Stream index (:term:`trace.index`).
-        self._stream = list()
+        #: dict[BufferID, Buffer]: Buffer field (:term:`trace.buffer`).
+        self._buffer = {}  # type: dict[BufferID, Buffer]
+        #: list[Index]: Stream index (:term:`trace.index`).
+        self._stream = []  # type: list[Index]
 
         #: Literal['little', 'big']: Output file byte order.
         self._endian = byteorder
@@ -334,17 +446,16 @@ class TraceFlow:
 
         # dump I/O object
         fio, ext = self.make_fout(fout, format)
-        #: Type[dictdumper.dumper.Dumper]: Dumper class.
+        #: Type[Dumper]: Dumper class.
         self._foutio = fio
-        #: str: Output file extension.
+        #: Optional[str]: Output file extension.
         self._fdpext = ext
 
-    def __call__(self, packet):
+    def __call__(self, packet: 'Packet') -> 'None':
         """Dump frame to output files.
 
         Arguments:
-            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)
+            packet: a flow packet (:term:`trace.packet`)
 
         """
-        self._newflg = True
         self.dump(packet)
