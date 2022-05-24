@@ -16,7 +16,7 @@ from pcapkit.protocols.misc.pcap.header import Header
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibIntEnum
-    from typing import Any, Optional, BinaryIO
+    from typing import Any, BinaryIO, Optional
 
     from aenum import IntEnum as AenumIntEnum
     from typing_extensions import Literal
