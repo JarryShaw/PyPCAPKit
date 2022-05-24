@@ -33,11 +33,8 @@ if TYPE_CHECKING:
 __all__ = ['UDP']
 
 
-class UDP(Transport):
+class UDP(Transport[DataType_UDP]):
     """This class implements User Datagram Protocol."""
-
-    #: Parsed packet data.
-    _info: 'DataType_UDP'
 
     ##########################################################################
     # Defaults.
@@ -125,7 +122,7 @@ class UDP(Transport):
             checksum=_csum,
         )
 
-        return self._decode_next_layer(udp, None, udp.len - 8)  # type: ignore[return-value]
+        return self._decode_next_layer(udp, None, udp.len - 8)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

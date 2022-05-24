@@ -20,7 +20,7 @@ import string
 import struct
 import textwrap
 import urllib.parse
-from typing import TYPE_CHECKING, cast, overload
+from typing import TYPE_CHECKING, cast, overload, Generic, TypeVar
 
 import aenum
 import chardet
@@ -43,12 +43,17 @@ if TYPE_CHECKING:
 
 __all__ = ['Protocol']
 
+PT = TypeVar('PT', bound='Info')
+
 # readable characters' order list
 readable = [ord(char) for char in filter(lambda char: not char.isspace(), string.printable)]
 
 
-class Protocol(metaclass=abc.ABCMeta):
+class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     """Abstract base class for all protocol family."""
+
+    #: Parsed packet data.
+    _info: 'PT'
 
     # Internal data storage for cached properties.
     __cached__ = {}  # type: Dict[str, Any]
@@ -96,7 +101,7 @@ class Protocol(metaclass=abc.ABCMeta):
 
     # info dict of current instance
     @property
-    def info(self) -> 'Info':
+    def info(self) -> 'PT':
         """Info dict of current instance."""
         return self._info
 
@@ -162,7 +167,7 @@ class Protocol(metaclass=abc.ABCMeta):
         return (cls.__name__,)
 
     @abc.abstractmethod
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'Info':
+    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'PT':
         """Read (parse) packet data.
 
         Args:
@@ -799,8 +804,8 @@ class Protocol(metaclass=abc.ABCMeta):
             return cls._make_pack(index, size=size, signed=signed, lilendian=lilendian)
         return index
 
-    def _decode_next_layer(self, dict_: 'Info', proto: 'Optional[int]' = None,
-                           length: 'Optional[int]' = None) -> 'Info':
+    def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None,
+                           length: 'Optional[int]' = None) -> 'PT':
         """Decode next layer protocol.
 
         Arguments:

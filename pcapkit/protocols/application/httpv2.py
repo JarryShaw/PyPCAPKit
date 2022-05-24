@@ -65,11 +65,8 @@ if TYPE_CHECKING:
 __all__ = ['HTTPv2']
 
 
-class HTTPv2(HTTP):
+class HTTPv2(HTTP[DataType_HTTP]):
     """This class implements Hypertext Transfer Protocol (HTTP/2)."""
-
-    #: Parsed packet data.
-    _info: 'DataType_HTTP'
 
     ##########################################################################
     # Defaults.

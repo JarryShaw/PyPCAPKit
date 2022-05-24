@@ -12,8 +12,9 @@ and :class:`HTTP/2 <pcapkit.protocols.application.application.httpv2>`.
 
 """
 import contextlib
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic
 
+from pcapkit.protocols.protocol import PT
 from pcapkit.protocols.application.application import Application
 from pcapkit.utilities.exceptions import ProtocolError
 
@@ -28,16 +29,13 @@ if TYPE_CHECKING:
 __all__ = ['HTTP']
 
 
-class HTTP(Application):
+class HTTP(Application[DataType_HTTP], Generic[PT]):
     """This class implements all protocols in HTTP family.
 
     - Hypertext Transfer Protocol (HTTP/1.1) [:rfc:`7230`]
     - Hypertext Transfer Protocol version 2 (HTTP/2) [:rfc:`7540`]
 
     """
-
-    #: Parsed packet data.
-    _info: 'DataType_HTTP'
 
     ##########################################################################
     # Properties.
@@ -104,7 +102,7 @@ class HTTP(Application):
         http = protocol(self._file, length, **kwargs)
         self._version = http.version
         self._length = http.length
-        return http.info  # type: ignore[return-value]
+        return http.info
 
     def make(self, *, version: 'Literal[1, 2]', **kwargs: 'Any') -> 'bytes':  # type: ignore[override]
         """Make (construct) packet data.

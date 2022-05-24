@@ -28,11 +28,8 @@ if TYPE_CHECKING:
 __all__ = ['FTP']
 
 
-class FTP(Application):
+class FTP(Application[DataType_FTP]):
     """This class implements File Transfer Protocol."""
-
-    #: Parsed packet data.
-    _info: 'DataType_FTP'
 
     ##########################################################################
     # Properties.

@@ -53,11 +53,9 @@ _MAGIC_NUM = {
     ('little', False):  b'\xd4\xc3\xb2\xa1',
 }
 
-class Header(Protocol):
-    """PCAP file global header extractor."""
 
-    #: Parsed packet data.
-    _info: 'DataType_Header'
+class Header(Protocol[DataType_Header]):
+    """PCAP file global header extractor."""
 
     ##########################################################################
     # Properties.

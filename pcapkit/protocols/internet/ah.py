@@ -39,11 +39,8 @@ if TYPE_CHECKING:
 __all__ = ['AH']
 
 
-class AH(IPsec):
+class AH(IPsec[DataType_AH]):
     """This class implements Authentication Header."""
-
-    #: Parsed packet data.
-    _info: 'DataType_AH'
 
     ##########################################################################
     # Properties.
@@ -169,7 +166,7 @@ class AH(IPsec):
 
         if extension:
             return ah
-        return self._decode_next_layer(ah, _next, length - ah.length)  # type: ignore[return-value]
+        return self._decode_next_layer(ah, _next, length - ah.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

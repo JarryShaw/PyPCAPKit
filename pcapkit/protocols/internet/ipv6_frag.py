@@ -39,11 +39,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Frag']
 
 
-class IPv6_Frag(Internet):
+class IPv6_Frag(Internet[DataType_IPv6_Frag]):
     """This class implements Fragment Header for IPv6."""
-
-    #: Parsed packet data.
-    _info: 'DataType_IPv6_Frag'
 
     ##########################################################################
     # Properties.
@@ -147,7 +144,7 @@ class IPv6_Frag(Internet):
 
         if extension:
             return ipv6_frag
-        return self._decode_next_layer(ipv6_frag, _next, length - self.length)  # type: ignore[return-value]
+        return self._decode_next_layer(ipv6_frag, _next, length - self.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

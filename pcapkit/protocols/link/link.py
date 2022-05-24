@@ -8,10 +8,10 @@ which is a base class for link layer protocols, e.g. :class:`~pcapkit.protocols.
 
 """
 import collections
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic
 
 from pcapkit.const.reg.ethertype import EtherType as RegType_EtherType
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import Protocol, PT
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 __all__ = ['Link']
 
 
-class Link(Protocol):  # pylint: disable=abstract-method
+class Link(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     """Abstract base class for link layer protocol family.
 
     This class currently supports parsing of the following protocols, which are

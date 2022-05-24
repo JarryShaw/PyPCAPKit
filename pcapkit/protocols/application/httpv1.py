@@ -57,11 +57,8 @@ _RE_VERSION = re.compile(rb"HTTP/(?P<version>\d\.\d)")
 _RE_STATUS = re.compile(rb'\d{3}')
 
 
-class HTTPv1(HTTP):
+class HTTPv1(HTTP[DataType_HTTP]):
     """This class implements Hypertext Transfer Protocol (HTTP/1.*)."""
-
-    #: Parsed packet data.
-    _info: 'DataType_HTTP'
 
     ##########################################################################
     # Defaults.

@@ -9,11 +9,11 @@ which is a base class for application layer protocols, eg.
 and etc.
 
 """
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload, Generic
 
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import Protocol, PT
 from pcapkit.utilities.exceptions import IntError, UnsupportedCall
 
 if TYPE_CHECKING:
@@ -21,12 +21,10 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.corekit.infoclass import Info
-
 __all__ = ['Application']
 
 
-class Application(Protocol):  # pylint: disable=abstract-method
+class Application(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     """Abstract base class for transport layer protocol family."""
 
     ##########################################################################
@@ -93,7 +91,7 @@ class Application(Protocol):  # pylint: disable=abstract-method
     # Utilities.
     ##########################################################################
 
-    def _decode_next_layer(self, dict_: 'Info', proto: 'Optional[int]' = None,
+    def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None,
                            length: 'Optional[int]' = None) -> 'NoReturn':
         """Decode next layer protocol.
 

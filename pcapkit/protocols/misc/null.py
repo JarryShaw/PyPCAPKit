@@ -23,11 +23,8 @@ if TYPE_CHECKING:
 __all__ = ['NoPayload']
 
 
-class NoPayload(Protocol):
+class NoPayload(Protocol[DataType_NoPayload]):
     """This class implements no-payload protocol."""
-
-    #: Parsed packet data.
-    _info: 'DataType_NoPayload'
 
     ##########################################################################
     # Properties.

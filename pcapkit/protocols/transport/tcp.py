@@ -107,11 +107,8 @@ if TYPE_CHECKING:
 __all__ = ['TCP']
 
 
-class TCP(Transport):
+class TCP(Transport[DataType_TCP]):
     """This class implements Transmission Control Protocol."""
-
-    #: Parsed packet data.
-    _info: 'DataType_TCP'
 
     ##########################################################################
     # Defaults.
@@ -285,7 +282,7 @@ class TCP(Transport):
                 'options': self._read_tcp_options(_optl),
             })
 
-        return self._decode_next_layer(tcp, None, length - tcp.hdr_len)  # type: ignore[return-value]
+        return self._decode_next_layer(tcp, None, length - tcp.hdr_len)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

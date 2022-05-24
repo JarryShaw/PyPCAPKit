@@ -61,11 +61,8 @@ if TYPE_CHECKING:
 __all__ = ['L2TP']
 
 
-class L2TP(Link):
+class L2TP(Link[DataType_L2TP]):
     """This class implements Layer Two Tunnelling Protocol."""
-
-    #: Parsed packet data.
-    _info: 'DataType_L2TP'
 
     ##########################################################################
     # Properties.
@@ -158,7 +155,7 @@ class L2TP(Link):
         # if _size:
         #     l2tp['padding'] = self._read_fileng(_size * 8)
 
-        return self._decode_next_layer(l2tp, length - l2tp.hdr_len)  # type: ignore[return-value]
+        return self._decode_next_layer(l2tp, length - l2tp.hdr_len)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=unused-argument
         """Make (construct) packet data.

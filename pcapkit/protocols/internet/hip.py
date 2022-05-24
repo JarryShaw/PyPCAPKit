@@ -147,11 +147,8 @@ if TYPE_CHECKING:
 __all__ = ['HIP']
 
 
-class HIP(Internet):
+class HIP(Internet[DataType_HIP]):
     """This class implements Host Identity Protocol."""
-
-    #: Parsed packet data.
-    _info: 'DataType_HIP'
 
     ##########################################################################
     # Properties.
@@ -294,7 +291,7 @@ class HIP(Internet):
 
         if extension:
             return hip
-        return self._decode_next_layer(hip, _next, length - hip.length)  # type: ignore[return-value]
+        return self._decode_next_layer(hip, _next, length - hip.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
@@ -644,11 +641,11 @@ class HIP(Internet):
 
             """
             if kind == 0 and size == 16:
-                return ipaddress.ip_address(self._read_fileng(16))
+                return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
             if kind == 1 and size == 20:
                 return DataType_LocatorData(
                     spi=self._read_unpack(4),
-                    ip=ipaddress.ip_address(self._read_fileng(16)),
+                    ip=ipaddress.ip_address(self._read_fileng(16)),  # type: ignore[arg-type]
                 )
             raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
 
@@ -1945,7 +1942,7 @@ class HIP(Internet):
             length=clen,
             port=_port,
             protocol=_ptcl,
-            address=ipaddress.ip_address(_addr),
+            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
         )
 
         return reg_from
@@ -2429,7 +2426,7 @@ class HIP(Internet):
 
         _addr = []  # type: list[IPv6Address]
         for _ in range((clen - 4) // 16):
-            _addr.append(ipaddress.ip_address(self._read_fileng(16)))
+            _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
 
         route_dst = DataType_RouteDstParameter(
             type=desc,
@@ -2859,7 +2856,7 @@ class HIP(Internet):
             length=clen,
             port=_port,
             protocol=_ptcl,
-            address=ipaddress.ip_address(_addr),
+            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
         )
 
         return relay_from
@@ -2918,7 +2915,7 @@ class HIP(Internet):
             length=clen,
             port=_port,
             protocol=_ptcl,
-            address=ipaddress.ip_address(_addr),
+            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
         )
 
         return relay_to
@@ -3028,7 +3025,7 @@ class HIP(Internet):
 
         _addr = []  # type: list[IPv6Address]
         for _ in range((clen - 4) // 16):
-            _addr.append(ipaddress.ip_address(self._read_fileng(16)))
+            _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
 
         route_via = DataType_RouteViaParameter(
             type=desc,
@@ -3090,7 +3087,7 @@ class HIP(Internet):
             type=desc,
             critical=cbit,
             length=clen,
-            address=ipaddress.ip_address(_addr),
+            address=ipaddress.ip_address(_addr),  # type: ignore[arg-type]
         )
 
         return from_
@@ -3195,7 +3192,7 @@ class HIP(Internet):
 
         _addr = []  # type: list[IPv6Address]
         for _ in range(clen // 16):
-            _addr.append(ipaddress.ip_address(self._read_fileng(16)))
+            _addr.append(ipaddress.ip_address(self._read_fileng(16)))  # type: ignore[arg-type]
 
         via_rvs = DataType_ViaRVSParameter(
             type=desc,

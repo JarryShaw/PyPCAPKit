@@ -49,11 +49,8 @@ if TYPE_CHECKING:
 __all__ = ['OSPF']
 
 
-class OSPF(Link):
+class OSPF(Link[DataType_OSPF]):
     """This class implements Open Shortest Path First."""
-
-    #: Parsed packet data.
-    _info: 'DataType_OSPF'
 
     ##########################################################################
     # Properties.
@@ -145,7 +142,7 @@ class OSPF(Link):
             ospf.__update__([
                 ('auth', self._read_fileng(8)),
             ])
-        return self._decode_next_layer(ospf, length - self.length)  # type: ignore[return-value]
+        return self._decode_next_layer(ospf, length - self.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
@@ -180,7 +177,7 @@ class OSPF(Link):
         """
         #_byte = self._read_fileng(4)
         #_addr = '.'.join(str(_) for _ in _byte)
-        return ipaddress.ip_address(self._read_fileng(4))
+        return ipaddress.ip_address(self._read_fileng(4))  # type: ignore[return-value]
 
     def _read_encrypt_auth(self) -> 'DataType_CrytographicAuthentication':
         """Read Authentication field when Cryptographic Authentication is employed,

@@ -5,7 +5,9 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info
 
-__all__ = ['Packet']
+__all__ = [
+    'Packet',
+]
 
 
 class Packet(Info):

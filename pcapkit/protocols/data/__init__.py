@@ -3,7 +3,7 @@
 """data models for protocols"""
 
 # Base Class for Protocols
-from pcapkit.protocols.data.protocol import Packet
+from pcapkit.protocols.data.protocol import *
 
 # Link Layer Protocols
 from pcapkit.protocols.data.link import *

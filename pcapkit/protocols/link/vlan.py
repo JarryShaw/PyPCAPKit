@@ -37,11 +37,8 @@ if TYPE_CHECKING:
 __all__ = ['VLAN']
 
 
-class VLAN(Link):
+class VLAN(Link[DataType_VLAN]):
     """This class implements 802.1Q Customer VLAN Tag Type."""
-
-    #: Parsed packet data.
-    _info: 'DataType_VLAN'
 
     ##########################################################################
     # Properties.
@@ -117,7 +114,7 @@ class VLAN(Link):
             ),
             type=_type,
         )
-        return self._decode_next_layer(vlan, _type, length - self.length)  # type: ignore[return-value]
+        return self._decode_next_layer(vlan, _type, length - self.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

@@ -77,11 +77,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Opts']
 
 
-class IPv6_Opts(Internet):
+class IPv6_Opts(Internet[DataType_IPv6_Opts]):
     """This class implements Destination Options for IPv6."""
-
-    #: Parsed packet data.
-    _info: 'DataType_IPv6_Opts'
 
     ##########################################################################
     # Defaults.
@@ -217,7 +214,7 @@ class IPv6_Opts(Internet):
 
         if extension:
             return ipv6_opts
-        return self._decode_next_layer(ipv6_opts, _next, length - ipv6_opts.length)  # type: ignore[return-value]
+        return self._decode_next_layer(ipv6_opts, _next, length - ipv6_opts.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

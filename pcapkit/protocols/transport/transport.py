@@ -8,9 +8,9 @@ which is a base class for transport layer protocols, eg.
 :class:`~pcapkit.protocols.transport.transport.udp.UDP`.
 
 """
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic
 
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import Protocol, PT
 from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 __all__ = ['Transport']
 
 
-class Transport(Protocol):  # pylint: disable=abstract-method
+class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     """Abstract base class for transport layer protocol family."""
 
     ##########################################################################

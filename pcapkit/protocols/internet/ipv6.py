@@ -41,11 +41,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv6']
 
 
-class IPv6(IP):
+class IPv6(IP[DataType_IPv6]):
     """This class implements Internet Protocol version 6."""
-
-    #: Parsed packet data.
-    _info: 'DataType_IPv6'
 
     ##########################################################################
     # Properties.
@@ -263,4 +260,4 @@ class IPv6(IP):
         })
 
         ipv6_exthdr = ProtoChain.from_list(_protos)
-        return super()._decode_next_layer(ipv6, proto, raw_len, ipv6_exthdr=ipv6_exthdr)  # type: ignore[return-value]
+        return super()._decode_next_layer(ipv6, proto, raw_len, ipv6_exthdr=ipv6_exthdr)

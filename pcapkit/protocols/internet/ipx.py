@@ -39,11 +39,8 @@ if TYPE_CHECKING:
 __all__ = ['IPX']
 
 
-class IPX(Internet):
+class IPX(Internet[DataType_IPX]):
     """This class implements Internetwork Packet Exchange."""
-
-    #: Parsed packet data.
-    _info: 'DataType_IPX'
 
     ##########################################################################
     # Properties.
@@ -110,7 +107,7 @@ class IPX(Internet):
             src=_srca,
         )
 
-        return self._decode_next_layer(ipx, ipx.type, ipx.len - 30)  # type: ignore[return-value]
+        return self._decode_next_layer(ipx, ipx.type, ipx.len - 30)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

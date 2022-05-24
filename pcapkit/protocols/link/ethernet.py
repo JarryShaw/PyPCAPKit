@@ -40,11 +40,8 @@ __all__ = ['Ethernet']
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 
-class Ethernet(Link):
+class Ethernet(Link[DataType_Ethernet]):
     """This class implements Ethernet Protocol."""
-
-    #: Parsed packet data.
-    _info: 'DataType_Ethernet'
 
     ##########################################################################
     # Properties.
@@ -122,7 +119,7 @@ class Ethernet(Link):
             src=_srcm,
             type=_type,
         )
-        return self._decode_next_layer(ethernet, _type, length - self.length)  # type: ignore[return-value]
+        return self._decode_next_layer(ethernet, _type, length - self.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

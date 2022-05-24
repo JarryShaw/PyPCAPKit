@@ -74,11 +74,8 @@ if TYPE_CHECKING:
 __all__ = ['HOPOPT']
 
 
-class HOPOPT(Internet):
+class HOPOPT(Internet[DataType_HOPOPT]):
     """This class implements IPv6 Hop-by-Hop Options."""
-
-    #: Parsed packet data.
-    _info: 'DataType_HOPOPT'
 
     ##########################################################################
     # Defaults.
@@ -208,7 +205,7 @@ class HOPOPT(Internet):
 
         if extension:
             return hopopt
-        return self._decode_next_layer(hopopt, _next, length - hopopt.length)  # type: ignore[return-value]
+        return self._decode_next_layer(hopopt, _next, length - hopopt.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

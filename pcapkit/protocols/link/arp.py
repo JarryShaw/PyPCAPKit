@@ -58,7 +58,7 @@ __all__ = ['ARP']
 py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 
-class ARP(Link):
+class ARP(Link[DataType_ARP]):
     """This class implements all protocols in ARP family.
 
     - Address Resolution Protocol (ARP) [:rfc:`826`]
@@ -67,9 +67,6 @@ class ARP(Link):
     - Inverse Address Resolution Protocol (InARP) [:rfc:`2390`]
 
     """
-    #: Parsed packet data.
-    _info: 'DataType_ARP'
-
     #: Name of corresponding protocol.
     _name: 'Literal["Address Resolution Protocol", "Inverse Address Resolution Protocol", "Reverse Address Resolution Protocol", "Dynamic Reverse Address Resolution Protocol"]'  # pylint: disable=line-too-long
     #: Acronym of corresponding protocol.
@@ -192,7 +189,7 @@ class ARP(Link):
             tpa=_tpta,
             len=8 + _hlen * 2 + _plen * 2,
         )
-        return self._decode_next_layer(arp, None, length - arp.len)  # type: ignore[return-value]
+        return self._decode_next_layer(arp, None, length - arp.len)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

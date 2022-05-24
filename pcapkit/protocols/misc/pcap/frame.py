@@ -44,7 +44,7 @@ __all__ = ['Frame']
 py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
 
 
-class Frame(Protocol):
+class Frame(Protocol[DataType_Frame]):
     """Per packet frame header extractor.
 
     This class currently supports parsing of the following protocols, which are
@@ -64,9 +64,6 @@ class Frame(Protocol):
          - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
 
     """
-
-    #: Parsed packet data.
-    _info: 'DataType_Frame'
 
     ##########################################################################
     # Defaults.
@@ -347,7 +344,7 @@ class Frame(Protocol):
 
         return ts_sec, ts_usec
 
-    def _decode_next_layer(self, dict_: 'DataType_Frame', proto: 'Optional[int]' = None,  # type: ignore[override]
+    def _decode_next_layer(self, dict_: 'DataType_Frame', proto: 'Optional[int]' = None,
                            length: 'Optional[int]' = None) -> 'DataType_Frame':  # pylint: disable=arguments-differ
         """Decode next layer protocol.
 

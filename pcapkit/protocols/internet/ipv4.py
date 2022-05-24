@@ -89,11 +89,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv4']
 
 
-class IPv4(IP):
+class IPv4(IP[DataType_IPv4]):
     """This class implements Internet Protocol version 4."""
-
-    #: Parsed packet data.
-    _info: 'DataType_IPv4'
 
     ##########################################################################
     # Properties.
@@ -211,7 +208,7 @@ class IPv4(IP):
                 ('options', self._read_ipv4_options(_optl)),
             ])
 
-        return self._decode_next_layer(ipv4, _prot, ipv4.len - ipv4.hdr_len)  # type: ignore[return-value]
+        return self._decode_next_layer(ipv4, _prot, ipv4.len - ipv4.hdr_len)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

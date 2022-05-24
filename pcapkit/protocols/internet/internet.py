@@ -9,11 +9,11 @@ which is a base class for internet layer protocols, eg. :class:`~pcapkit.protoco
 """
 import collections
 import importlib
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, cast, Generic
 
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
 from pcapkit.corekit.protochain import ProtoChain
-from pcapkit.protocols.protocol import Protocol
+from pcapkit.protocols.protocol import Protocol, PT
 from pcapkit.utilities.decorators import beholder
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 __all__ = ['Internet']
 
 
-class Internet(Protocol):  # pylint: disable=abstract-method
+class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     """Abstract base class for internet layer protocol family.
 
     This class currently supports parsing of the following protocols, which are
@@ -144,9 +144,9 @@ class Internet(Protocol):  # pylint: disable=abstract-method
         _prot = RegType_TransType.get(_byte)
         return _prot
 
-    def _decode_next_layer(self, dict_: 'Info', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
+    def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
                            length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,
-                           ipv6_exthdr: 'Optional[ProtoChain]' = None) -> 'Info':
+                           ipv6_exthdr: 'Optional[ProtoChain]' = None) -> 'PT':
         """Decode next layer extractor.
 
         Arguments:

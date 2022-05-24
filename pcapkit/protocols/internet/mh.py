@@ -42,11 +42,8 @@ if TYPE_CHECKING:
 __all__ = ['MH']
 
 
-class MH(Internet):
+class MH(Internet[DataType_MH]):
     """This class implements Mobility Header."""
-
-    #: Parsed packet data.
-    _info: 'DataType_MH'
 
     ##########################################################################
     # Properties.
@@ -154,7 +151,7 @@ class MH(Internet):
 
         if extension:
             return mh
-        return self._decode_next_layer(mh, _next, length - mh.length)  # type: ignore[return-value]
+        return self._decode_next_layer(mh, _next, length - mh.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

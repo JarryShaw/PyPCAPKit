@@ -48,11 +48,8 @@ if TYPE_CHECKING:
 __all__ = ['IPv6_Route']
 
 
-class IPv6_Route(Internet):
+class IPv6_Route(Internet[DataType_IPv6_Route]):
     """This class implements Routing Header for IPv6."""
-
-    #: Parsed packet data.
-    _info: 'DataType_IPv6_Route'
 
     ##########################################################################
     # Defaults.
@@ -188,7 +185,7 @@ class IPv6_Route(Internet):
 
         if extension:
             return ipv6_route
-        return self._decode_next_layer(ipv6_route, _next, length - ipv6_route.length)  # type: ignore[return-value]
+        return self._decode_next_layer(ipv6_route, _next, length - ipv6_route.length)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

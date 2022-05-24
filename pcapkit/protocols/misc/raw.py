@@ -24,11 +24,8 @@ if TYPE_CHECKING:
 __all__ = ['Raw']
 
 
-class Raw(Protocol):
+class Raw(Protocol[DataType_Raw]):
     """This class implements universal unknown protocol."""
-
-    #: Parsed packet data.
-    _info: 'DataType_Raw'
 
     ##########################################################################
     # Properties.
