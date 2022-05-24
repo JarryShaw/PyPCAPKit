@@ -49,7 +49,7 @@
 
 <span class="c1">###############################################################################</span>
 <span class="c1"># from pcapkit.foundation.analysis import analyse</span>
-<span class="c1"># from pcapkit.protocols.raw import Raw</span>
+<span class="c1"># from pcapkit.protocols.misc.raw import Raw</span>
 <span class="c1">###############################################################################</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;seekset&#39;</span><span class="p">,</span> <span class="s1">&#39;seekset_ng&#39;</span><span class="p">,</span> <span class="s1">&#39;beholder&#39;</span><span class="p">,</span> <span class="s1">&#39;beholder_ng&#39;</span><span class="p">]</span>
@@ -127,7 +127,7 @@
 <span class="sd">    :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`, then</span>
 <span class="sd">    try to call the decorated function. Should any exception raised, it will</span>
 <span class="sd">    re-parse the :attr:`self._file &lt;pcapkit.protocols.protocol.Protocol._file&gt;`</span>
-<span class="sd">    as :class:`~pcapkit.protocols.raw.Raw` protocol.</span>
+<span class="sd">    as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The decorated function should have following signature::</span>
@@ -143,7 +143,7 @@
     <span class="k">def</span> <span class="nf">behold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">seek_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
             <span class="n">error</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
@@ -166,7 +166,7 @@
 
 <span class="sd">    This decorate first keep the current offset of ``file``, then try to call</span>
 <span class="sd">    the decorated function. Should any exception raised, it will re-parse the</span>
-<span class="sd">    ``file`` as :class:`~pcapkit.protocols.raw.Raw` protocol.</span>
+<span class="sd">    ``file`` as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        The decorated function should have following signature::</span>
