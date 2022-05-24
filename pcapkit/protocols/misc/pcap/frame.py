@@ -109,7 +109,7 @@ class Frame(Protocol):
     ##########################################################################
 
     @classmethod
-    def register(cls, code: 'RegType_LinkType', module: str, class_: str) -> 'None':
+    def register(cls, code: 'RegType_LinkType', module: 'str', class_: 'str') -> 'None':
         """Register a new protocol class.
 
         Arguments:
@@ -290,7 +290,7 @@ class Frame(Protocol):
             self._file = file  # type: ignore[assignment]
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.read()
+        self._info = self.read(length, **kwargs)
 
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""

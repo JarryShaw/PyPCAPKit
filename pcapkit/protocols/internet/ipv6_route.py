@@ -40,8 +40,8 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.protochain import ProtoChain
-    from pcapkit.protocols.protocol import Protocol
     from pcapkit.protocols.data.internet.ipv6_route import RoutingType as DataType_RoutingType
+    from pcapkit.protocols.protocol import Protocol
 
     TypeParser = Callable[['IPv6_Route', int], DataType_RoutingType]
 

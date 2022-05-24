@@ -5,10 +5,12 @@ import statistics
 import time
 
 import pcapkit
+from pcapkit.utilities.logging import logger
 
-multiprocessing.freeze_support()
+#multiprocessing.freeze_support()
+logger.setLevel('CRITICAL')
 
-for engine in ['default', 'dpkt', 'scapy', 'pyshark', 'pipline', 'server']:
+for engine in ['default', 'dpkt', 'scapy']:  #, 'pyshark', 'pipline', 'server']:
     lid = list()
     for index in range(1, 101):
         now = time.time()

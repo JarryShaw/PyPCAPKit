@@ -899,7 +899,7 @@ class Extractor:
 
         # read frame header
         if not self._flag_m:
-            frame = Frame(self._ifile, num=self._frnum+1, proto=self._dlink,
+            frame = Frame(self._ifile, num=self._frnum+1, header=self._gbhdr.info,
                           layer=self._exlyr, protocol=self._exptl, nanosecond=self._nnsec)
             self._frnum += 1
 
