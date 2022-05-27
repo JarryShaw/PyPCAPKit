@@ -136,13 +136,15 @@ class Frame(Protocol[DataType_Frame]):
         """
         return self._protos.index(name)
 
-    def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Frame':
+    def read(self, length: 'Optional[int]' = None, *,
+             __read: 'bool' = True, **kwargs: 'Any') -> 'DataType_Frame':
         """Read each block after global header.
 
         Args:
             length (Optional[int]): Length of packet data.
 
         Keyword Args:
+            __read: If the class is called in a parsing scenario.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -152,11 +154,10 @@ class Frame(Protocol[DataType_Frame]):
             EOFError: If :attr:`self._file <pcapkit.protocols.pcap.frame.Frame._file>` reaches EOF.
 
         """
-        # _scur = self._file.tell()
         try:
             _temp = self._read_unpack(4, lilendian=True)
         except StructError:
-            raise EOFError from None
+            raise EOFError
 
         _tsss = _temp
         _tsus = self._read_unpack(4, lilendian=True)
@@ -183,7 +184,7 @@ class Frame(Protocol[DataType_Frame]):
             cap_len=_olen,
         )
 
-        if hasattr(self, '_data'):
+        if not __read:
             # move backward to the beginning of the packet
             self._file.seek(-self.length, io.SEEK_CUR)
         else:
@@ -194,11 +195,11 @@ class Frame(Protocol[DataType_Frame]):
             self._file.seek(-self.length, io.SEEK_CUR)
 
             #: bytes: Raw packet data.
-            self._data = self._read_fileng(length)
+            self._data = self._read_fileng(self.length + frame.len)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
 
-            # move forward to the beginning of the packet
+            # move forward to the beginning of frame's first packet
             self._file.seek(self.length, io.SEEK_CUR)
 
         return self._decode_next_layer(frame, self._ghdr.network, frame.len)
@@ -278,16 +279,18 @@ class Frame(Protocol[DataType_Frame]):
         self._nsec = header.magic_number.nanosecond
 
         if file is None:
+            __read = False
             #: bytes: Raw packet data.
             self._data = self.make(**kwargs)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
         else:
+            __read = True
             #: io.BytesIO: Source packet stream.
             self._file = file  # type: ignore[assignment]
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.read(length, **kwargs)
+        self._info = self.read(length, __read=__read, **kwargs)
 
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""

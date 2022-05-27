@@ -596,6 +596,9 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             kind = None
 
         mem = self._file.read(size)
+        if not mem:
+            raise StructError('unpack: empty buffer', quiet=True)
+
         if kind is None:
             end = 'little' if lilendian else 'big'  # type: Literal['little', 'big']
             buf = int.from_bytes(mem, end, signed=signed)
