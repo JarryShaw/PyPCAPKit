@@ -285,12 +285,12 @@ class TraceFlow:
                     Converted object.
 
                 """
-                import datetime  # isort: skip
-                import decimal  # isort: skip
-                import enum  # isort: skip
-                import ipaddress  # isort: skip
+                import datetime
+                import decimal
+                import enum
+                import ipaddress
 
-                import aenum  # isort: skip
+                import aenum
 
                 if isinstance(o, decimal.Decimal):
                     return str(o)

@@ -20,7 +20,7 @@ from pcapkit.utilities.exceptions import FormatError
 from pcapkit.utilities.validations import bool_check, str_check
 
 if TYPE_CHECKING:
-    from typing import Optional, Callable, Type, Any
+    from typing import Any, Callable, Optional, Type
 
     from typing_extensions import Literal
 

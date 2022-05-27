@@ -635,12 +635,12 @@ class Extractor:
                         Converted object.
 
                     """
-                    import datetime  # isort: skip
-                    import decimal  # isort: skip
-                    import enum  # isort: skip
-                    import ipaddress  # isort: skip
+                    import datetime
+                    import decimal
+                    import enum
+                    import ipaddress
 
-                    import aenum  # isort: skip
+                    import aenum
 
                     if isinstance(o, decimal.Decimal):
                         return str(o)
@@ -784,8 +784,8 @@ class Extractor:
             Parsed frame instance.
 
         """
-        from pcapkit.toolkit.default import tcp_traceflow  # isort:skip
-        from pcapkit.toolkit.default import ipv4_reassembly, ipv6_reassembly, tcp_reassembly
+        from pcapkit.toolkit.default import (ipv4_reassembly, ipv6_reassembly, tcp_reassembly,
+                                             tcp_traceflow)
 
         # read frame header
         frame = Frame(self._ifile, num=self._frnum+1, header=self._gbhdr.info,
@@ -880,8 +880,8 @@ class Extractor:
             Please refer to :meth:`_default_read_frame` for more operational information.
 
         """
-        from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly, packet2chain,
-                                           packet2dict, tcp_reassembly, tcp_traceflow)
+        from pcapkit.toolkit.scapy import (ipv4_reassembly, ipv6_reassembly, packet2dict,
+                                           tcp_reassembly, tcp_traceflow)
 
         # fetch Scapy packet
         packet = next(self._extmp)
@@ -1004,8 +1004,8 @@ class Extractor:
             Please refer to :meth:`_default_read_frame` for more operational information.
 
         """
-        from pcapkit.toolkit.dpkt import (ipv4_reassembly, ipv6_reassembly, packet2chain,
-                                          packet2dict, tcp_reassembly, tcp_traceflow)
+        from pcapkit.toolkit.dpkt import (ipv4_reassembly, ipv6_reassembly, packet2dict,
+                                          tcp_reassembly, tcp_traceflow)
 
         # fetch DPKT packet
         timestamp, pkt = cast('tuple[float, bytes]', next(self._extmp))

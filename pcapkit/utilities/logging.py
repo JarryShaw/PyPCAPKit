@@ -6,8 +6,8 @@ of the Python logging system, i.e. a :class:`logging.Logger`
 instance as :data:`~pcapkit.utilities.logging.logger`.
 
 """
-import os
 import logging
+import os
 import sys
 
 __all__ = ['logger']
