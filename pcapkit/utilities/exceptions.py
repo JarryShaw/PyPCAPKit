@@ -14,8 +14,13 @@ import os
 import struct
 import sys
 import traceback
+from typing import TYPE_CHECKING
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
+from pcapkit.utilities.logging import DEVMODE, logger
+
+if TYPE_CHECKING:
+    from typing import Any
 
 __all__ = [
     'stacklevel',
@@ -39,17 +44,8 @@ __all__ = [
     'ModuleNotFound',                                               # ModuleNotFoundError
 ]
 
-# boolean mappings
-BOOLEAN_STATES = {'1': True, '0': False,
-                  'yes': True, 'no': False,
-                  'true': True, 'false': False,
-                  'on': True, 'off': False}
 
-#: Development mode (``DEVMODE``) flag.
-DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold(), False)
-
-
-def stacklevel():
+def stacklevel() -> 'int':
     """Fetch current stack level.
 
     The function will walk through the straceback stack (:func:`traceback.extract_stack`),
@@ -57,7 +53,7 @@ def stacklevel():
     display any disturbing internal traceback information when raising errors.
 
     Returns:
-        int: Stack level until internal stacks, i.e. contains ``/pcapkit/``.
+        Stack level until internal stacks, i.e. contains ``/pcapkit/``.
 
     """
     pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
@@ -93,20 +89,14 @@ class BaseError(Exception):
         :func:`pcapkit.utilities.exceptions.stacklevel`
 
     """
-    def __init__(self, *args, quiet=False, **kwargs):
-        if DEVMODE:
-            index = stacklevel()
-            if not quiet and index:
-                fmt_exc = traceback.format_exc(limit=-index)
-                if len(fmt_exc.splitlines(True)) > 1:
-                    print(fmt_exc, file=sys.stderr)
-        else:
-            sys.tracebacklimit = 0
-        super().__init__(*args, **kwargs)
-
+    def __init__(self, *args: 'Any', quiet: 'bool' = False, **kwargs: 'Any') -> 'None':
         # log error
-        from pcapkit.utilities.logging import logger  # pylint: disable=import-outside-toplevel
-        logger.error(str(self), exc_info=self)
+        if not quiet:
+            if DEVMODE:
+                logger.error(str(self), exc_info=self, stack_info=True, stacklevel=-stacklevel())
+            else:
+                logger.error(str(self))
+        super().__init__(*args, **kwargs)
 
 
 ##############################################################################
