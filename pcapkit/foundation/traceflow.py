@@ -82,6 +82,7 @@ from typing import TYPE_CHECKING, overload
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import FileExists, stacklevel
+from pcapkit.utilities.logging import logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning
 
 if TYPE_CHECKING:
@@ -284,19 +285,24 @@ class TraceFlow:
                     Converted object.
 
                 """
+                import datetime  # isort: skip
+                import decimal  # isort: skip
                 import enum  # isort: skip
-                import aenum  # isort: skip
                 import ipaddress  # isort: skip
 
+                import aenum  # isort: skip
+
+                if isinstance(o, decimal.Decimal):
+                    return str(o)
+                if isinstance(o, datetime.timedelta):
+                    return o.total_seconds()
                 if isinstance(o, Info):
                     return o.to_dict()
                 if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
                     return str(o)
                 if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
                     return dict(
-                        enum=type(o).__name__,
-                        desc=o.__doc__,
-                        name=o.name,
+                        name=f'{type(o).__name__}::{o.name}',
                         value=o.value,
                     )
                 return super().object_hook(o)  # type: ignore[unreachable]
@@ -308,8 +314,11 @@ class TraceFlow:
             def _append_fallback(self, value: 'Any', file: 'TextIO') -> 'None':
                 if hasattr(value, '__slots__'):
                     new_value = {key: getattr(value, key) for key in value.__slots__}
-                else:
+                elif hasattr(value, '__dict__'):
                     new_value = vars(value)
+                else:
+                    logger.warning('unsupported object type: %s', type(value))
+                    new_value = str(value)  # type: ignore[assignment]
 
                 func = self._encode_func(new_value)
                 func(new_value, file)

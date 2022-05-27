@@ -50,7 +50,7 @@ if TYPE_CHECKING:
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
     Protocols = str | Protocol | Type[Protocol]
-    VerboseHandler = Callable[['Extractor', Frame], Any]
+    VerboseHandler = Callable[['Extractor', Frame | ScapyPacket | DPKTPacket | PySharkPacket], Any]
 
 __all__ = ['Extractor']
 
@@ -103,6 +103,8 @@ class Extractor:
     _flag_q: 'bool'
     #: Trace flag.
     _flag_t: 'bool'
+    #: Verbose flag.
+    _flag_v: 'bool'
 
     #: Verbose callback function.
     #_vfunc: 'VerboseHandler'
@@ -431,7 +433,7 @@ class Extractor:
                 ofnm = fout
                 os.makedirs(ofnm, exist_ok=True)
             elif extension:
-                ofnm = f'{fout}.{ext}'
+                ofnm = fout if os.path.splitext(fout)[1] == ext else f'{fout}{ext}'
             else:
                 ofnm = fout
 
@@ -498,13 +500,13 @@ class Extractor:
     ##########################################################################
 
     def __init__(self,
-                 fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,               # basic settings  # pylint: disable=redefined-builtin
-                 auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                         # internal settings
-                 files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                     # output settings
-                 engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]'=None,  # extraction settings
-                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,  # reassembly settings
-                 trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,         # trace settings
-                 trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'None':    # trace settings
+                 fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                 # basic settings  # pylint: disable=redefined-builtin
+                 auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings
+                 files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings
+                 engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings
+                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,    # reassembly settings
+                 trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings
+                 trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'None':      # trace settings
         """Initialise PCAP Reader.
 
         Arguments:
@@ -564,16 +566,19 @@ class Extractor:
         self._flag_f = files   # split file flag
         self._flag_q = nofile  # no output flag
         self._flag_t = trace   # trace flag
+        self._flag_v = False   # verbose flag
 
         # verbose callback function
         if isinstance(verbose, bool):
+            self._flag_v = verbose
             if verbose:
-                self._vfunc = lambda e, f: logger.info(
+                self._vfunc = lambda e, f: print(
                     f'Frame {e._frnum:>3d}: {f.protochain}'
-                )  # type: VerboseHandler # pylint: disable=logging-fstring-interpolation
+                )  # pylint: disable=logging-fstring-interpolation
             else:
                 self._vfunc = lambda e, f: None
         else:
+            self._flag_v = True
             self._vfunc = verbose
 
         self._frnum = 0   # frame number
@@ -630,19 +635,24 @@ class Extractor:
                         Converted object.
 
                     """
+                    import datetime  # isort: skip
+                    import decimal  # isort: skip
                     import enum  # isort: skip
-                    import aenum  # isort: skip
                     import ipaddress  # isort: skip
 
+                    import aenum  # isort: skip
+
+                    if isinstance(o, decimal.Decimal):
+                        return str(o)
+                    if isinstance(o, datetime.timedelta):
+                        return o.total_seconds()
                     if isinstance(o, Info):
                         return o.to_dict()
                     if isinstance(o, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
                         return str(o)
                     if isinstance(o, (enum.IntEnum, aenum.IntEnum)):
                         return dict(
-                            enum=type(o).__name__,
-                            desc=o.__doc__,
-                            name=o.name,
+                            name=f'{type(o).__name__}::{o.name}',
                             value=o.value,
                         )
                     return super().object_hook(o)  # type: ignore[unreachable]
@@ -654,8 +664,11 @@ class Extractor:
                 def _append_fallback(self, value: 'Any', file: 'TextIO') -> 'None':
                     if hasattr(value, '__slots__'):
                         new_value = {key: getattr(value, key) for key in value.__slots__}
-                    else:
+                    elif hasattr(value, '__dict__'):
                         new_value = vars(value)
+                    else:
+                        logger.warning('unsupported object type: %s', type(value))
+                        new_value = str(value)  # type: ignore[assignment]
 
                     func = self._encode_func(new_value)
                     func(new_value, file)
@@ -839,6 +852,13 @@ class Extractor:
                           f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
                           AttributeWarning, stacklevel=stacklevel())
 
+        # setup verbose handler
+        if self._flag_v:
+            from pcapkit.toolkit.scapy import packet2chain  # isort:skip
+            self._vfunc = lambda e, f: print(
+                f'Frame {e._frnum:>3d}: {packet2chain(f)}'
+            )  # pylint: disable=logging-fstring-interpolation
+
         # extract global header
         self.record_header()
         self._ifile.seek(0, os.SEEK_SET)
@@ -932,6 +952,13 @@ class Extractor:
                           f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
                           AttributeWarning, stacklevel=stacklevel())
 
+        # setup verbose handler
+        if self._flag_v:
+            from pcapkit.toolkit.dpkt import packet2chain  # isort:skip
+            self._vfunc = lambda e, f: print(
+                f'Frame {e._frnum:>3d}: {packet2chain(f)}'
+            )  # pylint: disable=logging-fstring-interpolation
+
         # extract global header
         self.record_header()
         self._ifile.seek(0, os.SEEK_SET)
@@ -981,8 +1008,8 @@ class Extractor:
                                           packet2dict, tcp_reassembly, tcp_traceflow)
 
         # fetch DPKT packet
-        timestamp, packet = cast('tuple[float, DPKTPacket]', next(self._extmp))
-        self._expkg(packet)
+        timestamp, pkt = cast('tuple[float, bytes]', next(self._extmp))
+        packet = self._expkg(pkt)  # type: DPKTPacket
 
         # verbose output
         self._frnum += 1
@@ -1057,6 +1084,12 @@ class Extractor:
             warnings.warn("'Extractor(engine=pyshark)' object dose not support reassembly; "
                           f"so 'ipv4={self._ipv4}', 'ipv6={self._ipv6}' and 'tcp={self._tcp}' will be ignored",
                           AttributeWarning, stacklevel=stacklevel())
+
+        # setup verbose handler
+        if self._flag_v:
+            self._vfunc = lambda e, f: print(
+                f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'
+            )  # pylint: disable=logging-fstring-interpolation
 
         # extract & analyse file
         self._expkg = pyshark
