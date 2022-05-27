@@ -10,7 +10,7 @@ logger.setLevel('INFO')
 
 for engine in ['default', 'dpkt', 'scapy', 'pyshark']:
     lid = []
-    for index in range(1):
+    for index in range(1, 101):
         now = time.time()
 
         extraction = pcapkit.extract(fin='../sample/in.pcap', store=False, nofile=True, verbose=False, engine=engine)  # type: ignore[arg-type]
