@@ -45,7 +45,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>proto</strong> (<em>Protocol</em><em> | </em><em>Type</em><em>[</em><em>Protocol</em><em>]</em>) – </p></li>
+<li><p><strong>proto</strong> (<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – </p></li>
 <li><p><strong>alias</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p></li>
 <li><p><strong>basis</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><em>ProtoChain</em></a><em>]</em>) – </p></li>
 </ul>
@@ -86,7 +86,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <dd><p>Returns if <code class="docutils literal notranslate"><span class="pre">name</span></code> is in the chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> | </em><em>Protocol</em><em> | </em><em>Type</em><em>[</em><em>Protocol</em><em>]</em>) – </p>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> | </em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – </p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
@@ -117,7 +117,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>proto</strong> (<em>Protocol</em><em> | </em><em>Type</em><em>[</em><em>Protocol</em><em>]</em>) – New protocol class on the top stack.</p></li>
+<li><p><strong>proto</strong> (<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – New protocol class on the top stack.</p></li>
 <li><p><strong>alias</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – New protocol alias on the top stack.</p></li>
 <li><p><strong>basis</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><em>ProtoChain</em></a><em>]</em>) – </p></li>
 </ul>
@@ -137,7 +137,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <dd class="field-odd"><p>Iterator of protocol alias and class.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Iterator[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, Type[Protocol]]]</p>
+<dd class="field-even"><p>Iterator[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, Type[<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>]]]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -200,7 +200,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <dd><p>Number of occurrences of <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> | </em><em>Protocol</em><em> | </em><em>Type</em><em>[</em><em>Protocol</em><em>]</em>) – Value to search.</p>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> | </em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – Value to search.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
@@ -214,7 +214,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <dd><p>Create a protocol chain from a list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><em>Protocol</em><em> | </em><em>Type</em><em>[</em><em>Protocol</em><em>]</em><em>]</em>) – Protocol chain list.</p>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em><em>]</em>) – Protocol chain list.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference internal" href="#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain">ProtoChain</a></p>
@@ -229,7 +229,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> | </em><em>Protocol</em><em> | </em><em>Type</em><em>[</em><em>Protocol</em><em>]</em>) – Value to search.</p></li>
+<li><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> | </em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – Value to search.</p></li>
 <li><p><strong>start</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – start offset.</p></li>
 <li><p><strong>stop</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em>) – stop offset.</p></li>
 </ul>
@@ -257,7 +257,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.protocols">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">Protocol</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.protocols" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">Protocol</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.protocols" title="Permalink to this definition">¶</a></dt>
 <dd><p>List of protocols in the chain.</p>
 </dd></dl>
 
