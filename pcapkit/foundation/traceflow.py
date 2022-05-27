@@ -75,13 +75,12 @@ trace.index
 """
 import collections
 import importlib
-import pathlib
+import os
 import sys
 import warnings
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.utilities.compat import pathlib
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.warnings import FileWarning, FormatWarning
 
@@ -194,7 +193,7 @@ class TraceFlow:
     #: writing output files. The values should be a tuple representing the
     #: module name, class name and file extension.
     __output__ = collections.defaultdict(
-        lambda: ('pcapkit.dumpkit', 'NotImplementedIO', ''),
+        lambda: ('pcapkit.dumpkit', 'NotImplementedIO', None),
         {
             'pcap': ('pcapkit.dumpkit', 'PCAPIO', '.pcap'),
             'cap': ('pcapkit.dumpkit', 'PCAPIO', '.pcap'),
@@ -259,13 +258,13 @@ class TraceFlow:
 
         """
         module, class_, ext = cls.__output__[fmt]
-        if ext is not None and module == 'pcapkit.dumpkit' and class_ == 'NotImplementedIO':
+        if ext is None:
             warnings.warn(f'Unsupported output format: {fmt}; disabled file output feature',
                           FormatWarning, stacklevel=stacklevel())
         output = getattr(importlib.import_module(module), class_)  # type: Type[Dumper]
 
         try:
-            pathlib.Path(fout).mkdir(parents=True, exist_ok=True)
+            os.makedirs(fout, exist_ok=True)
         except FileExistsError as error:
             if ext is None:
                 warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
@@ -419,7 +418,7 @@ class TraceFlow:
     # Data models.
     ##########################################################################
 
-    def __init__(self, fout: 'str' = './tmp', format: 'str' = 'pcap',  # pylint: disable=redefined-builtin
+    def __init__(self, fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=redefined-builtin
                  byteorder: 'Literal["little", "big"]' = sys.byteorder,
                  nanosecond: bool = False) -> 'None':
         """Initialise instance.
@@ -431,6 +430,11 @@ class TraceFlow:
             nanosecond: output nanosecond-resolution file flag
 
         """
+        if fout is None:
+            fout = './tmp'
+        if format is None:
+            format = 'pcap'
+
         #: str: Output root path.
         self._fproot = fout
 
