@@ -3,19 +3,17 @@ Global Header
   |     |-- data -> d4 c3 b2 a1
   |     |-- byteorder -> little
   |     |-- nanosecond -> False
-  |-- version_major -> 2
-  |-- version_minor -> 4
+  |-- version 
+  |     |-- type -> VersionInfo
+  |     |-- value 
+  |           |--> 2
+  |           |--> 4
   |-- thiszone -> 0
   |-- sigfigs -> 0
   |-- snaplen -> 262144
   |-- network 
-  |     |-- enum -> LinkType
-  |     |-- desc -> [LinkType] Link-Layer Header Type Values
-  |     |-- name -> ETHERNET
-  |     |-- value -> 1
-  |-- packet 
-        |--> d4 c3 b2 a1 02 00 04 00 00 00 00 00 00 00 00 00
-             00 00 04 00 01 00 00 00
+        |-- name -> LinkType::ETHERNET
+        |-- value -> 1
 
 Frame 1
   |-- frame_info 
@@ -23,65 +21,32 @@ Frame 1
   |     |-- ts_usec -> 471719
   |     |-- incl_len -> 86
   |     |-- orig_len -> 86
-  |-- time -> 2017-11-19T23:49:05.471719
+  |-- time -> 2017-11-19T07:49:05.471719
   |-- number -> 1
   |-- time_epoch -> 1511106545.471719
   |-- len -> 86
   |-- cap_len -> 86
-  |-- packet 
-  |     |--> 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd 60 00
-  |          00 00 00 20 3a ff fe 80 00 00 00 00 00 00 00 a6
-  |          87 f9 27 93 16 ee fe 80 00 00 00 00 00 00 1c cd
-  |          7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00 fe 80
-  |          00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7 01 01
-  |          a4 5e 60 d9 6b 97
   |-- ethernet 
   |     |-- dst -> 40:33:1a:d1:85:1c
   |     |-- src -> a4:5e:60:d9:6b:97
   |     |-- type 
-  |     |     |-- enum -> EtherType
-  |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_version_6
+  |     |     |-- name -> EtherType::Internet_Protocol_version_6
   |     |     |-- value -> 34525
-  |     |-- packet 
-  |     |     |-- header -> 40 33 1a d1 85 1c a4 5e 60 d9 6b 97 86 dd
-  |     |     |-- payload 
-  |     |           |--> 60 00 00 00 00 20 3a ff fe 80 00 00 00 00 00 00
-  |     |                00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00 00 00
-  |     |                1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00 00 00
-  |     |                fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
-  |     |                01 01 a4 5e 60 d9 6b 97
   |     |-- ipv6 
   |           |-- version -> 6
   |           |-- class -> 96
   |           |-- label -> 0
   |           |-- payload -> 32
   |           |-- next 
-  |           |     |-- enum -> TransType
-  |           |     |-- desc 
-  |           |     |     |--> [TransType] Transport Layer Protocol
-  |           |     |          Numbers
-  |           |     |-- name -> IPv6_ICMP
+  |           |     |-- name -> TransType::IPv6_ICMP
   |           |     |-- value -> 58
   |           |-- limit -> 255
   |           |-- src -> fe80::a6:87f9:2793:16ee
   |           |-- dst -> fe80::1ccd:7c77:bac7:46b7
-  |           |-- packet 
-  |           |     |-- header 
-  |           |     |     |--> 00 00 00 a6 87 f9 27 93 16 ee fe 80 00 00 00 00
-  |           |     |          00 00 1c cd 7c 77 ba c7 46 b7 87 00 0e aa 00 00
-  |           |     |          00 00 fe 80 00 00 00 00
-  |           |     |-- payload 
-  |           |           |--> 00 00 1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9
-  |           |                6b 97
   |           |-- hdr_len -> 40
   |           |-- raw_len -> 32
   |           |-- protocol 
-  |           |     |-- enum -> TransType
-  |           |     |-- desc 
-  |           |     |     |--> [TransType] Transport Layer Protocol
-  |           |     |          Numbers
-  |           |     |-- name -> IPv6_ICMP
+  |           |     |-- name -> TransType::IPv6_ICMP
   |           |     |-- value -> 58
   |           |-- raw 
   |                 |-- packet 
@@ -96,61 +61,32 @@ Frame 2
   |     |-- ts_usec -> 578078
   |     |-- incl_len -> 78
   |     |-- orig_len -> 78
-  |-- time -> 2017-11-19T23:49:05.578078
+  |-- time -> 2017-11-19T07:49:05.578078
   |-- number -> 2
   |-- time_epoch -> 1511106545.578078
   |-- len -> 78
   |-- cap_len -> 78
-  |-- packet 
-  |     |--> a4 5e 60 d9 6b 97 40 33 1a d1 85 1c 86 dd 60 00
-  |          00 00 00 18 3a ff fe 80 00 00 00 00 00 00 1c cd
-  |          7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00 00 a6
-  |          87 f9 27 93 16 ee 88 00 3f 82 40 00 00 00 fe 80
-  |          00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
   |-- ethernet 
   |     |-- dst -> a4:5e:60:d9:6b:97
   |     |-- src -> 40:33:1a:d1:85:1c
   |     |-- type 
-  |     |     |-- enum -> EtherType
-  |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_version_6
+  |     |     |-- name -> EtherType::Internet_Protocol_version_6
   |     |     |-- value -> 34525
-  |     |-- packet 
-  |     |     |-- header -> a4 5e 60 d9 6b 97 40 33 1a d1 85 1c 86 dd
-  |     |     |-- payload 
-  |     |           |--> 60 00 00 00 00 18 3a ff fe 80 00 00 00 00 00 00
-  |     |                1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00 00 00
-  |     |                00 a6 87 f9 27 93 16 ee 88 00 3f 82 40 00 00 00
-  |     |                fe 80 00 00 00 00 00 00 1c cd 7c 77 ba c7 46 b7
   |     |-- ipv6 
   |           |-- version -> 6
   |           |-- class -> 96
   |           |-- label -> 0
   |           |-- payload -> 24
   |           |-- next 
-  |           |     |-- enum -> TransType
-  |           |     |-- desc 
-  |           |     |     |--> [TransType] Transport Layer Protocol
-  |           |     |          Numbers
-  |           |     |-- name -> IPv6_ICMP
+  |           |     |-- name -> TransType::IPv6_ICMP
   |           |     |-- value -> 58
   |           |-- limit -> 255
   |           |-- src -> fe80::1ccd:7c77:bac7:46b7
   |           |-- dst -> fe80::a6:87f9:2793:16ee
-  |           |-- packet 
-  |           |     |-- header 
-  |           |     |     |--> 00 00 1c cd 7c 77 ba c7 46 b7 fe 80 00 00 00 00
-  |           |     |          00 00 00 a6 87 f9 27 93 16 ee 88 00 3f 82 40 00
-  |           |     |          00 00 fe 80 00 00 00 00
-  |           |     |-- payload -> 00 00 1c cd 7c 77 ba c7 46 b7
   |           |-- hdr_len -> 40
   |           |-- raw_len -> 24
   |           |-- protocol 
-  |           |     |-- enum -> TransType
-  |           |     |-- desc 
-  |           |     |     |--> [TransType] Transport Layer Protocol
-  |           |     |          Numbers
-  |           |     |-- name -> IPv6_ICMP
+  |           |     |-- name -> TransType::IPv6_ICMP
   |           |     |-- value -> 58
   |           |-- raw 
   |                 |-- packet 
@@ -165,112 +101,57 @@ Frame 3
   |     |-- ts_usec -> 777804
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T23:49:09.777804
+  |-- time -> 2017-11-19T07:49:09.777804
   |-- number -> 3
   |-- time_epoch -> 1511106549.777804
   |-- len -> 54
   |-- cap_len -> 54
-  |-- packet 
-  |     |--> a4 5e 60 d9 6b 97 b8 f8 83 a5 f9 47 08 00 45 00
-  |          00 28 c5 34 40 00 2b 06 7a 86 7b 81 d2 87 c0 a8
-  |          01 64 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11
-  |          7c b0 7c 8e 00 00
   |-- ethernet 
   |     |-- dst -> a4:5e:60:d9:6b:97
   |     |-- src -> b8:f8:83:a5:f9:47
   |     |-- type 
-  |     |     |-- enum -> EtherType
-  |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_version_4
+  |     |     |-- name -> EtherType::Internet_Protocol_version_4
   |     |     |-- value -> 2048
-  |     |-- packet 
-  |     |     |-- header -> a4 5e 60 d9 6b 97 b8 f8 83 a5 f9 47 08 00
-  |     |     |-- payload 
-  |     |           |--> 45 00 00 28 c5 34 40 00 2b 06 7a 86 7b 81 d2 87
-  |     |                c0 a8 01 64 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff
-  |     |                50 11 7c b0 7c 8e 00 00
   |     |-- ipv4 
   |           |-- version -> 4
   |           |-- hdr_len -> 20
-  |           |-- dsfield 
-  |           |     |-- dscp 
-  |           |     |     |-- pre 
-  |           |     |     |     |-- enum -> ToSPrecedence
-  |           |     |     |     |-- desc 
-  |           |     |     |     |     |--> [ToSPrecedence] ToS (DS Field)
-  |           |     |     |     |          Precedence
-  |           |     |     |     |-- name -> Routine
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- del 
-  |           |     |     |     |-- enum -> ToSDelay
-  |           |     |     |     |-- desc -> [ToSDelay] ToS (DS Field) Delay
-  |           |     |     |     |-- name -> NORMAL
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- thr 
-  |           |     |     |     |-- enum -> ToSThroughput
-  |           |     |     |     |-- desc 
-  |           |     |     |     |     |--> [ToSThroughput] ToS (DS Field)
-  |           |     |     |     |          Throughput
-  |           |     |     |     |-- name -> NORMAL
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- rel 
-  |           |     |           |-- enum -> ToSReliability
-  |           |     |           |-- desc 
-  |           |     |           |     |--> [ToSReliability] ToS (DS Field)
-  |           |     |           |          Reliability
-  |           |     |           |-- name -> NORMAL
-  |           |     |           |-- value -> 0
+  |           |-- tos 
+  |           |     |-- pre 
+  |           |     |     |-- name -> ToSPrecedence::Routine
+  |           |     |     |-- value -> 0
+  |           |     |-- del 
+  |           |     |     |-- name -> ToSDelay::NORMAL
+  |           |     |     |-- value -> 0
+  |           |     |-- thr 
+  |           |     |     |-- name -> ToSThroughput::NORMAL
+  |           |     |     |-- value -> 0
+  |           |     |-- rel 
+  |           |     |     |-- name -> ToSReliability::NORMAL
+  |           |     |     |-- value -> 0
   |           |     |-- ecn 
-  |           |           |-- enum -> ToSECN
-  |           |           |-- desc -> [ToSECN] ToS ECN Field
-  |           |           |-- name -> Not_ECT
+  |           |           |-- name -> ToSECN::Not_ECT
   |           |           |-- value -> 0
   |           |-- len -> 40
   |           |-- id -> 50484
   |           |-- flags 
   |           |     |-- df -> True
   |           |     |-- mf -> False
-  |           |-- frag_offset -> 0
-  |           |-- ttl -> 43
-  |           |-- proto 
-  |           |     |-- enum -> TransType
-  |           |     |-- desc 
-  |           |     |     |--> [TransType] Transport Layer Protocol
-  |           |     |          Numbers
-  |           |     |-- name -> TCP
+  |           |-- offset -> 0
+  |           |-- ttl -> 43.0
+  |           |-- protocol 
+  |           |     |-- name -> TransType::TCP
   |           |     |-- value -> 6
   |           |-- checksum -> 7a 86
   |           |-- src -> 123.129.210.135
   |           |-- dst -> 192.168.1.100
-  |           |-- packet 
-  |           |     |-- header 
-  |           |     |     |--> d2 87 c0 a8 01 64 00 50 d7 c0 d5 9f b1 54 a6 7a
-  |           |     |          a0 ff 50 11
-  |           |     |-- payload -> 7c b0 7c 8e 00 00
-  |           |-- tcp 
-  |                 |-- srcport -> 80
-  |                 |-- dstport -> 55232
-  |                 |-- seq -> 3584012628
-  |                 |-- ack -> 2793054463
-  |                 |-- hdr_len -> 20
-  |                 |-- flags 
-  |                 |     |-- ns -> False
-  |                 |     |-- cwr -> False
-  |                 |     |-- ece -> False
-  |                 |     |-- urg -> False
-  |                 |     |-- ack -> True
-  |                 |     |-- psh -> False
-  |                 |     |-- rst -> False
-  |                 |     |-- syn -> False
-  |                 |     |-- fin -> True
-  |                 |-- window_size -> 31920
-  |                 |-- checksum -> 7c 8e
-  |                 |-- urgent_pointer -> 0
+  |           |-- raw 
   |                 |-- packet 
-  |                 |     |-- header  -> NIL
-  |                 |     |-- payload  -> NIL
-  |                 |-- nopayload  -> NIL
-  |-- protocols -> Ethernet:IPv4:TCP
+  |                 |     |--> 00 50 d7 c0 d5 9f b1 54 a6 7a a0 ff 50 11 7c b0
+  |                 |          7c 8e 00 00
+  |                 |-- error 
+  |                       |--> AttributeError: 'Flags' object has no
+  |                            attribute 'syn'
+  |-- protocols -> Ethernet:IPv4:Raw
 
 Frame 4
   |-- frame_info 
@@ -278,112 +159,57 @@ Frame 4
   |     |-- ts_usec -> 777868
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T23:49:09.777868
+  |-- time -> 2017-11-19T07:49:09.777868
   |-- number -> 4
   |-- time_epoch -> 1511106549.777868
   |-- len -> 54
   |-- cap_len -> 54
-  |-- packet 
-  |     |--> b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00 45 00
-  |          00 28 00 00 40 00 40 06 2a bb c0 a8 01 64 7b 81
-  |          d2 87 d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10
-  |          ff ff f9 3e 00 00
   |-- ethernet 
   |     |-- dst -> b8:f8:83:a5:f9:47
   |     |-- src -> a4:5e:60:d9:6b:97
   |     |-- type 
-  |     |     |-- enum -> EtherType
-  |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_version_4
+  |     |     |-- name -> EtherType::Internet_Protocol_version_4
   |     |     |-- value -> 2048
-  |     |-- packet 
-  |     |     |-- header -> b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00
-  |     |     |-- payload 
-  |     |           |--> 45 00 00 28 00 00 40 00 40 06 2a bb c0 a8 01 64
-  |     |                7b 81 d2 87 d7 c0 00 50 a6 7a a0 ff d5 9f b1 55
-  |     |                50 10 ff ff f9 3e 00 00
   |     |-- ipv4 
   |           |-- version -> 4
   |           |-- hdr_len -> 20
-  |           |-- dsfield 
-  |           |     |-- dscp 
-  |           |     |     |-- pre 
-  |           |     |     |     |-- enum -> ToSPrecedence
-  |           |     |     |     |-- desc 
-  |           |     |     |     |     |--> [ToSPrecedence] ToS (DS Field)
-  |           |     |     |     |          Precedence
-  |           |     |     |     |-- name -> Routine
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- del 
-  |           |     |     |     |-- enum -> ToSDelay
-  |           |     |     |     |-- desc -> [ToSDelay] ToS (DS Field) Delay
-  |           |     |     |     |-- name -> NORMAL
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- thr 
-  |           |     |     |     |-- enum -> ToSThroughput
-  |           |     |     |     |-- desc 
-  |           |     |     |     |     |--> [ToSThroughput] ToS (DS Field)
-  |           |     |     |     |          Throughput
-  |           |     |     |     |-- name -> NORMAL
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- rel 
-  |           |     |           |-- enum -> ToSReliability
-  |           |     |           |-- desc 
-  |           |     |           |     |--> [ToSReliability] ToS (DS Field)
-  |           |     |           |          Reliability
-  |           |     |           |-- name -> NORMAL
-  |           |     |           |-- value -> 0
+  |           |-- tos 
+  |           |     |-- pre 
+  |           |     |     |-- name -> ToSPrecedence::Routine
+  |           |     |     |-- value -> 0
+  |           |     |-- del 
+  |           |     |     |-- name -> ToSDelay::NORMAL
+  |           |     |     |-- value -> 0
+  |           |     |-- thr 
+  |           |     |     |-- name -> ToSThroughput::NORMAL
+  |           |     |     |-- value -> 0
+  |           |     |-- rel 
+  |           |     |     |-- name -> ToSReliability::NORMAL
+  |           |     |     |-- value -> 0
   |           |     |-- ecn 
-  |           |           |-- enum -> ToSECN
-  |           |           |-- desc -> [ToSECN] ToS ECN Field
-  |           |           |-- name -> Not_ECT
+  |           |           |-- name -> ToSECN::Not_ECT
   |           |           |-- value -> 0
   |           |-- len -> 40
   |           |-- id -> 0
   |           |-- flags 
   |           |     |-- df -> True
   |           |     |-- mf -> False
-  |           |-- frag_offset -> 0
-  |           |-- ttl -> 64
-  |           |-- proto 
-  |           |     |-- enum -> TransType
-  |           |     |-- desc 
-  |           |     |     |--> [TransType] Transport Layer Protocol
-  |           |     |          Numbers
-  |           |     |-- name -> TCP
+  |           |-- offset -> 0
+  |           |-- ttl -> 64.0
+  |           |-- protocol 
+  |           |     |-- name -> TransType::TCP
   |           |     |-- value -> 6
   |           |-- checksum -> 2a bb
   |           |-- src -> 192.168.1.100
   |           |-- dst -> 123.129.210.135
-  |           |-- packet 
-  |           |     |-- header 
-  |           |     |     |--> 01 64 7b 81 d2 87 d7 c0 00 50 a6 7a a0 ff d5 9f
-  |           |     |          b1 55 50 10
-  |           |     |-- payload -> ff ff f9 3e 00 00
-  |           |-- tcp 
-  |                 |-- srcport -> 55232
-  |                 |-- dstport -> 80
-  |                 |-- seq -> 2793054463
-  |                 |-- ack -> 3584012629
-  |                 |-- hdr_len -> 20
-  |                 |-- flags 
-  |                 |     |-- ns -> False
-  |                 |     |-- cwr -> False
-  |                 |     |-- ece -> False
-  |                 |     |-- urg -> False
-  |                 |     |-- ack -> True
-  |                 |     |-- psh -> False
-  |                 |     |-- rst -> False
-  |                 |     |-- syn -> False
-  |                 |     |-- fin -> False
-  |                 |-- window_size -> 65535
-  |                 |-- checksum -> f9 3e
-  |                 |-- urgent_pointer -> 0
+  |           |-- raw 
   |                 |-- packet 
-  |                 |     |-- header  -> NIL
-  |                 |     |-- payload  -> NIL
-  |                 |-- nopayload  -> NIL
-  |-- protocols -> Ethernet:IPv4:TCP
+  |                 |     |--> d7 c0 00 50 a6 7a a0 ff d5 9f b1 55 50 10 ff ff
+  |                 |          f9 3e 00 00
+  |                 |-- error 
+  |                       |--> AttributeError: 'Flags' object has no
+  |                            attribute 'syn'
+  |-- protocols -> Ethernet:IPv4:Raw
 
 Frame 5
   |-- frame_info 
@@ -391,112 +217,57 @@ Frame 5
   |     |-- ts_usec -> 913720
   |     |-- incl_len -> 54
   |     |-- orig_len -> 54
-  |-- time -> 2017-11-19T23:49:09.913720
+  |-- time -> 2017-11-19T07:49:09.913720
   |-- number -> 5
   |-- time_epoch -> 1511106549.91372
   |-- len -> 54
   |-- cap_len -> 54
-  |-- packet 
-  |     |--> b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00 45 00
-  |          00 28 00 00 40 00 40 06 2a bb c0 a8 01 64 7b 81
-  |          d2 87 d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11
-  |          ff ff 2a f4 00 00
   |-- ethernet 
   |     |-- dst -> b8:f8:83:a5:f9:47
   |     |-- src -> a4:5e:60:d9:6b:97
   |     |-- type 
-  |     |     |-- enum -> EtherType
-  |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_version_4
+  |     |     |-- name -> EtherType::Internet_Protocol_version_4
   |     |     |-- value -> 2048
-  |     |-- packet 
-  |     |     |-- header -> b8 f8 83 a5 f9 47 a4 5e 60 d9 6b 97 08 00
-  |     |     |-- payload 
-  |     |           |--> 45 00 00 28 00 00 40 00 40 06 2a bb c0 a8 01 64
-  |     |                7b 81 d2 87 d7 b0 00 50 2d d4 8d 21 6d 65 74 6e
-  |     |                50 11 ff ff 2a f4 00 00
   |     |-- ipv4 
   |           |-- version -> 4
   |           |-- hdr_len -> 20
-  |           |-- dsfield 
-  |           |     |-- dscp 
-  |           |     |     |-- pre 
-  |           |     |     |     |-- enum -> ToSPrecedence
-  |           |     |     |     |-- desc 
-  |           |     |     |     |     |--> [ToSPrecedence] ToS (DS Field)
-  |           |     |     |     |          Precedence
-  |           |     |     |     |-- name -> Routine
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- del 
-  |           |     |     |     |-- enum -> ToSDelay
-  |           |     |     |     |-- desc -> [ToSDelay] ToS (DS Field) Delay
-  |           |     |     |     |-- name -> NORMAL
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- thr 
-  |           |     |     |     |-- enum -> ToSThroughput
-  |           |     |     |     |-- desc 
-  |           |     |     |     |     |--> [ToSThroughput] ToS (DS Field)
-  |           |     |     |     |          Throughput
-  |           |     |     |     |-- name -> NORMAL
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- rel 
-  |           |     |           |-- enum -> ToSReliability
-  |           |     |           |-- desc 
-  |           |     |           |     |--> [ToSReliability] ToS (DS Field)
-  |           |     |           |          Reliability
-  |           |     |           |-- name -> NORMAL
-  |           |     |           |-- value -> 0
+  |           |-- tos 
+  |           |     |-- pre 
+  |           |     |     |-- name -> ToSPrecedence::Routine
+  |           |     |     |-- value -> 0
+  |           |     |-- del 
+  |           |     |     |-- name -> ToSDelay::NORMAL
+  |           |     |     |-- value -> 0
+  |           |     |-- thr 
+  |           |     |     |-- name -> ToSThroughput::NORMAL
+  |           |     |     |-- value -> 0
+  |           |     |-- rel 
+  |           |     |     |-- name -> ToSReliability::NORMAL
+  |           |     |     |-- value -> 0
   |           |     |-- ecn 
-  |           |           |-- enum -> ToSECN
-  |           |           |-- desc -> [ToSECN] ToS ECN Field
-  |           |           |-- name -> Not_ECT
+  |           |           |-- name -> ToSECN::Not_ECT
   |           |           |-- value -> 0
   |           |-- len -> 40
   |           |-- id -> 0
   |           |-- flags 
   |           |     |-- df -> True
   |           |     |-- mf -> False
-  |           |-- frag_offset -> 0
-  |           |-- ttl -> 64
-  |           |-- proto 
-  |           |     |-- enum -> TransType
-  |           |     |-- desc 
-  |           |     |     |--> [TransType] Transport Layer Protocol
-  |           |     |          Numbers
-  |           |     |-- name -> TCP
+  |           |-- offset -> 0
+  |           |-- ttl -> 64.0
+  |           |-- protocol 
+  |           |     |-- name -> TransType::TCP
   |           |     |-- value -> 6
   |           |-- checksum -> 2a bb
   |           |-- src -> 192.168.1.100
   |           |-- dst -> 123.129.210.135
-  |           |-- packet 
-  |           |     |-- header 
-  |           |     |     |--> 01 64 7b 81 d2 87 d7 b0 00 50 2d d4 8d 21 6d 65
-  |           |     |          74 6e 50 11
-  |           |     |-- payload -> ff ff 2a f4 00 00
-  |           |-- tcp 
-  |                 |-- srcport -> 55216
-  |                 |-- dstport -> 80
-  |                 |-- seq -> 768904481
-  |                 |-- ack -> 1835365486
-  |                 |-- hdr_len -> 20
-  |                 |-- flags 
-  |                 |     |-- ns -> False
-  |                 |     |-- cwr -> False
-  |                 |     |-- ece -> False
-  |                 |     |-- urg -> False
-  |                 |     |-- ack -> True
-  |                 |     |-- psh -> False
-  |                 |     |-- rst -> False
-  |                 |     |-- syn -> False
-  |                 |     |-- fin -> True
-  |                 |-- window_size -> 65535
-  |                 |-- checksum -> 2a f4
-  |                 |-- urgent_pointer -> 0
+  |           |-- raw 
   |                 |-- packet 
-  |                 |     |-- header  -> NIL
-  |                 |     |-- payload  -> NIL
-  |                 |-- nopayload  -> NIL
-  |-- protocols -> Ethernet:IPv4:TCP
+  |                 |     |--> d7 b0 00 50 2d d4 8d 21 6d 65 74 6e 50 11 ff ff
+  |                 |          2a f4 00 00
+  |                 |-- error 
+  |                       |--> AttributeError: 'Flags' object has no
+  |                            attribute 'syn'
+  |-- protocols -> Ethernet:IPv4:Raw
 
 Frame 6
   |-- frame_info 
@@ -504,123 +275,54 @@ Frame 6
   |     |-- ts_usec -> 66835
   |     |-- incl_len -> 159
   |     |-- orig_len -> 159
-  |-- time -> 2017-11-19T23:49:11.066835
+  |-- time -> 2017-11-19T07:49:11.066835
   |-- number -> 6
   |-- time_epoch -> 1511106551.066835
   |-- len -> 159
   |-- cap_len -> 159
-  |-- packet 
-  |     |--> ff ff ff ff ff ff b8 f8 83 a5 f9 47 08 00 45 00
-  |          00 91 00 00 40 00 40 11 78 b3 c0 a8 01 01 ff ff
-  |          ff ff 92 44 13 89 00 7d 63 b1 01 01 0e 00 e1 2b
-  |          83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57
-  |          44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00
-  |          01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41
-  |          35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31
-  |          36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69
-  |          6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33
-  |          30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34
   |-- ethernet 
   |     |-- dst -> ff:ff:ff:ff:ff:ff
   |     |-- src -> b8:f8:83:a5:f9:47
   |     |-- type 
-  |     |     |-- enum -> EtherType
-  |     |     |-- desc -> [EtherType] Ethertype IEEE 802 Numbers
-  |     |     |-- name -> Internet_Protocol_version_4
+  |     |     |-- name -> EtherType::Internet_Protocol_version_4
   |     |     |-- value -> 2048
-  |     |-- packet 
-  |     |     |-- header -> ff ff ff ff ff ff b8 f8 83 a5 f9 47 08 00
-  |     |     |-- payload 
-  |     |           |--> 45 00 00 91 00 00 40 00 40 11 78 b3 c0 a8 01 01
-  |     |                ff ff ff ff 92 44 13 89 00 7d 63 b1 01 01 0e 00
-  |     |                e1 2b 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c
-  |     |                2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00
-  |     |                07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33
-  |     |                2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32
-  |     |                2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f
-  |     |                67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52
-  |     |                36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e
-  |     |                34
   |     |-- ipv4 
   |           |-- version -> 4
   |           |-- hdr_len -> 20
-  |           |-- dsfield 
-  |           |     |-- dscp 
-  |           |     |     |-- pre 
-  |           |     |     |     |-- enum -> ToSPrecedence
-  |           |     |     |     |-- desc 
-  |           |     |     |     |     |--> [ToSPrecedence] ToS (DS Field)
-  |           |     |     |     |          Precedence
-  |           |     |     |     |-- name -> Routine
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- del 
-  |           |     |     |     |-- enum -> ToSDelay
-  |           |     |     |     |-- desc -> [ToSDelay] ToS (DS Field) Delay
-  |           |     |     |     |-- name -> NORMAL
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- thr 
-  |           |     |     |     |-- enum -> ToSThroughput
-  |           |     |     |     |-- desc 
-  |           |     |     |     |     |--> [ToSThroughput] ToS (DS Field)
-  |           |     |     |     |          Throughput
-  |           |     |     |     |-- name -> NORMAL
-  |           |     |     |     |-- value -> 0
-  |           |     |     |-- rel 
-  |           |     |           |-- enum -> ToSReliability
-  |           |     |           |-- desc 
-  |           |     |           |     |--> [ToSReliability] ToS (DS Field)
-  |           |     |           |          Reliability
-  |           |     |           |-- name -> NORMAL
-  |           |     |           |-- value -> 0
+  |           |-- tos 
+  |           |     |-- pre 
+  |           |     |     |-- name -> ToSPrecedence::Routine
+  |           |     |     |-- value -> 0
+  |           |     |-- del 
+  |           |     |     |-- name -> ToSDelay::NORMAL
+  |           |     |     |-- value -> 0
+  |           |     |-- thr 
+  |           |     |     |-- name -> ToSThroughput::NORMAL
+  |           |     |     |-- value -> 0
+  |           |     |-- rel 
+  |           |     |     |-- name -> ToSReliability::NORMAL
+  |           |     |     |-- value -> 0
   |           |     |-- ecn 
-  |           |           |-- enum -> ToSECN
-  |           |           |-- desc -> [ToSECN] ToS ECN Field
-  |           |           |-- name -> Not_ECT
+  |           |           |-- name -> ToSECN::Not_ECT
   |           |           |-- value -> 0
   |           |-- len -> 145
   |           |-- id -> 0
   |           |-- flags 
   |           |     |-- df -> True
   |           |     |-- mf -> False
-  |           |-- frag_offset -> 0
-  |           |-- ttl -> 64
-  |           |-- proto 
-  |           |     |-- enum -> TransType
-  |           |     |-- desc 
-  |           |     |     |--> [TransType] Transport Layer Protocol
-  |           |     |          Numbers
-  |           |     |-- name -> UDP
+  |           |-- offset -> 0
+  |           |-- ttl -> 64.0
+  |           |-- protocol 
+  |           |     |-- name -> TransType::UDP
   |           |     |-- value -> 17
   |           |-- checksum -> 78 b3
   |           |-- src -> 192.168.1.1
   |           |-- dst -> 255.255.255.255
-  |           |-- packet 
-  |           |     |-- header 
-  |           |     |     |--> 01 01 ff ff ff ff 92 44 13 89 00 7d 63 b1 01 01
-  |           |     |          0e 00 e1 2b
-  |           |     |-- payload 
-  |           |           |--> 83 c7 f9 8b 00 67 00 00 00 06 00 0a 54 4c 2d 57
-  |           |                44 52 36 33 30 30 00 0b 00 03 36 2e 30 00 07 00
-  |           |                01 01 00 05 00 11 42 38 2d 46 38 2d 38 33 2d 41
-  |           |                35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32 2e 31
-  |           |                36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f 67 69
-  |           |                6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52 36 33
-  |           |                30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e 34
   |           |-- udp 
   |                 |-- srcport -> 37444
   |                 |-- dstport -> 5001
   |                 |-- len -> 125
   |                 |-- checksum -> 63 b1
-  |                 |-- packet 
-  |                 |     |-- header -> 00 00 00 06 00 0a 54 4c
-  |                 |     |-- payload 
-  |                 |           |--> 2d 57 44 52 36 33 30 30 00 0b 00 03 36 2e 30 00
-  |                 |                07 00 01 01 00 05 00 11 42 38 2d 46 38 2d 38 33
-  |                 |                2d 41 35 2d 46 39 2d 34 37 00 08 00 0b 31 39 32
-  |                 |                2e 31 36 38 2e 31 2e 31 00 09 00 0a 74 70 6c 6f
-  |                 |                67 69 6e 2e 63 6e 00 0a 00 0e 54 4c 2d 57 44 52
-  |                 |                36 33 30 30 20 36 2e 30 00 0c 00 05 31 2e 37 2e
-  |                 |                34
   |                 |-- raw 
   |                       |-- packet 
   |                       |     |--> 01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06

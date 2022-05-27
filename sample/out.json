@@ -9,21 +9,16 @@
 			"byteorder": "little",
 			"nanosecond": false
 		},
-		"version_major": 2,
-		"version_minor": 4,
+		"version": {
+			"type": "VersionInfo",
+			"value": [ 2, 4 ]
+		},
 		"thiszone": 0,
 		"sigfigs": 0,
 		"snaplen": 262144,
 		"network": {
-			"enum": "LinkType",
-			"desc": "[LinkType] Link-Layer Header Type Values",
-			"name": "ETHERNET",
+			"name": "LinkType::ETHERNET",
 			"value": 1
-		},
-		"packet": {
-			"type": "bytes",
-			"value": "\ufffd\u00f2\ufffd\u0002\u0000\u0004\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0004\u0000\u0001\u0000\u0000\u0000",
-			"hex": "d4c3b2a10200040000000000000000000000040001000000"
 		}
 	},
 	"Frame 1": {
@@ -33,36 +28,17 @@
 			"incl_len": 86,
 			"orig_len": 86
 		},
-		"time": "2017-11-19T23:49:05.471719",
+		"time": "2017-11-19T07:49:05.471719",
 		"number": 1,
-		"time_epoch": 1511106545.471719,
+		"time_epoch": "1511106545.471719",
 		"len": 86,
 		"cap_len": 86,
-		"packet": {
-			"type": "bytes",
-			"value": "@3\u001a\u0445\u001c\ufffd^`\ufffdk\ufffd\ufffd\ufffd`\u0000\u0000\u0000\u0000 :\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\ufffd\ufffd\ufffd'\ufffd\u0016\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\ufffd\u0000\u000e\ufffd\u0000\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\u0001\u0001\ufffd^`\ufffdk\ufffd",
-			"hex": "40331ad1851ca45e60d96b9786dd6000000000203afffe8000000000000000a687f9279316eefe800000000000001ccd7c77bac746b787000eaa00000000fe800000000000001ccd7c77bac746b70101a45e60d96b97"
-		},
 		"ethernet": {
 			"dst": "40:33:1a:d1:85:1c",
 			"src": "a4:5e:60:d9:6b:97",
 			"type": {
-				"enum": "EtherType",
-				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_version_6",
+				"name": "EtherType::Internet_Protocol_version_6",
 				"value": 34525
-			},
-			"packet": {
-				"header": {
-					"type": "bytes",
-					"value": "@3\u001a\u0445\u001c\ufffd^`\ufffdk\ufffd\ufffd\ufffd",
-					"hex": "40331ad1851ca45e60d96b9786dd"
-				},
-				"payload": {
-					"type": "bytes",
-					"value": "`\u0000\u0000\u0000\u0000 :\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\ufffd\ufffd\ufffd'\ufffd\u0016\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\ufffd\u0000\u000e\ufffd\u0000\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\u0001\u0001\ufffd^`\ufffdk\ufffd",
-					"hex": "6000000000203afffe8000000000000000a687f9279316eefe800000000000001ccd7c77bac746b787000eaa00000000fe800000000000001ccd7c77bac746b70101a45e60d96b97"
-				}
 			},
 			"ipv6": {
 				"version": 6,
@@ -70,32 +46,16 @@
 				"label": 0,
 				"payload": 32,
 				"next": {
-					"enum": "TransType",
-					"desc": "[TransType] Transport Layer Protocol Numbers",
-					"name": "IPv6_ICMP",
+					"name": "TransType::IPv6_ICMP",
 					"value": 58
 				},
 				"limit": 255,
 				"src": "fe80::a6:87f9:2793:16ee",
 				"dst": "fe80::1ccd:7c77:bac7:46b7",
-				"packet": {
-					"header": {
-						"type": "bytes",
-						"value": "\u0000\u0000\u0000\ufffd\ufffd\ufffd'\ufffd\u0016\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\ufffd\u0000\u000e\ufffd\u0000\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000",
-						"hex": "000000a687f9279316eefe800000000000001ccd7c77bac746b787000eaa00000000fe8000000000"
-					},
-					"payload": {
-						"type": "bytes",
-						"value": "\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\u0001\u0001\ufffd^`\ufffdk\ufffd",
-						"hex": "00001ccd7c77bac746b70101a45e60d96b97"
-					}
-				},
 				"hdr_len": 40,
 				"raw_len": 32,
 				"protocol": {
-					"enum": "TransType",
-					"desc": "[TransType] Transport Layer Protocol Numbers",
-					"name": "IPv6_ICMP",
+					"name": "TransType::IPv6_ICMP",
 					"value": 58
 				},
 				"raw": {
@@ -117,36 +77,17 @@
 			"incl_len": 78,
 			"orig_len": 78
 		},
-		"time": "2017-11-19T23:49:05.578078",
+		"time": "2017-11-19T07:49:05.578078",
 		"number": 2,
-		"time_epoch": 1511106545.578078,
+		"time_epoch": "1511106545.578078",
 		"len": 78,
 		"cap_len": 78,
-		"packet": {
-			"type": "bytes",
-			"value": "\ufffd^`\ufffdk\ufffd@3\u001a\u0445\u001c\ufffd\ufffd`\u0000\u0000\u0000\u0000\u0018:\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\ufffd\ufffd\ufffd'\ufffd\u0016\ufffd\u0000?\ufffd@\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd",
-			"hex": "a45e60d96b9740331ad1851c86dd6000000000183afffe800000000000001ccd7c77bac746b7fe8000000000000000a687f9279316ee88003f8240000000fe800000000000001ccd7c77bac746b7"
-		},
 		"ethernet": {
 			"dst": "a4:5e:60:d9:6b:97",
 			"src": "40:33:1a:d1:85:1c",
 			"type": {
-				"enum": "EtherType",
-				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_version_6",
+				"name": "EtherType::Internet_Protocol_version_6",
 				"value": 34525
-			},
-			"packet": {
-				"header": {
-					"type": "bytes",
-					"value": "\ufffd^`\ufffdk\ufffd@3\u001a\u0445\u001c\ufffd\ufffd",
-					"hex": "a45e60d96b9740331ad1851c86dd"
-				},
-				"payload": {
-					"type": "bytes",
-					"value": "`\u0000\u0000\u0000\u0000\u0018:\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\ufffd\ufffd\ufffd'\ufffd\u0016\ufffd\u0000?\ufffd@\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd",
-					"hex": "6000000000183afffe800000000000001ccd7c77bac746b7fe8000000000000000a687f9279316ee88003f8240000000fe800000000000001ccd7c77bac746b7"
-				}
 			},
 			"ipv6": {
 				"version": 6,
@@ -154,32 +95,16 @@
 				"label": 0,
 				"payload": 24,
 				"next": {
-					"enum": "TransType",
-					"desc": "[TransType] Transport Layer Protocol Numbers",
-					"name": "IPv6_ICMP",
+					"name": "TransType::IPv6_ICMP",
 					"value": 58
 				},
 				"limit": 255,
 				"src": "fe80::1ccd:7c77:bac7:46b7",
 				"dst": "fe80::a6:87f9:2793:16ee",
-				"packet": {
-					"header": {
-						"type": "bytes",
-						"value": "\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u0000\ufffd\ufffd\ufffd'\ufffd\u0016\ufffd\u0000?\ufffd@\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000",
-						"hex": "00001ccd7c77bac746b7fe8000000000000000a687f9279316ee88003f8240000000fe8000000000"
-					},
-					"payload": {
-						"type": "bytes",
-						"value": "\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd",
-						"hex": "00001ccd7c77bac746b7"
-					}
-				},
 				"hdr_len": 40,
 				"raw_len": 24,
 				"protocol": {
-					"enum": "TransType",
-					"desc": "[TransType] Transport Layer Protocol Numbers",
-					"name": "IPv6_ICMP",
+					"name": "TransType::IPv6_ICMP",
 					"value": 58
 				},
 				"raw": {
@@ -201,71 +126,40 @@
 			"incl_len": 54,
 			"orig_len": 54
 		},
-		"time": "2017-11-19T23:49:09.777804",
+		"time": "2017-11-19T07:49:09.777804",
 		"number": 3,
-		"time_epoch": 1511106549.777804,
+		"time_epoch": "1511106549.777804",
 		"len": 54,
 		"cap_len": 54,
-		"packet": {
-			"type": "bytes",
-			"value": "\ufffd^`\ufffdk\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdG\u0008\u0000E\u0000\u0000(\ufffd4@\u0000+\u0006z\ufffd{\ufffd\u0487\ufffd\ufffd\u0001d\u0000P\ufffd\ufffd\u055f\ufffdT\ufffdz\ufffd\ufffdP\u0011|\ufffd|\ufffd\u0000\u0000",
-			"hex": "a45e60d96b97b8f883a5f947080045000028c53440002b067a867b81d287c0a801640050d7c0d59fb154a67aa0ff50117cb07c8e0000"
-		},
 		"ethernet": {
 			"dst": "a4:5e:60:d9:6b:97",
 			"src": "b8:f8:83:a5:f9:47",
 			"type": {
-				"enum": "EtherType",
-				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_version_4",
+				"name": "EtherType::Internet_Protocol_version_4",
 				"value": 2048
-			},
-			"packet": {
-				"header": {
-					"type": "bytes",
-					"value": "\ufffd^`\ufffdk\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdG\u0008\u0000",
-					"hex": "a45e60d96b97b8f883a5f9470800"
-				},
-				"payload": {
-					"type": "bytes",
-					"value": "E\u0000\u0000(\ufffd4@\u0000+\u0006z\ufffd{\ufffd\u0487\ufffd\ufffd\u0001d\u0000P\ufffd\ufffd\u055f\ufffdT\ufffdz\ufffd\ufffdP\u0011|\ufffd|\ufffd\u0000\u0000",
-					"hex": "45000028c53440002b067a867b81d287c0a801640050d7c0d59fb154a67aa0ff50117cb07c8e0000"
-				}
 			},
 			"ipv4": {
 				"version": 4,
 				"hdr_len": 20,
-				"dsfield": {
-					"dscp": {
-						"pre": {
-							"enum": "ToSPrecedence",
-							"desc": "[ToSPrecedence] ToS (DS Field) Precedence",
-							"name": "Routine",
-							"value": 0
-						},
-						"del": {
-							"enum": "ToSDelay",
-							"desc": "[ToSDelay] ToS (DS Field) Delay",
-							"name": "NORMAL",
-							"value": 0
-						},
-						"thr": {
-							"enum": "ToSThroughput",
-							"desc": "[ToSThroughput] ToS (DS Field) Throughput",
-							"name": "NORMAL",
-							"value": 0
-						},
-						"rel": {
-							"enum": "ToSReliability",
-							"desc": "[ToSReliability] ToS (DS Field) Reliability",
-							"name": "NORMAL",
-							"value": 0
-						}
+				"tos": {
+					"pre": {
+						"name": "ToSPrecedence::Routine",
+						"value": 0
+					},
+					"del": {
+						"name": "ToSDelay::NORMAL",
+						"value": 0
+					},
+					"thr": {
+						"name": "ToSThroughput::NORMAL",
+						"value": 0
+					},
+					"rel": {
+						"name": "ToSReliability::NORMAL",
+						"value": 0
 					},
 					"ecn": {
-						"enum": "ToSECN",
-						"desc": "[ToSECN] ToS ECN Field",
-						"name": "Not_ECT",
+						"name": "ToSECN::Not_ECT",
 						"value": 0
 					}
 				},
@@ -275,12 +169,10 @@
 					"df": true,
 					"mf": false
 				},
-				"frag_offset": 0,
-				"ttl": 43,
-				"proto": {
-					"enum": "TransType",
-					"desc": "[TransType] Transport Layer Protocol Numbers",
-					"name": "TCP",
+				"offset": 0,
+				"ttl": 43.0,
+				"protocol": {
+					"name": "TransType::TCP",
 					"value": 6
 				},
 				"checksum": {
@@ -290,60 +182,17 @@
 				},
 				"src": "123.129.210.135",
 				"dst": "192.168.1.100",
-				"packet": {
-					"header": {
-						"type": "bytes",
-						"value": "\u0487\ufffd\ufffd\u0001d\u0000P\ufffd\ufffd\u055f\ufffdT\ufffdz\ufffd\ufffdP\u0011",
-						"hex": "d287c0a801640050d7c0d59fb154a67aa0ff5011"
-					},
-					"payload": {
-						"type": "bytes",
-						"value": "|\ufffd|\ufffd\u0000\u0000",
-						"hex": "7cb07c8e0000"
-					}
-				},
-				"tcp": {
-					"srcport": 80,
-					"dstport": 55232,
-					"seq": 3584012628,
-					"ack": 2793054463,
-					"hdr_len": 20,
-					"flags": {
-						"ns": false,
-						"cwr": false,
-						"ece": false,
-						"urg": false,
-						"ack": true,
-						"psh": false,
-						"rst": false,
-						"syn": false,
-						"fin": true
-					},
-					"window_size": 31920,
-					"checksum": {
-						"type": "bytes",
-						"value": "|\ufffd",
-						"hex": "7c8e"
-					},
-					"urgent_pointer": 0,
+				"raw": {
 					"packet": {
-						"header": {
-							"type": "bytes",
-							"value": "",
-							"hex": ""
-						},
-						"payload": {
-							"type": "bytes",
-							"value": "",
-							"hex": ""
-						}
+						"type": "bytes",
+						"value": "\u0000P\ufffd\ufffd\u055f\ufffdT\ufffdz\ufffd\ufffdP\u0011|\ufffd|\ufffd\u0000\u0000",
+						"hex": "0050d7c0d59fb154a67aa0ff50117cb07c8e0000"
 					},
-					"nopayload": {
-					}
+					"error": "AttributeError: 'Flags' object has no attribute 'syn'"
 				}
 			}
 		},
-		"protocols": "Ethernet:IPv4:TCP"
+		"protocols": "Ethernet:IPv4:Raw"
 	},
 	"Frame 4": {
 		"frame_info": {
@@ -352,71 +201,40 @@
 			"incl_len": 54,
 			"orig_len": 54
 		},
-		"time": "2017-11-19T23:49:09.777868",
+		"time": "2017-11-19T07:49:09.777868",
 		"number": 4,
-		"time_epoch": 1511106549.777868,
+		"time_epoch": "1511106549.777868",
 		"len": 54,
 		"cap_len": 54,
-		"packet": {
-			"type": "bytes",
-			"value": "\ufffd\ufffd\ufffd\ufffd\ufffdG\ufffd^`\ufffdk\ufffd\u0008\u0000E\u0000\u0000(\u0000\u0000@\u0000@\u0006*\ufffd\ufffd\ufffd\u0001d{\ufffd\u0487\ufffd\ufffd\u0000P\ufffdz\ufffd\ufffd\u055f\ufffdUP\u0010\ufffd\ufffd\ufffd>\u0000\u0000",
-			"hex": "b8f883a5f947a45e60d96b970800450000280000400040062abbc0a801647b81d287d7c00050a67aa0ffd59fb1555010fffff93e0000"
-		},
 		"ethernet": {
 			"dst": "b8:f8:83:a5:f9:47",
 			"src": "a4:5e:60:d9:6b:97",
 			"type": {
-				"enum": "EtherType",
-				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_version_4",
+				"name": "EtherType::Internet_Protocol_version_4",
 				"value": 2048
-			},
-			"packet": {
-				"header": {
-					"type": "bytes",
-					"value": "\ufffd\ufffd\ufffd\ufffd\ufffdG\ufffd^`\ufffdk\ufffd\u0008\u0000",
-					"hex": "b8f883a5f947a45e60d96b970800"
-				},
-				"payload": {
-					"type": "bytes",
-					"value": "E\u0000\u0000(\u0000\u0000@\u0000@\u0006*\ufffd\ufffd\ufffd\u0001d{\ufffd\u0487\ufffd\ufffd\u0000P\ufffdz\ufffd\ufffd\u055f\ufffdUP\u0010\ufffd\ufffd\ufffd>\u0000\u0000",
-					"hex": "450000280000400040062abbc0a801647b81d287d7c00050a67aa0ffd59fb1555010fffff93e0000"
-				}
 			},
 			"ipv4": {
 				"version": 4,
 				"hdr_len": 20,
-				"dsfield": {
-					"dscp": {
-						"pre": {
-							"enum": "ToSPrecedence",
-							"desc": "[ToSPrecedence] ToS (DS Field) Precedence",
-							"name": "Routine",
-							"value": 0
-						},
-						"del": {
-							"enum": "ToSDelay",
-							"desc": "[ToSDelay] ToS (DS Field) Delay",
-							"name": "NORMAL",
-							"value": 0
-						},
-						"thr": {
-							"enum": "ToSThroughput",
-							"desc": "[ToSThroughput] ToS (DS Field) Throughput",
-							"name": "NORMAL",
-							"value": 0
-						},
-						"rel": {
-							"enum": "ToSReliability",
-							"desc": "[ToSReliability] ToS (DS Field) Reliability",
-							"name": "NORMAL",
-							"value": 0
-						}
+				"tos": {
+					"pre": {
+						"name": "ToSPrecedence::Routine",
+						"value": 0
+					},
+					"del": {
+						"name": "ToSDelay::NORMAL",
+						"value": 0
+					},
+					"thr": {
+						"name": "ToSThroughput::NORMAL",
+						"value": 0
+					},
+					"rel": {
+						"name": "ToSReliability::NORMAL",
+						"value": 0
 					},
 					"ecn": {
-						"enum": "ToSECN",
-						"desc": "[ToSECN] ToS ECN Field",
-						"name": "Not_ECT",
+						"name": "ToSECN::Not_ECT",
 						"value": 0
 					}
 				},
@@ -426,12 +244,10 @@
 					"df": true,
 					"mf": false
 				},
-				"frag_offset": 0,
-				"ttl": 64,
-				"proto": {
-					"enum": "TransType",
-					"desc": "[TransType] Transport Layer Protocol Numbers",
-					"name": "TCP",
+				"offset": 0,
+				"ttl": 64.0,
+				"protocol": {
+					"name": "TransType::TCP",
 					"value": 6
 				},
 				"checksum": {
@@ -441,60 +257,17 @@
 				},
 				"src": "192.168.1.100",
 				"dst": "123.129.210.135",
-				"packet": {
-					"header": {
-						"type": "bytes",
-						"value": "\u0001d{\ufffd\u0487\ufffd\ufffd\u0000P\ufffdz\ufffd\ufffd\u055f\ufffdUP\u0010",
-						"hex": "01647b81d287d7c00050a67aa0ffd59fb1555010"
-					},
-					"payload": {
-						"type": "bytes",
-						"value": "\ufffd\ufffd\ufffd>\u0000\u0000",
-						"hex": "fffff93e0000"
-					}
-				},
-				"tcp": {
-					"srcport": 55232,
-					"dstport": 80,
-					"seq": 2793054463,
-					"ack": 3584012629,
-					"hdr_len": 20,
-					"flags": {
-						"ns": false,
-						"cwr": false,
-						"ece": false,
-						"urg": false,
-						"ack": true,
-						"psh": false,
-						"rst": false,
-						"syn": false,
-						"fin": false
-					},
-					"window_size": 65535,
-					"checksum": {
-						"type": "bytes",
-						"value": "\ufffd>",
-						"hex": "f93e"
-					},
-					"urgent_pointer": 0,
+				"raw": {
 					"packet": {
-						"header": {
-							"type": "bytes",
-							"value": "",
-							"hex": ""
-						},
-						"payload": {
-							"type": "bytes",
-							"value": "",
-							"hex": ""
-						}
+						"type": "bytes",
+						"value": "\ufffd\ufffd\u0000P\ufffdz\ufffd\ufffd\u055f\ufffdUP\u0010\ufffd\ufffd\ufffd>\u0000\u0000",
+						"hex": "d7c00050a67aa0ffd59fb1555010fffff93e0000"
 					},
-					"nopayload": {
-					}
+					"error": "AttributeError: 'Flags' object has no attribute 'syn'"
 				}
 			}
 		},
-		"protocols": "Ethernet:IPv4:TCP"
+		"protocols": "Ethernet:IPv4:Raw"
 	},
 	"Frame 5": {
 		"frame_info": {
@@ -503,71 +276,40 @@
 			"incl_len": 54,
 			"orig_len": 54
 		},
-		"time": "2017-11-19T23:49:09.913720",
+		"time": "2017-11-19T07:49:09.913720",
 		"number": 5,
-		"time_epoch": 1511106549.91372,
+		"time_epoch": "1511106549.91372",
 		"len": 54,
 		"cap_len": 54,
-		"packet": {
-			"type": "bytes",
-			"value": "\ufffd\ufffd\ufffd\ufffd\ufffdG\ufffd^`\ufffdk\ufffd\u0008\u0000E\u0000\u0000(\u0000\u0000@\u0000@\u0006*\ufffd\ufffd\ufffd\u0001d{\ufffd\u0487\u05f0\u0000P-\u050d!metnP\u0011\ufffd\ufffd*\ufffd\u0000\u0000",
-			"hex": "b8f883a5f947a45e60d96b970800450000280000400040062abbc0a801647b81d287d7b000502dd48d216d65746e5011ffff2af40000"
-		},
 		"ethernet": {
 			"dst": "b8:f8:83:a5:f9:47",
 			"src": "a4:5e:60:d9:6b:97",
 			"type": {
-				"enum": "EtherType",
-				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_version_4",
+				"name": "EtherType::Internet_Protocol_version_4",
 				"value": 2048
-			},
-			"packet": {
-				"header": {
-					"type": "bytes",
-					"value": "\ufffd\ufffd\ufffd\ufffd\ufffdG\ufffd^`\ufffdk\ufffd\u0008\u0000",
-					"hex": "b8f883a5f947a45e60d96b970800"
-				},
-				"payload": {
-					"type": "bytes",
-					"value": "E\u0000\u0000(\u0000\u0000@\u0000@\u0006*\ufffd\ufffd\ufffd\u0001d{\ufffd\u0487\u05f0\u0000P-\u050d!metnP\u0011\ufffd\ufffd*\ufffd\u0000\u0000",
-					"hex": "450000280000400040062abbc0a801647b81d287d7b000502dd48d216d65746e5011ffff2af40000"
-				}
 			},
 			"ipv4": {
 				"version": 4,
 				"hdr_len": 20,
-				"dsfield": {
-					"dscp": {
-						"pre": {
-							"enum": "ToSPrecedence",
-							"desc": "[ToSPrecedence] ToS (DS Field) Precedence",
-							"name": "Routine",
-							"value": 0
-						},
-						"del": {
-							"enum": "ToSDelay",
-							"desc": "[ToSDelay] ToS (DS Field) Delay",
-							"name": "NORMAL",
-							"value": 0
-						},
-						"thr": {
-							"enum": "ToSThroughput",
-							"desc": "[ToSThroughput] ToS (DS Field) Throughput",
-							"name": "NORMAL",
-							"value": 0
-						},
-						"rel": {
-							"enum": "ToSReliability",
-							"desc": "[ToSReliability] ToS (DS Field) Reliability",
-							"name": "NORMAL",
-							"value": 0
-						}
+				"tos": {
+					"pre": {
+						"name": "ToSPrecedence::Routine",
+						"value": 0
+					},
+					"del": {
+						"name": "ToSDelay::NORMAL",
+						"value": 0
+					},
+					"thr": {
+						"name": "ToSThroughput::NORMAL",
+						"value": 0
+					},
+					"rel": {
+						"name": "ToSReliability::NORMAL",
+						"value": 0
 					},
 					"ecn": {
-						"enum": "ToSECN",
-						"desc": "[ToSECN] ToS ECN Field",
-						"name": "Not_ECT",
+						"name": "ToSECN::Not_ECT",
 						"value": 0
 					}
 				},
@@ -577,12 +319,10 @@
 					"df": true,
 					"mf": false
 				},
-				"frag_offset": 0,
-				"ttl": 64,
-				"proto": {
-					"enum": "TransType",
-					"desc": "[TransType] Transport Layer Protocol Numbers",
-					"name": "TCP",
+				"offset": 0,
+				"ttl": 64.0,
+				"protocol": {
+					"name": "TransType::TCP",
 					"value": 6
 				},
 				"checksum": {
@@ -592,60 +332,17 @@
 				},
 				"src": "192.168.1.100",
 				"dst": "123.129.210.135",
-				"packet": {
-					"header": {
-						"type": "bytes",
-						"value": "\u0001d{\ufffd\u0487\u05f0\u0000P-\u050d!metnP\u0011",
-						"hex": "01647b81d287d7b000502dd48d216d65746e5011"
-					},
-					"payload": {
-						"type": "bytes",
-						"value": "\ufffd\ufffd*\ufffd\u0000\u0000",
-						"hex": "ffff2af40000"
-					}
-				},
-				"tcp": {
-					"srcport": 55216,
-					"dstport": 80,
-					"seq": 768904481,
-					"ack": 1835365486,
-					"hdr_len": 20,
-					"flags": {
-						"ns": false,
-						"cwr": false,
-						"ece": false,
-						"urg": false,
-						"ack": true,
-						"psh": false,
-						"rst": false,
-						"syn": false,
-						"fin": true
-					},
-					"window_size": 65535,
-					"checksum": {
-						"type": "bytes",
-						"value": "*\ufffd",
-						"hex": "2af4"
-					},
-					"urgent_pointer": 0,
+				"raw": {
 					"packet": {
-						"header": {
-							"type": "bytes",
-							"value": "",
-							"hex": ""
-						},
-						"payload": {
-							"type": "bytes",
-							"value": "",
-							"hex": ""
-						}
+						"type": "bytes",
+						"value": "\u05f0\u0000P-\u050d!metnP\u0011\ufffd\ufffd*\ufffd\u0000\u0000",
+						"hex": "d7b000502dd48d216d65746e5011ffff2af40000"
 					},
-					"nopayload": {
-					}
+					"error": "AttributeError: 'Flags' object has no attribute 'syn'"
 				}
 			}
 		},
-		"protocols": "Ethernet:IPv4:TCP"
+		"protocols": "Ethernet:IPv4:Raw"
 	},
 	"Frame 6": {
 		"frame_info": {
@@ -654,71 +351,40 @@
 			"incl_len": 159,
 			"orig_len": 159
 		},
-		"time": "2017-11-19T23:49:11.066835",
+		"time": "2017-11-19T07:49:11.066835",
 		"number": 6,
-		"time_epoch": 1511106551.066835,
+		"time_epoch": "1511106551.066835",
 		"len": 159,
 		"cap_len": 159,
-		"packet": {
-			"type": "bytes",
-			"value": "\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdG\u0008\u0000E\u0000\u0000\ufffd\u0000\u0000@\u0000@\u0011x\ufffd\ufffd\ufffd\u0001\u0001\ufffd\ufffd\ufffd\ufffd\ufffdD\u0013\ufffd\u0000}c\ufffd\u0001\u0001\u000e\u0000\ufffd+\ufffd\ufffd\ufffd\ufffd\u0000g\u0000\u0000\u0000\u0006\u0000\nTL-WDR6300\u0000\u000b\u0000\u00036.0\u0000\u0007\u0000\u0001\u0001\u0000\u0005\u0000\u0011B8-F8-83-A5-F9-47\u0000\u0008\u0000\u000b192.168.1.1\u0000\t\u0000\ntplogin.cn\u0000\n\u0000\u000eTL-WDR6300 6.0\u0000\f\u0000\u00051.7.4",
-			"hex": "ffffffffffffb8f883a5f94708004500009100004000401178b3c0a80101ffffffff92441389007d63b101010e00e12b83c7f98b006700000006000a544c2d57445236333030000b0003362e3000070001010005001142382d46382d38332d41352d46392d34370008000b3139322e3136382e312e310009000a74706c6f67696e2e636e000a000e544c2d5744523633303020362e30000c0005312e372e34"
-		},
 		"ethernet": {
 			"dst": "ff:ff:ff:ff:ff:ff",
 			"src": "b8:f8:83:a5:f9:47",
 			"type": {
-				"enum": "EtherType",
-				"desc": "[EtherType] Ethertype IEEE 802 Numbers",
-				"name": "Internet_Protocol_version_4",
+				"name": "EtherType::Internet_Protocol_version_4",
 				"value": 2048
-			},
-			"packet": {
-				"header": {
-					"type": "bytes",
-					"value": "\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffd\ufffdG\u0008\u0000",
-					"hex": "ffffffffffffb8f883a5f9470800"
-				},
-				"payload": {
-					"type": "bytes",
-					"value": "E\u0000\u0000\ufffd\u0000\u0000@\u0000@\u0011x\ufffd\ufffd\ufffd\u0001\u0001\ufffd\ufffd\ufffd\ufffd\ufffdD\u0013\ufffd\u0000}c\ufffd\u0001\u0001\u000e\u0000\ufffd+\ufffd\ufffd\ufffd\ufffd\u0000g\u0000\u0000\u0000\u0006\u0000\nTL-WDR6300\u0000\u000b\u0000\u00036.0\u0000\u0007\u0000\u0001\u0001\u0000\u0005\u0000\u0011B8-F8-83-A5-F9-47\u0000\u0008\u0000\u000b192.168.1.1\u0000\t\u0000\ntplogin.cn\u0000\n\u0000\u000eTL-WDR6300 6.0\u0000\f\u0000\u00051.7.4",
-					"hex": "4500009100004000401178b3c0a80101ffffffff92441389007d63b101010e00e12b83c7f98b006700000006000a544c2d57445236333030000b0003362e3000070001010005001142382d46382d38332d41352d46392d34370008000b3139322e3136382e312e310009000a74706c6f67696e2e636e000a000e544c2d5744523633303020362e30000c0005312e372e34"
-				}
 			},
 			"ipv4": {
 				"version": 4,
 				"hdr_len": 20,
-				"dsfield": {
-					"dscp": {
-						"pre": {
-							"enum": "ToSPrecedence",
-							"desc": "[ToSPrecedence] ToS (DS Field) Precedence",
-							"name": "Routine",
-							"value": 0
-						},
-						"del": {
-							"enum": "ToSDelay",
-							"desc": "[ToSDelay] ToS (DS Field) Delay",
-							"name": "NORMAL",
-							"value": 0
-						},
-						"thr": {
-							"enum": "ToSThroughput",
-							"desc": "[ToSThroughput] ToS (DS Field) Throughput",
-							"name": "NORMAL",
-							"value": 0
-						},
-						"rel": {
-							"enum": "ToSReliability",
-							"desc": "[ToSReliability] ToS (DS Field) Reliability",
-							"name": "NORMAL",
-							"value": 0
-						}
+				"tos": {
+					"pre": {
+						"name": "ToSPrecedence::Routine",
+						"value": 0
+					},
+					"del": {
+						"name": "ToSDelay::NORMAL",
+						"value": 0
+					},
+					"thr": {
+						"name": "ToSThroughput::NORMAL",
+						"value": 0
+					},
+					"rel": {
+						"name": "ToSReliability::NORMAL",
+						"value": 0
 					},
 					"ecn": {
-						"enum": "ToSECN",
-						"desc": "[ToSECN] ToS ECN Field",
-						"name": "Not_ECT",
+						"name": "ToSECN::Not_ECT",
 						"value": 0
 					}
 				},
@@ -728,12 +394,10 @@
 					"df": true,
 					"mf": false
 				},
-				"frag_offset": 0,
-				"ttl": 64,
-				"proto": {
-					"enum": "TransType",
-					"desc": "[TransType] Transport Layer Protocol Numbers",
-					"name": "UDP",
+				"offset": 0,
+				"ttl": 64.0,
+				"protocol": {
+					"name": "TransType::UDP",
 					"value": 17
 				},
 				"checksum": {
@@ -743,18 +407,6 @@
 				},
 				"src": "192.168.1.1",
 				"dst": "255.255.255.255",
-				"packet": {
-					"header": {
-						"type": "bytes",
-						"value": "\u0001\u0001\ufffd\ufffd\ufffd\ufffd\ufffdD\u0013\ufffd\u0000}c\ufffd\u0001\u0001\u000e\u0000\ufffd+",
-						"hex": "0101ffffffff92441389007d63b101010e00e12b"
-					},
-					"payload": {
-						"type": "bytes",
-						"value": "\ufffd\ufffd\ufffd\ufffd\u0000g\u0000\u0000\u0000\u0006\u0000\nTL-WDR6300\u0000\u000b\u0000\u00036.0\u0000\u0007\u0000\u0001\u0001\u0000\u0005\u0000\u0011B8-F8-83-A5-F9-47\u0000\u0008\u0000\u000b192.168.1.1\u0000\t\u0000\ntplogin.cn\u0000\n\u0000\u000eTL-WDR6300 6.0\u0000\f\u0000\u00051.7.4",
-						"hex": "83c7f98b006700000006000a544c2d57445236333030000b0003362e3000070001010005001142382d46382d38332d41352d46392d34370008000b3139322e3136382e312e310009000a74706c6f67696e2e636e000a000e544c2d5744523633303020362e30000c0005312e372e34"
-					}
-				},
 				"udp": {
 					"srcport": 37444,
 					"dstport": 5001,
@@ -763,18 +415,6 @@
 						"type": "bytes",
 						"value": "c\ufffd",
 						"hex": "63b1"
-					},
-					"packet": {
-						"header": {
-							"type": "bytes",
-							"value": "\u0000\u0000\u0000\u0006\u0000\nTL",
-							"hex": "00000006000a544c"
-						},
-						"payload": {
-							"type": "bytes",
-							"value": "-WDR6300\u0000\u000b\u0000\u00036.0\u0000\u0007\u0000\u0001\u0001\u0000\u0005\u0000\u0011B8-F8-83-A5-F9-47\u0000\u0008\u0000\u000b192.168.1.1\u0000\t\u0000\ntplogin.cn\u0000\n\u0000\u000eTL-WDR6300 6.0\u0000\f\u0000\u00051.7.4",
-							"hex": "2d57445236333030000b0003362e3000070001010005001142382d46382d38332d41352d46392d34370008000b3139322e3136382e312e310009000a74706c6f67696e2e636e000a000e544c2d5744523633303020362e30000c0005312e372e34"
-						}
 					},
 					"raw": {
 						"packet": {
