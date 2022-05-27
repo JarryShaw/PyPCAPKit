@@ -388,6 +388,9 @@ class EtherType(IntEnum):
     #: IEEE Std 802.3 - Ethernet Passive Optical Network (EPON) [EPON][:rfc:`7042`]
     IEEE_Std_802_3_Ethernet_Passive_Optical_Network = 0x8808
 
+    #: Slow Protocols (Link Aggregation, OAM, etc.) [IEEE]
+    Slow_Protocols = 0x8809
+
     #: Point-to-Point Protocol (PPP) [:rfc:`7042`]
     Point_to_Point_Protocol = 0x880B
 

@@ -28,7 +28,7 @@ class TransType(IntEnum):
     #: Stream [:rfc:`1190`][:rfc:`1819`]
     ST = 5
 
-    #: Transmission Control [:rfc:`793`]
+    #: Transmission Control [RFC-ietf-tcpm-rfc793bis-28]
     TCP = 6
 
     #: CBT [Tony Ballardie]

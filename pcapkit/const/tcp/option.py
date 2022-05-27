@@ -10,13 +10,13 @@ __all__ = ['Option']
 class Option(IntEnum):
     """[Option] TCP Option Kind Numbers"""
 
-    #: End of Option List [:rfc:`793`]
+    #: End of Option List [RFC-ietf-tcpm-rfc793bis-28]
     End_of_Option_List = 0
 
-    #: No-Operation [:rfc:`793`]
+    #: No-Operation [RFC-ietf-tcpm-rfc793bis-28]
     No_Operation = 1
 
-    #: Maximum Segment Size [:rfc:`793`]
+    #: Maximum Segment Size [RFC-ietf-tcpm-rfc793bis-28]
     Maximum_Segment_Size = 2
 
     #: Window Scale [:rfc:`7323`]

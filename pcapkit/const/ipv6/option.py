@@ -64,16 +64,15 @@ class Option(IntEnum):
     #: Performance and Diagnostic Metrics (PDM) [:rfc:`8250`]
     PDM = 0x0F
 
-    #: Path MTU Record Option (TEMPORARY - registered 2019-09-03, extension
-    #: registered 2021-08-12, expires 2022-09-03) [draft-ietf-6man-mtu-option-06]
+    #: Path MTU Record Option [RFC-ietf-6man-mtu-option-15]
     Path_MTU_Record_Option = 0x30
 
-    #: IOAM (TEMPORARY - registered 2020-04-16, extension registered 2021-03-15,
-    #: expires 2022-04-16) [draft-ietf-ippm-ioam-ipv6-options-05]
+    #: IOAM (TEMPORARY - registered 2020-04-16, extension registered 2022-04-12,
+    #: expires 2023-04-16) [draft-ietf-ippm-ioam-ipv6-options-05]
     IOAM_0x11 = 0x11
 
-    #: IOAM (TEMPORARY - registered 2020-04-16, extension registered 2021-03-15,
-    #: expires 2022-04-16) [draft-ietf-ippm-ioam-ipv6-options-05]
+    #: IOAM (TEMPORARY - registered 2020-04-16, extension registered 2022-04-12,
+    #: expires 2023-04-16) [draft-ietf-ippm-ioam-ipv6-options-05]
     IOAM_0x31 = 0x31
 
     #: RFC3692-style Experiment [:rfc:`4727`]

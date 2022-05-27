@@ -15,7 +15,7 @@ class LinkType(IntEnum):
     #: of either 24, 28, or 30 for IPv6 packets, a value of 7 for OSI packets, or a
     #: value of 23 for IPX packets. All of the IPv6 values correspond to IPv6
     #: packets; code reading files should check for all of them. Note that ``host
-    #: byte order'' is the byte order of the machine on which the packets are
+    #: byte order'' is the byte order of the machine on that the packets are
     #: captured; if a live capture is being done, ``host byte order'' is the byte
     #: order of the machine capturing the packets, but if a ``savefile'' is being
     #: read, the byte order is not necessarily that of the machine reading the
@@ -102,10 +102,10 @@ class LinkType(IntEnum):
     LTALK = 114
 
     #: [``DLT_PFLOG``] OpenBSD pflog; the link-layer header contains a struct
-    #: pfloghdr structure, as defined by the host on which the file was saved.
-    #: (This differs from operating system to operating system and release to
-    #: release; there is nothing in the file to indicate what the layout of that
-    #: structure is.)
+    #: pfloghdr structure, as defined by the host on that the file was saved. (This
+    #: differs from operating system to operating system and release to release;
+    #: there is nothing in the file to indicate what the layout of that structure
+    #: is.)
     PFLOG = 117
 
     #: [``DLT_PRISM_HEADER``] Prism monitor mode information followed by an 802.11
@@ -265,7 +265,7 @@ class LinkType(IntEnum):
     #: specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt
     #: file in the Linux source tree. Only the first 48 bytes of that header are
     #: present. All fields in the header are in host byte order. When performing a
-    #: live capture, the host byte order is the byte order of the machine on which
+    #: live capture, the host byte order is the byte order of the machine on that
     #: the packets are captured. When reading a pcap file, the byte order is the
     #: byte order for the file, as specified by the file's magic number; when
     #: reading a pcapng file, the byte order is the byte order for the section of
@@ -358,12 +358,12 @@ class LinkType(IntEnum):
     #: as specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt
     #: file in the Linux source tree. All 64 bytes of the header are present. All
     #: fields in the header are in host byte order. When performing a live capture,
-    #: the host byte order is the byte order of the machine on which the packets
-    #: are captured. When reading a pcap file, the byte order is the byte order for
-    #: the file, as specified by the file's magic number; when reading a pcapng
-    #: file, the byte order is the byte order for the section of the pcapng file,
-    #: as specified by the Section Header Block. For isochronous transfers, the
-    #: ndesc field specifies the number of isochronous descriptors that follow.
+    #: the host byte order is the byte order of the machine on that the packets are
+    #: captured. When reading a pcap file, the byte order is the byte order for the
+    #: file, as specified by the file's magic number; when reading a pcapng file,
+    #: the byte order is the byte order for the section of the pcapng file, as
+    #: specified by the Section Header Block. For isochronous transfers, the ndesc
+    #: field specifies the number of isochronous descriptors that follow.
     USB_LINUX_MMAPPED = 220
 
     #: [``DLT_FC_2``] Fibre Channel FC-2 frames, beginning with a Frame_Header.
