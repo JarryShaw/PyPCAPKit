@@ -48,7 +48,7 @@
     <span class="c1">#: of either 24, 28, or 30 for IPv6 packets, a value of 7 for OSI packets, or a</span>
     <span class="c1">#: value of 23 for IPX packets. All of the IPv6 values correspond to IPv6</span>
     <span class="c1">#: packets; code reading files should check for all of them. Note that ``host</span>
-    <span class="c1">#: byte order&#39;&#39; is the byte order of the machine on which the packets are</span>
+    <span class="c1">#: byte order&#39;&#39; is the byte order of the machine on that the packets are</span>
     <span class="c1">#: captured; if a live capture is being done, ``host byte order&#39;&#39; is the byte</span>
     <span class="c1">#: order of the machine capturing the packets, but if a ``savefile&#39;&#39; is being</span>
     <span class="c1">#: read, the byte order is not necessarily that of the machine reading the</span>
@@ -135,10 +135,10 @@
     <span class="n">LTALK</span> <span class="o">=</span> <span class="mi">114</span>
 
     <span class="c1">#: [``DLT_PFLOG``] OpenBSD pflog; the link-layer header contains a struct</span>
-    <span class="c1">#: pfloghdr structure, as defined by the host on which the file was saved.</span>
-    <span class="c1">#: (This differs from operating system to operating system and release to</span>
-    <span class="c1">#: release; there is nothing in the file to indicate what the layout of that</span>
-    <span class="c1">#: structure is.)</span>
+    <span class="c1">#: pfloghdr structure, as defined by the host on that the file was saved. (This</span>
+    <span class="c1">#: differs from operating system to operating system and release to release;</span>
+    <span class="c1">#: there is nothing in the file to indicate what the layout of that structure</span>
+    <span class="c1">#: is.)</span>
     <span class="n">PFLOG</span> <span class="o">=</span> <span class="mi">117</span>
 
     <span class="c1">#: [``DLT_PRISM_HEADER``] Prism monitor mode information followed by an 802.11</span>
@@ -298,7 +298,7 @@
     <span class="c1">#: specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt</span>
     <span class="c1">#: file in the Linux source tree. Only the first 48 bytes of that header are</span>
     <span class="c1">#: present. All fields in the header are in host byte order. When performing a</span>
-    <span class="c1">#: live capture, the host byte order is the byte order of the machine on which</span>
+    <span class="c1">#: live capture, the host byte order is the byte order of the machine on that</span>
     <span class="c1">#: the packets are captured. When reading a pcap file, the byte order is the</span>
     <span class="c1">#: byte order for the file, as specified by the file&#39;s magic number; when</span>
     <span class="c1">#: reading a pcapng file, the byte order is the byte order for the section of</span>
@@ -391,12 +391,12 @@
     <span class="c1">#: as specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt</span>
     <span class="c1">#: file in the Linux source tree. All 64 bytes of the header are present. All</span>
     <span class="c1">#: fields in the header are in host byte order. When performing a live capture,</span>
-    <span class="c1">#: the host byte order is the byte order of the machine on which the packets</span>
-    <span class="c1">#: are captured. When reading a pcap file, the byte order is the byte order for</span>
-    <span class="c1">#: the file, as specified by the file&#39;s magic number; when reading a pcapng</span>
-    <span class="c1">#: file, the byte order is the byte order for the section of the pcapng file,</span>
-    <span class="c1">#: as specified by the Section Header Block. For isochronous transfers, the</span>
-    <span class="c1">#: ndesc field specifies the number of isochronous descriptors that follow.</span>
+    <span class="c1">#: the host byte order is the byte order of the machine on that the packets are</span>
+    <span class="c1">#: captured. When reading a pcap file, the byte order is the byte order for the</span>
+    <span class="c1">#: file, as specified by the file&#39;s magic number; when reading a pcapng file,</span>
+    <span class="c1">#: the byte order is the byte order for the section of the pcapng file, as</span>
+    <span class="c1">#: specified by the Section Header Block. For isochronous transfers, the ndesc</span>
+    <span class="c1">#: field specifies the number of isochronous descriptors that follow.</span>
     <span class="n">USB_LINUX_MMAPPED</span> <span class="o">=</span> <span class="mi">220</span>
 
     <span class="c1">#: [``DLT_FC_2``] Fibre Channel FC-2 frames, beginning with a Frame_Header.</span>

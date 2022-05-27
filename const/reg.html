@@ -719,7 +719,7 @@ field, in host byte order, containing a value of 2 for IPv4 packets, a value
 of either 24, 28, or 30 for IPv6 packets, a value of 7 for OSI packets, or a
 value of 23 for IPX packets. All of the IPv6 values correspond to IPv6
 packets; code reading files should check for all of them. Note that <a href="#id2"><span class="problematic" id="id3">``</span></a>host
-byte order’’ is the byte order of the machine on which the packets are
+byte order’’ is the byte order of the machine on that the packets are
 captured; if a live capture is being done, <a href="#id4"><span class="problematic" id="id5">``</span></a>host byte order’’ is the byte
 order of the machine capturing the packets, but if a <a href="#id6"><span class="problematic" id="id7">``</span></a>savefile’’ is being
 read, the byte order is not necessarily that of the machine reading the
@@ -736,10 +736,10 @@ capture file.</p>
 <dt class="sig sig-object py" id="pcapkit.const.reg.linktype.LinkType.PFLOG">
 <span class="sig-name descname"><span class="pre">PFLOG</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">117</span></em><a class="headerlink" href="#pcapkit.const.reg.linktype.LinkType.PFLOG" title="Permalink to this definition">¶</a></dt>
 <dd><p>[<code class="docutils literal notranslate"><span class="pre">DLT_PFLOG</span></code>] OpenBSD pflog; the link-layer header contains a struct
-pfloghdr structure, as defined by the host on which the file was saved.
-(This differs from operating system to operating system and release to
-release; there is nothing in the file to indicate what the layout of that
-structure is.)</p>
+pfloghdr structure, as defined by the host on that the file was saved. (This
+differs from operating system to operating system and release to release;
+there is nothing in the file to indicate what the layout of that structure
+is.)</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -915,7 +915,7 @@ header.</p>
 specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt
 file in the Linux source tree. Only the first 48 bytes of that header are
 present. All fields in the header are in host byte order. When performing a
-live capture, the host byte order is the byte order of the machine on which
+live capture, the host byte order is the byte order of the machine on that
 the packets are captured. When reading a pcap file, the byte order is the
 byte order for the file, as specified by the file’s magic number; when
 reading a pcapng file, the byte order is the byte order for the section of
@@ -929,12 +929,12 @@ the pcapng file, as specified by the Section Header Block.</p>
 as specified by the struct usbmon_packet in the Documentation/usb/usbmon.txt
 file in the Linux source tree. All 64 bytes of the header are present. All
 fields in the header are in host byte order. When performing a live capture,
-the host byte order is the byte order of the machine on which the packets
-are captured. When reading a pcap file, the byte order is the byte order for
-the file, as specified by the file’s magic number; when reading a pcapng
-file, the byte order is the byte order for the section of the pcapng file,
-as specified by the Section Header Block. For isochronous transfers, the
-ndesc field specifies the number of isochronous descriptors that follow.</p>
+the host byte order is the byte order of the machine on that the packets are
+captured. When reading a pcap file, the byte order is the byte order for the
+file, as specified by the file’s magic number; when reading a pcapng file,
+the byte order is the byte order for the section of the pcapng file, as
+specified by the Section Header Block. For isochronous transfers, the ndesc
+field specifies the number of isochronous descriptors that follow.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1879,6 +1879,12 @@ Wellfleet) [<span class="target" id="index-3"></span><a class="rfc reference ext
 <dt class="sig sig-object py" id="pcapkit.const.reg.ethertype.EtherType.Secure_Data">
 <span class="sig-name descname"><span class="pre">Secure_Data</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34669</span></em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Secure_Data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Secure Data [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1701.html"><strong>RFC 1701</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.reg.ethertype.EtherType.Slow_Protocols">
+<span class="sig-name descname"><span class="pre">Slow_Protocols</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34825</span></em><a class="headerlink" href="#pcapkit.const.reg.ethertype.EtherType.Slow_Protocols" title="Permalink to this definition">¶</a></dt>
+<dd><p>Slow Protocols (Link Aggregation, OAM, etc.) [IEEE]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2874,7 +2880,7 @@ California at Berkeley, June 1986.][Bruce Willins]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.TCP">
 <span class="sig-name descname"><span class="pre">TCP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.TCP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Transmission Control [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html"><strong>RFC 793</strong></a>]</p>
+<dd><p>Transmission Control [RFC-ietf-tcpm-rfc793bis-28]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2917,13 +2923,13 @@ Oberg]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.UDP">
 <span class="sig-name descname"><span class="pre">UDP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.UDP" title="Permalink to this definition">¶</a></dt>
-<dd><p>User Datagram [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc768.html"><strong>RFC 768</strong></a>][Jon Postel]</p>
+<dd><p>User Datagram [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc768.html"><strong>RFC 768</strong></a>][Jon Postel]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.UDPLite">
 <span class="sig-name descname"><span class="pre">UDPLite</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">136</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.UDPLite" title="Permalink to this definition">¶</a></dt>
-<dd><p>[<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3828.html"><strong>RFC 3828</strong></a>]</p>
+<dd><p>[<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3828.html"><strong>RFC 3828</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2935,13 +2941,13 @@ Oberg]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_253">
 <span class="sig-name descname"><span class="pre">Use_for_experimentation_and_testing_253</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">253</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_253" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use for experimentation and testing [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
+<dd><p>Use for experimentation and testing [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_254">
 <span class="sig-name descname"><span class="pre">Use_for_experimentation_and_testing_254</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.Use_for_experimentation_and_testing_254" title="Permalink to this definition">¶</a></dt>
-<dd><p>Use for experimentation and testing [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
+<dd><p>Use for experimentation and testing [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2965,7 +2971,7 @@ Oberg]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.VRRP">
 <span class="sig-name descname"><span class="pre">VRRP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">112</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.VRRP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Virtual Router Redundancy Protocol [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5798.html"><strong>RFC 5798</strong></a>]</p>
+<dd><p>Virtual Router Redundancy Protocol [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5798.html"><strong>RFC 5798</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -2983,7 +2989,7 @@ Oberg]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.WESP">
 <span class="sig-name descname"><span class="pre">WESP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">141</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.WESP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapped Encapsulating Security Payload [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5840.html"><strong>RFC 5840</strong></a>]</p>
+<dd><p>Wrapped Encapsulating Security Payload [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5840.html"><strong>RFC 5840</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -3057,7 +3063,7 @@ CT., October 1980.][XEROX]</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.reg.transtype.TransType.manet">
 <span class="sig-name descname"><span class="pre">manet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">138</span></em><a class="headerlink" href="#pcapkit.const.reg.transtype.TransType.manet" title="Permalink to this definition">¶</a></dt>
-<dd><p>MANET Protocols [<span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5498.html"><strong>RFC 5498</strong></a>]</p>
+<dd><p>MANET Protocols [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5498.html"><strong>RFC 5498</strong></a>]</p>
 </dd></dl>
 
 </dd></dl>
