@@ -7,8 +7,8 @@ interfaces, variables, and etc., which wraps around the
 foundation classes from :mod:`pcapkit.foundation`.
 
 """
-import io
 import sys
+from typing import TYPE_CHECKING
 
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.traceflow import TraceFlow
@@ -17,14 +17,27 @@ from pcapkit.reassembly.ipv4 import IPv4_Reassembly
 from pcapkit.reassembly.ipv6 import IPv6_Reassembly
 from pcapkit.reassembly.tcp import TCP_Reassembly
 from pcapkit.utilities.exceptions import FormatError
-from pcapkit.utilities.validations import bool_check, int_check, io_check, str_check
+from pcapkit.utilities.validations import bool_check, str_check
+
+if TYPE_CHECKING:
+    from typing import Optional, Callable, Type, Any
+
+    from typing_extensions import Literal
+
+    from pcapkit.protocols.misc.pcap.frame import Frame
+
+    Formats = Literal['pcap', 'json', 'tree', 'plist']
+    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
+    Layers = Literal['link', 'internet', 'transport', 'application', 'none']
+
+    Protocols = str | Protocol | Type[Protocol]
+    VerboseHandler = Callable[['Extractor', Frame], Any]
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # interface functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # format macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # layer macros
-    'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',
-                                                            # engine macros
+    'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # engine macros
 ]
 
 # output file formats
@@ -34,80 +47,70 @@ PLIST = 'plist'
 PCAP = 'pcap'
 
 # layer thresholds
-RAW = 'None'
-LINK = 'Link'
-INET = 'Internet'
-TRANS = 'Transport'
-APP = 'Application'
+RAW = 'none'
+LINK = 'link'
+INET = 'internet'
+TRANS = 'transport'
+APP = 'application'
 
 # extraction engines
 DPKT = 'dpkt'
 Scapy = 'scapy'
 PCAPKit = 'default'
 PyShark = 'pyshark'
-MPServer = 'server'
-MPPipeline = 'pipeline'
 
 
-def extract(fin=None, fout=None, format=None,                           # basic settings  # pylint: disable=redefined-builtin
-            auto=True, extension=True, store=True,                      # internal settings
-            files=False, nofile=False, verbose=False,                   # output settings
-            engine=None, layer=None, protocol=None,                     # extraction settings
-            ip=False, ipv4=False, ipv6=False, tcp=False, strict=True,   # reassembly settings
-            trace=False, trace_fout=None, trace_format=None,            # trace settings  # pylint: disable=redefined-outer-name
-            trace_byteorder=sys.byteorder, trace_nanosecond=False):     # trace settings
+def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                                  # basic settings  # pylint: disable=redefined-builtin
+            auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                                            # internal settings
+            files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                                        # output settings
+            engine: 'Optional[Engines]' = None, layer: 'Optional[Layers | Type[Protocol]]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings
+            ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,                     # reassembly settings
+            trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,                            # trace settings
+            trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'Extractor':                  # trace settings
     """Extract a PCAP file.
 
     Arguments:
-        fin (Optiona[str]): file name to be read; if file not exist, raise :exc:`FileNotFound`
-        fout (Optiona[str]): file name to be written
-        format (Optional[Literal['plist', 'json', 'tree']]): file format of output
+        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
+        fout: file name to be written
+        format: file format of output
 
-        auto (bool): if automatically run till EOF
-        extension (bool): if check and append extensions to output file
-        store (bool): if store extracted packet info
+        auto: if automatically run till EOF
+        extension: if check and append extensions to output file
+        store: if store extracted packet info
 
-        files (bool): if split each frame into different files
-        nofile (bool): if no output file is to be dumped
-        verbose (bool): if print verbose output information
+        files: if split each frame into different files
+        nofile: if no output file is to be dumped
+        verbose: a :obj:`bool` value or a function takes the :class:`Extract`
+            instance and current parsed frame (depends on engine selected) as
+            parameters to print verbose output information
 
-        engine (Optional[Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'server', 'pipeline']]):
-            extraction engine to be used
-        layer (Optional[Literal['Link', 'Internet', 'Transport', 'Application']]): extract til which layer
-        protocol (Optional[Union[str, Tuple[str], Type[Protocol]]]): extract til which protocol
+        engine: extraction engine to be used
+        layer: extract til which layer
+        protocol: extract til which protocol
 
-        ip (bool): if record data for IPv4 & IPv6 reassembly
-        ipv4 (bool): if perform IPv4 reassembly
-        ipv6 (bool): if perform IPv6 reassembly
-        tcp (bool): if perform TCP reassembly
-        strict (bool): if set strict flag for reassembly
+        ip: if record data for IPv4 & IPv6 reassembly
+        ipv4: if perform IPv4 reassembly
+        ipv6: if perform IPv6 reassembly
+        tcp: if perform TCP reassembly
+        strict: if set strict flag for reassembly
 
-        trace (bool): if trace TCP traffic flows
-        trace_fout (Optional[str]): path name for flow tracer if necessary
-        trace_format (Optional[Literal['plist', 'json', 'tree', 'pcap']]): output file
-            format of flow tracer
-        trace_byteorder (Literal['little', 'big']): output file byte order
-        trace_nanosecond (bool): output nanosecond-resolution file flag
+        trace: if trace TCP traffic flows
+        trace_fout: path name for flow tracer if necessary
+        trace_format: output file format of flow tracer
+        trace_byteorder: output file byte order
+        trace_nanosecond: output nanosecond-resolution file flag
 
     Returns:
-        Extractor -- an :class:`~pcapkit.foundation.extraction.Extractor` object
+        An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
     """
     if isinstance(layer, type) and issubclass(layer, Protocol):
-        layer = layer.__layer__
-    if isinstance(protocol, type) and issubclass(protocol, Protocol):
-        protocol = protocol.id()
-
-    str_check(fin or '', fout or '', format or '',
-              trace_fout or '', trace_format or '',
-              engine or '', layer or '', *(protocol or ''))
-    bool_check(files, nofile, verbose, auto, extension, store,
-               ip, ipv4, ipv6, tcp, strict, trace)
+        layer = (layer.__layer__ or 'none').lower()  # type: ignore[assignment]
 
     return Extractor(fin=fin, fout=fout, format=format,
                      store=store, files=files, nofile=nofile,
                      auto=auto, verbose=verbose, extension=extension,
-                     engine=engine, layer=layer, protocol=protocol,
+                     engine=engine, layer=layer, protocol=protocol,  # type: ignore[arg-type]
                      ip=ip, ipv4=ipv4, ipv6=ipv6, tcp=tcp, strict=strict,
                      trace=trace, trace_fout=trace_fout, trace_format=trace_format,
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond)
@@ -143,18 +146,19 @@ def reassemble(protocol, strict=False):
     raise FormatError(f'Unsupported reassembly protocol: {protocol}')
 
 
-def trace(fout=None, format=None, byteorder=sys.byteorder, nanosecond=False):  # pylint: disable=redefined-builtin
+def trace(fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=redefined-builtin
+          byteorder: 'Literal["little", "big"]' = sys.byteorder,
+          nanosecond: bool = False) -> 'TraceFlow':
     """Trace TCP flows.
 
     Arguments:
-        fout (str): output path
-        format (Optional[str]): output format
-        byteorder (str): output file byte order
-        nanosecond (bool): output nanosecond-resolution file flag
+        fout: output path
+        format: output format
+        byteorder: output file byte order
+        nanosecond: output nanosecond-resolution file flag
 
     Returns:
-        TraceFlow: a :class:`~pcapkit.foundation.traceflow.TraceFlow` object
+        A :class:`~pcapkit.foundation.traceflow.TraceFlow` object.
 
     """
-    str_check(fout or '', format or '')
     return TraceFlow(fout=fout, format=format, byteorder=byteorder, nanosecond=nanosecond)

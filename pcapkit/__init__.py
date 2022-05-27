@@ -65,7 +65,8 @@ import warnings
 
 import tbtrim
 
-from pcapkit.utilities.exceptions import DEVMODE, BaseError
+from pcapkit.utilities.exceptions import BaseError
+from pcapkit.utilities.logging import DEVMODE
 from pcapkit.utilities.warnings import DevModeWarning
 
 # set up sys.excepthook
@@ -77,9 +78,6 @@ else:
     ROOT = os.path.dirname(os.path.realpath(__file__))
     tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
                          exception=BaseError, strict=False)
-
-# All Reference
-import pcapkit.all
 
 # Interface
 from pcapkit.interface import *
@@ -117,8 +115,7 @@ __all__ = [
     'extract', 'reassemble', 'trace',                       # Interface Functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
-    'DPKT', 'Scapy', 'PyShark', 'MPServer', 'MPPipeline', 'PCAPKit',
-                                                            # Engine Macros
+    'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # Engine Macros
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
