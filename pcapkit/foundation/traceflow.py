@@ -44,8 +44,8 @@ trace.buffer
        (dict) buffer --> memory buffer for reassembly
         |--> (tuple) BUFID : (dict)
         |       |--> ip.src      |
-        |       |--> ip.dst      |
         |       |--> tcp.srcport |
+        |       |--> ip.dst      |
         |       |--> tcp.dstport |
         |                        |--> 'fpout' : (dictdumper.dumper.Dumper) output dumper object
         |                        |--> 'index': (list) list of frame index
@@ -99,12 +99,12 @@ if TYPE_CHECKING:
     IPAddress = IPv4Address | IPv6Address
     BufferID = tuple[IPAddress, int, IPAddress, int]
 
-###############################################################################
-# from dictdumper import JSON, PLIST, XML, JavaScript, Tree
-# from pcapkit.dumpkit import PCAP, NotImplementedIO
-###############################################################################
-
 __all__ = ['TraceFlow']
+
+
+###############################################################################
+# Data Models
+###############################################################################
 
 
 class Packet(Info):
@@ -161,7 +161,6 @@ class Buffer(Info):
         def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
 
-
 class Index(Info):
     """Data structure for **TCP flow tracing**.
 
@@ -183,8 +182,16 @@ class Index(Info):
         def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
 
+###############################################################################
+# Algorithm Implementation
+###############################################################################
+
+
 class TraceFlow:
     """Trace TCP flows."""
+
+    # Internal data storage for cached properties.
+    __cached__ = {}  # type: dict[str, Any]
 
     ##########################################################################
     # Defaults.
@@ -215,7 +222,7 @@ class TraceFlow:
     def index(self) -> 'tuple[Index, ...]':
         """Index table for traced flow."""
         if self._buffer:
-            return tuple(self.submit())
+            return self.submit()
         return tuple(self._stream)
 
     ##########################################################################
@@ -366,7 +373,8 @@ class TraceFlow:
                f'{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}'
 
         """
-        self._newflg = True
+        # clear cache
+        self.__cached__['submit'] = None
 
         # Buffer Identifier
         BUFID = (packet.src, packet.srcport, packet.dst, packet.dstport)  # type: BufferID
@@ -408,20 +416,26 @@ class TraceFlow:
         # return label or output object
         return fpout if output else label
 
-    def submit(self) -> 'list[Index]':
+    def submit(self) -> 'tuple[Index, ...]':
         """Submit traced TCP flows.
 
         Returns:
             Traced TCP flow (:term:`trace.index`).
 
         """
+        if (cached := self.__cached__.get('submit')) is not None:
+            return cached
+
         ret = []  # type: list[Index]
         for buf in self._buffer.values():
             ret.append(Index(fpout=f"{self._fproot}/{buf.label}{self._fdpext}" if self._fdpext else None,
                              index=tuple(buf.index),
                              label=buf.label,))
         ret.extend(self._stream)
-        return ret
+        ret_submit = tuple(ret)
+
+        self.__cached__['submit'] = ret_submit
+        return ret_submit
 
     ##########################################################################
     # Data models.
@@ -471,4 +485,5 @@ class TraceFlow:
             packet: a flow packet (:term:`trace.packet`)
 
         """
+        # trace frame record
         self.dump(packet)
