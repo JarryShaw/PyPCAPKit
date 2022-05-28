@@ -197,25 +197,27 @@ tcp.buffer
 
 """
 import sys
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.reassembly.reassembly import Reassembly
 
 if TYPE_CHECKING:
-    from ipaddress import IPv4Address
+    from ipaddress import IPv4Address, IPv6Address
     from typing import Type, overload
 
     from typing_extensions import Literal
 
 __all__ = ['TCP_Reassembly']
 
+IPAddress = TypeVar('IPAddress', 'IPv4Address', 'IPv6Address')
+
 ###############################################################################
 # Data Models
 ###############################################################################
 
-BufferID = tuple['IPv4Address', 'int', 'IPv4Address', 'int']
+BufferID = tuple[IPAddress, int, IPAddress, int]
 
 
 class Packet(Info):
@@ -250,27 +252,27 @@ class Packet(Info):
         def __init__(self, bufid: 'BufferID', dsn: 'int', ack: 'int', num: 'int', syn: 'bool', fin: 'bool', rst: 'bool', len: 'int', first: 'int', last: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
 
-class DatagramID(Info):
+class DatagramID(Info, Generic[IPAddress]):
     """Data model for :term:`tcp.datagram` original packet identifier."""
 
     #: Source address.
-    src: 'tuple[IPv4Address, int]'
+    src: 'tuple[IPAddress, int]'
     #: Destination address.
-    dst: 'tuple[IPv4Address, int]'
+    dst: 'tuple[IPAddress, int]'
     #: Original packet ACK number.
     ack: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, src: 'tuple[IPv4Address, int]', dst: 'tuple[IPv4Address, int]', ack: 'int') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, src: 'tuple[IPAddress, int]', dst: 'tuple[IPAddress, int]', ack: 'int') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
 
-class Datagram(Info):
+class Datagram(Info, Generic[IPAddress]):
     """Data model for :term:`tcp.datagram`."""
 
     #: Completed flag.
     completed: 'bool'
     #: Original packet identifier.
-    id: 'DatagramID'
+    id: 'DatagramID[IPAddress]'
     #: Packet numbers.
     index: 'tuple[int, ...]'
     #: Initial TCP header.
@@ -280,12 +282,12 @@ class Datagram(Info):
 
     if TYPE_CHECKING:
         @overload
-        def __init__(self, completed: 'Literal[True]', id: 'DatagramID', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
         @overload
-        def __init__(self, completed: 'Literal[False]', id: 'DatagramID', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
-        def __init__(self, completed: 'bool', id: 'DatagramID', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, completed: 'bool', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
 
 class HoleDiscriptor(Info):
