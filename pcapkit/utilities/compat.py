@@ -3,6 +3,10 @@
 import builtins
 import collections.abc
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Optional, Type, Union
 
 __all__ = [
     # exceptions
@@ -13,16 +17,21 @@ __all__ = [
 
     # modules
     'pathlib',
+
+    # functions
+    'cached_property',
 ]
 
-if sys.version_info[:2] < (3, 6):
+version = sys.version_info[:2]
+
+if version < (3, 6):
     class ModuleNotFoundError(ImportError):  # pylint: disable=redefined-builtin
         """Module not found."""
 else:
-    ModuleNotFoundError = builtins.ModuleNotFoundError
+    ModuleNotFoundError = builtins.ModuleNotFoundError  # type: ignore[misc,assignment]
 
-if sys.version_info[:2] <= (3, 5):
-    def _check_methods(C, *methods):
+if version <= (3, 5):
+    def _check_methods(C: 'Type[Any]', *methods: 'str') -> 'bool | Any':
         mro = C.__mro__
         for method in methods:
             for B in mro:
@@ -39,33 +48,38 @@ if sys.version_info[:2] <= (3, 5):
         __slots__ = ()
 
         @classmethod
-        def __subclasshook__(cls, C):
+        def __subclasshook__(cls, C: 'Type[Any]') -> 'bool | Any':
             if cls is Collection:
                 return _check_methods(C, "__len__", "__iter__", "__contains__")
             return NotImplemented
 else:
-    Collection = collections.abc.Collection
+    Collection = collections.abc.Collection  # type: ignore[misc,assignment]
 
-if sys.version_info[:2] <= (3, 4):
+if version <= (3, 4):
     import pathlib2 as pathlib  # pylint: disable=import-error
 else:
-    import pathlib
+    import pathlib  # type: ignore[no-redef]
 
-try:
+# functools.cached_property added in 3.8
+if version >= (3, 8):
     from functools import cached_property
-except ImportError:
-    from _thread import RLock
+else:
+    from _thread import RLock  # type: ignore[attr-defined]
+    from typing import Generic, TypeVar  # isort: split
+
+    _T = TypeVar("_T")
+    _S = TypeVar("_S")
 
     _NOT_FOUND = object()
 
-    class cached_property:
-        def __init__(self, func):
-            self.func = func
-            self.attrname = None
+    class cached_property(Generic[_T]):  # type: ignore[no-redef]
+        def __init__(self, func: 'Callable[[Any], _T]') -> 'None':
+            self.func = func  # type: Callable[[Any], _T]
+            self.attrname = None  # type: Optional[str]
             self.__doc__ = func.__doc__
             self.lock = RLock()
 
-        def __set_name__(self, owner, name):
+        def __set_name__(self, owner: 'Type[Any]', name: 'str') -> 'None':
             if self.attrname is None:
                 self.attrname = name
             elif name != self.attrname:
@@ -74,9 +88,10 @@ except ImportError:
                     f"({self.attrname!r} and {name!r})."
                 )
 
-        def __get__(self, instance, owner=None):
+        def __get__(self, instance: 'Optional[_S]',
+                    owner: 'Optional[Type[Any]]' = None) -> 'Union[cached_property[_T], _T]':
             if instance is None:
-                return self
+                return self  # type: ignore[return-value]
             if self.attrname is None:
                 raise TypeError(
                     "Cannot use cached_property instance without calling __set_name__ on it.")
