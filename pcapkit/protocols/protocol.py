@@ -36,7 +36,7 @@ from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, BinaryIO, DefaultDict, Dict, Optional, Type
+    from typing import Any, BinaryIO, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -56,7 +56,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     _info: 'PT'
 
     # Internal data storage for cached properties.
-    __cached__ = {}  # type: Dict[str, Any]
+    __cached__ = {}  # type: dict[str, Any]
 
     ##########################################################################
     # Defaults.
