@@ -9,55 +9,65 @@ datagram reassembly of IP and TCP packets.
 
 """
 import abc
-import copy
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from pcapkit.corekit.infoclass import Info
-from pcapkit.utilities.validations import frag_check, int_check
+if TYPE_CHECKING:
+    from typing import Any, Optional, Type
+
+    from pcapkit.corekit.infoclass import Info
+    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['Reassembly']
 
+# packet
+PT = TypeVar('PT', bound='Info')
+# datagram
+DT = TypeVar('DT', bound='Info')
+# buffer ID
+IT = TypeVar('IT', bound='tuple')
+# buffer
+BT = TypeVar('BT', bound='Info')
 
-class Reassembly(metaclass=abc.ABCMeta):
+
+class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     """Base class for reassembly procedure."""
+
+    # Internal data storage for cached properties.
+    __cached__ = {}  # type: dict[str, Any]
 
     ##########################################################################
     # Properties.
     ##########################################################################
 
-    # protocol of current packet
+    # protocol name of current reassembly object
     @property
     @abc.abstractmethod
-    def name(self):
-        """Protocol of current packet.
-
-        :rtype: str
-        """
+    def name(self) -> 'str':
+        """Protocol name of current reassembly object."""
 
     # total number of reassembled packets
     @property
-    def count(self):
-        """Total number of reassembled packets.
+    def count(self) -> 'int':
+        """Total number of reassembled packets."""
+        if (cached := self.__cached__.get('count')) is not None:
+            return cached
 
-        :rtype: int
-        """
-        return len(self.fetch())
+        ret = len(self.datagram)
+        self.__cached__['count'] = ret
+        return ret
 
     # reassembled datagram
     @property
-    def datagram(self):
-        """Reassembled datagram.
-
-        :rtype: tuple
-        """
-        return self.fetch()
+    def datagram(self) -> 'tuple[DT, ...]':
+        """Reassembled datagram."""
+        if self._buffer:
+            return self.fetch()
+        return tuple(self._dtgram)
 
     @property
     @abc.abstractmethod
-    def protocol(self):
-        """Protocol of current reassembly object.
-
-        :rtype: str
-        """
+    def protocol(self) -> 'Type[Protocol]':
+        """Protocol of current reassembly object."""
 
     ##########################################################################
     # Methods.
@@ -65,116 +75,112 @@ class Reassembly(metaclass=abc.ABCMeta):
 
     # reassembly procedure
     @abc.abstractmethod
-    def reassembly(self, info):
+    def reassembly(self, info: 'PT') -> 'None':
         """Reassembly procedure.
 
         Arguments:
-            info (pcapkit.corekit.infoclass.Info): info dict of packets to be reassembled
+            info: info dict of packets to be reassembled
 
         """
+        # clear cache
+        self.__cached__['count'] = None
+        self.__cached__['fetch'] = None
 
     # submit reassembled payload
     @abc.abstractmethod
-    def submit(self, buf, **kwargs):
+    def submit(self, buf: 'BT', **kwargs: 'Any') -> 'list[DT]':
         """Submit reassembled payload.
 
         Arguments:
-            buf (dict): buffer dict of reassembled packets
+            buf: buffer dict of reassembled packets
 
         """
 
     # fetch datagram
-    def fetch(self):
+    def fetch(self) -> 'tuple[DT, ...]':
         """Fetch datagram.
 
         Returns:
-            Tuple[dict]: Tuple of reassembled datagrams.
+            Tuple of reassembled datagrams.
 
         Fetch reassembled datagrams from
         :attr:`~pcapkit.reassembly.reassembly.Reassembly._dtgram`
         and returns a *tuple* of such datagrams.
 
-        If :attr:`~pcapkit.reassembly.reassembly.Reassembly._newflg`
-        set as ``True``, the method will call
+        If no cache found, the method will call
         :meth:`~pcapkit.reassembly.reassembly.Reassembly.submit` to
-        (*force*) obtain newly reassembled payload. Otherwise, the
+        *forcedly* obtain newly reassembled payload. Otherwise, the
         already calculated :attr:`~pcapkit.reassembly.reassembly.Reassembly._dtgram`
         will be returned.
 
         """
-        if self._newflg:
-            self._newflg = False
-            temp_dtgram = copy.deepcopy(self._dtgram)
-            for (bufid, buffer) in self._buffer.items():
-                temp_dtgram += self.submit(buffer, bufid=bufid)
-            return tuple(temp_dtgram)
-        return tuple(self._dtgram)
+        if (cached := self.__cached__.get('fetch')) is not None:
+            return cached
+
+        temp_dtgram = []  # type: list[DT]
+        for (bufid, buffer) in self._buffer.items():
+            temp_dtgram.extend(
+                self.submit(buffer, bufid=bufid)
+            )
+        temp_dtgram.extend(self._dtgram)
+        ret = tuple(temp_dtgram)
+
+        self.__cached__['fetch'] = ret
+        return ret
 
     # return datagram index
-    def index(self, pkt_num):
+    def index(self, pkt_num: 'int') -> 'Optional[int]':
         """Return datagram index.
 
         Arguments:
-            pkt_num (int): index of packet
+            pkt_num: index of packet
 
         Returns:
-            Optional[int]: reassembled datagram index which was from No. ``pkt_num`` packet;
-            if not found, returns ``None``
+            Reassembled datagram index which was from No. ``pkt_num`` packet;
+            if not found, returns :obj:`None`.
 
         """
-        int_check(pkt_num)
         for counter, datagram in enumerate(self.datagram):
-            if pkt_num in datagram.index:
+            if pkt_num in datagram.index:  # type: ignore[attr-defined]
                 return counter
         return None
 
     # run automatically
-    def run(self, packets):
+    def run(self, packets: 'list[PT]') -> 'None':
         """Run automatically.
 
         Arguments:
-            packets (List[dict]): list of packet dicts to be reassembled
+            packets: list of packet dicts to be reassembled
 
         """
         for packet in packets:
-            frag_check(packet, protocol=self.protocol)
-            info = Info(packet)
-            self.reassembly(info)
-        self._newflg = True
+            self.reassembly(packet)
 
     ##########################################################################
     # Data models.
     ##########################################################################
 
-    #: Not hashable.
-    __hash__ = None
-
-    def __init__(self, *, strict=True):
+    def __init__(self, *, strict: 'bool' = True) -> 'None':
         """Initialise packet reassembly.
 
         Keyword arguments:
-            strict (bool): if return all datagrams (including those not
+            strict: if return all datagrams (including those not
                 implemented) when submit
 
         """
-        #: bool: if new packets reassembled flag
-        self._newflg = False
         #: bool: strict mode flag
         self._strflg = strict
-        #: dict buffer field
-        self._buffer = dict()
-        #: list reassembled datagram
-        self._dtgram = list()
+        #: dict[IT, BT]: dict buffer field
+        self._buffer = {}  # type: dict[IT, BT]
+        #: list[DT]: list reassembled datagram
+        self._dtgram = []  # type: list[DT]
 
-    def __call__(self, packet):
+    def __call__(self, packet: 'PT') -> 'None':
         """Call packet reassembly.
 
         Arguments:
-            packet (dict): packet dict to be reassembled
+            packet: packet dict to be reassembled
                 (detailed format described in corresponding protocol)
 
         """
-        frag_check(packet, protocol=self.protocol)
-        info = Info(packet)
-        self.reassembly(info)
-        self._newflg = True
+        self.reassembly(packet)

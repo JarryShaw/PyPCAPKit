@@ -70,24 +70,127 @@ Algorithm::
     }
 
 """
+from typing import TYPE_CHECKING, Generic, TypeVar
+
 from pcapkit.corekit.infoclass import Info
 from pcapkit.reassembly.reassembly import Reassembly
 
+if TYPE_CHECKING:
+    from ipaddress import IPv4Address, IPv6Address
+    from typing import overload
+
+    from typing_extensions import Literal
+
+    from pcapkit.const.reg.ethertype import EtherType
+
 __all__ = ['IP_Reassembly']
 
+AT = TypeVar('AT', 'IPv4Address', 'IPv6Address')
 
-class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
+###############################################################################
+# Data Models
+###############################################################################
+
+
+class Packet(Info, Generic[AT]):
+    """Data model for :term:`ipv4.packet` / :term:`ipv6.packet`."""
+
+    #: Buffer ID.
+    bufid: 'tuple[AT, AT, int, EtherType]'
+    #: Original packet range number.
+    num: 'int'
+    #: Fragment offset.
+    fo: 'int'
+    #: Internet header length.
+    ihl: 'int'
+    #: More fragments flag.
+    mf: 'bool'
+    #: Total length, header includes.
+    tl: 'int'
+    #: Raw :obj:`bytes`  type header.
+    header: 'bytes'
+    #: Raw :obj:`bytearray` type payload.
+    payload: 'bytearray'
+
+    if TYPE_CHECKING:
+        def __init__(self, bufid: 'tuple[AT, AT, int, EtherType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class DatagramID(Info, Generic[AT]):
+    """Data model for :term:`ipv4.datagram` / :term:`ipv6.datagram` original packet identifier."""
+
+    #: Source address.
+    src: 'AT'
+    #: Destination address.
+    dst: 'AT'
+    #: IP protocol identifier.
+    id: 'int'
+    #: Payload protocol type.
+    proto: 'EtherType'
+
+    if TYPE_CHECKING:
+        def __init__(self, src: 'AT', dst: 'AT', id: 'int', proto: 'EtherType') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class Datagram(Info, Generic[AT]):
+    """Data model for :term:`ipv4.datagram` / :term:`ipv6.datagram`."""
+
+    #: Completed flag.
+    completed: 'bool'
+    #: Original packet identifier.
+    id: 'DatagramID[AT]'
+    #: Packet numbers.
+    index: 'tuple[int, ...]'
+    #: Initial IP header.
+    header: 'bytes'
+    #: Reassembled IP payload..
+    payload: 'bytes | tuple[bytes, ...]'
+
+    if TYPE_CHECKING:
+        @overload
+        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes') -> 'None': ...# pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+        @overload
+        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]') -> 'None': ...# pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+        def __init__(self, completed: 'bool', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]') -> 'None': ...# pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class Buffer(Info, Generic[AT]):
+    """Data model for :term:`ipv4.buffer` / :term:`ipv6.buffer`."""
+
+    #: Total data length.
+    TDL: 'int'
+    #: Fragment received bit table.
+    RCVBT: 'bytearray'
+    #: List of reassembled packets.
+    index: 'list[int]'
+    #: Header buffer.
+    header: 'bytes'
+    #: Data buffer, holes set to ``b'\x00'``.
+    datagram: 'bytearray'
+
+    if TYPE_CHECKING:
+        def __init__(self, TDL: 'int', RCVBT: 'bytearray', index: 'list[int]', header: 'bytes', datagram: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+###############################################################################
+# Algorithm Implementation
+###############################################################################
+
+
+class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'EtherType'], Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
     """Reassembly for IP payload."""
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def reassembly(self, info):
+    def reassembly(self, info: 'Packet[AT]') -> 'None':
         """Reassembly procedure.
 
         Arguments:
-            info (pcapkit.corekit.infoclass.Info): info dict of packets to be reassembled
+            info: info dict of packets to be reassembled
 
         """
         BUFID = info.bufid  # Buffer Identifier
@@ -99,73 +202,76 @@ class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
         # when non-fragmented (possibly discarded) packet received
         if not FO and not MF:
             if BUFID in self._buffer:
-                self._dtgram += self.submit(self._buffer[BUFID])
-                del self._buffer[BUFID]
+                self._dtgram.extend(
+                    self.submit(self._buffer.pop(BUFID), bufid=BUFID)
+                )
                 return
 
         # initialise buffer with BUFID
         if BUFID not in self._buffer:
-            self._buffer[BUFID] = dict(
-                TDL=0,                          # Total Data Length
-                RCVBT=bytearray(8191),          # Fragment Received Bit Table
-                index=list(),                   # index record
-                header=bytearray(),             # header buffer
-                datagram=bytearray(65535),      # data buffer
+            self._buffer[BUFID] = Buffer(
+                TDL=0,                              # Total Data Length
+                RCVBT=bytearray(8191),              # Fragment Received Bit Table
+                index=[],                           # index record
+                header=b'' if FO else info.header,  # header buffer
+                datagram=bytearray(65535),          # data buffer
             )
+        else:
+            # put header into header buffer
+            if not FO:
+                self._buffer[BUFID].__update__(header=info.header)
 
         # append packet index
-        self._buffer[BUFID]['index'].append(info.num)
+        self._buffer[BUFID].index.append(info.num)
 
         # put data into data buffer
         start = FO
         stop = TL - IHL + FO
-        self._buffer[BUFID]['datagram'][start:stop] = info.payload
+        self._buffer[BUFID].datagram[start:stop] = info.payload
 
         # set RCVBT bits (in 8 octets)
         start = FO // 8
         stop = FO // 8 + (TL - IHL + 7) // 8
-        self._buffer[BUFID]['RCVBT'][start:stop] = b'\x01' * (stop - start + 1)
+        self._buffer[BUFID].RCVBT[start:stop] = b'\x01' * (stop - start + 1)
 
         # get total data length (header excludes)
         if not MF:
             TDL = TL - IHL + FO
 
-        # put header into header buffer
-        if not FO:
-            self._buffer[BUFID]['header'] = info.header
-
         # when datagram is reassembled in whole
         start = 0
         stop = (TDL + 7) // 8
-        if TDL and all(self._buffer[BUFID]['RCVBT'][start:stop]):
-            self._dtgram += self.submit(self._buffer[BUFID], checked=True)
-            del self._buffer[BUFID]
+        if TDL and all(self._buffer[BUFID].RCVBT[start:stop]):
+            self._dtgram.extend(
+                self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
+            )
 
-    def submit(self, buf, *, checked=False):  # pylint: disable=arguments-differ
+    def submit(self, buf: 'Buffer[AT]', *, bufid: 'tuple[AT, AT, int, EtherType]', checked: 'bool' = False) -> 'list[Datagram[AT]]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Submit reassembled payload.
 
         Arguments:
-            buf (dict): buffer dict of reassembled packets
+            buf: buffer dict of reassembled packets
 
         Keyword Arguments:
-            bufid (tuple): buffer identifier
+            bufid: buffer identifier
+            checked: buffer consistency checked flag
 
         Returns:
-            list: reassembled packets
+            Reassembled packets.
 
         """
-        TDL = buf['TDL']
-        RCVBT = buf['RCVBT']
-        index = buf['index']
-        header = buf['header']
-        datagram = buf['datagram']
+        TDL = buf.TDL
+        RCVBT = buf.RCVBT
+        index = buf.index
+        header = buf.header
+        datagram = buf.datagram
 
         start = 0
         stop = (TDL + 7) // 8
         flag = checked or (TDL and all(RCVBT[start:stop]))
         # if datagram is not implemented
         if not flag and self._strflg:
-            data = list()
+            data = []  # type: list[bytes]
             byte = bytearray()
             # extract received payload
             for (bctr, bit) in enumerate(RCVBT):
@@ -179,18 +285,31 @@ class IP_Reassembly(Reassembly):  # pylint: disable=abstract-method
                     byte = bytearray()
             # strip empty packets
             if data or header:
-                packet = Info(
-                    NotImplemented=True,
+                packet = Datagram(
+                    completed=False,
+                    id=DatagramID(
+                        src=bufid[0],
+                        dst=bufid[1],
+                        id=bufid[2],
+                        proto=bufid[3],
+                    ),
                     index=tuple(index),
-                    header=header or None,
-                    payload=tuple(data) or None,
+                    header=header,
+                    payload=tuple(data),
                 )
         # if datagram is reassembled in whole
         else:
             payload = datagram[:TDL]
-            packet = Info(
-                NotImplemented=False,
+            packet = Datagram(  # type: ignore[call-overload]
+                completed=True,
+                id=DatagramID(
+                    src=bufid[0],
+                    dst=bufid[1],
+                    id=bufid[2],
+                    proto=bufid[3],
+                ),
                 index=tuple(index),
-                packet=(bytes(header) + bytes(payload)) or None,
+                header=header,
+                packet=bytes(payload),
             )
         return [packet]

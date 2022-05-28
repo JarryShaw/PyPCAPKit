@@ -28,7 +28,7 @@ ipv4.packet
          ihl = ipv4.hdr_len,             # internet header length
          mf = ipv4.flags.mf,             # more fragment flag
          tl = ipv4.len,                  # total length, header includes
-         header = ipv4.header,           # raw bytearray type header
+         header = ipv4.header,           # raw bytes type header
          payload = ipv4.payload,         # raw bytearray type payload
        )
 
@@ -40,19 +40,29 @@ ipv4.datagram
     .. code-block:: python
 
        (tuple) datagram
-        |--> (dict) data
-        |     |--> 'NotImplemented' : (bool) True --> implemented
+        |--> (Info) data
+        |     |--> 'completed' : (bool) True --> implemented
+        |     |--> 'id' : (Info) original packet identifier
+        |     |            |--> 'src' --> (IPv4Address) ipv4.src
+        |     |            |--> 'dst' --> (IPv4Address) ipv4.dst
+        |     |            |--> 'id' --> (int) ipv4.id
+        |     |            |--> 'proto' --> (EtherType) ipv4.proto
         |     |--> 'index' : (tuple) packet numbers
         |     |               |--> (int) original packet range number
-        |     |--> 'packet' : (Optional[bytes]) reassembled IPv4 packet
-        |--> (dict) data
-        |     |--> 'NotImplemented' : (bool) False --> not implemented
+        |     |--> 'packet' : (bytes) reassembled IPv4 packet
+        |--> (Info) data
+        |     |--> 'completed' : (bool) False --> not implemented
+        |     |--> 'id' : (Info) original packet identifier
+        |     |            |--> 'src' --> (IPv4Address) ipv4.src
+        |     |            |--> 'dst' --> (IPv4Address) ipv4.dst
+        |     |            |--> 'id' --> (int) ipv4.id
+        |     |            |--> 'proto' --> (EtherType) ipv4.proto
         |     |--> 'index' : (tuple) packet numbers
         |     |               |--> (int) original packet range number
-        |     |--> 'header' : (Optional[bytes]) IPv4 header
-        |     |--> 'payload' : (Optional[tuple]) partially reassembled IPv4 payload
-        |                       |--> (Optional[bytes]) IPv4 payload fragment
-        |--> (dict) data ...
+        |     |--> 'header' : (bytes) IPv4 header
+        |     |--> 'payload' : (tuple) partially reassembled IPv4 payload
+        |                       |--> (bytes) IPv4 payload fragment
+        |--> (Info) data ...
 
 ipv4.buffer
     Data structure for internal buffering when performing reassembly algorithms
@@ -63,27 +73,36 @@ ipv4.buffer
        (dict) buffer --> memory buffer for reassembly
         |--> (tuple) BUFID : (dict)
         |     |--> ipv4.src       |
-        |     |--> ipc6.dst       |
-        |     |--> ipv4.label     |
-        |     |--> ipv4_frag.next |
+        |     |--> ipv4.dst       |
+        |     |--> ipv4.id        |
+        |     |--> ipv4.proto     |
         |                         |--> 'TDL' : (int) total data length
-        |                         |--> RCVBT : (bytearray) fragment received bit table
-        |                         |             |--> (bytes) b'\\x00' -> not received
-        |                         |             |--> (bytes) b'\\x01' -> received
-        |                         |             |--> (bytes) ...
+        |                         |--> 'RCVBT' : (bytearray) fragment received bit table
+        |                         |               |--> (bytes) b'\\x00' -> not received
+        |                         |               |--> (bytes) b'\\x01' -> received
+        |                         |               |--> (bytes) ...
         |                         |--> 'index' : (list) list of reassembled packets
         |                         |               |--> (int) packet range number
-        |                         |--> 'header' : (bytearray) header buffer
+        |                         |--> 'header' : (bytes) header buffer
         |                         |--> 'datagram' : (bytearray) data buffer, holes set to b'\\x00'
         |--> (tuple) BUFID ...
 
 """
+from typing import TYPE_CHECKING
+
+from pcapkit.protocols.internet.ipv4 import IPv4
 from pcapkit.reassembly.ip import IP_Reassembly
+
+if TYPE_CHECKING:
+    from ipaddress import IPv4Address
+    from typing import Type
+
+    from typing_extensions import Literal
 
 __all__ = ['IPv4_Reassembly']
 
 
-class IPv4_Reassembly(IP_Reassembly):
+class IPv4_Reassembly(IP_Reassembly['IPv4Address']):
     """Reassembly for IPv4 payload.
 
     Example:
@@ -101,17 +120,11 @@ class IPv4_Reassembly(IP_Reassembly):
     ##########################################################################
 
     @property
-    def name(self):
-        """Protocol of current packet.
-
-        :rtype: Literal['Internet Protocol version 4']
-        """
+    def name(self) -> 'Literal["Internet Protocol version 4"]':
+        """Protocol of current packet."""
         return 'Internet Protocol version 4'
 
     @property
-    def protocol(self):
-        """Protocol of current reassembly object.
-
-        :rtype: Literal['IPv4']
-        """
-        return 'IPv4'
+    def protocol(self) -> 'Type[IPv4]':
+        """Protocol of current reassembly object."""
+        return IPv4

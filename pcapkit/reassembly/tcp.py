@@ -108,10 +108,12 @@ tcp.packet
        packet_dict = Info(
          bufid = tuple(
              ip.src,                     # source IP address
-             ip.dst,                     # destination IP address
              tcp.srcport,                # source port
+             ip.dst,                     # destination IP address
              tcp.dstport,                # destination port
          ),
+         dsn = tcp.seq,                  # data sequence number
+         ack = tcp.ack,                  # acknowledgement number
          num = frame.number,             # original packet range number
          syn = tcp.flags.syn,            # synchronise flag
          fin = tcp.flags.fin,            # finish flag
@@ -119,6 +121,7 @@ tcp.packet
          len = tcp.raw_len,              # payload length, header excludes
          first = tcp.seq,                # this sequence number
          last = tcp.seq + tcp.raw_len,   # next (wanted) sequence number
+         header = tcp.packet.header,     # raw bytes type header
          payload = tcp.raw,              # raw bytearray type payload
        )
 
@@ -134,32 +137,34 @@ tcp.datagram
         |     |--> 'NotImplemented' : (bool) True --> implemented
         |     |--> 'id' : (Info) original packet identifier
         |     |            |--> 'src' --> (tuple)
-        |     |            |               |--> (str) ip.src
+        |     |            |               |--> (IPv4Address) ip.src
         |     |            |               |--> (int) tcp.srcport
         |     |            |--> 'dst' --> (tuple)
-        |     |            |               |--> (str) ip.dst
+        |     |            |               |--> (IPv4Address) ip.dst
         |     |            |               |--> (int) tcp.dstport
         |     |            |--> 'ack' --> (int) original packet ACK number
         |     |--> 'index' : (tuple) packet numbers
         |     |               |--> (int) original packet range number
-        |     |--> 'payload' : (Optional[bytes]) reassembled application layer data
-        |     |--> 'packets' : (Tuple[Analysis]) analysed payload
+        |     |               |--> ...
+        |     |--> 'header' : (bytes) initial TCP header
+        |     |--> 'payload' : (bytes) reassembled payload
         |--> (Info) data
         |     |--> 'NotImplemented' : (bool) False --> not implemented
         |     |--> 'id' : (Info) original packet identifier
         |     |            |--> 'src' --> (tuple)
-        |     |            |               |--> (str) ip.src
+        |     |            |               |--> (IPv4Address) ip.src
         |     |            |               |--> (int) tcp.srcport
         |     |            |--> 'dst' --> (tuple)
-        |     |            |               |--> (str) ip.dst
+        |     |            |               |--> (IPv4Address) ip.dst
         |     |            |               |--> (int) tcp.dstport
         |     |            |--> 'ack' --> (int) original packet ACK number
-        |     |--> 'ack' : (int) original packet ACK number
         |     |--> 'index' : (tuple) packet numbers
         |     |               |--> (int) original packet range number
-        |     |--> 'payload' : (Optional[tuple]) partially reassembled payload
-        |     |                 |--> (Optional[bytes]) payload fragment
-        |     |--> 'packets' : (Tuple[Analysis]) analysed payloads
+        |     |               |--> ...
+        |     |--> 'header' : (bytes) initial TCP header
+        |     |--> 'payload' : (tuple) partially reassembled payload
+        |                       |--> (bytes) payload fragment
+        |                       |--> ...
         |--> (Info) data ...
 
 tcp.buffer
@@ -178,27 +183,159 @@ tcp.buffer
         |                        |             |--> (Info) hole --> hole descriptor
         |                        |                   |--> "first" --> (int) start of hole
         |                        |                   |--> "last" --> (int) stop of hole
-        |                        |--> (int) ACK : (dict)
-        |                        |                 |--> 'ind' : (list) list of reassembled packets
-        |                        |                 |             |--> (int) packet range number
-        |                        |                 |--> 'isn' : (int) ISN of payload buffer
-        |                        |                 |--> 'len' : (int) length of payload buffer
-        |                        |                 |--> 'raw' : (bytearray) reassembled payload, holes set to b'\\x00'
-        |                        |--> (int) ACK ...
-        |                        |--> ...
+        |                        |--> 'hdr' : (bytes) initial TCP header
+        |                        |--> 'ack' : (dict) ACK list
+        |                                      |--> (int) ACK : (dict)
+        |                                      |                 |--> 'ind' : (list) list of reassembled packets
+        |                                      |                 |             |--> (int) packet range number
+        |                                      |                 |--> 'isn' : (int) ISN of payload buffer
+        |                                      |                 |--> 'len' : (int) length of payload buffer
+        |                                      |                 |--> 'raw' : (bytearray) reassembled payload, holes set to b'\\x00'
+        |                                      |--> (int) ACK ...
+        |                                      |--> ...
         |--> (tuple) BUFID ...
 
 """
-import io
 import sys
+from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.transport.tcp import TCP
 from pcapkit.reassembly.reassembly import Reassembly
+
+if TYPE_CHECKING:
+    from ipaddress import IPv4Address
+    from typing import Type, overload
+
+    from typing_extensions import Literal
 
 __all__ = ['TCP_Reassembly']
 
+###############################################################################
+# Data Models
+###############################################################################
 
-class TCP_Reassembly(Reassembly):
+BufferID = tuple['IPv4Address', 'int', 'IPv4Address', 'int']
+
+
+class Packet(Info):
+    """Data model for :term:`tcp.packet`."""
+
+    #: Buffer ID.
+    bufid: 'BufferID'
+    #: Data sequence number.
+    dsn: 'int'
+    #: Acknowledgment number.
+    ack: 'int'
+    #: Original packet range number.
+    num: 'int'
+    #: Synchronise flag.
+    syn: 'bool'
+    #: Finish flag.
+    fin: 'bool'
+    #: Reset connection flag.
+    rst: 'bool'
+    #: Payload length, header excludes.
+    len: 'int'
+    #: This sequence number.
+    first: 'int'
+    #: Next (wanted) sequence number.
+    last: 'int'
+    #: Raw :obj:`bytes` type header.
+    header: 'bytes'
+    #: Raw :obj:`bytearray` type payload.
+    payload: 'bytearray'
+
+    if TYPE_CHECKING:
+        def __init__(self, bufid: 'BufferID', dsn: 'int', ack: 'int', num: 'int', syn: 'bool', fin: 'bool', rst: 'bool', len: 'int', first: 'int', last: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class DatagramID(Info):
+    """Data model for :term:`tcp.datagram` original packet identifier."""
+
+    #: Source address.
+    src: 'tuple[IPv4Address, int]'
+    #: Destination address.
+    dst: 'tuple[IPv4Address, int]'
+    #: Original packet ACK number.
+    ack: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, src: 'tuple[IPv4Address, int]', dst: 'tuple[IPv4Address, int]', ack: 'int') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class Datagram(Info):
+    """Data model for :term:`tcp.datagram`."""
+
+    #: Completed flag.
+    completed: 'bool'
+    #: Original packet identifier.
+    id: 'DatagramID'
+    #: Packet numbers.
+    index: 'tuple[int, ...]'
+    #: Initial TCP header.
+    header: 'bytes'
+    #: Reassembled payload (application layer data).
+    payload: 'bytes | tuple[bytes, ...]'
+
+    if TYPE_CHECKING:
+        @overload
+        def __init__(self, completed: 'Literal[True]', id: 'DatagramID', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+        @overload
+        def __init__(self, completed: 'Literal[False]', id: 'DatagramID', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+        def __init__(self, completed: 'bool', id: 'DatagramID', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class HoleDiscriptor(Info):
+    """Data model for :term:`tcp.buffer` hole descriptor."""
+
+    #: Start of hole.
+    first: 'int'
+    #: Stop of hole.
+    last: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, first: 'int', last: 'int') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class Fragment(Info):
+    """Data model for :term:`tcp.buffer` ACK list fragment item."""
+
+    #: List of reassembled packets.
+    ind: 'list[int]'
+    #: ISN of payload buffer.
+    isn: 'int'
+    #: Length of payload buffer.
+    len: 'int'
+    #: Reassembled payload holes set to b'\x00'.
+    raw: 'bytearray'
+
+    if TYPE_CHECKING:
+        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+class Buffer(Info):
+    """Data model for :term:`tcp.buffer`."""
+
+    #: Hole descriptor list.
+    hdl: 'list[HoleDiscriptor]'
+    #: Initial TCP header.
+    hdr: 'bytes'
+    #: ACK list.
+    ack: 'dict[int, Fragment]'
+
+    if TYPE_CHECKING:
+        def __init__(self, hdl: 'list[HoleDiscriptor]', hdr: 'bytes', ack: 'dict[int, Fragment]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+###############################################################################
+# Algorithm Implementation
+###############################################################################
+
+
+class TCP_Reassembly(Reassembly[Packet, Datagram, BufferID, Buffer]):
     """Reassembly for TCP payload.
 
     Example:
@@ -216,30 +353,24 @@ class TCP_Reassembly(Reassembly):
     ##########################################################################
 
     @property
-    def name(self):
-        """Protocol of current packet.
-
-        :rtype: Literal['Transmission Control Protocol']
-        """
+    def name(self) -> 'Literal["Transmission Control Protocol"]':
+        """Protocol of current packet."""
         return 'Transmission Control Protocol'
 
     @property
-    def protocol(self):
-        """Protocol of current reassembly object.
-
-        :rtype: Literal['TCP']
-        """
-        return 'TCP'
+    def protocol(self) -> 'Type[TCP]':
+        """Protocol of current reassembly object."""
+        return TCP
 
     ##########################################################################
     # Methods.
     ##########################################################################
 
-    def reassembly(self, info):
+    def reassembly(self, info: 'Packet') -> 'None':
         """Reassembly procedure.
 
         Arguments:
-            info (pcapkit.corekit.infoclass.Info): :term:`info <tcp.packet>` dict of packets to be reassembled
+            info: :term:`info <tcp.packet>` dict of packets to be reassembled
 
         """
         BUFID = info.bufid  # Buffer Identifier
@@ -249,40 +380,57 @@ class TCP_Reassembly(Reassembly):
         RST = info.rst      # Reset Connection Flag (Termination)
         SYN = info.syn      # Synchronise Flag (Establishment)
 
-        # when SYN is set, reset buffer of this session
+        # when SYN is set, reset buffer of existing session
         if SYN and BUFID in self._buffer:
-            self._dtgram += self.submit(self._buffer[BUFID], bufid=BUFID)
-            del self._buffer[BUFID]
+            self._dtgram.extend(
+                self.submit(self._buffer.pop(BUFID), bufid=BUFID)
+            )
 
         # initialise buffer with BUFID & ACK
         if BUFID not in self._buffer:
-            self._buffer[BUFID] = {
-                'hdl': [Info(first=info.len, last=sys.maxsize)],
-                ACK: dict(
-                    ind=[info.num],
-                    isn=info.dsn,
-                    len=info.len,
-                    raw=info.payload,
-                ),
-            }
+            self._buffer[BUFID] = Buffer(
+                hdl=[
+                    HoleDiscriptor(
+                        first=info.len,
+                        last=sys.maxsize,
+                    ),
+                ],
+                hdr=info.header if SYN else b'',
+                ack={
+                    ACK: Fragment(
+                        ind=[
+                            info.num,
+                        ],
+                        isn=info.dsn,
+                        len=info.len,
+                        raw=info.payload,
+                    ),
+                },
+            )
         else:
             # initialise buffer with ACK
-            if ACK not in self._buffer[BUFID]:
-                self._buffer[BUFID][ACK] = dict(
-                    ind=[info.num],
+            if ACK not in self._buffer[BUFID].ack:
+                self._buffer[BUFID].ack[ACK] = Fragment(
+                    ind=[
+                        info.num,
+                    ],
                     isn=info.dsn,
                     len=info.len,
                     raw=info.payload,
                 )
             else:
+                # put header into header buffer
+                if SYN:
+                    self._buffer[BUFID].__update__(hdr=info.header)
+
                 # append packet index
-                self._buffer[BUFID][ACK]['ind'].append(info.num)
+                self._buffer[BUFID].ack[ACK].ind.append(info.num)
 
                 # record fragment payload
-                ISN = self._buffer[BUFID][ACK]['isn']   # Initial Sequence Number
-                RAW = self._buffer[BUFID][ACK]['raw']   # Raw Payload Data
+                ISN = self._buffer[BUFID].ack[ACK].isn       # Initial Sequence Number
+                RAW = self._buffer[BUFID].ack[ACK].raw       # Raw Payload Data
                 if DSN >= ISN:  # if fragment goes after existing payload
-                    LEN = self._buffer[BUFID][ACK]['len']
+                    LEN = self._buffer[BUFID].ack[ACK].len
                     GAP = DSN - (ISN + LEN)     # gap length between payloads
                     if GAP >= 0:    # if fragment goes after existing payload
                         RAW += bytearray(GAP) + info.payload
@@ -291,103 +439,105 @@ class TCP_Reassembly(Reassembly):
                 else:           # if fragment exceeds existing payload
                     LEN = info.len
                     GAP = ISN - (DSN + LEN)     # gap length between payloads
-                    self._buffer[BUFID][ACK]['isn'] = DSN
+                    self._buffer[BUFID].ack[ACK].isn = DSN
                     if GAP >= 0:    # if fragment exceeds existing payload
                         RAW = info.payload + bytearray(GAP) + RAW
                     else:           # if fragment partially overlaps existing payload
                         RAW = info.payload + RAW[ISN-GAP:]
-                self._buffer[BUFID][ACK]['raw'] = RAW       # update payload datagram
-                self._buffer[BUFID][ACK]['len'] = len(RAW)  # update payload length
+                self._buffer[BUFID].ack[ACK].raw = RAW       # update payload datagram
+                self._buffer[BUFID].ack[ACK].len = len(RAW)  # update payload length
 
             # update hole descriptor list
-            HDL = self._buffer[BUFID]['hdl']
-            for (index, hole) in enumerate(HDL):                            # step one
-                if info.first > hole.last:                                  # step two
+            HDL = self._buffer[BUFID].hdl                          # HDL alias
+            for (index, hole) in enumerate(HDL):                   # step one
+                if info.first > hole.last:                         # step two
                     continue
-                if info.last < hole.first:                                  # step three
+                if info.last < hole.first:                         # step three
                     continue
-                del HDL[index]                                              # step four
-                if info.first > hole.first:                                 # step five
-                    new_hole = Info(
+                del HDL[index]                                     # step four
+                if info.first > hole.first:                        # step five
+                    new_hole = HoleDiscriptor(
                         first=hole.first,
                         last=info.first - 1,
                     )
                     HDL.insert(index, new_hole)
                     index += 1
-                if info.last < hole.last and not FIN and not RST:           # step six
-                    new_hole = Info(
+                if info.last < hole.last and not FIN and not RST:  # step six
+                    new_hole = HoleDiscriptor(
                         first=info.last + 1,
                         last=hole.last
                     )
                     HDL.insert(index, new_hole)
-                break                                                       # step seven
-            self._buffer[BUFID]['hdl'] = HDL                                # update HDL
+                break                                              # step seven
+            #self._buffer[BUFID].hdl = HDL                         # update HDL
 
         # when FIN/RST is set, submit buffer of this session
         if FIN or RST:
-            self._dtgram += self.submit(self._buffer[BUFID], bufid=BUFID)
-            del self._buffer[BUFID]
+            self._dtgram.extend(
+                self.submit(self._buffer.pop(BUFID), bufid=BUFID)
+            )
 
-    def submit(self, buf, *, bufid):  # pylint: disable=arguments-differ
+    def submit(self, buf: 'Buffer', *, bufid: 'BufferID') -> 'list[Datagram]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Submit reassembled payload.
 
         Arguments:
-            buf (dict): :term:`buffer <tcp.buffer>` dict of reassembled packets
+            buf: :term:`buffer <tcp.buffer>` dict of reassembled packets
 
         Keyword Arguments:
-            bufid (tuple): buffer identifier
+            bufid: buffer identifier
 
         Returns:
-            List[dict]: reassembled :term:`packets <tcp.datagram>`
+            Reassembled :term:`packets <tcp.datagram>`.
 
         """
-        datagram = []           # reassembled datagram
-        HDL = buf.pop('hdl')    # hole descriptor list (remove from dict)
+        datagram = []  # type: list[Datagram] # reassembled datagram
+        HDL = buf.hdl                         # hole descriptor list
 
         # check through every buffer with ACK
-        for (ack, buffer) in buf.items():
+        for (ack, buffer) in buf.ack.items():
             # if this buffer is not implemented
             # go through every hole and extract received payload
             if len(HDL) > 2 and self._strflg:
-                data = []
+                data = []  # type: list[bytes]
                 start = stop = 0
                 for hole in HDL:
                     stop = hole.first
-                    byte = buffer['raw'][start:stop]
+                    byte = buffer.raw[start:stop]
                     start = hole.last
                     if byte:    # strip empty payload
                         data.append(byte)
-                byte = buffer['raw'][start:]
+                byte = buffer.raw[start:]
                 if byte:    # strip empty payload
-                    data.append(byte)
+                    data.append(bytes(byte))
                 if data:    # strip empty buffer
-                    packet = Info(
-                        NotImplemented=True,
-                        id=Info(
-                            src=(bufid[0], bufid[2]),
-                            dst=(bufid[1], bufid[3]),
+                    packet = Datagram(
+                        completed=False,
+                        id=DatagramID(
+                            src=(bufid[0], bufid[1]),
+                            dst=(bufid[2], bufid[3]),
                             ack=ack,
                         ),
-                        index=tuple(buffer['ind']),
-                        payload=tuple(data) or None,
-                        packets=tuple(analyse(io.BytesIO(frag), len(frag)) for frag in data),
+                        index=tuple(buffer.ind),
+                        header=buf.hdr,
+                        payload=tuple(data),
                     )
                     datagram.append(packet)
+
             # if this buffer is implemented
             # export payload data & convert into bytes
             else:
-                data = buffer['raw']
-                if data:    # strip empty buffer
-                    packet = Info(
-                        NotImplemented=False,
-                        id=Info(
-                            src=(bufid[0], bufid[2]),
-                            dst=(bufid[1], bufid[3]),
+                payload = buffer.raw
+                if payload:    # strip empty buffer
+                    packet = Datagram(
+                        completed=True,
+                        id=DatagramID(
+                            src=(bufid[0], bufid[1]),
+                            dst=(bufid[2], bufid[3]),
                             ack=ack,
                         ),
-                        index=tuple(buffer['ind']),
-                        payload=bytes(data) or None,
-                        packets=(analyse(io.BytesIO(data), len(data)),),
+                        index=tuple(buffer.ind),
+                        header=buf.hdr,
+                        payload=bytes(payload),
                     )
                     datagram.append(packet)
         return datagram
