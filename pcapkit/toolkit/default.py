@@ -6,17 +6,34 @@
 flag to indicate if usable for its caller.
 
 """
+from typing import TYPE_CHECKING, cast
+
+from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_ExtensionHeader
+
+if TYPE_CHECKING:
+    from ipaddress import IPv4Address, IPv6Address
+
+    from pcapkit.const.reg.linktype import LinkType
+    from pcapkit.foundation.traceflow import Packet as TF_Packet
+    from pcapkit.protocols.internet.ipv4 import IPv4
+    from pcapkit.protocols.internet.ipv6 import IPv6
+    from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
+    from pcapkit.protocols.misc.pcap import Frame
+    from pcapkit.protocols.transport.tcp import TCP
+    from pcapkit.reassembly.ip import Packet as IP_Packet
+    from pcapkit.reassembly.tcp import Packet as TCP_Packet
+
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow']
 
 
-def ipv4_reassembly(frame):
+def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
     Args:
-        frame (pcapkit.protocols.pcap.frame.Frame): PCAP frame.
+        frame: PCAP frame.
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for IPv4 reassembly.
+       Data for IPv4 reassembly.
 
         * If the ``frame`` can be used for IPv4 reassembly. A frame can be reassembled
           if it contains IPv4 layer (:class:`pcapkit.protocols.internet.ipv4.IPv4`) and
@@ -26,33 +43,35 @@ def ipv4_reassembly(frame):
           reassembly (c.f. :term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.reassembly.ipv4.IPv4Reassembly`
+        :class:`pcapkit.reassembly.ipv4.IPv4Reassembly`
 
     """
     if 'IPv4' in frame:
-        ipv4 = frame['IPv4'].info
-        if ipv4.flags.df:       # dismiss not fragmented frame
-            return False, None
-        data = dict(
+        ipv4 = cast('IPv4', frame['IPv4'])
+        ipv4_info = ipv4.info
+        if ipv4_info.flags.df:       # dismiss not fragmented frame
+            return None
+
+        data = IP_Packet(
             bufid=(
-                ipv4.src,                                   # source IP address
-                ipv4.dst,                                   # destination IP address
-                ipv4.id,                                    # identification
-                ipv4.proto.name,                            # payload protocol type
+                ipv4_info.src,                       # source IP address
+                ipv4_info.dst,                       # destination IP address
+                ipv4_info.id,                        # identification
+                ipv4_info.protocol,                  # payload protocol type
             ),
-            num=frame.info.number,                          # original packet range number
-            fo=ipv4.frag_offset,                            # fragment offset
-            ihl=ipv4.hdr_len,                               # internet header length
-            mf=ipv4.flags.mf,                               # more fragment flag
-            tl=ipv4.len,                                    # total length, header includes
-            header=bytearray(ipv4.packet.header),           # raw bytearray type header
-            payload=bytearray(ipv4.packet.payload or b''),  # raw bytearray type payload
+            num=frame.info.number,                   # original packet range number
+            fo=ipv4_info.offset,                     # fragment offset
+            ihl=ipv4_info.hdr_len,                   # internet header length
+            mf=ipv4_info.flags.mf,                   # more fragment flag
+            tl=ipv4_info.len,                        # total length, header includes
+            header=ipv4.packet.header,               # raw bytes type header
+            payload=bytearray(ipv4.packet.payload),  # raw bytearray type payload
         )
-        return True, data
-    return False, None
+        return data
+    return None
 
 
-def ipv6_reassembly(frame):
+def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
     Args:
@@ -69,33 +88,36 @@ def ipv6_reassembly(frame):
           reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.reassembly.ipv6.IPv6Reassembly`
+        :class:`pcapkit.reassembly.ipv6.IPv6Reassembly`
 
     """
     if 'IPv6' in frame:
-        ipv6 = frame['IPv6'].info
-        if 'frag' not in ipv6:      # dismiss not fragmented frame
-            return False, None
-        data = dict(
+        ipv6 = cast('IPv6', frame['IPv6'])
+        ipv6_info = ipv6.info
+        if (ipv6_frag := ipv6.extension_headers.get(RegType_ExtensionHeader.IPv6_Frag)) is None:  # dismiss not fragmented frame
+            return None
+        ipv6_frag_info = cast('IPv6_Frag', ipv6_frag).info
+
+        data = IP_Packet(
             bufid=(
-                ipv6.src,                                       # source IP address
-                ipv6.dst,                                       # destination IP address
-                ipv6.label,                                     # label
-                ipv6.ipv6_frag.next.name,                       # next header field in IPv6 Fragment Header
+                ipv6_info.src,                              # source IP address
+                ipv6_info.dst,                              # destination IP address
+                ipv6_info.label,                            # label
+                ipv6_frag_info.next,                        # next header field in IPv6 Fragment Header
             ),
-            num=frame.info.number,                              # original packet range number
-            fo=ipv6.ipv6_frag.offset,                           # fragment offset
-            ihl=ipv6.hdr_len,                                   # header length, only headers before IPv6-Frag
-            mf=ipv6.ipv6_frag.mf,                               # more fragment flag
-            tl=ipv6.hdr_len + ipv6.raw_len,                     # total length, header includes
-            header=bytearray(ipv6.fragment.header),             # raw bytearray type header before IPv6-Frag
-            payload=bytearray(ipv6.fragment.payload or b''),    # raw bytearray type payload after IPv6-Frag
+            num=frame.info.number,                          # original packet range number
+            fo=ipv6_frag_info.offset,                       # fragment offset
+            ihl=ipv6_info.hdr_len,                          # header length, only headers before IPv6-Frag
+            mf=ipv6_frag_info.mf,                           # more fragment flag
+            tl=ipv6_info.hdr_len + ipv6_info.raw_len,       # total length, header includes
+            header=ipv6_info.fragment.header,               # raw bytearray type header before IPv6-Frag
+            payload=bytearray(ipv6_info.fragment.payload),  # raw bytearray type payload after IPv6-Frag
         )
-        return True, data
-    return False, None
+        return data
+    return None
 
 
-def tcp_reassembly(frame):
+def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
     Args:
@@ -110,46 +132,50 @@ def tcp_reassembly(frame):
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.reassembly.tcp.TCPReassembly`
+        :class:`pcapkit.reassembly.tcp.TCPReassembly`
 
     """
     if 'TCP' in frame:
-        ip = (frame['IPv4'] if 'IPv4' in frame else frame['IPv6']).info
-        tcp = frame['TCP'].info
-        data = dict(
+        ip = cast('IPv4 | IPv6', frame['IP'])
+        ip_info = ip.info
+        tcp = cast('TCP', frame['TCP'])
+        tcp_info = tcp.info
+        raw_len = len(tcp.packet.payload)
+
+        data = TCP_Packet(
             bufid=(
-                ip.src,                                     # source IP address
-                ip.dst,                                     # destination IP address
-                tcp.srcport,                                # source port
-                tcp.dstport,                                # destination port
+                ip_info.src,                        # source IP address
+                tcp_info.srcport,                   # source port
+                ip_info.dst,                        # destination IP address
+                tcp_info.dstport,                   # destination port
             ),
-            num=frame.info.number,                          # original packet range number
-            ack=tcp.ack,                                    # acknowledgement
-            dsn=tcp.seq,                                    # data sequence number
-            syn=tcp.flags.syn,                              # synchronise flag
-            fin=tcp.flags.fin,                              # finish flag
-            rst=tcp.flags.rst,                              # reset connection flag
-            payload=bytearray(tcp.packet.payload or b''),   # raw bytearray type payload
+            num=frame.info.number,                  # original packet range number
+            ack=tcp_info.ack,                       # acknowledgement
+            dsn=tcp_info.seq,                       # data sequence number
+            syn=tcp_info.flags.syn,                 # synchronise flag
+            fin=tcp_info.flags.fin,                 # finish flag
+            rst=tcp_info.flags.rst,                 # reset connection flag
+            header=tcp.packet.header,               # raw bytes type header
+            payload=bytearray(tcp.packet.payload),  # raw bytearray type payload
+            first=tcp_info.seq,                     # this sequence number
+            last=tcp_info.seq + raw_len,            # next (wanted) sequence number
+            len=raw_len,                            # payload length, header excludes
         )
-        raw_len = len(data['payload'])                      # payload length, header excludes
-        data['first'] = tcp.seq                             # this sequence number
-        data['last'] = tcp.seq + raw_len                    # next (wanted) sequence number
-        data['len'] = raw_len                               # payload length, header excludes
-        return True, data
-    return False, None
+        return data
+    return None
 
 
-def tcp_traceflow(frame, *, data_link):
+def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
-        frame (pcapkit.protocols.pcap.frame.Frame): PCAP frame.
+        frame: PCAP frame.
 
     Keyword Args:
-        data_link (str): Data link layer protocol (from global header).
+        data_link: Data link layer protocol (from global header).
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
+        Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP flow tracing. A frame can be reassembled
           if it contains TCP layer (:class:`pcapkit.protocols.transport.tcp.TCP`).
@@ -157,23 +183,26 @@ def tcp_traceflow(frame, *, data_link):
           flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.foundation.traceflow.TraceFlow`
+        :class:`pcapkit.foundation.traceflow.TraceFlow`
 
     """
     if 'TCP' in frame:
-        ip = (frame['IPv4'] if 'IPv4' in frame else frame['IPv6']).info
-        tcp = frame['TCP'].info
-        data = dict(
-            protocol=data_link,                     # data link type from global header
-            index=frame.info.number,                # frame number
-            frame=frame.info,                       # extracted frame info
-            syn=tcp.flags.syn,                      # TCP synchronise (SYN) flag
-            fin=tcp.flags.fin,                      # TCP finish (FIN) flag
-            src=ip.src,                             # source IP
-            dst=ip.dst,                             # destination IP
-            srcport=tcp.srcport,                    # TCP source port
-            dstport=tcp.dstport,                    # TCP destination port
-            timestamp=frame.info.time_epoch,        # frame timestamp
+        ip = cast('IPv4 | IPv6', frame['IP'])
+        ip_info = ip.info
+        tcp = cast('TCP', frame['TCP'])
+        tcp_info = tcp.info
+
+        data = TF_Packet(  # type: ignore[type-var]
+            protocol=data_link,                      # data link type from global header
+            index=frame.info.number,                 # frame number
+            frame=frame.info,                        # extracted frame info
+            syn=tcp_info.flags.syn,                  # TCP synchronise (SYN) flag
+            fin=tcp_info.flags.fin,                  # TCP finish (FIN) flag
+            src=ip_info.src,                         # source IP
+            dst=ip_info.dst,                         # destination IP
+            srcport=tcp_info.srcport,                # TCP source port
+            dstport=tcp_info.dstport,                # TCP destination port
+            timestamp=float(frame.info.time_epoch),  # frame timestamp
         )
-        return True, data
-    return False, None
+        return data
+    return None
