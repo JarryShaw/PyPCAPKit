@@ -441,13 +441,19 @@ class TCP_Reassembly(Reassembly[Packet, Datagram, BufferID, Buffer]):
                 else:           # if fragment exceeds existing payload
                     LEN = info.len
                     GAP = ISN - (DSN + LEN)     # gap length between payloads
-                    self._buffer[BUFID].ack[ACK].isn = DSN
+                    self._buffer[BUFID].ack[ACK].__update__(
+                        isn=DSN,
+                    )
                     if GAP >= 0:    # if fragment exceeds existing payload
                         RAW = info.payload + bytearray(GAP) + RAW
                     else:           # if fragment partially overlaps existing payload
                         RAW = info.payload + RAW[ISN-GAP:]
-                self._buffer[BUFID].ack[ACK].raw = RAW       # update payload datagram
-                self._buffer[BUFID].ack[ACK].len = len(RAW)  # update payload length
+                #self._buffer[BUFID].ack[ACK].raw = RAW       # update payload datagram
+                #self._buffer[BUFID].ack[ACK].len = len(RAW)  # update payload length
+                self._buffer[BUFID].ack[ACK].__update__(
+                    raw=RAW,       # update payload datagram
+                    len=len(RAW),  # update payload length
+                )
 
             # update hole descriptor list
             HDL = self._buffer[BUFID].hdl                          # HDL alias
