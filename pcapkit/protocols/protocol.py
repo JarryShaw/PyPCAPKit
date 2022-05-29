@@ -308,6 +308,8 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         """
         logger.debug(type(self).__name__)
 
+        #: int: File pointer.
+        self._seekset = io.SEEK_SET  # type: int
         #: str: Parse packet until such layer.
         self._exlayer = kwargs.pop('_layer', None)  # type: Optional[str]
         #: str: Parse packet until such protocol.
