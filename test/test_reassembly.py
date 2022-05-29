@@ -6,17 +6,17 @@ import textwrap
 
 import pcapkit
 
-os.system('> ../sample/out')
+os.system('> ../sample/out')  # nosec: B605 B607
 
 extraction = pcapkit.extract(
-    fin='../sample/test.pcap', engine=pcapkit.PCAPKit,
+    fin='../sample/test.pcap', engine=pcapkit.PCAPKit,  # type: ignore[arg-type]
     store=False, tcp=True, verbose=True, strict=True, nofile=True,
 )
 # pprint.pprint(extraction.frame)
 
 with open('../sample/out', 'a') as file:
     # pprint.pprint(extraction.reassembly.tcp)
-    for datagram in extraction.reassembly.tcp:
+    for datagram in extraction.reassembly.tcp:  # type: ignore[union-attr]
         print(f'completed = {datagram.completed}')
         file.write(f'completed = {datagram.completed}')
         file.write('\n')
