@@ -17,7 +17,6 @@ from pcapkit.reassembly.ipv4 import IPv4_Reassembly
 from pcapkit.reassembly.ipv6 import IPv6_Reassembly
 from pcapkit.reassembly.tcp import TCP_Reassembly
 from pcapkit.utilities.exceptions import FormatError
-from pcapkit.utilities.validations import bool_check, str_check
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type
@@ -25,6 +24,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.protocols.misc.pcap.frame import Frame
+    from pcapkit.reassembly.reassembly import Reassembly
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
@@ -116,26 +116,22 @@ def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: '
                      trace_byteorder=trace_byteorder, trace_nanosecond=trace_nanosecond)
 
 
-def reassemble(protocol, strict=False):
+def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Reassembly':
     """Reassemble fragmented datagrams.
 
     Arguments:
-        protocol (Union[str, Type[Protocol]]) protocol to be reassembled
-        strict (bool): if return all datagrams (including those not implemented) when submit
+        protocol: protocol to be reassembled
+        strict: if return all datagrams (including those not implemented) when submit
 
     Returns:
-        Union[IPv4_Reassembly, IPv6_Reassembly, TCP_Reassembly]: a :class:`~pcapkit.reassembly.reassembly.Reassembly`
-        object of corresponding protocol
+        A :class:`~pcapkit.reassembly.reassembly.Reassembly` object of corresponding protocol.
 
     Raises:
         FormatError: If ``protocol`` is **NOT** any of IPv4, IPv6 or TCP.
 
     """
     if isinstance(protocol, type) and issubclass(protocol, Protocol):
-        protocol = protocol.id()
-
-    str_check(protocol)
-    bool_check(strict)
+        protocol = protocol.id()[0]
 
     if protocol == 'IPv4':
         return IPv4_Reassembly(strict=strict)

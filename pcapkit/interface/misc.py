@@ -6,7 +6,9 @@ user interface functions, classes, etc., which are
 generally provided per user's requests.
 
 """
+import sys
 import warnings
+from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.foundation.extraction import Extractor
@@ -14,29 +16,60 @@ from pcapkit.reassembly.tcp import TCP_Reassembly
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import EngineWarning
 
+if TYPE_CHECKING:
+    from typing import Optional
 
-def follow_tcp_stream(fin=None, verbose=False, extension=True, engine=None,      # Extrator options
-                      fout=None, format=None, byteorder=None, nanosecond=None):  # TraceFlow options
+    from typing_extensions import Literal
+
+    from pcapkit.protocols.misc.pcap.frame import Frame
+
+    ByteOrder = Literal['little', 'big']
+    Formats = Literal['pcap', 'json', 'tree', 'plist']
+    Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
+
+__all__ = ['follow_tcp_stream']
+
+###############################################################################
+# Follow TCP Stream
+###############################################################################
+
+
+class Stream(Info):
+    """Data model for TCP streams."""
+
+    #: Output filename.
+    filename: 'Optional[str]'
+    #: Packet list.
+    packets: 'tuple[Frame, ...]'
+    #: TCP conversation.
+    conversations: 'tuple[bytes | tuple[bytes, ...], ...]'
+
+    if TYPE_CHECKING:
+        def __init__(self, filename: 'Optional[str]', packets: 'tuple[Frame, ...]', conversations: 'tuple[bytes | tuple[bytes, ...], ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+
+
+def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,              # Extrator options
+                      extension: 'bool' = True, engine: 'Optional[Engines]' = None,
+                      fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,  # TraceFlow options
+                      byteorder: 'ByteOrder' = sys.byteorder, nanosecond: 'bool' = False) -> 'tuple[Stream, ...]':
     """Follow TCP streams.
 
     Arguments:
-        fin (Optiona[str]): file name to be read; if file not exist, raise :exc:`FileNotFound`
-        extension (bool): if check and append extensions to output file
-        verbose (bool): if print verbose output information
-        engine (Optional[Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark', 'server', 'pipeline']]):
-            extraction engine to be used
+        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
+        extension: if check and append extensions to output file
+        verbose: if print verbose output information
+        engine: extraction engine to be used
 
-        fout (Optional[str]): path name for flow tracer if necessary
-        format (Optional[Literal['plist', 'json', 'tree', 'pcap']]): output file
-            format of flow tracer
-        byteorder (Literal['little', 'big']): output file byte order
-        nanosecond (bool): output nanosecond-resolution file flag
+        fout: path name for flow tracer if necessary
+        format: output file format of flow tracer
+        byteorder: output file byte order
+        nanosecond: output nanosecond-resolution file flag
 
     Returns:
-        Tuple[pcapkit.corekit.infoclass.Info]: List of extracted TCP streams.
+        List of extracted TCP streams.
 
     """
-    if isinstance(engine, str) and engine.casefold() == 'pyshark':
+    if engine is not None and engine.lower() == 'pyshark':
         warnings.warn(f'unsupported extraction engine: {engine}; fallback to default engine',
                       EngineWarning, stacklevel=stacklevel())
         engine = None
@@ -51,12 +84,12 @@ def follow_tcp_stream(fin=None, verbose=False, extension=True, engine=None,     
     if extraction.engine == 'dpkt':
         from pcapkit.toolkit.dpkt import tcp_reassembly
     elif extraction.engine == 'scapy':
-        from pcapkit.toolkit.scapy import tcp_reassembly
+        from pcapkit.toolkit.scapy import tcp_reassembly  # type: ignore[no-redef]
     else:
-        from pcapkit.toolkit.default import tcp_reassembly
+        from pcapkit.toolkit.default import tcp_reassembly  # type: ignore[no-redef]
         fallback = True
 
-    streams = list()
+    streams = []  # type: list[Stream]
     frames = extraction.frame
     for stream in extraction.trace:
         reassembly = TCP_Reassembly(strict=False)
@@ -74,7 +107,7 @@ def follow_tcp_stream(fin=None, verbose=False, extension=True, engine=None,     
             if flag:
                 reassembly(data)
 
-        streams.append(Info(
+        streams.append(Stream(
             filename=stream.fpout,
             packets=tuple(packets),
             conversations=tuple(datagram.payload for datagram in sorted(
