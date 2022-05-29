@@ -28,6 +28,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as DataType_IPv6
 from pcapkit.protocols.internet.ip import IP
@@ -37,6 +38,8 @@ if TYPE_CHECKING:
     from typing import Any, NoReturn, Optional
 
     from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['IPv6']
 
@@ -74,6 +77,11 @@ class IPv6(IP[DataType_IPv6]):
     def dst(self) -> 'IPv6Address':
         """Destination IP address."""
         return self._info.dst
+
+    @property
+    def extension_headers(self) -> 'OrderedMultiDict[RegType_ExtensionHeader, Protocol]':
+        """IPv6 extension header records."""
+        return self._exthdr
 
     ##########################################################################
     # Methods.
@@ -216,17 +224,19 @@ class IPv6(IP[DataType_IPv6]):
             Current protocol with next layer extracted.
 
         """
+        #: Extension headers.
+        self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[RegType_ExtensionHeader, Protocol]
+
         hdr_len = self.length       # header length
         raw_len = ipv6.payload      # payload length
         _protos = []                # ProtoChain buffer
 
         # traverse if next header is an extensive header
-        while proto in RegType_ExtensionHeader:  # type: ignore[operator]
-            # keep original data after fragment header
-            if proto == RegType_ExtensionHeader.IPv6_Frag:
-                ipv6.__update__({
-                    'fragment': self._read_packet(header=hdr_len, payload=raw_len),
-                })
+        while True:
+            try:
+                ex_proto = RegType_ExtensionHeader(proto)
+            except ValueError:
+                break
 
             # # directly break when No Next Header occurs
             # if proto.name == 'IPv6-NoNxt':
@@ -249,6 +259,16 @@ class IPv6(IP[DataType_IPv6]):
             # update header & payload length
             hdr_len += info.length
             raw_len -= info.length
+
+            # keep original data after fragment header
+            if ex_proto == RegType_ExtensionHeader.IPv6_Frag:
+                ipv6.__update__({
+                    'fragment': self._read_packet(header=hdr_len, payload=raw_len),
+                })
+                break
+
+            # keep record of extension headers
+            self._exthdr.add(ex_proto, next_)
 
         # record real header & payload length (headers exclude)
         ipv6.__update__({

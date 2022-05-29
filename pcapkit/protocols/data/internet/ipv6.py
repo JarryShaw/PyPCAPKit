@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.protocols.data.protocol import Packet
 
 __all__ = [
     'IPv6',
@@ -52,9 +53,13 @@ class IPv6(Info):
     dst: 'IPv6Address'
 
     if TYPE_CHECKING:
-        fragment: 'Info'
+        #: Fragmented packet header & payload (from IPv6-Frag header).
+        fragment: 'Packet'
+        #: Highest header protocol type (extension header excluded).
         protocol: 'TransType'
+        #: Header length (including extension headers).
         hdr_len: 'int'
+        #: Raw payload length (excluding extension headers).
         raw_len: 'int'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
