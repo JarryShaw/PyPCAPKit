@@ -44,7 +44,7 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">KeyExists</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
@@ -106,7 +106,7 @@
         <span class="c1"># NOTE: We only generate ``__init__`` method for subclasses of the</span>
         <span class="c1"># ``Info`` class, rather than itself, plus that such class does not</span>
         <span class="c1"># override the ``__init__`` method of the meta class.</span>
-        <span class="k">if</span> <span class="s1">&#39;__init__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span> <span class="ow">and</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;__init__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span><span class="p">:</span>
             <span class="n">args_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
             <span class="n">dict_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
 
@@ -128,18 +128,21 @@
             <span class="n">args_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
             <span class="n">dict_</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
 
-            <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
-            <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
-            <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;    def __init__(self, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;        self.__update__(</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
-                <span class="sa">f</span><span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="p">)</span>
-            <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
-            <span class="n">exec</span><span class="p">(</span><span class="n">init_</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>  <span class="c1"># pylint: disable=exec-used # nosec</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;__create_fn__&#39;</span><span class="p">]()</span>  <span class="c1"># type: ignore[assignment]</span>
-            <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__&#39;</span>
+            <span class="c1"># NOTE: We only generate ``__init__`` method if only the class has</span>
+            <span class="c1"># type annotations from any of itself and its base classes.</span>
+            <span class="k">if</span> <span class="n">args_</span><span class="p">:</span>
+                <span class="c1"># NOTE: The following code is to make the ``__init__`` method work.</span>
+                <span class="c1"># It is inspired from the :func:`dataclasses._create_fn` function.</span>
+                <span class="n">init_</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;def __create_fn__():</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;    def __init__(self, </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args_</span><span class="p">)</span><span class="si">}</span><span class="s1">):</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;        self.__update__(</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
+                    <span class="sa">f</span><span class="s1">&#39;    return __init__</span><span class="se">\n</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
+                <span class="n">ns</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
+                <span class="n">exec</span><span class="p">(</span><span class="n">init_</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ns</span><span class="p">)</span>  <span class="c1"># pylint: disable=exec-used # nosec</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span> <span class="o">=</span> <span class="n">ns</span><span class="p">[</span><span class="s1">&#39;__create_fn__&#39;</span><span class="p">]()</span>  <span class="c1"># type: ignore[assignment]</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="o">.</span><span class="vm">__qualname__</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.__init__&#39;</span>
 
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -170,19 +173,16 @@
 
                 <span class="n">key</span> <span class="o">=</span> <span class="n">new_key</span>
 
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">KeyExists</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> already exists&#39;</span><span class="p">)</span>
+            <span class="c1"># if key in self.__dict__:</span>
+            <span class="c1">#     raise KeyExists(f&#39;{key!r} already exists&#39;)</span>
 
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">Info</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="c1"># NOTE: We don&#39;t rewrite the key names here, just keep the</span>
-                <span class="c1"># original ones, even though they might break on the ``.``</span>
-                <span class="c1"># (:obj:`getattr`) operator.</span>
+            <span class="c1"># NOTE: We don&#39;t rewrite the key names here, just keep the</span>
+            <span class="c1"># original ones, even though they might break on the ``.``</span>
+            <span class="c1"># (:obj:`getattr`) operator.</span>
 
-                <span class="c1"># if isinstance(key, str):</span>
-                <span class="c1">#     key = re.sub(r&#39;\W&#39;, &#39;_&#39;, key)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="c1"># if isinstance(key, str):</span>
+            <span class="c1">#     key = re.sub(r&#39;\W&#39;, &#39;_&#39;, key)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>

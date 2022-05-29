@@ -114,7 +114,7 @@
 
 <span class="sd">          .. note::</span>
 
-<span class="sd">            This note is deprecated since Python fixed the problem above.</span>
+<span class="sd">             This note is deprecated since Python fixed the problem above.</span>
 
 <span class="sd">        * In Python 2.7, :func:`trace.print_stack(limit)` dose not support negative limit.</span>
 
@@ -129,6 +129,9 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=-</span><span class="n">stacklevel</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">DEVMODE</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">tracebacklimit</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
