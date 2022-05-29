@@ -11,7 +11,7 @@ import collections.abc
 import itertools
 from typing import TYPE_CHECKING, Generic, TypeVar
 
-from pcapkit.utilities.exceptions import KeyExists, UnsupportedCall
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from typing import Any, Iterable, Iterator, Mapping, NoReturn, Optional
@@ -73,7 +73,7 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
         # NOTE: We only generate ``__init__`` method for subclasses of the
         # ``Info`` class, rather than itself, plus that such class does not
         # override the ``__init__`` method of the meta class.
-        if '__init__' not in cls.__dict__ and cls is not Info and cls.__annotations__:
+        if '__init__' not in cls.__dict__ and cls is not Info:
             args_ = []  # type: list[str]
             dict_ = []  # type: list[str]
 
@@ -95,18 +95,21 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
             args_.reverse()
             dict_.reverse()
 
-            # NOTE: The following code is to make the ``__init__`` method work.
-            # It is inspired from the :func:`dataclasses._create_fn` function.
-            init_ = (
-                f'def __create_fn__():\n'
-                f'    def __init__(self, {", ".join(args_)}):\n'
-                f'        self.__update__({", ".join(dict_)})\n'
-                f'    return __init__\n'
-            )
-            ns = {}  # type: dict[str, Any]
-            exec(init_, None, ns)  # pylint: disable=exec-used # nosec
-            cls.__init__ = ns['__create_fn__']()  # type: ignore[assignment]
-            cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
+            # NOTE: We only generate ``__init__`` method if only the class has
+            # type annotations from any of itself and its base classes.
+            if args_:
+                # NOTE: The following code is to make the ``__init__`` method work.
+                # It is inspired from the :func:`dataclasses._create_fn` function.
+                init_ = (
+                    f'def __create_fn__():\n'
+                    f'    def __init__(self, {", ".join(args_)}):\n'
+                    f'        self.__update__({", ".join(dict_)})\n'
+                    f'    return __init__\n'
+                )
+                ns = {}  # type: dict[str, Any]
+                exec(init_, None, ns)  # pylint: disable=exec-used # nosec
+                cls.__init__ = ns['__create_fn__']()  # type: ignore[assignment]
+                cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
 
         self = super().__new__(cls)
         return self
@@ -137,19 +140,16 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
 
                 key = new_key
 
-            if key in self.__dict__:
-                raise KeyExists(f'{key} already exists')
+            # if key in self.__dict__:
+            #     raise KeyExists(f'{key!r} already exists')
 
-            if isinstance(value, dict):
-                self.__dict__[key] = Info(value)
-            else:
-                # NOTE: We don't rewrite the key names here, just keep the
-                # original ones, even though they might break on the ``.``
-                # (:obj:`getattr`) operator.
+            # NOTE: We don't rewrite the key names here, just keep the
+            # original ones, even though they might break on the ``.``
+            # (:obj:`getattr`) operator.
 
-                # if isinstance(key, str):
-                #     key = re.sub(r'\W', '_', key)
-                self.__dict__[key] = value
+            # if isinstance(key, str):
+            #     key = re.sub(r'\W', '_', key)
+            self.__dict__[key] = value
 
     def __str__(self) -> 'str':
         temp = []  # type: list[str]
