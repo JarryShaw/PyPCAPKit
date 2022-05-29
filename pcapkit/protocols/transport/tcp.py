@@ -374,7 +374,7 @@ class TCP(Transport[DataType_TCP]):
             if isinstance(name, str):
                 meth_name = f'_read_mode_{name}'
                 meth = getattr(self, meth_name, self._read_mode_donone)  # type: Callable[[RegType_Option, NamedArg(Option, 'options')], DataType_Option]
-                data = meth(kind, options=options)
+                data = meth(kind, options=options)  # type: DataType_Option
             else:
                 data = name(self, kind, options=options)
 

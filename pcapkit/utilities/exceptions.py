@@ -81,7 +81,7 @@ class BaseError(Exception):
 
           .. note::
 
-            This note is deprecated since Python fixed the problem above.
+             This note is deprecated since Python fixed the problem above.
 
         * In Python 2.7, :func:`trace.print_stack(limit)` dose not support negative limit.
 
@@ -96,6 +96,9 @@ class BaseError(Exception):
                 logger.error(str(self), exc_info=self, stack_info=True, stacklevel=-stacklevel())
             else:
                 logger.error(str(self))
+
+        if not DEVMODE:
+            sys.tracebacklimit = 0
         super().__init__(*args, **kwargs)
 
 
