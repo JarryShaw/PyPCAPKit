@@ -9,7 +9,7 @@ import pcapkit
 os.system('> ../sample/out')
 
 extraction = pcapkit.extract(
-    fin='../sample/test.pcap', engine=pcapkit.DPKT,
+    fin='../sample/test.pcap', engine=pcapkit.PCAPKit,
     store=False, tcp=True, verbose=True, strict=True, nofile=True,
 )
 # pprint.pprint(extraction.frame)
@@ -17,8 +17,8 @@ extraction = pcapkit.extract(
 with open('../sample/out', 'a') as file:
     # pprint.pprint(extraction.reassembly.tcp)
     for datagram in extraction.reassembly.tcp:
-        print(f'NotImplemented = {datagram.NotImplemented}')
-        file.write(f'NotImplemented = {datagram.NotImplemented}')
+        print(f'completed = {datagram.completed}')
+        file.write(f'completed = {datagram.completed}')
         file.write('\n')
         print(f'index = {datagram.index}')
         file.write(f'index = {datagram.index}')
@@ -29,13 +29,19 @@ with open('../sample/out', 'a') as file:
                 for item in textwrap.wrap(payload.hex(), 64):
                     file.write(' '.join(textwrap.wrap(item, 2)))
                     file.write('\n')
+
+                file.write(payload.decode(errors='replace'))
+                file.write('\n')
         else:
             for item in textwrap.wrap(datagram.payload.hex(), 64):
                 file.write(' '.join(textwrap.wrap(item, 2)))
                 file.write('\n')
-        for packet in datagram.packets:
-            file.write(str(packet))
+
+            file.write(datagram.payload.decode(errors='replace'))
             file.write('\n')
+        # for packet in datagram.packets:
+        #     file.write(str(packet))
+        #     file.write('\n')
         print()
         file.write('\n\n')
         file.write('-' * 80)
