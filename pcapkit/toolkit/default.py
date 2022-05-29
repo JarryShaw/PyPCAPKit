@@ -9,19 +9,20 @@ flag to indicate if usable for its caller.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_ExtensionHeader
+from pcapkit.foundation.traceflow import Packet as TF_Packet
+from pcapkit.protocols.internet.ip import IP
+from pcapkit.reassembly.ip import Packet as IP_Packet
+from pcapkit.reassembly.tcp import Packet as TCP_Packet
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
 
     from pcapkit.const.reg.linktype import LinkType
-    from pcapkit.foundation.traceflow import Packet as TF_Packet
     from pcapkit.protocols.internet.ipv4 import IPv4
     from pcapkit.protocols.internet.ipv6 import IPv6
     from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
     from pcapkit.protocols.misc.pcap import Frame
     from pcapkit.protocols.transport.tcp import TCP
-    from pcapkit.reassembly.ip import Packet as IP_Packet
-    from pcapkit.reassembly.tcp import Packet as TCP_Packet
 
 __all__ = ['ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow']
 
@@ -136,7 +137,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
 
     """
     if 'TCP' in frame:
-        ip = cast('IPv4 | IPv6', frame['IP'])
+        ip = cast('IPv4 | IPv6', frame[IP])
         ip_info = ip.info
         tcp = cast('TCP', frame['TCP'])
         tcp_info = tcp.info
@@ -187,7 +188,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_Packet | None
 
     """
     if 'TCP' in frame:
-        ip = cast('IPv4 | IPv6', frame['IP'])
+        ip = cast('IPv4 | IPv6', frame[IP])
         ip_info = ip.info
         tcp = cast('TCP', frame['TCP'])
         tcp_info = tcp.info

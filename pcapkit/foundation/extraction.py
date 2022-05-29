@@ -40,9 +40,11 @@ if TYPE_CHECKING:
     from pcapkit.corekit.version import VersionInfo
     from pcapkit.foundation.traceflow import Index, TraceFlow
     from pcapkit.protocols.protocol import Protocol
+    from pcapkit.reassembly.ip import Datagram as IP_Datagram
     from pcapkit.reassembly.ipv4 import IPv4_Reassembly
     from pcapkit.reassembly.ipv6 import IPv6_Reassembly
     from pcapkit.reassembly.reassembly import Reassembly
+    from pcapkit.reassembly.tcp import Datagram as TCP_Datagram
     from pcapkit.reassembly.tcp import TCP_Reassembly
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
@@ -59,14 +61,14 @@ class ReassemblyData(Info):
     """Data storage for reassembly."""
 
     #: IPv4 reassembled data.
-    ipv4: 'Optional[tuple[IPv4_Reassembly, ...]]'
+    ipv4: 'Optional[tuple[IP_Datagram, ...]]'
     #: IPv6 reassembled data.
-    ipv6: 'Optional[tuple[IPv6_Reassembly, ...]]'
+    ipv6: 'Optional[tuple[IP_Datagram, ...]]'
     #: TCP reassembled data.
-    tcp: 'Optional[tuple[TCP_Reassembly, ...]]'
+    tcp: 'Optional[tuple[TCP_Datagram, ...]]'
 
     if TYPE_CHECKING:
-        def __init__(self, ipv4: 'Optional[tuple[IPv4_Reassembly, ...]]', ipv6: 'Optional[tuple[IPv6_Reassembly, ...]]', tcp: 'Optional[tuple[TCP_Reassembly, ...]]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
 
 class Extractor:
@@ -249,9 +251,9 @@ class Extractor:
     def reassembly(self) -> 'ReassemblyData':
         """Frame record for reassembly.
 
-        * ``ipv4`` -- tuple of TCP payload fragment (:class:`~pcapkit.reassembly.ipv4.IPv4_Reassembly`)
-        * ``ipv6`` -- tuple of TCP payload fragment (:class:`~pcapkit.reassembly.ipv6.IPv6_Reassembly`)
-        * ``tcp`` -- tuple of TCP payload fragment (:class:`~pcapkit.reassembly.tcp.TCP_Reassembly`)
+        * ``ipv4`` -- tuple of TCP payload fragment (:term:`ipv4.datagram`)
+        * ``ipv6`` -- tuple of TCP payload fragment (:term:`ipv6.datagram`)
+        * ``tcp`` -- tuple of TCP payload fragment (:term:`tcp.datagram`)
 
         """
         data = ReassemblyData(
@@ -806,23 +808,23 @@ class Extractor:
 
         # record fragments
         if self._ipv4:
-            data = ipv4_reassembly(frame)
-            if data is not None:
-                cast('IPv4_Reassembly', self._reasm[0])(data)
+            data_ipv4 = ipv4_reassembly(frame)
+            if data_ipv4 is not None:
+                cast('IPv4_Reassembly', self._reasm[0])(data_ipv4)
         if self._ipv6:
-            data = ipv6_reassembly(frame)
-            if data is not None:
-                cast('IPv6_Reassembly', self._reasm[1])(data)
+            data_ipv6 = ipv6_reassembly(frame)
+            if data_ipv6 is not None:
+                cast('IPv6_Reassembly', self._reasm[1])(data_ipv6)
         if self._tcp:
-            data = tcp_reassembly(frame)
-            if data is not None:
-                cast('TCP_Reassembly', self._reasm[2])(data)
+            data_tcp = tcp_reassembly(frame)
+            if data_tcp is not None:
+                cast('TCP_Reassembly', self._reasm[2])(data_tcp)
 
         # trace flows
         if self._flag_t:
-            data = tcp_traceflow(frame, data_link=self._dlink)
-            if data is not None:
-                cast('TraceFlow', self._trace)(data)
+            data_tf = tcp_traceflow(frame, data_link=self._dlink)
+            if data_tf is not None:
+                cast('TraceFlow', self._trace)(data_tf)
 
         # record frames
         if self._flag_d:
