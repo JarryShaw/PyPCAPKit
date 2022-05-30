@@ -54,6 +54,10 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
     #: Parsed packet data.
     _info: 'PT'
+    #： Next layer protocol instance.
+    _next: 'Protocol'
+    #: Protocol chain instance.
+    _protos: 'ProtoChain'
 
     # Internal data storage for cached properties.
     __cached__ = {}  # type: dict[str, Any]
@@ -405,7 +409,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         strlst = list(iter(functools.partial(io.StringIO(strbuf).read, number), ''))
 
         # cache and return
-        str_ = os.linesep.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))  # pylint: disable=zip-builtin-not-iterating
+        str_ = os.linesep.join(map(lambda x: f'{x[0].ljust(length)}    {x[1]}', zip(hexlst, strlst)))
 
         self.__cached__['__str__'] = str_
         return str_
@@ -639,7 +643,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     @overload
     def _read_packet(self, *, header: 'int', payload: 'Optional[int]' = ..., discard: 'Literal[False]' = ...) -> 'DataType_Packet': ...  # pylint: disable=line-too-long
 
-    @seekset
+    @seekset  # type: ignore[misc]
     def _read_packet(self, length: 'Optional[int]' = None, *, header: 'Optional[int]' = None,
                      payload: 'Optional[int]' = None, discard: bool = False) -> 'bytes | DataType_Packet':
         """Read raw packet data.
@@ -822,7 +826,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             Current protocol with next layer extracted.
 
         """
-        next_ = self._import_next_layer(proto, length)
+        next_ = self._import_next_layer(proto, length)  # type: ignore[call-arg,misc]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
