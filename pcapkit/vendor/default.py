@@ -76,7 +76,7 @@ def get_proxies() -> 'dict[str, str]':
     """
     HTTP_PROXY = os.getenv('PCAPKIT_HTTP_PROXY')
     HTTPS_PROXY = os.getenv('PCAPKIT_HTTPS_PROXY')
-    PROXIES = dict()
+    PROXIES = {}  # type: dict[str, str]
     if HTTP_PROXY is not None:
         PROXIES['http'] = HTTP_PROXY
     if HTTPS_PROXY is not None:
@@ -204,7 +204,7 @@ class Vendor(metaclass=abc.ABCMeta):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '%s %s' % (
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '%s %s' % (  # pylint: disable=consider-using-f-string
                 name, ''.join(temp) if rfcs else '',
             ), re.MULTILINE))
 
@@ -241,8 +241,8 @@ class Vendor(metaclass=abc.ABCMeta):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self.safe_name(item[1]),  # pylint: disable=map-builtin-not-iterating
-                                       filter(lambda item: len(item[0].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[1]),
+                                       filter(lambda item: len(item[0].split('-')) != 2, reader)))
 
     def context(self, data: 'list[str]') -> 'str':
         """Generate constant context.
@@ -314,7 +314,7 @@ class Vendor(metaclass=abc.ABCMeta):
         ROOT, STEM = os.path.split(temp)
 
         os.makedirs(os.path.join(ROOT, '..', 'const', STEM), exist_ok=True)
-        with open(os.path.join(ROOT, '..', 'const', STEM, FILE), 'w') as file:
+        with open(os.path.join(ROOT, '..', 'const', STEM, FILE), 'w') as file:  # pylint: disable=unspecified-encoding
             print(context, file=file)
 
     def _request(self) -> 'list[str]':
@@ -355,12 +355,12 @@ class Vendor(metaclass=abc.ABCMeta):
 
         try:
             page = requests.get(self.LINK)
-        except requests.RequestException:
+        except requests.RequestException as err:
             warnings.warn('Connection failed; retry with proxies (if any)...', VendorRequestWarning, stacklevel=2)
             try:
                 proxies = get_proxies() or None
                 if proxies is None:
-                    raise requests.RequestException
+                    raise requests.RequestException from err
                 page = requests.get(self.LINK, proxies=proxies)
             except requests.RequestException:
                 warnings.warn('Connection failed; retry with manual intervene...', VendorRequestWarning, stacklevel=2)
@@ -390,7 +390,7 @@ class Vendor(metaclass=abc.ABCMeta):
                         print('File not found; please save the page source at')
                         print(f'    {temp_file}')
 
-                    with open(temp_file) as file:
+                    with open(temp_file) as file:  # pylint: disable=unspecified-encoding
                         text = file.read()
             else:
                 text = page.text

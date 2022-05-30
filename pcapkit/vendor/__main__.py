@@ -5,22 +5,23 @@ import argparse
 import importlib
 import sys
 import warnings
+from typing import TYPE_CHECKING
 
-import pcapkit.vendor as vendor_module
+from pcapkit import vendor as vendor_module
 from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning
-from pcapkit.vendor import __all__ as vendor_all
+
+if TYPE_CHECKING:
+    from typing import Type
+    from argparse import ArgumentParser
+
+    from pcapkit.vendor.default import Vendor
 
 #: version string
 __version__ = '0.15.5'
 
 
-def get_parser():
-    """CLI argument parser.
-
-    Returns:
-        argparse.ArgumentParser: Argument parser.
-
-    """
+def get_parser() -> 'ArgumentParser':
+    """CLI argument parser."""
     parser = argparse.ArgumentParser(prog='pcapkit-vendor',
                                      description='update constant enumerations')
     parser.add_argument('-V', '--version', action='version', version=__version__)
@@ -29,11 +30,11 @@ def get_parser():
     return parser
 
 
-def run(vendor):
+def run(vendor: 'Type[Vendor]') -> 'None':
     """Script runner.
 
     Args:
-        vendor (Type[Vendor]): Subclass of :class:`~pcapkit.vendor.default.Vendor` from :mod:`pcapkit.vendor`.
+        vendor: Subclass of :class:`~pcapkit.vendor.default.Vendor` from :mod:`pcapkit.vendor`.
 
     Warns:
         VendorRuntimeWarning: If failed to initiate the ``vendor`` class.
@@ -46,7 +47,7 @@ def run(vendor):
         warnings.warn(f'{vendor.__module__}.{vendor.__name__} <{error!r}>', VendorRuntimeWarning, stacklevel=2)
 
 
-def main():
+def main() -> 'int':
     """Entrypoint.
 
     Warns:
@@ -56,7 +57,7 @@ def main():
     parser = get_parser()
     args = parser.parse_args()
 
-    target_list = list()
+    target_list = []  # type: list[Type[Vendor]]
     for target in args.target:
         try:
             module = importlib.import_module(f'pcapkit.vendor.{target}')
@@ -68,11 +69,13 @@ def main():
     if not target_list:
         if args.target:
             parser.error('missing valid targets')
-        target_list.extend(getattr(vendor_module, name) for name in vendor_all)
+        target_list.extend(getattr(vendor_module, name) for name in vendor_module.__all__)
 
     # with multiprocessing.Pool() as pool:
     #     pool.map(run, target_list)
-    [run(vendor) for vendor in target_list]  # pylint: disable=expression-not-assigned
+    for vendor in target_list:
+        run(vendor)
+    return 0
 
 
 if __name__ == "__main__":

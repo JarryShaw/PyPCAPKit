@@ -8,23 +8,22 @@
 import argparse
 import sys
 import warnings
+from typing import TYPE_CHECKING
 
 import emoji
 
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.interface import JSON, PLIST, TREE
 
+if TYPE_CHECKING:
+    from argparse import ArgumentParser
+
 #: version number
 __version__ = '0.15.5'
 
 
-def get_parser():
-    """CLI argument parser.
-
-    Returns:
-        argparse.ArgumentParser: Argument parser.
-
-    """
+def get_parser() -> 'ArgumentParser':
+    """CLI argument parser."""
     parser = argparse.ArgumentParser(prog='pcapkit-cli',
                                      description='PCAP file extractor and formatted dumper')
     parser.add_argument('-V', '--version', action='version', version=__version__)
@@ -68,7 +67,7 @@ def get_parser():
     return parser
 
 
-def main():
+def main() -> 'int':
     """Entrypoint."""
     parser = get_parser()
     args = parser.parse_args()
@@ -89,19 +88,21 @@ def main():
                           fin=args.fin, fout=args.fout,
                           auto=args.verbose, files=args.files,
                           layer=args.layer, protocol=args.protocol,
-                          engine=args.engine, extension=args.auto_extension)
+                          engine=args.engine, extension=args.auto_extension,
+                          verbose=args.verbose)
 
     if not args.verbose:
         try:
             print(emoji.emojize(f":police_car_light: Loading file {extractor.input!r}"))
         except UnicodeEncodeError:
             print(f"[*] Loading file {extractor.input!r}")
-        for _ in extractor:
-            print(f' - Frame {extractor.length:>3d}: {extractor.protocol}')
+
         try:
             print(emoji.emojize(f":beer_mug: Report file{'s' if args.files else ''} stored in {extractor.output!r}"))
         except UnicodeEncodeError:
             print(f"[*] Report file{'s' if args.files else ''} stored in {extractor.output!r}")
+
+    return 0
 
 
 if __name__ == '__main__':
