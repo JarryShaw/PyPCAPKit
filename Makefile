@@ -212,3 +212,6 @@ dist-master: dist-prep dist-post
 
 isort:
 	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
+
+vermin:
+	vermin pcapkit --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --no-parse-comments pcapkit -v
