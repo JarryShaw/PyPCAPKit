@@ -223,8 +223,14 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
         :class:`pcapkit.foundation.reassembly.tcp.TCPReassembly`
 
     """
+    if 'IP' in packet:
+        ip = cast('IP', packet['IP'])
+    elif 'IPv6' in packet:
+        ip = cast('IPv6', packet['IPv6'])
+    else:
+        return None
+
     if 'TCP' in packet:
-        ip = cast('IP', packet['IP']) if 'IP' in packet else cast('IPv6', packet['IPv6'])
         tcp = cast('TCP', packet['TCP'])
 
         raw_len = len(tcp.payload)                  # payload length, header excludes
