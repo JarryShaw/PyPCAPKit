@@ -9,8 +9,8 @@ tracer :class:`~pcapkit.foundation.tractflow.TraceFlow`, as
 well as the reassembly algorithm implementations.
 
 """
-from pcapkit.foundation.extraction import *
-from pcapkit.foundation.traceflow import *
+from pcapkit.foundation.extraction import Extractor
+from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.foundation.reassembly import *
 
 __all__ = [

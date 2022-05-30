@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=bad-continuation
 """user interface
 
 :mod:`pcapkit.interface` defines several user-oriented

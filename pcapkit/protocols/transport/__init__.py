@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import,unused-wildcard-import,fixme
 """transport layer protocols
 
 `pcapkit.protocols.transport` is collection of all protocols
@@ -19,6 +20,6 @@ from pcapkit.protocols.transport.udp import UDP
 from pcapkit.const.reg.transtype import TransType as TRANSTYPE
 
 __all__ = [
-    'TRANSTYPE',     # Protocol Numbers
-    'TCP', 'UDP',   # Transport Layer Protocols
+    'TRANSTYPE',   # Protocol Numbers
+    'TCP', 'UDP',  # Transport Layer Protocols
 ]

@@ -20,11 +20,6 @@ from pcapkit.protocols.internet import *
 from pcapkit.protocols.transport import *
 from pcapkit.protocols.application import *
 
-# Deprecated / Base Protocols
-from pcapkit.protocols.internet.ip import IP
-from pcapkit.protocols.internet.ipsec import IPsec
-from pcapkit.protocols.application.http import HTTP
-
 __all__ = [
     # Protocol Numbers
     'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
@@ -53,5 +48,5 @@ __all__ = [
     'TCP', 'UDP',
 
     # Application Layer
-    'FTP', 'HTTP',
+    'FTP', 'HTTP', 'HTTPv1', 'HTTPv2',
 ]

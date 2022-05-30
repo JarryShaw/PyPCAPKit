@@ -6,8 +6,8 @@
 from pcapkit.protocols.misc.pcap import *
 
 # Miscellaneous Classes for Protocols
-from pcapkit.protocols.misc.raw import *
-from pcapkit.protocols.misc.null import *
+from pcapkit.protocols.misc.raw import Raw
+from pcapkit.protocols.misc.null import NoPayload
 
 __all__ = [
     # PCAP Headers

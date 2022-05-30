@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=unused-import,fixme
 """application layer protocols
 
 `pcapkit.protocols.application` is collection of all
@@ -20,4 +21,4 @@ from pcapkit.protocols.application.httpv2 import HTTPv2
 # Deprecated / Base Classes
 from pcapkit.protocols.application.http import HTTP
 
-__all__ = ['FTP', 'HTTPv1', 'HTTPv2']
+__all__ = ['FTP', 'HTTP', 'HTTPv1', 'HTTPv2']
