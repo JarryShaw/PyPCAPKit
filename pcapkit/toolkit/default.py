@@ -141,8 +141,8 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
         ip_info = ip.info
         tcp = cast('TCP', frame['TCP'])
         tcp_info = tcp.info
-        raw_len = len(tcp.packet.payload)
 
+        raw_len = len(tcp.packet.payload)
         data = TCP_Packet(
             bufid=(
                 ip_info.src,                        # source IP address
