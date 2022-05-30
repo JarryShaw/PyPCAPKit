@@ -8,7 +8,7 @@ from pcapkit.corekit.infoclass import Info
 if TYPE_CHECKING:
     from datetime import timedelta
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Optional
+    from typing import Optional, Union
 
     from typing_extensions import Literal
 
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from pcapkit.const.tcp.option import Option as OptionNumber
     from pcapkit.corekit.multidict import OrderedMultiDict
 
-    IPAddress = IPv4Address | IPv6Address
+    IPAddress = Union[IPv4Address, IPv6Address]
 
 __all__ = [
     'TCP',

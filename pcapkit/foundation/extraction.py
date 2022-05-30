@@ -29,7 +29,7 @@ from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, EngineWarn
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
-    from typing import Any, BinaryIO, Callable, DefaultDict, Iterator, Optional, TextIO, Type
+    from typing import Any, BinaryIO, Callable, DefaultDict, Iterator, Optional, TextIO, Type, Union
 
     from dictdumper.dumper import Dumper
     from dpkt.dpkt import Packet as DPKTPacket
@@ -51,8 +51,8 @@ if TYPE_CHECKING:
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
-    Protocols = str | Protocol | Type[Protocol]
-    VerboseHandler = Callable[['Extractor', Frame | ScapyPacket | DPKTPacket | PySharkPacket], Any]
+    Protocols = Union[str, Protocol, Type[Protocol]]
+    VerboseHandler = Callable[['Extractor', Union[Frame, ScapyPacket, DPKTPacket, PySharkPacket]], Any]
 
 __all__ = ['Extractor']
 
@@ -1029,23 +1029,23 @@ class Extractor:
 
         # record fragments
         if self._ipv4:
-            data = ipv4_reassembly(packet, count=self._frnum)
-            if data is not None:
-                cast('IPv4_Reassembly', self._reasm[0])(data)
+            data_ipv4 = ipv4_reassembly(packet, count=self._frnum)
+            if data_ipv4 is not None:
+                cast('IPv4_Reassembly', self._reasm[0])(data_ipv4)
         if self._ipv6:
-            data = ipv6_reassembly(packet, count=self._frnum)
-            if data is not None:
-                cast('IPv6_Reassembly', self._reasm[1])(data)
+            data_ipv6 = ipv6_reassembly(packet, count=self._frnum)
+            if data_ipv6 is not None:
+                cast('IPv6_Reassembly', self._reasm[1])(data_ipv6)
         if self._tcp:
-            data = tcp_reassembly(packet, count=self._frnum)
-            if data is not None:
-                cast('TCP_Reassembly', self._reasm[2])(data)
+            data_tcp = tcp_reassembly(packet, count=self._frnum)
+            if data_tcp is not None:
+                cast('TCP_Reassembly', self._reasm[2])(data_tcp)
 
         # trace flows
         if self._flag_t:
-            data = tcp_traceflow(packet, timestamp, data_link=self._dlink, count=self._frnum)
-            if data is not None:
-                cast('TraceFlow', self._trace)(data)
+            data_tf = tcp_traceflow(packet, timestamp, data_link=self._dlink, count=self._frnum)
+            if data_tf is not None:
+                cast('TraceFlow', self._trace)(data_tf)
 
         # record frames
         if self._flag_d:
@@ -1131,9 +1131,9 @@ class Extractor:
 
         # trace flows
         if self._flag_t:
-            data = tcp_traceflow(packet)
-            if data is not None:
-                cast('TraceFlow', self._trace)(data)
+            data_tf = tcp_traceflow(packet)
+            if data_tf is not None:
+                cast('TraceFlow', self._trace)(data_tf)
 
         # record frames
         if self._flag_d:

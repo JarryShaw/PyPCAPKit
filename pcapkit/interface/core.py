@@ -19,7 +19,7 @@ from pcapkit.protocols.protocol import Protocol
 from pcapkit.utilities.exceptions import FormatError
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional, Type
+    from typing import Any, Callable, Optional, Type, Union
 
     from typing_extensions import Literal
 
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
     Layers = Literal['link', 'internet', 'transport', 'application', 'none']
 
-    Protocols = str | Protocol | Type[Protocol]
+    Protocols = Union[str, Protocol, Type[Protocol]]
     VerboseHandler = Callable[['Extractor', Frame], Any]
 
 __all__ = [
