@@ -5,6 +5,13 @@
 
 """
 import warnings
+from typing import TYPE_CHECKING
+
+from pcapkit.utilities.logging import logger, DEVMODE
+from pcapkit.utilities.exceptions import stacklevel as stacklevel_calculator
+
+if TYPE_CHECKING:
+    from typing import Union, Type, Optional, Any
 
 __all__ = [
     'warn',
@@ -21,17 +28,16 @@ __all__ = [
 ]
 
 
-def warn(message, category, stacklevel=None):
+def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
+         stacklevel: 'Optional[int]' = None) -> 'None':
     """Wrapper function of :func:`warnings.warn`.
 
     Args:
-        message (Union[str, Warning]): Warning message.
-        category (Type[Warning]): Warning category.
-        stacklevel (Optional[int]): Warning stack level.
+        message: Warning message.
+        category: Warning category.
+        stacklevel: Warning stack level.
 
     """
-    from pcapkit.utilities.exceptions import \
-        stacklevel as stacklevel_calculator  # pylint: disable=import-outside-toplevel
     if stacklevel is None:
         stacklevel = stacklevel_calculator()
     warnings.warn(message, category, stacklevel)
@@ -45,13 +51,15 @@ def warn(message, category, stacklevel=None):
 class BaseWarning(UserWarning):
     """Base warning class of all kinds."""
 
-    def __init__(self, *args, **kwargs):  # pylint: disable=useless-super-delegation
+    def __init__(self, *args: 'Any', **kwargs: 'Any') -> 'None':  # pylint: disable=useless-super-delegation
+        # log warning
+        if DEVMODE:
+            logger.warning(str(self), exc_info=self)
+        else:
+            logger.warning(str(self))
+
         # warnings.simplefilter('default')
         super().__init__(*args, **kwargs)
-
-        # log warning
-        from pcapkit.utilities.logging import logger  # pylint: disable=import-outside-toplevel
-        logger.warning(str(self), exc_info=self)
 
 
 ##############################################################################
