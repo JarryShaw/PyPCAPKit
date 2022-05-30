@@ -38,14 +38,14 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.corekit.version import VersionInfo
+    from pcapkit.foundation.reassembly.ip import Datagram as IP_Datagram
+    from pcapkit.foundation.reassembly.ipv4 import IPv4_Reassembly
+    from pcapkit.foundation.reassembly.ipv6 import IPv6_Reassembly
+    from pcapkit.foundation.reassembly.reassembly import Reassembly
+    from pcapkit.foundation.reassembly.tcp import Datagram as TCP_Datagram
+    from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
     from pcapkit.foundation.traceflow import Index, TraceFlow
     from pcapkit.protocols.protocol import Protocol
-    from pcapkit.reassembly.ip import Datagram as IP_Datagram
-    from pcapkit.reassembly.ipv4 import IPv4_Reassembly
-    from pcapkit.reassembly.ipv6 import IPv6_Reassembly
-    from pcapkit.reassembly.reassembly import Reassembly
-    from pcapkit.reassembly.tcp import Datagram as TCP_Datagram
-    from pcapkit.reassembly.tcp import TCP_Reassembly
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
@@ -598,13 +598,13 @@ class Extractor:
         self._exeng = cast('Engines', (engine or 'default').lower())  # extract using engine
 
         if self._ipv4:
-            from pcapkit.reassembly.ipv4 import IPv4_Reassembly
+            from pcapkit.foundation.reassembly.ipv4 import IPv4_Reassembly
             self._reasm[0] = IPv4_Reassembly(strict=strict)
         if self._ipv6:
-            from pcapkit.reassembly.ipv6 import IPv6_Reassembly
+            from pcapkit.foundation.reassembly.ipv6 import IPv6_Reassembly
             self._reasm[1] = IPv6_Reassembly(strict=strict)
         if self._tcp:
-            from pcapkit.reassembly.tcp import TCP_Reassembly
+            from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
             self._reasm[2] = TCP_Reassembly(strict=strict)
 
         if trace:
@@ -904,23 +904,23 @@ class Extractor:
 
         # record fragments
         if self._ipv4:
-            data = ipv4_reassembly(packet, count=self._frnum)
-            if data is not None:
-                cast('IPv4_Reassembly', self._reasm[0])(data)
+            data_ipv4 = ipv4_reassembly(packet, count=self._frnum)
+            if data_ipv4 is not None:
+                cast('IPv4_Reassembly', self._reasm[0])(data_ipv4)
         if self._ipv6:
-            data = ipv6_reassembly(packet, count=self._frnum)
-            if data is not None:
-                cast('IPv6_Reassembly', self._reasm[1])(data)
+            data_ipv6 = ipv6_reassembly(packet, count=self._frnum)
+            if data_ipv6 is not None:
+                cast('IPv6_Reassembly', self._reasm[1])(data_ipv6)
         if self._tcp:
-            data = tcp_reassembly(packet, count=self._frnum)
-            if data is not None:
-                cast('TCP_Reassembly', self._reasm[2])(data)
+            data_tcp = tcp_reassembly(packet, count=self._frnum)
+            if data_tcp is not None:
+                cast('TCP_Reassembly', self._reasm[2])(data_tcp)
 
         # trace flows
         if self._flag_t:
-            data = tcp_traceflow(packet, count=self._frnum)
-            if data is not None:
-                cast('TraceFlow', self._trace)(data)
+            data_tf = tcp_traceflow(packet, count=self._frnum)
+            if data_tf is not None:
+                cast('TraceFlow', self._trace)(data_tf)
 
         # record frames
         if self._flag_d:

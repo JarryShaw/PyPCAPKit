@@ -9,15 +9,15 @@ contains all things from :mod:`pcapkit`.
 
 """
 import pcapkit.const as const
-#import pcapkit.vendor as vendor
 from pcapkit.corekit import *
 from pcapkit.dumpkit import *
 from pcapkit.foundation import *
 from pcapkit.interface import *
 from pcapkit.protocols import *
-from pcapkit.reassembly import *
 from pcapkit.toolkit import *
 from pcapkit.utilities import *  # pylint: disable=redefined-builtin
+
+#import pcapkit.vendor as vendor
 
 __all__ = [
     # pcapkit.const

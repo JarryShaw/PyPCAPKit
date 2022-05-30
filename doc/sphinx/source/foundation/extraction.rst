@@ -97,9 +97,9 @@ extracts parametres from a PCAP file.
       Current frame's protocol chain.
 
    .. attribute:: _reasm
-      :type: List[Optiona[pcapkit.reassembly.ipv4.IPv4_Reassembly],
-                  Optiona[pcapkit.reassembly.ipv6.IPv6_Reassembly],
-                  Optiona[pcapkit.reassembly.tcp.TCP_Reassembly]]
+      :type: List[Optiona[pcapkit.foundation.reassembly.ipv4.IPv4_Reassembly],
+                  Optiona[pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly],
+                  Optiona[pcapkit.foundation.reassembly.tcp.TCP_Reassembly]]
 
       Reassembly buffers.
 
@@ -250,9 +250,9 @@ extracts parametres from a PCAP file.
       TCP flow tracer.
 
    .. attribute:: _mpkit.reassembly
-      :type: List[Optiona[pcapkit.reassembly.ipv4.IPv4_Reassembly],
-                  Optiona[pcapkit.reassembly.ipv6.IPv6_Reassembly],
-                  Optiona[pcapkit.reassembly.tcp.TCP_Reassembly]]
+      :type: List[Optiona[pcapkit.foundation.reassembly.ipv4.IPv4_Reassembly],
+                  Optiona[pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly],
+                  Optiona[pcapkit.foundation.reassembly.tcp.TCP_Reassembly]]
 
       Reassembly buffers.
 
@@ -275,9 +275,9 @@ extracts parametres from a PCAP file.
 
    .. attribute:: _mprsm
       :type: Union[multiprocessing.managers.SyncManager.list,
-                   List[Optiona[pcapkit.reassembly.ipv4.IPv4_Reassembly],
-                        Optiona[pcapkit.reassembly.ipv6.IPv6_Reassembly],
-                        Optiona[pcapkit.reassembly.tcp.TCP_Reassembly]]]
+                   List[Optiona[pcapkit.foundation.reassembly.ipv4.IPv4_Reassembly],
+                        Optiona[pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly],
+                        Optiona[pcapkit.foundation.reassembly.tcp.TCP_Reassembly]]]
 
       Multiprocessing storage for reassembly buffers.
 

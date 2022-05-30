@@ -8,15 +8,15 @@ TCP packets.
 
 """
 # Base Class for Reassembly
-from pcapkit.reassembly.reassembly import Reassembly
-from pcapkit.reassembly.ip import IP_Reassembly
+from pcapkit.foundation.reassembly.reassembly import Reassembly
+from pcapkit.foundation.reassembly.ip import IP_Reassembly
 
 # Reassembly for IP
-from pcapkit.reassembly.ipv4 import IPv4_Reassembly
-from pcapkit.reassembly.ipv6 import IPv6_Reassembly
+from pcapkit.foundation.reassembly.ipv4 import IPv4_Reassembly
+from pcapkit.foundation.reassembly.ipv6 import IPv6_Reassembly
 
 # Reassembly for TCP
-from pcapkit.reassembly.tcp import TCP_Reassembly
+from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
 
 __all__ = [
     'IPv4_Reassembly', 'IPv6_Reassembly',   # IP Reassembly

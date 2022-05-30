@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """IP fragments reassembly
 
-:mod:`pcapkit.reassembly.ipv4` contains
-:class:`~pcapkit.reassembly.ipv4.IP_Reassembly`
+:mod:`pcapkit.foundation.reassembly.ipv4` contains
+:class:`~pcapkit.foundation.reassembly.ipv4.IP_Reassembly`
 only, which reconstructs fragmented IP packets back to
 origin. The following algorithm implement is based on IP
 reassembly procedure introduced in :rfc:`791`, using
@@ -73,7 +73,7 @@ Algorithm::
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info
-from pcapkit.reassembly.reassembly import Reassembly
+from pcapkit.foundation.reassembly.reassembly import Reassembly
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address

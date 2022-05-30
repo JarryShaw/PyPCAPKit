@@ -19,11 +19,11 @@ from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
+from pcapkit.foundation.traceflow import Packet as TF_Packet
 from pcapkit.utilities.exceptions import ModuleNotFound, stacklevel
 from pcapkit.utilities.warnings import ScapyWarning
-from pcapkit.foundation.traceflow import Packet as TF_Packet
-from pcapkit.reassembly.ip import Packet as IP_Packet
-from pcapkit.reassembly.tcp import Packet as TCP_Packet
 
 try:
     import scapy.all as scapy_all
@@ -36,9 +36,9 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any
 
-    from scapy.packet import Packet
     from scapy.layers.inet import IP, TCP
     from scapy.layers.inet6 import IPv6, IPv6ExtHdrFragment
+    from scapy.packet import Packet
 
 __all__ = [
     'packet2chain', 'packet2dict',
@@ -118,7 +118,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
           reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.reassembly.ipv4.IPv4Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`
 
     """
     if 'IP' in packet:
@@ -169,7 +169,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         ModuleNotFound: If `Scapy`_ is not installed.
 
     See Also:
-        :class:`pcapkit.reassembly.ipv6.IPv6Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`
 
     """
     if scapy_all is None:
@@ -220,7 +220,7 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.reassembly.tcp.TCPReassembly`
+        :class:`pcapkit.foundation.reassembly.tcp.TCPReassembly`
 
     """
     if 'TCP' in packet:

@@ -9,10 +9,10 @@ flag to indicate if usable for its caller.
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_ExtensionHeader
+from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow import Packet as TF_Packet
 from pcapkit.protocols.internet.ip import IP
-from pcapkit.reassembly.ip import Packet as IP_Packet
-from pcapkit.reassembly.tcp import Packet as TCP_Packet
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -44,7 +44,7 @@ def ipv4_reassembly(frame: 'Frame') -> 'IP_Packet[IPv4Address] | None':
           reassembly (c.f. :term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.reassembly.ipv4.IPv4Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`
 
     """
     if 'IPv4' in frame:
@@ -89,7 +89,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
           reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.reassembly.ipv6.IPv6Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`
 
     """
     if 'IPv6' in frame:
@@ -133,7 +133,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`pcapkit.reassembly.tcp.TCPReassembly`
+        :class:`pcapkit.foundation.reassembly.tcp.TCPReassembly`
 
     """
     if 'TCP' in frame:

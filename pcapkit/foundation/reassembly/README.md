@@ -112,7 +112,7 @@ timer expires: {
 
  > described in [`src/reassembly/reassembly.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly/reassembly.py)
 
-&emsp; `pcapkit.reassembly.reassembly` contains `Reassembly` only, which is an abstract base class for all reassembly classes, bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets.
+&emsp; `pcapkit.foundation.reassembly.reassembly` contains `Reassembly` only, which is an abstract base class for all reassembly classes, bases on algorithms described in [`RFC 815`](https://tools.ietf.org/html/rfc815), implements datagram reassembly of IP and TCP packets.
 
 ```python
 class Reassembly(builtins.object)
@@ -177,10 +177,10 @@ class Reassembly(builtins.object)
 
  > described in [`src/reassembly/ip.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly/ip.py)
 
-&emsp; `pcapkit.reassembly.ip` contains `IP_Reassembly` only, which is the base class for IPv4 and IPv6 reassembly. The algorithm implementation is based on IP reassembly procedure introduced in [`RFC 791`](https://tools.ietf.org/html/rfc791), using `RCVBT` (fragment received-bit table). Though another algorithm is explained in [`RFC 815`](https://tools.ietf.org/html/rfc815), replacing `RCVBT`, however, this implementation still used the elder one.
+&emsp; `pcapkit.foundation.reassembly.ip` contains `IP_Reassembly` only, which is the base class for IPv4 and IPv6 reassembly. The algorithm implementation is based on IP reassembly procedure introduced in [`RFC 791`](https://tools.ietf.org/html/rfc791), using `RCVBT` (fragment received-bit table). Though another algorithm is explained in [`RFC 815`](https://tools.ietf.org/html/rfc815), replacing `RCVBT`, however, this implementation still used the elder one.
 
 ```python
-class IP_Reassembly(pcapkit.reassembly.reassembly.Reassembly)
+class IP_Reassembly(pcapkit.foundation.reassembly.reassembly.Reassembly)
 ```
 
 ##### Reassembly for IP payload.
@@ -276,7 +276,7 @@ class IP_Reassembly(pcapkit.reassembly.reassembly.Reassembly)
  > described in [`src/reassembly/ipv4.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly/ipv4.py)
 
 ```python
-class IPv4_Reassembly(pcapkit.reassembly.ip.IP_Reassembly)
+class IPv4_Reassembly(pcapkit.foundation.reassembly.ip.IP_Reassembly)
 ```
 
 ##### Reassembly for IPv4 payload.
@@ -297,7 +297,7 @@ class IPv4_Reassembly(pcapkit.reassembly.ip.IP_Reassembly)
  > described in [`src/reassembly/ipv6.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly/ipv6.py)
 
 ```python
-class IPv6_Reassembly(pcapkit.reassembly.ip.IP_Reassembly)
+class IPv6_Reassembly(pcapkit.foundation.reassembly.ip.IP_Reassembly)
 ```
 
 ##### Reassembly for IPv4 payload.
@@ -317,10 +317,10 @@ class IPv6_Reassembly(pcapkit.reassembly.ip.IP_Reassembly)
 
  > described in [`src/reassembly/tcp.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly/tcp.py)
 
-&emsp; `pcapkit.reassembly.tcp` contains `TCP_Reassembly` only, which reconstructs fragmented TCP packets back to origin. The algorithm implementation is based on `IP Datagram Reassembly Algorithm` introduced in [`RFC 815`](https://tools.ietf.org/html/rfc815). It described an algorithm dealing with `RCVBT` (fragment received bit table) appeared in [`RFC 791`](https://tools.ietf.org/html/rfc791).
+&emsp; `pcapkit.foundation.reassembly.tcp` contains `TCP_Reassembly` only, which reconstructs fragmented TCP packets back to origin. The algorithm implementation is based on `IP Datagram Reassembly Algorithm` introduced in [`RFC 815`](https://tools.ietf.org/html/rfc815). It described an algorithm dealing with `RCVBT` (fragment received bit table) appeared in [`RFC 791`](https://tools.ietf.org/html/rfc791).
 
 ```python
-class TCP_Reassembly(pcapkit.reassembly.reassembly.Reassembly)
+class TCP_Reassembly(pcapkit.foundation.reassembly.reassembly.Reassembly)
 ```
 
 ##### Reassembly for TCP payload.

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """IPv6 fragments reassembly
 
-:mod:`pcapkit.reassembly.ipv6` contains
-:class:`~pcapkit.reassembly.ipv6.IPv6_Reassembly`
+:mod:`pcapkit.foundation.reassembly.ipv6` contains
+:class:`~pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly`
 only, which reconstructs fragmented IPv6 packets back to
 origin.
 
@@ -11,7 +11,7 @@ Glossary
 
 ipv6.packet
     Data structure for **IPv6 datagram reassembly**
-    (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`)
+    (:meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly`)
     is as following:
 
     .. code-block:: python
@@ -34,7 +34,7 @@ ipv6.packet
 
 ipv6.datagram
     Data structure for **reassembled IPv6 datagram** (element from
-    :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
+    :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.datagram` *tuple*)
     is as following:
 
     .. code-block:: python
@@ -66,7 +66,7 @@ ipv6.datagram
 
 ipv6.buffer
     Data structure for internal buffering when performing reassembly algorithms
-    (:attr:`~pcapkit.reassembly.reassembly.Reassembly._buffer`) is as following:
+    (:attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`) is as following:
 
     .. code-block:: python
 
@@ -90,8 +90,8 @@ ipv6.buffer
 """
 from typing import TYPE_CHECKING
 
+from pcapkit.foundation.reassembly.ip import IP_Reassembly
 from pcapkit.protocols.internet.ipv6 import IPv6
-from pcapkit.reassembly.ip import IP_Reassembly
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address

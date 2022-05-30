@@ -1,8 +1,8 @@
 IPv6 Datagram Reassembly
 ========================
 
-:mod:`pcapkit.reassembly.ipv6` contains
-:class:`~pcapkit.reassembly.ipv6.IPv6_Reassembly`
+:mod:`pcapkit.foundation.reassembly.ipv6` contains
+:class:`~pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly`
 only, which reconstructs fragmented IPv6 packets back to
 origin. Please refer to :doc:`ip` for more information.
 
@@ -13,7 +13,7 @@ Data Structure
 
    ipv6.packet
       Data structure for **IPv6 datagram reassembly**
-      (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`)
+      (:meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly`)
       is as following:
 
       .. code-block:: python
@@ -36,7 +36,7 @@ Data Structure
 
    ipv6.datagram
       Data structure for **reassembled IPv6 datagram** (element from
-      :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
+      :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.datagram` *tuple*)
       is as following:
 
       .. code-block:: python
@@ -58,7 +58,7 @@ Data Structure
 
    ipv6.buffer
       Data structure for internal buffering when performing reassembly algorithms
-      (:attr:`~pcapkit.reassembly.reassembly.Reassembly._buffer`) is as following:
+      (:attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`) is as following:
 
       .. code-block:: python
 
@@ -82,7 +82,7 @@ Data Structure
 Implementation
 --------------
 
-.. automodule:: pcapkit.reassembly.ipv6
+.. automodule:: pcapkit.foundation.reassembly.ipv6
    :members:
    :undoc-members:
    :private-members:

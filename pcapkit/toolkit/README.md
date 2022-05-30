@@ -57,7 +57,7 @@ ipv4_reassembly(frame)
 
  - Returns:
     * `bool` -- flag if `frame` is usable for IPv4 reassembly
-    * *if `True`* `dict` -- data for IPv4 reassembly as described in [`pcapkit.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
+    * *if `True`* `dict` -- data for IPv4 reassembly as described in [`pcapkit.foundation.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
     * *if `False`* `None`
 
 <a name="ipv6_reassembly"> </a>
@@ -75,7 +75,7 @@ ipv6_reassembly(frame)
 
  - Returns:
     * `bool` -- flag if `frame` is usable for IPv6 reassembly
-    * *if `True`* `dict` -- data for IPv6 reassembly as described in [`pcapkit.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
+    * *if `True`* `dict` -- data for IPv6 reassembly as described in [`pcapkit.foundation.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
     * *if `False`* `None`
 
 <a name="tcp_reassembly"> </a>
@@ -93,7 +93,7 @@ tcp_reassembly(frame)
 
  - Returns:
     * `bool` -- flag if `frame` is usable for TCP reassembly
-    * *if `True`* `dict` -- data for TCP reassembly as described in [`pcapkit.reassembly.tcp.TCP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#tcp_reassembly)
+    * *if `True`* `dict` -- data for TCP reassembly as described in [`pcapkit.foundation.reassembly.tcp.TCP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#tcp_reassembly)
     * *if `False`* `None`
 
 <a name="tcp_traceflow"> </a>
@@ -205,7 +205,7 @@ ipv4_reassembly(packet, *, count=NotImplemented)
 
  - Returns:
     * `bool` -- flag if `packet` is usable for IPv4 reassembly
-    * *if `True`* `dict` -- data for IPv4 reassembly as described in [`pcapkit.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
+    * *if `True`* `dict` -- data for IPv4 reassembly as described in [`pcapkit.foundation.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
     * *if `False`* `None`
 
 <a name="dpkt_ipv6_reassembly"> </a>
@@ -226,7 +226,7 @@ ipv6_reassembly(packet, *, count=NotImplemented)
 
  - Returns:
     * `bool` -- flag if `packet` is usable for IPv6 reassembly
-    * *if `True`* `dict` -- data for IPv6 reassembly as described in [`pcapkit.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
+    * *if `True`* `dict` -- data for IPv6 reassembly as described in [`pcapkit.foundation.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
     * *if `False`* `None`
 
 <a name="dpkt_tcp_reassembly"> </a>
@@ -247,7 +247,7 @@ tcp_reassembly(packet, *, count=NotImplemented)
 
  - Returns:
     * `bool` -- flag if `packet` is usable for TCP reassembly
-    * *if `True`* `dict` -- data for TCP reassembly as described in [`pcapkit.reassembly.tcp.TCP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#tcp_reassembly)
+    * *if `True`* `dict` -- data for TCP reassembly as described in [`pcapkit.foundation.reassembly.tcp.TCP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#tcp_reassembly)
     * *if `False`* `None`
 
 <a name="dpkt_tcp_traceflow"> </a>
@@ -390,7 +390,7 @@ ipv4_reassembly(packet, *, count=NotImplemented)
 
  - Returns:
     * `bool` -- flag if `packet` is usable for IPv4 reassembly
-    * *if `True`* `dict` -- data for IPv4 reassembly as described in [`pcapkit.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
+    * *if `True`* `dict` -- data for IPv4 reassembly as described in [`pcapkit.foundation.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
     * *if `False`* `None`
 
 <a name="scapy_ipv6_reassembly"> </a>
@@ -411,7 +411,7 @@ ipv6_reassembly(packet, *, count=NotImplemented)
 
  - Returns:
     * `bool` -- flag if `packet` is usable for IPv6 reassembly
-    * *if `True`* `dict` -- data for IPv6 reassembly as described in [`pcapkit.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
+    * *if `True`* `dict` -- data for IPv6 reassembly as described in [`pcapkit.foundation.reassembly.ip.IP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#ip_reassembly)
     * *if `False`* `None`
 
 <a name="scapy_tcp_reassembly"> </a>
@@ -432,7 +432,7 @@ tcp_reassembly(packet, *, count=NotImplemented)
 
  - Returns:
     * `bool` -- flag if `packet` is usable for TCP reassembly
-    * *if `True`* `dict` -- data for TCP reassembly as described in [`pcapkit.reassembly.tcp.TCP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#tcp_reassembly)
+    * *if `True`* `dict` -- data for TCP reassembly as described in [`pcapkit.foundation.reassembly.tcp.TCP_Reassembly`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/reassembly#tcp_reassembly)
     * *if `False`* `None`
 
 <a name="scapy_tcp_traceflow"> </a>

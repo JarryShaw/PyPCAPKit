@@ -1,8 +1,8 @@
 TCP Datagram Reassembly
 =======================
 
-:mod:`pcapkit.reassembly.tcp` contains
-:class:`~pcapkit.reassembly.tcp.TCP_Reassembly` only,
+:mod:`pcapkit.foundation.reassembly.tcp` contains
+:class:`~pcapkit.foundation.reassembly.tcp.TCP_Reassembly` only,
 which reconstructs fragmented TCP packets back to origin.
 The algorithm for TCP reassembly is described as below.
 
@@ -120,7 +120,7 @@ Data Structure
 
    tcp.packet
       Data structure for **TCP datagram reassembly**
-      (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`) is as following:
+      (:meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly`) is as following:
 
       .. code-block:: python
 
@@ -143,7 +143,7 @@ Data Structure
 
    tcp.datagram
       Data structure for **reassembled TCP datagram** (element from
-      :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
+      :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.datagram` *tuple*)
       is as following:
 
       .. code-block:: python
@@ -183,7 +183,7 @@ Data Structure
 
    tcp.buffer
       Data structure for internal buffering when performing reassembly algorithms
-      (:attr:`~pcapkit.reassembly.reassembly.Reassembly._buffer`) is as following:
+      (:attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`) is as following:
 
       .. code-block:: python
 
@@ -210,7 +210,7 @@ Data Structure
 Implementation
 --------------
 
-.. automodule:: pcapkit.reassembly.tcp
+.. automodule:: pcapkit.foundation.reassembly.tcp
    :members:
    :undoc-members:
    :private-members:

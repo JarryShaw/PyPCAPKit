@@ -11,11 +11,11 @@ import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.foundation.extraction import Extractor
+from pcapkit.foundation.reassembly.ipv4 import IPv4_Reassembly
+from pcapkit.foundation.reassembly.ipv6 import IPv6_Reassembly
+from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
 from pcapkit.foundation.traceflow import TraceFlow
 from pcapkit.protocols.protocol import Protocol
-from pcapkit.reassembly.ipv4 import IPv4_Reassembly
-from pcapkit.reassembly.ipv6 import IPv6_Reassembly
-from pcapkit.reassembly.tcp import TCP_Reassembly
 from pcapkit.utilities.exceptions import FormatError
 
 if TYPE_CHECKING:
@@ -23,8 +23,8 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
+    from pcapkit.foundation.reassembly.reassembly import Reassembly
     from pcapkit.protocols.misc.pcap.frame import Frame
-    from pcapkit.reassembly.reassembly import Reassembly
 
     Formats = Literal['pcap', 'json', 'tree', 'plist']
     Engines = Literal['default', 'pcapkit', 'dpkt', 'scapy', 'pyshark']
@@ -124,7 +124,7 @@ def reassemble(protocol: 'str | Type[Protocol]', strict: 'bool' = False) -> 'Rea
         strict: if return all datagrams (including those not implemented) when submit
 
     Returns:
-        A :class:`~pcapkit.reassembly.reassembly.Reassembly` object of corresponding protocol.
+        A :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` object of corresponding protocol.
 
     Raises:
         FormatError: If ``protocol`` is **NOT** any of IPv4, IPv6 or TCP.

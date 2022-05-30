@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.foundation.extraction import Extractor
-from pcapkit.reassembly.tcp import TCP_Reassembly
+from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import EngineWarning
 

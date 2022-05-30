@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """TCP datagram reassembly
 
-:mod:`pcapkit.reassembly.tcp` contains
-:class:`~pcapkit.reassembly.reassembly.Reassembly` only,
+:mod:`pcapkit.foundation.reassembly.tcp` contains
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which reconstructs fragmented TCP packets back to origin.
 The algorithm for TCP reassembly is described as below.
 
@@ -101,7 +101,7 @@ Glossary
 
 tcp.packet
     Data structure for **TCP datagram reassembly**
-    (:meth:`~pcapkit.reassembly.reassembly.Reassembly.reassembly`) is as following:
+    (:meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly`) is as following:
 
     .. code-block:: python
 
@@ -127,7 +127,7 @@ tcp.packet
 
 tcp.datagram
     Data structure for **reassembled TCP datagram** (element from
-    :attr:`~pcapkit.reassembly.reassembly.Reassembly.datagram` *tuple*)
+    :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.datagram` *tuple*)
     is as following:
 
     .. code-block:: python
@@ -169,7 +169,7 @@ tcp.datagram
 
 tcp.buffer
     Data structure for internal buffering when performing reassembly algorithms
-    (:attr:`~pcapkit.reassembly.reassembly.Reassembly._buffer`) is as following:
+    (:attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._buffer`) is as following:
 
     .. code-block:: python
 
@@ -200,8 +200,8 @@ import sys
 from typing import TYPE_CHECKING, Generic, TypeVar
 
 from pcapkit.corekit.infoclass import Info
+from pcapkit.foundation.reassembly.reassembly import Reassembly
 from pcapkit.protocols.transport.tcp import TCP
-from pcapkit.reassembly.reassembly import Reassembly
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address

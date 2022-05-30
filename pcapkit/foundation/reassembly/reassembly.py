@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """fragmented packets reassembly
 
-:mod:`pcapkit.reassembly.reassembly` contains
-class:`~pcapkit.reassembly.reassembly.Reassembly` only,
+:mod:`pcapkit.foundation.reassembly.reassembly` contains
+class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which is an abstract base class for all reassembly classes,
 bases on algorithms described in :rfc:`815`, implements
 datagram reassembly of IP and TCP packets.
@@ -104,13 +104,13 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
             Tuple of reassembled datagrams.
 
         Fetch reassembled datagrams from
-        :attr:`~pcapkit.reassembly.reassembly.Reassembly._dtgram`
+        :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
         and returns a *tuple* of such datagrams.
 
         If no cache found, the method will call
-        :meth:`~pcapkit.reassembly.reassembly.Reassembly.submit` to
+        :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.submit` to
         *forcedly* obtain newly reassembled payload. Otherwise, the
-        already calculated :attr:`~pcapkit.reassembly.reassembly.Reassembly._dtgram`
+        already calculated :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly._dtgram`
         will be returned.
 
         """

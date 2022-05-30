@@ -106,7 +106,7 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
           reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.reassembly.ipv4.IPv4Reassembly`
+        :class:`~pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`
 
     """
     ipv4 = getattr(packet, 'ip', None)
@@ -151,7 +151,7 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
           reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.reassembly.ipv6.IPv6Reassembly`
+        :class:`~pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`
 
     """
     ipv6 = getattr(packet, 'ip6', None)
@@ -197,7 +197,7 @@ def tcp_reassembly(packet, *, count=NotImplemented):
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.reassembly.tcp.TCPReassembly`
+        :class:`~pcapkit.foundation.reassembly.tcp.TCPReassembly`
 
     """
     if getattr(packet, 'ip', None):
