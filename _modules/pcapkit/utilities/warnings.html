@@ -38,6 +38,13 @@
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">stacklevel</span> <span class="k">as</span> <span class="n">stacklevel_calculator</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">logger</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;warn&#39;</span><span class="p">,</span>
@@ -54,17 +61,16 @@
 <span class="p">]</span>
 
 
-<div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="warn"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.warn">[docs]</a><span class="k">def</span> <span class="nf">warn</span><span class="p">(</span><span class="n">message</span><span class="p">:</span> <span class="s1">&#39;Union[str, Warning]&#39;</span><span class="p">,</span> <span class="n">category</span><span class="p">:</span> <span class="s1">&#39;Type[Warning]&#39;</span><span class="p">,</span>
+         <span class="n">stacklevel</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Wrapper function of :func:`warnings.warn`.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        message (Union[str, Warning]): Warning message.</span>
-<span class="sd">        category (Type[Warning]): Warning category.</span>
-<span class="sd">        stacklevel (Optional[int]): Warning stack level.</span>
+<span class="sd">        message: Warning message.</span>
+<span class="sd">        category: Warning category.</span>
+<span class="sd">        stacklevel: Warning stack level.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> \
-        <span class="n">stacklevel</span> <span class="k">as</span> <span class="n">stacklevel_calculator</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
     <span class="k">if</span> <span class="n">stacklevel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">stacklevel</span> <span class="o">=</span> <span class="n">stacklevel_calculator</span><span class="p">()</span>
     <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span></div>
@@ -78,13 +84,15 @@
 <div class="viewcode-block" id="BaseWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning">[docs]</a><span class="k">class</span> <span class="nc">BaseWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base warning class of all kinds.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseWarning.__init__"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
-        <span class="c1"># warnings.simplefilter(&#39;default&#39;)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-
+<div class="viewcode-block" id="BaseWarning.__init__"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
         <span class="c1"># log warning</span>
-        <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span></div></div>
+        <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="c1"># warnings.simplefilter(&#39;default&#39;)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <span class="c1">##############################################################################</span>

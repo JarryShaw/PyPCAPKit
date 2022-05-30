@@ -157,8 +157,6 @@
 </li>
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol._info">_info (pcapkit.protocols.protocol.Protocol attribute)</a>
 </li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations._ip_frag_check">_ip_frag_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="corekit/version.html#pcapkit.corekit.version.VersionInfo._make">_make() (pcapkit.corekit.version.VersionInfo class method)</a>
 </li>
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol._make_index">_make_index() (pcapkit.protocols.protocol.Protocol class method)</a>
@@ -177,6 +175,10 @@
         <li><a href="const/reg.html#pcapkit.const.reg.transtype.TransType._missing_">(pcapkit.const.reg.transtype.TransType class method)</a>
 </li>
       </ul></li>
+      <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol._next">_next (pcapkit.protocols.protocol.Protocol attribute)</a>
+</li>
+      <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol._protos">_protos (pcapkit.protocols.protocol.Protocol attribute)</a>
+</li>
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol._read_binary">_read_binary() (pcapkit.protocols.protocol.Protocol method)</a>
 </li>
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol._read_fileng">_read_fileng() (pcapkit.protocols.protocol.Protocol method)</a>
@@ -192,8 +194,6 @@
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol._seekset">_seekset (pcapkit.protocols.protocol.Protocol attribute)</a>
 </li>
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol._sigterm">_sigterm (pcapkit.protocols.protocol.Protocol attribute)</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations._tcp_frag_check">_tcp_frag_check() (in module pcapkit.utilities.validations)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -403,22 +403,20 @@
 </li>
       <li><a href="utilities/decorators.html#pcapkit.utilities.decorators.beholder">beholder() (in module pcapkit.utilities.decorators)</a>
 </li>
-      <li><a href="utilities/decorators.html#pcapkit.utilities.decorators.beholder_ng">beholder_ng() (in module pcapkit.utilities.decorators)</a>
-</li>
       <li><a href="const/reg.html#pcapkit.const.reg.ethertype.EtherType.Berkeley_Trailer_nego">Berkeley_Trailer_nego (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.ethertype.EtherType.BIIN_0x814D">BIIN_0x814D (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.ethertype.EtherType.BIIN_0x814E">BIIN_0x814E (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.DataType_Opt_CALIPSO.bitmap">bitmap (pcapkit.protocols.internet.hopopt.DataType_Opt_CALIPSO attribute)</a>
 
       <ul>
         <li><a href="protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO.bitmap">(pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO attribute)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.BLUETOOTH_BREDR_BB">BLUETOOTH_BREDR_BB (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.BLUETOOTH_HCI_H4">BLUETOOTH_HCI_H4 (pcapkit.const.reg.linktype.LinkType attribute)</a>
@@ -439,19 +437,13 @@
         <li><a href="protocols/application/httpv1.html#DataType_HTTP_Raw.body">(DataType_HTTP_Raw attribute)</a>
 </li>
       </ul></li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.bool_check">bool_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.BoolError">BoolError</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.transtype.TransType.BR_SAT_MON">BR_SAT_MON (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.bytearray_check">bytearray_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.BytearrayError">BytearrayError</a>
 </li>
       <li><a href="protocols/pcap/header.html#DataType_MagicNumber.byteorder">byteorder (DataType_MagicNumber attribute)</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.bytes_check">bytes_check() (in module pcapkit.utilities.validations)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.BytesError">BytesError</a>
 </li>
@@ -471,7 +463,7 @@
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.CAN_SOCKETCAN">CAN_SOCKETCAN (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.cap_len">cap_len (pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.cap_len">cap_len (pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
       <li><a href="protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE.capable">capable (pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE attribute)</a>
 </li>
@@ -529,10 +521,10 @@
       </ul></li>
       <li><a href="protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.cmpr_e">cmpr_e (pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL attribute)</a>
 </li>
-      <li><a href="protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.cmpr_i">cmpr_i (pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL attribute)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL.cmpr_i">cmpr_i (pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL attribute)</a>
+</li>
       <li><a href="protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.DataType_Opt_CALIPSO.cmpt_len">cmpt_len (pcapkit.protocols.internet.hopopt.DataType_Opt_CALIPSO attribute)</a>
 
       <ul>
@@ -552,8 +544,6 @@
       <li><a href="const/reg.html#pcapkit.const.reg.transtype.TransType.Compaq_Peer">Compaq_Peer (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.ComparisonError">ComparisonError</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.complex_check">complex_check() (in module pcapkit.utilities.validations)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.ComplexError">ComplexError</a>
 </li>
@@ -713,9 +703,9 @@
 </li>
       <li><a href="protocols/internet/hip.html#DataType_Flags">DataType_Flags (built-in class)</a>, <a href="protocols/link/l2tp.html#DataType_Flags">[1]</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame">DataType_Frame (class in pcapkit.protocols.pcap.frame)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame">DataType_Frame (class in pcapkit.protocols.misc.pcap.frame)</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_FrameInfo">DataType_FrameInfo (class in pcapkit.protocols.pcap.frame)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo">DataType_FrameInfo (class in pcapkit.protocols.misc.pcap.frame)</a>
 </li>
       <li><a href="protocols/application/ftp.html#DataType_FTP_Request">DataType_FTP_Request (built-in class)</a>
 </li>
@@ -1175,8 +1165,6 @@
 </li>
       <li><a href="protocols/internet/hip.html#DataType_Param_Host_ID.di_type">di_type (DataType_Param_Host_ID attribute)</a>
 </li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.dict_check">dict_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.DictError">DictError</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.DigitError">DigitError</a>
@@ -1319,8 +1307,6 @@
 </li>
       <li><a href="utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning">EngineWarning</a>
 </li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.enum_check">enum_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.EnumError">EnumError</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.EPON">EPON (pcapkit.const.reg.linktype.LinkType attribute)</a>
@@ -1334,7 +1320,7 @@
 </li>
         <li><a href="protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM.error">(pcapkit.protocols.application.httpv2.DataType_HTTPv2_RST_STREAM attribute)</a>
 </li>
-        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.error">(pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.error">(pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1499,13 +1485,11 @@
         <li><a href="protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE.frag">(pcapkit.protocols.application.httpv2.DataType_HTTPv2_PUSH_PROMISE attribute)</a>
 </li>
       </ul></li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.frag_check">frag_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_IPv4.frag_offset">frag_offset (pcapkit.protocols.internet.ipv4.DataType_IPv4 attribute)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.FragmentError">FragmentError</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.frame_info">frame_info (pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.frame_info">frame_info (pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
       <li><a href="const/arp.html#pcapkit.const.arp.hardware.Hardware.Frame_Relay">Frame_Relay (pcapkit.const.arp.hardware.Hardware attribute)</a>
 </li>
@@ -1783,31 +1767,27 @@
 </li>
       <li><a href="const/arp.html#pcapkit.const.arp.operation.Operation.InARP_Request">InARP_Request (pcapkit.const.arp.operation.Operation attribute)</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_FrameInfo.incl_len">incl_len (pcapkit.protocols.pcap.frame.DataType_FrameInfo attribute)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo.incl_len">incl_len (pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo attribute)</a>
 </li>
       <li><a href="protocols/internet/hip.html#DataType_Param_ESP_Info.index">index (DataType_Param_ESP_Info attribute)</a>
 </li>
       <li><a href="corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.index">index() (pcapkit.corekit.protochain.ProtoChain method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.IndexNotFound">IndexNotFound</a>
 </li>
       <li><a href="const/arp.html#pcapkit.const.arp.hardware.Hardware.InfiniBand">InfiniBand (pcapkit.const.arp.hardware.Hardware attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.INFINIBAND">INFINIBAND (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
       <li><a href="corekit/infoclass.html#pcapkit.corekit.infoclass.Info">Info (class in pcapkit.corekit.infoclass)</a>
 </li>
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol.info">info (pcapkit.protocols.protocol.Protocol property)</a>
 </li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.info_check">info_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol.info_name">info_name (pcapkit.protocols.protocol.Protocol property)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.InfoError">InfoError</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.int_check">int_check() (in module pcapkit.utilities.validations)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4">Internet_Protocol_version_4 (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
@@ -1816,8 +1796,6 @@
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.IntError">IntError</a>
 </li>
       <li><a href="utilities/warnings.html#pcapkit.utilities.warnings.InvalidVendorWarning">InvalidVendorWarning</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.io_check">io_check() (in module pcapkit.utilities.validations)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.IOObjError">IOObjError</a>
 </li>
@@ -1856,8 +1834,6 @@
       <li><a href="const/arp.html#pcapkit.const.arp.hardware.Hardware.IP_and_ARP_over_ISO_7816_3">IP_and_ARP_over_ISO_7816_3 (pcapkit.const.arp.hardware.Hardware attribute)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.ethertype.EtherType.IP_Autonomous_Systems">IP_Autonomous_Systems (pcapkit.const.reg.ethertype.EtherType attribute)</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.ip_check">ip_check() (in module pcapkit.utilities.validations)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.IP_OVER_FC">IP_OVER_FC (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
@@ -2004,7 +1980,7 @@
 </li>
         <li><a href="protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_IPv4.len">(pcapkit.protocols.internet.ipv4.DataType_IPv4 attribute)</a>
 </li>
-        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.len">(pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.len">(pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
       </ul></li>
       <li><a href="protocols/internet/ah.html#DataType_AH.length">length (DataType_AH attribute)</a>
@@ -2104,8 +2080,6 @@
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.LINUX_SLL">LINUX_SLL (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.LINUX_SLL2">LINUX_SLL2 (pcapkit.const.reg.linktype.LinkType attribute)</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.list_check">list_check() (in module pcapkit.utilities.validations)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.ListError">ListError</a>
 </li>
@@ -2311,9 +2285,9 @@
 </li>
         <li><a href="protocols/link/index.html#module-pcapkit.protocols.link.link">pcapkit.protocols.link.link</a>
 </li>
-        <li><a href="protocols/pcap/index.html#module-pcapkit.protocols.pcap">pcapkit.protocols.pcap</a>
+        <li><a href="protocols/pcap/index.html#module-pcapkit.protocols.misc.pcap">pcapkit.protocols.misc.pcap</a>
 </li>
-        <li><a href="protocols/pcap/frame.html#module-pcapkit.protocols.pcap.frame">pcapkit.protocols.pcap.frame</a>
+        <li><a href="protocols/pcap/frame.html#module-pcapkit.protocols.misc.pcap.frame">pcapkit.protocols.misc.pcap.frame</a>
 </li>
         <li><a href="protocols/transport/index.html#module-pcapkit.protocols.transport">pcapkit.protocols.transport</a>
 </li>
@@ -2328,8 +2302,6 @@
         <li><a href="utilities/index.html#module-pcapkit.utilities">pcapkit.utilities</a>
 </li>
         <li><a href="utilities/exceptions.html#module-pcapkit.utilities.exceptions">pcapkit.utilities.exceptions</a>
-</li>
-        <li><a href="utilities/validations.html#module-pcapkit.utilities.validations">pcapkit.utilities.validations</a>
 </li>
         <li><a href="utilities/warnings.html#module-pcapkit.utilities.warnings">pcapkit.utilities.warnings</a>
 </li>
@@ -2495,11 +2467,9 @@
 </li>
         <li><a href="protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_IPv4_Option_Type.number">(pcapkit.protocols.internet.ipv4.DataType_IPv4_Option_Type attribute)</a>
 </li>
-        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.number">(pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.number">(pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
       </ul></li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.number_check">number_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="const/reg.html#pcapkit.const.reg.transtype.TransType.NVP_II">NVP_II (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
   </ul></td>
@@ -2552,7 +2522,7 @@
         <li><a href="protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts.options">(pcapkit.protocols.internet.ipv6_opts.DataType_IPv6_Opts attribute)</a>
 </li>
       </ul></li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_FrameInfo.orig_len">orig_len (pcapkit.protocols.pcap.frame.DataType_FrameInfo attribute)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo.orig_len">orig_len (pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo attribute)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.transtype.TransType.OSPFIGP">OSPFIGP (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
@@ -2583,7 +2553,7 @@
 </li>
         <li><a href="protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.packet">(pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route attribute)</a>
 </li>
-        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.packet">(pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.packet">(pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
         <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol.packet">(pcapkit.protocols.protocol.Protocol property)</a>
 </li>
@@ -2986,17 +2956,17 @@
 </li>
       </ul></li>
       <li>
-    pcapkit.protocols.pcap
+    pcapkit.protocols.misc.pcap
 
       <ul>
-        <li><a href="protocols/pcap/index.html#module-pcapkit.protocols.pcap">module</a>
+        <li><a href="protocols/pcap/index.html#module-pcapkit.protocols.misc.pcap">module</a>
 </li>
       </ul></li>
       <li>
-    pcapkit.protocols.pcap.frame
+    pcapkit.protocols.misc.pcap.frame
 
       <ul>
-        <li><a href="protocols/pcap/frame.html#module-pcapkit.protocols.pcap.frame">module</a>
+        <li><a href="protocols/pcap/frame.html#module-pcapkit.protocols.misc.pcap.frame">module</a>
 </li>
       </ul></li>
       <li>
@@ -3052,13 +3022,6 @@
 
       <ul>
         <li><a href="utilities/exceptions.html#module-pcapkit.utilities.exceptions">module</a>
-</li>
-      </ul></li>
-      <li>
-    pcapkit.utilities.validations
-
-      <ul>
-        <li><a href="utilities/validations.html#module-pcapkit.utilities.validations">module</a>
 </li>
       </ul></li>
       <li>
@@ -3175,8 +3138,6 @@
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.transtype.TransType.PIPE">PIPE (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.pkt_check">pkt_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.PKTAP">PKTAP (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.ethertype.EtherType.Planning_Research_Corp">Planning_Research_Corp (pcapkit.const.reg.ethertype.EtherType attribute)</a>
@@ -3274,7 +3235,7 @@
       <li><a href="corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.protocols">protocols (pcapkit.corekit.protochain.ProtoChain property)</a>
 
       <ul>
-        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.protocols">(pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+        <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.protocols">(pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
       </ul></li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolUnbound">ProtocolUnbound</a>
@@ -3399,8 +3360,6 @@
       <li><a href="const/reg.html#pcapkit.const.reg.linktype.LinkType.RDS">RDS (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
       <li><a href="protocols/index.html#pcapkit.protocols.protocol.Protocol.read">read() (pcapkit.protocols.protocol.Protocol method)</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.real_check">real_check() (in module pcapkit.utilities.validations)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.RealError">RealError</a>
 </li>
@@ -3805,8 +3764,6 @@
       </ul></li>
       <li><a href="utilities/decorators.html#pcapkit.utilities.decorators.seekset">seekset() (in module pcapkit.utilities.decorators)</a>
 </li>
-      <li><a href="utilities/decorators.html#pcapkit.utilities.decorators.seekset_ng">seekset_ng() (in module pcapkit.utilities.decorators)</a>
-</li>
       <li><a href="protocols/internet/ipv6_route.html#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route.seg_left">seg_left (pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route attribute)</a>
 </li>
       <li><a href="protocols/internet/ah.html#DataType_AH.seq">seq (DataType_AH attribute)</a>
@@ -3941,8 +3898,6 @@
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.ethertype.EtherType.STP_HIPPI_ST">STP_HIPPI_ST (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.str_check">str_check() (in module pcapkit.utilities.validations)</a>
-</li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.StringError">StringError</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.StructError">StructError</a>
@@ -4023,9 +3978,9 @@
       </ul></li>
       <li><a href="const/reg.html#pcapkit.const.reg.ethertype.EtherType.Tigan_Inc">Tigan_Inc (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.time">time (pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.time">time (pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_Frame.time_epoch">time_epoch (pcapkit.protocols.pcap.frame.DataType_Frame attribute)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_Frame.time_epoch">time_epoch (pcapkit.protocols.misc.pcap.frame.DataType_Frame attribute)</a>
 </li>
       <li><a href="protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT.timeout">timeout (pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT attribute)</a>
 </li>
@@ -4065,9 +4020,9 @@
 </li>
       <li><a href="const/reg.html#pcapkit.const.reg.transtype.TransType.TRUNK_2">TRUNK_2 (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_FrameInfo.ts_sec">ts_sec (pcapkit.protocols.pcap.frame.DataType_FrameInfo attribute)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo.ts_sec">ts_sec (pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo attribute)</a>
 </li>
-      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.pcap.frame.DataType_FrameInfo.ts_usec">ts_usec (pcapkit.protocols.pcap.frame.DataType_FrameInfo attribute)</a>
+      <li><a href="protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo.ts_usec">ts_usec (pcapkit.protocols.misc.pcap.frame.DataType_FrameInfo attribute)</a>
 </li>
       <li><a href="protocols/internet/hip.html#DataType_Param_Overlay_TTL.ttl">ttl (DataType_Param_Overlay_TTL attribute)</a>
 
@@ -4086,8 +4041,6 @@
       <li><a href="const/reg.html#pcapkit.const.reg.transtype.TransType.TTP">TTP (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
       <li><a href="protocols/link/l2tp.html#DataType_L2TP.tunnelid">tunnelid (DataType_L2TP attribute)</a>
-</li>
-      <li><a href="utilities/validations.html#pcapkit.utilities.validations.tuple_check">tuple_check() (in module pcapkit.utilities.validations)</a>
 </li>
       <li><a href="utilities/exceptions.html#pcapkit.utilities.exceptions.TupleError">TupleError</a>
 </li>

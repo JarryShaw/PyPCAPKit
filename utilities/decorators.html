@@ -62,32 +62,12 @@ the decorated function.</p>
 <p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol._read_packet" title="pcapkit.protocols.protocol.Protocol._read_packet"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._read_packet()</span></code></a></p>
 </div>
 <dl class="field-list simple">
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.decorators.seekset_ng">
-<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.decorators.</span></span><span class="sig-name descname"><span class="pre">seekset_ng</span></span><a class="reference internal" href="../_modules/pcapkit/utilities/decorators.html#seekset_ng"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.decorators.seekset_ng" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read file from start then set back to original.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>This decorator function is designed for decorating <em>plain functions</em>.</p>
-</div>
-<p>The decorator will rewind the offset of <code class="docutils literal notranslate"><span class="pre">file</span></code>  to <code class="docutils literal notranslate"><span class="pre">seekset</span></code>, then
-call the decorated function and returns its return value.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The decorated function should have following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">seekset</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>c.f. <code class="xref py py-func docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis._analyse()</span></code>.</p>
-</div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.analysis</span></code></p>
-</div>
-<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>Concatenate</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><em>P</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable[P, R]</p>
+</dd>
 </dl>
 </dd></dl>
 
@@ -116,32 +96,12 @@ as <code class="xref py py-class docutils literal notranslate"><span class="pre"
 <p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._decode_next_layer()</span></code></a></p>
 </div>
 <dl class="field-list simple">
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.decorators.beholder_ng">
-<span class="sig-prename descclassname"><span class="pre">&#64;</span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.decorators.</span></span><span class="sig-name descname"><span class="pre">beholder_ng</span></span><a class="reference internal" href="../_modules/pcapkit/utilities/decorators.html#beholder_ng"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.decorators.beholder_ng" title="Permalink to this definition">¶</a></dt>
-<dd><p>Behold analysis procedure.</p>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>This decorator function is designed for decorating <em>plain functions</em>.</p>
-</div>
-<p>This decorate first keep the current offset of <code class="docutils literal notranslate"><span class="pre">file</span></code>, then try to call
-the decorated function. Should any exception raised, it will re-parse the
-<code class="docutils literal notranslate"><span class="pre">file</span></code> as <code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code> protocol.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The decorated function should have following signature:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.transport.Transport._import_next_layer()</span></code></p>
-</div>
-<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>Concatenate</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>P</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Callable[P, R]</p>
+</dd>
 </dl>
 </dd></dl>
 

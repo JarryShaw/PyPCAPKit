@@ -44,18 +44,24 @@
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>
 
-<span class="c1">###############################################################################</span>
-<span class="c1"># from pcapkit.foundation.analysis import analyse</span>
-<span class="c1"># from pcapkit.protocols.misc.raw import Raw</span>
-<span class="c1">###############################################################################</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;seekset&#39;</span><span class="p">,</span> <span class="s1">&#39;seekset_ng&#39;</span><span class="p">,</span> <span class="s1">&#39;beholder&#39;</span><span class="p">,</span> <span class="s1">&#39;beholder_ng&#39;</span><span class="p">]</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Concatenate</span><span class="p">,</span> <span class="n">ParamSpec</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+
+    <span class="n">P</span> <span class="o">=</span> <span class="n">ParamSpec</span><span class="p">(</span><span class="s1">&#39;P&#39;</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;R&#39;</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;seekset&#39;</span><span class="p">,</span> <span class="s1">&#39;beholder&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="seekset"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.seekset">[docs]</a><span class="k">def</span> <span class="nf">seekset</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<div class="viewcode-block" id="seekset"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.seekset">[docs]</a><span class="k">def</span> <span class="nf">seekset</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="s1">&#39;Callable[Concatenate[Protocol, P], R]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable[P, R]&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Read file from start then set back to original.</span>
 
 <span class="sd">    Important:</span>
@@ -77,47 +83,24 @@
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">seekcur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">seekcur</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;P.args&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="s1">&#39;P.kwargs&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span>
+        <span class="c1"># extract self object</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Protocol&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># move file pointer</span>
         <span class="n">seek_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_seekset</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-        <span class="n">return_</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="c1"># call method</span>
+        <span class="n">return_</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+        <span class="c1"># reset file pointer</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">return_</span>
     <span class="k">return</span> <span class="n">seekcur</span></div>
 
 
-<div class="viewcode-block" id="seekset_ng"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.seekset_ng">[docs]</a><span class="k">def</span> <span class="nf">seekset_ng</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Read file from start then set back to original.</span>
-
-<span class="sd">    Important:</span>
-<span class="sd">        This decorator function is designed for decorating *plain functions*.</span>
-
-<span class="sd">    The decorator will rewind the offset of ``file``  to ``seekset``, then</span>
-<span class="sd">    call the decorated function and returns its return value.</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        The decorated function should have following signature::</span>
-
-<span class="sd">            func(protocol, file, *args, seekset=os.SEEK_SET, **kw)</span>
-
-<span class="sd">        c.f. :func:`pcapkit.foundation.analysis._analyse`.</span>
-
-<span class="sd">    See Also:</span>
-<span class="sd">        :mod:`pcapkit.foundation.analysis`</span>
-
-<span class="sd">    :meta decorator:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">seekcur</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">seekset</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>  <span class="c1"># pylint: disable=redefined-outer-name</span>
-        <span class="c1"># seek_cur = file.tell()</span>
-        <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seekset</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-        <span class="n">return_</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">file</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">seekset</span><span class="o">=</span><span class="n">seekset</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-        <span class="c1"># file.seek(seek_cur, os.SEEK_SET)</span>
-        <span class="k">return</span> <span class="n">return_</span>
-    <span class="k">return</span> <span class="n">seekcur</span></div>
-
-
-<div class="viewcode-block" id="beholder"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.beholder">[docs]</a><span class="k">def</span> <span class="nf">beholder</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+<div class="viewcode-block" id="beholder"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.beholder">[docs]</a><span class="k">def</span> <span class="nf">beholder</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="s1">&#39;Callable[Concatenate[Protocol, int, Optional[int], P], R]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable[P, R]&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Behold extraction procedure.</span>
 
 <span class="sd">    Important:</span>
@@ -140,13 +123,19 @@
 <span class="sd">    :meta decorator:</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">behold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">behold</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;P.args&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;P.kwargs&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span>
+        <span class="c1"># extract self object &amp; args</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;Protocol&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="c1"># record file pointer</span>
         <span class="n">seek_cur</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># call method</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
             <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-            <span class="n">error</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
             <span class="c1"># error = traceback.format_exc()</span>
 
             <span class="c1"># log error</span>
@@ -154,50 +143,7 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
             <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)),</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">next_</span>
-    <span class="k">return</span> <span class="n">behold</span></div>
-
-
-<div class="viewcode-block" id="beholder_ng"><a class="viewcode-back" href="../../../utilities/decorators.html#pcapkit.utilities.decorators.beholder_ng">[docs]</a><span class="k">def</span> <span class="nf">beholder_ng</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Behold analysis procedure.</span>
-
-<span class="sd">    Important:</span>
-<span class="sd">        This decorator function is designed for decorating *plain functions*.</span>
-
-<span class="sd">    This decorate first keep the current offset of ``file``, then try to call</span>
-<span class="sd">    the decorated function. Should any exception raised, it will re-parse the</span>
-<span class="sd">    ``file`` as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.</span>
-
-<span class="sd">    Note:</span>
-<span class="sd">        The decorated function should have following signature::</span>
-
-<span class="sd">            func(file, length, *args, **kwargs)</span>
-
-<span class="sd">    See Also:</span>
-<span class="sd">        :meth:`pcapkit.protocols.transport.transport.Transport._import_next_layer`</span>
-
-<span class="sd">    :meta decorator:</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nd">@functools</span><span class="o">.</span><span class="n">wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">behold</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">seek_cur</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
-            <span class="c1"># from pcapkit.foundation.analysis import analyse</span>
-            <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.raw</span> <span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
-            <span class="n">error</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">(</span><span class="n">limit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-            <span class="c1"># error = traceback.format_exc()</span>
-
-            <span class="c1"># log error</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exc</span><span class="p">)</span>
-
-            <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-
-            <span class="c1"># raw = Raw(file, length, error=str(error))</span>
-            <span class="c1"># return analyse(raw.info, raw.protochain, raw.alias)</span>
-            <span class="n">next_</span> <span class="o">=</span> <span class="n">Raw</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">next_</span>
+            <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="n">next_</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">behold</span></div>
 </pre></div>
 
