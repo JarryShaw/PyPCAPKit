@@ -22,9 +22,9 @@ if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, Optional
 
+    from dpkt.dpkt import Packet
     from dpkt.ip import IP
     from dpkt.ip6 import IP6, IP6FragmentHeader
-    from dpkt.dpkt import Packet
     from dpkt.tcp import TCP
 
     from pcapkit.const.reg.linktype import LinkType
