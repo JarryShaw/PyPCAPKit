@@ -37,6 +37,11 @@ codecov = "*"
 sphinx = "*"
 rstcheck = "*"
 vermin = "*"
+types-chardet = "*"
+types-docutils = "*"
+types-emoji = "*"
+types-requests = "*"
+types-urllib3 = "*"
 
 [requires]
 python_version = "3"
