@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=wrong-import-position, unused-import, unused-wildcard-import, bad-continuation
+# pylint: disable=wrong-import-position,unused-import,unused-wildcard-import
 """stream pcap file extractor
 
 :mod:`pcapkit` is an independent open source library, using only
@@ -79,49 +79,30 @@ else:
     tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
                          exception=BaseError, strict=False)
 
-# Interface
 from pcapkit.interface import *
-
-# ToolKit
+from pcapkit.protocols import *
 from pcapkit.toolkit import *
-
-# Protocols
-from pcapkit.protocols.misc.null import NoPayload
-from pcapkit.protocols.misc.raw import Raw
-from pcapkit.protocols.link.arp import ARP
-from pcapkit.protocols.link.ethernet import Ethernet
-from pcapkit.protocols.application.ftp import FTP
-from pcapkit.protocols.link.l2tp import L2TP
-from pcapkit.protocols.link.ospf import OSPF
-from pcapkit.protocols.link.rarp import RARP
-from pcapkit.protocols.link.vlan import VLAN
-from pcapkit.protocols.internet.ah import AH
-from pcapkit.protocols.internet.hip import HIP
-from pcapkit.protocols.internet.hopopt import HOPOPT
-from pcapkit.protocols.internet.ip import IP
-from pcapkit.protocols.internet.ipsec import IPsec
-from pcapkit.protocols.internet.ipv4 import IPv4
-from pcapkit.protocols.internet.ipv6 import IPv6
-from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
-from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
-from pcapkit.protocols.internet.ipv6_route import IPv6_Route
-from pcapkit.protocols.internet.ipx import IPX
-from pcapkit.protocols.internet.mh import MH
-from pcapkit.protocols.transport.tcp import TCP
-from pcapkit.protocols.transport.udp import UDP
-from pcapkit.protocols.application.http import HTTP
 
 __all__ = [
     'extract', 'reassemble', 'trace',                       # Interface Functions
+
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
     'LINK', 'INET', 'TRANS', 'APP', 'RAW',                  # Layer Macros
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # Engine Macros
+
+    # Protocol Numbers
+    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
+
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
+
     'ARP', 'Ethernet', 'L2TP', 'OSPF', 'RARP', 'VLAN',      # Link Layer
+
     'AH', 'IP', 'IPsec', 'IPv4', 'IPv6', 'IPX',             # Internet Layer
     'HIP', 'HOPOPT', 'IPv6_Frag', 'IPv6_Opts', 'IPv6_Route', 'MH',
                                                             # IPv6 Extension Header
+
     'TCP', 'UDP',                                           # Transport Layer
+
     'FTP', 'HTTP',                                          # Application Layer
 ]

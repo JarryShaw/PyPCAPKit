@@ -8,6 +8,8 @@ with detailed implementation and methods.
 """
 # TODO: Implement specified classes for MAC and IP addresses.
 
+from typing import TYPE_CHECKING
+
 # Base Class for Protocols
 from pcapkit.protocols.protocol import Protocol
 
@@ -20,10 +22,10 @@ from pcapkit.protocols.internet import *
 from pcapkit.protocols.transport import *
 from pcapkit.protocols.application import *
 
-__all__ = [
-    # Protocol Numbers
-    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
+if TYPE_CHECKING:
+    from typing import Type
 
+__all__ = [
     # PCAP Headers
     'Header', 'Frame',
 
@@ -50,3 +52,13 @@ __all__ = [
     # Application Layer
     'FTP', 'HTTP', 'HTTPv1', 'HTTPv2',
 ]
+
+# protocol registry
+__proto__ = {}  # type: dict[str, Type[Protocol]]
+for name in __all__:
+    __proto__[name.upper()] = globals()[name]
+
+__all__.extend((
+    # Protocol Numbers
+    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',
+))

@@ -275,7 +275,10 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         2. If ``value`` is a protocol class, the method will return the
            protocol class itself, and the protocols names in upper case
            obtained from :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
-        3. If ``value`` is :obj:`str`, the method will return the value itself.
+        3. If ``value`` is :obj:`str`, the method will attempt to search for
+           the existing registered protocol class from
+           :obj:`pcapkit.protocols.__proto__` and follow **step 2**; otherwise,
+           return the value itself.
 
         """
         if isinstance(value, type) and issubclass(value, Protocol):
@@ -283,7 +286,12 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         elif isinstance(value, Protocol):
             comp = (type(value), *(name.upper() for name in value.id()))
         else:
-            comp = (value.upper(),)
+            from pcapkit.protocols import __proto__ as protocols_registry  # pylint: disable=import-outside-toplevel
+
+            if (proto := protocols_registry.get(value.upper())) is not None:
+                comp = (proto, *(name.upper() for name in proto.id()))
+            else:
+                comp = (value.upper(),)
         return comp
 
     ##########################################################################

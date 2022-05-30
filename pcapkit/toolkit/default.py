@@ -12,7 +12,6 @@ from pcapkit.const.ipv6.extension_header import ExtensionHeader as RegType_Exten
 from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow import Packet as TF_Packet
-from pcapkit.protocols.internet.ip import IP
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -137,7 +136,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
 
     """
     if 'TCP' in frame:
-        ip = cast('IPv4 | IPv6', frame[IP])
+        ip = cast('IPv4 | IPv6', frame['IP'])
         ip_info = ip.info
         tcp = cast('TCP', frame['TCP'])
         tcp_info = tcp.info
@@ -188,7 +187,7 @@ def tcp_traceflow(frame: 'Frame', *, data_link: 'LinkType') -> 'TF_Packet | None
 
     """
     if 'TCP' in frame:
-        ip = cast('IPv4 | IPv6', frame[IP])
+        ip = cast('IPv4 | IPv6', frame['IP'])
         ip_info = ip.info
         tcp = cast('TCP', frame['TCP'])
         tcp_info = tcp.info
