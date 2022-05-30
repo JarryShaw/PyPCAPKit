@@ -10,8 +10,24 @@ its caller.
 
 """
 import ipaddress
+from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.reg.transtype import TransType as TP_PROTO
+from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
+from pcapkit.const.reg.transtype import TransType as RegType_TransType
+from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
+from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
+from pcapkit.foundation.traceflow import Packet as TF_Packet
+
+if TYPE_CHECKING:
+    from ipaddress import IPv4Address, IPv6Address
+    from typing import Any, Optional
+
+    from dpkt.ip import IP
+    from dpkt.ip6 import IP6, IP6FragmentHeader
+    from dpkt.dpkt import Packet
+    from dpkt.tcp import TCP
+
+    from pcapkit.const.reg.linktype import LinkType
 
 __all__ = [
     'ipv6_hdr_len', 'packet2chain', 'packet2dict',
@@ -19,14 +35,14 @@ __all__ = [
 ]
 
 
-def ipv6_hdr_len(ipv6):
+def ipv6_hdr_len(ipv6: 'IP6') -> 'int':
     """Calculate length of headers before IPv6 Fragment header.
 
     Args:
-        ipv6 (dpkt.ip6.IP6): DPKT IPv6 packet.
+        ipv6: DPKT IPv6 packet.
 
     Returns:
-        int: Length of headers before IPv6 Fragment header
+        Length of headers before IPv6 Fragment header
         :class:`dpkt.ip6.IP6FragmentHeader` (:rfc:`2460#section-4.5`).
 
     As specified in :rfc:`2460#section-4.1`, such headers (before the IPv6 Fragment Header)
@@ -44,14 +60,14 @@ def ipv6_hdr_len(ipv6):
     return hdr_len
 
 
-def packet2chain(packet):
+def packet2chain(packet: 'Packet') -> 'str':
     """Fetch DPKT packet protocol chain.
 
     Args:
-        packet (dpkt.dpkt.Packet): DPKT packet.
+        packet: DPKT packet.
 
     Returns:
-        str: Colon (``:``) seperated list of protocol chain.
+        Colon (``:``) seperated list of protocol chain.
 
     """
     chain = [type(packet).__name__]
@@ -62,7 +78,8 @@ def packet2chain(packet):
     return ':'.join(chain)
 
 
-def packet2dict(packet, timestamp, *, data_link):
+def packet2dict(packet: 'Packet', timestamp: 'float', *,
+                data_link: 'RegType_LinkType') -> 'dict[str, Any]':
     """Convert DPKT packet into :obj:`dict`.
 
     Args:
@@ -72,14 +89,15 @@ def packet2dict(packet, timestamp, *, data_link):
         Dict[str, Any]: A :obj:`dict` mapping of packet data.
 
     """
-    def wrapper(packet):
-        dict_ = dict()
+    def wrapper(packet: 'Packet') -> 'dict[str, Any]':
+        dict_ = {}  # type: dict[str, Any]
         for field in packet.__hdr_fields__:
             dict_[field] = getattr(packet, field, None)
         payload = packet.data
         if not isinstance(payload, bytes):
             dict_[type(payload).__name__] = wrapper(payload)
         return dict_
+
     return {
         'timestamp': timestamp,
         'packet': packet.pack(),
@@ -87,17 +105,17 @@ def packet2dict(packet, timestamp, *, data_link):
     }
 
 
-def ipv4_reassembly(packet, *, count=NotImplemented):
+def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Address] | None':
     """Make data for IPv4 reassembly.
 
     Args:
-        packet (dpkt.dpkt.Packet): DPKT packet.
+        packet: DPKT packet.
 
     Keyword Args:
-        count (int): Packet index. If not provided, default to ``NotImplemented``.
+        count: Packet index. If not provided, default to ``-1``.
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for IPv4 reassembly.
+        Data for IPv4 reassembly.
 
         * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled
           if it contains IPv4 layer (:class:`dpkt.ip.IP`) and the **DF** (:attr:`dpkt.ip.IP.df`)
@@ -106,43 +124,46 @@ def ipv4_reassembly(packet, *, count=NotImplemented):
           reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`
 
     """
-    ipv4 = getattr(packet, 'ip', None)
+    ipv4 = getattr(packet, 'ip', None)  # type: Optional[IP]
     if ipv4 is not None:
         if ipv4.df:     # dismiss not fragmented packet
-            return False, None
-        data = dict(
+            return None
+
+        data = IP_Packet(
             bufid=(
-                ipaddress.ip_address(ipv4.src),                 # source IP address
-                ipaddress.ip_address(ipv4.dst),                 # destination IP address
+                cast('IPv4Address',
+                     ipaddress.ip_address(ipv4.src)),           # source IP address
+                cast('IPv4Address',
+                     ipaddress.ip_address(ipv4.dst)),           # destination IP address
                 ipv4.id,                                        # identification
-                TP_PROTO.get(ipv4.p).name,                      # payload protocol type
+                RegType_TransType.get(ipv4.p).name,             # payload protocol type
             ),
             num=count,                                          # original packet range number
             fo=ipv4.off,                                        # fragment offset
             ihl=ipv4.__hdr_len__,                               # internet header length
             mf=bool(ipv4.mf),                                   # more fragment flag
             tl=ipv4.len,                                        # total length, header includes
-            header=bytearray(ipv4.pack()[:ipv4.__hdr_len__]),   # raw bytearray type header
+            header=ipv4.pack()[:ipv4.__hdr_len__],              # raw bytes type header
             payload=bytearray(ipv4.pack()[ipv4.__hdr_len__:]),  # raw bytearray type payload
         )
-        return True, data
-    return False, None
+        return data
+    return None
 
 
-def ipv6_reassembly(packet, *, count=NotImplemented):
+def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
     Args:
-        packet (dpkt.dpkt.Packet): DPKT packet.
+        packet: DPKT packet.
 
     Keyword Args:
-        count (int): Packet index. If not provided, default to ``NotImplemented``.
+        count: Packet index. If not provided, default to ``-1``.
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for IPv6 reassembly.
+        Data for IPv6 reassembly.
 
         * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled
           if it contains IPv6 layer (:class:`dpkt.ip6.IP6`) and IPv6 Fragment header
@@ -151,45 +172,48 @@ def ipv6_reassembly(packet, *, count=NotImplemented):
           reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`
+        :class:`pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`
 
     """
-    ipv6 = getattr(packet, 'ip6', None)
+    ipv6 = getattr(packet, 'ip6', None)  # type: Optional[IP6]
     if ipv6 is not None:
-        ipv6_frag = ipv6.extension_hdrs.get(44)
+        ipv6_frag = ipv6.extension_hdrs.get(44)  # type: Optional[IP6FragmentHeader]
         if ipv6_frag is None:       # dismiss not fragmented packet
-            return False, None
+            return None
         hdr_len = ipv6_hdr_len(ipv6)
-        data = dict(
+
+        data = IP_Packet(
             bufid=(
-                ipaddress.ip_address(ipv6.src),                     # source IP address
-                ipaddress.ip_address(ipv6.dst),                     # destination IP address
-                ipv6.flow,                                          # label
-                TP_PROTO.get(ipv6_frag.nh).name,                    # next header field in IPv6 Fragment Header
+                cast('IPv6Address',
+                     ipaddress.ip_address(ipv6.src)),            # source IP address
+                cast('IPv6Address',
+                     ipaddress.ip_address(ipv6.dst)),            # destination IP address
+                ipv6.flow,                                       # label
+                RegType_TransType.get(ipv6_frag.nh).name,        # next header field in IPv6 Fragment Header
             ),
-            num=count,                                              # original packet range number
-            fo=ipv6_frag.nxt,                                       # fragment offset
-            ihl=hdr_len,                                            # header length, only headers before IPv6-Frag
-            mf=bool(ipv6_frag.m_flag),                              # more fragment flag
-            tl=len(ipv6),                                           # total length, header includes
-            header=bytearray(ipv6.pack()[:hdr_len]),                # raw bytearray type header before IPv6-Frag
-            payload=bytearray(ipv6.pack()[hdr_len+ipv6_frag:]),     # raw bytearray type payload after IPv6-Frag
+            num=count,                                           # original packet range number
+            fo=ipv6_frag.nxt,                                    # fragment offset
+            ihl=hdr_len,                                         # header length, only headers before IPv6-Frag
+            mf=bool(ipv6_frag.m_flag),                           # more fragment flag
+            tl=len(ipv6),                                        # total length, header includes
+            header=ipv6.pack()[:hdr_len],                        # raw bytearray type header before IPv6-Frag
+            payload=bytearray(ipv6.pack()[hdr_len+ipv6_frag:]),  # raw bytearray type payload after IPv6-Frag
         )
-        return True, data
-    return False, None
+        return data
+    return None
 
 
-def tcp_reassembly(packet, *, count=NotImplemented):
+def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
     Args:
-        packet (dpkt.dpkt.Packet): DPKT packet.
+        packet: DPKT packet.
 
     Keyword Args:
-        count (int): Packet index. If not provided, default to ``NotImplemented``.
+        count: Packet index. If not provided, default to ``-1``.
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
+        Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled
           if it contains TCP layer (:class:`dpkt.tcp.TCP`).
@@ -197,23 +221,26 @@ def tcp_reassembly(packet, *, count=NotImplemented):
           reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.foundation.reassembly.tcp.TCPReassembly`
+        :class:`pcapkit.foundation.reassembly.tcp.TCPReassembly`
 
     """
-    if getattr(packet, 'ip', None):
-        ip = packet['ip']
-    elif getattr(packet, 'ip6', None):
-        ip = packet['ip6']
+    if hasattr(packet, 'ip'):
+        ip = cast('IP', packet['ip'])
+    elif hasattr(packet, 'ip6'):
+        ip = cast('IP6', packet['ip6'])
     else:
-        return False, None
-    tcp = getattr(ip, 'tcp', None)
+        return None
+
+    tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
     if tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
-        data = dict(
+        raw_len = len(tcp.data)                                 # payload length, header excludes
+
+        data = TCP_Packet(
             bufid=(
                 ipaddress.ip_address(ip.src),                   # source IP address
-                ipaddress.ip_address(ip.dst),                   # destination IP address
                 tcp.sport,                                      # source port
+                ipaddress.ip_address(ip.dst),                   # destination IP address
                 tcp.dport,                                      # destination port
             ),
             num=count,                                          # original packet range number
@@ -222,29 +249,29 @@ def tcp_reassembly(packet, *, count=NotImplemented):
             rst=bool(int(flags[5])),                            # reset connection flag
             syn=bool(int(flags[6])),                            # synchronise flag
             fin=bool(int(flags[7])),                            # finish flag
+            header=tcp.pack()[:tcp.__hdr_len__],                # raw bytes type header
             payload=bytearray(tcp.pack()[tcp.__hdr_len__:]),    # raw bytearray type payload
+            first=tcp.seq,                                      # this sequence number
+            last=tcp.seq + raw_len,                             # next (wanted) sequence number
+            len=raw_len,                                        # payload length, header excludes
         )
-        raw_len = len(tcp.data)                                 # payload length, header excludes
-        data['first'] = tcp.seq                                 # this sequence number
-        data['last'] = tcp.seq + raw_len                        # next (wanted) sequence number
-        data['len'] = raw_len                                   # payload length, header excludes
-        return True, data
-    return False, None
+        return data
+    return None
 
 
-def tcp_traceflow(packet, timestamp, *, data_link, count=NotImplemented):
+def tcp_traceflow(packet: 'Packet', timestamp: 'float', *, data_link: 'LinkType', count: 'int' = -1) -> 'TF_Packet | None':
     """Trace packet flow for TCP.
 
     Args:
-        packet (dpkt.dpkt.Packet): DPKT packet.
-        timestamp (float): Timestamp of the packet.
+        packet: DPKT packet.
+        timestamp: Timestamp of the packet.
 
     Keyword Args:
-        data_link (str): Data link layer protocol (from global header).
-        count (int): Packet index. If not provided, default to ``NotImplemented``.
+        data_link: Data link layer protocol (from global header).
+        count: Packet index. If not provided, default to ``-1``.
 
     Returns:
-        Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.
+        Data for TCP reassembly.
 
         * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled
           if it contains TCP layer (:class:`dpkt.tcp.TCP`).
@@ -252,19 +279,21 @@ def tcp_traceflow(packet, timestamp, *, data_link, count=NotImplemented):
           flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.
 
     See Also:
-        :class:`~pcapkit.foundation.traceflow.TraceFlow`
+        :class:`pcapkit.foundation.traceflow.TraceFlow`
 
     """
-    if getattr(packet, 'ip', None):
-        ip = packet['ip']
-    elif getattr(packet, 'ip6', None):
-        ip = packet['ip6']
+    if hasattr(packet, 'ip'):
+        ip = cast('IP', packet['ip'])
+    elif hasattr(packet, 'ip6'):
+        ip = cast('IP6', packet['ip6'])
     else:
-        return False, None
-    tcp = getattr(ip, 'tcp', None)
+        return None
+
+    tcp = getattr(ip, 'tcp', None)  # type: Optional[TCP]
     if tcp is not None:
         flags = bin(tcp.flags)[2:].zfill(8)
-        data = dict(
+
+        data = TF_Packet(  # type: ignore[type-var]
             protocol=data_link,                                         # data link type from global header
             index=count,                                                # frame number
             frame=packet2dict(packet, timestamp, data_link=data_link),  # extracted packet
@@ -276,5 +305,5 @@ def tcp_traceflow(packet, timestamp, *, data_link, count=NotImplemented):
             dstport=tcp.dport,                                          # TCP destination port
             timestamp=timestamp,                                        # timestamp
         )
-        return True, data
-    return False, None
+        return data
+    return None
