@@ -11,18 +11,23 @@ import functools
 import io
 import os
 import traceback
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities.logging import logger
 
-###############################################################################
-# from pcapkit.foundation.analysis import analyse
-# from pcapkit.protocols.misc.raw import Raw
-###############################################################################
+if TYPE_CHECKING:
+    from typing import Callable, TypeVar, Optional
+    from pcapkit.protocols.protocol import Protocol
 
-__all__ = ['seekset', 'seekset_ng', 'beholder', 'beholder_ng']
+    from typing_extensions import ParamSpec, Concatenate
+
+    P = ParamSpec('P')
+    R = TypeVar('R')
+
+__all__ = ['seekset', 'beholder']
 
 
-def seekset(func):
+def seekset(func: 'Callable[Concatenate[Protocol, P], R]') -> 'Callable[P, R]':
     """Read file from start then set back to original.
 
     Important:
@@ -44,47 +49,24 @@ def seekset(func):
     :meta decorator:
     """
     @functools.wraps(func)
-    def seekcur(self, *args, **kw):
+    def seekcur(*args: 'P.args', **kw: 'P.kwargs') -> 'R':
+        # extract self object
+        self = cast('Protocol', args[0])
+
+        # move file pointer
         seek_cur = self._file.tell()
         self._file.seek(self._seekset, os.SEEK_SET)
-        return_ = func(self, *args, **kw)
+
+        # call method
+        return_ = func(*args, **kw)
+
+        # reset file pointer
         self._file.seek(seek_cur, os.SEEK_SET)
         return return_
     return seekcur
 
 
-def seekset_ng(func):
-    """Read file from start then set back to original.
-
-    Important:
-        This decorator function is designed for decorating *plain functions*.
-
-    The decorator will rewind the offset of ``file``  to ``seekset``, then
-    call the decorated function and returns its return value.
-
-    Note:
-        The decorated function should have following signature::
-
-            func(protocol, file, *args, seekset=os.SEEK_SET, **kw)
-
-        c.f. :func:`pcapkit.foundation.analysis._analyse`.
-
-    See Also:
-        :mod:`pcapkit.foundation.analysis`
-
-    :meta decorator:
-    """
-    @functools.wraps(func)
-    def seekcur(protocol, file, *args, seekset=os.SEEK_SET, **kw):  # pylint: disable=redefined-outer-name
-        # seek_cur = file.tell()
-        file.seek(seekset, os.SEEK_SET)
-        return_ = func(protocol, file, *args, seekset=seekset, **kw)
-        # file.seek(seek_cur, os.SEEK_SET)
-        return return_
-    return seekcur
-
-
-def beholder(func):
+def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') -> 'Callable[P, R]':
     """Behold extraction procedure.
 
     Important:
@@ -107,13 +89,19 @@ def beholder(func):
     :meta decorator:
     """
     @functools.wraps(func)
-    def behold(self, proto, length, *args, **kwargs):
+    def behold(*args: 'P.args', **kwargs: 'P.kwargs') -> 'R':
+        # extract self object & args
+        self = cast('Protocol', args[0])
+        length = cast('int', args[2])
+
+        # record file pointer
         seek_cur = self._file.tell()
         try:
-            return func(self, proto, length, *args, **kwargs)
+            # call method
+            return func(*args, **kwargs)
         except Exception as exc:
             from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel
-            error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
+            error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
             # error = traceback.format_exc()
 
             # log error
@@ -121,48 +109,5 @@ def beholder(func):
 
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=error)
-            return next_
-    return behold
-
-
-def beholder_ng(func):
-    """Behold analysis procedure.
-
-    Important:
-        This decorator function is designed for decorating *plain functions*.
-
-    This decorate first keep the current offset of ``file``, then try to call
-    the decorated function. Should any exception raised, it will re-parse the
-    ``file`` as :class:`~pcapkit.protocols.misc.raw.Raw` protocol.
-
-    Note:
-        The decorated function should have following signature::
-
-            func(file, length, *args, **kwargs)
-
-    See Also:
-        :meth:`pcapkit.protocols.transport.transport.Transport._import_next_layer`
-
-    :meta decorator:
-    """
-    @functools.wraps(func)
-    def behold(file, length, *args, **kwargs):
-        seek_cur = file.tell()
-        try:
-            return func(file, length, *args, **kwargs)
-        except Exception as exc:
-            # from pcapkit.foundation.analysis import analyse
-            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel
-            error = traceback.format_exc(limit=1).strip().split(os.linesep)[-1]
-            # error = traceback.format_exc()
-
-            # log error
-            logger.error(error, exc_info=exc)
-
-            file.seek(seek_cur, os.SEEK_SET)
-
-            # raw = Raw(file, length, error=str(error))
-            # return analyse(raw.info, raw.protochain, raw.alias)
-            next_ = Raw(file, length, error=error)
-            return next_
+            return cast('R', next_)
     return behold
