@@ -1,8 +1,8 @@
 Frame Header [*]_
 -----------------
 
-:mod:`pcapkit.protocols.pcap.frame` contains
-:class:`~pcapkit.protocols.pcap.frame.Frame` only,
+:mod:`pcapkit.protocols.misc.pcap.frame` contains
+:class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,
 which implements extractor for frame headers of PCAP,
 whose structure is described as below:
 
@@ -19,9 +19,9 @@ whose structure is described as below:
 
    <br />
 
-.. module:: pcapkit.protocols.pcap.frame
+.. module:: pcapkit.protocols.misc.pcap.frame
 
-.. autoclass:: pcapkit.protocols.pcap.frame.Frame
+.. autoclass:: pcapkit.protocols.misc.pcap.frame.Frame
    :members:
    :undoc-members:
    :private-members:

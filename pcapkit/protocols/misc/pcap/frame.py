@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """frame header
 
-:mod:`pcapkit.protocols.pcap.frame` contains
-:class:`~pcapkit.protocols.pcap.frame.Frame` only,
+:mod:`pcapkit.protocols.misc.pcap.frame` contains
+:class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,
 which implements extractor for frame headers of PCAP,
 whose structure is described as below:
 
@@ -151,7 +151,7 @@ class Frame(Protocol[DataType_Frame]):
             DataType_Frame: Parsed packet data.
 
         Raises:
-            EOFError: If :attr:`self._file <pcapkit.protocols.pcap.frame.Frame._file>` reaches EOF.
+            EOFError: If :attr:`self._file <pcapkit.protocols.misc.pcap.frame.Frame._file>` reaches EOF.
 
         """
         try:
@@ -270,7 +270,7 @@ class Frame(Protocol[DataType_Frame]):
         """
         #: int: frame index number
         self._fnum = num
-        #: pcapkit.protocols.pcap.header.Header: Global header of the PCAP file.
+        #: pcapkit.protocols.misc.pcap.header.Header: Global header of the PCAP file.
         self._ghdr = header
 
         #: pcapkit.const.reg.linktype.LinkType: next layer protocol index
@@ -302,7 +302,7 @@ class Frame(Protocol[DataType_Frame]):
         """Index of the frame.
 
         Returns:
-            If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.pcap.frame.Frame._fnum>`
+            If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.misc.pcap.frame.Frame._fnum>`
             exists, returns the frame index number of itself; else raises :exc:`UnsupportedCall`.
 
         Raises:

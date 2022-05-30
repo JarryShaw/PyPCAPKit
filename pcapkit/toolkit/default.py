@@ -76,7 +76,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
     """Make data for IPv6 reassembly.
 
     Args:
-        frame (pcapkit.protocols.pcap.frame.Frame): PCAP frame.
+        frame (pcapkit.protocols.misc.pcap.frame.Frame): PCAP frame.
 
     Returns:
         Tuple[bool, Dict[str, Any]]: A tuple of data for IPv6 reassembly.
@@ -122,7 +122,7 @@ def tcp_reassembly(frame: 'Frame') -> 'TCP_Packet | None':
     """Make data for TCP reassembly.
 
     Args:
-        frame (pcapkit.protocols.pcap.frame.Frame): PCAP frame.
+        frame (pcapkit.protocols.misc.pcap.frame.Frame): PCAP frame.
 
     Returns:
         Tuple[bool, Dict[str, Any]]: A tuple of data for TCP reassembly.

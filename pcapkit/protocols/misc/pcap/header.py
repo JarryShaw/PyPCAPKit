@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """global header
 
-:mod:`pcapkit.protocols.pcap.header` contains
-:class:`~pcapkit.protocols.pcap.header.Header`
+:mod:`pcapkit.protocols.misc.pcap.header` contains
+:class:`~pcapkit.protocols.misc.pcap.header.Header`
 only, which implements extractor for global
 headers of PCAP, whose structure is described
 as below:

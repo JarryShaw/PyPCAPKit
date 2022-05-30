@@ -53,7 +53,7 @@ ipv4_reassembly(frame)
 ##### Make data for IPv4 reassembly.
 
  - Positional arguments:
-    * `frame` -- `Frame`, a [`pcapkit.protocols.pcap.frame.Frame`](https://github.com/JarryShaw/pcapkit/tree/master/pcapkit/protocols/pcap#frame) object
+    * `frame` -- `Frame`, a [`pcapkit.protocols.misc.pcap.frame.Frame`](https://github.com/JarryShaw/pcapkit/tree/master/pcapkit/protocols/pcap#frame) object
 
  - Returns:
     * `bool` -- flag if `frame` is usable for IPv4 reassembly
@@ -71,7 +71,7 @@ ipv6_reassembly(frame)
 ##### Make data for IPv6 reassembly.
 
  - Positional arguments:
-    * `frame` -- `Frame`, a [`pcapkit.protocols.pcap.frame.Frame`](https://github.com/JarryShaw/pcapkit/tree/master/pcapkit/protocols/pcap#frame) object
+    * `frame` -- `Frame`, a [`pcapkit.protocols.misc.pcap.frame.Frame`](https://github.com/JarryShaw/pcapkit/tree/master/pcapkit/protocols/pcap#frame) object
 
  - Returns:
     * `bool` -- flag if `frame` is usable for IPv6 reassembly
@@ -89,7 +89,7 @@ tcp_reassembly(frame)
 ##### Make data for TCP reassembly.
 
  - Positional arguments:
-    * `frame` -- `Frame`, a [`pcapkit.protocols.pcap.frame.Frame`](https://github.com/JarryShaw/pcapkit/tree/master/pcapkit/protocols/pcap#frame) object
+    * `frame` -- `Frame`, a [`pcapkit.protocols.misc.pcap.frame.Frame`](https://github.com/JarryShaw/pcapkit/tree/master/pcapkit/protocols/pcap#frame) object
 
  - Returns:
     * `bool` -- flag if `frame` is usable for TCP reassembly
@@ -107,7 +107,7 @@ tcp_traceflow(frame, *, data_link)
 ##### Trace packet flow for TCP.
 
  - Positional arguments:
-    * `frame` -- `Frame`, a [`pcapkit.protocols.pcap.frame.Frame`](https://github.com/JarryShaw/pcapkit/tree/master/pcapkit/protocols/pcap#frame) object
+    * `frame` -- `Frame`, a [`pcapkit.protocols.misc.pcap.frame.Frame`](https://github.com/JarryShaw/pcapkit/tree/master/pcapkit/protocols/pcap#frame) object
 
  - Keyword arguments:
     * `data_link` -- `str`, name of data link layer protocol

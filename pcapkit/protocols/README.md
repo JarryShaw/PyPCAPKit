@@ -227,7 +227,7 @@ class NoPayload(pcapkit.protocols.protocol.Protocol)
 
  > described in [`src/protocols/pcap`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#pcap-headers-manual)
 
-&emsp; `pcapkit.protocols.pcap` contains header descriptions for PCAP files, including global header [`Header`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#header) and frame header [`Frame`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#frame).
+&emsp; `pcapkit.protocols.misc.pcap` contains header descriptions for PCAP files, including global header [`Header`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#header) and frame header [`Frame`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap#frame).
 
 &emsp;
 

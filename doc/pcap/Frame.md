@@ -39,7 +39,7 @@ class Frame(file, *, num, proto, nanosecond, **kwrags)
 
   1. `builtins.object`
   2. `pcapkit.protocols.protocol.Protocol`
-  3. `pcapkit.protocols.pcap.frame.Frame`
+  3. `pcapkit.protocols.misc.pcap.frame.Frame`
 
 ### Data Format
 

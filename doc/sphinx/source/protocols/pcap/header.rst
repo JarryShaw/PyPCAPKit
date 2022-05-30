@@ -1,8 +1,8 @@
 Global Header
 -------------
 
-:mod:`pcapkit.protocols.pcap.header` contains
-:class:`~pcapkit.protocols.pcap.Header` only,
+:mod:`pcapkit.protocols.misc.pcap.header` contains
+:class:`~pcapkit.protocols.misc.pcap.Header` only,
 which implements extractor for global headers
 [*]_ of PCAP, whose structure is described as
 below:
@@ -23,7 +23,7 @@ below:
 
    <br />
 
-.. automodule:: pcapkit.protocols.pcap.header
+.. automodule:: pcapkit.protocols.misc.pcap.header
    :members:
    :undoc-members:
    :private-members:

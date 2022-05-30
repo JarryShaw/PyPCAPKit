@@ -53,7 +53,7 @@ class Header(file=None, *args, **kwargs)
 
  1. `builtins.object`
  2. `pcapkit.protocols.protocol.Protocol`
- 3. `pcapkit.protocols.pcap.header.Header`
+ 3. `pcapkit.protocols.misc.pcap.header.Header`
 
 ### Data Format
 

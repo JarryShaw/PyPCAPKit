@@ -11,7 +11,7 @@
 
  > described in [`src/protocols/pcap/header.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap/header.py)
 
-&emsp; `pcapkit.protocols.pcap.header` contains `Header` only, which implements extractor for global headers of PCAP.
+&emsp; `pcapkit.protocols.misc.pcap.header` contains `Header` only, which implements extractor for global headers of PCAP.
 
 ```python
 class Header(pcapkit.protocols.protocol.Protocol)
@@ -58,7 +58,7 @@ class Header(pcapkit.protocols.protocol.Protocol)
 
  > described in [`src/protocols/pcap/frame.py`](https://github.com/JarryShaw/PyPCAPKit/tree/master/pcapkit/protocols/pcap/frame.py)
 
-&emsp; `pcapkit.protocols.pcap.frame` contains `Frame` only, which implements extractor for frame headers of PCAP.
+&emsp; `pcapkit.protocols.misc.pcap.frame` contains `Frame` only, which implements extractor for frame headers of PCAP.
 
 ```python
 class Frame(pcapkit.protocols.protocol.Protocol)

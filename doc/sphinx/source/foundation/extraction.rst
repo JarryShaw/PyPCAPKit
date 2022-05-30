@@ -70,13 +70,13 @@ extracts parametres from a PCAP file.
       TCP flow tracing flag (as the ``trace`` parameter).
 
    .. attribute:: _flag_v
-      :type: Union[bool, Callable[[pcapkit.foundation.extraction.Extractor, pcapkit.protocols.pcap.frame.Frame]]]
+      :type: Union[bool, Callable[[pcapkit.foundation.extraction.Extractor, pcapkit.protocols.misc.pcap.frame.Frame]]]
 
       A :obj:`bool` value or a function takes the :class:`Extract` instance and current parsed frame (depends on
       the engine selected) as parameters to print verbose output information (as the ``verbose`` parameter).
 
    .. attribute:: _vfunc
-      :type: Union[NotImplemented, Callable[[pcapkit.foundation.extraction.Extractor, pcapkit.protocols.pcap.frame.Frame]]]
+      :type: Union[NotImplemented, Callable[[pcapkit.foundation.extraction.Extractor, pcapkit.protocols.misc.pcap.frame.Frame]]]
 
       If the ``verbose`` parameter is a callable, then it will be assigned as :attr:`self._vfunc <Extractor._vfunc>`;
       otherwise, it keeps :obj:`NotImplemented` as a placeholder and has specific function for each engine.
@@ -87,7 +87,7 @@ extracts parametres from a PCAP file.
       Current frame number.
 
    .. attribute:: _frame
-      :type: List[pcapkit.protocols.pcap.frame.Frame]
+      :type: List[pcapkit.protocols.misc.pcap.frame.Frame]
 
       Frame records storage.
 
@@ -162,7 +162,7 @@ extracts parametres from a PCAP file.
          as a fallback solution.
 
    .. attribute::  _gbhdr
-      :type: pcapkit.protocols.pcap.header.Header
+      :type: pcapkit.protocols.misc.pcap.header.Header
 
       Parsed PCAP global header instance.
 
@@ -170,19 +170,19 @@ extracts parametres from a PCAP file.
       :type: pcapkit.corekit.version.VersionInfo
 
       The version info of the PCAP file (as the
-      :attr:`self._gbhdr.version <pcapkit.protocols.pcap.header.Header.version>` property).
+      :attr:`self._gbhdr.version <pcapkit.protocols.misc.pcap.header.Header.version>` property).
 
    .. attribute:: _dlink
       :type: pcapkit.const.reg.linktype.LinkType
 
       Protocol type of data link layer (as the
-      :attr:`self._gbhdr.protocol <pcapkit.protocols.pcap.header.Header.protocol>` property).
+      :attr:`self._gbhdr.protocol <pcapkit.protocols.misc.pcap.header.Header.protocol>` property).
 
    .. attribute:: _nnsec
       :type: bool
 
       Nanosecond PCAP file flag (as the
-      :attr:`self._gbhdr.nanosecond <pcapkit.protocols.pcap.header.Header.nanosecond>` property).
+      :attr:`self._gbhdr.nanosecond <pcapkit.protocols.misc.pcap.header.Header.nanosecond>` property).
 
    .. attribute:: _type
       :type: str
@@ -240,7 +240,7 @@ extracts parametres from a PCAP file.
       EOF flag.
 
    .. attribute:: _mpkit.frames
-      :type: Dict[int, pcapkit.protocols.pcap.frame.Frame]
+      :type: Dict[int, pcapkit.protocols.misc.pcap.frame.Frame]
 
       Frame storage.
 
@@ -263,13 +263,13 @@ extracts parametres from a PCAP file.
 
    .. attribute:: _mpbuf
       :type: Union[multiprocessing.managers.SyncManager.dict,
-                   Dict[int, pcapkit.protocols.pcap.frame.Frame]]
+                   Dict[int, pcapkit.protocols.misc.pcap.frame.Frame]]
 
       Multiprocessing buffer for parsed PCAP frames.
 
    .. attribute:: _mpfrm
       :type: Union[multiprocessing.managers.SyncManager.list,
-                   List[pcapkit.protocols.pcap.frame.Frame]]
+                   List[pcapkit.protocols.misc.pcap.frame.Frame]]
 
       Multiprocessing storage for proccessed PCAP frames.
 
