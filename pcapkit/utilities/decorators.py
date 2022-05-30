@@ -16,10 +16,11 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.utilities.logging import logger
 
 if TYPE_CHECKING:
-    from typing import Callable, TypeVar, Optional
-    from pcapkit.protocols.protocol import Protocol
+    from typing import Callable, Optional, TypeVar
 
-    from typing_extensions import ParamSpec, Concatenate
+    from typing_extensions import Concatenate, ParamSpec
+
+    from pcapkit.protocols.protocol import Protocol
 
     P = ParamSpec('P')
     R = TypeVar('R')

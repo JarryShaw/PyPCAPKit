@@ -7,11 +7,11 @@
 import warnings
 from typing import TYPE_CHECKING
 
-from pcapkit.utilities.logging import logger, DEVMODE
 from pcapkit.utilities.exceptions import stacklevel as stacklevel_calculator
+from pcapkit.utilities.logging import DEVMODE, logger
 
 if TYPE_CHECKING:
-    from typing import Union, Type, Optional, Any
+    from typing import Any, Optional, Type, Union
 
 __all__ = [
     'warn',

@@ -16,28 +16,29 @@ from pcapkit.interface import *
 from pcapkit.protocols import *
 from pcapkit.toolkit import *
 from pcapkit.utilities import *  # pylint: disable=redefined-builtin
+
 #from pcapkit import vendor
 
+# tools for Scapy engine
+from pcapkit.toolkit.scapy import packet2chain as scapy_packet2chain  # isort: skip
+from pcapkit.toolkit.scapy import packet2dict as scapy_packet2dict  # isort: skip
+from pcapkit.toolkit.scapy import ipv4_reassembly as scapy_ipv4_reassembly  # isort: skip
+from pcapkit.toolkit.scapy import ipv6_reassembly as scapy_ipv6_reassembly  # isort: skip
+from pcapkit.toolkit.scapy import tcp_reassembly as scapy_tcp_reassembly  # isort: skip
+from pcapkit.toolkit.scapy import tcp_traceflow as scapy_tcp_traceflow  # isort: skip
+
 # tools for DPKT engine
-from pcapkit.toolkit.dpkt import ipv6_hdr_len as dpkt_ipv6_hdr_len
-from pcapkit.toolkit.dpkt import packet2chain as dpkt_packet2chain
-from pcapkit.toolkit.dpkt import packet2dict as dpkt_packet2dict
-from pcapkit.toolkit.dpkt import ipv4_reassembly as dpkt_ipv4_reassembly
-from pcapkit.toolkit.dpkt import ipv6_reassembly as dpkt_ipv6_reassembly
-from pcapkit.toolkit.dpkt import tcp_reassembly as dpkt_tcp_reassembly
-from pcapkit.toolkit.dpkt import tcp_traceflow as dpkt_tcp_traceflow
+from pcapkit.toolkit.dpkt import ipv6_hdr_len as dpkt_ipv6_hdr_len  # isort: skip
+from pcapkit.toolkit.dpkt import packet2chain as dpkt_packet2chain  # isort: skip
+from pcapkit.toolkit.dpkt import packet2dict as dpkt_packet2dict  # isort: skip
+from pcapkit.toolkit.dpkt import ipv4_reassembly as dpkt_ipv4_reassembly  # isort: skip
+from pcapkit.toolkit.dpkt import ipv6_reassembly as dpkt_ipv6_reassembly  # isort: skip
+from pcapkit.toolkit.dpkt import tcp_reassembly as dpkt_tcp_reassembly  # isort: skip
+from pcapkit.toolkit.dpkt import tcp_traceflow as dpkt_tcp_traceflow  # isort: skip
 
 # tools for PyShark engine
-from pcapkit.toolkit.pyshark import packet2dict as pyshark_packet2dict
-from pcapkit.toolkit.pyshark import tcp_traceflow as pyshark_tcp_traceflow
-
-# tools for Scapy engine
-from pcapkit.toolkit.scapy import packet2chain as scapy_packet2chain
-from pcapkit.toolkit.scapy import packet2dict as scapy_packet2dict
-from pcapkit.toolkit.scapy import ipv4_reassembly as scapy_ipv4_reassembly
-from pcapkit.toolkit.scapy import ipv6_reassembly as scapy_ipv6_reassembly
-from pcapkit.toolkit.scapy import tcp_reassembly as scapy_tcp_reassembly
-from pcapkit.toolkit.scapy import tcp_traceflow as scapy_tcp_traceflow
+from pcapkit.toolkit.pyshark import packet2dict as pyshark_packet2dict  # isort: skip
+from pcapkit.toolkit.pyshark import tcp_traceflow as pyshark_tcp_traceflow  # isort: skip
 
 __all__ = [
     # pcapkit.const
