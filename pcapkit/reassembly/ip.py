@@ -81,7 +81,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.const.reg.ethertype import EtherType
+    from pcapkit.const.reg.transtype import TransType
 
 __all__ = ['IP_Reassembly']
 
@@ -96,7 +96,7 @@ class Packet(Info, Generic[AT]):
     """Data model for :term:`ipv4.packet` / :term:`ipv6.packet`."""
 
     #: Buffer ID.
-    bufid: 'tuple[AT, AT, int, EtherType]'
+    bufid: 'tuple[AT, AT, int, TransType]'
     #: Original packet range number.
     num: 'int'
     #: Fragment offset.
@@ -113,7 +113,7 @@ class Packet(Info, Generic[AT]):
     payload: 'bytearray'
 
     if TYPE_CHECKING:
-        def __init__(self, bufid: 'tuple[AT, AT, int, EtherType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, bufid: 'tuple[AT, AT, int, TransType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
 
 class DatagramID(Info, Generic[AT]):
@@ -126,10 +126,10 @@ class DatagramID(Info, Generic[AT]):
     #: IP protocol identifier.
     id: 'int'
     #: Payload protocol type.
-    proto: 'EtherType'
+    proto: 'TransType'
 
     if TYPE_CHECKING:
-        def __init__(self, src: 'AT', dst: 'AT', id: 'int', proto: 'EtherType') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, src: 'AT', dst: 'AT', id: 'int', proto: 'TransType') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
 
 
 class Datagram(Info, Generic[AT]):
@@ -179,7 +179,7 @@ class Buffer(Info, Generic[AT]):
 ###############################################################################
 
 
-class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'EtherType'], Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
+class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'TransType'], Buffer[AT]], Generic[AT]):  # pylint: disable=abstract-method
     """Reassembly for IP payload."""
 
     ##########################################################################
@@ -246,7 +246,7 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'E
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
             )
 
-    def submit(self, buf: 'Buffer[AT]', *, bufid: 'tuple[AT, AT, int, EtherType]', checked: 'bool' = False) -> 'list[Datagram[AT]]':  # type: ignore[override] # pylint: disable=arguments-differ
+    def submit(self, buf: 'Buffer[AT]', *, bufid: 'tuple[AT, AT, int, TransType]', checked: 'bool' = False) -> 'list[Datagram[AT]]':  # type: ignore[override] # pylint: disable=arguments-differ
         """Submit reassembled payload.
 
         Arguments:
