@@ -64,6 +64,7 @@
     <span class="s1">&#39;DictError&#39;</span><span class="p">,</span> <span class="s1">&#39;ListError&#39;</span><span class="p">,</span> <span class="s1">&#39;TupleError&#39;</span><span class="p">,</span> <span class="s1">&#39;IterableError&#39;</span><span class="p">,</span>        <span class="c1"># TypeError</span>
     <span class="s1">&#39;IOObjError&#39;</span><span class="p">,</span> <span class="s1">&#39;ProtocolUnbound&#39;</span><span class="p">,</span> <span class="s1">&#39;CallableError&#39;</span><span class="p">,</span>               <span class="c1"># TypeError</span>
     <span class="s1">&#39;InfoError&#39;</span><span class="p">,</span> <span class="s1">&#39;IPError&#39;</span><span class="p">,</span> <span class="s1">&#39;EnumError&#39;</span><span class="p">,</span> <span class="s1">&#39;ComparisonError&#39;</span><span class="p">,</span>         <span class="c1"># TypeError</span>
+    <span class="s1">&#39;RegistryError&#39;</span><span class="p">,</span>                                                <span class="c1"># TypeError</span>
     <span class="s1">&#39;FormatError&#39;</span><span class="p">,</span> <span class="s1">&#39;UnsupportedCall&#39;</span><span class="p">,</span>                               <span class="c1"># AttributeError</span>
     <span class="s1">&#39;FileError&#39;</span><span class="p">,</span>                                                    <span class="c1"># IOError</span>
     <span class="s1">&#39;FileExists&#39;</span><span class="p">,</span>                                                   <span class="c1"># FileExistsError</span>
@@ -214,6 +215,10 @@
 
 <div class="viewcode-block" id="ComparisonError"><a class="viewcode-back" href="../../../utilities/exceptions.html#pcapkit.utilities.exceptions.ComparisonError">[docs]</a><span class="k">class</span> <span class="nc">ComparisonError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Rich comparison not supported between instances.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="RegistryError"><a class="viewcode-back" href="../../../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError">[docs]</a><span class="k">class</span> <span class="nc">RegistryError</span><span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;The argument(s) must be *registry* type.&quot;&quot;&quot;</span></div>
 
 
 <span class="c1">##############################################################################</span>

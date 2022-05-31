@@ -655,7 +655,10 @@ protocol class, and the protocol names in upper case obtained from
 <li><p>If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a protocol class, the method will return the
 protocol class itself, and the protocols names in upper case
 obtained from <a class="reference internal" href="#pcapkit.protocols.protocol.Protocol.id" title="pcapkit.protocols.protocol.Protocol.id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.id</span></code></a>.</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">value</span></code> is <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, the method will return the value itself.</p></li>
+<li><p>If <code class="docutils literal notranslate"><span class="pre">value</span></code> is <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>, the method will attempt to search for
+the existing registered protocol class from
+<code class="xref py py-obj docutils literal notranslate"><span class="pre">pcapkit.protocols.__proto__</span></code> and follow <strong>step 2</strong>; otherwise,
+return the value itself.</p></li>
 </ol>
 </dd></dl>
 
