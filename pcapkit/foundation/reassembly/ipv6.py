@@ -49,7 +49,8 @@ ipv6.datagram
         |     |            |--> 'proto' --> (EtherType) ipv6_frag.next
         |     |--> 'index' : (tuple) packet numbers
         |     |               |--> (int) original packet range number
-        |     |--> 'packet' : (bytes) reassembled IPv4 packet
+        |     |--> 'payload' : (bytes) reassembled IPv4 packet
+        |     |--> 'packet' : (Protocol) parsed reassembled payload
         |--> (Info) data
         |     |--> 'completed' : (bool) False --> not implemented
         |     |--> 'id' : (Info) original packet identifier
@@ -61,7 +62,9 @@ ipv6.datagram
         |     |               |--> (int) original packet range number
         |     |--> 'header' : (bytes) IPv4 header
         |     |--> 'payload' : (tuple) partially reassembled IPv4 payload
-        |                       |--> (bytes) IPv4 payload fragment
+        |     |                 |--> (bytes) IPv4 payload fragment
+        |     |                 |--> ...
+        |     |--> 'packet' : (None)
         |--> (Info) data ...
 
 ipv6.buffer

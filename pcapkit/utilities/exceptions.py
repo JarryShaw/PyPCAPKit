@@ -90,6 +90,7 @@ class BaseError(Exception):
         :func:`pcapkit.utilities.exceptions.stacklevel`
 
     """
+
     def __init__(self, *args: 'Any', quiet: 'bool' = False, **kwargs: 'Any') -> 'None':
         # log error
         if not quiet:
@@ -285,6 +286,10 @@ class VendorNotImplemented(BaseError, NotImplementedError):
 
 class StructError(BaseError, struct.error):
     """Unpack failed."""
+
+    def __init__(self, *args: 'Any', eof: 'bool' = False, **kwargs: 'Any') -> 'None':
+        self.eof = eof
+        super().__init__(*args, **kwargs)
 
 
 ##############################################################################

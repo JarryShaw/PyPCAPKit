@@ -106,6 +106,11 @@ class HTTPv2(HTTP[DataType_HTTP]):
         """Header length of current protocol."""
         return 9
 
+    @property
+    def version(self) -> 'Literal["2"]':
+        """Version of current protocol."""
+        return '2'
+
     ##########################################################################
     # Methods.
     ##########################################################################
@@ -144,7 +149,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
             length = len(self)
 
         if length < 9:
-            raise ProtocolError('HTTP/2: invalid format', quiet=True)
+            raise ProtocolError('HTTP/2: invalid format')
 
         _tlen = self._read_unpack(3)
         _type = self._read_unpack(1)
@@ -152,18 +157,21 @@ class HTTPv2(HTTP[DataType_HTTP]):
         _rsid = self._read_binary(4)
 
         if _tlen != length:
-            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format')
 
         http_type = RegType_Frame.get(_type)
         http_sid = int(_rsid[1:], base=2)
 
         if http_type in (RegType_Frame.SETTINGS, RegType_Frame.PING) and http_sid != 0:
-            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {_type}] invalid format')
 
         name = self.__frame__[http_type]  # type: str | FrameParser
         if isinstance(name, str):
             meth_name = f'_read_http_{name}'
-            meth = getattr(self, meth_name, self._read_http_none)  # type: Callable[[RegType_Frame, int, str, int], DataType_HTTP]
+            meth = getattr(
+                self, meth_name,
+                self._read_http_none
+            )  # type: Callable[[RegType_Frame, int, str, int], DataType_HTTP]
             http = meth(http_type, length, _flag, http_sid)
         else:
             http = name(self, http_type, length, _flag, http_sid)
@@ -215,7 +223,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
     # Utilities.
     ##########################################################################
 
-    def _read_http_none(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_UnassignedFrame':
+    def _read_http_none(self, frame: 'RegType_Frame', length: 'int',
+                        flags: 'str', sid: 'int') -> 'DataType_UnassignedFrame':
         """Read HTTP packet with unassigned type.
 
         Args:
@@ -232,7 +241,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         """
         if any((int(bit, base=2) for bit in flags)):
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         data = DataType_UnassignedFrame(
             length=length,
@@ -289,14 +298,14 @@ class HTTPv2(HTTP[DataType_HTTP]):
             _plen = 0
 
         if _plen > length - 10:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         if _flag.PADDED:
             _dlen = length - _plen - 1
         else:
             _dlen = length - _plen
         if _dlen < 0:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _data = self._read_fileng(_dlen)
         _pads = self._read_binary(_plen)
@@ -312,7 +321,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_headers(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_HeadersFrame':
+    def _read_http_headers(self, frame: 'RegType_Frame', length: 'int',
+                           flags: 'str', sid: 'int') -> 'DataType_HeadersFrame':
         """Read HTTP/2 ``HEADERS`` frames.
 
         Structure of HTTP/2 ``HEADERS`` frame [:rfc:`7540`]:
@@ -375,7 +385,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
             _dlen = length - _plen - _elen
 
         if _dlen < 0:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _frag = self._read_fileng(_dlen) or None
         _pads = self._read_binary(_plen)
@@ -394,7 +404,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_priority(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_PriorityFrame':
+    def _read_http_priority(self, frame: 'RegType_Frame', length: 'int',
+                            flags: 'str', sid: 'int') -> 'DataType_PriorityFrame':  # pylint: disable=unused-argument
         """Read HTTP/2 ``PRIORITY`` frames.
 
         Structure of HTTP/2 ``PRIORITY`` frame [:rfc:`7540`]:
@@ -427,7 +438,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         """
         if length != 9:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _edep = self._read_binary(4)
         _wght = self._read_unpack(1)
@@ -444,7 +455,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_rst_stream(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_RstStreamFrame':
+    def _read_http_rst_stream(self, frame: 'RegType_Frame', length: 'int',
+                              flags: 'str', sid: 'int') -> 'DataType_RstStreamFrame':  # pylint: disable=unused-argument
         """Read HTTP/2 ``RST_STREAM`` frames.
 
         Structure of HTTP/2 ``RST_STREAM`` frame [:rfc:`7540`]:
@@ -475,7 +487,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         """
         if length != 4:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _code = self._read_unpack(4)
 
@@ -489,25 +501,26 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_settings(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_SettingsFrame':
+    def _read_http_settings(self, frame: 'RegType_Frame', length: 'int',
+                            flags: 'str', sid: 'int') -> 'DataType_SettingsFrame':
         """Read HTTP/2 ``SETTINGS`` frames.
 
         Structure of HTTP/2 ``SETTINGS`` frame [:rfc:`7540`]:
 
         .. code-block:: text
 
-            +-----------------------------------------------+
-            |                 Length (24)                   |
-            +---------------+---------------+---------------+
-            |   Type (8)    |   Flags (8)   |
-            +-+-------------+---------------+-------------------------------+
-            |R|                 Stream Identifier (31)                      |
-            +---------------------------------------------------------------+
-            |       Identifier (16)         |
-            +-------------------------------+-------------------------------+
-            |                        Value (32)                             |
-            +---------------------------------------------------------------+
-            |                          ......                               |
+           +-----------------------------------------------+
+           |                 Length (24)                   |
+           +---------------+---------------+---------------+
+           |   Type (8)    |   Flags (8)   |
+           +-+-------------+---------------+-------------------------------+
+           |R|                 Stream Identifier (31)                      |
+           +---------------------------------------------------------------+
+           |       Identifier (16)         |
+           +-------------------------------+-------------------------------+
+           |                        Value (32)                             |
+           +---------------------------------------------------------------+
+           |                          ......                               |
 
         Args:
             frame: Frame type.
@@ -523,14 +536,14 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         """
         if length % 6 != 0 or sid != 0:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _flag = DataType_SettingsFrameFlags(
             ACK=bool(int(flags[0], base=2)),  # bit 0
         )
 
         if _flag.ACK and length != 0:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _sets = OrderedMultiDict()  # type: OrderedMultiDict[RegType_Setting, int]
         for _ in range(length // 6):
@@ -550,7 +563,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_push_promise(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_PushPromiseFrame':
+    def _read_http_push_promise(self, frame: 'RegType_Frame', length: 'int',
+                                flags: 'str', sid: 'int') -> 'DataType_PushPromiseFrame':
         """Read HTTP/2 ``PUSH_PROMISE`` frames.
 
         Structure of HTTP/2 ``PUSH_PROMISE`` frame [:rfc:`7540`]:
@@ -587,7 +601,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         """
         if length < 4:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _flag = DataType_PushPromiseFrameFlags(
             END_HEADERS=bool(int(flags[2], base=2)),  # bit 2
@@ -602,7 +616,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
             _dlen = length - _plen - 4
 
         if _dlen < 0:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _rpid = self._read_binary(4)
         _frag = self._read_fileng(_dlen) or None
@@ -620,7 +634,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_ping(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_PingFrame':
+    def _read_http_ping(self, frame: 'RegType_Frame', length: 'int',
+                        flags: 'str', sid: 'int') -> 'DataType_PingFrame':
         """Read HTTP/2 ``PING`` frames.
 
         Structure of HTTP/2 ``PING`` frame [:rfc:`7540`]:
@@ -653,7 +668,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         """
         if length != 8:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _flag = DataType_PingFrameFlags(
             ACK=bool(int(flags[0], base=2)),  # bit 0
@@ -671,7 +686,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_goaway(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_GoawayFrame':
+    def _read_http_goaway(self, frame: 'RegType_Frame', length: 'int',
+                          flags: 'str', sid: 'int') -> 'DataType_GoawayFrame':  # pylint: disable=unused-argument
         """Read HTTP/2 ``GOAWAY`` frames.
 
         Structure of HTTP/2 ``GOAWAY`` frame [:rfc:`7540`]:
@@ -707,7 +723,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
         """
         _dlen = length - 8
         if _dlen < 0:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _rsid = self._read_binary(4)
         _code = self._read_unpack(4)
@@ -725,7 +741,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_window_update(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_WindowUpdateFrame':
+    def _read_http_window_update(self, frame: 'RegType_Frame', length: 'int',
+                                 flags: 'str', sid: 'int') -> 'DataType_WindowUpdateFrame':  # pylint: disable=unused-argument
         """Read HTTP/2 ``WINDOW_UPDATE`` frames.
 
         Structure of HTTP/2 ``WINDOW_UPDATE`` frame [:rfc:`7540`]:
@@ -756,7 +773,7 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         """
         if length != 4:
-            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format', quiet=True)
+            raise ProtocolError(f'HTTP/2: [Type {frame}] invalid format')
 
         _size = self._read_binary(4)
 
@@ -770,7 +787,8 @@ class HTTPv2(HTTP[DataType_HTTP]):
 
         return data
 
-    def _read_http_continuation(self, frame: 'RegType_Frame', length: 'int', flags: 'str', sid: 'int') -> 'DataType_ContinuationFrame':
+    def _read_http_continuation(self, frame: 'RegType_Frame', length: 'int',
+                                flags: 'str', sid: 'int') -> 'DataType_ContinuationFrame':
         """Read HTTP/2 ``CONTINUATION`` frames.
 
         Structure of HTTP/2 ``CONTINUATION`` frame [:rfc:`7540`]:

@@ -152,7 +152,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
 
     def __setstate__(self, value: 'Iterable[tuple[_KT, list[_VT]]]') -> 'None':
         dict.clear(self)
-        dict.update(self, value)
+        dict.update(self, value)  # type: ignore[arg-type]
 
     def __iter__(self) -> 'Iterator[_KT]':
         return dict.__iter__(self)
@@ -191,7 +191,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
             value: The value to add.
 
         """
-        dict.setdefault(self, key, []).append(value)
+        dict.setdefault(self, key, []).append(value)  # type: ignore[arg-type,attr-defined]
 
     def getlist(self, key: '_KT') -> 'list[_VT]':
         """Return the list of items for a given key.
@@ -375,10 +375,10 @@ class MultiDict(dict, Generic[_KT, _VT]):
         try:
             item = dict.popitem(self)
 
-            if len(item[1]) == 0:
+            if len(item[1]) == 0:  # type: ignore[arg-type]
                 raise MissingKeyError(item[0])
 
-            return (item[0], item[1][0])
+            return (item[0], item[1][0])  # type: ignore[index,return-value]
         except KeyError as e:
             raise MissingKeyError(e.args[0]) from None
 
@@ -397,7 +397,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
     def popitemlist(self) -> 'tuple[_KT, list[_VT]]':
         """Pop a ``(key, list)`` :obj:`tuple` from the :obj:`dict`."""
         try:
-            return dict.popitem(self)
+            return dict.popitem(self)  # type: ignore[return-value]
         except KeyError as e:
             raise MissingKeyError(e.args[0]) from None
 
@@ -524,7 +524,7 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
             yield values
 
     def add(self, key: '_KT', value: '_VT') -> 'None':
-        dict.setdefault(self, key, []).append(_omd_bucket(self, key, value))
+        dict.setdefault(self, key, []).append(_omd_bucket(self, key, value))  # type: ignore[arg-type,attr-defined]
 
     def getlist(self, key: '_KT') -> 'list[_VT]':
         try:

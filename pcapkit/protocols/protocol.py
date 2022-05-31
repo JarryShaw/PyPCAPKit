@@ -31,8 +31,8 @@ from pcapkit.protocols.data.protocol import Packet as DataType_Packet
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, StructError,
-                                          UnsupportedCall)
-from pcapkit.utilities.logging import logger
+                                          UnsupportedCall, stacklevel)
+from pcapkit.utilities.logging import DEVMODE, logger
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -60,7 +60,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     _protos: 'ProtoChain'
 
     # Internal data storage for cached properties.
-    __cached__ = {}  # type: dict[str, Any]
+    __cached__: 'dict[str, Any]'
 
     ##########################################################################
     # Defaults.
@@ -295,9 +295,53 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
                 comp = (value.upper(),)
         return comp
 
+    @classmethod
+    def analyze(cls, proto: 'int', payload: 'bytes', **kwargs: 'Any') -> 'Protocol':
+        """Analyse packet payload.
+
+        Args:
+            proto: Protocol registry number.
+            payload: Packet payload.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed payload as a :class:`~pcapkit.protocols.protocol.Protocol`
+            instance.
+
+        """
+        module, name = cls.__proto__[proto]
+        protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
+
+        payload_io = io.BytesIO(payload)
+        try:
+            report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
+        except Exception as exc:
+            if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
+                from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel # isort: skip
+            else:
+                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel # isort: skip
+            # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
+
+            # log error
+            logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
+
+            report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
+        return report
+
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Protocol[PT]':  # pylint: disable=unused-argument
+        self = super().__new__(cls)
+
+        # NOTE: Assign this attribute after ``__new__`` to avoid shared memory
+        # reference between instances.
+        self.__cached__ = {}
+
+        return self
 
     @overload
     def __init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
@@ -319,7 +363,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        logger.debug(type(self).__name__)
+        logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)
 
         #: int: File pointer.
         self._seekset = io.SEEK_SET  # type: int
@@ -612,7 +656,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
         mem = self._file.read(size)
         if not mem:
-            raise StructError('unpack: empty buffer', quiet=True)
+            raise StructError('unpack: empty buffer', quiet=True, eof=True)
 
         if kind is None:
             end = 'little' if lilendian else 'big'  # type: Literal['little', 'big']
@@ -822,8 +866,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             return cls._make_pack(index, size=size, signed=signed, lilendian=lilendian)
         return index
 
-    def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None,
-                           length: 'Optional[int]' = None) -> 'PT':
+    def _decode_next_layer(self, dict_: 'PT', proto: 'int', length: 'Optional[int]' = None) -> 'PT':
         """Decode next layer protocol.
 
         Arguments:

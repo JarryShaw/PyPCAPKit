@@ -75,7 +75,7 @@ class FTP(Application[DataType_FTP]):
 
         byte = self._read_fileng(length)
         if (not byte.endswith(b'\r\n')) or (len(byte.splitlines()) > 1):
-            raise ProtocolError('FTP: invalid format', quiet=True)
+            raise ProtocolError('FTP: invalid format')
         text = self.decode(byte.strip())
 
         if TYPE_CHECKING:

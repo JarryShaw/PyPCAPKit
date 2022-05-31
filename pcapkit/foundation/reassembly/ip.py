@@ -77,11 +77,12 @@ from pcapkit.foundation.reassembly.reassembly import Reassembly
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import overload
+    from typing import Optional, overload
 
     from typing_extensions import Literal
 
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['IP_Reassembly']
 
@@ -113,7 +114,7 @@ class Packet(Info, Generic[AT]):
     payload: 'bytearray'
 
     if TYPE_CHECKING:
-        def __init__(self, bufid: 'tuple[AT, AT, int, TransType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, bufid: 'tuple[AT, AT, int, TransType]', num: 'int', fo: 'int', ihl: 'int', mf: 'bool', tl: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class DatagramID(Info, Generic[AT]):
@@ -129,7 +130,7 @@ class DatagramID(Info, Generic[AT]):
     proto: 'TransType'
 
     if TYPE_CHECKING:
-        def __init__(self, src: 'AT', dst: 'AT', id: 'int', proto: 'TransType') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, src: 'AT', dst: 'AT', id: 'int', proto: 'TransType') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Datagram(Info, Generic[AT]):
@@ -145,15 +146,17 @@ class Datagram(Info, Generic[AT]):
     header: 'bytes'
     #: Reassembled IP payload..
     payload: 'bytes | tuple[bytes, ...]'
+    #: Parsed IP payload.
+    packet: 'Optional[Protocol]'
 
     if TYPE_CHECKING:
-        @overload
-        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes') -> 'None': ...# pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        @overload  #pylint: disable=used-before-assignment
+        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes', packet: 'Protocol') -> 'None': ...# pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
         @overload
-        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]') -> 'None': ...# pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]', packet: 'None') -> 'None': ...# pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
-        def __init__(self, completed: 'bool', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]') -> 'None': ...# pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, completed: 'bool', id: 'DatagramID[AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol]') -> 'None': ...# pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Buffer(Info, Generic[AT]):
@@ -171,7 +174,7 @@ class Buffer(Info, Generic[AT]):
     datagram: 'bytearray'
 
     if TYPE_CHECKING:
-        def __init__(self, TDL: 'int', RCVBT: 'bytearray', index: 'list[int]', header: 'bytes', datagram: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, TDL: 'int', RCVBT: 'bytearray', index: 'list[int]', header: 'bytes', datagram: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 ###############################################################################
@@ -218,7 +221,7 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'T
             )
         else:
             # put header into header buffer
-            if not FO:
+            if not FO:  # pylint: disable=else-if-used
                 self._buffer[BUFID].__update__(header=info.header)
 
         # append packet index
@@ -246,7 +249,8 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'T
                 self.submit(self._buffer.pop(BUFID), bufid=BUFID, checked=True)
             )
 
-    def submit(self, buf: 'Buffer[AT]', *, bufid: 'tuple[AT, AT, int, TransType]', checked: 'bool' = False) -> 'list[Datagram[AT]]':  # type: ignore[override] # pylint: disable=arguments-differ
+    def submit(self, buf: 'Buffer[AT]', *, bufid: 'tuple[AT, AT, int, TransType]',  # type: ignore[override] # pylint: disable=arguments-differ
+               checked: 'bool' = False) -> 'list[Datagram[AT]]':
         """Submit reassembled payload.
 
         Arguments:
@@ -296,11 +300,12 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'T
                     index=tuple(index),
                     header=header,
                     payload=tuple(data),
+                    packet=None,
                 )
         # if datagram is reassembled in whole
         else:
             payload = datagram[:TDL]
-            packet = Datagram(  # type: ignore[call-overload]
+            packet = Datagram(
                 completed=True,
                 id=DatagramID(
                     src=bufid[0],
@@ -310,6 +315,7 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'T
                 ),
                 index=tuple(index),
                 header=header,
-                packet=bytes(payload),
+                payload=bytes(payload),
+                packet=self.protocol.analyze(bufid[3], bytes(payload)),
             )
         return [packet]

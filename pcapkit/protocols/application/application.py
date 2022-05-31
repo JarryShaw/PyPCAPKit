@@ -51,7 +51,7 @@ class Application(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     @overload
     def __post_init__(self, file: 'BinaryIO', length: 'Optional[int]' = ..., **kwargs: 'Any') -> 'None': ...
     @overload
-    def __post_init__(self, **kwargs: 'Any') -> 'None': ...
+    def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
     def __post_init__(self, file: 'Optional[BinaryIO]' = None,
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
@@ -101,7 +101,7 @@ class Application(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
         """
         raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
 
-    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None) -> 'NoReturn':
+    def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None) -> 'NoReturn':  # type: ignore[override]
         """Import next layer extractor.
 
         Raises:

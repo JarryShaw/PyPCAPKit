@@ -156,8 +156,10 @@ class Frame(Protocol[DataType_Frame]):
         """
         try:
             _temp = self._read_unpack(4, lilendian=True)
-        except StructError:
-            raise EOFError
+        except StructError as exc:
+            if exc.eof:
+                raise EOFError  # pylint: disable=raise-missing-from
+            raise
 
         _tsss = _temp
         _tsus = self._read_unpack(4, lilendian=True)
@@ -360,7 +362,7 @@ class Frame(Protocol[DataType_Frame]):
             dict: current protocol with packet extracted
 
         """
-        next_ = self._import_next_layer(proto, length)
+        next_ = self._import_next_layer(proto, length)  # type: ignore[misc,call-arg]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name

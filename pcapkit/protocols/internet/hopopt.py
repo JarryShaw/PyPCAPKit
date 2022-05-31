@@ -327,7 +327,10 @@ class HOPOPT(Internet[DataType_HOPOPT]):
             name = self.__option__[kind]  # type: str | OptionParser
             if isinstance(name, str):
                 meth_name = f'_read_opt_{kind.name.lower()}'
-                meth = getattr(self, meth_name, self._read_opt_none)  # type: Callable[[RegType_Option, int, bool, NamedArg(Option, 'options')], DataType_Option]
+                meth = getattr(
+                    self, meth_name,
+                    self._read_opt_none
+                )  # type: Callable[[RegType_Option, int, bool, NamedArg(Option, 'options')], DataType_Option]
                 data = meth(kind, acts, cflg, options=options)
             else:
                 data = name(self, kind, acts, cflg, options=options)

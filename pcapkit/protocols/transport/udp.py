@@ -46,7 +46,7 @@ class UDP(Transport[DataType_UDP]):
     __proto__ = collections.defaultdict(
         lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
-            80: ('pcapkit.protocols.http', 'HTTP'),  # HTTP
+            80: ('pcapkit.protocols.application.http', 'HTTP'),  # HTTP
         },
     )
 
@@ -122,7 +122,7 @@ class UDP(Transport[DataType_UDP]):
             checksum=_csum,
         )
 
-        return self._decode_next_layer(udp, None, udp.len - 8)
+        return self._decode_next_layer(udp, (udp.srcport, udp.dstport), udp.len - 8)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

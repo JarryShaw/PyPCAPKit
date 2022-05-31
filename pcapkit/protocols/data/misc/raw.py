@@ -20,4 +20,4 @@ class Raw(Info):
     error: 'Optional[Exception]'
 
     if TYPE_CHECKING:
-        def __init__(self, packet: 'bytes', error: 'Optional[Exception]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, packet: 'bytes', error: 'Optional[Exception]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements

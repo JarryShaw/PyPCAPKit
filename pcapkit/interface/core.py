@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=bad-continuation
 """core user interface
 
 :mod:`pcapkit.interface.core` defines core user-oriented
@@ -61,12 +60,12 @@ PyShark = 'pyshark'
 
 
 def extract(fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                                  # basic settings  # pylint: disable=redefined-builtin
-            auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                                            # internal settings
-            files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                                        # output settings
-            engine: 'Optional[Engines]' = None, layer: 'Optional[Layers | Type[Protocol]]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings
-            ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,                     # reassembly settings
-            trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,                            # trace settings
-            trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'Extractor':                  # trace settings
+            auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                                            # internal settings # pylint: disable=line-too-long
+            files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                                        # output settings # pylint: disable=line-too-long
+            engine: 'Optional[Engines]' = None, layer: 'Optional[Layers | Type[Protocol]]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings # pylint: disable=line-too-long
+            ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,                     # reassembly settings # pylint: disable=line-too-long
+            trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,                            # trace settings # pylint: disable=line-too-long,redefined-outer-name
+            trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'Extractor':                  # trace settings # pylint: disable=line-too-long
     """Extract a PCAP file.
 
     Arguments:

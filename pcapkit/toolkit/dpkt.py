@@ -12,7 +12,6 @@ its caller.
 import ipaddress
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
 from pcapkit.const.reg.transtype import TransType as RegType_TransType
 from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
@@ -27,7 +26,7 @@ if TYPE_CHECKING:
     from dpkt.ip6 import IP6, IP6FragmentHeader
     from dpkt.tcp import TCP
 
-    from pcapkit.const.reg.linktype import LinkType
+    from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
 
 __all__ = [
     'ipv6_hdr_len', 'packet2chain', 'packet2dict',
@@ -259,7 +258,8 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
     return None
 
 
-def tcp_traceflow(packet: 'Packet', timestamp: 'float', *, data_link: 'LinkType', count: 'int' = -1) -> 'TF_Packet | None':
+def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
+                  data_link: 'RegType_LinkType', count: 'int' = -1) -> 'TF_Packet | None':
     """Trace packet flow for TCP.
 
     Args:

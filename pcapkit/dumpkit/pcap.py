@@ -22,7 +22,6 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
-    from pcapkit.protocols.misc.pcap.frame import Frame
 
 __all__ = [
     'PCAPIO',
@@ -46,7 +45,8 @@ class PCAPIO(dictdumper.Dumper):
     ##########################################################################
 
     def __init__(self, fname: 'str', *, protocol: 'RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int',
-                 byteorder: 'Literal["big", "little"]' = sys.byteorder, nanosecond: 'bool' = False, **kwargs: 'Any') -> 'None':  # pylint: disable=arguments-differ
+                 byteorder: 'Literal["big", "little"]' = sys.byteorder,
+                 nanosecond: 'bool' = False, **kwargs: 'Any') -> 'None':  # pylint: disable=arguments-differ
         """Initialise dumper.
 
         Args:
@@ -87,9 +87,9 @@ class PCAPIO(dictdumper.Dumper):
     # Utilities.
     ##########################################################################
 
-    def _dump_header(self, *, protocol: 'RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int',
+    def _dump_header(self, *, protocol: 'RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int',  # pylint: disable=arguments-differ
                      byteorder: 'Literal["big", "little"]' = sys.byteorder, nanosecond: 'bool' = False,
-                     **kwargs: 'Any') -> 'None':  # pylint: disable=arguments-differ,unused-argument
+                     **kwargs: 'Any') -> 'None':  # pylint: disable=unused-argument
         """Initially dump file heads and tails.
 
         Keyword Args:

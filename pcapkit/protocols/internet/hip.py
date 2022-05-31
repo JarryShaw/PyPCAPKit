@@ -1448,7 +1448,7 @@ class HIP(Internet[DataType_HIP]):
             Parsed parameter data.
 
         """
-        _hsid = list()
+        _hsid = []  # type: list[RegType_HITSuite]
         for _ in range(clen):
             _hsid.append(RegType_HITSuite.get(self._read_unpack(1)))
 

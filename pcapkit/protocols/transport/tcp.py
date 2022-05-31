@@ -38,7 +38,7 @@ import collections
 import datetime
 import ipaddress
 import sys
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.transtype import TransType
 from pcapkit.const.tcp.checksum import Checksum as RegType_Checksum
@@ -70,7 +70,6 @@ from pcapkit.protocols.data.transport.tcp import MPTCPCapableFlag as DataType_MP
 from pcapkit.protocols.data.transport.tcp import MPTCPDSSFlag as DataType_MPTCPDSSFlag
 from pcapkit.protocols.data.transport.tcp import MPTCPFallback as DataType_MPTCPFallback
 from pcapkit.protocols.data.transport.tcp import MPTCPFastclose as DataType_MPTCPFastclose
-from pcapkit.protocols.data.transport.tcp import MPTCPJoin as DataType_MPTCPJoin
 from pcapkit.protocols.data.transport.tcp import MPTCPJoinACK as DataType_MPTCPJoinACK
 from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYN as DataType_MPTCPJoinSYN
 from pcapkit.protocols.data.transport.tcp import MPTCPJoinSYNACK as DataType_MPTCPJoinSYNACK
@@ -98,6 +97,7 @@ if TYPE_CHECKING:
     from typing_extensions import Literal
 
     from pcapkit.protocols.data.transport.tcp import Option as DataType_Option
+    from pcapkit.protocols.data.transport.tcp import MPTCPJoin as DataType_MPTCPJoin
 
     Option = OrderedMultiDict[RegType_Option, DataType_Option]
     OptionParser = Callable[['TCP', RegType_Option, NamedArg(Option, 'options')], DataType_Option]
@@ -120,8 +120,8 @@ class TCP(Transport[DataType_TCP]):
     __proto__ = collections.defaultdict(
         lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
-            21: ('pcapkit.protocols.ftp', 'FTP'),    # FTP
-            80: ('pcapkit.protocols.http', 'HTTP'),  # HTTP
+            21: ('pcapkit.protocols.application.ftp', 'FTP'),    # FTP
+            80: ('pcapkit.protocols.application.http', 'HTTP'),  # HTTP
         },
     )
 
@@ -282,7 +282,7 @@ class TCP(Transport[DataType_TCP]):
                 'options': self._read_tcp_options(_optl),
             })
 
-        return self._decode_next_layer(tcp, None, length - tcp.hdr_len)
+        return self._decode_next_layer(tcp, (tcp.srcport, tcp.dstport), length - tcp.hdr_len)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
@@ -373,7 +373,10 @@ class TCP(Transport[DataType_TCP]):
             name = self.__option__[code]  # type: str | OptionParser
             if isinstance(name, str):
                 meth_name = f'_read_mode_{name}'
-                meth = getattr(self, meth_name, self._read_mode_donone)  # type: Callable[[RegType_Option, NamedArg(Option, 'options')], DataType_Option]
+                meth = getattr(
+                    self, meth_name,
+                    self._read_mode_donone
+                )  # type: Callable[[RegType_Option, NamedArg(Option, 'options')], DataType_Option]
                 data = meth(kind, options=options)  # type: DataType_Option
             else:
                 data = name(self, kind, options=options)
@@ -393,7 +396,7 @@ class TCP(Transport[DataType_TCP]):
 
         return options
 
-    def _read_mode_donone(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_UnassignedOption':
+    def _read_mode_donone(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_UnassignedOption':  # pylint: disable=unused-argument
         """Read options request no process.
 
         Arguments:
@@ -416,7 +419,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return option
 
-    def _read_mode_eool(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EndOfOptionList':
+    def _read_mode_eool(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EndOfOptionList':  # pylint: disable=unused-argument,no-self-use
         """Read TCP End of Option List option.
 
         Structure of TCP end of option list option [:rfc:`793`]:
@@ -443,7 +446,7 @@ class TCP(Transport[DataType_TCP]):
             length=1,
         )
 
-    def _read_mode_nop(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_NoOperation':
+    def _read_mode_nop(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_NoOperation':  # pylint: disable=unused-argument,no-self-use
         """Read TCP No Operation option.
 
         Structure of TCP maximum segment size option [:rfc:`793`]:
@@ -470,7 +473,7 @@ class TCP(Transport[DataType_TCP]):
             length=1,
         )
 
-    def _read_mode_mss(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MaximumSegmentSize':
+    def _read_mode_mss(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MaximumSegmentSize':  # pylint: disable=unused-argument
         """Read TCP max segment size option.
 
         Structure of TCP maximum segment size option [:rfc:`793`]:
@@ -507,7 +510,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_ws(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_WindowScale':
+    def _read_mode_ws(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_WindowScale':  # pylint: disable=unused-argument
         """Read TCP windows scale option.
 
         Structure of TCP window scale option [:rfc:`7323`]:
@@ -544,7 +547,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_sackpmt(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_SACKPermitted':
+    def _read_mode_sackpmt(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_SACKPermitted':  # pylint: disable=unused-argument
         """Read TCP SACK permitted option.
 
         Structure of TCP SACK permitted option [:rfc:`2018`]:
@@ -577,7 +580,7 @@ class TCP(Transport[DataType_TCP]):
             length=size,
         )
 
-    def _read_mode_sack(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_SACK':
+    def _read_mode_sack(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_SACK':  # pylint: disable=unused-argument
         """Read TCP SACK option.
 
         Structure of TCP SACK option [:rfc:`2018`]:
@@ -626,7 +629,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_echo(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Echo':
+    def _read_mode_echo(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Echo':  # pylint: disable=unused-argument
         """Read TCP echo option.
 
         Structure of TCP echo option [:rfc:`1072`]:
@@ -662,7 +665,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_echore(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EchoReply':
+    def _read_mode_echore(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EchoReply':  # pylint: disable=unused-argument
         """Read TCP echo reply option.
 
         Structure of TCP echo reply option [:rfc:`1072`]:
@@ -698,7 +701,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_ts(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Timestamp':
+    def _read_mode_ts(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Timestamp':  # pylint: disable=unused-argument
         """Read TCP timestamps option.
 
         Structure of TCP timestamp option [:rfc:`7323`]:
@@ -737,7 +740,8 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_poc(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_PartialOrderConnectionPermitted':
+    def _read_mode_poc(self, kind: 'RegType_Option', *,
+                       options: 'Option') -> 'DataType_PartialOrderConnectionPermitted':  # pylint: disable=unused-argument
         """Read TCP partial order connection service profile option.
 
         Structure of TCP ``POC-Permitted`` option [:rfc:`1693`][:rfc:`6247`]:
@@ -770,7 +774,8 @@ class TCP(Transport[DataType_TCP]):
             length=size,
         )
 
-    def _read_mode_pocsp(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_PartialOrderConnectionProfile':
+    def _read_mode_pocsp(self, kind: 'RegType_Option', *,
+                         options: 'Option') -> 'DataType_PartialOrderConnectionProfile':  # pylint: disable=unused-argument
         """Read TCP partial order connection service profile option.
 
         Structure of TCP ``POC-SP`` option [:rfc:`1693`][:rfc:`6247`]:
@@ -809,7 +814,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_cc(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CC':
+    def _read_mode_cc(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CC':  # pylint: disable=unused-argument
         """Read TCP connection count option.
 
         Structure of TCP ``CC`` option [:rfc:`1644`]:
@@ -846,7 +851,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_ccnew(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CCNew':
+    def _read_mode_ccnew(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CCNew':  # pylint: disable=unused-argument
         """Read TCP connection count (new) option.
 
         Structure of TCP ``CC.NEW`` option [:rfc:`1644`]:
@@ -883,7 +888,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_ccecho(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CCEcho':
+    def _read_mode_ccecho(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_CCEcho':  # pylint: disable=unused-argument
         """Read TCP connection count (echo) option.
 
         Structure of TCP ``CC.ECHO`` option [:rfc:`1644`]:
@@ -920,7 +925,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_chkreq(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_AlternateChecksumRequest':
+    def _read_mode_chkreq(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_AlternateChecksumRequest':  # pylint: disable=unused-argument
         """Read Alternate Checksum Request option.
 
         Structure of TCP ``CHKSUM-REQ`` [:rfc:`1146`][:rfc:`6247`]:
@@ -957,7 +962,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_chksum(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_AlternateChecksumData':
+    def _read_mode_chksum(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_AlternateChecksumData':  # pylint: disable=unused-argument
         """Read Alternate Checksum Data option.
 
         Structure of TCP ``CHKSUM`` [:rfc:`1146`][:rfc:`6247`]:
@@ -989,7 +994,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_sig(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MD5Signature':
+    def _read_mode_sig(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MD5Signature':  # pylint: disable=unused-argument
         """Read MD5 Signature option.
 
         Structure of TCP ``SIG`` option [:rfc:`2385`]:
@@ -1033,7 +1038,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mode_qs(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_QuickStartResponse':
+    def _read_mode_qs(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_QuickStartResponse':  # pylint: disable=unused-argument
         """Read Quick-Start Response option.
 
         Structure of TCP ``QSopt`` [:rfc:`4782`]:
@@ -1079,7 +1084,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_timeout(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_UserTimeout':
+    def _read_mode_timeout(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_UserTimeout':  # pylint: disable=unused-argument
         """Read User Timeout option.
 
         Structure of TCP ``TIMEOUT`` [:rfc:`5482`]:
@@ -1123,7 +1128,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_ao(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Authentication':
+    def _read_mode_ao(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_Authentication':  # pylint: disable=unused-argument
         """Read Authentication option.
 
         Structure of TCP ``AOopt`` [:rfc:`5925`]:
@@ -1170,7 +1175,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_mp(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MPTCP':
+    def _read_mode_mp(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_MPTCP':  # pylint: disable=unused-argument
         """Read Multipath TCP option.
 
         Structure of ``MP-TCP`` [:rfc:`6824`]:
@@ -1207,14 +1212,18 @@ class TCP(Transport[DataType_TCP]):
         name = self.__mp_option__[subt]  # type: str | MPOptionParser
         if isinstance(name, str):
             meth_name = f'_read_mptcp_{name}'
-            meth = getattr(self, meth_name, self._read_mptcp_unknown)  # type: Callable[[RegType_MPTCPOption, int, str, NamedArg(Option, 'options')], DataType_MPTCP]
+            meth = getattr(
+                self, meth_name,
+                self._read_mptcp_unknown
+            )  # type: Callable[[RegType_MPTCPOption, int, str, NamedArg(Option, 'options')], DataType_MPTCP]
             data = meth(subtype, dlen, bits, options=options)
         else:
             data = name(self, subtype, dlen, bits, options=options)
 
         return data
 
-    def _read_mptcp_unknown(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPUnknown':
+    def _read_mptcp_unknown(self, kind: 'RegType_MPTCPOption', dlen: int,
+                            bits: str, *, options: 'Option') -> 'DataType_MPTCPUnknown':  # pylint: disable=unused-argument
         """Read unknown MPTCP subtype.
 
         Arguments:
@@ -1237,7 +1246,8 @@ class TCP(Transport[DataType_TCP]):
         )
         return data
 
-    def _read_mptcp_capable(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPCapable':
+    def _read_mptcp_capable(self, kind: 'RegType_MPTCPOption', dlen: int,
+                            bits: str, *, options: 'Option') -> 'DataType_MPTCPCapable':  # pylint: disable=unused-argument
         """Read Multipath Capable option.
 
         Structure of ``MP_CAPABLE`` [:rfc:`6824`]:
@@ -1273,7 +1283,7 @@ class TCP(Transport[DataType_TCP]):
             ProtocolError: If length is **NOT** ``20`` or ``32``.
 
         """
-        if dlen != 17 and dlen != 29:
+        if dlen not in (17, 29):
             raise ProtocolError(f'{self.alias}: [OptNo {kind.value}] invalid format')
 
         vers = int(bits, base=2)
@@ -1297,7 +1307,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_join(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPJoin':
+    def _read_mptcp_join(self, kind: 'RegType_MPTCPOption', dlen: int,
+                         bits: str, *, options: 'Option') -> 'DataType_MPTCPJoin':
         """Read Join Connection option.
 
         Arguments:
@@ -1323,7 +1334,8 @@ class TCP(Transport[DataType_TCP]):
             return self._read_join_ack(kind, dlen, bits, options=options)
         raise ProtocolError(f'{self.alias}: : [OptNo {kind.value}] invalid flags combination')
 
-    def _read_join_syn(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinSYN':
+    def _read_join_syn(self, kind: 'RegType_MPTCPOption', dlen: int,
+                       bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinSYN':  # pylint: disable=unused-argument
         """Read Join Connection option for Initial SYN.
 
         Structure of ``MP_JOIN-SYN`` [:rfc:`6824`]:
@@ -1375,7 +1387,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_join_synack(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinSYNACK':
+    def _read_join_synack(self, kind: 'RegType_MPTCPOption', dlen: int,
+                          bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinSYNACK':  # pylint: disable=unused-argument
         """Read Join Connection option for Responding SYN/ACK.
 
         Structure of ``MP_JOIN-SYN/ACK`` [:rfc:`6824`]:
@@ -1429,7 +1442,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_join_ack(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinACK':
+    def _read_join_ack(self, kind: 'RegType_MPTCPOption', dlen: int,
+                       bits: str, *, options: 'Option') -> 'DataType_MPTCPJoinACK':  # pylint: disable=unused-argument
         """Read Join Connection option for Third ACK.
 
         Structure of ``MP_JOIN-ACK`` [:rfc:`6824`]:
@@ -1477,7 +1491,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_dss(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPDSS':
+    def _read_mptcp_dss(self, kind: 'RegType_MPTCPOption', dlen: int,
+                        bits: str, *, options: 'Option') -> 'DataType_MPTCPDSS':  # pylint: disable=unused-argument
         """Read Data Sequence Signal (Data ACK and Data Sequence Mapping) option.
 
         Structure of ``DSS`` [:rfc:`6824`]:
@@ -1545,7 +1560,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_addaddr(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPAddAddress':
+    def _read_mptcp_addaddr(self, kind: 'RegType_MPTCPOption', dlen: int,
+                            bits: str, *, options: 'Option') -> 'DataType_MPTCPAddAddress':  # pylint: disable=unused-argument
         """Read Add Address option.
 
         Structure of ``ADD_ADDR`` [:rfc:`6824`]:
@@ -1602,7 +1618,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_remove(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPRemoveAddress':
+    def _read_mptcp_remove(self, kind: 'RegType_MPTCPOption', dlen: int,
+                           bits: str, *, options: 'Option') -> 'DataType_MPTCPRemoveAddress':  # pylint: disable=unused-argument
         """Read Remove Address option.
 
         Structure of ``REMOVE_ADDR`` [:rfc:`6824`]:
@@ -1647,7 +1664,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_prio(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPPriority':
+    def _read_mptcp_prio(self, kind: 'RegType_MPTCPOption', dlen: int,
+                         bits: str, *, options: 'Option') -> 'DataType_MPTCPPriority':  # pylint: disable=unused-argument
         """Read Change Subflow Priority option.
 
         Structure of ``MP_PRIO`` [RFC 6824]:
@@ -1689,7 +1707,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_fail(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPFallback':
+    def _read_mptcp_fail(self, kind: 'RegType_MPTCPOption', dlen: int,
+                         bits: str, *, options: 'Option') -> 'DataType_MPTCPFallback':  # pylint: disable=unused-argument
         """Read Fallback option.
 
         Structure of ``MP_FAIL`` [:rfc:`6824`]:
@@ -1736,7 +1755,8 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mptcp_fastclose(self, kind: 'RegType_MPTCPOption', dlen: int, bits: str, *, options: 'Option') -> 'DataType_MPTCPFastclose':
+    def _read_mptcp_fastclose(self, kind: 'RegType_MPTCPOption', dlen: int,
+                              bits: str, *, options: 'Option') -> 'DataType_MPTCPFastclose':  # pylint: disable=unused-argument
         """Read Fast Close option.
 
         Structure of ``MP_FASTCLOSE`` [RFC 6824]:
@@ -1783,7 +1803,7 @@ class TCP(Transport[DataType_TCP]):
 
         return data
 
-    def _read_mode_fastopen(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_FastOpenCookie':
+    def _read_mode_fastopen(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_FastOpenCookie':  # pylint: disable=unused-argument
         """Read Fast Open option.
 
         Structure of TCP ``FASTOPEN`` [:rfc:`7413`]:

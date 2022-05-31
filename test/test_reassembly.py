@@ -14,15 +14,17 @@ extraction = pcapkit.extract(
 )
 # pprint.pprint(extraction.frame)
 
-with open('../sample/out', 'a') as file:
+with open('../sample/out', 'a') as file:  # pylint: disable=unspecified-encoding
     # pprint.pprint(extraction.reassembly.tcp)
     for datagram in extraction.reassembly.tcp:  # type: ignore[union-attr]
         print(f'completed = {datagram.completed}')
         file.write(f'completed = {datagram.completed}')
         file.write('\n')
+
         print(f'index = {datagram.index}')
         file.write(f'index = {datagram.index}')
-        file.write('\n')
+        file.write('\n\n')
+
         if isinstance(datagram.payload, tuple):
             for (index, payload) in enumerate(datagram.payload):
                 file.write(f'Fragment No. {index}\n')
@@ -39,10 +41,12 @@ with open('../sample/out', 'a') as file:
 
             file.write(datagram.payload.decode(errors='replace'))
             file.write('\n')
-        # for packet in datagram.packets:
-        #     file.write(str(packet))
-        #     file.write('\n')
+        file.write('\n')
+
+        print(repr(datagram.packet))
+        file.write(str(datagram.packet))
         print()
+
         file.write('\n\n')
         file.write('-' * 80)
         file.write('\n\n')

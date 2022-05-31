@@ -34,7 +34,7 @@ class Option(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self.safe_name(item[4]), reader))  # pylint: disable=map-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[4]), reader))
 
     def process(self, data: 'list[str]') -> 'tuple[list[str], list[str]]':
         """Process CSV data.

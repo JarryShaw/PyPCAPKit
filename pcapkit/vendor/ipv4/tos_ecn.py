@@ -45,7 +45,7 @@ class ToSECN(Vendor):
             Field recordings.
 
         """
-        return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
+        return collections.Counter(map(self.safe_name, data.values()))
 
     def rename(self, name: 'str', code: 'int') -> 'str':  # type: ignore[override] # pylint: disable=arguments-differ
         """Rename duplicated fields.

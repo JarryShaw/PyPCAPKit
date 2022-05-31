@@ -50,7 +50,7 @@ class Group(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            tmp1 = ' %s' % ''.join(temp) if rfcs else ''
+            tmp1 = ' %s' % ''.join(temp) if rfcs else ''  # pylint: disable=consider-using-f-string
             desc = self.wrap_comment(f'{name}{cmmt}{tmp1}')
 
             try:

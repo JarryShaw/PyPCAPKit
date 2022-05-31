@@ -21,8 +21,6 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.corekit.infoclass import Info
-
 __all__ = ['Internet']
 
 
@@ -162,7 +160,7 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
             Current protocol with next layer extracted.
 
         """
-        next_ = self._import_next_layer(proto, length, version=version)
+        next_ = self._import_next_layer(proto, length, version=version)  # type: ignore[misc,call-arg,arg-type]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name
@@ -177,7 +175,7 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
         self._protos = ProtoChain(self.__class__, self.alias, basis=chain)  # pylint: disable=attribute-defined-outside-init
         return dict_
 
-    @beholder
+    @beholder  # type: ignore[arg-type]
     def _import_next_layer(self, proto: 'int', length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
                            version: 'Literal[4, 6]' = 4, extension: 'bool' = False) -> 'Protocol':
         """Import next layer extractor.

@@ -149,7 +149,7 @@ class IPv6(IP[DataType_IPv6]):
             'dst': _dsta,
         })  # type: DataType_IPv6
 
-        return self._decode_next_layer(ipv6, _next, ipv6.payload)
+        return self._decode_next_layer(ipv6, _next, ipv6.payload)  # pylint: disable=no-member
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
@@ -211,7 +211,7 @@ class IPv6(IP[DataType_IPv6]):
         """
         return ipaddress.ip_address(self._read_fileng(16))  # type: ignore[return-value]
 
-    def _decode_next_layer(self, ipv6: 'DataType_IPv6', proto: 'Optional[int]' = None,  # type: ignore[override] # pylint: disable=arguments-differ
+    def _decode_next_layer(self, ipv6: 'DataType_IPv6', proto: 'Optional[int]' = None,  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
                            length: 'Optional[int]' = None) -> 'DataType_IPv6':  # pylint: disable=arguments-differ
         """Decode next layer extractor.
 
@@ -225,7 +225,7 @@ class IPv6(IP[DataType_IPv6]):
 
         """
         #: Extension headers.
-        self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[RegType_ExtensionHeader, Protocol]
+        self._exthdr = OrderedMultiDict()  # type: OrderedMultiDict[RegType_ExtensionHeader, Protocol] # pylint: disable=attribute-defined-outside-init
 
         hdr_len = self.length       # header length
         raw_len = ipv6.payload      # payload length
@@ -244,7 +244,7 @@ class IPv6(IP[DataType_IPv6]):
             #     break
 
             # make protocol name
-            next_ = self._import_next_layer(proto, version=6, extension=True)
+            next_ = self._import_next_layer(proto, version=6, extension=True)  # type: ignore[misc,call-arg,arg-type]
             info = next_.info
             name = next_.alias.lstrip('IPv6-').lower()
             ipv6.__update__({
@@ -279,5 +279,5 @@ class IPv6(IP[DataType_IPv6]):
             'protocol': proto,
         })
 
-        ipv6_exthdr = ProtoChain.from_list(_protos)
+        ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
         return super()._decode_next_layer(ipv6, proto, raw_len, ipv6_exthdr=ipv6_exthdr)

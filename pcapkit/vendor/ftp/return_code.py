@@ -93,7 +93,7 @@ class ReturnCode(Vendor):
         """
         return bs4.BeautifulSoup(text, 'html5lib')
 
-    def context(self, soup: 'BeautifulSoup') -> 'str':  # pylint: disable=arguments-differ
+    def context(self, soup: 'BeautifulSoup') -> 'str':  # pylint: disable=arguments-differ,arguments-renamed
         """Generate constant context.
 
         Args:
@@ -107,7 +107,7 @@ class ReturnCode(Vendor):
         ENUM = '\n\n    '.join(map(lambda s: s.rstrip(), enum))
         return LINE(self.NAME, self.DOCS, self.FLAG, ENUM)
 
-    def process(self, soup: 'BeautifulSoup') -> 'list[str]':  # type: ignore[override] # pylint: disable=arguments-differ
+    def process(self, soup: 'BeautifulSoup') -> 'list[str]':  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
         """Process registry data.
 
         Args:
@@ -118,7 +118,7 @@ class ReturnCode(Vendor):
 
         """
         table = soup.find_all('table', class_='wikitable')[2]
-        content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
+        content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)
         next(content)  # header
 
         enum = []  # type: list[str]
@@ -132,16 +132,16 @@ class ReturnCode(Vendor):
             #desc = f"{' '.join(line[1].stripped_strings).split('.')[0].strip()}."
             #enum.append(f'{self.NAME}[{self.rename(desc, code)!r}] = {code}')
 
-            sufs = self.wrap_comment('. '.join(map(lambda s: s.strip(), ' '.join(line[1].stripped_strings).split('.'))).replace('e. g. ,', 'e.g.,'))
+            sufs = self.wrap_comment('. '.join(map(lambda s: s.strip(), ' '.join(line[1].stripped_strings).split('.'))).replace('e. g. ,', 'e.g.,'))  # pylint: disable=line-too-long
             pref = f"CODE_{code} = {code}"
 
             enum.append(f'#: {sufs}\n    {pref}')
         return enum
 
-    def count(self, soup: 'BeautifulSoup') -> 'Counter[str]':  # pylint: disable=arguments-differ, no-self-use
+    def count(self, soup: 'BeautifulSoup') -> 'Counter[str]':  # pylint: disable=arguments-differ,no-self-use,arguments-renamed,unused-argument
         """Count field records."""
         #table = soup.find_all('table', class_='wikitable')[2]
-        #content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
+        #content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)
         #next(content)  # header
 
         #temp = list()

@@ -25,7 +25,7 @@ class PriorityLevel(Vendor):
     #: Link to registry.
     LINK = 'https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels'
 
-    def request(self, text: 'str') -> 'BeautifulSoup':  # type: ignore[override] # pylint: disable=signature-differs
+    def request(self, text: 'str') -> 'BeautifulSoup':  # type: ignore[override] # pylint: disable=signature-differs,arguments-renamed
         """Fetch registry table.
 
         Args:
@@ -37,11 +37,11 @@ class PriorityLevel(Vendor):
         """
         return bs4.BeautifulSoup(text, 'html5lib')
 
-    def count(self, soup: 'BeautifulSoup') -> 'Counter[str]':  # pylint: disable=signature-differs
+    def count(self, soup: 'BeautifulSoup') -> 'Counter[str]':  # pylint: disable=signature-differs,arguments-renamed,unused-argument
         """Count field records."""
         return collections.Counter()
 
-    def process(self, soup: 'BeautifulSoup') -> 'tuple[list[str], list[str]]':  # pylint: disable=arguments-differ
+    def process(self, soup: 'BeautifulSoup') -> 'tuple[list[str], list[str]]':  # pylint: disable=arguments-differ,arguments-renamed,unused-argument
         """Process HTML data.
 
         Args:
@@ -52,7 +52,7 @@ class PriorityLevel(Vendor):
 
         """
         table = soup.find_all('table', class_='wikitable')[0]
-        content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
+        content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)
         next(content)  # header
 
         enum = []  # type: list[str]

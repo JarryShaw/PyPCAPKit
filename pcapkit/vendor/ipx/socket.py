@@ -61,7 +61,7 @@ class Socket(Vendor):
         """
         return bs4.BeautifulSoup(text, 'html5lib')
 
-    def process(self, soup: 'BeautifulSoup') -> 'tuple[list[str], list[str]]':  # pylint: disable=arguments-differ
+    def process(self, soup: 'BeautifulSoup') -> 'tuple[list[str], list[str]]':  # pylint: disable=arguments-differ,arguments-renamed
         """Process HTML source.
 
         Args:
@@ -72,7 +72,7 @@ class Socket(Vendor):
 
         """
         table = soup.find_all('table', class_='wikitable')[3]
-        content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)  # pylint: disable=filter-builtin-not-iterating
+        content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)
         next(content)  # header
 
         enum = []  # type: list[str]

@@ -33,7 +33,7 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     """Base class for reassembly procedure."""
 
     # Internal data storage for cached properties.
-    __cached__ = {}  # type: dict[str, Any]
+    __cached__: 'dict[str, Any]'
 
     ##########################################################################
     # Properties.
@@ -159,6 +159,15 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     ##########################################################################
     # Data models.
     ##########################################################################
+
+    def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Reassembly[PT, DT, IT, BT]':  # pylint: disable=unused-argument
+        self = super().__new__(cls)
+
+        # NOTE: Assign this attribute after ``__new__`` to avoid shared memory
+        # reference between instances.
+        self.__cached__ = {}
+
+        return self
 
     def __init__(self, *, strict: 'bool' = True) -> 'None':
         """Initialise packet reassembly.

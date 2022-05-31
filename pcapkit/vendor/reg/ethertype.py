@@ -35,8 +35,8 @@ class EtherType(Vendor):
         """
         reader = csv.reader(data)
         next(reader)  # header
-        return collections.Counter(map(lambda item: self.safe_name(item[4]),  # pylint: disable=map-builtin-not-iterating
-                                       filter(lambda item: len(item[1].split('-')) != 2, reader)))  # pylint: disable=filter-builtin-not-iterating
+        return collections.Counter(map(lambda item: self.safe_name(item[4]),
+                                       filter(lambda item: len(item[1].split('-')) != 2, reader)))
 
     def rename(self, name: 'str', code: 'str', *, original: 'Optional[str]' = None) -> 'str':  # pylint: disable=redefined-outer-name
         """Rename duplicated fields.
@@ -104,7 +104,7 @@ class EtherType(Vendor):
 
                 miss.append(f'if 0x{start} <= value <= 0x{stop}:')
                 miss.append(f'    #: {desc}')
-                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")
+                miss.append(f"    extend_enum(cls, '{self.safe_name(name)}_0x%s' % hex(value)[2:].upper().zfill(4), value)")  # pylint: disable=line-too-long
                 miss.append('    return cls(value)')
         return enum, miss
 

@@ -10,10 +10,10 @@ and :func:`~pcapkit.utilities.decorators.beholder`.
 import functools
 import io
 import os
-import traceback
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.utilities.logging import logger
+from pcapkit.utilities.exceptions import StructError, stacklevel
+from pcapkit.utilities.logging import DEVMODE, logger
 
 if TYPE_CHECKING:
     from typing import Callable, Optional, TypeVar
@@ -101,14 +101,19 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') 
             # call method
             return func(*args, **kwargs)
         except Exception as exc:
-            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel
-            error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
-            # error = traceback.format_exc()
+            if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
+                from pcapkit.protocols.misc.null import \
+                    NoPayload as protocol  # pylint: disable=import-outside-toplevel
+            else:
+                from pcapkit.protocols.misc.raw import \
+                    Raw as \
+                    protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
+            # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
-            logger.error(error, exc_info=exc)
+            logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
 
             self._file.seek(seek_cur, os.SEEK_SET)
-            next_ = Raw(io.BytesIO(self._read_fileng(length)), length, error=error)
+            next_ = protocol(io.BytesIO(self._read_fileng(length)), length, error=str(exc))
             return cast('R', next_)
     return behold

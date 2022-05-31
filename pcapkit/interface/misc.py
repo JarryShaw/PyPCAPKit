@@ -45,12 +45,12 @@ class Stream(Info):
     conversations: 'tuple[bytes | tuple[bytes, ...], ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, filename: 'Optional[str]', packets: 'tuple[Frame, ...]', conversations: 'tuple[bytes | tuple[bytes, ...], ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, filename: 'Optional[str]', packets: 'tuple[Frame, ...]', conversations: 'tuple[bytes | tuple[bytes, ...], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,              # Extrator options
                       extension: 'bool' = True, engine: 'Optional[Engines]' = None,
-                      fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,  # TraceFlow options
+                      fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,  # TraceFlow options # pylint: disable=redefined-builtin
                       byteorder: 'ByteOrder' = sys.byteorder, nanosecond: 'bool' = False) -> 'tuple[Stream, ...]':
     """Follow TCP streams.
 
@@ -82,11 +82,11 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
 
     fallback = False
     if extraction.engine == 'dpkt':
-        from pcapkit.toolkit.dpkt import tcp_reassembly
+        from pcapkit.toolkit.dpkt import tcp_reassembly  # pylint: disable=import-outside-toplevel
     elif extraction.engine == 'scapy':
-        from pcapkit.toolkit.scapy import tcp_reassembly  # type: ignore[no-redef]
+        from pcapkit.toolkit.scapy import tcp_reassembly  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
     else:
-        from pcapkit.toolkit.default import tcp_reassembly  # type: ignore[no-redef]
+        from pcapkit.toolkit.default import tcp_reassembly  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
         fallback = True
 
     streams = []  # type: list[Stream]
@@ -94,17 +94,17 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     for stream in extraction.trace:
         reassembly = TCP_Reassembly(strict=False)
 
-        packets = list()
+        packets = []  # type: list[Frame]
         for index in stream.index:
             frame = frames[index-1]
             packets.append(frame)
 
             if fallback:
-                flag, data = tcp_reassembly(frame)
+                data = tcp_reassembly(frame)
             else:
-                flag, data = tcp_reassembly(frame, count=index)
+                data = tcp_reassembly(frame, count=index)
 
-            if flag:
+            if data is not None:
                 reassembly(data)
 
         streams.append(Stream(

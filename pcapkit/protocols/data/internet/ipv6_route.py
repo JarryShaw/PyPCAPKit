@@ -32,7 +32,7 @@ class IPv6_Route(Info):
     seg_left: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int'): ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, next: 'TransType', length: 'int', type: 'Routing', seg_left: 'int'): ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 class RoutingType(Info):
@@ -46,7 +46,7 @@ class UnknownType(RoutingType):
     data: 'bytes'
 
     if TYPE_CHECKING:
-        def __init__(self, data: 'bytes') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, data: 'bytes') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 class SourceRoute(RoutingType):
@@ -56,7 +56,7 @@ class SourceRoute(RoutingType):
     ip: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 class Type2(RoutingType):
@@ -66,7 +66,7 @@ class Type2(RoutingType):
     ip: 'IPv6Address'
 
     if TYPE_CHECKING:
-        def __init__(self, ip: 'IPv6Address') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, ip: 'IPv6Address') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
 
 
 class RPL(RoutingType):
@@ -82,4 +82,4 @@ class RPL(RoutingType):
     ip: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, cmpr_i: 'int', cmpr_e: 'int', pad: 'int', ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disabl=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long
+        def __init__(self, cmpr_i: 'int', cmpr_e: 'int', pad: 'int', ip: 'tuple[IPv6Address, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,redefined-builtin,line-too-long

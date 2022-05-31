@@ -37,7 +37,7 @@ make = lambda cmmd, feat, desc, kind, conf, rfcs, cmmt: f'''\
         conf={conf!r},
         note={rfcs!r},
     ),
-'''.strip()  # type: Callable[[str, Optional[str], Optional[str], Optional[tuple[str, ...]], Optional[str], Optional[tuple[str, ...]], str], str]
+'''.strip()  # type: Callable[[str, Optional[str], Optional[str], Optional[tuple[str, ...]], Optional[str], Optional[tuple[str, ...]], str], str] # pylint: disable=line-too-long
 
 #: Constant template of enumerate registry from IANA CSV.
 LINE = lambda NAME, DOCS, INFO, MISS: f'''\
@@ -131,7 +131,7 @@ class Command(Vendor):
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
             rfcs = tuple(rfcs_temp) or None
-            cmmt = self.wrap_comment('%s %s' % (cmmd, ''.join(temp)))
+            cmmt = self.wrap_comment('%s %s' % (cmmd, ''.join(temp)))  # pylint: disable=consider-using-f-string
 
             if cmmd == '-N/A-':
                 MISS = '\n'.ljust(32).join(("CommandType(name='%s' % key,",
@@ -155,7 +155,7 @@ class Command(Vendor):
 
         """
         info, MISS = self.process(data)
-        INFO = '\n    '.join(map(lambda s: s.strip(), info.values()))  # pylint: disable=dict-values-not-iterating
+        INFO = '\n    '.join(map(lambda s: s.strip(), info.values()))
         return LINE(self.NAME, self.DOCS, INFO, MISS)
 
 

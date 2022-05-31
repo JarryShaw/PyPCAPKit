@@ -39,14 +39,9 @@ class Raw(Protocol[DataType_Raw]):
 
     # header length of current protocol
     @property
-    def length(self) -> 'NoReturn':
-        """Header length of current protocol.
-
-        Raises:
-            UnsupportedCall: This protocol doesn't support :attr:`length`.
-
-        """
-        raise UnsupportedCall(f"{self.__class__.__name__!r} object has no attribute 'length'")
+    def length(self) -> 'Literal[0]':
+        """Header length of current protocol."""
+        return 0
 
     # name of next layer protocol
     @property

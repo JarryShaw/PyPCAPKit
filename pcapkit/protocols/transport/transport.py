@@ -8,12 +8,17 @@ which is a base class for transport layer protocols, eg.
 :class:`~pcapkit.protocols.transport.transport.udp.UDP`.
 
 """
-from typing import TYPE_CHECKING, Generic
+import importlib
+import io
+from typing import TYPE_CHECKING, Generic, cast
 
 from pcapkit.protocols.protocol import PT, Protocol
-from pcapkit.utilities.exceptions import UnsupportedCall
+from pcapkit.utilities.exceptions import StructError, UnsupportedCall, stacklevel
+from pcapkit.utilities.logging import DEVMODE, logger
 
 if TYPE_CHECKING:
+    from typing import Any, Optional, Type
+
     from typing_extensions import Literal
 
 __all__ = ['Transport']
@@ -66,3 +71,60 @@ class Transport(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
             raise UnsupportedCall(f'{cls.__name__} is an abstract class')
 
         cls.__proto__[code] = (module, class_)
+
+    @classmethod
+    def analyze(cls, ports: 'tuple[int, int]', payload: 'bytes', **kwargs: 'Any') -> 'Protocol':  # type: ignore[override] # pylint: disable=arguments-renamed
+        """Analyse packet payload.
+
+        Args:
+            ports: Source & destination port numbers.
+            payload: Packet payload.
+
+        Keyword Args:
+            **kwargs: Arbitrary keyword arguments.
+
+        Returns:
+            Parsed payload as a :class:`~pcapkit.protocols.protocol.Protocol`
+            instance.
+
+        """
+        if ports[0] in cls.__proto__:
+            module, name = cls.__proto__[ports[0]]
+        else:
+            module, name = cls.__proto__[ports[1]]
+        protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
+
+        payload_io = io.BytesIO(payload)
+        try:
+            report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
+        except Exception as exc:
+            if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
+                from pcapkit.protocols.misc.null import NoPayload as protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel # isort:skip
+            else:
+                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel # isort:skip
+            # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
+
+            # log error
+            logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
+
+            report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
+        return report
+
+    ##########################################################################
+    # Utilities.
+    ##########################################################################
+
+    def _decode_next_layer(self, dict_: 'PT', ports: 'tuple[int, int]', length: 'Optional[int]' = None) -> 'PT':  # type: ignore[override] # pylint: disable=arguments-renamed
+        """Decode next layer protocol.
+
+        Arguments:
+            dict_: info buffer
+            ports: source & destination port numbers
+            length: valid (*non-padding*) length
+
+        Returns:
+            Current protocol with next layer extracted.
+
+        """
+        proto = ports[0] if ports[0] in self.__proto__ else ports[1]
+        return super()._decode_next_layer(dict_, proto, length)

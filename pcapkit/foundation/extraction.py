@@ -68,7 +68,7 @@ class ReassemblyData(Info):
     tcp: 'Optional[tuple[TCP_Datagram, ...]]'
 
     if TYPE_CHECKING:
-        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 class Extractor:
@@ -286,7 +286,7 @@ class Extractor:
     ##########################################################################
 
     @classmethod
-    def register(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':
+    def register(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
         """Register a new dumper class.
 
         Arguments:
@@ -369,8 +369,9 @@ class Extractor:
         return module
 
     @classmethod
-    def make_name(cls, fin: 'str' = 'in.pcap', fout: 'str' = 'out', fmt: 'Formats' = 'tree', extension: 'bool' = True, *,
-                  files: 'bool' = False, nofile: 'bool' = False) -> 'tuple[str, Optional[str], Formats, Optional[str], bool]':
+    def make_name(cls, fin: 'str' = 'in.pcap', fout: 'str' = 'out', fmt: 'Formats' = 'tree',
+                  extension: 'bool' = True, *, files: 'bool' = False,
+                  nofile: 'bool' = False) -> 'tuple[str, Optional[str], Formats, Optional[str], bool]':
         """Generate input and output filenames.
 
         The method will perform following processing:
@@ -502,13 +503,13 @@ class Extractor:
     ##########################################################################
 
     def __init__(self,
-                 fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                 # basic settings  # pylint: disable=redefined-builtin
-                 auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings
-                 files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings
-                 engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings
-                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,    # reassembly settings
-                 trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings
-                 trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'None':      # trace settings
+                 fin: 'Optional[str]' = None, fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,                 # basic settings # pylint: disable=redefined-builtin
+                 auto: 'bool' = True, extension: 'bool' = True, store: 'bool' = True,                                           # internal settings # pylint: disable=line-too-long
+                 files: 'bool' = False, nofile: 'bool' = False, verbose: 'bool | VerboseHandler' = False,                       # output settings # pylint: disable=line-too-long
+                 engine: 'Optional[Engines]' = None, layer: 'Optional[Layers]' = None, protocol: 'Optional[Protocols]' = None,  # extraction settings # pylint: disable=line-too-long
+                 ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,    # reassembly settings # pylint: disable=line-too-long
+                 trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
+                 trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'None':      # trace settings # pylint: disable=line-too-long
         """Initialise PCAP Reader.
 
         Arguments:
@@ -575,7 +576,7 @@ class Extractor:
             self._flag_v = verbose
             if verbose:
                 self._vfunc = lambda e, f: print(
-                    f'Frame {e._frnum:>3d}: {f.protochain}'
+                    f'Frame {e._frnum:>3d}: {f.protochain}'  # pylint: disable=protected-access
                 )  # pylint: disable=logging-fstring-interpolation
             else:
                 self._vfunc = lambda e, f: None
@@ -616,7 +617,7 @@ class Extractor:
             self._trace = TraceFlow(fout=trace_fout, format=trace_format,
                                     byteorder=trace_byteorder, nanosecond=trace_nanosecond)
 
-        self._ifile = open(ifnm, 'rb')  # input file
+        self._ifile = open(ifnm, 'rb')  # input file # pylint: disable=unspecified-encoding,consider-using-with
         if not self._flag_q:
             module, class_, ext = self.__output__[fmt]
             if ext is None:
@@ -659,7 +660,7 @@ class Extractor:
                         )
                     return super().object_hook(o)  # type: ignore[unreachable]
 
-                def default(self, o: 'Any') -> 'Literal["fallback"]':
+                def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=no-self-use,unused-argument
                     """Check content type for function call."""
                     return 'fallback'
 
@@ -702,7 +703,7 @@ class Extractor:
             return self._read_frame()
         except (EOFError, StopIteration):
             self._cleanup()
-            raise StopIteration
+            raise StopIteration  # pylint: disable=raise-missing-from
 
     def __call__(self) -> 'Frame | ScapyPacket | DPKTPacket':
         """Works as a simple wrapper for the iteration protocol.
@@ -858,7 +859,7 @@ class Extractor:
         if self._flag_v:
             from pcapkit.toolkit.scapy import packet2chain  # isort:skip
             self._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f)}'
+                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract global header
@@ -958,7 +959,7 @@ class Extractor:
         if self._flag_v:
             from pcapkit.toolkit.dpkt import packet2chain  # isort:skip
             self._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f)}'
+                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract global header
@@ -1090,7 +1091,7 @@ class Extractor:
         # setup verbose handler
         if self._flag_v:
             self._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'
+                f'Frame {e._frnum:>3d}: {f.frame_info.protocols}'  # pylint: disable=protected-access
             )  # pylint: disable=logging-fstring-interpolation
 
         # extract & analyse file

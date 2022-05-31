@@ -116,7 +116,7 @@ class ARP(Link[DataType_ARP]):
         return ('ARP', 'InARP')
 
     def read(self, length: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_ARP':  # pylint: disable=unused-argument
-        """Read Address Resolution Protocol.
+        r"""Read Address Resolution Protocol.
 
         Data structure of ARP Request header [:rfc:`826`]:
 
@@ -189,7 +189,7 @@ class ARP(Link[DataType_ARP]):
             tpa=_tpta,
             len=8 + _hlen * 2 + _plen * 2,
         )
-        return self._decode_next_layer(arp, None, length - arp.len)
+        return self._decode_next_layer(arp, -1, length - arp.len)
 
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.

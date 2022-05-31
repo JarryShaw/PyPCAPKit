@@ -49,7 +49,7 @@ class MPTCPOption(Vendor):
             Field recordings.
 
         """
-        return collections.Counter(map(self.safe_name, data.values()))  # pylint: disable=dict-values-not-iterating,map-builtin-not-iterating
+        return collections.Counter(map(self.safe_name, data.values()))
 
     def process(self, data: 'dict[int, str]') -> 'tuple[list[str], list[str]]':  # type: ignore[override]
         """Process CSV data.

@@ -30,7 +30,6 @@ from typing import TYPE_CHECKING
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP
 from pcapkit.protocols.data.application.httpv1 import HTTP as DataType_HTTP
-from pcapkit.protocols.data.application.httpv1 import Header as DataType_Header
 from pcapkit.protocols.data.application.httpv1 import RequestHeader as DataType_RequestHeader
 from pcapkit.protocols.data.application.httpv1 import ResponseHeader as DataType_ResponseHeader
 from pcapkit.utilities.exceptions import ProtocolError
@@ -39,6 +38,8 @@ if TYPE_CHECKING:
     from typing import Any, NoReturn, Optional
 
     from typing_extensions import Literal
+
+    from pcapkit.protocols.data.application.httpv1 import Header as DataType_Header
 
 __all__ = ['HTTPv1']
 
@@ -115,10 +116,7 @@ class HTTPv1(HTTP[DataType_HTTP]):
             length = len(self)
 
         packet = self._file.read(length)
-        try:
-            header, body = packet.split(b'\r\n\r\n', maxsplit=1)
-        except ValueError:
-            raise ProtocolError('HTTP: invalid format', quiet=True)
+        header, body = packet.split(b'\r\n\r\n', maxsplit=1)
 
         header_line, header_unpacked = self._read_http_header(header)
         body_unpacked = self._read_http_body(body) or None
@@ -129,6 +127,8 @@ class HTTPv1(HTTP[DataType_HTTP]):
             body=body_unpacked,
         )
         self._receipt = header_line.type
+        self._version = header_line.version  # type: ignore[attr-defined]
+        self._length = len(packet)
 
         return http
 
@@ -180,13 +180,10 @@ class HTTPv1(HTTP[DataType_HTTP]):
             ProtocolError: If the packet is malformed.
 
         """
-        try:
-            startline, headerfield = header.split(b'\r\n', 1)
-            para1, para2, para3 = re.split(rb'\s+', startline, 2)
-            fields = headerfield.split(b'\r\n')
-            lists = (re.split(rb'\s*:\s*', field, 1) for field in fields)
-        except ValueError:
-            raise ProtocolError('HTTP: invalid format', quiet=True)
+        startline, headerfield = header.split(b'\r\n', 1)
+        para1, para2, para3 = re.split(rb'\s+', startline, 2)
+        fields = headerfield.split(b'\r\n')
+        lists = (re.split(rb'\s*:\s*', field, 1) for field in fields)
 
         if TYPE_CHECKING:
             header_line: 'DataType_Header'
@@ -210,16 +207,13 @@ class HTTPv1(HTTP[DataType_HTTP]):
                 message=self.decode(para3),
             )
         else:
-            raise ProtocolError('HTTP: invalid format', quiet=True)
+            raise ProtocolError('HTTP: invalid format')
 
         header_fields = OrderedMultiDict()  # type: OrderedMultiDict[str, str]
-        try:
-            for item in lists:
-                key = self.decode(item[0].strip())
-                value = self.decode(item[1].strip())
-                header_fields.add(key, value)
-        except IndexError:
-            raise ProtocolError('HTTP: invalid format', quiet=True)
+        for item in lists:
+            key = self.decode(item[0].strip())
+            value = self.decode(item[1].strip())
+            header_fields.add(key, value)
 
         return header_line, header_fields
 

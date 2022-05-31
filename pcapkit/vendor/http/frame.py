@@ -48,7 +48,7 @@ class Frame(Vendor):
                     temp.append(f'[:rfc:`{rfc[3:]}`]')
                 else:
                     temp.append(f'[{rfc}]'.replace('_', ' '))
-            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '``%s`` %s' % (
+            desc = self.wrap_comment(re.sub(r'\r*\n', ' ', '``%s`` %s' % (  # pylint: disable=consider-using-f-string
                 name, ''.join(temp) if rfcs else '',
             ), re.MULTILINE))
 

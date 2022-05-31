@@ -99,7 +99,7 @@ class MH(Internet[DataType_MH]):
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,  # pylint: disable=arguments-differ
+    def read(self, length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,  # pylint: disable=arguments-differ,unused-argument
              extension: bool = False, **kwargs: 'Any') -> 'DataType_MH':  # pylint: disable=unused-argument
         """Read Mobility Header.
 
@@ -177,7 +177,7 @@ class MH(Internet[DataType_MH]):
     def __post_init__(self, **kwargs: 'Any') -> 'None': ...  # pylint: disable=arguments-differ
 
     def __post_init__(self, file: 'Optional[BinaryIO]' = None, length: 'Optional[int]' = None, *,  # pylint: disable=arguments-differ
-                      version: 'Literal[4, 6]' = 4, extension: 'bool' = False,
+                      version: 'Literal[4, 6]' = 4, extension: 'bool' = False,  # pylint: disable=unused-argument
                       **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 

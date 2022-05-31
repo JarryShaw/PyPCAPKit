@@ -86,6 +86,11 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
                 # NOTE: We iterate in reversed order to ensure that the type
                 # annotations of the superclasses are considered first.
                 for key in reversed(cls_.__annotations__):
+                    # NOTE: We skip duplicated annotations to avoid duplicate
+                    # argument in function definition.
+                    if key in args_:
+                        continue
+
                     args_.append(key)
                     dict_.append(f'{key}={key}')
 
@@ -124,11 +129,11 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
 
         if dict_ is None:
-            data_iter = kwargs.items()  # type: Iterable[tuple[str, Any]] # pylint: disable=dict-items-not-iterating
+            data_iter = kwargs.items()  # type: Iterable[tuple[str, Any]]
         elif isinstance(dict_, collections.abc.Mapping):
-            data_iter = itertools.chain(dict_.items(), kwargs.items())  # pylint: disable=dict-items-not-iterating
+            data_iter = itertools.chain(dict_.items(), kwargs.items())
         else:
-            data_iter = itertools.chain(dict_, kwargs.items())  # pylint: disable=dict-items-not-iterating
+            data_iter = itertools.chain(dict_, kwargs.items())
 
         for (key, value) in data_iter:
             if key in self.__builtin__:

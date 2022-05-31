@@ -25,7 +25,7 @@ class MagicNumber(Info):
     nanosecond: 'bool'
 
     if TYPE_CHECKING:
-        def __init__(self, data: 'bytes', byteorder: 'Literal["big", "little"]', nanosecond: 'bool') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, data: 'bytes', byteorder: 'Literal["big", "little"]', nanosecond: 'bool') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
 class Header(Info):
@@ -45,5 +45,5 @@ class Header(Info):
     network: 'LinkType'
 
     if TYPE_CHECKING:
-        def __init__(self, magic_number: 'MagicNumber', version: 'VersionInfo',  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, magic_number: 'MagicNumber', version: 'VersionInfo',  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
                      thiszone: 'int', sigfigs: 'int', snaplen: 'int', network: 'LinkType') -> 'None': ...  # pylint: disable=unused-argument

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""TCP datagram reassembly
+r"""TCP datagram reassembly
 
 :mod:`pcapkit.foundation.reassembly.tcp` contains
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
@@ -134,7 +134,7 @@ tcp.datagram
 
        (tuple) datagram
         |--> (Info) data
-        |     |--> 'NotImplemented' : (bool) True --> implemented
+        |     |--> 'completed' : (bool) True --> implemented
         |     |--> 'id' : (Info) original packet identifier
         |     |            |--> 'src' --> (tuple)
         |     |            |               |--> (IPv4Address) ip.src
@@ -148,8 +148,9 @@ tcp.datagram
         |     |               |--> ...
         |     |--> 'header' : (bytes) initial TCP header
         |     |--> 'payload' : (bytes) reassembled payload
+        |     |--> 'packet' : (Protocol) parsed reassembled payload
         |--> (Info) data
-        |     |--> 'NotImplemented' : (bool) False --> not implemented
+        |     |--> 'completed' : (bool) False --> not implemented
         |     |--> 'id' : (Info) original packet identifier
         |     |            |--> 'src' --> (tuple)
         |     |            |               |--> (IPv4Address) ip.src
@@ -163,8 +164,9 @@ tcp.datagram
         |     |               |--> ...
         |     |--> 'header' : (bytes) initial TCP header
         |     |--> 'payload' : (tuple) partially reassembled payload
-        |                       |--> (bytes) payload fragment
-        |                       |--> ...
+        |     |                 |--> (bytes) payload fragment
+        |     |                 |--> ...
+        |     |--> 'packet' : (None) not implemented
         |--> (Info) data ...
 
 tcp.buffer
@@ -190,7 +192,8 @@ tcp.buffer
         |                                      |                 |             |--> (int) packet range number
         |                                      |                 |--> 'isn' : (int) ISN of payload buffer
         |                                      |                 |--> 'len' : (int) length of payload buffer
-        |                                      |                 |--> 'raw' : (bytearray) reassembled payload, holes set to b'\\x00'
+        |                                      |                 |--> 'raw' : (bytearray) reassembled payload,
+        |                                      |                                          holes set to b'\x00'
         |                                      |--> (int) ACK ...
         |                                      |--> ...
         |--> (tuple) BUFID ...
@@ -205,9 +208,11 @@ from pcapkit.protocols.transport.tcp import TCP
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Type, overload
+    from typing import Optional, Type, overload
 
     from typing_extensions import Literal
+
+    from pcapkit.protocols.protocol import Protocol
 
 __all__ = ['TCP_Reassembly']
 
@@ -249,7 +254,7 @@ class Packet(Info):
     payload: 'bytearray'
 
     if TYPE_CHECKING:
-        def __init__(self, bufid: 'BufferID', dsn: 'int', ack: 'int', num: 'int', syn: 'bool', fin: 'bool', rst: 'bool', len: 'int', first: 'int', last: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, bufid: 'BufferID', dsn: 'int', ack: 'int', num: 'int', syn: 'bool', fin: 'bool', rst: 'bool', len: 'int', first: 'int', last: 'int', header: 'bytes', payload: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class DatagramID(Info, Generic[IPAddress]):
@@ -263,7 +268,7 @@ class DatagramID(Info, Generic[IPAddress]):
     ack: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, src: 'tuple[IPAddress, int]', dst: 'tuple[IPAddress, int]', ack: 'int') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, src: 'tuple[IPAddress, int]', dst: 'tuple[IPAddress, int]', ack: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Datagram(Info, Generic[IPAddress]):
@@ -279,15 +284,17 @@ class Datagram(Info, Generic[IPAddress]):
     header: 'bytes'
     #: Reassembled payload (application layer data).
     payload: 'bytes | tuple[bytes, ...]'
+    #: Parsed reassembled payload.
+    packet: 'Optional[Protocol]'
 
     if TYPE_CHECKING:
-        @overload
-        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        @overload  # pylint: disable=used-before-assignment
+        def __init__(self, completed: 'Literal[True]', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes', packet: 'Protocol') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
         @overload
-        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, completed: 'Literal[False]', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'tuple[bytes, ...]', packet: 'None') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
-        def __init__(self, completed: 'bool', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, completed: 'bool', id: 'DatagramID[IPAddress]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[Protocol]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class HoleDiscriptor(Info):
@@ -299,7 +306,7 @@ class HoleDiscriptor(Info):
     last: 'int'
 
     if TYPE_CHECKING:
-        def __init__(self, first: 'int', last: 'int') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, first: 'int', last: 'int') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Fragment(Info):
@@ -315,7 +322,7 @@ class Fragment(Info):
     raw: 'bytearray'
 
     if TYPE_CHECKING:
-        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, ind: 'list[int]', isn: 'int', len: 'int', raw: 'bytearray') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 class Buffer(Info):
@@ -329,7 +336,7 @@ class Buffer(Info):
     ack: 'dict[int, Fragment]'
 
     if TYPE_CHECKING:
-        def __init__(self, hdl: 'list[HoleDiscriptor]', hdr: 'bytes', ack: 'dict[int, Fragment]') -> 'None': ...  # pylint: disable=unused-argument, super-init-not-called, multiple-statements
+        def __init__(self, hdl: 'list[HoleDiscriptor]', hdr: 'bytes', ack: 'dict[int, Fragment]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin
 
 
 ###############################################################################
@@ -528,6 +535,7 @@ class TCP_Reassembly(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         index=tuple(buffer.ind),
                         header=buf.hdr,
                         payload=tuple(data),
+                        packet=None,
                     )
                     datagram.append(packet)
 
@@ -546,6 +554,7 @@ class TCP_Reassembly(Reassembly[Packet, Datagram, BufferID, Buffer]):
                         index=tuple(buffer.ind),
                         header=buf.hdr,
                         payload=bytes(payload),
+                        packet=self.protocol.analyze((bufid[1], bufid[3]), bytes(payload)),
                     )
                     datagram.append(packet)
         return datagram
