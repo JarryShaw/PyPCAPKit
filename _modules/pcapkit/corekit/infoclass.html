@@ -119,6 +119,11 @@
                 <span class="c1"># NOTE: We iterate in reversed order to ensure that the type</span>
                 <span class="c1"># annotations of the superclasses are considered first.</span>
                 <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">cls_</span><span class="o">.</span><span class="vm">__annotations__</span><span class="p">):</span>
+                    <span class="c1"># NOTE: We skip duplicated annotations to avoid duplicate</span>
+                    <span class="c1"># argument in function definition.</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">args_</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
                     <span class="n">args_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                     <span class="n">dict_</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">=</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
@@ -157,11 +162,11 @@
         <span class="vm">__name__</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 
         <span class="k">if</span> <span class="n">dict_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">data_iter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>  <span class="c1"># type: Iterable[tuple[str, Any]] # pylint: disable=dict-items-not-iterating</span>
+            <span class="n">data_iter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>  <span class="c1"># type: Iterable[tuple[str, Any]]</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
-            <span class="n">data_iter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">dict_</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>  <span class="c1"># pylint: disable=dict-items-not-iterating</span>
+            <span class="n">data_iter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">dict_</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">data_iter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>  <span class="c1"># pylint: disable=dict-items-not-iterating</span>
+            <span class="n">data_iter</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iter</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">:</span>
