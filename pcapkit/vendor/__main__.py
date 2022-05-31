@@ -11,8 +11,8 @@ from pcapkit import vendor as vendor_module
 from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning
 
 if TYPE_CHECKING:
-    from typing import Type
     from argparse import ArgumentParser
+    from typing import Type
 
     from pcapkit.vendor.default import Vendor
 

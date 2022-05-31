@@ -286,7 +286,8 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         elif isinstance(value, Protocol):
             comp = (type(value), *(name.upper() for name in value.id()))
         else:
-            from pcapkit.protocols import __proto__ as protocols_registry  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols import \
+                __proto__ as protocols_registry  # pylint: disable=import-outside-toplevel
 
             if (proto := protocols_registry.get(value.upper())) is not None:
                 comp = (proto, *(name.upper() for name in proto.id()))
