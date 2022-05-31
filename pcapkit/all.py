@@ -60,6 +60,20 @@ __all__ = [
     'Extractor',                                            # Extraction
     'TraceFlow',                                            # Trace Flow
 
+    # pcapkit.foundation.reassembly
+    'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
+    'TCP_Reassembly',                                       # TCP Reassembly
+
+    # pcapkit.foundation.registry
+    'register_protocol',
+    'register_linktype', 'register_pcap',
+    'register_ethertype', 'register_transtype',
+    'register_port', 'register_tcp_port', 'register_udp_port',
+    'register_output', 'register_extractor', 'register_traceflow',
+    'register_hopopt', 'register_ipv6_opts', 'register_ipv6_route',
+    'register_tcp', 'register_mptcp',
+    'register_http',
+
     # pcapkit.interface
     'extract', 'reassemble', 'trace',                       # Interface Functions
     'TREE', 'JSON', 'PLIST', 'PCAP',                        # Format Macros
@@ -78,10 +92,6 @@ __all__ = [
                                                             # IPv6 Extension Header
     'TCP', 'UDP',                                           # Transport Layer
     'FTP', 'HTTP',                                          # Application Layer
-
-    # pcapkit.reassembly
-    'IPv4_Reassembly', 'IPv6_Reassembly',                   # IP Reassembly
-    'TCP_Reassembly',                                       # TCP Reassembly
 
     # pcapkit.toolkit
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',

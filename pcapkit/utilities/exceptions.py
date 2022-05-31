@@ -31,6 +31,7 @@ __all__ = [
     'DictError', 'ListError', 'TupleError', 'IterableError',        # TypeError
     'IOObjError', 'ProtocolUnbound', 'CallableError',               # TypeError
     'InfoError', 'IPError', 'EnumError', 'ComparisonError',         # TypeError
+    'RegistryError',                                                # TypeError
     'FormatError', 'UnsupportedCall',                               # AttributeError
     'FileError',                                                    # IOError
     'FileExists',                                                   # FileExistsError
@@ -181,6 +182,10 @@ class EnumError(BaseError, TypeError):
 
 class ComparisonError(BaseError, TypeError):
     """Rich comparison not supported between instances."""
+
+
+class RegistryError(BaseError, TypeError):
+    """The argument(s) must be *registry* type."""
 
 
 ##############################################################################

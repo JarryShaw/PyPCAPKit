@@ -79,6 +79,7 @@ else:
     tbtrim.set_trim_rule(lambda filename: ROOT in os.path.realpath(filename),
                          exception=BaseError, strict=False)
 
+from pcapkit.foundation.registry import *
 from pcapkit.interface import *
 from pcapkit.protocols import *
 from pcapkit.toolkit import *

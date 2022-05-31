@@ -287,7 +287,7 @@ class Extractor:
 
     @classmethod
     def register(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':
-        """Register a new protocol class.
+        """Register a new dumper class.
 
         Arguments:
             format: format name
@@ -296,7 +296,7 @@ class Extractor:
             ext: file extension
 
         Notes:
-            The full qualified class name of the new protocol class
+            The full qualified class name of the new dumper class
             should be as ``{module}.{class_}``.
 
         """
