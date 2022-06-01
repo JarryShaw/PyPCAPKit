@@ -97,6 +97,7 @@ attrs = dict(
         'Programming Language :: Python :: Implementation :: PyPy',
         'Topic :: System :: Networking',
         'Topic :: Utilities',
+        'Typing :: Typed',
     ],
     # distclass
     # script_name
