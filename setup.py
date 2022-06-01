@@ -4,7 +4,7 @@ import subprocess  # nosec
 import sys
 
 # version string
-__version__ = '0.15.5'
+__version__ = '0.16.0'
 
 # README
 with open('README.md', encoding='utf-8') as file:
@@ -21,7 +21,7 @@ attrs = dict(
     maintainer='Jarry Shaw',
     maintainer_email='jarryshaw@icloud.com',
     url='https://github.com/JarryShaw/PyPCAPKit',
-    download_url='https://github.com/JarryShaw/PyPCAPKit/archive/v%s.tar.gz' % __version__,
+    download_url='https://github.com/JarryShaw/PyPCAPKit/archive/v%s.tar.gz' % __version__,  # pylint: disable=consider-using-f-string
     # py_modules
     packages=[
         'pcapkit',
@@ -86,12 +86,11 @@ attrs = dict(
         'Operating System :: OS Independent',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3 :: Only',
         'Programming Language :: Python :: Implementation',
         'Programming Language :: Python :: Implementation :: CPython',
@@ -188,12 +187,12 @@ try:
         # password
         # fullname
         long_description_content_type='text/markdown',
-        python_requires='>=3.4',
+        python_requires='>=3.6',
         zip_safe=True,  # type: ignore
     ))
 except ImportError:
-    from distutils.core import setup
-    from distutils.command.build_py import build_py
+    from distutils.core import setup  # pylint: disable=deprecated-module
+    from distutils.command.build_py import build_py  # pylint: disable=deprecated-module
 
 
 class build(build_py):
