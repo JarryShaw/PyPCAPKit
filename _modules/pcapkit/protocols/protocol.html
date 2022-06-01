@@ -64,8 +64,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.compat</span> <span class="kn">import</span> <span class="n">cached_property</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.decorators</span> <span class="kn">import</span> <span class="n">beholder</span><span class="p">,</span> <span class="n">seekset</span>
 <span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ProtocolNotFound</span><span class="p">,</span> <span class="n">ProtocolNotImplemented</span><span class="p">,</span> <span class="n">StructError</span><span class="p">,</span>
-                                          <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">DEVMODE</span><span class="p">,</span> <span class="n">logger</span>
+                                          <span class="n">UnsupportedCall</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -358,7 +357,7 @@
             <span class="c1"># error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]</span>
 
             <span class="c1"># log error</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">exc</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="n">exc</span><span class="p">,</span> <span class="n">stack_info</span><span class="o">=</span><span class="n">DEVMODE</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="c1">#logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())</span>
 
             <span class="n">report</span> <span class="o">=</span> <span class="n">protocol</span><span class="p">(</span><span class="n">payload_io</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[abstract]</span>
         <span class="k">return</span> <span class="n">report</span></div>
@@ -396,7 +395,7 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">(file, </span><span class="si">%s</span><span class="s1">, **</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1">#logger.debug(&#39;%s(file, %s, **%s)&#39;, type(self).__name__, length, kwargs)</span>
 
         <span class="c1">#: int: File pointer.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_seekset</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span>  <span class="c1"># type: int</span>
