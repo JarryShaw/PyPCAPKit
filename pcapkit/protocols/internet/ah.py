@@ -53,7 +53,7 @@ class AH(IPsec[DataType_AH]):
 
     @property
     def length(self) -> 'int':
-        """Info dict of current instance."""
+        """Header length of current protocol."""
         return self._info.length
 
     @property

@@ -26,57 +26,27 @@ which implements Encapsulating Security Payload header
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-# Encapsulating Security Payload
-# Analyser for ESP header
-
-
 from pcapkit.protocols.internet.ipsec import IPsec
-from pcapkit.utilities import Info
+from pcapkit.corekit.infoclass import Info
 
 __all__ = ['ESP']
 
 
 class ESP(IPsec):
-    """This class implements Encapsulating Security Payload.
+    """This class implements Encapsulating Security Payload."""
 
-    Properties:
-        * name -- str, name of corresponding procotol
-        * info -- Info, info dict of current instance
-        * alias -- str, acronym of corresponding procotol
-        * layer -- str, `Internet`
-        * length -- int, header length of corresponding protocol
-        * protocol -- str, name of next layer protocol
-        * protochain -- ProtoChain, protocol chain of current instance
-
-    Methods:
-        * read_esp -- read Encapsulating Security Payload (ESP)
-
-    Attributes:
-        * _file -- BytesIO, bytes to be extracted
-        * _info -- Info, info dict of current instance
-        * _protos -- ProtoChain, protocol chain of current instance
-
-    Utilities:
-        * _read_protos -- read next layer protocol type
-        * _read_fileng -- read file buffer
-        * _read_unpack -- read bytes and unpack to integers
-        * _read_binary -- read bytes and convert into binaries
-        * _decode_next_layer -- decode next layer protocol type
-        * _import_next_layer -- import next layer protocol extractor
-
-    """
     ##########################################################################
     # Properties.
     ##########################################################################
 
     @property
     def name(self):
-        """Name of corresponding procotol."""
+        """Name of corresponding protocol."""
         return 'Encapsulating Security Payload'
 
     @property
     def length(self):
-        """Info dict of current instance."""
+        """"Header length of current protocol."""
         return self._info.length
 
     @property
@@ -88,7 +58,7 @@ class ESP(IPsec):
     # Methods.
     ##########################################################################
 
-    def read_esp(self, length, version):
+    def read(self, length, version):
         """Read Encapsulating Security Payload.
 
         Structure of ESP header [RFC 4303]:
@@ -119,10 +89,6 @@ class ESP(IPsec):
     ##########################################################################
     # Data models.
     ##########################################################################
-
-    def __init__(self, _file, *, version=4):
-        self._file = _file
-        self._info = Info(self.read_esp(length, version))
 
     def __len__(self):
         return self._info.length
