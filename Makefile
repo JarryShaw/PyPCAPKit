@@ -29,7 +29,7 @@ dist:
 	find dist -iname '*.whl' -exec mv {} wheels \;
 	find dist -iname '*.tar.gz' -exec mv {} sdist \;
 	rm -rf build dist *.egg-info
-	pipenv run python setup.py sdist bdist_wheel --python-tag='cp38'
+	pipenv run python setup.py sdist bdist_wheel
 	twine check dist/* || true
 	twine upload dist/* -r pypi --skip-existing
 	twine upload dist/* -r pypitest --skip-existing

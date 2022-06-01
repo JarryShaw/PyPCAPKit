@@ -15,6 +15,7 @@ prune sample
 prune src
 prune test
 prune testbench
+prune temp
 
 include README.md
 include LICENSE
