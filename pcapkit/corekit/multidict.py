@@ -193,6 +193,17 @@ class MultiDict(dict, Generic[_KT, _VT]):
         """
         dict.setdefault(self, key, []).append(value)  # type: ignore[arg-type,attr-defined]
 
+    @overload
+    def get(self, key: '_KT') -> '_VT | _T': ...
+    @overload
+    def get(self, key: '_KT', default: '_VT | _T' = ...) -> '_VT | _T': ...
+
+    def get(self, key: '_KT', default: '_VT | _T' = None) -> '_VT | _T':  # type: ignore[assignment,misc]
+        try:
+            return self[key]
+        except MissingKeyError:
+            return default
+
     def getlist(self, key: '_KT') -> 'list[_VT]':
         """Return the list of items for a given key.
 

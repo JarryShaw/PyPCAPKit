@@ -95,9 +95,11 @@ class BaseError(Exception):
         # log error
         if not quiet:
             if DEVMODE:
-                logger.error(str(self), exc_info=self, stack_info=True, stacklevel=-stacklevel())
+                logger.error('%s: %s', type(self).__name__, str(self), exc_info=self,
+                             stack_info=True, stacklevel=-stacklevel())
+                # logger.error('%s: %s', type(self).__name__, str(self))
             else:
-                logger.error(str(self))
+                logger.error('%s: %s', type(self).__name__, str(self))
 
         if not DEVMODE:
             sys.tracebacklimit = 0

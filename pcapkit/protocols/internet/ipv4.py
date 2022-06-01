@@ -222,6 +222,16 @@ class IPv4(IP[DataType_IPv4]):
         """
         raise NotImplementedError
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["IPv4"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('IPv4',)
+
     ##########################################################################
     # Data models.
     ##########################################################################

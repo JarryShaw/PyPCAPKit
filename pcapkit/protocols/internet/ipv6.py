@@ -163,6 +163,16 @@ class IPv6(IP[DataType_IPv6]):
         """
         raise NotImplementedError
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["IPv6"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('IPv6',)
+
     ##########################################################################
     # Data models.
     ##########################################################################
@@ -257,8 +267,11 @@ class IPv6(IP[DataType_IPv6]):
             proto = info.next
 
             # update header & payload length
-            hdr_len += info.length
-            raw_len -= info.length
+            hdr_len += next_.length  # type: ignore[assignment]
+            raw_len -= next_.length
+
+            # keep record of extension headers
+            self._exthdr.add(ex_proto, next_)
 
             # keep original data after fragment header
             if ex_proto == RegType_ExtensionHeader.IPv6_Frag:
@@ -266,9 +279,6 @@ class IPv6(IP[DataType_IPv6]):
                     'fragment': self._read_packet(header=hdr_len, payload=raw_len),
                 })
                 break
-
-            # keep record of extension headers
-            self._exthdr.add(ex_proto, next_)
 
         # record real header & payload length (headers exclude)
         ipv6.__update__({

@@ -31,8 +31,7 @@ from pcapkit.protocols.data.protocol import Packet as DataType_Packet
 from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.decorators import beholder, seekset
 from pcapkit.utilities.exceptions import (ProtocolNotFound, ProtocolNotImplemented, StructError,
-                                          UnsupportedCall, stacklevel)
-from pcapkit.utilities.logging import DEVMODE, logger
+                                          UnsupportedCall)
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -325,7 +324,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
-            logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
+            #logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
 
             report = protocol(payload_io, len(payload), **kwargs)  # type: ignore[abstract]
         return report
@@ -363,7 +362,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             **kwargs: Arbitrary keyword arguments.
 
         """
-        logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)
+        #logger.debug('%s(file, %s, **%s)', type(self).__name__, length, kwargs)
 
         #: int: File pointer.
         self._seekset = io.SEEK_SET  # type: int

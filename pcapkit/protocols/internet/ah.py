@@ -180,6 +180,16 @@ class AH(IPsec[DataType_AH]):
         """
         raise NotImplementedError
 
+    @classmethod
+    def id(cls) -> 'tuple[Literal["AH"]]':  # type: ignore[override]
+        """Index ID of the protocol.
+
+        Returns:
+            Index ID of the protocol.
+
+        """
+        return ('AH',)
+
     ##########################################################################
     # Data models.
     ##########################################################################

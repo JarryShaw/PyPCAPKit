@@ -224,9 +224,9 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
     """
     if hasattr(packet, 'ip'):
-        ip = cast('IP', packet['ip'])
+        ip = cast('IP', packet.ip)
     elif hasattr(packet, 'ip6'):
-        ip = cast('IP6', packet['ip6'])
+        ip = cast('IP6', packet.ip6)
     else:
         return None
 
@@ -283,9 +283,9 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
 
     """
     if hasattr(packet, 'ip'):
-        ip = cast('IP', packet['ip'])
+        ip = cast('IP', packet.ip)
     elif hasattr(packet, 'ip6'):
-        ip = cast('IP6', packet['ip6'])
+        ip = cast('IP6', packet.ip6)
     else:
         return None
 

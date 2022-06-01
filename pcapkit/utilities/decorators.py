@@ -12,8 +12,7 @@ import io
 import os
 from typing import TYPE_CHECKING, cast
 
-from pcapkit.utilities.exceptions import StructError, stacklevel
-from pcapkit.utilities.logging import DEVMODE, logger
+from pcapkit.utilities.exceptions import StructError
 
 if TYPE_CHECKING:
     from typing import Callable, Optional, TypeVar
@@ -93,7 +92,10 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') 
     def behold(*args: 'P.args', **kwargs: 'P.kwargs') -> 'R':
         # extract self object & args
         self = cast('Protocol', args[0])
-        length = cast('int', args[2])
+        try:
+            length = cast('int', args[2])
+        except IndexError:
+            length = None
 
         # record file pointer
         seek_cur = self._file.tell()
@@ -102,16 +104,13 @@ def beholder(func: 'Callable[Concatenate[Protocol, int, Optional[int], P], R]') 
             return func(*args, **kwargs)
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
-                from pcapkit.protocols.misc.null import \
-                    NoPayload as protocol  # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel
             else:
-                from pcapkit.protocols.misc.raw import \
-                    Raw as \
-                    protocol  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
+                from pcapkit.protocols.misc.raw import Raw as protocol  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
             # error = traceback.format_exc(limit=1).strip().rsplit(os.linesep, maxsplit=1)[-1]
 
             # log error
-            logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
+            #logger.error(str(exc), exc_info=exc, stack_info=DEVMODE, stacklevel=stacklevel())
 
             self._file.seek(seek_cur, os.SEEK_SET)
             next_ = protocol(io.BytesIO(self._read_fileng(length)), length, error=str(exc))

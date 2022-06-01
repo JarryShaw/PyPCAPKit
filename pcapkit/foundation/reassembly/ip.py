@@ -238,6 +238,7 @@ class IP_Reassembly(Reassembly[Packet[AT], Datagram[AT], tuple[AT, AT, 'int', 'T
         self._buffer[BUFID].RCVBT[start:stop] = b'\x01' * (stop - start + 1)
 
         # get total data length (header excludes)
+        TDL = 0
         if not MF:
             TDL = TL - IHL + FO
 

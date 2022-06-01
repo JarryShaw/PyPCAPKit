@@ -171,7 +171,10 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
         dict_.__update__([(layer, info)])
         self._next = next_  # pylint: disable=attribute-defined-outside-init
         if ipv6_exthdr is not None:
-            chain = ipv6_exthdr + chain
+            if chain is not None:
+                chain = ipv6_exthdr + chain
+            else:
+                chain = ipv6_exthdr  # type: ignore[unreachable]
         self._protos = ProtoChain(self.__class__, self.alias, basis=chain)  # pylint: disable=attribute-defined-outside-init
         return dict_
 
