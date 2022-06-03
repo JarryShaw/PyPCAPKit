@@ -305,17 +305,53 @@
 				<string>123.129.210.135</string>
 				<key>dst</key>
 				<string>192.168.1.100</string>
-				<key>raw</key>
+				<key>tcp</key>
 				<dict>
-					<key>packet</key>
-					<data>AFDXwNWfsVSmeqD/UBF8sHyOAAA=</data>
-					<key>error</key>
-					<string>AttributeError: 'Flags' object has no attribute 'syn'</string>
+					<key>srcport</key>
+					<integer>80</integer>
+					<key>dstport</key>
+					<integer>55232</integer>
+					<key>seq</key>
+					<integer>3584012628</integer>
+					<key>ack</key>
+					<integer>2793054463</integer>
+					<key>hdr_len</key>
+					<integer>20</integer>
+					<key>flags</key>
+					<dict>
+						<key>ns</key>
+						<false/>
+						<key>cwr</key>
+						<false/>
+						<key>ece</key>
+						<false/>
+						<key>urg</key>
+						<false/>
+						<key>ack</key>
+						<true/>
+						<key>psh</key>
+						<false/>
+						<key>rst</key>
+						<false/>
+						<key>syn</key>
+						<false/>
+						<key>fin</key>
+						<true/>
+					</dict>
+					<key>window_size</key>
+					<integer>31920</integer>
+					<key>checksum</key>
+					<data>fI4=</data>
+					<key>urgent_pointer</key>
+					<integer>0</integer>
+					<key>nopayload</key>
+					<dict>
+					</dict>
 				</dict>
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:Raw</string>
+		<string>Ethernet:IPv4:TCP</string>
 	</dict>
 	<key>Frame 4</key>
 	<dict>
@@ -425,17 +461,53 @@
 				<string>192.168.1.100</string>
 				<key>dst</key>
 				<string>123.129.210.135</string>
-				<key>raw</key>
+				<key>tcp</key>
 				<dict>
-					<key>packet</key>
-					<data>18AAUKZ6oP/Vn7FVUBD///k+AAA=</data>
-					<key>error</key>
-					<string>AttributeError: 'Flags' object has no attribute 'syn'</string>
+					<key>srcport</key>
+					<integer>55232</integer>
+					<key>dstport</key>
+					<integer>80</integer>
+					<key>seq</key>
+					<integer>2793054463</integer>
+					<key>ack</key>
+					<integer>3584012629</integer>
+					<key>hdr_len</key>
+					<integer>20</integer>
+					<key>flags</key>
+					<dict>
+						<key>ns</key>
+						<false/>
+						<key>cwr</key>
+						<false/>
+						<key>ece</key>
+						<false/>
+						<key>urg</key>
+						<false/>
+						<key>ack</key>
+						<true/>
+						<key>psh</key>
+						<false/>
+						<key>rst</key>
+						<false/>
+						<key>syn</key>
+						<false/>
+						<key>fin</key>
+						<false/>
+					</dict>
+					<key>window_size</key>
+					<integer>65535</integer>
+					<key>checksum</key>
+					<data>+T4=</data>
+					<key>urgent_pointer</key>
+					<integer>0</integer>
+					<key>nopayload</key>
+					<dict>
+					</dict>
 				</dict>
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:Raw</string>
+		<string>Ethernet:IPv4:TCP</string>
 	</dict>
 	<key>Frame 5</key>
 	<dict>
@@ -545,17 +617,53 @@
 				<string>192.168.1.100</string>
 				<key>dst</key>
 				<string>123.129.210.135</string>
-				<key>raw</key>
+				<key>tcp</key>
 				<dict>
-					<key>packet</key>
-					<data>17AAUC3UjSFtZXRuUBH//yr0AAA=</data>
-					<key>error</key>
-					<string>AttributeError: 'Flags' object has no attribute 'syn'</string>
+					<key>srcport</key>
+					<integer>55216</integer>
+					<key>dstport</key>
+					<integer>80</integer>
+					<key>seq</key>
+					<integer>768904481</integer>
+					<key>ack</key>
+					<integer>1835365486</integer>
+					<key>hdr_len</key>
+					<integer>20</integer>
+					<key>flags</key>
+					<dict>
+						<key>ns</key>
+						<false/>
+						<key>cwr</key>
+						<false/>
+						<key>ece</key>
+						<false/>
+						<key>urg</key>
+						<false/>
+						<key>ack</key>
+						<true/>
+						<key>psh</key>
+						<false/>
+						<key>rst</key>
+						<false/>
+						<key>syn</key>
+						<false/>
+						<key>fin</key>
+						<true/>
+					</dict>
+					<key>window_size</key>
+					<integer>65535</integer>
+					<key>checksum</key>
+					<data>KvQ=</data>
+					<key>urgent_pointer</key>
+					<integer>0</integer>
+					<key>nopayload</key>
+					<dict>
+					</dict>
 				</dict>
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv4:Raw</string>
+		<string>Ethernet:IPv4:TCP</string>
 	</dict>
 	<key>Frame 6</key>
 	<dict>
