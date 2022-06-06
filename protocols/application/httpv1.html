@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>HTTP/1.* - Hypertext Transfer Protocol &#8212; PyPCAPKit 0.15.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -34,11 +35,11 @@
           <div class="body" role="main">
             
   <section id="http-1-hypertext-transfer-protocol">
-<h1>HTTP/1.* - Hypertext Transfer Protocol<a class="headerlink" href="#http-1-hypertext-transfer-protocol" title="Permalink to this headline">¶</a></h1>
+<h1>HTTP/1.* - Hypertext Transfer Protocol<a class="headerlink" href="#http-1-hypertext-transfer-protocol" title="Permalink to this heading">¶</a></h1>
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.httpv1</span></code> contains
 <code class="xref py py-class docutils literal notranslate"><span class="pre">HTTPv1</span></code>
 only, which implements extractor for Hypertext Transfer
-Protocol (HTTP/1.*) <a class="footnote-reference brackets" href="#id2" id="id1">*</a>, whose structure is described
+Protocol (HTTP/1.*) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described
 as below:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">METHOD</span> <span class="n">URL</span> <span class="n">HTTP</span><span class="o">/</span><span class="n">VERSION</span>\<span class="n">r</span>\<span class="n">n</span> <span class="o">:==</span><span class="p">:</span> <span class="n">REQUEST</span> <span class="n">LINE</span>
 <span class="o">&lt;</span><span class="n">key</span><span class="o">&gt;</span> <span class="p">:</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span>\<span class="n">r</span>\<span class="n">n</span>         <span class="o">:==</span><span class="p">:</span> <span class="n">REQUEST</span> <span class="n">HEADER</span>
@@ -54,7 +55,7 @@ as below:</p>
 </pre></div>
 </div>
 <section id="data-structure">
-<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
+<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>Following classes are only for <em>documentation</em> purpose.
@@ -64,7 +65,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="DataType_HTTP">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP</span></span><a class="headerlink" href="#DataType_HTTP" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -99,7 +100,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="DataType_HTTP_Raw">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Raw</span></span><a class="headerlink" href="#DataType_HTTP_Raw" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -128,7 +129,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="DataType_HTTP_Request_Header">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Request_Header</span></span><a class="headerlink" href="#DataType_HTTP_Request_Header" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -145,7 +146,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="DataType_HTTP_Response_Header">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Response_Header</span></span><a class="headerlink" href="#DataType_HTTP_Response_Header" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -162,7 +163,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="DataType_HTTP_Request_Header_Meta">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Request_Header_Meta</span></span><a class="headerlink" href="#DataType_HTTP_Request_Header_Meta" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -191,7 +192,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="DataType_HTTP_Response_Header_Meta">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_HTTP_Response_Header_Meta</span></span><a class="headerlink" href="#DataType_HTTP_Response_Header_Meta" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -216,11 +217,10 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 
 </dd></dl>
 
-<hr /><dl class="footnote brackets">
-<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
-<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol</a></p>
-</dd>
-</dl>
+<hr /><aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol">https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol</a></p>
+</aside>
 </section>
 </section>
 
@@ -290,7 +290,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 

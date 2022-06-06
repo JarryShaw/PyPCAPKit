@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>IP Datagram Reassembly &#8212; PyPCAPKit 0.15.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -34,7 +35,7 @@
           <div class="body" role="main">
             
   <section id="ip-datagram-reassembly">
-<h1>IP Datagram Reassembly<a class="headerlink" href="#ip-datagram-reassembly" title="Permalink to this headline">¶</a></h1>
+<h1>IP Datagram Reassembly<a class="headerlink" href="#ip-datagram-reassembly" title="Permalink to this heading">¶</a></h1>
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ip</span></code> contains
 <code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Reassembly</span></code>
 only, which reconstructs fragmented IP packets back to
@@ -44,12 +45,8 @@ reassembly procedure introduced in <span class="target" id="index-0"></span><a c
 algorithm is explained in <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc815.html"><strong>RFC 815</strong></a>, replacing <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code>,
 however, this implement still used the elder one.</p>
 <section id="notation">
-<h2>Notation<a class="headerlink" href="#notation" title="Permalink to this headline">¶</a></h2>
+<h2>Notation<a class="headerlink" href="#notation" title="Permalink to this heading">¶</a></h2>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 28%" />
-<col style="width: 73%" />
-</colgroup>
 <tbody>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">FO</span></code></p></td>
 <td><p>Fragment Offset</p></td>
@@ -85,7 +82,7 @@ however, this implement still used the elder one.</p>
 </table>
 </section>
 <section id="algorithm">
-<h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this headline">¶</a></h2>
+<h2>Algorithm<a class="headerlink" href="#algorithm" title="Permalink to this heading">¶</a></h2>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>DO {
    BUFID &lt;- source|destination|protocol|identification;
 
@@ -133,7 +130,7 @@ timer expires: {
 </div>
 </section>
 <section id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading">¶</a></h2>
 </section>
 </section>
 
@@ -201,7 +198,7 @@ timer expires: {
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 

@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>TCP - Transmission Control Protocol &#8212; PyPCAPKit 0.15.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -34,19 +35,13 @@
           <div class="body" role="main">
             
   <section id="module-pcapkit.protocols.transport.tcp">
-<span id="tcp-transmission-control-protocol"></span><h1>TCP - Transmission Control Protocol<a class="headerlink" href="#module-pcapkit.protocols.transport.tcp" title="Permalink to this headline">¶</a></h1>
+<span id="tcp-transmission-control-protocol"></span><h1>TCP - Transmission Control Protocol<a class="headerlink" href="#module-pcapkit.protocols.transport.tcp" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.transport.tcp" title="pcapkit.protocols.transport.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.tcp</span></code></a> contains
 <code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> only,
 which implements extractor for Transmission Control
-Protocol (TCP) <a class="footnote-reference brackets" href="#id2" id="id1">*</a>, whose structure is described as
+Protocol (TCP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as
 below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 9%" />
-<col style="width: 11%" />
-<col style="width: 31%" />
-<col style="width: 49%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -157,14 +152,6 @@ below:</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">TCP_OPT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT" title="pcapkit.protocols.transport.tcp.DataType_TCP_OPT"><span class="pre">DataType_TCP_OPT</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.TCP_OPT" title="Permalink to this definition">¶</a></dt>
 <dd><p>TCP option <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> parsing mapping.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 5%" />
-<col style="width: 7%" />
-<col style="width: 8%" />
-<col style="width: 8%" />
-<col style="width: 13%" />
-<col style="width: 60%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>kind</p></th>
 <th class="head"><p>length</p></th>
@@ -342,11 +329,6 @@ below:</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">process_opt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">pcapkit.protocols.transport.tcp.TCP</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt"><span class="pre">DataType_TCP_Opt</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.process_opt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process method for TCP options.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Code</p></th>
 <th class="head"><p>Method</p></th>
@@ -399,11 +381,6 @@ below:</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">mptcp_opt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">pcapkit.protocols.transport.tcp.TCP</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataType_TCP_MP_Opt</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.mptcp_opt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Process method for multipath TCP options [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Code</p></th>
 <th class="head"><p>Method</p></th>
@@ -448,7 +425,7 @@ below:</p>
 </dd></dl>
 
 <section id="data-structure">
-<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
+<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>Following classes are only for <em>documentation</em> purpose.
@@ -458,7 +435,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -535,7 +512,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Flags</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -600,7 +577,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -623,7 +600,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_OPT">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_OPT</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -659,17 +636,11 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dd></dl>
 
 <section id="tcp-miscellaneous-options">
-<h3>TCP Miscellaneous Options<a class="headerlink" href="#tcp-miscellaneous-options" title="Permalink to this headline">¶</a></h3>
+<h3>TCP Miscellaneous Options<a class="headerlink" href="#tcp-miscellaneous-options" title="Permalink to this heading">¶</a></h3>
 <section id="no-process-options">
-<h4>No Process Options<a class="headerlink" href="#no-process-options" title="Permalink to this headline">¶</a></h4>
+<h4>No Process Options<a class="headerlink" href="#no-process-options" title="Permalink to this heading">¶</a></h4>
 <p>For TCP options require no process, its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 14%" />
-<col style="width: 32%" />
-<col style="width: 41%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -699,7 +670,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DONONE">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_DONONE</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DONONE" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -714,15 +685,9 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 
 </section>
 <section id="unpack-process-options">
-<h4>Unpack Process Options<a class="headerlink" href="#unpack-process-options" title="Permalink to this headline">¶</a></h4>
+<h4>Unpack Process Options<a class="headerlink" href="#unpack-process-options" title="Permalink to this heading">¶</a></h4>
 <p>For TCP options require unpack process, its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 14%" />
-<col style="width: 32%" />
-<col style="width: 41%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -752,7 +717,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UNPACK">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_UNPACK</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UNPACK" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -768,16 +733,10 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </section>
 </section>
 <section id="timestamps-option">
-<h3>Timestamps Option<a class="headerlink" href="#timestamps-option" title="Permalink to this headline">¶</a></h3>
+<h3>Timestamps Option<a class="headerlink" href="#timestamps-option" title="Permalink to this heading">¶</a></h3>
 <p>For TCP Timestamps (<code class="docutils literal notranslate"><span class="pre">TS</span></code>) option as described in <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 14%" />
-<col style="width: 32%" />
-<col style="width: 41%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -812,7 +771,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TS">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_TS</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TS" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -833,16 +792,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="partial-order-connection-service-profile-option">
-<h3>Partial Order Connection Service Profile Option<a class="headerlink" href="#partial-order-connection-service-profile-option" title="Permalink to this headline">¶</a></h3>
+<h3>Partial Order Connection Service Profile Option<a class="headerlink" href="#partial-order-connection-service-profile-option" title="Permalink to this heading">¶</a></h3>
 <p>For TCP Partial Order Connection Service Profile (<code class="docutils literal notranslate"><span class="pre">POC-SP</span></code>) option as described in <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a> and <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 13%" />
-<col style="width: 14%" />
-<col style="width: 32%" />
-<col style="width: 41%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -882,7 +835,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_POCSP</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -909,16 +862,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="alternate-checksum-request-option">
-<h3>Alternate Checksum Request Option<a class="headerlink" href="#alternate-checksum-request-option" title="Permalink to this headline">¶</a></h3>
+<h3>Alternate Checksum Request Option<a class="headerlink" href="#alternate-checksum-request-option" title="Permalink to this heading">¶</a></h3>
 <p>For TCP Alternate Checksum Request (<code class="docutils literal notranslate"><span class="pre">CHKSUM-REQ</span></code>) option as described in <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a> and <span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 12%" />
-<col style="width: 13%" />
-<col style="width: 36%" />
-<col style="width: 39%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -948,7 +895,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ACOPT">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_ACOPT</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ACOPT" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -963,16 +910,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="quick-start-response-option">
-<h3>Quick-Start Response Option<a class="headerlink" href="#quick-start-response-option" title="Permalink to this headline">¶</a></h3>
+<h3>Quick-Start Response Option<a class="headerlink" href="#quick-start-response-option" title="Permalink to this heading">¶</a></h3>
 <p>For TCP Quick-Start Response (<code class="docutils literal notranslate"><span class="pre">QS</span></code>) option as described in <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 12%" />
-<col style="width: 13%" />
-<col style="width: 35%" />
-<col style="width: 40%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1022,7 +963,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_QSOPT</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -1049,16 +990,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="user-timeout-option">
-<h3>User Timeout Option<a class="headerlink" href="#user-timeout-option" title="Permalink to this headline">¶</a></h3>
+<h3>User Timeout Option<a class="headerlink" href="#user-timeout-option" title="Permalink to this heading">¶</a></h3>
 <p>For TCP User Timeout (<code class="docutils literal notranslate"><span class="pre">TIMEOUT</span></code>) option as described in <span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 13%" />
-<col style="width: 38%" />
-<col style="width: 38%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1093,7 +1028,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_UTOPT</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -1114,16 +1049,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="authentication-option">
-<h3>Authentication Option<a class="headerlink" href="#authentication-option" title="Permalink to this headline">¶</a></h3>
+<h3>Authentication Option<a class="headerlink" href="#authentication-option" title="Permalink to this heading">¶</a></h3>
 <p>For Authentication (<code class="docutils literal notranslate"><span class="pre">AO</span></code>) option as described in <span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5925.html"><strong>RFC 5925</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 13%" />
-<col style="width: 38%" />
-<col style="width: 38%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1163,7 +1092,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_TCPAO</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -1190,16 +1119,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="multipath-tcp-options">
-<h3>Multipath TCP Options<a class="headerlink" href="#multipath-tcp-options" title="Permalink to this headline">¶</a></h3>
+<h3>Multipath TCP Options<a class="headerlink" href="#multipath-tcp-options" title="Permalink to this heading">¶</a></h3>
 <p>For Multipath TCP (<code class="docutils literal notranslate"><span class="pre">MP-TCP</span></code>) options as described in <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 11%" />
-<col style="width: 13%" />
-<col style="width: 38%" />
-<col style="width: 38%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1234,7 +1157,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MPTCP">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MPTCP</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MPTCP" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt</p>
 </dd>
 </dl>
@@ -1254,16 +1177,10 @@ its structure is described as below:</p>
 </dd></dl>
 
 <section id="multipath-capable-option">
-<h4>Multipath Capable Option<a class="headerlink" href="#multipath-capable-option" title="Permalink to this headline">¶</a></h4>
+<h4>Multipath Capable Option<a class="headerlink" href="#multipath-capable-option" title="Permalink to this heading">¶</a></h4>
 <p>For Multipath Capable (<code class="docutils literal notranslate"><span class="pre">MP_CAPABLE</span></code>) options as described in <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 12%" />
-<col style="width: 36%" />
-<col style="width: 42%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1329,7 +1246,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_CAPABLE</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
 </dd>
 </dl>
@@ -1346,7 +1263,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_CAPABLE_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -1381,7 +1298,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_CAPABLE_Flags</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -1414,16 +1331,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="join-connection-option">
-<h4>Join Connection Option<a class="headerlink" href="#join-connection-option" title="Permalink to this headline">¶</a></h4>
+<h4>Join Connection Option<a class="headerlink" href="#join-connection-option" title="Permalink to this heading">¶</a></h4>
 <p>For Join Connection (<code class="docutils literal notranslate"><span class="pre">MP_JOIN</span></code>) options as described in <span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 12%" />
-<col style="width: 36%" />
-<col style="width: 42%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1458,7 +1369,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
 </dd>
 </dl>
@@ -1481,7 +1392,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -1495,16 +1406,10 @@ its structure is described as below:</p>
 </dd></dl>
 
 <section id="mp-join-syn">
-<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code><a class="headerlink" href="#mp-join-syn" title="Permalink to this headline">¶</a></h5>
+<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code><a class="headerlink" href="#mp-join-syn" title="Permalink to this heading">¶</a></h5>
 <p>For Join Connection (<code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code>) option for Initial SYN as described in <span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 12%" />
-<col style="width: 36%" />
-<col style="width: 42%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1559,7 +1464,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYN</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MP_JOIN_Data</p>
 </dd>
 </dl>
@@ -1576,7 +1481,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYN_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -1609,16 +1514,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="mp-join-syn-ack">
-<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code><a class="headerlink" href="#mp-join-syn-ack" title="Permalink to this headline">¶</a></h5>
+<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code><a class="headerlink" href="#mp-join-syn-ack" title="Permalink to this heading">¶</a></h5>
 <p>For Join Connection (<code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code>) option for Responding SYN/ACK as described in <span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 11%" />
-<col style="width: 38%" />
-<col style="width: 41%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1673,7 +1572,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYNACK</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MP_JOIN_Data</p>
 </dd>
 </dl>
@@ -1690,7 +1589,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYNACK_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -1723,16 +1622,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="mp-join-ack">
-<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code><a class="headerlink" href="#mp-join-ack" title="Permalink to this headline">¶</a></h5>
+<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code><a class="headerlink" href="#mp-join-ack" title="Permalink to this heading">¶</a></h5>
 <p>For Join Connection (<code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code>) option for Third ACK as described in <span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 11%" />
-<col style="width: 38%" />
-<col style="width: 41%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1772,7 +1665,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_ACK</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MP_JOIN_Data</p>
 </dd>
 </dl>
@@ -1789,7 +1682,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_ACK_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -1805,16 +1698,10 @@ its structure is described as below:</p>
 </section>
 </section>
 <section id="data-sequence-signal-option">
-<h4>Data Sequence Signal Option<a class="headerlink" href="#data-sequence-signal-option" title="Permalink to this headline">¶</a></h4>
+<h4>Data Sequence Signal Option<a class="headerlink" href="#data-sequence-signal-option" title="Permalink to this heading">¶</a></h4>
 <p>For Data Sequence Signal (<code class="docutils literal notranslate"><span class="pre">DSS</span></code>) options as described in <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 7%" />
-<col style="width: 9%" />
-<col style="width: 28%" />
-<col style="width: 56%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -1899,7 +1786,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_DSS</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
 </dd>
 </dl>
@@ -1916,7 +1803,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_DSS_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -1963,7 +1850,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_DSS_Flags</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -2002,16 +1889,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="add-address-option">
-<h4>Add Address Option<a class="headerlink" href="#add-address-option" title="Permalink to this headline">¶</a></h4>
+<h4>Add Address Option<a class="headerlink" href="#add-address-option" title="Permalink to this heading">¶</a></h4>
 <p>For Add Address (<code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code>) options as described in <span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 7%" />
-<col style="width: 9%" />
-<col style="width: 28%" />
-<col style="width: 56%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -2061,7 +1942,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_ADD_ADDR</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
 </dd>
 </dl>
@@ -2078,7 +1959,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_ADD_ADDR_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -2111,16 +1992,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="remove-address-option">
-<h4>Remove Address Option<a class="headerlink" href="#remove-address-option" title="Permalink to this headline">¶</a></h4>
+<h4>Remove Address Option<a class="headerlink" href="#remove-address-option" title="Permalink to this heading">¶</a></h4>
 <p>For Remove Address (<code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code>) options as described in <span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 7%" />
-<col style="width: 9%" />
-<col style="width: 29%" />
-<col style="width: 55%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -2160,7 +2035,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_REMOVE_ADDR</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
 </dd>
 </dl>
@@ -2177,7 +2052,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_REMOVE_ADDR_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -2192,16 +2067,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="change-subflow-priority-option">
-<h4>Change Subflow Priority Option<a class="headerlink" href="#change-subflow-priority-option" title="Permalink to this headline">¶</a></h4>
+<h4>Change Subflow Priority Option<a class="headerlink" href="#change-subflow-priority-option" title="Permalink to this heading">¶</a></h4>
 <p>For Change Subflow Priority (<code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code>) options as described in <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 7%" />
-<col style="width: 9%" />
-<col style="width: 29%" />
-<col style="width: 55%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -2241,7 +2110,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_PRIO</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
 </dd>
 </dl>
@@ -2258,7 +2127,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_PRIO_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -2279,16 +2148,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="fallback-option">
-<h4>Fallback Option<a class="headerlink" href="#fallback-option" title="Permalink to this headline">¶</a></h4>
+<h4>Fallback Option<a class="headerlink" href="#fallback-option" title="Permalink to this heading">¶</a></h4>
 <p>For Fallback (<code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code>) options as described in <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 7%" />
-<col style="width: 9%" />
-<col style="width: 29%" />
-<col style="width: 55%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -2328,7 +2191,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_FAIL</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
 </dd>
 </dl>
@@ -2345,7 +2208,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_FAIL_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -2360,16 +2223,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="fast-close-option">
-<h4>Fast Close Option<a class="headerlink" href="#fast-close-option" title="Permalink to this headline">¶</a></h4>
+<h4>Fast Close Option<a class="headerlink" href="#fast-close-option" title="Permalink to this heading">¶</a></h4>
 <p>For Fast Close (<code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code>) options as described in <span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 7%" />
-<col style="width: 9%" />
-<col style="width: 29%" />
-<col style="width: 55%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -2409,7 +2266,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_FASTCLOSE</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
 </dd>
 </dl>
@@ -2426,7 +2283,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE_Data">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_FASTCLOSE_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE_Data" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -2439,11 +2296,10 @@ its structure is described as below:</p>
 
 </dd></dl>
 
-<hr /><dl class="footnote brackets">
-<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
-<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">https://en.wikipedia.org/wiki/Transmission_Control_Protocol</a></p>
-</dd>
-</dl>
+<hr /><aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">https://en.wikipedia.org/wiki/Transmission_Control_Protocol</a></p>
+</aside>
 </section>
 </section>
 </section>
@@ -2515,7 +2371,7 @@ its structure is described as below:</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 

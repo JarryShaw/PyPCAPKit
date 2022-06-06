@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>IPv6-Route - Routing Header for IPv6 &#8212; PyPCAPKit 0.15.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -34,18 +35,12 @@
           <div class="body" role="main">
             
   <section id="module-pcapkit.protocols.internet.ipv6_route">
-<span id="ipv6-route-routing-header-for-ipv6"></span><h1>IPv6-Route - Routing Header for IPv6<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6_route" title="Permalink to this headline">¶</a></h1>
+<span id="ipv6-route-routing-header-for-ipv6"></span><h1>IPv6-Route - Routing Header for IPv6<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6_route" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_route" title="pcapkit.protocols.internet.ipv6_route"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_route</span></code></a> contains
 <code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code>
 only, which implements extractor for Routing Header for IPv6
-(IPv6-Route) <a class="footnote-reference brackets" href="#id2" id="id1">*</a>, whose structure is described as below:</p>
+(IPv6-Route) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 13%" />
-<col style="width: 30%" />
-<col style="width: 46%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -86,11 +81,6 @@ only, which implements extractor for Routing Header for IPv6
 <span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">_ROUTE_PROC</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.pcapkit.protocols.internet.ipv6_route._ROUTE_PROC" title="Permalink to this definition">¶</a></dt>
 <dd><p>IPv6 routing processors.</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 4%" />
-<col style="width: 71%" />
-<col style="width: 26%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Code</p></th>
 <th class="head"><p>Processor</p></th>
@@ -115,7 +105,7 @@ only, which implements extractor for Routing Header for IPv6
 </dd></dl>
 
 <section id="data-structure">
-<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this headline">¶</a></h2>
+<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>Following classes are only for <em>documentation</em> purpose.
@@ -158,16 +148,10 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dd></dl>
 
 <section id="ipv6-route-unknown-type">
-<h3>IPv6-Route Unknown Type<a class="headerlink" href="#ipv6-route-unknown-type" title="Permalink to this headline">¶</a></h3>
+<h3>IPv6-Route Unknown Type<a class="headerlink" href="#ipv6-route-unknown-type" title="Permalink to this heading">¶</a></h3>
 <p>For IPv6-Route unknown type data as described in <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a> and <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 13%" />
-<col style="width: 42%" />
-<col style="width: 35%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -207,7 +191,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_None">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route_None</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_None" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -222,16 +206,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="ipv6-route-source-route">
-<h3>IPv6-Route Source Route<a class="headerlink" href="#ipv6-route-source-route" title="Permalink to this headline">¶</a></h3>
+<h3>IPv6-Route Source Route<a class="headerlink" href="#ipv6-route-source-route" title="Permalink to this heading">¶</a></h3>
 <p>For IPv6-Route Source Route data as described in <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 13%" />
-<col style="width: 42%" />
-<col style="width: 35%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -276,7 +254,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_Source">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route_Source</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_Source" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -291,16 +269,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="ipv6-route-type-2">
-<h3>IPv6-Route Type 2<a class="headerlink" href="#ipv6-route-type-2" title="Permalink to this headline">¶</a></h3>
+<h3>IPv6-Route Type 2<a class="headerlink" href="#ipv6-route-type-2" title="Permalink to this heading">¶</a></h3>
 <p>For IPv6-Route Type 2 data as described in <span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 13%" />
-<col style="width: 42%" />
-<col style="width: 35%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -345,7 +317,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_2">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route_2</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_2" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -360,16 +332,10 @@ its structure is described as below:</p>
 
 </section>
 <section id="ipv6-route-rpl-source">
-<h3>IPv6-Route RPL Source<a class="headerlink" href="#ipv6-route-rpl-source" title="Permalink to this headline">¶</a></h3>
+<h3>IPv6-Route RPL Source<a class="headerlink" href="#ipv6-route-rpl-source" title="Permalink to this heading">¶</a></h3>
 <p>For IPv6-Route RPL Source data as described in <span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>,
 its structure is described as below:</p>
 <table class="docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 13%" />
-<col style="width: 42%" />
-<col style="width: 35%" />
-</colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Octets</p></th>
 <th class="head"><p>Bits</p></th>
@@ -429,7 +395,7 @@ its structure is described as below:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.ipv6_route.</span></span><span class="sig-name descname"><span class="pre">DataType_IPv6_Route_RPL</span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipv6_route.DataType_IPv6_Route_RPL" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Bases</dt>
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
 </dd>
 </dl>
@@ -460,11 +426,10 @@ its structure is described as below:</p>
 
 </dd></dl>
 
-<hr /><dl class="footnote brackets">
-<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">*</a></span></dt>
-<dd><p><a class="reference external" href="https://en.wikipedia.org/wiki/IPv6_packet#Routing">https://en.wikipedia.org/wiki/IPv6_packet#Routing</a></p>
-</dd>
-</dl>
+<hr /><aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/IPv6_packet#Routing">https://en.wikipedia.org/wiki/IPv6_packet#Routing</a></p>
+</aside>
 </section>
 </section>
 </section>
@@ -535,7 +500,7 @@ its structure is described as below:</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 

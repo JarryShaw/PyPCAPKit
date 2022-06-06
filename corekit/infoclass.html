@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Info Class &#8212; PyPCAPKit 0.15.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -34,7 +35,7 @@
           <div class="body" role="main">
             
   <section id="info-class">
-<h1>Info Class<a class="headerlink" href="#info-class" title="Permalink to this headline">¶</a></h1>
+<h1>Info Class<a class="headerlink" href="#info-class" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.corekit.infoclass" title="pcapkit.corekit.infoclass"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.infoclass</span></code></a> contains <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> like class
 <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> only, which is originally
 designed to work alike <a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">dataclasses.dataclass()</span></code></a> as introduced
@@ -42,7 +43,7 @@ in <span class="target" id="index-0"></span><a class="pep reference external" hr
 <span class="target" id="module-pcapkit.corekit.infoclass"></span><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.infoclass.</span></span><span class="sig-name descname"><span class="pre">Info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pcapkit/corekit/infoclass.html#Info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.Info" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">pcapkit.corekit.infoclass.VT</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">pcapkit.corekit.infoclass.VT</span></code>]</p>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-obj docutils literal notranslate"><span class="pre">VT</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">VT</span></code>]</p>
 <p>Turn dictionaries into <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></a> like instances.</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> objects inherit from <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> type</p></li>
@@ -60,13 +61,13 @@ accessing such renamed keys, the original key name should always be
 used, i.e., such renaming is totally transparent to the user.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>args</strong> (<em>VT</em>) – </p></li>
 <li><p><strong>kwargs</strong> (<em>VT</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
@@ -78,18 +79,17 @@ used, i.e., such renaming is totally transparent to the user.</p>
 the same signature as specified in class variables’ type annotations,
 which is inspired by <span class="target" id="index-1"></span><a class="pep reference external" href="https://peps.python.org/pep-0557/"><strong>PEP 557</strong></a> (<a class="reference external" href="https://docs.python.org/3/library/dataclasses.html#module-dataclasses" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">dataclasses</span></code></a>).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>*args</strong> – Arbitrary positional arguments.</p></li>
-<li><p><strong>args</strong> (<em>pcapkit.corekit.infoclass.VT</em>) – </p></li>
-<li><p><strong>kwargs</strong> (<em>pcapkit.corekit.infoclass.VT</em>) – </p></li>
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>kwargs</strong> (<em>VT</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Keyword Arguments</dt>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">pcapkit.corekit.infoclass.Info</a></p>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><em>Info</em></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -107,17 +107,17 @@ which is inspired by <span class="target" id="index-1"></span><a class="pep refe
 <code class="docutils literal notranslate"><span class="pre">for</span> <span class="pre">k,</span> <span class="pre">v</span> <span class="pre">in</span> <span class="pre">kwargs.items():</span> <span class="pre">self[k]</span> <span class="pre">=</span> <span class="pre">v</span></code>.</p></li>
 </ul>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dict</strong> – Source data.</p></li>
 <li><p><strong>dict_</strong> (<em>Optional</em><em>[</em><em>Mapping</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>VT</em><em>] </em><em>| </em><em>Iterable</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>VT</em><em>]</em><em>]</em><em>]</em>) – </p></li>
 <li><p><strong>kwargs</strong> (<em>VT</em>) – </p></li>
 </ul>
 </dd>
-<dt class="field-even">Keyword Arguments</dt>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
@@ -136,7 +136,7 @@ types, such as <a class="reference external" href="https://docs.python.org/3/lib
 shall not convert them into <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> and remain them intact.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, ~VT]</p>
 </dd>
 </dl>
@@ -210,7 +210,7 @@ shall not convert them into <a class="reference external" href="https://docs.pyt
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 

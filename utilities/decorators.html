@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Decorator Functions &#8212; PyPCAPKit 0.15.5 documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
@@ -12,6 +12,7 @@
     <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
     <script src="../_static/jquery.js"></script>
     <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -34,7 +35,7 @@
           <div class="body" role="main">
             
   <section id="decorator-functions">
-<h1>Decorator Functions<a class="headerlink" href="#decorator-functions" title="Permalink to this headline">¶</a></h1>
+<h1>Decorator Functions<a class="headerlink" href="#decorator-functions" title="Permalink to this heading">¶</a></h1>
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.decorators</span></code> contains several useful
 decorators, including <a class="reference internal" href="#pcapkit.utilities.decorators.seekset" title="pcapkit.utilities.decorators.seekset"><code class="xref py py-func docutils literal notranslate"><span class="pre">seekset()</span></code></a>
 and <a class="reference internal" href="#pcapkit.utilities.decorators.beholder" title="pcapkit.utilities.decorators.beholder"><code class="xref py py-func docutils literal notranslate"><span class="pre">beholder()</span></code></a>.</p>
@@ -62,10 +63,10 @@ the decorated function.</p>
 <p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol._read_packet" title="pcapkit.protocols.protocol.Protocol._read_packet"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._read_packet()</span></code></a></p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>Concatenate</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><em>P</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Callable[P, R]</p>
 </dd>
 </dl>
@@ -96,10 +97,10 @@ as <code class="xref py py-class docutils literal notranslate"><span class="pre"
 <p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._decode_next_layer()</span></code></a></p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>Concatenate</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>P</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>Callable[P, R]</p>
 </dd>
 </dl>
@@ -177,7 +178,7 @@ for decorating <em>class methods</em>.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
 
 
 
