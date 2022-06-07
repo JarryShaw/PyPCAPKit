@@ -26,8 +26,8 @@ which implements Encapsulating Security Payload header
 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
 """
-from pcapkit.protocols.internet.ipsec import IPsec
 from pcapkit.corekit.infoclass import Info
+from pcapkit.protocols.internet.ipsec import IPsec
 
 __all__ = ['ESP']
 

@@ -29,7 +29,6 @@ Octets      Bits        Name                    Description
 """
 import datetime
 import ipaddress
-import warnings
 from typing import TYPE_CHECKING, overload
 
 from pcapkit.const.hip.certificate import Certificate as RegType_Certificate
@@ -127,7 +126,7 @@ from pcapkit.protocols.data.internet.hip import UnassignedParameter as DataType_
 from pcapkit.protocols.data.internet.hip import ViaRVSParameter as DataType_ViaRVSParameter
 from pcapkit.protocols.internet.internet import Internet
 from pcapkit.utilities.exceptions import ProtocolError, UnsupportedCall
-from pcapkit.utilities.warnings import ProtocolWarning
+from pcapkit.utilities.warnings import ProtocolWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
@@ -1125,7 +1124,7 @@ class HIP(Internet[DataType_HIP]):
             # NOTE: The sender of a HIP_CIPHER parameter MUST make sure that there are no
             # more than six (6) Cipher IDs in one HIP_CIPHER parameter. [:rfc:`7401#section-5.2.8`]
             if index > 5:
-                warnings.warn(f'HIPv{version}: [ParamNo {code}] invalid format', ProtocolWarning)
+                warn(f'HIPv{version}: [ParamNo {code}] invalid format', ProtocolWarning)
                 # raise ProtocolError(f'HIPv{version}: [ParamNo {code}] invalid format')
             _cpid.append(RegType_Cipher.get(self._read_unpack(2)))
 

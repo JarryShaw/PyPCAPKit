@@ -2,6 +2,24 @@
 # pylint: disable=unused-import, unused-wildcard-import
 """Web crawlers for constant enumerations."""
 
+from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
+from pcapkit.utilities.exceptions import stacklevel
+from pcapkit.utilities.warnings import VendorWarning, warn
+
+try:
+    import requests
+    import socks
+except ModuleNotFoundError:
+    warn("dependency package 'requests[socks]' not found",
+         VendorWarning, stacklevel=stacklevel())
+
+try:
+    import bs4
+    import html5lib
+except ModuleNotFoundError:
+    warn("dependency package 'beautifulsoup4[html5lib]' not found",
+         VendorWarning, stacklevel=stacklevel())
+
 # base crawler
 from pcapkit.vendor.default import Vendor
 

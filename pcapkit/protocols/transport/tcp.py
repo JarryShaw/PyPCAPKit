@@ -96,8 +96,8 @@ if TYPE_CHECKING:
     from mypy_extensions import NamedArg
     from typing_extensions import Literal
 
-    from pcapkit.protocols.data.transport.tcp import Option as DataType_Option
     from pcapkit.protocols.data.transport.tcp import MPTCPJoin as DataType_MPTCPJoin
+    from pcapkit.protocols.data.transport.tcp import Option as DataType_Option
 
     Option = OrderedMultiDict[RegType_Option, DataType_Option]
     OptionParser = Callable[['TCP', RegType_Option, NamedArg(Option, 'options')], DataType_Option]

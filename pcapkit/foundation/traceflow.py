@@ -77,16 +77,14 @@ import collections
 import importlib
 import os
 import sys
-import warnings
 from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import FileExists, stacklevel
 from pcapkit.utilities.logging import logger
-from pcapkit.utilities.warnings import FileWarning, FormatWarning
+from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
-    from decimal import Decimal
     from ipaddress import IPv4Address, IPv6Address
     from typing import Any, DefaultDict, Optional, TextIO, Type
 
@@ -267,15 +265,15 @@ class TraceFlow:
         """
         module, class_, ext = cls.__output__[fmt]
         if ext is None:
-            warnings.warn(f'Unsupported output format: {fmt}; disabled file output feature',
-                          FormatWarning, stacklevel=stacklevel())
+            warn(f'Unsupported output format: {fmt}; disabled file output feature',
+                 FormatWarning, stacklevel=stacklevel())
         output = getattr(importlib.import_module(module), class_)  # type: Type[Dumper]
 
         try:
             os.makedirs(fout, exist_ok=True)
         except FileExistsError as error:
             if ext is None:
-                warnings.warn(error.strerror, FileWarning, stacklevel=stacklevel())
+                warn(error.strerror, FileWarning, stacklevel=stacklevel())
             else:
                 raise FileExists(*error.args).with_traceback(error.__traceback__)
 

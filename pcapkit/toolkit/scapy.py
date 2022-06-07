@@ -14,7 +14,6 @@ Warns:
 """
 import ipaddress
 import time
-import warnings
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
@@ -22,15 +21,16 @@ from pcapkit.const.reg.transtype import TransType as RegType_TransType
 from pcapkit.foundation.reassembly.ip import Packet as IP_Packet
 from pcapkit.foundation.reassembly.tcp import Packet as TCP_Packet
 from pcapkit.foundation.traceflow import Packet as TF_Packet
+from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import ModuleNotFound, stacklevel
-from pcapkit.utilities.warnings import ScapyWarning
+from pcapkit.utilities.warnings import ScapyWarning, warn
 
 try:
     import scapy.all as scapy_all
-except ImportError:
+except ModuleNotFoundError:
     scapy_all = None
-    warnings.warn("dependency package 'Scapy' not found",
-                  ScapyWarning, stacklevel=stacklevel())
+    warn("dependency package 'Scapy' not found",
+         ScapyWarning, stacklevel=stacklevel())
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address

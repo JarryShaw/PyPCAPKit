@@ -10,14 +10,13 @@ import os
 import re
 import tempfile
 import textwrap
-import warnings
 import webbrowser
 from typing import TYPE_CHECKING
 
 import requests
 
 from pcapkit.utilities.exceptions import VendorNotImplemented
-from pcapkit.utilities.warnings import VendorRequestWarning
+from pcapkit.utilities.warnings import VendorRequestWarning, warn
 
 if TYPE_CHECKING:
     from collections import Counter
@@ -356,14 +355,14 @@ class Vendor(metaclass=abc.ABCMeta):
         try:
             page = requests.get(self.LINK)
         except requests.RequestException as err:
-            warnings.warn('Connection failed; retry with proxies (if any)...', VendorRequestWarning, stacklevel=2)
+            warn('Connection failed; retry with proxies (if any)...', VendorRequestWarning, stacklevel=2)
             try:
                 proxies = get_proxies() or None
                 if proxies is None:
                     raise requests.RequestException from err
                 page = requests.get(self.LINK, proxies=proxies)
             except requests.RequestException:
-                warnings.warn('Connection failed; retry with manual intervene...', VendorRequestWarning, stacklevel=2)
+                warn('Connection failed; retry with manual intervene...', VendorRequestWarning, stacklevel=2)
                 with tempfile.TemporaryDirectory(suffix='-tempdir',
                                                  prefix='pcapkit-',
                                                  dir=os.path.abspath(os.curdir)) as tempdir:

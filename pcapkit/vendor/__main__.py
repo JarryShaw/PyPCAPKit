@@ -8,7 +8,7 @@ import warnings
 from typing import TYPE_CHECKING
 
 from pcapkit import vendor as vendor_module
-from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning
+from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning, warn
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from pcapkit.vendor.default import Vendor
 
 #: version string
-__version__ = '0.15.5'
+__version__ = '0.16.1'
 
 
 def get_parser() -> 'ArgumentParser':
@@ -44,7 +44,7 @@ def run(vendor: 'Type[Vendor]') -> 'None':
     try:
         vendor()
     except Exception as error:
-        warnings.warn(f'{vendor.__module__}.{vendor.__name__} <{error!r}>', VendorRuntimeWarning, stacklevel=2)
+        warn(f'{vendor.__module__}.{vendor.__name__} <{error!r}>', VendorRuntimeWarning, stacklevel=2)
 
 
 def main() -> 'int':

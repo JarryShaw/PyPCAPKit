@@ -24,7 +24,8 @@ __all__ = [
     'FileWarning', 'LayerWarning', 'ProtocolWarning', 'AttributeWarning',
     'DevModeWarning', 'VendorRequestWarning', 'VendorRuntimeWarning',
     # ResourceWarning
-    'DPKTWarning', 'ScapyWarning', 'PySharkWarning'
+    'DPKTWarning', 'ScapyWarning', 'PySharkWarning', 'EmojiWarning',
+    'VendorWarning',
 ]
 
 
@@ -127,3 +128,11 @@ class ScapyWarning(BaseWarning, ResourceWarning):
 
 class PySharkWarning(BaseWarning, ResourceWarning):
     """Warnings on PyShark usage."""
+
+
+class EmojiWarning(BaseWarning, ResourceWarning):
+    """Warnings on Emoji usage."""
+
+
+class VendorWarning(BaseWarning, ResourceWarning):
+    """Warnings on vendor usage."""

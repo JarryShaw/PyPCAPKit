@@ -7,14 +7,13 @@ generally provided per user's requests.
 
 """
 import sys
-import warnings
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.foundation.extraction import Extractor
 from pcapkit.foundation.reassembly.tcp import TCP_Reassembly
 from pcapkit.utilities.exceptions import stacklevel
-from pcapkit.utilities.warnings import EngineWarning
+from pcapkit.utilities.warnings import EngineWarning, warn
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -70,8 +69,8 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
 
     """
     if engine is not None and engine.lower() == 'pyshark':
-        warnings.warn(f'unsupported extraction engine: {engine}; fallback to default engine',
-                      EngineWarning, stacklevel=stacklevel())
+        warn(f'unsupported extraction engine: {engine}; fallback to default engine',
+             EngineWarning, stacklevel=stacklevel())
         engine = None
 
     extraction = Extractor(fin=fin, fout=None, format=None, auto=True, extension=extension,
@@ -84,9 +83,11 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     if extraction.engine == 'dpkt':
         from pcapkit.toolkit.dpkt import tcp_reassembly  # pylint: disable=import-outside-toplevel
     elif extraction.engine == 'scapy':
-        from pcapkit.toolkit.scapy import tcp_reassembly  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
+        from pcapkit.toolkit.scapy import \
+            tcp_reassembly  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
     else:
-        from pcapkit.toolkit.default import tcp_reassembly  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
+        from pcapkit.toolkit.default import \
+            tcp_reassembly  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
         fallback = True
 
     streams = []  # type: list[Stream]

@@ -94,7 +94,7 @@ def ipv6_reassembly(frame: 'Frame') -> 'IP_Packet[IPv6Address] | None':
     if 'IPv6' in frame:
         ipv6 = cast('IPv6', frame['IPv6'])
         ipv6_info = ipv6.info
-        if (ipv6_frag := ipv6.extension_headers.get(
+        if (ipv6_frag := ipv6.extension_headers.get(  # type: ignore[call-overload]
             RegType_ExtensionHeader.IPv6_Frag
         )) is None:  # dismiss not fragmented frame
             return None

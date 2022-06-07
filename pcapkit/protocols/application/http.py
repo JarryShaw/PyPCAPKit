@@ -150,11 +150,11 @@ class HTTP(Application[DataType_HTTP], Generic[PT]):
             Parsed packet data.
 
         """
-        from pcapkit.protocols.application.httpv1 import HTTPv1 # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.application.httpv1 import HTTPv1  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError):
             return HTTPv1(self._file, length, **kwargs)
 
-        from pcapkit.protocols.application.httpv2 import HTTPv2 # pylint: disable=line-too-long,import-outside-toplevel
+        from pcapkit.protocols.application.httpv2 import HTTPv2  # isort: skip # pylint: disable=line-too-long,import-outside-toplevel
         with contextlib.suppress(ProtocolError):
             return HTTPv2(self._file, length, **kwargs)
 

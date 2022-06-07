@@ -4,6 +4,9 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+# pylint: disable=all
+# type: ignore
+
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -24,7 +27,7 @@ copyright = f'2018-{datetime.date.today().year}, Jarry Shaw'  # pylint: disable=
 author = 'Jarry Shaw'
 
 # The full version, including alpha/beta/rc tags
-release = '0.15.5'
+release = '0.16.1'
 
 
 # -- General configuration ---------------------------------------------------

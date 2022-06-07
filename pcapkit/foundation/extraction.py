@@ -15,7 +15,6 @@ import collections
 import importlib
 import os
 import sys
-import warnings
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
@@ -25,7 +24,8 @@ from pcapkit.protocols.misc.pcap.header import Header
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
 from pcapkit.utilities.logging import logger
-from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, EngineWarning, FormatWarning
+from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWarning, FormatWarning,
+                                        warn)
 
 if TYPE_CHECKING:
     from types import ModuleType, TracebackType
@@ -336,8 +336,8 @@ class Extractor:
             if engine is not None:
                 return self._run_pyshark(engine)
         elif self._exeng not in ('default', 'pcapkit'):
-            warnings.warn(f'unsupported extraction engine: {self._exeng}; '
-                          'using default engine instead', EngineWarning, stacklevel=stacklevel())
+            warn(f'unsupported extraction engine: {self._exeng}; '
+                 'using default engine instead', EngineWarning, stacklevel=stacklevel())
             self._exeng = 'default'  # using default/pcapkit engine
 
         self.record_header()  # read PCAP global header
@@ -364,8 +364,8 @@ class Extractor:
             module = importlib.import_module(engine)
         except ImportError:
             module = None
-            warnings.warn(f"extraction engine '{name or engine}' not available; "
-                          'using default engine instead', EngineWarning, stacklevel=stacklevel())
+            warn(f"extraction engine '{name or engine}' not available; "
+                 'using default engine instead', EngineWarning, stacklevel=stacklevel())
         return module
 
     @classmethod
@@ -611,8 +611,8 @@ class Extractor:
         if trace:
             from pcapkit.foundation.traceflow import TraceFlow  # isort: skip
             if self._exeng in ('pyshark',) and trace_format in ('pcap',):
-                warnings.warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
-                              "using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
+                warn(f"'Extractor(engine={self._exeng})' does not support 'trace_format={trace_format}'; "
+                     "using 'trace_format=None' instead", FormatWarning, stacklevel=stacklevel())
                 trace_format = None
             self._trace = TraceFlow(fout=trace_fout, format=trace_format,
                                     byteorder=trace_byteorder, nanosecond=trace_nanosecond)
@@ -621,8 +621,8 @@ class Extractor:
         if not self._flag_q:
             module, class_, ext = self.__output__[fmt]
             if ext is None:
-                warnings.warn(f'Unsupported output format: {fmt}; disabled file output feature',
-                              FormatWarning, stacklevel=stacklevel())
+                warn(f'Unsupported output format: {fmt}; disabled file output feature',
+                     FormatWarning, stacklevel=stacklevel())
             output = getattr(importlib.import_module(module), class_)  # type: Type[Dumper]
 
             class DictDumper(output):  # type: ignore[valid-type,misc]
@@ -851,9 +851,9 @@ class Extractor:
 
         """
         if self._exlyr != 'none' or self._exptl != 'null':
-            warnings.warn("'Extractor(engine=scapy)' does not support protocol and layer threshold; "
-                          f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
-                          AttributeWarning, stacklevel=stacklevel())
+            warn("'Extractor(engine=scapy)' does not support protocol and layer threshold; "
+                 f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler
         if self._flag_v:
@@ -951,9 +951,9 @@ class Extractor:
             import dpkt  # type: ignore[no-redef]
 
         if self._exlyr != 'none' or self._exptl != 'null':
-            warnings.warn("'Extractor(engine=dpkt)' does not support protocol and layer threshold; "
-                          f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
-                          AttributeWarning, stacklevel=stacklevel())
+            warn("'Extractor(engine=dpkt)' does not support protocol and layer threshold; "
+                 f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler
         if self._flag_v:
@@ -973,8 +973,8 @@ class Extractor:
         elif self._dlink.value == RegType_LinkType.IPV6:
             pkg = dpkt.ip6.IP6
         else:
-            warnings.warn('unrecognised link layer protocol; all analysis functions ignored',
-                          DPKTWarning, stacklevel=stacklevel())
+            warn('unrecognised link layer protocol; all analysis functions ignored',
+                 DPKTWarning, stacklevel=stacklevel())
 
             class RawPacket(dpkt.dpkt.Packet):  # type: ignore[name-defined]
                 """Raw packet."""
@@ -1077,16 +1077,16 @@ class Extractor:
 
         """
         if self._exlyr != 'none' or self._exptl != 'null':
-            warnings.warn("'Extractor(engine=pyshark)' does not support protocol and layer threshold; "
-                          f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
-                          AttributeWarning, stacklevel=stacklevel())
+            warn("'Extractor(engine=pyshark)' does not support protocol and layer threshold; "
+                 f"'layer={self._exlyr}' and 'protocol={self._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
 
         if (self._ipv4 or self._ipv6 or self._tcp):
             self._ipv4 = self._ipv6 = self._tcp = False
             self._reasm = [None, None, None]
-            warnings.warn("'Extractor(engine=pyshark)' object dose not support reassembly; "
-                          f"so 'ipv4={self._ipv4}', 'ipv6={self._ipv6}' and 'tcp={self._tcp}' will be ignored",
-                          AttributeWarning, stacklevel=stacklevel())
+            warn("'Extractor(engine=pyshark)' object dose not support reassembly; "
+                 f"so 'ipv4={self._ipv4}', 'ipv6={self._ipv6}' and 'tcp={self._tcp}' will be ignored",
+                 AttributeWarning, stacklevel=stacklevel())
 
         # setup verbose handler
         if self._flag_v:
