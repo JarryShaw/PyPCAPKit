@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pcapkit.utilities.warnings &#8212; PyPCAPKit 0.15.5 documentation</title>
+    <title>pcapkit.utilities.warnings &#8212; PyPCAPKit 0.16.1 documentation</title>
     <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
@@ -58,7 +58,8 @@
     <span class="s1">&#39;FileWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;LayerWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ProtocolWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;AttributeWarning&#39;</span><span class="p">,</span>
     <span class="s1">&#39;DevModeWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRequestWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;VendorRuntimeWarning&#39;</span><span class="p">,</span>
     <span class="c1"># ResourceWarning</span>
-    <span class="s1">&#39;DPKTWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ScapyWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;PySharkWarning&#39;</span>
+    <span class="s1">&#39;DPKTWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;ScapyWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;PySharkWarning&#39;</span><span class="p">,</span> <span class="s1">&#39;EmojiWarning&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;VendorWarning&#39;</span><span class="p">,</span>
 <span class="p">]</span>
 
 
@@ -161,6 +162,14 @@
 
 <div class="viewcode-block" id="PySharkWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.PySharkWarning">[docs]</a><span class="k">class</span> <span class="nc">PySharkWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Warnings on PyShark usage.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="EmojiWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.EmojiWarning">[docs]</a><span class="k">class</span> <span class="nc">EmojiWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warnings on Emoji usage.&quot;&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="VendorWarning"><a class="viewcode-back" href="../../../utilities/warnings.html#pcapkit.utilities.warnings.VendorWarning">[docs]</a><span class="k">class</span> <span class="nc">VendorWarning</span><span class="p">(</span><span class="n">BaseWarning</span><span class="p">,</span> <span class="ne">ResourceWarning</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Warnings on vendor usage.&quot;&quot;&quot;</span></div>
 </pre></div>
 
           </div>
