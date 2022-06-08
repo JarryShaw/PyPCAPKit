@@ -1,0 +1,2404 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>TCP - Transmission Control Protocol &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Application Layer Protocols" href="../application/index.html" />
+    <link rel="prev" title="UDP - User Datagram Protocol" href="udp.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pcapkit.protocols.transport.tcp">
+<span id="tcp-transmission-control-protocol"></span><h1>TCP - Transmission Control Protocol<a class="headerlink" href="#module-pcapkit.protocols.transport.tcp" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.protocols.transport.tcp" title="pcapkit.protocols.transport.tcp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.tcp</span></code></a> contains
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code> only,
+which implements extractor for Transmission Control
+Protocol (TCP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as
+below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.srcport</span></code></p></td>
+<td><p>Source Port</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.dstport</span></code></p></td>
+<td><p>Destination Port</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.seq</span></code></p></td>
+<td><p>Sequence Number</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>64</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ack</span></code></p></td>
+<td><p>Acknowledgement Number (if ACK set)</p></td>
+</tr>
+<tr class="row-even"><td><p>12</p></td>
+<td><p>96</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.hdr_len</span></code></p></td>
+<td><p>Data Offset</p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>100</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>12</p></td>
+<td><p>103</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.ns</span></code></p></td>
+<td><p>ECN Concealment Protection (NS)</p></td>
+</tr>
+<tr class="row-odd"><td><p>13</p></td>
+<td><p>104</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.cwr</span></code></p></td>
+<td><p>Congestion Window Reduced (CWR)</p></td>
+</tr>
+<tr class="row-even"><td><p>13</p></td>
+<td><p>105</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.ece</span></code></p></td>
+<td><p>ECN-Echo (ECE)</p></td>
+</tr>
+<tr class="row-odd"><td><p>13</p></td>
+<td><p>106</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.urg</span></code></p></td>
+<td><p>Urgent (URG)</p></td>
+</tr>
+<tr class="row-even"><td><p>13</p></td>
+<td><p>107</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.ack</span></code></p></td>
+<td><p>Acknowledgement (ACK)</p></td>
+</tr>
+<tr class="row-odd"><td><p>13</p></td>
+<td><p>108</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.psh</span></code></p></td>
+<td><p>Push Function (PSH)</p></td>
+</tr>
+<tr class="row-even"><td><p>13</p></td>
+<td><p>109</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.rst</span></code></p></td>
+<td><p>Reset Connection (RST)</p></td>
+</tr>
+<tr class="row-odd"><td><p>13</p></td>
+<td><p>110</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.syn</span></code></p></td>
+<td><p>Synchronize Sequence Numbers (SYN)</p></td>
+</tr>
+<tr class="row-even"><td><p>13</p></td>
+<td><p>111</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.flags.fin</span></code></p></td>
+<td><p>Last Packet from Sender (FIN)</p></td>
+</tr>
+<tr class="row-odd"><td><p>14</p></td>
+<td><p>112</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.window_size</span></code></p></td>
+<td><p>Size of Receive Window</p></td>
+</tr>
+<tr class="row-even"><td><p>16</p></td>
+<td><p>128</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.checksum</span></code></p></td>
+<td><p>Checksum</p></td>
+</tr>
+<tr class="row-odd"><td><p>18</p></td>
+<td><p>144</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.urgent_pointer</span></code></p></td>
+<td><p>Urgent Pointer (if URG set)</p></td>
+</tr>
+<tr class="row-even"><td><p>20</p></td>
+<td><p>160</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.opt</span></code></p></td>
+<td><p>TCP Options (if data offset &gt; 5)</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.TCP_OPT">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">TCP_OPT</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT" title="pcapkit.protocols.transport.tcp.DataType_TCP_OPT"><span class="pre">DataType_TCP_OPT</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.TCP_OPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>TCP option <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> parsing mapping.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>kind</p></th>
+<th class="head"><p>length</p></th>
+<th class="head"><p>type</p></th>
+<th class="head"><p>process</p></th>
+<th class="head"><p>comment</p></th>
+<th class="head"><p>name</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>[<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html"><strong>RFC 793</strong></a>] End of Option List</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>[<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html"><strong>RFC 793</strong></a>] No-Operation</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">H</span></code></p></td>
+<td><p>1</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html"><strong>RFC 793</strong></a>] Maximum Segment Size</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">B</span></code></p></td>
+<td><p>1</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a>] Window Scale</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">?</span></code></p></td>
+<td></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a></p></td>
+<td><p>[<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2018.html"><strong>RFC 2018</strong></a>] SACK Permitted</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">2+8*N</span></code></p></td>
+<td><p>[<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2018.html"><strong>RFC 2018</strong></a>] SACK</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>6</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1072.html"><strong>RFC 1072</strong></a>][<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] Echo</p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p>6</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1072.html"><strong>RFC 1072</strong></a>][<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] Echo Reply</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p>10</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">II</span></code></p></td>
+<td><p>2</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a>] Timestamps</p></td>
+</tr>
+<tr class="row-odd"><td><p>9</p></td>
+<td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">?</span></code></p></td>
+<td></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a></p></td>
+<td><p>[<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] POC Permitted</p></td>
+</tr>
+<tr class="row-even"><td><p>10</p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">??P</span></code></p></td>
+<td><p>3</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] POC-Serv Profile</p></td>
+</tr>
+<tr class="row-odd"><td><p>11</p></td>
+<td><p>6</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] Connection Count</p></td>
+</tr>
+<tr class="row-even"><td><p>12</p></td>
+<td><p>6</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] CC.NEW</p></td>
+</tr>
+<tr class="row-odd"><td><p>13</p></td>
+<td><p>6</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] CC.ECHO</p></td>
+</tr>
+<tr class="row-even"><td><p>14</p></td>
+<td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">B</span></code></p></td>
+<td><p>4</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>][<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] Alt-Chksum Request</p></td>
+</tr>
+<tr class="row-odd"><td><p>15</p></td>
+<td><p>?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>][<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>] Alt-Chksum Data</p></td>
+</tr>
+<tr class="row-even"><td><p>19</p></td>
+<td><p>18</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2385.html"><strong>RFC 2385</strong></a>] MD5 Signature Option</p></td>
+</tr>
+<tr class="row-odd"><td><p>27</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>5</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>] Quick-Start Response</p></td>
+</tr>
+<tr class="row-even"><td><p>28</p></td>
+<td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>6</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a>] User Timeout Option</p></td>
+</tr>
+<tr class="row-odd"><td><p>29</p></td>
+<td><p>?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>7</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5925.html"><strong>RFC 5925</strong></a>] TCP Authentication Option</p></td>
+</tr>
+<tr class="row-even"><td><p>30</p></td>
+<td><p>?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>8</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>] Multipath TCP</p></td>
+</tr>
+<tr class="row-odd"><td><p>34</p></td>
+<td><p>?</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">P</span></code></p></td>
+<td><p>0</p></td>
+<td></td>
+<td><p>[<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7413.html"><strong>RFC 7413</strong></a>] Fast Open</p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT" title="pcapkit.protocols.transport.tcp.DataType_TCP_OPT"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.tcp.DataType_TCP_OPT</span></code></a></p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.process_opt">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">process_opt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">pcapkit.protocols.transport.tcp.TCP</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt"><span class="pre">DataType_TCP_Opt</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.process_opt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process method for TCP options.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Code</p></th>
+<th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_donone()</span></code></p></td>
+<td><p>do nothing</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_unpack()</span></code></p></td>
+<td><p>unpack according to size</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_tsopt()</span></code></p></td>
+<td><p>timestamps</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_pocsp()</span></code></p></td>
+<td><p>POC service profile</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_acopt()</span></code></p></td>
+<td><p>alternate checksum request</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_qsopt()</span></code></p></td>
+<td><p>Quick-Start response</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_utopt()</span></code></p></td>
+<td><p>user timeout option</p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_tcpao()</span></code></p></td>
+<td><p>TCP authentication option</p></td>
+</tr>
+<tr class="row-even"><td><p>8</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mode_mptcp()</span></code></p></td>
+<td><p>multipath TCP</p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.mptcp_opt">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">mptcp_opt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">pcapkit.protocols.transport.tcp.TCP</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataType_TCP_MP_Opt</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.mptcp_opt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process method for multipath TCP options [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Code</p></th>
+<th class="head"><p>Method</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mptcp_capable()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MP_CAPABLE</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mptcp_join()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MP_JOIN</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mptcp_dss()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">DSS</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mptcp_add()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mptcp_remove()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mptcp_prio()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mptcp_fail()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>7</p></td>
+<td><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_mptcp_fastclose()</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<section id="data-structure">
+<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>Following classes are only for <em>documentation</em> purpose.
+They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of TCP header [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc793.html"><strong>RFC 793</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.srcport">
+<span class="sig-name descname"><span class="pre">srcport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.srcport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Source port.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.dstport">
+<span class="sig-name descname"><span class="pre">dstport</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.dstport" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description port.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.seq">
+<span class="sig-name descname"><span class="pre">seq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequence number.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.ack">
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.ack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acknowledgement number.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.hdr_len">
+<span class="sig-name descname"><span class="pre">hdr_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.hdr_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data offset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags" title="pcapkit.protocols.transport.tcp.DataType_TCP_Flags"><span class="pre">DataType_TCP_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flags.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.window_size">
+<span class="sig-name descname"><span class="pre">window_size</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.window_size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of receive window.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.checksum">
+<span class="sig-name descname"><span class="pre">checksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.checksum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checksum.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.urgent_pointer">
+<span class="sig-name descname"><span class="pre">urgent_pointer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.urgent_pointer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Urgent pointer.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.opt">
+<span class="sig-name descname"><span class="pre">opt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">pcapkit.const.tcp.option.Option</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.opt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of TCP options.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP.packet">
+<span class="sig-name descname"><span class="pre">packet</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP.packet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw packet data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Flags</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Flags.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.ns">
+<span class="sig-name descname"><span class="pre">ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.ns" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECN concealment  protection.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.cwr">
+<span class="sig-name descname"><span class="pre">cwr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.cwr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Congestion window reduced.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.ece">
+<span class="sig-name descname"><span class="pre">ece</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.ece" title="Permalink to this definition">¶</a></dt>
+<dd><p>ECN-Echo.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.urg">
+<span class="sig-name descname"><span class="pre">urg</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.urg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Urgent.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.ack">
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.ack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acknowledgement.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.psh">
+<span class="sig-name descname"><span class="pre">psh</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.psh" title="Permalink to this definition">¶</a></dt>
+<dd><p>Push function.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.rst">
+<span class="sig-name descname"><span class="pre">rst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.rst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset connection.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.syn">
+<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.syn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Synchronize sequence numbers.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Flags.fin">
+<span class="sig-name descname"><span class="pre">fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.fin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Last packet from sender.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of TCP options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt.kind">
+<span class="sig-name descname"><span class="pre">kind</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt.kind" title="Permalink to this definition">¶</a></dt>
+<dd><p>Option kind value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt.length">
+<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Length of option.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_OPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_OPT</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>TCP option <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> parsing mapping.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_OPT.flag">
+<span class="sig-name descname"><span class="pre">flag</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT.flag" title="Permalink to this definition">¶</a></dt>
+<dd><p>If the length of option is <strong>GREATER THAN</strong> <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_OPT.desc">
+<span class="sig-name descname"><span class="pre">desc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT.desc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Description string, also attribute name.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_OPT.func">
+<span class="sig-name descname"><span class="pre">func</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT.func" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function, length of data bytes.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_OPT.proc">
+<span class="sig-name descname"><span class="pre">proc</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT.proc" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process method that data bytes need (when <a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_OPT.flag" title="pcapkit.protocols.transport.tcp.DataType_TCP_OPT.flag"><code class="xref py py-attr docutils literal notranslate"><span class="pre">flag</span></code></a> is <a class="reference external" href="https://docs.python.org/3/library/constants.html#True" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>).</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="#pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.process_opt" title="pcapkit.protocols.transport.tcp.pcapkit.protocols.transport.tcp.process_opt"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.tcp.process_opt</span></code></a></p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<section id="tcp-miscellaneous-options">
+<h3>TCP Miscellaneous Options<a class="headerlink" href="#tcp-miscellaneous-options" title="Permalink to this heading">¶</a></h3>
+<section id="no-process-options">
+<h4>No Process Options<a class="headerlink" href="#no-process-options" title="Permalink to this heading">¶</a></h4>
+<p>For TCP options require no process, its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.opt.kind</span></code></p></td>
+<td><p>Kind</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.opt.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.opt.data</span></code></p></td>
+<td><p>Kind-specific Data</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DONONE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_DONONE</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DONONE" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of TCP options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DONONE.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DONONE.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kind-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="unpack-process-options">
+<h4>Unpack Process Options<a class="headerlink" href="#unpack-process-options" title="Permalink to this heading">¶</a></h4>
+<p>For TCP options require unpack process, its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.opt.kind</span></code></p></td>
+<td><p>Kind</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.opt.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.opt.data</span></code></p></td>
+<td><p>Kind-specific Data</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UNPACK">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_UNPACK</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UNPACK" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of TCP options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UNPACK.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UNPACK.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Kind-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="timestamps-option">
+<h3>Timestamps Option<a class="headerlink" href="#timestamps-option" title="Permalink to this heading">¶</a></h3>
+<p>For TCP Timestamps (<code class="docutils literal notranslate"><span class="pre">TS</span></code>) option as described in <span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ts.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">8</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ts.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">10</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ts.val</span></code></p></td>
+<td><p>Timestamp Value</p></td>
+</tr>
+<tr class="row-odd"><td><p>6</p></td>
+<td><p>48</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ts.ecr</span></code></p></td>
+<td><p>Timestamps Echo Reply</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_TS</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TS" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of TCP <code class="docutils literal notranslate"><span class="pre">TSopt</span></code> [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7323.html"><strong>RFC 7323</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TS.val">
+<span class="sig-name descname"><span class="pre">val</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TS.val" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timestamp value.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TS.ecr">
+<span class="sig-name descname"><span class="pre">ecr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TS.ecr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Timestamps echo reply.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="partial-order-connection-service-profile-option">
+<h3>Partial Order Connection Service Profile Option<a class="headerlink" href="#partial-order-connection-service-profile-option" title="Permalink to this heading">¶</a></h3>
+<p>For TCP Partial Order Connection Service Profile (<code class="docutils literal notranslate"><span class="pre">POC-SP</span></code>) option as described in <span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a> and <span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.pocsp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">10</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.pocsp.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">3</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.pocsp.start</span></code></p></td>
+<td><p>Start Flag</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>17</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.pocsp.end</span></code></p></td>
+<td><p>End Flag</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>18</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.pocsp.filler</span></code></p></td>
+<td><p>Filler</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_POCSP</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of TCP <code class="docutils literal notranslate"><span class="pre">POC-SP</span></code> Option [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1693.html"><strong>RFC 1693</strong></a>][<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP.start">
+<span class="sig-name descname"><span class="pre">start</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP.end">
+<span class="sig-name descname"><span class="pre">end</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP.end" title="Permalink to this definition">¶</a></dt>
+<dd><p>End flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP.filler">
+<span class="sig-name descname"><span class="pre">filler</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_POCSP.filler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filler.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="alternate-checksum-request-option">
+<h3>Alternate Checksum Request Option<a class="headerlink" href="#alternate-checksum-request-option" title="Permalink to this heading">¶</a></h3>
+<p>For TCP Alternate Checksum Request (<code class="docutils literal notranslate"><span class="pre">CHKSUM-REQ</span></code>) option as described in <span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a> and <span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.chksumreq.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">14</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.chksumreq.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">3</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.chksumreq.ac</span></code></p></td>
+<td><p>Checksum Algorithm</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ACOPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_ACOPT</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ACOPT" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of TCP <code class="docutils literal notranslate"><span class="pre">CHKSUM-REQ</span></code> [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1146.html"><strong>RFC 1146</strong></a>][<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6247.html"><strong>RFC 6247</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ACOPT.ac">
+<span class="sig-name descname"><span class="pre">ac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.const.tcp.checksum.Checksum</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ACOPT.ac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checksum algorithm.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="quick-start-response-option">
+<h3>Quick-Start Response Option<a class="headerlink" href="#quick-start-response-option" title="Permalink to this heading">¶</a></h3>
+<p>For TCP Quick-Start Response (<code class="docutils literal notranslate"><span class="pre">QS</span></code>) option as described in <span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.qs.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">27</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.qs.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">8</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.qs.req_rate</span></code></p></td>
+<td><p>Request Rate</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.qs.ttl_diff</span></code></p></td>
+<td><p>TTL Difference</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.qs.nounce</span></code></p></td>
+<td><p>QS Nounce</p></td>
+</tr>
+<tr class="row-even"><td><p>7</p></td>
+<td><p>62</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_QSOPT</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of TCP <code class="docutils literal notranslate"><span class="pre">QSopt</span></code> [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT.req_rate">
+<span class="sig-name descname"><span class="pre">req_rate</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT.req_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Request rate.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT.ttl_diff">
+<span class="sig-name descname"><span class="pre">ttl_diff</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT.ttl_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>TTL difference.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT.nounce">
+<span class="sig-name descname"><span class="pre">nounce</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT.nounce" title="Permalink to this definition">¶</a></dt>
+<dd><p>QS nounce.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="user-timeout-option">
+<h3>User Timeout Option<a class="headerlink" href="#user-timeout-option" title="Permalink to this heading">¶</a></h3>
+<p>For TCP User Timeout (<code class="docutils literal notranslate"><span class="pre">TIMEOUT</span></code>) option as described in <span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.timeout.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">28</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.timeout.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">4</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.timeout.granularity</span></code></p></td>
+<td><p>Granularity</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>17</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.timeout.timeout</span></code></p></td>
+<td><p>User Timeout</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_UTOPT</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of TCP <code class="docutils literal notranslate"><span class="pre">TIMEOUT</span></code> [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5482.html"><strong>RFC 5482</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT.granularity">
+<span class="sig-name descname"><span class="pre">granularity</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'minutes'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'seconds'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT.granularity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Granularity.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.timedelta" title="(in Python v3.10)"><span class="pre">datetime.timedelta</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_UTOPT.timeout" title="Permalink to this definition">¶</a></dt>
+<dd><p>User timeout.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="authentication-option">
+<h3>Authentication Option<a class="headerlink" href="#authentication-option" title="Permalink to this heading">¶</a></h3>
+<p>For Authentication (<code class="docutils literal notranslate"><span class="pre">AO</span></code>) option as described in <span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5925.html"><strong>RFC 5925</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ao.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">29</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ao.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ao.key_id</span></code></p></td>
+<td><p>KeyID</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ao.r_next_key_id</span></code></p></td>
+<td><p>RNextKeyID</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.ao.mac</span></code></p></td>
+<td><p>Message Authentication Code</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_TCPAO</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of TCP <code class="docutils literal notranslate"><span class="pre">AOopt</span></code> [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5925.html"><strong>RFC 5925</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO.key_id">
+<span class="sig-name descname"><span class="pre">key_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO.key_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>KeyID.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO.r_next_key_id">
+<span class="sig-name descname"><span class="pre">r_next_key_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO.r_next_key_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>RNextKeyID.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO.mac">
+<span class="sig-name descname"><span class="pre">mac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO.mac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message authentication code.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="multipath-tcp-options">
+<h3>Multipath TCP Options<a class="headerlink" href="#multipath-tcp-options" title="Permalink to this heading">¶</a></h3>
+<p>For Multipath TCP (<code class="docutils literal notranslate"><span class="pre">MP-TCP</span></code>) options as described in <span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.data</span></code></p></td>
+<td><p>Subtype-specific Data</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MPTCP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MPTCP</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MPTCP" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP-TCP</span></code> [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MPTCP.subtype">
+<span class="sig-name descname"><span class="pre">subtype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.const.tcp.mp_tcp_option.MPTCPOption</span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MPTCP.subtype" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MPTCP.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MPTCP.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="multipath-capable-option">
+<h4>Multipath Capable Option<a class="headerlink" href="#multipath-capable-option" title="Permalink to this heading">¶</a></h4>
+<p>For Multipath Capable (<code class="docutils literal notranslate"><span class="pre">MP_CAPABLE</span></code>) options as described in <span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">12</span></code>/<code class="docutils literal notranslate"><span class="pre">20</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">0</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.capable.version</span></code></p></td>
+<td><p>Version</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.capable.flags.req</span></code></p></td>
+<td><p>Checksum Require Flag (<code class="docutils literal notranslate"><span class="pre">A</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>25</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.capable.flags.ext</span></code></p></td>
+<td><p>Extensibility Flag (<code class="docutils literal notranslate"><span class="pre">B</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>26</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.capable.flags.res</span></code></p></td>
+<td><p>Unassigned (<code class="docutils literal notranslate"><span class="pre">C</span></code> - <code class="docutils literal notranslate"><span class="pre">G</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>31</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.capable.flags.hsa</span></code></p></td>
+<td><p>HMAC-SHA1 Flag (<code class="docutils literal notranslate"><span class="pre">H</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.capable.skey</span></code></p></td>
+<td><p>Option Sender’s Key</p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>96</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.capable.rkey</span></code></p></td>
+<td><p>Option Receiver’s Key
+(only if option length is <code class="docutils literal notranslate"><span class="pre">20</span></code>)</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_CAPABLE</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_CAPABLE</span></code> [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE.capable">
+<span class="sig-name descname"><span class="pre">capable</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data"><span class="pre">DataType_TCP_Opt_MP_CAPABLE_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE.capable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_CAPABLE_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_CAPABLE</span></code> [<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Version.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags"><span class="pre">DataType_TCP_Opt_MP_CAPABLE_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flags.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data.skey">
+<span class="sig-name descname"><span class="pre">skey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data.skey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Option sender’s key.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data.rkey">
+<span class="sig-name descname"><span class="pre">rkey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Data.rkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Option receiver’s key.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_CAPABLE_Flags</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Flags.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags.req">
+<span class="sig-name descname"><span class="pre">req</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags.req" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checksum require flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags.ext">
+<span class="sig-name descname"><span class="pre">ext</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags.ext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extensibility flag.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags.res">
+<span class="sig-name descname"><span class="pre">res</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags.res" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unassigned flags.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags.hsa">
+<span class="sig-name descname"><span class="pre">hsa</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_CAPABLE_Flags.hsa" title="Permalink to this definition">¶</a></dt>
+<dd><p>HMAC-SHA1 flag.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="join-connection-option">
+<h4>Join Connection Option<a class="headerlink" href="#join-connection-option" title="Permalink to this heading">¶</a></h4>
+<p>For Join Connection (<code class="docutils literal notranslate"><span class="pre">MP_JOIN</span></code>) options as described in <span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">1</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.data</span></code></p></td>
+<td><p>Handshake-specific Data</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN</span></code> [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN.connection">
+<span class="sig-name descname"><span class="pre">connection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'SYN/ACK'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'SYN'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'ACK'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN.connection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Join connection type.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN.join">
+<span class="sig-name descname"><span class="pre">join</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_Data"><span class="pre">DataType_TCP_Opt_MP_JOIN_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN.join" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN</span></code> [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_Data.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_Data.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unknown type data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<section id="mp-join-syn">
+<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code><a class="headerlink" href="#mp-join-syn" title="Permalink to this heading">¶</a></h5>
+<p>For Join Connection (<code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code>) option for Initial SYN as described in <span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">12</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">1</span></code> | <code class="docutils literal notranslate"><span class="pre">SYN</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>23</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.syn.backup</span></code></p></td>
+<td><p>Backup Path (<code class="docutils literal notranslate"><span class="pre">B</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.syn.addr_id</span></code></p></td>
+<td><p>Address ID</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.syn.token</span></code></p></td>
+<td><p>Receiver’s Token</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>64</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.syn.rand_num</span></code></p></td>
+<td><p>Sender’s Random Number</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYN</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MP_JOIN_Data</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code> [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN.syn">
+<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYN_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN.syn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYN_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN</span></code> [<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data.backup">
+<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data.backup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backup path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data.addr_id">
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data.addr_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Address ID.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data.token">
+<span class="sig-name descname"><span class="pre">token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data.token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Receiver’s token.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data.rand_num">
+<span class="sig-name descname"><span class="pre">rand_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYN_Data.rand_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sender’s random number.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="mp-join-syn-ack">
+<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code><a class="headerlink" href="#mp-join-syn-ack" title="Permalink to this heading">¶</a></h5>
+<p>For Join Connection (<code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code>) option for Responding SYN/ACK as described in <span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">16</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">1</span></code> | <code class="docutils literal notranslate"><span class="pre">SYN/ACK</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>23</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.synack.backup</span></code></p></td>
+<td><p>Backup Path (<code class="docutils literal notranslate"><span class="pre">B</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.synack.addr_id</span></code></p></td>
+<td><p>Address ID</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.synack.hmac</span></code></p></td>
+<td><p>Sender’s Truncated HMAC</p></td>
+</tr>
+<tr class="row-odd"><td><p>12</p></td>
+<td><p>96</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.synack.rand_num</span></code></p></td>
+<td><p>Sender’s Random Number</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYNACK</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MP_JOIN_Data</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code> [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK.syn">
+<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYNACK_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK.syn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_SYNACK_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-SYN/ACK</span></code> [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data.backup">
+<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data.backup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backup path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data.addr_id">
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data.addr_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Address ID.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data.hmac">
+<span class="sig-name descname"><span class="pre">hmac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data.hmac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sender’s truncated HMAC.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data.rand_num">
+<span class="sig-name descname"><span class="pre">rand_num</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_SYNACK_Data.rand_num" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sender’s random number.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="mp-join-ack">
+<h5><code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code><a class="headerlink" href="#mp-join-ack" title="Permalink to this heading">¶</a></h5>
+<p>For Join Connection (<code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code>) option for Third ACK as described in <span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length (<code class="docutils literal notranslate"><span class="pre">16</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">1</span></code> | <code class="docutils literal notranslate"><span class="pre">ACK</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.join.ack.hmac</span></code></p></td>
+<td><p>Sender’s HMAC</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_ACK</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MP_JOIN_Data</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code> [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK.syn">
+<span class="sig-name descname"><span class="pre">syn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK_Data"><span class="pre">DataType_TCP_Opt_MP_JOIN_ACK_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK.syn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_JOIN_ACK_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_JOIN-ACK</span></code> [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK_Data.hmac">
+<span class="sig-name descname"><span class="pre">hmac</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_JOIN_ACK_Data.hmac" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sender’s HMAC.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="data-sequence-signal-option">
+<h4>Data Sequence Signal Option<a class="headerlink" href="#data-sequence-signal-option" title="Permalink to this heading">¶</a></h4>
+<p>For Data Sequence Signal (<code class="docutils literal notranslate"><span class="pre">DSS</span></code>) options as described in <span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">2</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>27</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.flags.fin</span></code></p></td>
+<td><p>DATA_FIN (<code class="docutils literal notranslate"><span class="pre">F</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>28</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.flags.dsn_len</span></code></p></td>
+<td><p>DSN Length (<code class="docutils literal notranslate"><span class="pre">m</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>29</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.flags.data_pre</span></code></p></td>
+<td><p>DSN, SSN, Data-Level Length, CHKSUM Present (<code class="docutils literal notranslate"><span class="pre">M</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>30</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.flags.ack_len</span></code></p></td>
+<td><p>ACK Length (<code class="docutils literal notranslate"><span class="pre">a</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>31</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.flags.ack_pre</span></code></p></td>
+<td><p>Data ACK Present (<code class="docutils literal notranslate"><span class="pre">A</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.ack</span></code></p></td>
+<td><p>Data ACK (<code class="docutils literal notranslate"><span class="pre">4</span></code> / <code class="docutils literal notranslate"><span class="pre">8</span></code> octets)</p></td>
+</tr>
+<tr class="row-even"><td><p>8/12</p></td>
+<td><p>64/96</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.dsn</span></code></p></td>
+<td><p>DSN (<code class="docutils literal notranslate"><span class="pre">4</span></code> / <code class="docutils literal notranslate"><span class="pre">8</span></code> octets)</p></td>
+</tr>
+<tr class="row-odd"><td><p>12/20</p></td>
+<td><p>48/160</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.ssn</span></code></p></td>
+<td><p>Subflow Sequence Number</p></td>
+</tr>
+<tr class="row-even"><td><p>16/24</p></td>
+<td><p>128/192</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.dl_len</span></code></p></td>
+<td><p>Data-Level Length</p></td>
+</tr>
+<tr class="row-odd"><td><p>18/26</p></td>
+<td><p>144/208</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.dss.checksum</span></code></p></td>
+<td><p>Checksum</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_DSS</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">DSS</span></code> [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS.dss">
+<span class="sig-name descname"><span class="pre">dss</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data"><span class="pre">DataType_TCP_Opt_DSS_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS.dss" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_DSS_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">DSS</span></code> [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags"><span class="pre">DataType_TCP_Opt_DSS_Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flags.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.ack">
+<span class="sig-name descname"><span class="pre">ack</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.ack" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data ACK.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.dsn">
+<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.dsn" title="Permalink to this definition">¶</a></dt>
+<dd><p>DSN.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.ssn">
+<span class="sig-name descname"><span class="pre">ssn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.ssn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subflow sequence number.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.dl_len">
+<span class="sig-name descname"><span class="pre">dl_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.dl_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data-level length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.checksum">
+<span class="sig-name descname"><span class="pre">checksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Data.checksum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Checksum.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_DSS_Flags</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Flags.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.fin">
+<span class="sig-name descname"><span class="pre">fin</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.fin" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">DATA_FIN</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.dsn_len">
+<span class="sig-name descname"><span class="pre">dsn_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.dsn_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>DSN length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.data_pre">
+<span class="sig-name descname"><span class="pre">data_pre</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.data_pre" title="Permalink to this definition">¶</a></dt>
+<dd><p>DSN, SSN, data-level length, checksum present.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.ack_len">
+<span class="sig-name descname"><span class="pre">ack_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.ack_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>ACK length.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.ack_pre">
+<span class="sig-name descname"><span class="pre">ack_pre</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_DSS_Flags.ack_pre" title="Permalink to this definition">¶</a></dt>
+<dd><p>ACK present.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="add-address-option">
+<h4>Add Address Option<a class="headerlink" href="#add-address-option" title="Permalink to this heading">¶</a></h4>
+<p>For Add Address (<code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code>) options as described in <span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">3</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.add_addr.ip_ver</span></code></p></td>
+<td><p>IP Version</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.add_addr.addr_id</span></code></p></td>
+<td><p>Address ID</p></td>
+</tr>
+<tr class="row-odd"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.add_addr.addr</span></code></p></td>
+<td><p>IP Address (<code class="docutils literal notranslate"><span class="pre">4</span></code> / <code class="docutils literal notranslate"><span class="pre">16</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>8/20</p></td>
+<td><p>64/160</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.add_addr.port</span></code></p></td>
+<td><p>Port (optional)</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_ADD_ADDR</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code> [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR.add_addr">
+<span class="sig-name descname"><span class="pre">add_addr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data"><span class="pre">DataType_TCP_Opt_ADD_ADDR_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR.add_addr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_ADD_ADDR_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">ADD_ADDR</span></code> [<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data.ip_ver">
+<span class="sig-name descname"><span class="pre">ip_ver</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">4</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data.ip_ver" title="Permalink to this definition">¶</a></dt>
+<dd><p>IP version.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data.addr_id">
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data.addr_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Address ID.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data.addr">
+<span class="sig-name descname"><span class="pre">addr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv4Address</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv6Address</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data.addr" title="Permalink to this definition">¶</a></dt>
+<dd><p>IP address.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data.port">
+<span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_ADD_ADDR_Data.port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Port.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="remove-address-option">
+<h4>Remove Address Option<a class="headerlink" href="#remove-address-option" title="Permalink to this heading">¶</a></h4>
+<p>For Remove Address (<code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code>) options as described in <span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">4</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>20</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.remove_addr.addr_id</span></code></p></td>
+<td><p>Address ID (optional list)</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_REMOVE_ADDR</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code> [<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR.remove_addr">
+<span class="sig-name descname"><span class="pre">remove_addr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR_Data"><span class="pre">DataType_TCP_Opt_REMOVE_ADDR_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR.remove_addr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_REMOVE_ADDR_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">REMOVE_ADDR</span></code> [<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR_Data.addr_id">
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_REMOVE_ADDR_Data.addr_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Array of address IDs.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="change-subflow-priority-option">
+<h4>Change Subflow Priority Option<a class="headerlink" href="#change-subflow-priority-option" title="Permalink to this heading">¶</a></h4>
+<p>For Change Subflow Priority (<code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code>) options as described in <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">4</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>23</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.prio.backup</span></code></p></td>
+<td><p>Backup Path (<code class="docutils literal notranslate"><span class="pre">B</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>3</p></td>
+<td><p>24</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.prio.addr_id</span></code></p></td>
+<td><p>Address ID (optional)</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_PRIO</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code> [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO.prio">
+<span class="sig-name descname"><span class="pre">prio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data"><span class="pre">DataType_TCP_Opt_MP_PRIO_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO.prio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_PRIO_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_PRIO</span></code> [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data.backup">
+<span class="sig-name descname"><span class="pre">backup</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data.backup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backup path.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data.addr_id">
+<span class="sig-name descname"><span class="pre">addr_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO_Data.addr_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Address ID.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="fallback-option">
+<h4>Fallback Option<a class="headerlink" href="#fallback-option" title="Permalink to this heading">¶</a></h4>
+<p>For Fallback (<code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code>) options as described in <span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">4</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>23</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.fail.dsn</span></code></p></td>
+<td><p>Data Sequence Number</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_FAIL</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code> [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL.fail">
+<span class="sig-name descname"><span class="pre">fail</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL_Data"><span class="pre">DataType_TCP_Opt_MP_FAIL_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL.fail" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_FAIL_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FAIL</span></code> [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL_Data.dsn">
+<span class="sig-name descname"><span class="pre">dsn</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FAIL_Data.dsn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Data sequence number.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="fast-close-option">
+<h4>Fast Close Option<a class="headerlink" href="#fast-close-option" title="Permalink to this heading">¶</a></h4>
+<p>For Fast Close (<code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code>) options as described in <span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>,
+its structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.kind</span></code></p></td>
+<td><p>Kind (<code class="docutils literal notranslate"><span class="pre">30</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>8</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.length</span></code></p></td>
+<td><p>Length</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.subtype</span></code></p></td>
+<td><p>Subtype (<code class="docutils literal notranslate"><span class="pre">4</span></code>)</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>23</p></td>
+<td></td>
+<td><p>Reserved (must be <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">tcp.mp.fastclose.rkey</span></code></p></td>
+<td><p>Option Receiver’s Key</p></td>
+</tr>
+</tbody>
+</table>
+<br /><dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_FASTCLOSE</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DataType_TCP_Opt_MPTCP</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code> [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE.fastclose">
+<span class="sig-name descname"><span class="pre">fastclose</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE_Data" title="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE_Data"><span class="pre">DataType_TCP_Opt_MP_FASTCLOSE_Data</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE.fastclose" title="Permalink to this definition">¶</a></dt>
+<dd><p>Subtype-specific data.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE_Data">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.transport.tcp.</span></span><span class="sig-name descname"><span class="pre">DataType_TCP_Opt_MP_FASTCLOSE_Data</span></span><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE_Data" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Bases<span class="colon">:</span></dt>
+<dd class="field-odd"><p>TypedDict</p>
+</dd>
+</dl>
+<p>Structure of <code class="docutils literal notranslate"><span class="pre">MP_FASTCLOSE</span></code> [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6824.html"><strong>RFC 6824</strong></a>].</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE_Data.rkey">
+<span class="sig-name descname"><span class="pre">rkey</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_FASTCLOSE_Data.rkey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Option receiver’s key.</p>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Transmission_Control_Protocol">https://en.wikipedia.org/wiki/Transmission_Control_Protocol</a></p>
+</aside>
+</section>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="../index.html">Protocol Family</a><ul>
+  <li><a href="index.html">Transport Layer Protocols</a><ul>
+      <li>Previous: <a href="udp.html" title="previous chapter">UDP - User Datagram Protocol</a></li>
+      <li>Next: <a href="../application/index.html" title="next chapter">Application Layer Protocols</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+      |
+      <a href="../../../_sources/pcapkit/protocols/transport/tcp.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

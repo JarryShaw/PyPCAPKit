@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PyPCAPKit's documentation!
-=====================================
+PyPCAPKit - Stream PCAP File Extractor
+======================================
 
 The :mod:`PyPCAPKit <pcapkit>` project is an open source Python program focus
 on `PCAP`_ parsing and analysis, which works as a stream PCAP file extractor.
@@ -13,13 +13,14 @@ output report formats.
 
 .. important::
 
-   The whole project supports **Python 3.4** or later.
+   The whole project supports **Python 3.6** or later.
 
 .. toctree::
    :maxdepth: 2
 
-   pcapkit
-   cli
+   pcapkit/index
+   demo
+   pep
 
 -----
 About
@@ -31,10 +32,15 @@ About
 .. note::
 
    There is a project called |jspcapy|_ works on :mod:`pcapkit`, which is a
-   command line tool for PCAP extraction but now ***DEPRECATED***.
+   command line tool for PCAP extraction.
 
    .. |jspcapy| replace:: ``jspcapy``
    .. _jspcapy: https://github.com/JarryShaw/jspcapy
+
+   .. deprecated:: 0.8.0
+
+      The |jspcapy|_ project is deprecated and has been merged into the
+      :mod:`PyPCAPKit <pcapkit>` project as its CLI support.
 
 Unlike popular PCAP file extractors, such as :mod:`Scapy <scapy>`,
 :mod:`dpkt <dpkt>`, :mod:`PyShark <pyshark>`, and etc, :mod:`pcapkit` uses
@@ -48,49 +54,51 @@ In :mod:`pcapkit`, all files can be described as following eight parts.
 
 - Interface (:mod:`pcapkit.interface`)
 
-  User interface for the :mod:`pcapkit` library, which standardise and
-  simplify the usage of this library.
+  User interface for the :mod:`pcapkit` library, which
+  standardises and simplifies the usage of this library.
 
 - Foundation (:mod:`pcapkit.foundation`)
 
-  Synthesise file I/O and protocol analysis, coordinate information
-  exchange in all network layers.
-
-- Reassembly (:mod:`pcapkit.reassembly`)
-
-  Based on algorithms described in :rfc:`815`, implement datagram reassembly
-  of IP and TCP packets.
+  Synthesises file I/O and protocol analysis, coordinates
+  information exchange in all network layers, as well as
+  provides the foundamental functions for :mod:`pcapkit`.
 
 - Protocols (:mod:`pcapkit.protocols`)
 
-  Collection of all protocol family, with detail implementation and methods,
-  as well as constructors.
-
-- CoreKit (:mod:`pcapkit.corekit`)
-
-  Core utilities for :mod:`pcapkit` implementation.
-
-- TookKit (:mod:`pcapkit.toolkit`)
-
-  Compatibility tools for :mod:`pcapkit` implementation.
-
-- DumpKit (:mod:`pcapkit.dumpkit`
-
-  Dump utilities for :mod:`pcapkit` implementation.
+  Collection of all protocol family, with detailed
+  implementation and methods.
 
 - Utilities (:mod:`pcapkit.utilities`)
 
-  Collection of four utility functions and classes.
+  Auxiliary functions and tools for :mod:`pcapkit`.
+
+- CoreKit (:mod:`pcapkit.corekit`)
+
+  Core utilities for :mod:`pcapkit` implementation, mainly
+  for internal data structure and processing.
+
+- ToolKit (:mod:`pcapkit.toolkit`)
+
+  Auxiliary tools for :mod:`pcapkit` to support the multiple
+  extraction engines with a unified interface.
+
+- DumpKit (:mod:`pcapkit.dumpkit`)
+
+  File output formatters for :mod:`pcapkit`.
+
+- Constants (:mod:`pcapkit.const`)
+
+  Constant enumerations used in :mod:`pcapkit` for protocol
+  family extraction and representation.
 
 Engine Comparison
 -----------------
 
-Besides, due to complexity of :mod:`pcapkit`, its extraction procedure takes
-around *0.0009* seconds per packet, which is not ideal enough. Thus
+Due to the general overhead of :mod:`pcapkit`, its extraction procedure takes
+around *0.0008* seconds per packet, which is already impressive but not enough
+comparing to other popular extration engines availbale on the market. Thus
 :mod:`pcapkit` introduced alternative extractionengines to accelerate this
 procedure. By now :mod:`pcapkit` supports `Scapy`_, `DPKT`_, and `PyShark`_.
-Plus, :mod:`pcapkit` supports two strategies of multiprocessing (``server`` &
-``pipeline``). For more information, please refer to the documentation.
 
 Test Environment
 ~~~~~~~~~~~~~~~~
@@ -98,7 +106,7 @@ Test Environment
 .. list-table::
 
    * - Operating System
-     - macOS Mojave
+     - macOS Monterey
    * - Processor Name
      - Intel Core i7
    * - Processor Speed
@@ -114,12 +122,10 @@ Test Results
 ============= =================================
 Engine        Performance (seconds per packet)
 ============= =================================
-``dpkt``      0.00017389218012491862
-``scapy``     0.00036091208457946774
-``default``   0.0009537641207377116
-``pipeline``  0.0009694552421569824
-``server``    0.018088217973709107
-``pyshark``   0.04200994372367859
+``dpkt``      0.00006832083066304525
+``scapy``     0.0002489296595255534
+``pcapkit``   0.0008274253209431966
+``pyshark``   0.039607704480489093
 ============= =================================
 
 .. raw:: html
@@ -132,7 +138,7 @@ Installation
 
 .. note::
 
-   :mod:`pcapkit` supports Python versions **since 3.4**.
+   :mod:`pcapkit` supports Python versions **since 3.6**.
 
 Simply run the following to install the current version from PyPI:
 
@@ -166,112 +172,13 @@ plug-in functions, you may want to install the optional ones:
    # or to do this explicitly
    pip install pypcapkit dpkt scapy pyshark
 
--------
-Samples
--------
+For CLI usage, you will need to install the optional packages:
 
-Usage Samples
--------------
+.. code-block:: shell
 
-As described above, :mo:d`pcapkit` is quite easy to use, with simply three
-verbs as its main interface. Several scenarios are shown as below.
-
-1. extract a PCAP file and dump the result to a specific file
-   (with no reassembly)
-
-   .. code-block:: python
-
-      import pcapkit
-      # dump to a PLIST file with no frame storage (property frame disabled)
-      plist = pcapkit.extract(fin='in.pcap', fout='out.plist', format='plist', store=False)
-      # dump to a JSON file with no extension auto-complete
-      json = pcapkit.extract(fin='in.cap', fout='out.json', format='json', extension=False)
-      # dump to a folder with each tree-view text file per frame
-      tree = pcapkit.extract(fin='in.pcap', fout='out', format='tree', files=True)
-
-2. extract a PCAP file and fetch IP packet (both IPv4 and IPv6) from a frame
-   (with no output file)
-
-   .. code-block:: python
-
-      >>> import pcapkit
-      >>> extraction = pcapkit.extract(fin='in.pcap', nofile=True)
-      >>> frame0 = extraction.frame[0]
-      # check if IP in this frame, otherwise ProtocolNotFound will be raised
-      >>> flag = pcapkit.IP in frame0
-      >>> tcp = frame0[pcapkit.IP] if flag else None
-
-3. extract a PCAP file and reassemble TCP payload
-   (with no output file nor frame storage)
-
-   .. code-block:: python
-
-      import pcapkit
-      # set strict to make sure full reassembly
-      extraction = pcapkit.extract(fin='in.pcap', store=False, nofile=True, tcp=True, strict=True)
-      # print extracted packet if HTTP in reassembled payloads
-      for packet in extraction.reassembly.tcp:
-          for reassembly in packet.packets:
-              if pcapkit.HTTP in reassembly.protochain:
-                  print(reassembly.info)
-
-CLI Samples
------------
-
-The CLI (command line interface) of :mod:`pcapkit` has two different access.
-
-* through console scripts
-
-  Use command name ``pcapkit [...]`` directly (as shown in samples).
-
-* through Python module
-
-  ``python -m pypcapkit [...]`` works exactly the same as above.
-
-Here are some usage samples:
-
-1. export to a macOS Property List
-   (`Xcode`_ has special support for this format)
-
-   .. code-block:: shell
-
-      $ pcapkit in --format plist --verbose
-      🚨Loading file 'in.pcap'
-       - Frame   1: Ethernet:IPv6:ICMPv6
-       - Frame   2: Ethernet:IPv6:ICMPv6
-       - Frame   3: Ethernet:IPv4:TCP
-       - Frame   4: Ethernet:IPv4:TCP
-       - Frame   5: Ethernet:IPv4:TCP
-       - Frame   6: Ethernet:IPv4:UDP
-      🍺Report file stored in 'out.plist'
-
-2. export to a JSON file (with no format specified)
-
-   .. code-block:: shell
-
-      $ pcapkit in --output out.json --verbose
-      🚨Loading file 'in.pcap'
-       - Frame   1: Ethernet:IPv6:ICMPv6
-       - Frame   2: Ethernet:IPv6:ICMPv6
-       - Frame   3: Ethernet:IPv4:TCP
-       - Frame   4: Ethernet:IPv4:TCP
-       - Frame   5: Ethernet:IPv4:TCP
-       - Frame   6: Ethernet:IPv4:UDP
-      🍺Report file stored in 'out.json'
-
-3. export to a text tree view file (without extension autocorrect)
-
-   .. code-block:: shell
-
-      $ pcapkit in --output out --format tree --verbose
-      🚨Loading file 'in.pcap'
-       - Frame   1: Ethernet:IPv6:ICMPv6
-       - Frame   2: Ethernet:IPv6:ICMPv6
-       - Frame   3: Ethernet:IPv4:TCP
-       - Frame   4: Ethernet:IPv4:TCP
-       - Frame   5: Ethernet:IPv4:TCP
-       - Frame   6: Ethernet:IPv4:UDP
-      🍺Report file stored in 'out'
+   pip install pypcapkit[cli]
+   # or explicitly...
+   pip install pypcapkit emoji
 
 Indices and tables
 ==================
@@ -284,4 +191,3 @@ Indices and tables
 .. _Scapy: https://scapy.net
 .. _DPKT: https://dpkt.readthedocs.io
 .. _PyShark: https://kiminewt.github.io/pyshark
-.. _Xcode: https://developer.apple.com/xcode

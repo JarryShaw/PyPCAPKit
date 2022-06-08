@@ -55,7 +55,7 @@
 <span class="n">VT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;VT&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">VT</span><span class="p">]):</span>
+<div class="viewcode-block" id="Info"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info">[docs]</a><span class="k">class</span> <span class="nc">Info</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">VT</span><span class="p">],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">VT</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;Turn dictionaries into :obj:`object` like instances.</span>
 
 <span class="sd">    * :class:`Info` objects inherit from :obj:`dict` type</span>
@@ -82,7 +82,7 @@
     <span class="c1">#： List of builtin methods.</span>
     <span class="n">__builtin__</span><span class="p">:</span> <span class="s1">&#39;set[str]&#39;</span>
 
-<div class="viewcode-block" id="Info.__new__"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__">[docs]</a>    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="Info.__new__"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__new__">[docs]</a>    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
         <span class="sd">&quot;&quot;&quot;Create a new instance.</span>
 
 <span class="sd">        The class will try to automatically generate ``__init__`` method with</span>
@@ -226,7 +226,7 @@
     <span class="k">def</span> <span class="fm">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">&quot;can&#39;t delete attribute&quot;</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Info.from_dict"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Info.from_dict"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                   <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;VT&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Info&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Create a new instance.</span>
@@ -249,7 +249,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="Info.to_dict"><a class="viewcode-back" href="../../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, VT]&#39;</span><span class="p">:</span>
+<div class="viewcode-block" id="Info.to_dict"><a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, VT]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Convert :class:`Info` into :obj:`dict`.</span>
 
 <span class="sd">        Important:</span>
@@ -294,7 +294,7 @@
 
 
 <p>
-<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=pypcapkit&type=star&count=true&size=large&v=2"
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
   allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
 </p>
 
@@ -304,8 +304,9 @@
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit.html">Stream PCAP File Extractor</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../cli.html">Command Line Interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit/index.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
 </ul>
 
 <div class="relations">
@@ -340,12 +341,12 @@
       <div class="clearer"></div>
     </div>
     <div class="footer">
-      &copy;2018-2022, Jarry Shaw.
+      &copy;2017-2022, Jarry Shaw.
       
     </div>
 
     
-    <a href="https://github.com/JarryShaw/pypcapkit" class="github">
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
         <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
     </a>
     

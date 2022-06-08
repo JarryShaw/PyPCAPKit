@@ -1,0 +1,232 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Help Wanted &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="How to …" href="demo.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="help-wanted">
+<h1>Help Wanted<a class="headerlink" href="#help-wanted" title="Permalink to this heading">¶</a></h1>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>This is a copy of the <a href="#id1"><span class="problematic" id="id2">`discussion thread`_</span></a> started on the GitHub. The
+documentation is <strong>only</strong> used as a backup reference to the original
+discussion thread.</p>
+<p>_discussion thread: <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/106">https://github.com/JarryShaw/PyPCAPKit/discussions/106</a></p>
+</div>
+<p>As PyPCAPKit reaches its <em>16k</em> lines of code and <em>800th</em> commit, I figure it
+would be a better idea to record the project enchancement proposals here in
+the discussion thread. The proposals and/or notes will be documented and
+maintained here.</p>
+<p>Pull requests for the existing proposals and any new ideas are highly welcomed
+and encouraged. Should you have any questions, please leave a note either in
+this thread or under the <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a">**Q&amp;A** category discussions</a>.</p>
+<p>Wish you enjoy <strong>PyPCAPKit</strong>!!!</p>
+<section id="more-protocols-more">
+<h2>More Protocols, More!!!<a class="headerlink" href="#more-protocols-more" title="Permalink to this heading">¶</a></h2>
+<p>As you may have noticed, there are some protocol-named files under the
+<code class="docutils literal notranslate"><span class="pre">NotImplemented</span></code> folders. These protocols are what I planned to implement
+but not yet done. Namely, grouped by each TCP/IP layer and ordered by protocol
+name alphabetically,</p>
+<ul class="simple">
+<li><p>Link Layer: DSL, EAPOL, FDDI, ISDN, PPP</p></li>
+<li><p>Internet Layer: ECN, ESP, ICMP, ICMPv6, IGMP, NDP, Shim6</p></li>
+<li><p>Transport Layer: DCCP, QUIC, RSVP, SCTP</p></li>
+<li><p>Application Layer: BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP,
+ONC/RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL, XMPP</p></li>
+</ul>
+<p>Specifically, I have attempted to implement <strong>ESP</strong> several years ago, and I
+abandoned the implementation in the <cite>NotImplemented</cite> folder due to some design
+flaws within PyPCAPKit at that time. But now, the protocol should be able to
+implement quite smoothly.</p>
+<p>More over, <code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> requires some help to
+implement all the <em>message data</em> types, you can find more information in the
+specific file.</p>
+<p>Also, for the existing protocols, I am looking for a helping hand to implement
+the construction features, as defined in the <a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.make</span></code></a>
+method. You can find some reference from the PCAP’s <code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code>
+header class.</p>
+</section>
+<section id="pcapng-support">
+<h2><a class="reference external" href="https://wiki.wireshark.org/Development/PcapNg">PCAPNG</a> Support<a class="headerlink" href="#pcapng-support" title="Permalink to this heading">¶</a></h2>
+<p>As mentioned in #35, PyPCAPKit does not support parsing PCAPNG files with its
+builtin default engine at the moment – <em>partly because I could not understand
+the file format specifications</em>.</p>
+<p>If you are to help with it, please refer to the implementation of PCAP format
+support in <a class="reference internal" href="pcapkit/protocols/pcap/index.html#module-pcapkit.protocols.misc.pcap" title="pcapkit.protocols.misc.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap</span></code></a> module.</p>
+</section>
+<section id="maybe-even-faster">
+<h2>Maybe Even Faster?<a class="headerlink" href="#maybe-even-faster" title="Permalink to this heading">¶</a></h2>
+<p>Based on my recent benchmarking, PyPCAPKit’s builtin default engine is <em>only</em> 4
+times slower than Scapy and 10 times to DPKT. Considering the general overhead
+and verbose features provided by PyPCAPKit’s builtin default engine, such
+performance difference is acceptable.</p>
+<p>However, there might still be a way to further accelerate the protocol
+implementation – merge and concatenation <code class="docutils literal notranslate"><span class="pre">_read_xxxxxx</span></code> methods within one
+single <code class="xref py py-meth docutils literal notranslate"><span class="pre">file.read()</span></code>, such that we shall decrease the overall number of IO
+calls and reduce the duplicated <a class="reference external" href="https://docs.python.org/3/library/struct.html#struct.unpack" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">struct.unpack()</span></code></a> calls, etc. I am not yet
+confident about the performance improvement, but this is the most efficient way
+to accelerate PyPCAPKit at the moment, inspired from the implementation of
+Scapy and DPKT themselves.</p>
+<p>Specifically, as the following code from <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.Frame.read()</span></code>,</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_tsus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">_ilen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">_olen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>we might be able to rewrite it as</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_tsus</span><span class="p">,</span> <span class="n">_ilen</span><span class="p">,</span> <span class="n">_olen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fields</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>and the PoC of <code class="docutils literal notranslate"><span class="pre">_read_fields</span></code> would be something like</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">_read_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">fields</span><span class="p">:</span> <span class="s1">&#39;Field&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Any, ...]&#39;</span><span class="p">:</span>
+    <span class="c1"># built template</span>
+    <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">template</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">)</span>
+    <span class="nb">len</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">field</span><span class="o">.</span><span class="n">length</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">)</span>
+
+    <span class="c1"># read from buffer &amp; do unpack</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">fmt</span><span class="p">)</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">buf</span><span class="p">)</span>
+
+    <span class="c1"># do post-processing based on field-specific implementations</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">fields</span><span class="p">,</span> <span class="n">tmp</span><span class="p">):</span>
+         <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ret</span>
+</pre></div>
+</div>
+</section>
+<section id="logging-integration">
+<h2>Logging Integration<a class="headerlink" href="#logging-integration" title="Permalink to this heading">¶</a></h2>
+<p>As PyPCAPKit now has the <a class="reference internal" href="pcapkit/utilities/logging.html#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.utilities.logging.logger</span></code></a> in place, I’m
+expecting to fully extend its functionality in the entire module. Ideas and
+contributions are welcomed to integrate the logging system into PyPCAPKit.</p>
+</section>
+<section id="new-engines">
+<h2>New Engines<a class="headerlink" href="#new-engines" title="Permalink to this heading">¶</a></h2>
+<p>Although PyPCAPKit already has support for some popular PCAP parsing libraries,
+I’m expecting to extend the list of supported engines furthermore. The candidate
+engines include:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/pynetwork/pypcap">pypcap</a></p></li>
+<li><p><a class="reference external" href="https://github.com/kisom/pypcapfile">pycapfile</a></p></li>
+</ul>
+<p>Implementation for support of new engines would include adding corresponding
+handler methods and code blocks into <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code>
+(see support for Scapy, DPKT, and/or PyShark), as well as, the unified auxiliary
+tools located in <a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="pcapkit/index.html">Stream PCAP File Extractor</a></li>
+<li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Help Wanted</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#more-protocols-more">More Protocols, More!!!</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pcapng-support">PCAPNG Support</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#maybe-even-faster">Maybe Even Faster?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#logging-integration">Logging Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#new-engines">New Engines</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="demo.html" title="previous chapter">How to …</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+      |
+      <a href="_sources/pep.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

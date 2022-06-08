@@ -1,0 +1,176 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Application Layer Protocols &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="FTP - File Transfer Protocol" href="ftp.html" />
+    <link rel="prev" title="TCP - Transmission Control Protocol" href="../transport/tcp.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pcapkit.protocols.application">
+<span id="application-layer-protocols"></span><h1>Application Layer Protocols<a class="headerlink" href="#module-pcapkit.protocols.application" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application</span></code></a> is collection of all protocols in
+application layer, with detailed implementation and methods.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ftp.html">FTP - File Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ftp.html#data-structure">Data Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="http.html">HTTP - Hypertext Transfer Protocol</a></li>
+<li class="toctree-l1"><a class="reference internal" href="httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="httpv1.html#data-structure">Data Structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="httpv2.html#data-structure">Data Structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-unassigned-frame">HTTP/2 Unassigned Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-data-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">DATA</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-headers-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">HEADERS</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-priority-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">PRIORITY</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-rst-stream-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">RST_STREAM</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-settings-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">SETTINGS</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-push-promise-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">PUSH_PROMISE</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-ping-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">PING</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-goaway-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">GOAWAY</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-window-update-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">WINDOW_UPDATE</span></code> Frame</a></li>
+<li class="toctree-l3"><a class="reference internal" href="httpv2.html#http-2-continuation-frame">HTTP/2 <code class="docutils literal notranslate"><span class="pre">CONTINUATION</span></code> Frame</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="base-protocol">
+<h2>Base Protocol<a class="headerlink" href="#base-protocol" title="Permalink to this heading">¶</a></h2>
+<p><a class="reference internal" href="#module-pcapkit.protocols.application.application" title="pcapkit.protocols.application.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.application</span></code></a> contains only
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code>,
+which is a base class for application layer protocols, eg.
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/1.*</span></code>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/2</span></code>
+and etc.</p>
+<span class="target" id="module-pcapkit.protocols.application.application"></span></section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Stream PCAP File Extractor</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#module-pcapkit.all">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Stream PCAP File Extractor</a><ul>
+  <li><a href="../index.html">Protocol Family</a><ul>
+      <li>Previous: <a href="../transport/tcp.html" title="previous chapter">TCP - Transmission Control Protocol</a></li>
+      <li>Next: <a href="ftp.html" title="next chapter">FTP - File Transfer Protocol</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+      |
+      <a href="../../../_sources/pcapkit/protocols/application/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
