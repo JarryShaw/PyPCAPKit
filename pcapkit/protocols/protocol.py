@@ -594,7 +594,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     # Utilities.
     ##########################################################################
 
-    def _read_protos(self, size: int) -> 'Optional[StdlibEnum | AenumEnum]':  # pylint: disable=no-self-use, unused-argument
+    def _read_protos(self, size: int) -> 'Optional[StdlibEnum | AenumEnum]':  # pylint: disable=unused-argument
         """Read next layer protocol type.
 
         * If *succeed*, returns the enum of next layer protocol.
@@ -913,7 +913,8 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
             module, name = self.__proto__[proto]
             protocol = cast('Type[Protocol]', getattr(importlib.import_module(module), name))
 
-        next_ = protocol(self._file, length, layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
+        next_ = protocol(self._file, length, alias=proto,
+                         layer=self._exlayer, protocol=self._exproto)  # type: ignore[abstract]
         return next_
 
     def _check_term_threshold(self) -> bool:

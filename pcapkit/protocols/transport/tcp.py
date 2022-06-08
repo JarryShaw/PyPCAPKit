@@ -419,7 +419,7 @@ class TCP(Transport[DataType_TCP]):
         )
         return option
 
-    def _read_mode_eool(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EndOfOptionList':  # pylint: disable=unused-argument,no-self-use
+    def _read_mode_eool(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_EndOfOptionList':  # pylint: disable=unused-argument
         """Read TCP End of Option List option.
 
         Structure of TCP end of option list option [:rfc:`793`]:
@@ -446,7 +446,7 @@ class TCP(Transport[DataType_TCP]):
             length=1,
         )
 
-    def _read_mode_nop(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_NoOperation':  # pylint: disable=unused-argument,no-self-use
+    def _read_mode_nop(self, kind: 'RegType_Option', *, options: 'Option') -> 'DataType_NoOperation':  # pylint: disable=unused-argument
         """Read TCP No Operation option.
 
         Structure of TCP maximum segment size option [:rfc:`793`]:

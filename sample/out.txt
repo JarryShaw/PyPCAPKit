@@ -49,11 +49,14 @@ Frame 1
   |           |     |-- name -> TransType::IPv6_ICMP
   |           |     |-- value -> 58
   |           |-- raw 
+  |                 |-- protocol 
+  |                 |     |-- name -> TransType::IPv6_ICMP
+  |                 |     |-- value -> 58
   |                 |-- packet 
   |                 |     |--> 87 00 0e aa 00 00 00 00 fe 80 00 00 00 00 00 00
   |                 |          1c cd 7c 77 ba c7 46 b7 01 01 a4 5e 60 d9 6b 97
   |                 |-- error -> NIL
-  |-- protocols -> Ethernet:IPv6:Raw
+  |-- protocols -> Ethernet:IPv6:IPv6_ICMP
 
 Frame 2
   |-- frame_info 
@@ -89,11 +92,14 @@ Frame 2
   |           |     |-- name -> TransType::IPv6_ICMP
   |           |     |-- value -> 58
   |           |-- raw 
+  |                 |-- protocol 
+  |                 |     |-- name -> TransType::IPv6_ICMP
+  |                 |     |-- value -> 58
   |                 |-- packet 
   |                 |     |--> 88 00 3f 82 40 00 00 00 fe 80 00 00 00 00 00 00
   |                 |          1c cd 7c 77 ba c7 46 b7
   |                 |-- error -> NIL
-  |-- protocols -> Ethernet:IPv6:Raw
+  |-- protocols -> Ethernet:IPv6:IPv6_ICMP
 
 Frame 3
   |-- frame_info 
@@ -363,6 +369,7 @@ Frame 6
   |                 |-- len -> 125
   |                 |-- checksum -> 63 b1
   |                 |-- raw 
+  |                       |-- protocol -> 5001
   |                       |-- packet 
   |                       |     |--> 01 01 0e 00 e1 2b 83 c7 f9 8b 00 67 00 00 00 06
   |                       |          00 0a 54 4c 2d 57 44 52 36 33 30 30 00 0b 00 03

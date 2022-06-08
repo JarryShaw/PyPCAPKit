@@ -109,13 +109,20 @@
 				</dict>
 				<key>raw</key>
 				<dict>
+					<key>protocol</key>
+					<dict>
+						<key>name</key>
+						<string>TransType::IPv6_ICMP</string>
+						<key>value</key>
+						<integer>58</integer>
+					</dict>
 					<key>packet</key>
 					<data>hwAOqgAAAAD+gAAAAAAAABzNfHe6x0a3AQGkXmDZa5c=</data>
 				</dict>
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv6:Raw</string>
+		<string>Ethernet:IPv6:IPv6_ICMP</string>
 	</dict>
 	<key>Frame 2</key>
 	<dict>
@@ -189,13 +196,20 @@
 				</dict>
 				<key>raw</key>
 				<dict>
+					<key>protocol</key>
+					<dict>
+						<key>name</key>
+						<string>TransType::IPv6_ICMP</string>
+						<key>value</key>
+						<integer>58</integer>
+					</dict>
 					<key>packet</key>
 					<data>iAA/gkAAAAD+gAAAAAAAABzNfHe6x0a3</data>
 				</dict>
 			</dict>
 		</dict>
 		<key>protocols</key>
-		<string>Ethernet:IPv6:Raw</string>
+		<string>Ethernet:IPv6:IPv6_ICMP</string>
 	</dict>
 	<key>Frame 3</key>
 	<dict>
@@ -785,6 +799,8 @@
 					<data>Y7E=</data>
 					<key>raw</key>
 					<dict>
+						<key>protocol</key>
+						<integer>5001</integer>
 						<key>packet</key>
 						<data>AQEOAOErg8f5iwBnAAAABgAKVEwtV0RSNjMwMAALAAM2LjAABwABAQAFABFCOC1GOC04My1BNS1GOS00NwAIAAsxOTIuMTY4LjEuMQAJAAp0cGxvZ2luLmNuAAoADlRMLVdEUjYzMDAgNi4wAAwABTEuNy40</data>
 					</dict>

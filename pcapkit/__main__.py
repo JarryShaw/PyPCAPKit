@@ -7,7 +7,6 @@
 """
 import argparse
 import sys
-import warnings
 from typing import TYPE_CHECKING
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
@@ -60,7 +59,7 @@ def get_parser() -> 'ArgumentParser':
                               'tools. This option overrides all other options.'))
     parser.add_argument('-a', '--auto-extension', action='store_true', default=False,
                         help='If output file extension omits, append automatically.')
-    parser.add_argument('-v', '--verbose', action='store_false', default=True,
+    parser.add_argument('-v', '--verbose', action='store_true', default=False,
                         help='Show more information.')
     parser.add_argument('-F', '--files', action='store_true', default=False,
                         help='Split each frame into different files.')
@@ -79,7 +78,6 @@ def main() -> 'int':
     """Entrypoint."""
     parser = get_parser()
     args = parser.parse_args()
-    warnings.simplefilter('ignore')
 
     if args.format:
         fmt = args.format
@@ -92,18 +90,21 @@ def main() -> 'int':
     else:
         fmt = None
 
-    extractor = Extractor(store=False, format=fmt,
+    extractor = Extractor(store=False, auto=False,
                           fin=args.fin, fout=args.fout,
-                          auto=args.verbose, files=args.files,
+                          files=args.files, format=fmt,
                           layer=args.layer, protocol=args.protocol,
                           engine=args.engine, extension=args.auto_extension,
                           verbose=args.verbose)
 
-    if not args.verbose:
+    if args.verbose:
         try:
             print(emoji.emojize(f":police_car_light: Loading file {extractor.input!r}"))
         except UnicodeEncodeError:
             print(f"[*] Loading file {extractor.input!r}")
+
+        for _ in extractor:
+            pass
 
         try:
             print(emoji.emojize(f":beer_mug: Report file{'s' if args.files else ''} stored in {extractor.output!r}"))

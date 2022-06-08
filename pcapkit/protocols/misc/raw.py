@@ -59,7 +59,7 @@ class Raw(Protocol[DataType_Raw]):
     ##########################################################################
 
     def read(self, length: 'Optional[int]' = None, *, error: 'Optional[Exception]' = None,  # pylint: disable=arguments-differ
-             **kwargs: 'Any') -> 'DataType_Raw':  # pylint: disable=unused-argument
+             alias: 'Optional[int]' = None, **kwargs: 'Any') -> 'DataType_Raw':  # pylint: disable=unused-argument
         """Read raw packet data.
 
         Args:
@@ -67,6 +67,7 @@ class Raw(Protocol[DataType_Raw]):
 
         Keyword Args:
             error: Parsing errors if any.
+            alias: Original enumeration of the unknown protocol.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -74,6 +75,7 @@ class Raw(Protocol[DataType_Raw]):
 
         """
         raw = DataType_Raw(
+            protocol=alias,
             packet=self._data,
             error=error,
         )
@@ -113,6 +115,7 @@ class Raw(Protocol[DataType_Raw]):
 
         Keyword Args:
             error (Optional[Exception]): Parsing errors if any (for parsing).
+            alias (Optional[int]): Original enumeration of the unknown protocol.
             **kwargs: Arbitrary keyword arguments.
 
         Would :mod:`pcapkit` encounter malformed packets, the original parsing
@@ -134,10 +137,15 @@ class Raw(Protocol[DataType_Raw]):
         #: pcapkit.protocols.data.misc.raw.Raw: Parsed packet data.
         self._info = self.read(length, **kwargs)
 
+        if self._info.protocol is not None and hasattr(self._info.protocol, 'name'):
+            alias = self._info.protocol.name  # type: ignore[attr-defined]
+        else:
+            alias = self.alias
+
         #: pcapkit.protocols.null.NoPayload: Next layer (no payload).
         self._next = NoPayload()
         #: pcapkit.corekit.protochain.ProtoChain: Protocol chain from current layer.
-        self._protos = ProtoChain(self.__class__, self.alias)
+        self._protos = ProtoChain(self.__class__, alias)
 
     @classmethod
     def __index__(cls) -> 'NoReturn':

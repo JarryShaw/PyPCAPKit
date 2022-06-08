@@ -319,7 +319,7 @@ class Frame(Protocol[DataType_Frame]):
     # Utilities.
     ##########################################################################
 
-    def _make_timestamp(self, timestamp: 'Optional[float | Decimal]' = None, ts_sec: 'Optional[int]' = None,  # pylint: disable=no-self-use
+    def _make_timestamp(self, timestamp: 'Optional[float | Decimal]' = None, ts_sec: 'Optional[int]' = None,
                         ts_usec: 'Optional[int]' = None, nanosecond: 'bool' = False) -> 'tuple[int, int]':
         """Make timestamp.
 

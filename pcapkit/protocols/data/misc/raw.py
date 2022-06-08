@@ -14,10 +14,12 @@ __all__ = ['Raw']
 class Raw(Info):
     """Raw packet is an unknown protocol."""
 
+    #: Original enumeration of this protocol.
+    protocol: 'Optional[int]'
     #: packet data
     packet: 'bytes'
     #: error instance when parsing packet data
     error: 'Optional[Exception]'
 
     if TYPE_CHECKING:
-        def __init__(self, packet: 'bytes', error: 'Optional[Exception]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, protocol: 'Optional[int]', packet: 'bytes', error: 'Optional[Exception]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements

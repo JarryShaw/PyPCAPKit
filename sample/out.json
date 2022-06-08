@@ -59,6 +59,10 @@
 					"value": 58
 				},
 				"raw": {
+					"protocol": {
+						"name": "TransType::IPv6_ICMP",
+						"value": 58
+					},
 					"packet": {
 						"type": "bytes",
 						"value": "\ufffd\u0000\u000e\ufffd\u0000\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd\u0001\u0001\ufffd^`\ufffdk\ufffd",
@@ -68,7 +72,7 @@
 				}
 			}
 		},
-		"protocols": "Ethernet:IPv6:Raw"
+		"protocols": "Ethernet:IPv6:IPv6_ICMP"
 	},
 	"Frame 2": {
 		"frame_info": {
@@ -108,6 +112,10 @@
 					"value": 58
 				},
 				"raw": {
+					"protocol": {
+						"name": "TransType::IPv6_ICMP",
+						"value": 58
+					},
 					"packet": {
 						"type": "bytes",
 						"value": "\ufffd\u0000?\ufffd@\u0000\u0000\u0000\ufffd\ufffd\u0000\u0000\u0000\u0000\u0000\u0000\u001c\ufffd|w\ufffd\ufffdF\ufffd",
@@ -117,7 +125,7 @@
 				}
 			}
 		},
-		"protocols": "Ethernet:IPv6:Raw"
+		"protocols": "Ethernet:IPv6:IPv6_ICMP"
 	},
 	"Frame 3": {
 		"frame_info": {
@@ -474,6 +482,7 @@
 						"hex": "63b1"
 					},
 					"raw": {
+						"protocol": 5001,
 						"packet": {
 							"type": "bytes",
 							"value": "\u0001\u0001\u000e\u0000\ufffd+\ufffd\ufffd\ufffd\ufffd\u0000g\u0000\u0000\u0000\u0006\u0000\nTL-WDR6300\u0000\u000b\u0000\u00036.0\u0000\u0007\u0000\u0001\u0001\u0000\u0005\u0000\u0011B8-F8-83-A5-F9-47\u0000\u0008\u0000\u000b192.168.1.1\u0000\t\u0000\ntplogin.cn\u0000\n\u0000\u000eTL-WDR6300 6.0\u0000\f\u0000\u00051.7.4",

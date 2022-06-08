@@ -430,7 +430,9 @@ class Extractor:
             ext = cls.__output__[fmt][2]
             if ext is None:
                 raise FormatError(f'unknown output format: {fmt}')
-            os.makedirs(os.path.split(fout)[0], exist_ok=True)
+
+            if (parent := os.path.split(fout)[0]):
+                os.makedirs(parent, exist_ok=True)
 
             if files:
                 ofnm = fout
@@ -660,7 +662,7 @@ class Extractor:
                         )
                     return super().object_hook(o)  # type: ignore[unreachable]
 
-                def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=no-self-use,unused-argument
+                def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
                     """Check content type for function call."""
                     return 'fallback'
 
