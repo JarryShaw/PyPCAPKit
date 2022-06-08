@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=wrong-import-position,unused-import,unused-wildcard-import
-"""stream pcap file extractor
+"""Stream PCAP File Extractor
+================================
 
 :mod:`pcapkit` is an independent open source library, using only
 `DictDumper`_ as its formatted output dumper.
@@ -25,39 +26,42 @@ different components.
 
 - Interface (:mod:`pcapkit.interface`)
 
-  user interface for the :mod:`pcapkit` library, which
-  standardise and simplify the usage of this library
+  User interface for the :mod:`pcapkit` library, which
+  standardises and simplifies the usage of this library.
 
 - Foundation (:mod:`pcapkit.foundation`)
 
-  synthesise file I/O and protocol analysis, coordinate
-  information exchange in all network layers
-
-- Reassembly (:mod:`pcapkit.reassembly`)
-
-  base on algorithms described in :rfc:`815`,
-  implement datagram reassembly of IP and TCP packets
+  Synthesises file I/O and protocol analysis, coordinates
+  information exchange in all network layers, as well as
+  provides the foundamental functions for :mod:`pcapkit`.
 
 - Protocols (:mod:`pcapkit.protocols`)
 
-  collection of all protocol family, with detailed
-  implementation and methods
+  Collection of all protocol family, with detailed
+  implementation and methods.
 
 - Utilities (:mod:`pcapkit.utilities`)
 
-  collection of utility functions and classes
+  Auxiliary functions and tools for :mod:`pcapkit`.
 
 - CoreKit (:mod:`pcapkit.corekit`)
 
-  core utilities for :mod:`pcapkit` implementation
+  Core utilities for :mod:`pcapkit` implementation, mainly
+  for internal data structure and processing.
 
 - ToolKit (:mod:`pcapkit.toolkit`)
 
-  utility tools for :mod:`pcapkit` implementation
+  Auxiliary tools for :mod:`pcapkit` to support the multiple
+  extraction engines with a unified interface.
 
 - DumpKit (:mod:`pcapkit.dumpkit`)
 
-  dump utilities for :mod:`pcapkit` implementation
+  File output formatters for :mod:`pcapkit`.
+
+- Constants (:mod:`pcapkit.const`)
+
+  Constant enumerations used in :mod:`pcapkit` for protocol
+  family extraction and representation.
 
 """
 import os

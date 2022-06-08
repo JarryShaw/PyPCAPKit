@@ -4,8 +4,19 @@
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
-# pylint: disable=all
-# type: ignore
+import datetime
+import importlib
+import logging
+import sys
+import typing
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, List
+    from sphinx.application import Sphinx
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 # -- Path setup --------------------------------------------------------------
 
@@ -17,13 +28,11 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-import datetime
-
 
 # -- Project information -----------------------------------------------------
 
 project = 'PyPCAPKit'
-copyright = f'2018-{datetime.date.today().year}, Jarry Shaw'  # pylint: disable=redefined-builtin
+copyright = f'2017-{datetime.date.today().year}, Jarry Shaw'  # pylint: disable=redefined-builtin
 author = 'Jarry Shaw'
 
 # The full version, including alpha/beta/rc tags
@@ -41,6 +50,7 @@ extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.autodoc.typehints',
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
+    'sphinx_autodoc_typehints',
 ]
 
 intersphinx_mapping = {
@@ -58,7 +68,7 @@ autodoc_default_options = {
     'member-order': 'groupwise',
     'special-members': '__init__',
     'undoc-members': True,
-    'exclude-members': '__weakref__, _abc_impl',
+    'exclude-members': '__weakref__, _abc_impl, _unbound_fields, _wtforms_meta, _meta, _schema',
     'ignore-module-all': True,
     'private-members': True,
 }
@@ -89,7 +99,7 @@ templates_path = ['_templates']
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = []  # type: list[str]
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -110,7 +120,7 @@ html_static_path = ['_static']
 html_theme_options = {
     'show_powered_by': False,
     'github_user': 'JarryShaw',
-    'github_repo': 'pypcapkit',
+    'github_repo': 'PyPCAPKit',
     'github_banner': True,
     'github_type': 'star',
     #'show_related': False,
@@ -120,17 +130,51 @@ html_theme_options = {
 }
 
 
-def maybe_skip_member(app, what: str, name: str, obj: object, skip: bool, options: dict):  # pylint: disable=unused-argument
-    if '_abc_impl' in name:
+def maybe_skip_member(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
+                      obj: 'Any', skip: bool, options: 'Dict[str, Any]') -> bool:  # pylint: disable=unused-argument
+    if name == '_abc_impl':
         return True
+    if name == '__init__':
+        if '__create_fn__' in obj.__qualname__:
+            return True
     return skip
 
 
-def remove_module_docstring(app, what: str, name: str, obj: object, options: dict, lines: list):  # pylint: disable=unused-argument
+def remove_module_docstring(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
+                            obj: 'Any', options: 'Dict[str, Any]', lines: 'List[str]') -> None:  # pylint: disable=unused-argument
     if what == "module" and "pcapkit" in name:
-        lines.clear()
+        module = sys.modules.get(name)
+        if module is not None:
+            logger.info('reloading module: %s', name)
+            typing.TYPE_CHECKING = True
+            importlib.reload(module)
+            logger.info('reloaded module: %s', name)
+        #lines.clear()
 
 
-def setup(app):
-    app.connect("autodoc-process-docstring", remove_module_docstring)
+def process_docstring(app: 'Sphinx', what: str, name: str,  # pylint: disable=unused-argument
+                      obj: 'Any', options: 'Dict[str, Any]', lines: 'List[str]') -> None:  # pylint: disable=unused-argument
+    if what == "module" and "pcapkit" in name:
+        module = importlib.import_module(name)
+        typing.TYPE_CHECKING = True
+        importlib.reload(module)
+
+
+def source_read(app: 'Sphinx', docname: str, source_text: str) -> None:  # pylint: disable=unused-argument
+    print(docname, source_text)
+
+
+def setup(app: 'Sphinx') -> None:
+    #app.connect('autodoc-process-docstring', process_docstring, 0)
+    #app.connect("autodoc-process-docstring", remove_module_docstring)
     app.connect('autodoc-skip-member', maybe_skip_member)
+    #app.connect('source-read', source_read)
+
+    # typing.TYPE_CHECKING = True
+    # for name, module in sys.modules.copy().items():
+    #     if 'pcapkit' not in name:
+    #         continue
+
+    #     logger.info('reloading module: %s', name)
+    #     importlib.reload(module)
+    #     logger.info('reloaded module: %s', name)
