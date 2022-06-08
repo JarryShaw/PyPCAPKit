@@ -141,9 +141,6 @@ attrs = dict(
         'chardet',                  # for bytes decode
         'aenum',                    # for const types
         'tbtrim>=0.2.1',            # for refined exceptions
-        # version compatibility
-        'f2format; python_version < "3.6"',
-        'pathlib2>=2.3.2; python_version == "3.4"',
     ],
     entry_points={
         'console_scripts': [
@@ -167,8 +164,11 @@ attrs = dict(
         'vendor': ['requests[socks]', 'beautifulsoup4[html5lib]'],
     },
     setup_requires=[
-        'bpc-f2format; python_version < "3.6"',
-        'bpc-walrus; python_version < "3.8"',
+        # version compatibility
+        #'bpc-f2format; python_version < "3.6"',
+        'f2format; python_version < "3.6"',
+        #'bpc-walrus; python_version < "3.8"',
+        'python-walrus==0.1.5rc1; python_version < "3.8"',
         'pathlib2>=2.3.2; python_version == "3.4"',
     ]
 )
