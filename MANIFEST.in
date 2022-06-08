@@ -17,7 +17,7 @@ prune test
 prune testbench
 prune temp
 
-include README.md
+include README.rst
 include LICENSE
 
 exclude pcapkit/protocols/*/NotImplemented

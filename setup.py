@@ -7,7 +7,7 @@ import sys
 __version__ = '0.16.1'
 
 # README
-with open('README.md', encoding='utf-8') as file:
+with open('README.rst', encoding='utf-8') as file:
     long_description = file.read()
 
 # setup attributes
@@ -123,7 +123,7 @@ attrs = dict(
     package_data={
         '': [
             'LICENSE',
-            'README.md',
+            'README.rst',
         ],
     },
     # include_package_data
@@ -187,7 +187,7 @@ try:
         # include_dirs
         # password
         # fullname
-        long_description_content_type='text/markdown',
+        long_description_content_type='text/x-rst',
         python_requires='>=3.6',
         zip_safe=True,  # type: ignore
     ))

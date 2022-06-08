@@ -6,7 +6,7 @@ resources to make it easier to get your contribution accepted.
 ## Getting started
 
 - Fork the repository on GitHub.
-- Read the README.md for build instructions.
+- Read the README.rst for build instructions.
 - Play with the project, submit bugs, submit patches!
 
 ## Contribution flow
