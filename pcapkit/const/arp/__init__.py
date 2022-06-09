@@ -11,7 +11,7 @@ enumerations include:
    :widths: auto
 
    * - :class:`ARP_Hardware <pcapkit.const.arp.hardware.Hardware>`
-     - Hardware Types [*]_
+     - ARP Hardware Types [*]_
    * - :class:`ARP_Operation <pcapkit.const.arp.operation.Operation>`
      - Operation Codes [*]_
 

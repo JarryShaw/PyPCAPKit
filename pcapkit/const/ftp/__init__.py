@@ -4,7 +4,8 @@
 ===========================================================================
 
 This module contains all constant enumerations of
-:class:`~pcapkit.protocols.application.ftp.FTP` enumerations include:
+:class:`~pcapkit.protocols.application.ftp.FTP` implementations. Available
+enumerations include:
 
 .. list-table::
    :widths: auto

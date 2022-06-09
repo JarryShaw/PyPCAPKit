@@ -1,10 +1,49 @@
-HIP Constant Enumerations
-=========================
+:class:`~pcapkit.protocols.internet.hip.HIP` Constant Enumerations
+==================================================================
 
 .. module:: pcapkit.const.hip
 
-HIP Certificate Types [*]_
---------------------------
+This module contains all constant enumerations of
+:class:`~pcapkit.protocols.internet.hip.HIP` implementations. Available
+enumerations include:
+
+.. list-table::
+   :widths: auto
+
+   * - :class:`HIP_Certificate <pcapkit.const.hip.certificate.Certificate>`
+     - HIP Certificate Types [*]_
+   * - :class:`HIP_Cipher <pcapkit.const.hip.cipher.Cipher>`
+     - HIP Cipher IDs [*]_
+   * - :class:`HIP_DITypes <pcapkit.const.hip.di.DITypes>`
+     - DI-Types [*]_
+   * - :class:`HIP_ECDSACurve <pcapkit.const.hip.ecdsa_curve.ECDSACurve>`
+     - ECDSA Curve Label [*]_
+   * - :class:`HIP_ECDSALowCurve <pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve>`
+     - ECDSA_LOW Curve Label [*]_
+   * - :class:`HIP_ESPTransformSuite <pcapkit.const.hip.esp_transform_suite.ESPTransformSuite>`
+     - ESP Transform Suite IDs [*]_
+   * - :class:`HIP_Group <pcapkit.const.hip.group.Group>`
+     - Group IDs [*]_
+   * - :class:`HIP_HIAlgorithm <pcapkit.const.hip.hi_algorithm.HIAlgorithm>`
+     - HI Algorithm [*]_
+   * - :class:`HIP_HITSuite <pcapkit.const.hip.hit_suite.HITSuite>`
+     - HIT Suite IDs [*]_
+   * - :class:`HIP_NATTraversal <pcapkit.const.hip.nat_traversal.NATTraversal>`
+     - HIP NAT Traversal Modes [*]_
+   * - :class:`HIP_NotifyMessage <pcapkit.const.hip.notify_message.NotifyMessage>`
+     - Notify Message Types [*]_
+   * - :class:`HIP_Packet <pcapkit.const.hip.packet.Packet>`
+     - Packet Types [*]_
+   * - :class:`HIP_Parameter <pcapkit.const.hip.parameter.Parameter>`
+     - Parameter Types [*]_
+   * - :class:`HIP_Registration <pcapkit.const.hip.registration.Registration>`
+     - Registration Types [*]_
+   * - :class:`HIP_RegistrationFailure <pcapkit.const.hip.registration_failure.RegistrationFailure>`
+     - Registration Failure Types [*]_
+   * - :class:`HIP_Suite <pcapkit.const.hip.suite.Suite>`
+     - Suite IDs [*]_
+   * - :class:`HIP_Transport <pcapkit.const.hip.transport.Transport>`
+     - HIP Transport Modes [*]_
 
 .. automodule:: pcapkit.const.hip.certificate
    :members:
@@ -12,17 +51,11 @@ HIP Certificate Types [*]_
    :private-members:
    :show-inheritance:
 
-HIP Cipher IDs [*]_
--------------------
-
 .. automodule:: pcapkit.const.hip.cipher
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-DI-Types [*]_
--------------
 
 .. automodule:: pcapkit.const.hip.di
    :members:
@@ -30,17 +63,11 @@ DI-Types [*]_
    :private-members:
    :show-inheritance:
 
-ECDSA Curve Label [*]_
-----------------------
-
 .. automodule:: pcapkit.const.hip.ecdsa_curve
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-ECDSA_LOW Curve Label [*]_
---------------------------
 
 .. automodule:: pcapkit.const.hip.ecdsa_low_curve
    :members:
@@ -48,17 +75,11 @@ ECDSA_LOW Curve Label [*]_
    :private-members:
    :show-inheritance:
 
-ESP Transform Suite IDs [*]_
-----------------------------
-
 .. automodule:: pcapkit.const.hip.esp_transform_suite
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-Group IDs [*]_
---------------
 
 .. automodule:: pcapkit.const.hip.group
    :members:
@@ -66,17 +87,11 @@ Group IDs [*]_
    :private-members:
    :show-inheritance:
 
-HI Algorithm [*]_
------------------
-
 .. automodule:: pcapkit.const.hip.hi_algorithm
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-HIT Suite ID [*]_
------------------
 
 .. automodule:: pcapkit.const.hip.hit_suite
    :members:
@@ -84,17 +99,11 @@ HIT Suite ID [*]_
    :private-members:
    :show-inheritance:
 
-HIP NAT Traversal Modes [*]_
-----------------------------
-
 .. automodule:: pcapkit.const.hip.nat_traversal
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-Notify Message Types [*]_
--------------------------
 
 .. automodule:: pcapkit.const.hip.notify_message
    :members:
@@ -102,17 +111,11 @@ Notify Message Types [*]_
    :private-members:
    :show-inheritance:
 
-Packet Types [*]_
------------------
-
 .. automodule:: pcapkit.const.hip.packet
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-Parameter Types [*]_
---------------------
 
 .. automodule:: pcapkit.const.hip.parameter
    :members:
@@ -120,17 +123,11 @@ Parameter Types [*]_
    :private-members:
    :show-inheritance:
 
-Registration Types [*]_
------------------------
-
 .. automodule:: pcapkit.const.hip.registration
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-Registration Failure Types [*]_
--------------------------------
 
 .. automodule:: pcapkit.const.hip.registration_failure
    :members:
@@ -138,17 +135,11 @@ Registration Failure Types [*]_
    :private-members:
    :show-inheritance:
 
-Suite IDs [*]_
---------------
-
 .. automodule:: pcapkit.const.hip.suite
    :members:
    :undoc-members:
    :private-members:
    :show-inheritance:
-
-HIP Transport Modes [*]_
-------------------------
 
 .. automodule:: pcapkit.const.hip.transport
    :members:
