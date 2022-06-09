@@ -1,5 +1,6 @@
-Stream PCAP File Extractor
-==========================
+====================
+Module Documentation
+====================
 
 .. module:: pcapkit
 
@@ -7,9 +8,6 @@ Stream PCAP File Extractor
 `DictDumper`_ as its formatted output dumper.
 
 .. _DictDumper: https://dictdumper.jarryshaw.me
-
-    There is a project called |jspcapy|_ works on :mod:`pcapkit`,
-    which is a command line tool for PCAP extraction.
 
 Unlike popular PCAP file extractors, such as `Scapy`_,
 `DPKT`_, `PyShark`_, and etc, :mod:`pcapkit` uses streaming
@@ -22,67 +20,63 @@ efficiency in some way.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   foundation/index
    interface/index
+   foundation/index
    protocols/index
-   reassembly/index
    corekit/index
-   dumpkit/index
    toolkit/index
+   dumpkit/index
    utilities/index
    const/index
    vendor/index
 
-In :mod:`pcapkit`, all files can be described as following eight
-different components.
+.. automodule:: pcapkit.__main__
+   :no-members:
 
-- Interface (:mod:`pcapkit.interface`)
+.. code-block:: text
 
-  user interface for the :mod:`pcapkit` library, which
-  standardise and simplify the usage of this library
+   usage: pcapkit-cli [-h] [-V] [-o file-name] [-f format] [-j] [-p] [-t] [-a]
+                      [-v] [-F] [-E PKG] [-P PROTOCOL] [-L LAYER]
+                      input-file-name
 
-- Foundation (:mod:`pcapkit.foundation`)
+   PCAP file extractor and formatted dumper
 
-  synthesise file I/O and protocol analysis, coordinate
-  information exchange in all network layers
+   positional arguments:
+     input-file-name       The name of input pcap file. If ".pcap" omits, it will
+                           be automatically appended.
 
-- Reassembly (:mod:`pcapkit.reassembly`)
+   optional arguments:
+     -h, --help            show this help message and exit
+     -V, --version         show program's version number and exit
+     -o file-name, --output file-name
+                           The name of input pcap file. If format extension
+                           omits, it will be automatically appended.
+     -f format, --format format
+                           Print a extraction report in the specified output
+                           format. Available are all formats supported by
+                           dictdumper, e.g.: json, plist, and tree.
+     -j, --json            Display extraction report as json. This will yield
+                           "raw" output that may be used by external tools. This
+                           option overrides all other options.
+     -p, --plist           Display extraction report as macOS Property List
+                           (plist). This will yield "raw" output that may be used
+                           by external tools. This option overrides all other
+                           options.
+     -t, --tree            Display extraction report as tree view text. This will
+                           yield "raw" output that may be used by external tools.
+                           This option overrides all other options.
+     -a, --auto-extension  If output file extension omits, append automatically.
+     -v, --verbose         Show more information.
+     -F, --files           Split each frame into different files.
+     -E PKG, --engine PKG  Indicate extraction engine. Note that except default
+                           or pcapkit engine, all other engines need support of
+                           corresponding packages.
+     -P PROTOCOL, --protocol PROTOCOL
+                           Indicate extraction stops after which protocol.
+     -L LAYER, --layer LAYER
+                           Indicate extract frames until which layer.
 
-  base on algorithms described in :rfc:`815`,
-  implement datagram reassembly of IP and TCP packets
-
-- Protocols (:mod:`pcapkit.protocols`)
-
-  collection of all protocol family, with detailed
-  implementation and methods
-
-- Utilities (:mod:`pcapkit.utilities`)
-
-  collection of utility functions and classes
-
-- CoreKit (:mod:`pcapkit.corekit`)
-
-  core utilities for :mod:`pcapkit` implementation
-
-- ToolKit (:mod:`pcapkit.toolkit`)
-
-  utility tools for :mod:`pcapkit` implementation
-
-- DumpKit (:mod:`pcapkit.dumpkit`)
-
-  dump utilities for :mod:`pcapkit` implementation
-
-.. |jspcapy| replace:: ``jspcapy``
-.. _jspcapy: https://github.com/JarryShaw/jspcapy
-
-Library Index
--------------
-
-.. module:: pcapkit.all
-
-:mod:`pcapkit` has defined various and numerous functions
-and classes, which have different features and purposes.
-To make a simple index for this library, :mod:`pcapkit.all`
-contains all things from :mod:`pcapkit`.
+.. automodule:: pcapkit.all
+   :no-members:
