@@ -3,11 +3,9 @@ Help Wanted
 
 .. important::
 
-   This is a copy of the `discussion thread`_ started on the GitHub. The
-   documentation is **only** used as a backup reference to the original
-   discussion thread.
-
-   _discussion thread: https://github.com/JarryShaw/PyPCAPKit/discussions/106
+   This is a copy of the `discussion thread <https://github.com/JarryShaw/PyPCAPKit/discussions/106>`__
+   started on the GitHub. The documentation is **only** used as a backup
+   reference to the original discussion thread.
 
 As PyPCAPKit reaches its *16k* lines of code and *800th* commit, I figure it
 would be a better idea to record the project enchancement proposals here in
@@ -16,7 +14,7 @@ maintained here.
 
 Pull requests for the existing proposals and any new ideas are highly welcomed
 and encouraged. Should you have any questions, please leave a note either in
-this thread or under the `**Q&A** category discussions <https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a>`__.
+this thread or under the `Q&A category discussions <https://github.com/JarryShaw/PyPCAPKit/discussions/categories/q-a>`__.
 
 Wish you enjoy **PyPCAPKit**!!!
 

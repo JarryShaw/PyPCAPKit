@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import,unused-wildcard-import,wildcard-import
-"""index for the library
+"""Library Index
+===================
 
 :mod:`pcapkit` has defined various and numerous functions
 and classes, which have different features and purposes.

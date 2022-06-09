@@ -8,9 +8,6 @@
 
 .. _DictDumper: https://dictdumper.jarryshaw.me
 
-    There is a project called |jspcapy|_ works on :mod:`pcapkit`,
-    which is a command line tool for PCAP extraction.
-
 Unlike popular PCAP file extractors, such as `Scapy`_,
 `DPKT`_, `PyShark`_, and etc, :mod:`pcapkit` uses streaming
 strategy to read input files. That is to read frame by
