@@ -4,7 +4,7 @@
 ==================
 
 This module contains the constant enumeration for **QS Functions**,
-which is automatically generated from :class:`pcapkit.const.ipv4.qs_function.QSFunction`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.qs_function.QSFunction`.
 
 """
 

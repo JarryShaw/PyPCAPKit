@@ -4,7 +4,7 @@
 ======================================================================================
 
 This module contains the constant enumeration for **Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options**,
-which is automatically generated from :class:`pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode`.
+which is automatically generated from :class:`pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode`.
 
 """
 

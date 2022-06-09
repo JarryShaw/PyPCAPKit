@@ -4,7 +4,7 @@
 =====================
 
 This module contains the constant enumeration for **Operation Codes**,
-which is automatically generated from :class:`pcapkit.const.arp.operation.Operation`.
+which is automatically generated from :class:`pcapkit.vendor.arp.operation.Operation`.
 
 """
 

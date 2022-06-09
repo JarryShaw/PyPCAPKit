@@ -4,7 +4,7 @@
 ======================
 
 This module contains the constant enumeration for **IPX Packet Types**,
-which is automatically generated from :class:`pcapkit.const.ipx.packet.Packet`.
+which is automatically generated from :class:`pcapkit.vendor.ipx.packet.Packet`.
 
 """
 

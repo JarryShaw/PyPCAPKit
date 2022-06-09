@@ -4,7 +4,7 @@
 ====================================
 
 This module contains the constant enumeration for **Classification Level Encodings**,
-which is automatically generated from :class:`pcapkit.const.ipv4.classification_level.ClassificationLevel`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.classification_level.ClassificationLevel`.
 
 """
 

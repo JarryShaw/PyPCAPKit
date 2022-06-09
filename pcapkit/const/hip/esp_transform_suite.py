@@ -4,7 +4,7 @@
 =============================
 
 This module contains the constant enumeration for **ESP Transform Suite IDs**,
-which is automatically generated from :class:`pcapkit.const.hip.esp_transform_suite.ESPTransformSuite`.
+which is automatically generated from :class:`pcapkit.vendor.hip.esp_transform_suite.ESPTransformSuite`.
 
 """
 

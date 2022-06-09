@@ -4,7 +4,7 @@
 =============================
 
 This module contains the constant enumeration for **HIP NAT Traversal Modes**,
-which is automatically generated from :class:`pcapkit.const.hip.nat_traversal.NATTraversal`.
+which is automatically generated from :class:`pcapkit.vendor.hip.nat_traversal.NATTraversal`.
 
 """
 

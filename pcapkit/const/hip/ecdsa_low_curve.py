@@ -4,7 +4,7 @@
 ===========================
 
 This module contains the constant enumeration for **ECDSA_LOW Curve Label**,
-which is automatically generated from :class:`pcapkit.const.hip.ecdsa_low_curve.ECDSALowCurve`.
+which is automatically generated from :class:`pcapkit.vendor.hip.ecdsa_low_curve.ECDSALowCurve`.
 
 """
 

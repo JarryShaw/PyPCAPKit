@@ -4,7 +4,7 @@
 ==========================================================================
 
 This module contains the constant enumeration for **Mobility Header Types - for the MH Type field in the Mobility Header**,
-which is automatically generated from :class:`pcapkit.const.mh.packet.Packet`.
+which is automatically generated from :class:`pcapkit.vendor.mh.packet.Packet`.
 
 """
 

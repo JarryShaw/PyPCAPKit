@@ -4,7 +4,7 @@
 ==========================================
 
 This module contains the constant enumeration for **Protection Authority Bit Assignments**,
-which is automatically generated from :class:`pcapkit.const.ipv4.protection_authority.ProtectionAuthority`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.protection_authority.ProtectionAuthority`.
 
 """
 

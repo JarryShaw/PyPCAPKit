@@ -4,7 +4,7 @@
 =======================
 
 This module contains the constant enumeration for **IP Option Numbers**,
-which is automatically generated from :class:`pcapkit.const.ipv4.option_number.OptionNumber`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.option_number.OptionNumber`.
 
 """
 

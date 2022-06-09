@@ -4,7 +4,7 @@
 =============================
 
 This module contains the constant enumeration for **TCP Option Kind Numbers**,
-which is automatically generated from :class:`pcapkit.const.tcp.option.Option`.
+which is automatically generated from :class:`pcapkit.vendor.tcp.option.Option`.
 
 """
 

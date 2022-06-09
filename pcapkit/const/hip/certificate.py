@@ -4,7 +4,7 @@
 ===========================
 
 This module contains the constant enumeration for **HIP Certificate Types**,
-which is automatically generated from :class:`pcapkit.const.hip.certificate.Certificate`.
+which is automatically generated from :class:`pcapkit.vendor.hip.certificate.Certificate`.
 
 """
 

@@ -11,9 +11,12 @@ enumerations include:
    :widths: auto
 
    * - :class:`ARP_Hardware <pcapkit.const.arp.hardware.Hardware>`
-     - :doc:`hardware` [*]_
+     - Hardware Types [*]_
    * - :class:`ARP_Operation <pcapkit.const.arp.operation.Operation>`
-     - :doc:`operation` [*]_
+     - Operation Codes [*]_
+
+.. [*] https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml#arp-parameters-2
+.. [*] https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml#arp-parameters-1
 
 """
 

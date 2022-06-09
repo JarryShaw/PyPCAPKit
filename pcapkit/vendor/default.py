@@ -32,7 +32,7 @@ LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
 {'=' * (len(name) + 6)}
 
 This module contains the constant enumeration for **{name}**,
-which is automatically generated from :class:`{MODL.replace('vendor', 'const')}.{NAME}`.
+which is automatically generated from :class:`{MODL}.{NAME}`.
 
 """
 

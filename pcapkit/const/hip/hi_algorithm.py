@@ -4,7 +4,7 @@
 ==================
 
 This module contains the constant enumeration for **HI Algorithm**,
-which is automatically generated from :class:`pcapkit.const.hip.hi_algorithm.HIAlgorithm`.
+which is automatically generated from :class:`pcapkit.vendor.hip.hi_algorithm.HIAlgorithm`.
 
 """
 

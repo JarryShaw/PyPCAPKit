@@ -4,7 +4,7 @@
 ==================
 
 This module contains the constant enumeration for **HIT Suite ID**,
-which is automatically generated from :class:`pcapkit.const.hip.hit_suite.HITSuite`.
+which is automatically generated from :class:`pcapkit.vendor.hip.hit_suite.HITSuite`.
 
 """
 

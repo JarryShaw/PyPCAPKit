@@ -4,7 +4,7 @@
 ================================
 
 This module contains the constant enumeration for **Ethertype IEEE 802 Numbers**,
-which is automatically generated from :class:`pcapkit.const.reg.ethertype.EtherType`.
+which is automatically generated from :class:`pcapkit.vendor.reg.ethertype.EtherType`.
 
 """
 

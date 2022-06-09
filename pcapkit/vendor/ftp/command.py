@@ -40,10 +40,16 @@ make = lambda cmmd, feat, desc, kind, conf, rfcs, cmmt: f'''\
 '''.strip()  # type: Callable[[str, Optional[str], Optional[str], Optional[tuple[str, ...]], Optional[str], Optional[tuple[str, ...]], str], str] # pylint: disable=line-too-long
 
 #: Constant template of enumerate registry from IANA CSV.
-LINE = lambda NAME, DOCS, INFO, MISS: f'''\
+LINE = lambda NAME, DOCS, INFO, MISS, MODL: f'''\
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""{DOCS}"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""{(name := DOCS.split(' [', maxsplit=1)[0])}
+{'=' * (len(name) + 6)}
+
+This module contains the constant enumeration for **{name}**,
+which is automatically generated from :class:`{MODL}.{NAME}`.
+
+"""
 
 from typing import TYPE_CHECKING
 
@@ -76,10 +82,21 @@ class CommandType(Info):
 
 
 class defaultInfo(Info[CommandType]):
-    """Extended :class:`~pcapkit.corekit.infoclass.Info` with default values."""
+    """Extended :class:`~pcapkit.corekit.infoclass.Info` with default values.
+
+    Args:
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
+
+    """
 
     def __getitem__(self, key: 'str') -> 'CommandType':
-        """Missing keys as specified in :rfc:`3659`."""
+        """Missing keys as specified in :rfc:`3659`.
+
+        Args:
+            key: Key of missing command.
+
+        """
         try:
             return super().__getitem__(key)
         except KeyError:
@@ -90,7 +107,7 @@ class defaultInfo(Info[CommandType]):
 {NAME} = defaultInfo(
     {INFO}
 )
-'''  # type: Callable[[str, str, str, str], str]
+'''  # type: Callable[[str, str, str, str, str], str]
 
 
 class Command(Vendor):
@@ -156,7 +173,7 @@ class Command(Vendor):
         """
         info, MISS = self.process(data)
         INFO = '\n    '.join(map(lambda s: s.strip(), info.values()))
-        return LINE(self.NAME, self.DOCS, INFO, MISS)
+        return LINE(self.NAME, self.DOCS, INFO, MISS, self.__module__)
 
 
 if __name__ == "__main__":

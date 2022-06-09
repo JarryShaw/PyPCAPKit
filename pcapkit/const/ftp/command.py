@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""FTP Command"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""FTP Command
+=================
+
+This module contains the constant enumeration for **FTP Command**,
+which is automatically generated from :class:`pcapkit.vendor.ftp.command.Command`.
+
+"""
 
 from typing import TYPE_CHECKING
 
@@ -33,10 +39,21 @@ class CommandType(Info):
 
 
 class defaultInfo(Info[CommandType]):
-    """Extended :class:`~pcapkit.corekit.infoclass.Info` with default values."""
+    """Extended :class:`~pcapkit.corekit.infoclass.Info` with default values.
+
+    Args:
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
+
+    """
 
     def __getitem__(self, key: 'str') -> 'CommandType':
-        """Missing keys as specified in :rfc:`3659`."""
+        """Missing keys as specified in :rfc:`3659`.
+
+        Args:
+            key: Key of missing command.
+
+        """
         try:
             return super().__getitem__(key)
         except KeyError:

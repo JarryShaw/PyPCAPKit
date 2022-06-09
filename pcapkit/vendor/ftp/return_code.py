@@ -16,10 +16,16 @@ if TYPE_CHECKING:
 
 __all__ = ['ReturnCode']
 
-LINE = lambda NAME, DOCS, FLAG, ENUM: f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""{DOCS}"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""{(name := DOCS.split(' [', maxsplit=1)[0])}
+{'=' * (len(name) + 6)}
+
+This module contains the constant enumeration for **{name}**,
+which is automatically generated from :class:`{MODL}.{NAME}`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -53,7 +59,16 @@ class {NAME}(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> '{NAME}':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return {NAME}(key)
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
@@ -62,7 +77,12 @@ class {NAME}(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> '{NAME}':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         code = str(value)
@@ -70,7 +90,7 @@ class {NAME}(IntEnum):
         info = INFO.get(code[1], 'Reserved')
         extend_enum(cls, '%s - %s [%s]' % (kind, info, value), value)
         return cls(value)
-'''  # type: Callable[[str, str, str, str], str]
+'''  # type: Callable[[str, str, str, str, str], str]
 
 
 class ReturnCode(Vendor):
@@ -105,7 +125,7 @@ class ReturnCode(Vendor):
         """
         enum = self.process(soup)
         ENUM = '\n\n    '.join(map(lambda s: s.rstrip(), enum))
-        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM)
+        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, self.__module__)
 
     def process(self, soup: 'BeautifulSoup') -> 'list[str]':  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
         """Process registry data.
@@ -138,7 +158,7 @@ class ReturnCode(Vendor):
             enum.append(f'#: {sufs}\n    {pref}')
         return enum
 
-    def count(self, soup: 'BeautifulSoup') -> 'Counter[str]':  # pylint: disable=arguments-differ,no-self-use,arguments-renamed,unused-argument
+    def count(self, soup: 'BeautifulSoup') -> 'Counter[str]':  # pylint: disable=arguments-differ,arguments-renamed,unused-argument
         """Count field records."""
         #table = soup.find_all('table', class_='wikitable')[2]
         #content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)

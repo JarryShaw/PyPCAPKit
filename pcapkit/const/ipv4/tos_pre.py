@@ -4,7 +4,7 @@
 ===============================
 
 This module contains the constant enumeration for **ToS (DS Field) Precedence**,
-which is automatically generated from :class:`pcapkit.const.ipv4.tos_pre.ToSPrecedence`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_pre.ToSPrecedence`.
 
 """
 

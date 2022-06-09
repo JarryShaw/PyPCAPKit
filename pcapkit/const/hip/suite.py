@@ -4,7 +4,7 @@
 ===============
 
 This module contains the constant enumeration for **Suite IDs**,
-which is automatically generated from :class:`pcapkit.const.hip.suite.Suite`.
+which is automatically generated from :class:`pcapkit.vendor.hip.suite.Suite`.
 
 """
 

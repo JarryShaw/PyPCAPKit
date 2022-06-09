@@ -4,7 +4,7 @@
 ====================
 
 This module contains the constant enumeration for **TaggerID Types**,
-which is automatically generated from :class:`pcapkit.const.ipv6.tagger_id.TaggerID`.
+which is automatically generated from :class:`pcapkit.vendor.ipv6.tagger_id.TaggerID`.
 
 """
 

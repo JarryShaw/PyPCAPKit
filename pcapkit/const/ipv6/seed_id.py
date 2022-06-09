@@ -4,7 +4,7 @@
 ===================
 
 This module contains the constant enumeration for **Seed-ID Types**,
-which is automatically generated from :class:`pcapkit.const.ipv6.seed_id.SeedID`.
+which is automatically generated from :class:`pcapkit.vendor.ipv6.seed_id.SeedID`.
 
 """
 

@@ -4,7 +4,7 @@
 ==================
 
 This module contains the constant enumeration for **TCP Checksum**,
-which is automatically generated from :class:`pcapkit.const.tcp.checksum.Checksum`.
+which is automatically generated from :class:`pcapkit.vendor.tcp.checksum.Checksum`.
 
 """
 

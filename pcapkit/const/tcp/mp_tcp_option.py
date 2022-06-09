@@ -4,7 +4,7 @@
 ===========================
 
 This module contains the constant enumeration for **Multipath TCP options**,
-which is automatically generated from :class:`pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
+which is automatically generated from :class:`pcapkit.vendor.tcp.mp_tcp_option.MPTCPOption`.
 
 """
 

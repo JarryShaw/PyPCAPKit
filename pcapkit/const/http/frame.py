@@ -4,7 +4,7 @@
 =======================
 
 This module contains the constant enumeration for **HTTP/2 Frame Type**,
-which is automatically generated from :class:`pcapkit.const.http.frame.Frame`.
+which is automatically generated from :class:`pcapkit.vendor.http.frame.Frame`.
 
 """
 

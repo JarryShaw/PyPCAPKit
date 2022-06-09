@@ -4,7 +4,7 @@
 =============
 
 This module contains the constant enumeration for **TS Flag**,
-which is automatically generated from :class:`pcapkit.const.ipv4.ts_flag.TSFlag`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.ts_flag.TSFlag`.
 
 """
 

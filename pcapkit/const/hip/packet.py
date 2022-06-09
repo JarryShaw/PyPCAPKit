@@ -4,7 +4,7 @@
 ======================
 
 This module contains the constant enumeration for **HIP Packet Types**,
-which is automatically generated from :class:`pcapkit.const.hip.packet.Packet`.
+which is automatically generated from :class:`pcapkit.vendor.hip.packet.Packet`.
 
 """
 

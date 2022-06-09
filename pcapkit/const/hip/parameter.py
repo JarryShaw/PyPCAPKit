@@ -4,7 +4,7 @@
 =========================
 
 This module contains the constant enumeration for **HIP Parameter Types**,
-which is automatically generated from :class:`pcapkit.const.hip.parameter.Parameter`.
+which is automatically generated from :class:`pcapkit.vendor.hip.parameter.Parameter`.
 
 """
 

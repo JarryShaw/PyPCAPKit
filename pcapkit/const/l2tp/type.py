@@ -4,7 +4,7 @@
 ===============
 
 This module contains the constant enumeration for **L2TP Type**,
-which is automatically generated from :class:`pcapkit.const.l2tp.type.Type`.
+which is automatically generated from :class:`pcapkit.vendor.l2tp.type.Type`.
 
 """
 

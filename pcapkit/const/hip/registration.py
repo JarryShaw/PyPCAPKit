@@ -4,7 +4,7 @@
 ========================
 
 This module contains the constant enumeration for **Registration Types**,
-which is automatically generated from :class:`pcapkit.const.hip.registration.Registration`.
+which is automatically generated from :class:`pcapkit.vendor.hip.registration.Registration`.
 
 """
 

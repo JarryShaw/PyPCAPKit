@@ -4,7 +4,7 @@
 ================================
 
 This module contains the constant enumeration for **ToS (DS Field) Reliability**,
-which is automatically generated from :class:`pcapkit.const.ipv4.tos_rel.ToSReliability`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.tos_rel.ToSReliability`.
 
 """
 

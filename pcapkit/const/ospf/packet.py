@@ -4,7 +4,7 @@
 =======================
 
 This module contains the constant enumeration for **OSPF Packet Types**,
-which is automatically generated from :class:`pcapkit.const.ospf.packet.Packet`.
+which is automatically generated from :class:`pcapkit.vendor.ospf.packet.Packet`.
 
 """
 

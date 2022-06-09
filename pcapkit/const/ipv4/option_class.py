@@ -4,7 +4,7 @@
 ====================
 
 This module contains the constant enumeration for **Option Classes**,
-which is automatically generated from :class:`pcapkit.const.ipv4.option_class.OptionClass`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.option_class.OptionClass`.
 
 """
 

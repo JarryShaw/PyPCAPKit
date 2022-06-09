@@ -4,7 +4,7 @@
 ==========================
 
 This module contains the constant enumeration for **Authentication Types**,
-which is automatically generated from :class:`pcapkit.const.ospf.authentication.Authentication`.
+which is automatically generated from :class:`pcapkit.vendor.ospf.authentication.Authentication`.
 
 """
 

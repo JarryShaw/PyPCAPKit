@@ -4,7 +4,7 @@
 =====================================
 
 This module contains the constant enumeration for **IPv4 Router Alert Option Values**,
-which is automatically generated from :class:`pcapkit.const.ipv4.router_alert.RouterAlert`.
+which is automatically generated from :class:`pcapkit.vendor.ipv4.router_alert.RouterAlert`.
 
 """
 
