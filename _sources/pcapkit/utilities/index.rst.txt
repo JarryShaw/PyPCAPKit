@@ -15,5 +15,4 @@ several user-refined exceptions and validations.
    decorators
    exceptions
    logging
-   validations
    warnings

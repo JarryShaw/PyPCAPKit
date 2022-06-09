@@ -35,12 +35,26 @@
           <div class="body" role="main">
             
   <section id="module-pcapkit.const.ftp">
-<span id="ftp-constant-enumerations"></span><h1>FTP Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.ftp" title="Permalink to this heading">¶</a></h1>
-<section id="ftp-commands">
-<h2>FTP Commands <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a><a class="headerlink" href="#ftp-commands" title="Permalink to this heading">¶</a></h2>
-</section>
-<section id="ftp-return-codes">
-<h2>FTP Return Codes <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a><a class="headerlink" href="#ftp-return-codes" title="Permalink to this heading">¶</a></h2>
+<span id="ftp-constant-enumerations"></span><h1><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.ftp" title="Permalink to this heading">¶</a></h1>
+<p>This module contains all constant enumerations of
+<code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> implementations. Available
+enumerations include:</p>
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.ftp.pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP_Command</span></code></a></p></td>
+<td><p>FTP Commands <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP_ReturnCode</span></code></p></td>
+<td><p>FTP Return Codes <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.const.ftp.pcapkit.const.ftp.command.Command">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.const.ftp.command.</span></span><span class="sig-name descname"><span class="pre">Command</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">defaultInfo</span><span class="p"><span class="pre">[</span></span><span class="pre">CommandType</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.const.ftp.pcapkit.const.ftp.command.Command" title="Permalink to this definition">¶</a></dt>
+<dd><p>FTP commands.</p>
+</dd></dl>
+
 <hr /><aside class="footnote brackets" id="id3" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions.xhtml#ftp-commands-extensions-2">https://www.iana.org/assignments/ftp-commands-extensions/ftp-commands-extensions.xhtml#ftp-commands-extensions-2</a></p>
@@ -49,7 +63,6 @@
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes">https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes</a></p>
 </aside>
-</section>
 </section>
 
 
@@ -77,7 +90,18 @@
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pep.html">Help Wanted</a></li>
 </ul>
@@ -88,8 +112,8 @@
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
   <li><a href="index.html">Constant Enumerations</a><ul>
-      <li>Previous: <a href="arp.html" title="previous chapter">ARP Constant Enumerations</a></li>
-      <li>Next: <a href="hip.html" title="next chapter">HIP Constant Enumerations</a></li>
+      <li>Previous: <a href="arp.html" title="previous chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+      <li>Next: <a href="hip.html" title="next chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
   </ul></li>
   </ul></li>
   </ul></li>

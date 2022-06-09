@@ -3,6 +3,9 @@ Constant Enumerations
 
 .. module:: pcapkit.const
 
+This module contains all constant enumerations of :mod:`pcapkit`, which are
+automatically generated from the :mod:`pcapkit.vendor` module.
+
 .. toctree::
    :maxdepth: 2
 

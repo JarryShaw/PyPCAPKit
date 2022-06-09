@@ -1,23 +1,43 @@
-FTP Constant Enumerations
-=========================
+:class:`~pcapkit.protocols.application.ftp.FTP` Constant Enumerations
+=====================================================================
 
 .. module:: pcapkit.const.ftp
 
-FTP Commands [*]_
------------------
+This module contains all constant enumerations of
+:class:`~pcapkit.protocols.application.ftp.FTP` implementations. Available
+enumerations include:
+
+.. list-table::
+   :widths: auto
+
+   * - :class:`FTP_Command <pcapkit.const.ftp.command.Command>`
+     - FTP Commands [*]_
+   * - :class:`FTP_ReturnCode <pcapkit.const.ftp.return_code.ReturnCode>`
+     - FTP Return Codes [*]_
 
 .. automodule:: pcapkit.const.ftp.command
+   :no-members:
+
+.. data:: pcapkit.const.ftp.command.Command
+   :type: defaultInfo[CommandType]
+
+   FTP commands.
+
+.. autoclass:: pcapkit.const.ftp.command.CommandType
    :members:
-   :undoc-members:
    :private-members:
    :show-inheritance:
 
-FTP Return Codes [*]_
----------------------
+.. autoclass:: pcapkit.const.ftp.command.defaultInfo
+   :members:
+   :private-members:
+   :show-inheritance:
 
 .. automodule:: pcapkit.const.ftp.return_code
+   :no-members:
+
+.. autoclass:: pcapkit.const.ftp.return_code.ReturnCode
    :members:
-   :undoc-members:
    :private-members:
    :show-inheritance:
 

@@ -20,7 +20,7 @@ efficiency in some way.
 .. _PyShark: https://kiminewt.github.io/pyshark
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    interface/index
    foundation/index

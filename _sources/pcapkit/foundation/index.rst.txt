@@ -15,3 +15,4 @@ and TCP flow tracer :class:`~pcapkit.foundation.tractflow.TraceFlow`.
    analysis
    extraction
    traceflow
+   reassembly/index
