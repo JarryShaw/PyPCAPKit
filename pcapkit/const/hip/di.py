@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""DI-Types"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""DI-Types
+==============
+
+This module contains the constant enumeration for **DI-Types**,
+which is automatically generated from :class:`pcapkit.const.hip.di.DITypes`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -21,7 +27,16 @@ class DITypes(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'DITypes':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return DITypes(key)
         if key not in DITypes._member_map_:  # pylint: disable=no-member
@@ -30,7 +45,12 @@ class DITypes(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'DITypes':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 15):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 3 <= value <= 15:

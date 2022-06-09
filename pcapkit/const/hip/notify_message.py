@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""Notify Message Types"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""Notify Message Types
+==========================
+
+This module contains the constant enumeration for **Notify Message Types**,
+which is automatically generated from :class:`pcapkit.const.hip.notify_message.NotifyMessage`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -126,7 +132,16 @@ class NotifyMessage(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'NotifyMessage':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return NotifyMessage(key)
         if key not in NotifyMessage._member_map_:  # pylint: disable=no-member
@@ -135,7 +150,12 @@ class NotifyMessage(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'NotifyMessage':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 2 <= value <= 6:

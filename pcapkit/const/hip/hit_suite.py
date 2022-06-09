@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""HIT Suite ID"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""HIT Suite ID
+==================
+
+This module contains the constant enumeration for **HIT Suite ID**,
+which is automatically generated from :class:`pcapkit.const.hip.hit_suite.HITSuite`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -24,7 +30,16 @@ class HITSuite(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'HITSuite':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return HITSuite(key)
         if key not in HITSuite._member_map_:  # pylint: disable=no-member
@@ -33,7 +48,12 @@ class HITSuite(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'HITSuite':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 15):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 4 <= value <= 15:

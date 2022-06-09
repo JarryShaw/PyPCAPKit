@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""Transport Layer Protocol Numbers"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""Transport Layer Protocol Numbers
+======================================
+
+This module contains the constant enumeration for **Transport Layer Protocol Numbers**,
+which is automatically generated from :class:`pcapkit.const.reg.transtype.TransType`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -479,7 +485,16 @@ class TransType(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'TransType':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return TransType(key)
         if key not in TransType._member_map_:  # pylint: disable=no-member
@@ -488,7 +503,12 @@ class TransType(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'TransType':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 144 <= value <= 252:

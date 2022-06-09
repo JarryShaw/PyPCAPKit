@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""HIP Transport Modes"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""HIP Transport Modes
+=========================
+
+This module contains the constant enumeration for **HIP Transport Modes**,
+which is automatically generated from :class:`pcapkit.const.hip.transport.Transport`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -24,7 +30,16 @@ class Transport(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'Transport':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return Transport(key)
         if key not in Transport._member_map_:  # pylint: disable=no-member
@@ -33,7 +48,12 @@ class Transport(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Transport':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 3):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         return super()._missing_(value)

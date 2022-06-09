@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""ToS (DS Field) Reliability"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""ToS (DS Field) Reliability
+================================
+
+This module contains the constant enumeration for **ToS (DS Field) Reliability**,
+which is automatically generated from :class:`pcapkit.const.ipv4.tos_rel.ToSReliability`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -16,7 +22,16 @@ class ToSReliability(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'ToSReliability':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return ToSReliability(key)
         if key not in ToSReliability._member_map_:  # pylint: disable=no-member
@@ -25,7 +40,12 @@ class ToSReliability(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'ToSReliability':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 1):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned_%d' % value, value)

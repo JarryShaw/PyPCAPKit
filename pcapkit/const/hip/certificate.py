@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""HIP Certificate Types"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""HIP Certificate Types
+===========================
+
+This module contains the constant enumeration for **HIP Certificate Types**,
+which is automatically generated from :class:`pcapkit.const.hip.certificate.Certificate`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -39,7 +45,16 @@ class Certificate(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'Certificate':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return Certificate(key)
         if key not in Certificate._member_map_:  # pylint: disable=no-member
@@ -48,7 +63,12 @@ class Certificate(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Certificate':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 9 <= value <= 255:

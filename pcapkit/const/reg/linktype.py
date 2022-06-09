@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""Link-Layer Header Type Values"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""Link-Layer Header Type Values
+===================================
+
+This module contains the constant enumeration for **Link-Layer Header Type Values**,
+which is automatically generated from :class:`pcapkit.const.reg.linktype.LinkType`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -627,7 +633,16 @@ class LinkType(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'LinkType':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return LinkType(key)
         if key not in LinkType._member_map_:  # pylint: disable=no-member
@@ -636,7 +651,12 @@ class LinkType(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'LinkType':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0x00000000 <= value <= 0xFFFFFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned_%d' % value, value)

@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""Socket Types"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""Socket Types
+==================
+
+This module contains the constant enumeration for **Socket Types**,
+which is automatically generated from :class:`pcapkit.const.ipx.socket.Socket`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -54,7 +60,16 @@ class Socket(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'Socket':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return Socket(key)
         if key not in Socket._member_map_:  # pylint: disable=no-member
@@ -63,7 +78,12 @@ class Socket(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Socket':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0x0000 <= value <= 0xFFFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0001 <= value <= 0x0BB8:

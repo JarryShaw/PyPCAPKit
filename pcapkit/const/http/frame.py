@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""HTTP/2 Frame Type"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""HTTP/2 Frame Type
+=======================
+
+This module contains the constant enumeration for **HTTP/2 Frame Type**,
+which is automatically generated from :class:`pcapkit.const.http.frame.Frame`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -10,34 +16,34 @@ __all__ = ['Frame']
 class Frame(IntEnum):
     """[Frame] HTTP/2 Frame Type"""
 
-    #: ``DATA`` [RFC-ietf-httpbis-http2bis-07, Section 6.1]
+    #: ``DATA`` [:rfc:`9113, Section 6.1`]
     DATA = 0x00
 
-    #: ``HEADERS`` [RFC-ietf-httpbis-http2bis-07, Section 6.2]
+    #: ``HEADERS`` [:rfc:`9113, Section 6.2`]
     HEADERS = 0x01
 
-    #: ``PRIORITY`` [RFC-ietf-httpbis-http2bis-07, Section 6.3]
+    #: ``PRIORITY`` [:rfc:`9113, Section 6.3`]
     PRIORITY = 0x02
 
-    #: ``RST_STREAM`` [RFC-ietf-httpbis-http2bis-07, Section 6.4]
+    #: ``RST_STREAM`` [:rfc:`9113, Section 6.4`]
     RST_STREAM = 0x03
 
-    #: ``SETTINGS`` [RFC-ietf-httpbis-http2bis-07, Section 6.5]
+    #: ``SETTINGS`` [:rfc:`9113, Section 6.5`]
     SETTINGS = 0x04
 
-    #: ``PUSH_PROMISE`` [RFC-ietf-httpbis-http2bis-07, Section 6.6]
+    #: ``PUSH_PROMISE`` [:rfc:`9113, Section 6.6`]
     PUSH_PROMISE = 0x05
 
-    #: ``PING`` [RFC-ietf-httpbis-http2bis-07, Section 6.7]
+    #: ``PING`` [:rfc:`9113, Section 6.7`]
     PING = 0x06
 
-    #: ``GOAWAY`` [RFC-ietf-httpbis-http2bis-07, Section 6.8]
+    #: ``GOAWAY`` [:rfc:`9113, Section 6.8`]
     GOAWAY = 0x07
 
-    #: ``WINDOW_UPDATE`` [RFC-ietf-httpbis-http2bis-07, Section 6.9]
+    #: ``WINDOW_UPDATE`` [:rfc:`9113, Section 6.9`]
     WINDOW_UPDATE = 0x08
 
-    #: ``CONTINUATION`` [RFC-ietf-httpbis-http2bis-07, Section 6.10]
+    #: ``CONTINUATION`` [:rfc:`9113, Section 6.10`]
     CONTINUATION = 0x09
 
     #: ``ALTSVC`` [:rfc:`7838, Section 4`]
@@ -54,7 +60,16 @@ class Frame(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'Frame':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return Frame(key)
         if key not in Frame._member_map_:  # pylint: disable=no-member
@@ -63,7 +78,12 @@ class Frame(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Frame':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0x00 <= value <= 0xFF):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 0x0D <= value <= 0x0F:

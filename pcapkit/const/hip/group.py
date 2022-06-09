@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""Group IDs"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""Group IDs
+===============
+
+This module contains the constant enumeration for **Group IDs**,
+which is automatically generated from :class:`pcapkit.const.hip.group.Group`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -48,7 +54,16 @@ class Group(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'Group':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return Group(key)
         if key not in Group._member_map_:  # pylint: disable=no-member
@@ -57,7 +72,12 @@ class Group(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'Group':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 12 <= value <= 255:

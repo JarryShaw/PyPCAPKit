@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""Registration Failure Types"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""Registration Failure Types
+================================
+
+This module contains the constant enumeration for **Registration Failure Types**,
+which is automatically generated from :class:`pcapkit.const.hip.registration_failure.RegistrationFailure`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -43,7 +49,16 @@ class RegistrationFailure(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'RegistrationFailure':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return RegistrationFailure(key)
         if key not in RegistrationFailure._member_map_:  # pylint: disable=no-member
@@ -52,7 +67,12 @@ class RegistrationFailure(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'RegistrationFailure':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 255):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 10 <= value <= 200:

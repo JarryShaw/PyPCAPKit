@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""Protection Authority Bit Assignments"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""Protection Authority Bit Assignments
+==========================================
+
+This module contains the constant enumeration for **Protection Authority Bit Assignments**,
+which is automatically generated from :class:`pcapkit.const.ipv4.protection_authority.ProtectionAuthority`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -28,7 +34,16 @@ class ProtectionAuthority(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'ProtectionAuthority':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return ProtectionAuthority(key)
         if key not in ProtectionAuthority._member_map_:  # pylint: disable=no-member
@@ -37,7 +52,12 @@ class ProtectionAuthority(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'ProtectionAuthority':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 7):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         extend_enum(cls, 'Unassigned_%d' % value, value)

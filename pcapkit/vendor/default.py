@@ -25,10 +25,16 @@ if TYPE_CHECKING:
 __all__ = ['Vendor']
 
 #: Default constant template of enumerate registry from IANA CSV.
-LINE = lambda NAME, DOCS, FLAG, ENUM, MISS: f'''\
+LINE = lambda NAME, DOCS, FLAG, ENUM, MISS, MODL: f'''\
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""{DOCS}"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""{(name := DOCS.split(' [', maxsplit=1)[0])}
+{'=' * (len(name) + 6)}
+
+This module contains the constant enumeration for **{name}**,
+which is automatically generated from :class:`{MODL.replace('vendor', 'const')}.{NAME}`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -42,7 +48,16 @@ class {NAME}(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> '{NAME}':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return {NAME}(key)
         if key not in {NAME}._member_map_:  # pylint: disable=no-member
@@ -51,12 +66,17 @@ class {NAME}(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> '{NAME}':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not ({FLAG}):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         {MISS}
         {'' if '        return cls(value)' in MISS.splitlines()[-1:] else 'return super()._missing_(value)'}
-'''.strip()  # type: Callable[[str, str, str, str, str], str]
+'''.strip()  # type: Callable[[str, str, str, str, str, str], str]
 
 
 def get_proxies() -> 'dict[str, str]':
@@ -228,7 +248,7 @@ class Vendor(metaclass=abc.ABCMeta):
                 miss.append('    return cls(value)')
         return enum, miss
 
-    def count(self, data: 'list[str]') -> 'Counter[str]':  # pylint: disable=no-self-use
+    def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records.
 
         Args:
@@ -258,9 +278,9 @@ class Vendor(metaclass=abc.ABCMeta):
         ENUM = '\n\n    '.join(map(lambda s: s.rstrip(), enum)).strip()
         MISS = '\n        '.join(map(lambda s: s.rstrip(), miss)).strip()
 
-        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, MISS)
+        return LINE(self.NAME, self.DOCS, self.FLAG, ENUM, MISS, self.__module__)
 
-    def request(self, text: 'Optional[str]' = None) -> 'list[str]':  # pylint: disable=no-self-use
+    def request(self, text: 'Optional[str]' = None) -> 'list[str]':
         """Fetch CSV file.
 
         Args:

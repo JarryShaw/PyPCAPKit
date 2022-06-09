@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import, unused-wildcard-import
-"""Constant enumerations."""
+"""Constant Enumerations
+===========================
+
+This module contains all constant enumerations of :mod:`pcapkit`, which are
+automatically generated from the :mod:`pcapkit.vendor` module.
+
+"""
 
 # IANA registration
 from pcapkit.const.reg import *

@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""HI Algorithm"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""HI Algorithm
+==================
+
+This module contains the constant enumeration for **HI Algorithm**,
+which is automatically generated from :class:`pcapkit.const.hip.hi_algorithm.HIAlgorithm`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -42,7 +48,16 @@ class HIAlgorithm(IntEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1) -> 'HIAlgorithm':
-        """Backport support for original codes."""
+        """Backport support for original codes.
+
+        Args:
+            key: Key to get enum item.
+            default: Default value if not found.
+
+        Returns:
+            Enum item.
+
+        """
         if isinstance(key, int):
             return HIAlgorithm(key)
         if key not in HIAlgorithm._member_map_:  # pylint: disable=no-member
@@ -51,7 +66,12 @@ class HIAlgorithm(IntEnum):
 
     @classmethod
     def _missing_(cls, value: 'int') -> 'HIAlgorithm':
-        """Lookup function used when value is not found."""
+        """Lookup function used when value is not found.
+
+        Args:
+            value: Value to get enum item.
+
+        """
         if not (isinstance(value, int) and 0 <= value <= 65535):
             raise ValueError('%r is not a valid %s' % (value, cls.__name__))
         if 10 <= value <= 65535:
