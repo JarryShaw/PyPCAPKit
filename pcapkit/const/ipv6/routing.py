@@ -56,9 +56,6 @@ class Routing(IntEnum):
             key: Key to get enum item.
             default: Default value if not found.
 
-        Returns:
-            Enum item.
-
         """
         if isinstance(key, int):
             return Routing(key)
