@@ -16,7 +16,7 @@ output report formats.
    The whole project supports **Python 3.6** or later.
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
    pcapkit/index
    demo
