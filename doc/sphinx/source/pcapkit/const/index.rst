@@ -6,18 +6,49 @@ Constant Enumerations
 This module contains all constant enumerations of :mod:`pcapkit`, which are
 automatically generated from the :mod:`pcapkit.vendor` module.
 
+Protocol Numbers
+----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   reg
+
+Link Layer
+----------
+
 .. toctree::
    :maxdepth: 2
 
    arp
-   ftp
+   ospf
+   vlan
+
+Internet Layer
+--------------
+
+.. toctree::
+   :maxdepth: 2
+
    hip
-   http
    ipv4
    ipv6
    ipx
    mh
-   ospf
-   reg
+
+Transport Layer
+---------------
+
+.. toctree::
+   :maxdepth: 2
+
    tcp
-   vlan
+
+Application Layer
+-----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   ftp
+   http
