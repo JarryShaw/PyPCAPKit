@@ -16,8 +16,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="FTP Constant Enumerations" href="ftp.html" />
-    <link rel="prev" title="Constant Enumerations" href="index.html" />
+    <link rel="next" title="OSPF Constant Enumerations" href="ospf.html" />
+    <link rel="prev" title="Protocol Type Registry Constant Enumerations" href="reg.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -44,7 +44,7 @@ enumerations include:</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.arp.hardware.Hardware" title="pcapkit.const.arp.hardware.Hardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP_Hardware</span></code></a></p></td>
 <td><p>ARP Hardware Types <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP_Operation</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.arp.operation.Operation" title="pcapkit.const.arp.operation.Operation"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP_Operation</span></code></a></p></td>
 <td><p>Operation Codes <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
@@ -345,6 +345,206 @@ Telecommunications Industry of America (TIA) TR-8.5 Formulating Group,
 <p>This module contains the constant enumeration for <strong>Operation Codes</strong>,
 which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.arp.operation.Operation</span></code>.</p>
 </section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.arp.operation.</span></span><span class="sig-name descname"><span class="pre">Operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/operation.html#Operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.operation.Operation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[Operation] Operation Codes [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/operation.html#Operation._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.operation.Operation._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.arp.operation.Operation" title="pcapkit.const.arp.operation.Operation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/operation.html#Operation.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.arp.operation.Operation" title="pcapkit.const.arp.operation.Operation">Operation</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.ARP_NAK">
+<span class="sig-name descname"><span class="pre">ARP_NAK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.ARP_NAK" title="Permalink to this definition">¶</a></dt>
+<dd><p>ARP-NAK [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1577.html"><strong>RFC 1577</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Error">
+<span class="sig-name descname"><span class="pre">DRARP_Error</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>DRARP-Error [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Reply">
+<span class="sig-name descname"><span class="pre">DRARP_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>DRARP-Reply [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Request">
+<span class="sig-name descname"><span class="pre">DRARP_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>DRARP-Request [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.InARP_Reply">
+<span class="sig-name descname"><span class="pre">InARP_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.InARP_Reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>InARP-Reply [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2390.html"><strong>RFC 2390</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.InARP_Request">
+<span class="sig-name descname"><span class="pre">InARP_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.InARP_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>InARP-Request [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2390.html"><strong>RFC 2390</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MAPOS_UNARP">
+<span class="sig-name descname"><span class="pre">MAPOS_UNARP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MAPOS_UNARP" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAPOS-UNARP [Mitsuru Maruyama][<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2176.html"><strong>RFC 2176</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Grouplist_Reply">
+<span class="sig-name descname"><span class="pre">MARS_Grouplist_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Grouplist_Reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Grouplist-Reply [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Grouplist_Request">
+<span class="sig-name descname"><span class="pre">MARS_Grouplist_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Grouplist_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Grouplist-Request [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Join">
+<span class="sig-name descname"><span class="pre">MARS_Join</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Join" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Join [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Leave">
+<span class="sig-name descname"><span class="pre">MARS_Leave</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Leave" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Leave [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_MServ">
+<span class="sig-name descname"><span class="pre">MARS_MServ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_MServ" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-MServ [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Multi">
+<span class="sig-name descname"><span class="pre">MARS_Multi</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Multi" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Multi [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_NAK">
+<span class="sig-name descname"><span class="pre">MARS_NAK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_NAK" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-NAK [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Redirect_Map">
+<span class="sig-name descname"><span class="pre">MARS_Redirect_Map</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Redirect_Map" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Redirect-Map [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Request">
+<span class="sig-name descname"><span class="pre">MARS_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Request [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_SJoin">
+<span class="sig-name descname"><span class="pre">MARS_SJoin</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_SJoin" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-SJoin [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_SLeave">
+<span class="sig-name descname"><span class="pre">MARS_SLeave</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_SLeave" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-SLeave [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Unserv">
+<span class="sig-name descname"><span class="pre">MARS_Unserv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Unserv" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Unserv [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.OP_EXP1">
+<span class="sig-name descname"><span class="pre">OP_EXP1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.OP_EXP1" title="Permalink to this definition">¶</a></dt>
+<dd><p>OP_EXP1 [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.OP_EXP2">
+<span class="sig-name descname"><span class="pre">OP_EXP2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.OP_EXP2" title="Permalink to this definition">¶</a></dt>
+<dd><p>OP_EXP2 [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.REPLY">
+<span class="sig-name descname"><span class="pre">REPLY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.REPLY" title="Permalink to this definition">¶</a></dt>
+<dd><p>REPLY [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5227.html"><strong>RFC 5227</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.REQUEST">
+<span class="sig-name descname"><span class="pre">REQUEST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.REQUEST" title="Permalink to this definition">¶</a></dt>
+<dd><p>REQUEST [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5227.html"><strong>RFC 5227</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.Reserved_0">
+<span class="sig-name descname"><span class="pre">Reserved_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.Reserved_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.Reserved_65535">
+<span class="sig-name descname"><span class="pre">Reserved_65535</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.Reserved_65535" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.reply_Reverse">
+<span class="sig-name descname"><span class="pre">reply_Reverse</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.reply_Reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>reply Reverse [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc903.html"><strong>RFC 903</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.request_Reverse">
+<span class="sig-name descname"><span class="pre">request_Reverse</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.request_Reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>request Reverse [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc903.html"><strong>RFC 903</strong></a>]</p>
+</dd></dl>
+
+</dd></dl>
+
 <hr /><aside class="footnote brackets" id="id3" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml#arp-parameters-2">https://www.iana.org/assignments/arp-parameters/arp-parameters.xhtml#arp-parameters-2</a></p>
@@ -388,7 +588,14 @@ which is automatically generated from <code class="xref py py-class docutils lit
 <li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Constant Enumerations</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Constant Enumerations</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#protocol-numbers">Protocol Numbers</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#link-layer">Link Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#internet-layer">Internet Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#transport-layer">Transport Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="index.html#application-layer">Application Layer</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
 </ul>
 </li>
@@ -402,8 +609,8 @@ which is automatically generated from <code class="xref py py-class docutils lit
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
   <li><a href="index.html">Constant Enumerations</a><ul>
-      <li>Previous: <a href="index.html" title="previous chapter">Constant Enumerations</a></li>
-      <li>Next: <a href="ftp.html" title="next chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+      <li>Previous: <a href="reg.html" title="previous chapter">Protocol Type Registry Constant Enumerations</a></li>
+      <li>Next: <a href="ospf.html" title="next chapter">OSPF Constant Enumerations</a></li>
   </ul></li>
   </ul></li>
   </ul></li>

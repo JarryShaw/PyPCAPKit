@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="ARP Constant Enumerations" href="arp.html" />
+    <link rel="next" title="Protocol Type Registry Constant Enumerations" href="reg.html" />
     <link rel="prev" title="User Defined Warnings" href="../utilities/warnings.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -38,6 +38,21 @@
 <span id="constant-enumerations"></span><h1>Constant Enumerations<a class="headerlink" href="#module-pcapkit.const" title="Permalink to this heading">¶</a></h1>
 <p>This module contains all constant enumerations of <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, which are
 automatically generated from the <a class="reference internal" href="../vendor/index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> module.</p>
+<section id="protocol-numbers">
+<h2>Protocol Numbers<a class="headerlink" href="#protocol-numbers" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reg.html">Protocol Type Registry Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.linktype">LINK-LAYER HEADER TYPES </a></li>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.ethertype">ETHER TYPES </a></li>
+<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.transtype">Assigned Internet Protocol Numbers </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="link-layer">
+<h2>Link Layer<a class="headerlink" href="#link-layer" title="Permalink to this heading">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="arp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a><ul>
@@ -45,28 +60,24 @@ automatically generated from the <a class="reference internal" href="../vendor/i
 <li class="toctree-l2"><a class="reference internal" href="arp.html#operation-codes">Operation Codes</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ospf.html">OSPF Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ospf.html#authentication-codes">Authentication Codes </a></li>
+<li class="toctree-l2"><a class="reference internal" href="ospf.html#ospf-packet-type">OSPF Packet Type </a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="vlan.html">VLAN Constant Enumerations</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="vlan.html#priority-levels">Priority Levels </a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="internet-layer">
+<h2>Internet Layer<a class="headerlink" href="#internet-layer" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="hip.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HIP</span></code> Constant Enumerations</a></li>
-<li class="toctree-l1"><a class="reference internal" href="http.html">HTTP Constant Enumerations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="http.html#http-2-error-code">HTTP/2 Error Code </a></li>
-<li class="toctree-l2"><a class="reference internal" href="http.html#http-2-frame-type">HTTP/2 Frame Type </a></li>
-<li class="toctree-l2"><a class="reference internal" href="http.html#http-2-settings">HTTP/2 Settings </a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="ipv4.html">IPv4 Constant Enumerations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#classification-level-encodings">Classification Level Encodings</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#option-classes">Option Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#ip-option-numbers">IP Option Numbers </a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#protection-authority-bit-assignments">Protection Authority Bit Assignments</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#qs-functions">QS Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#ipv4-router-alert-option-values">IPv4 Router Alert Option Values </a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#tos-ds-field-delay">ToS (DS Field) Delay</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#tos-ecn-field">ToS ECN Field</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#tos-ds-field-precedence">ToS (DS Field) Precedence</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#tos-ds-field-reliability">ToS (DS Field) Reliability</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ipv4.html#tos-ds-field-throughput">ToS (DS Field) Throughput</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="ipv4.html">IPv4 Constant Enumerations</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ipv6.html">IPv6 Constant Enumerations</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ipv6.html#ipv6-extension-header-types">IPv6 Extension Header Types </a></li>
 <li class="toctree-l2"><a class="reference internal" href="ipv6.html#destination-options-and-hop-by-hop-options">Destination Options and Hop-by-Hop Options </a></li>
@@ -86,28 +97,30 @@ automatically generated from the <a class="reference internal" href="../vendor/i
 <li class="toctree-l2"><a class="reference internal" href="mh.html#mobility-header-types">Mobility Header Types </a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ospf.html">OSPF Constant Enumerations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ospf.html#authentication-codes">Authentication Codes </a></li>
-<li class="toctree-l2"><a class="reference internal" href="ospf.html#ospf-packet-type">OSPF Packet Type </a></li>
 </ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="reg.html">Protocol Type Registry Constant Enumerations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.linktype">LINK-LAYER HEADER TYPES </a></li>
-<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.ethertype">ETHER TYPES </a></li>
-<li class="toctree-l2"><a class="reference internal" href="reg.html#module-pcapkit.const.reg.transtype">Assigned Internet Protocol Numbers </a></li>
-</ul>
-</li>
+</div>
+</section>
+<section id="transport-layer">
+<h2>Transport Layer<a class="headerlink" href="#transport-layer" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="tcp.html">TCP Constant Enumerations</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#tcp-checksum">TCP Checksum </a></li>
 <li class="toctree-l2"><a class="reference internal" href="tcp.html#tcp-option-kind-numbers">TCP Option Kind Numbers </a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="vlan.html">VLAN Constant Enumerations</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="vlan.html#priority-levels">Priority Levels </a></li>
-</ul>
-</li>
 </ul>
 </div>
+</section>
+<section id="application-layer">
+<h2>Application Layer<a class="headerlink" href="#application-layer" title="Permalink to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ftp.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">FTP</span></code> Constant Enumerations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="http.html"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP</span></code> Constant Enumerations</a></li>
+</ul>
+</div>
+</section>
 </section>
 
 
@@ -143,7 +156,14 @@ automatically generated from the <a class="reference internal" href="../vendor/i
 <li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Constant Enumerations</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Constant Enumerations</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#protocol-numbers">Protocol Numbers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#link-layer">Link Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#internet-layer">Internet Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#transport-layer">Transport Layer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#application-layer">Application Layer</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
 </ul>
 </li>
@@ -157,7 +177,7 @@ automatically generated from the <a class="reference internal" href="../vendor/i
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
       <li>Previous: <a href="../utilities/warnings.html" title="previous chapter">User Defined Warnings</a></li>
-      <li>Next: <a href="arp.html" title="next chapter"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code> Constant Enumerations</a></li>
+      <li>Next: <a href="reg.html" title="next chapter">Protocol Type Registry Constant Enumerations</a></li>
   </ul></li>
   </ul></li>
 </ul>

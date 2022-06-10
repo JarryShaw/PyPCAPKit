@@ -27,7 +27,7 @@ enumerations include:
 .. automodule:: pcapkit.const.arp.operation
    :no-members:
 
-.. auto-class:: pcapkit.const.arp.operation.Operation
+.. autoclass:: pcapkit.const.arp.operation.Operation
    :members:
    :undoc-members:
    :private-members:
