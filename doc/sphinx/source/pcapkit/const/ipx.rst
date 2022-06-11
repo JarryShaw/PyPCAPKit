@@ -1,23 +1,32 @@
-IPX Constant Enumerations
-=========================
+:class:`~pcapkit.protocols.internet.ipx.IPX` Constant Enumerations
+==================================================================
 
 .. module:: pcapkit.const.ipx
 
-IPX Packet Types [*]_
----------------------
+This module contains all constant enumerations of
+:class:`~pcapkit.protocols.internet.ipx.IPX` implementations. Available
+enumerations include:
+
+.. list-table::
+
+   * - :class:`IPX_Packet <pcapkit.const.ipx.packet.Packet>`
+     - IPX Packet Types [*]_
+   * - :class:`IPX_Socket <pcapkit.const.ipx.socket.Socket>`
+     - IPX Socket Types [*]_
 
 .. automodule:: pcapkit.const.ipx.packet
+   :no-members:
+
+.. autoclass:: pcapkit.const.ipx.packet.Packet
    :members:
-   :undoc-members:
    :private-members:
    :show-inheritance:
 
-IPX Socket Types [*]_
----------------------
-
 .. automodule:: pcapkit.const.ipx.socket
+   :no-members:
+
+.. autoclass:: pcapkit.const.ipx.socket.Socket
    :members:
-   :undoc-members:
    :private-members:
    :show-inheritance:
 
