@@ -59,18 +59,252 @@ which is automatically generated from <code class="xref py py-class docutils lit
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.arp.hardware.</span></span><span class="sig-name descname"><span class="pre">Hardware</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/hardware.html#Hardware"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Hardware] Hardware Types [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware._missing_">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/hardware.html#Hardware._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware._missing_" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lookup function used when value is not found.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.arp.hardware.Hardware" title="pcapkit.const.arp.hardware.Hardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hardware</span></code></a></p>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Reserved_0">
+<span class="sig-name descname"><span class="pre">Reserved_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Reserved_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Ethernet">
+<span class="sig-name descname"><span class="pre">Ethernet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Ethernet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ethernet (10Mb) [Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Experimental_Ethernet">
+<span class="sig-name descname"><span class="pre">Experimental_Ethernet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Experimental_Ethernet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Experimental Ethernet (3Mb) [Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Amateur_Radio_AX_25">
+<span class="sig-name descname"><span class="pre">Amateur_Radio_AX_25</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Amateur_Radio_AX_25" title="Permalink to this definition">¶</a></dt>
+<dd><p>Amateur Radio AX.25 [Philip Koch]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Proteon_ProNET_Token_Ring">
+<span class="sig-name descname"><span class="pre">Proteon_ProNET_Token_Ring</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Proteon_ProNET_Token_Ring" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proteon ProNET Token Ring [Avri Doria]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Chaos">
+<span class="sig-name descname"><span class="pre">Chaos</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Chaos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Chaos [Gill Pratt]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.IEEE_802_Networks">
+<span class="sig-name descname"><span class="pre">IEEE_802_Networks</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.IEEE_802_Networks" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE 802 Networks [Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.ARCNET">
+<span class="sig-name descname"><span class="pre">ARCNET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.ARCNET" title="Permalink to this definition">¶</a></dt>
+<dd><p>ARCNET [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1201.html"><strong>RFC 1201</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Hyperchannel">
+<span class="sig-name descname"><span class="pre">Hyperchannel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Hyperchannel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hyperchannel [Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Lanstar">
+<span class="sig-name descname"><span class="pre">Lanstar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Lanstar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lanstar [Tom Unger]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Autonet_Short_Address">
+<span class="sig-name descname"><span class="pre">Autonet_Short_Address</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Autonet_Short_Address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Autonet Short Address [Mike Burrows]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.LocalTalk">
+<span class="sig-name descname"><span class="pre">LocalTalk</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.LocalTalk" title="Permalink to this definition">¶</a></dt>
+<dd><p>LocalTalk [Joyce K Reynolds]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.LocalNet">
+<span class="sig-name descname"><span class="pre">LocalNet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.LocalNet" title="Permalink to this definition">¶</a></dt>
+<dd><p>LocalNet (IBM PCNet or SYTEK LocalNET) [Joseph Murdock]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Ultra_link">
+<span class="sig-name descname"><span class="pre">Ultra_link</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Ultra_link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Ultra link [Rajiv Dhingra]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.SMDS">
+<span class="sig-name descname"><span class="pre">SMDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.SMDS" title="Permalink to this definition">¶</a></dt>
+<dd><p>SMDS [George Clapp]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Frame_Relay">
+<span class="sig-name descname"><span class="pre">Frame_Relay</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Frame_Relay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Frame Relay [Andy Malis]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_16">
+<span class="sig-name descname"><span class="pre">Asynchronous_Transmission_Mode_16</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_16" title="Permalink to this definition">¶</a></dt>
+<dd><p>Asynchronous Transmission Mode (ATM) [JXB2]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HDLC">
+<span class="sig-name descname"><span class="pre">HDLC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HDLC" title="Permalink to this definition">¶</a></dt>
+<dd><p>HDLC [Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Fibre_Channel">
+<span class="sig-name descname"><span class="pre">Fibre_Channel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Fibre_Channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fibre Channel [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4338.html"><strong>RFC 4338</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_19">
+<span class="sig-name descname"><span class="pre">Asynchronous_Transmission_Mode_19</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_19" title="Permalink to this definition">¶</a></dt>
+<dd><p>Asynchronous Transmission Mode (ATM) [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2225.html"><strong>RFC 2225</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Serial_Line">
+<span class="sig-name descname"><span class="pre">Serial_Line</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Serial_Line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serial Line [Jon Postel]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_21">
+<span class="sig-name descname"><span class="pre">Asynchronous_Transmission_Mode_21</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_21" title="Permalink to this definition">¶</a></dt>
+<dd><p>Asynchronous Transmission Mode (ATM) [Mike Burrows]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.MIL_STD_188_220">
+<span class="sig-name descname"><span class="pre">MIL_STD_188_220</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.MIL_STD_188_220" title="Permalink to this definition">¶</a></dt>
+<dd><p>MIL-STD-188-220 [Herb Jensen]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Metricom">
+<span class="sig-name descname"><span class="pre">Metricom</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Metricom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Metricom [Jonathan Stone]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.IEEE_1394_1995">
+<span class="sig-name descname"><span class="pre">IEEE_1394_1995</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.IEEE_1394_1995" title="Permalink to this definition">¶</a></dt>
+<dd><p>IEEE 1394.1995 [Myron Hattig]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.MAPOS">
+<span class="sig-name descname"><span class="pre">MAPOS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.MAPOS" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAPOS [Mitsuru Maruyama][<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2176.html"><strong>RFC 2176</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Twinaxial">
+<span class="sig-name descname"><span class="pre">Twinaxial</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Twinaxial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Twinaxial [Marion Pitts]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.EUI_64">
+<span class="sig-name descname"><span class="pre">EUI_64</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.EUI_64" title="Permalink to this definition">¶</a></dt>
+<dd><p>EUI-64 [Kenji Fujisawa]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HIPARP">
+<span class="sig-name descname"><span class="pre">HIPARP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HIPARP" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIPARP [Jean Michel Pittet]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.IP_and_ARP_over_ISO_7816_3">
+<span class="sig-name descname"><span class="pre">IP_and_ARP_over_ISO_7816_3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.IP_and_ARP_over_ISO_7816_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>IP and ARP over ISO 7816-3 [Scott Guthery]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.ARPSec">
+<span class="sig-name descname"><span class="pre">ARPSec</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.ARPSec" title="Permalink to this definition">¶</a></dt>
+<dd><p>ARPSec [Jerome Etienne]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.IPsec_tunnel">
+<span class="sig-name descname"><span class="pre">IPsec_tunnel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.IPsec_tunnel" title="Permalink to this definition">¶</a></dt>
+<dd><p>IPsec tunnel [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3456.html"><strong>RFC 3456</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.InfiniBand">
+<span class="sig-name descname"><span class="pre">InfiniBand</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.InfiniBand" title="Permalink to this definition">¶</a></dt>
+<dd><p>InfiniBand (TM) [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4391.html"><strong>RFC 4391</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.TIA_102_Project_25_Common_Air_Interface">
+<span class="sig-name descname"><span class="pre">TIA_102_Project_25_Common_Air_Interface</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.TIA_102_Project_25_Common_Air_Interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>TIA-102 Project 25 Common Air Interface (CAI) [Jeff Anderson,
+Telecommunications Industry of America (TIA) TR-8.5 Formulating Group,
+&lt;cja015&amp;motorola.com&gt;, June 2004]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Wiegand_Interface">
+<span class="sig-name descname"><span class="pre">Wiegand_Interface</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Wiegand_Interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wiegand Interface [Scott Guthery 2]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Pure_IP">
+<span class="sig-name descname"><span class="pre">Pure_IP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">35</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Pure_IP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pure IP [Inaky Perez-Gonzalez]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HW_EXP1">
+<span class="sig-name descname"><span class="pre">HW_EXP1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">36</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HW_EXP1" title="Permalink to this definition">¶</a></dt>
+<dd><p>HW_EXP1 [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HFI">
+<span class="sig-name descname"><span class="pre">HFI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">37</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HFI" title="Permalink to this definition">¶</a></dt>
+<dd><p>HFI [Tseng-Hui Lin]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HW_EXP2">
+<span class="sig-name descname"><span class="pre">HW_EXP2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HW_EXP2" title="Permalink to this definition">¶</a></dt>
+<dd><p>HW_EXP2 [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.AEthernet">
+<span class="sig-name descname"><span class="pre">AEthernet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">257</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.AEthernet" title="Permalink to this definition">¶</a></dt>
+<dd><p>AEthernet [Geoffroy Gramaize]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Reserved_65535">
+<span class="sig-name descname"><span class="pre">Reserved_65535</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Reserved_65535" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
 </dd></dl>
 
 <dl class="py method">
@@ -90,252 +324,18 @@ which is automatically generated from <code class="xref py py-class docutils lit
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.AEthernet">
-<span class="sig-name descname"><span class="pre">AEthernet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">257</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.AEthernet" title="Permalink to this definition">¶</a></dt>
-<dd><p>AEthernet [Geoffroy Gramaize]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.ARCNET">
-<span class="sig-name descname"><span class="pre">ARCNET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.ARCNET" title="Permalink to this definition">¶</a></dt>
-<dd><p>ARCNET [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1201.html"><strong>RFC 1201</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.ARPSec">
-<span class="sig-name descname"><span class="pre">ARPSec</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.ARPSec" title="Permalink to this definition">¶</a></dt>
-<dd><p>ARPSec [Jerome Etienne]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Amateur_Radio_AX_25">
-<span class="sig-name descname"><span class="pre">Amateur_Radio_AX_25</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Amateur_Radio_AX_25" title="Permalink to this definition">¶</a></dt>
-<dd><p>Amateur Radio AX.25 [Philip Koch]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_16">
-<span class="sig-name descname"><span class="pre">Asynchronous_Transmission_Mode_16</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_16" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asynchronous Transmission Mode (ATM) [JXB2]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_19">
-<span class="sig-name descname"><span class="pre">Asynchronous_Transmission_Mode_19</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_19" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asynchronous Transmission Mode (ATM) [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2225.html"><strong>RFC 2225</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_21">
-<span class="sig-name descname"><span class="pre">Asynchronous_Transmission_Mode_21</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Asynchronous_Transmission_Mode_21" title="Permalink to this definition">¶</a></dt>
-<dd><p>Asynchronous Transmission Mode (ATM) [Mike Burrows]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Autonet_Short_Address">
-<span class="sig-name descname"><span class="pre">Autonet_Short_Address</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Autonet_Short_Address" title="Permalink to this definition">¶</a></dt>
-<dd><p>Autonet Short Address [Mike Burrows]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Chaos">
-<span class="sig-name descname"><span class="pre">Chaos</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Chaos" title="Permalink to this definition">¶</a></dt>
-<dd><p>Chaos [Gill Pratt]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.EUI_64">
-<span class="sig-name descname"><span class="pre">EUI_64</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.EUI_64" title="Permalink to this definition">¶</a></dt>
-<dd><p>EUI-64 [Kenji Fujisawa]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Ethernet">
-<span class="sig-name descname"><span class="pre">Ethernet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Ethernet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ethernet (10Mb) [Jon Postel]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Experimental_Ethernet">
-<span class="sig-name descname"><span class="pre">Experimental_Ethernet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Experimental_Ethernet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Experimental Ethernet (3Mb) [Jon Postel]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Fibre_Channel">
-<span class="sig-name descname"><span class="pre">Fibre_Channel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Fibre_Channel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fibre Channel [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4338.html"><strong>RFC 4338</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Frame_Relay">
-<span class="sig-name descname"><span class="pre">Frame_Relay</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Frame_Relay" title="Permalink to this definition">¶</a></dt>
-<dd><p>Frame Relay [Andy Malis]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HDLC">
-<span class="sig-name descname"><span class="pre">HDLC</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HDLC" title="Permalink to this definition">¶</a></dt>
-<dd><p>HDLC [Jon Postel]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HFI">
-<span class="sig-name descname"><span class="pre">HFI</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">37</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HFI" title="Permalink to this definition">¶</a></dt>
-<dd><p>HFI [Tseng-Hui Lin]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HIPARP">
-<span class="sig-name descname"><span class="pre">HIPARP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HIPARP" title="Permalink to this definition">¶</a></dt>
-<dd><p>HIPARP [Jean Michel Pittet]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HW_EXP1">
-<span class="sig-name descname"><span class="pre">HW_EXP1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">36</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HW_EXP1" title="Permalink to this definition">¶</a></dt>
-<dd><p>HW_EXP1 [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.HW_EXP2">
-<span class="sig-name descname"><span class="pre">HW_EXP2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.HW_EXP2" title="Permalink to this definition">¶</a></dt>
-<dd><p>HW_EXP2 [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Hyperchannel">
-<span class="sig-name descname"><span class="pre">Hyperchannel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Hyperchannel" title="Permalink to this definition">¶</a></dt>
-<dd><p>Hyperchannel [Jon Postel]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.IEEE_1394_1995">
-<span class="sig-name descname"><span class="pre">IEEE_1394_1995</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.IEEE_1394_1995" title="Permalink to this definition">¶</a></dt>
-<dd><p>IEEE 1394.1995 [Myron Hattig]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.IEEE_802_Networks">
-<span class="sig-name descname"><span class="pre">IEEE_802_Networks</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.IEEE_802_Networks" title="Permalink to this definition">¶</a></dt>
-<dd><p>IEEE 802 Networks [Jon Postel]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.IP_and_ARP_over_ISO_7816_3">
-<span class="sig-name descname"><span class="pre">IP_and_ARP_over_ISO_7816_3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.IP_and_ARP_over_ISO_7816_3" title="Permalink to this definition">¶</a></dt>
-<dd><p>IP and ARP over ISO 7816-3 [Scott Guthery]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.IPsec_tunnel">
-<span class="sig-name descname"><span class="pre">IPsec_tunnel</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.IPsec_tunnel" title="Permalink to this definition">¶</a></dt>
-<dd><p>IPsec tunnel [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3456.html"><strong>RFC 3456</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.InfiniBand">
-<span class="sig-name descname"><span class="pre">InfiniBand</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.InfiniBand" title="Permalink to this definition">¶</a></dt>
-<dd><p>InfiniBand (TM) [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4391.html"><strong>RFC 4391</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Lanstar">
-<span class="sig-name descname"><span class="pre">Lanstar</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Lanstar" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lanstar [Tom Unger]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.LocalNet">
-<span class="sig-name descname"><span class="pre">LocalNet</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.LocalNet" title="Permalink to this definition">¶</a></dt>
-<dd><p>LocalNet (IBM PCNet or SYTEK LocalNET) [Joseph Murdock]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.LocalTalk">
-<span class="sig-name descname"><span class="pre">LocalTalk</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.LocalTalk" title="Permalink to this definition">¶</a></dt>
-<dd><p>LocalTalk [Joyce K Reynolds]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.MAPOS">
-<span class="sig-name descname"><span class="pre">MAPOS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.MAPOS" title="Permalink to this definition">¶</a></dt>
-<dd><p>MAPOS [Mitsuru Maruyama][<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2176.html"><strong>RFC 2176</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.MIL_STD_188_220">
-<span class="sig-name descname"><span class="pre">MIL_STD_188_220</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.MIL_STD_188_220" title="Permalink to this definition">¶</a></dt>
-<dd><p>MIL-STD-188-220 [Herb Jensen]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Metricom">
-<span class="sig-name descname"><span class="pre">Metricom</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Metricom" title="Permalink to this definition">¶</a></dt>
-<dd><p>Metricom [Jonathan Stone]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Proteon_ProNET_Token_Ring">
-<span class="sig-name descname"><span class="pre">Proteon_ProNET_Token_Ring</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Proteon_ProNET_Token_Ring" title="Permalink to this definition">¶</a></dt>
-<dd><p>Proteon ProNET Token Ring [Avri Doria]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Pure_IP">
-<span class="sig-name descname"><span class="pre">Pure_IP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">35</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Pure_IP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pure IP [Inaky Perez-Gonzalez]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Reserved_0">
-<span class="sig-name descname"><span class="pre">Reserved_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Reserved_0" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reserved [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Reserved_65535">
-<span class="sig-name descname"><span class="pre">Reserved_65535</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Reserved_65535" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reserved [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.SMDS">
-<span class="sig-name descname"><span class="pre">SMDS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.SMDS" title="Permalink to this definition">¶</a></dt>
-<dd><p>SMDS [George Clapp]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Serial_Line">
-<span class="sig-name descname"><span class="pre">Serial_Line</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Serial_Line" title="Permalink to this definition">¶</a></dt>
-<dd><p>Serial Line [Jon Postel]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.TIA_102_Project_25_Common_Air_Interface">
-<span class="sig-name descname"><span class="pre">TIA_102_Project_25_Common_Air_Interface</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.TIA_102_Project_25_Common_Air_Interface" title="Permalink to this definition">¶</a></dt>
-<dd><p>TIA-102 Project 25 Common Air Interface (CAI) [Jeff Anderson,
-Telecommunications Industry of America (TIA) TR-8.5 Formulating Group,
-&lt;cja015&amp;motorola.com&gt;, June 2004]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Twinaxial">
-<span class="sig-name descname"><span class="pre">Twinaxial</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Twinaxial" title="Permalink to this definition">¶</a></dt>
-<dd><p>Twinaxial [Marion Pitts]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Ultra_link">
-<span class="sig-name descname"><span class="pre">Ultra_link</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Ultra_link" title="Permalink to this definition">¶</a></dt>
-<dd><p>Ultra link [Rajiv Dhingra]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware.Wiegand_Interface">
-<span class="sig-name descname"><span class="pre">Wiegand_Interface</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34</span></em><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware.Wiegand_Interface" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wiegand Interface [Scott Guthery 2]</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.arp.hardware.Hardware._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/hardware.html#Hardware._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.hardware.Hardware._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.arp.hardware.Hardware" title="pcapkit.const.arp.hardware.Hardware"><code class="xref py py-class docutils literal notranslate"><span class="pre">Hardware</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -350,18 +350,166 @@ which is automatically generated from <code class="xref py py-class docutils lit
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.arp.operation.</span></span><span class="sig-name descname"><span class="pre">Operation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/operation.html#Operation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.operation.Operation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
 <p>[Operation] Operation Codes [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation._missing_">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/operation.html#Operation._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.operation.Operation._missing_" title="Permalink to this definition">¶</a></dt>
-<dd><p>Lookup function used when value is not found.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.arp.operation.Operation" title="pcapkit.const.arp.operation.Operation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></a></p>
-</dd>
-</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.Reserved_0">
+<span class="sig-name descname"><span class="pre">Reserved_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.Reserved_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.REQUEST">
+<span class="sig-name descname"><span class="pre">REQUEST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.REQUEST" title="Permalink to this definition">¶</a></dt>
+<dd><p>REQUEST [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5227.html"><strong>RFC 5227</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.REPLY">
+<span class="sig-name descname"><span class="pre">REPLY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.REPLY" title="Permalink to this definition">¶</a></dt>
+<dd><p>REPLY [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5227.html"><strong>RFC 5227</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.request_Reverse">
+<span class="sig-name descname"><span class="pre">request_Reverse</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.request_Reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>request Reverse [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc903.html"><strong>RFC 903</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.reply_Reverse">
+<span class="sig-name descname"><span class="pre">reply_Reverse</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.reply_Reverse" title="Permalink to this definition">¶</a></dt>
+<dd><p>reply Reverse [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc903.html"><strong>RFC 903</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Request">
+<span class="sig-name descname"><span class="pre">DRARP_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>DRARP-Request [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Reply">
+<span class="sig-name descname"><span class="pre">DRARP_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>DRARP-Reply [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Error">
+<span class="sig-name descname"><span class="pre">DRARP_Error</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>DRARP-Error [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.InARP_Request">
+<span class="sig-name descname"><span class="pre">InARP_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.InARP_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>InARP-Request [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2390.html"><strong>RFC 2390</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.InARP_Reply">
+<span class="sig-name descname"><span class="pre">InARP_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.InARP_Reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>InARP-Reply [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2390.html"><strong>RFC 2390</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.ARP_NAK">
+<span class="sig-name descname"><span class="pre">ARP_NAK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.ARP_NAK" title="Permalink to this definition">¶</a></dt>
+<dd><p>ARP-NAK [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1577.html"><strong>RFC 1577</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Request">
+<span class="sig-name descname"><span class="pre">MARS_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Request [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Multi">
+<span class="sig-name descname"><span class="pre">MARS_Multi</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Multi" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Multi [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_MServ">
+<span class="sig-name descname"><span class="pre">MARS_MServ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_MServ" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-MServ [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Join">
+<span class="sig-name descname"><span class="pre">MARS_Join</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Join" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Join [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Leave">
+<span class="sig-name descname"><span class="pre">MARS_Leave</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Leave" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Leave [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_NAK">
+<span class="sig-name descname"><span class="pre">MARS_NAK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_NAK" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-NAK [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Unserv">
+<span class="sig-name descname"><span class="pre">MARS_Unserv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Unserv" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Unserv [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_SJoin">
+<span class="sig-name descname"><span class="pre">MARS_SJoin</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_SJoin" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-SJoin [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_SLeave">
+<span class="sig-name descname"><span class="pre">MARS_SLeave</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_SLeave" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-SLeave [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Grouplist_Request">
+<span class="sig-name descname"><span class="pre">MARS_Grouplist_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Grouplist_Request" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Grouplist-Request [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Grouplist_Reply">
+<span class="sig-name descname"><span class="pre">MARS_Grouplist_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Grouplist_Reply" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Grouplist-Reply [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Redirect_Map">
+<span class="sig-name descname"><span class="pre">MARS_Redirect_Map</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Redirect_Map" title="Permalink to this definition">¶</a></dt>
+<dd><p>MARS-Redirect-Map [Grenville Armitage]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MAPOS_UNARP">
+<span class="sig-name descname"><span class="pre">MAPOS_UNARP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MAPOS_UNARP" title="Permalink to this definition">¶</a></dt>
+<dd><p>MAPOS-UNARP [Mitsuru Maruyama][<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2176.html"><strong>RFC 2176</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.OP_EXP1">
+<span class="sig-name descname"><span class="pre">OP_EXP1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.OP_EXP1" title="Permalink to this definition">¶</a></dt>
+<dd><p>OP_EXP1 [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.OP_EXP2">
+<span class="sig-name descname"><span class="pre">OP_EXP2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.OP_EXP2" title="Permalink to this definition">¶</a></dt>
+<dd><p>OP_EXP2 [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.Reserved_65535">
+<span class="sig-name descname"><span class="pre">Reserved_65535</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.Reserved_65535" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
 </dd></dl>
 
 <dl class="py method">
@@ -381,166 +529,18 @@ which is automatically generated from <code class="xref py py-class docutils lit
 </dl>
 </dd></dl>
 
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.ARP_NAK">
-<span class="sig-name descname"><span class="pre">ARP_NAK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.ARP_NAK" title="Permalink to this definition">¶</a></dt>
-<dd><p>ARP-NAK [<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1577.html"><strong>RFC 1577</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Error">
-<span class="sig-name descname"><span class="pre">DRARP_Error</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Error" title="Permalink to this definition">¶</a></dt>
-<dd><p>DRARP-Error [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Reply">
-<span class="sig-name descname"><span class="pre">DRARP_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Reply" title="Permalink to this definition">¶</a></dt>
-<dd><p>DRARP-Reply [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.DRARP_Request">
-<span class="sig-name descname"><span class="pre">DRARP_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.DRARP_Request" title="Permalink to this definition">¶</a></dt>
-<dd><p>DRARP-Request [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1931.html"><strong>RFC 1931</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.InARP_Reply">
-<span class="sig-name descname"><span class="pre">InARP_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.InARP_Reply" title="Permalink to this definition">¶</a></dt>
-<dd><p>InARP-Reply [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2390.html"><strong>RFC 2390</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.InARP_Request">
-<span class="sig-name descname"><span class="pre">InARP_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.InARP_Request" title="Permalink to this definition">¶</a></dt>
-<dd><p>InARP-Request [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2390.html"><strong>RFC 2390</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MAPOS_UNARP">
-<span class="sig-name descname"><span class="pre">MAPOS_UNARP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MAPOS_UNARP" title="Permalink to this definition">¶</a></dt>
-<dd><p>MAPOS-UNARP [Mitsuru Maruyama][<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2176.html"><strong>RFC 2176</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Grouplist_Reply">
-<span class="sig-name descname"><span class="pre">MARS_Grouplist_Reply</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Grouplist_Reply" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-Grouplist-Reply [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Grouplist_Request">
-<span class="sig-name descname"><span class="pre">MARS_Grouplist_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Grouplist_Request" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-Grouplist-Request [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Join">
-<span class="sig-name descname"><span class="pre">MARS_Join</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Join" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-Join [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Leave">
-<span class="sig-name descname"><span class="pre">MARS_Leave</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Leave" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-Leave [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_MServ">
-<span class="sig-name descname"><span class="pre">MARS_MServ</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_MServ" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-MServ [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Multi">
-<span class="sig-name descname"><span class="pre">MARS_Multi</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Multi" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-Multi [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_NAK">
-<span class="sig-name descname"><span class="pre">MARS_NAK</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_NAK" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-NAK [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Redirect_Map">
-<span class="sig-name descname"><span class="pre">MARS_Redirect_Map</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Redirect_Map" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-Redirect-Map [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Request">
-<span class="sig-name descname"><span class="pre">MARS_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Request" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-Request [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_SJoin">
-<span class="sig-name descname"><span class="pre">MARS_SJoin</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_SJoin" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-SJoin [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_SLeave">
-<span class="sig-name descname"><span class="pre">MARS_SLeave</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_SLeave" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-SLeave [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.MARS_Unserv">
-<span class="sig-name descname"><span class="pre">MARS_Unserv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.MARS_Unserv" title="Permalink to this definition">¶</a></dt>
-<dd><p>MARS-Unserv [Grenville Armitage]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.OP_EXP1">
-<span class="sig-name descname"><span class="pre">OP_EXP1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.OP_EXP1" title="Permalink to this definition">¶</a></dt>
-<dd><p>OP_EXP1 [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.OP_EXP2">
-<span class="sig-name descname"><span class="pre">OP_EXP2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.OP_EXP2" title="Permalink to this definition">¶</a></dt>
-<dd><p>OP_EXP2 [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.REPLY">
-<span class="sig-name descname"><span class="pre">REPLY</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.REPLY" title="Permalink to this definition">¶</a></dt>
-<dd><p>REPLY [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5227.html"><strong>RFC 5227</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.REQUEST">
-<span class="sig-name descname"><span class="pre">REQUEST</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.REQUEST" title="Permalink to this definition">¶</a></dt>
-<dd><p>REQUEST [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc826.html"><strong>RFC 826</strong></a>][<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5227.html"><strong>RFC 5227</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.Reserved_0">
-<span class="sig-name descname"><span class="pre">Reserved_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.Reserved_0" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reserved [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.Reserved_65535">
-<span class="sig-name descname"><span class="pre">Reserved_65535</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.Reserved_65535" title="Permalink to this definition">¶</a></dt>
-<dd><p>Reserved [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5494.html"><strong>RFC 5494</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.reply_Reverse">
-<span class="sig-name descname"><span class="pre">reply_Reverse</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.reply_Reverse" title="Permalink to this definition">¶</a></dt>
-<dd><p>reply Reverse [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc903.html"><strong>RFC 903</strong></a>]</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation.request_Reverse">
-<span class="sig-name descname"><span class="pre">request_Reverse</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.arp.operation.Operation.request_Reverse" title="Permalink to this definition">¶</a></dt>
-<dd><p>request Reverse [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc903.html"><strong>RFC 903</strong></a>]</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.arp.operation.Operation._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/arp/operation.html#Operation._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.arp.operation.Operation._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.arp.operation.Operation" title="pcapkit.const.arp.operation.Operation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Operation</span></code></a></p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>

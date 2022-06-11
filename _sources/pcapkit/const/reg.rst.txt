@@ -3,30 +3,39 @@ Protocol Type Registry Constant Enumerations
 
 .. module:: pcapkit.const.reg
 
-LINK-LAYER HEADER TYPES [*]_
-----------------------------
+This module contains all constant enumerations of protocol type registry
+implementations. Available enumerations include:
+
+.. list-table::
+
+   * - :class:`LINKTYPE <pcapkit.const.reg.linktype.LinkType>`
+     - Link-Layer Header Type Values [*]_
+   * - :class:`ETHERTYPE <pcapkit.const.reg.ethertype.EtherType>`
+     - Ethertype IEEE 802 Numbers [*]_
+   * - :class:`TRANSTYPE <pcapkit.const.reg.transtype.TransType>`
+     - Transport Layer Protocol Numbers [*]_
 
 .. automodule:: pcapkit.const.reg.linktype
+   :no-members:
+
+.. autoclass:: pcapkit.const.reg.linktype.LinkType
    :members:
-   :undoc-members:
    :private-members:
    :show-inheritance:
-
-ETHER TYPES [*]_
-----------------
 
 .. automodule:: pcapkit.const.reg.ethertype
+   :no-members:
+
+.. autoclass:: pcapkit.const.reg.ethertype.EtherType
    :members:
-   :undoc-members:
    :private-members:
    :show-inheritance:
 
-Assigned Internet Protocol Numbers [*]_
----------------------------------------
-
 .. automodule:: pcapkit.const.reg.transtype
+   :no-members:
+
+.. autoclass:: pcapkit.const.reg.transtype.TransType
    :members:
-   :undoc-members:
    :private-members:
    :show-inheritance:
 
