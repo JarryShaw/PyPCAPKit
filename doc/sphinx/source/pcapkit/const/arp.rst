@@ -8,7 +8,6 @@ and :class:`~pcapkit.protocols.link.rarp.RARP` implementations. Available
 enumerations include:
 
 .. list-table::
-   :widths: auto
 
    * - :class:`ARP_Hardware <pcapkit.const.arp.hardware.Hardware>`
      - ARP Hardware Types [*]_

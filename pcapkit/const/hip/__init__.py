@@ -9,7 +9,6 @@ This module contains all constant enumerations of
 :class:`~pcapkit.protocols.internet.hip.HIP` enumerations include:
 
 .. list-table::
-   :widths: auto
 
    * - :class:`HIP_Certificate <pcapkit.const.hip.certificate.Certificate>`
      - HIP Certificate Types [*]_

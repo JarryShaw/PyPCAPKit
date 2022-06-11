@@ -8,7 +8,6 @@ This module contains all constant enumerations of
 enumerations include:
 
 .. list-table::
-   :widths: auto
 
    * - :class:`FTP_Command <pcapkit.const.ftp.command.Command>`
      - FTP Commands [*]_

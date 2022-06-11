@@ -8,7 +8,6 @@ This module contains all constant enumerations of
 enumerations include:
 
 .. list-table::
-   :widths: auto
 
    * - :class:`HIP_Certificate <pcapkit.const.hip.certificate.Certificate>`
      - HIP Certificate Types [*]_

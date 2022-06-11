@@ -1,10 +1,13 @@
-IPv4 Constant Enumerations
-==========================
+:class:`~pcapkit.protocols.internet.ipv4.IPv4` Constant Enumerations
+====================================================================
 
 .. module:: pcapkit.const.ipv4
 
+This module contains all constant enumerations of
+:class:`~pcapkit.protocols.internet.ipv4.IPv4` implementations. Available
+enumerations include:
+
 .. list-table::
-   :widths: auto
 
    * - :class:`IPv4_ClassificationLevel <pcapkit.const.ipv4.classification_level.ClassificationLevel>`
      - Classification Level Encodings

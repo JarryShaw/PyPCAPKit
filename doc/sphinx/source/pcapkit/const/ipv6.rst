@@ -1,5 +1,5 @@
-IPv6 Constant Enumerations
-==========================
+:class:`~pcapkit.protocols.internet.ipv6.IPv6` Constant Enumerations
+====================================================================
 
 .. module:: pcapkit.const.ipv6
 
@@ -8,7 +8,6 @@ This module contains all constant enumerations of
 enumerations include:
 
 .. list-table::
-   :widths: auto
 
    * - :class:`IPv6_Extension_Header <pcapkit.const.ipv6.extension_header.ExtensionHeader>`
      - IPv6 Extension Header Types [*]_

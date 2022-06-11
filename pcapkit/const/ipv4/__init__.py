@@ -8,7 +8,6 @@ This module contains all constant enumerations of
 enumerations include:
 
 .. list-table::
-   :widths: auto
 
    * - :class:`IPv4_ClassificationLevel <pcapkit.const.ipv4.classification_level.ClassificationLevel>`
      - Classification Level Encodings
