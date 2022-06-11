@@ -1,14 +1,22 @@
-MH Constant Enumerations
-========================
+:class:`~pcapkit.protocols.internet.mh.MH` Constant Enumerations
+================================================================
 
 .. module:: pcapkit.const.mh
 
-Mobility Header Types [*]_
---------------------------
+This module contains all constant enumerations of
+:class:`~pcapkit.protocols.internet.mh.MH` implementations. Available
+enumerations include:
+
+.. list-table::
+
+   * - :class:`MH_Packet <pcapkit.const.mh.packet.Packet>`
+     - Mobility Header Types [*]_
 
 .. automodule:: pcapkit.const.mh.packet
+   :no-members:
+
+.. autoclass:: pcapkit.const.mh.packet.Packet
    :members:
-   :undoc-members:
    :private-members:
    :show-inheritance:
 
