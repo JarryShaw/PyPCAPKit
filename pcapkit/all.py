@@ -82,7 +82,7 @@ __all__ = [
     'DPKT', 'Scapy', 'PyShark', 'PCAPKit',                  # Engine Macros
 
     # pcapkit.protocols
-    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',                    # Protocol Numbers
+    'LINKTYPE', 'ETHERTYPE', 'TRANSTYPE',                   # Protocol Numbers
     'Header', 'Frame',                                      # PCAP Headers
     'NoPayload',                                            # No Payload
     'Raw',                                                  # Raw Packet
