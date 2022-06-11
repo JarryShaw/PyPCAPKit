@@ -21,6 +21,7 @@ Link Layer
    :maxdepth: 2
 
    arp
+   l2tp
    ospf
    vlan
 
