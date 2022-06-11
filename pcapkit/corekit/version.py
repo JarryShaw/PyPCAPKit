@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""version info
+"""Version Info
+==================
 
 :mod:`pcapkit.corekit.version` contains :obj:`tuple`
 like class :class:`~pcapkit.corekit.version.VersionInfo`,

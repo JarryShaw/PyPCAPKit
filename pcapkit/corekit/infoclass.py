@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""info class
+"""Info Class
+================
 
 :mod:`pcapkit.corekit.infoclass` contains :obj:`dict` like class
 :class:`~pcapkit.corekit.infoclass.Info` only, which is originally
@@ -37,6 +38,10 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
         accessing such renamed keys, the original key name should always be
         used, i.e., such renaming is totally transparent to the user.
 
+    Args:
+        *args: Arbitrary positional arguments.
+        **kwargs: Arbitrary keyword arguments.
+
     """
 
     #: Mapping of name conflicts with builtin methods (original names to
@@ -57,8 +62,6 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
 
         Args:
             *args: Arbitrary positional arguments.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         """
@@ -195,7 +198,7 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
     @classmethod
     def from_dict(cls, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
                   **kwargs: 'VT') -> 'Info':
-        """Create a new instance.
+        r"""Create a new instance.
 
         * If ``dict_`` is present and has a ``.keys()`` method, then does:
           ``for k in dict_: self[k] = dict_[k]``.
@@ -205,9 +208,7 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
           ``for k, v in kwargs.items(): self[k] = v``.
 
         Args:
-            dict_: Source data.
-
-        Keyword Args:
+            dict\_: Source data.
             **kwargs: Arbitrary keyword arguments.
 
         """

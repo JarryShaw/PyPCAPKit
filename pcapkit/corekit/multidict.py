@@ -1,5 +1,14 @@
 # -*- coding: utf-8 -*-
-"""multi-mapping dictionary"""
+"""Multi-Mapping Dictionary
+==============================
+
+:mod:`pcapkit.corekit.multidict` contains multi-mapping dictionary classes,
+which are used to store multiple mappings of the same key. The implementation
+is inspired and based on the `Werkzeug`_ project.
+
+.. _Werkzeug: https://werkzeug.palletsprojects.com/
+
+"""
 
 import copy
 from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
@@ -123,8 +132,6 @@ class MultiDict(dict, Generic[_KT, _VT]):
         The class is inspired from and based on the `Werkzeug`_ project (c.f.
         ``werkzeug.datastructures.MultiDict``).
 
-    .. _Werkzeug: https://werkzeug.palletsprojects.com/
-
     """
 
     def __init__(self, mapping: 'Optional[dict[_KT, _VT] | Iterable[tuple[_KT, _VT]]]' = None) -> 'None':  # pylint: disable=line-too-long
@@ -174,7 +181,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
         raise MissingKeyError(key)
 
     def __setitem__(self, key: '_KT', value: '_VT') -> 'None':
-        """Like :meth:`add but removes an existing key first.
+        """Like :meth:`add` but removes an existing key first.
 
         Args:
             key: The key for the value.
@@ -316,14 +323,14 @@ class MultiDict(dict, Generic[_KT, _VT]):
 
     def deepcopy(self, memo: 'Optional[dict]' = None) -> 'MultiDict[_KT, _VT]':
         """Return a deep copy of this object."""
-        return self.__class__(copy.deepcopy(self.to_dict(flat=False), memo=memo))  # type: ignore[call-overload]
+        return self.__class__(copy.deepcopy(self.to_dict(flat=False), memo=memo))  # type: ignore[arg-type]
 
     @overload
     def to_dict(self, flat: 'Literal[True]' = ...) -> 'dict[_KT, _VT]': ...
     @overload
-    def to_dict(self, flag: 'Literal[False]') -> 'dict[_KT, list[_VT]]': ...
+    def to_dict(self, flat: 'Literal[False]') -> 'dict[_KT, list[_VT]]': ...
 
-    def to_dict(self, flat: 'bool' = True) -> 'dict[_KT, _VT] | dict[_KT, list[_VT]]':  # type: ignore[misc]
+    def to_dict(self, flat: 'bool' = True) -> 'dict[_KT, _VT] | dict[_KT, list[_VT]]':
         """Return the contents as regular :obj:`dict`.
 
         If ``flat`` is :obj:`True` the returned :obj:`dict` will only have the
@@ -346,6 +353,11 @@ class MultiDict(dict, Generic[_KT, _VT]):
         If the value :obj:`list` for a key in ``other_dict`` is empty, no new
         values will be added to the :obj:`dict` and the key will not be
         created.
+
+        Args:
+            mapping: The extending value for the :class:`MultiDict`. Either a
+                regular :obj:`dict`, an iterable of ``(key, value)`` tuples, or
+                :obj:`None`.
 
         """
         for key, value in iter_multi_items(mapping):
@@ -396,6 +408,9 @@ class MultiDict(dict, Generic[_KT, _VT]):
     def poplist(self, key: '_KT') -> 'list[_VT]':
         """Pop the :obj:`list` for a key from the :obj:`dict`.
 
+        Args:
+            key: The key to pop.
+
         If the key is not in the :obj:`dict` an empty :obj:`list` is returned.
 
         Notes:
@@ -425,6 +440,11 @@ class MultiDict(dict, Generic[_KT, _VT]):
 class OrderedMultiDict(MultiDict[_KT, _VT]):
     """Works like a regular :class:`MultiDict` but preserves the order of the
     fields.
+
+    Args:
+        mapping: The initial value for the :class:`MultiDict`. Either a
+            regular :obj:`dict`, an iterable of ``(key, value)`` tuples, or
+            :obj:`None`.
 
     To convert the ordered multi dict into a :obj:`list` you can us the
     :meth:`items` method and pass it ``multi=True``.
@@ -549,7 +569,7 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
         for value in new_list:
             self.add(key, value)
 
-    def setlistdefault(self, key: '_KT', default_list: 'Optional[Iterable[_VT]]' = None) -> 'NoReturn':  # pylint: disable=no-self-use
+    def setlistdefault(self, key: '_KT', default_list: 'Optional[Iterable[_VT]]' = None) -> 'NoReturn':
         raise UnsupportedCall('setlistdefault is unsupported for ordered multi dicts')
 
     def update(self, mapping: 'Mapping[_KT, _VT] | Iterable[tuple[_KT, _VT]]') -> 'None':  # type: ignore[override]

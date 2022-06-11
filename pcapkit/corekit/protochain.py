@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""protocol chain collection
+"""Protocol Chain
+====================
 
 :mod:`pcapkit.corekit.protochain` contains special protocol
 collection class :class:`~pcapkit.corekit.protochain.ProtoChain`.
@@ -21,7 +22,14 @@ __all__ = ['ProtoChain']
 
 
 class ProtoChain(collections.abc.Sequence):
-    """Protocols chain."""
+    """Protocols chain.
+
+    Args:
+        proto: New protocol class on the top stack.
+        alias: New protocol alias on the top stack.
+        basis: Original protocol chain as base stacks.
+
+    """
 
     #: Internal data storage for protocol chain.
     __data__: 'tuple[tuple[str, Type[Protocol]], ...]'
@@ -130,16 +138,6 @@ class ProtoChain(collections.abc.Sequence):
 
     def __init__(self, proto: 'Protocol | Type[Protocol]', alias: 'Optional[str]' = None, *,
                  basis: 'Optional[ProtoChain]' = None):
-        """Initialisation.
-
-        Args:
-            proto: New protocol class on the top stack.
-            alias: New protocol alias on the top stack.
-
-        Keyword Args:
-            basis: Original protocol chain as base stacks.
-
-        """
         from pcapkit.protocols.protocol import Protocol  # pylint: disable=import-outside-toplevel
         if isinstance(proto, Protocol):
             if alias is None:
