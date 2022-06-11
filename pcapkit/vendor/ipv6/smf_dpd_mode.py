@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 __all__ = ['SMFDPDMode']
 
-#: QS function registry.
+#: ``SMF_DPD`` mode registry.
 DATA = {
     0:  'I-DPD',
     1:  'H-DPD',

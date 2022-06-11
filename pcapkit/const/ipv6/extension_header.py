@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""IPv6 Extension Header Types"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""IPv6 Extension Header Types
+=================================
+
+This module contains the constant enumeration for **IPv6 Extension Header Types**,
+which is automatically generated from :class:`pcapkit.vendor.ipv6.extension_header.ExtensionHeader`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 

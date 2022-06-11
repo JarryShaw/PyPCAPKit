@@ -14,10 +14,16 @@ if TYPE_CHECKING:
 
 __all__ = ['ExtensionHeader']
 
-LINE = lambda NAME, DOCS, ENUM: f'''\
+LINE = lambda NAME, DOCS, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-
-# pylint: disable=line-too-long
-"""{DOCS}"""
+# pylint: disable=line-too-long,consider-using-f-string
+"""{(name := DOCS.split(' [', maxsplit=1)[0])}
+{'=' * (len(name) + 6)}
+
+This module contains the constant enumeration for **{name}**,
+which is automatically generated from :class:`{MODL}.{NAME}`.
+
+"""
 
 from aenum import IntEnum, extend_enum
 
@@ -35,7 +41,7 @@ class {NAME}(IntEnum):
         if isinstance(key, int):
             return {NAME}(key)
         return {NAME}[key]  # type: ignore[misc]
-'''  # type: Callable[[str, str, str], str]
+'''  # type: Callable[[str, str, str, str], str]
 
 
 class ExtensionHeader(Vendor):
@@ -44,7 +50,7 @@ class ExtensionHeader(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/protocol-numbers/protocol-numbers-1.csv'
 
-    def count(self, data: 'list[str]') -> 'Counter[str]':  # pylint: disable=no-self-use
+    def count(self, data: 'list[str]') -> 'Counter[str]':
         """Count field records.
 
         Args:
@@ -141,7 +147,7 @@ class ExtensionHeader(Vendor):
         """
         enum, _ = self.process(data)
         ENUM = '\n\n    '.join(map(lambda s: s.rstrip(), enum))
-        return LINE(self.NAME, self.DOCS, ENUM)
+        return LINE(self.NAME, self.DOCS, ENUM, self.__module__)
 
 
 if __name__ == '__main__':
