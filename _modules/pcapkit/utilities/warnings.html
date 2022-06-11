@@ -86,7 +86,7 @@
 <div class="viewcode-block" id="BaseWarning"><a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning">[docs]</a><span class="k">class</span> <span class="nc">BaseWarning</span><span class="p">(</span><span class="ne">UserWarning</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base warning class of all kinds.&quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="BaseWarning.__init__"><a class="viewcode-back" href="../../../pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.BaseWarning.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=useless-super-delegation</span>
         <span class="c1"># log warning</span>
         <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">exc_info</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
@@ -94,7 +94,7 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
         <span class="c1"># warnings.simplefilter(&#39;default&#39;)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <span class="c1">##############################################################################</span>

@@ -24,11 +24,13 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ftp.command.CommandType
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.const.ftp.command.defaultInfo
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -37,6 +39,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ftp.return_code.ReturnCode
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

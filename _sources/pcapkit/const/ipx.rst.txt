@@ -19,6 +19,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipx.packet.Packet
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -27,6 +28,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipx.socket.Socket
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

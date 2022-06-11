@@ -17,6 +17,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.vlan.priority_level.PriorityLevel
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

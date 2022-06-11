@@ -7,21 +7,8 @@ Dump Utilities
 :mod:`pcapkit` implementation, which is alike those described
 in :mod:`dictdumper`.
 
-PCAP Dumper
------------
+.. toctree::
+   :maxdepth: 2
 
-.. autoclass:: pcapkit.dumpkit.PCAP
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
-
-
-Undefined Dumper
-----------------
-
-.. autoclass:: pcapkit.dumpkit.NotImplementedIO
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+   null
+   pcap

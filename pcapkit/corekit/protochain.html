@@ -17,7 +17,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Version Info" href="version.html" />
-    <link rel="prev" title="Info Class" href="infoclass.html" />
+    <link rel="prev" title="Multi-Mapping Dictionary" href="multidict.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -46,24 +46,12 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>proto</strong> (<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – </p></li>
-<li><p><strong>alias</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – </p></li>
-<li><p><strong>basis</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><em>ProtoChain</em></a><em>]</em>) – </p></li>
+<li><p><strong>proto</strong> (<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – New protocol class on the top stack.</p></li>
+<li><p><strong>alias</strong> (<em>Optional</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em>) – New protocol alias on the top stack.</p></li>
+<li><p><strong>basis</strong> (<em>Optional</em><em>[</em><a class="reference internal" href="#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><em>ProtoChain</em></a><em>]</em>) – Original protocol chain as base stacks.</p></li>
 </ul>
 </dd>
 </dl>
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__alias__">
-<span class="sig-name descname"><span class="pre">__alias__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.corekit.protochain._AliasList</span></em><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__alias__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol aliases chain.</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__proto__">
-<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.corekit.protochain._ProtoList</span></em><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__proto__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Protocol classes chain.</p>
-</dd></dl>
-
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.protocols">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><span class="pre">pcapkit.protocols.protocol.Protocol</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.protocols" title="Permalink to this definition">¶</a></dt>
@@ -137,41 +125,6 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">proto</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">basis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialisation.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>proto</strong> – New protocol class on the top stack.</p></li>
-<li><p><strong>alias</strong> – New protocol alias on the top stack.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>basis</strong> – Original protocol chain as base stacks.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__repr__">
-<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__repr__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns representation of protocol chain data.</p>
-<div class="admonition-example admonition">
-<p class="admonition-title">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">protochain</span>
-<span class="go">ProtoChain(Ethernet, IPv6, Raw)</span>
-</pre></div>
-</div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__str__">
 <span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__str__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns formatted hex representation of source data stream.</p>
@@ -192,76 +145,19 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__contains__">
-<span class="sig-name descname"><span class="pre">__contains__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__contains__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__contains__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns if <code class="docutils literal notranslate"><span class="pre">name</span></code> is in the chain.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em> | </em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em> | </em><em>Type</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>]</em>) – </p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)">bool</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__getitem__">
-<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__getitem__" title="Permalink to this definition">¶</a></dt>
-<dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.10)"><span class="pre">slice</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span></span></dt>
-<dd><p>Subscription (<code class="docutils literal notranslate"><span class="pre">getitem</span></code>) support.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>index</strong> – Indexing key.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Protocol alias at such index.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__iter__">
-<span class="sig-name descname"><span class="pre">__iter__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__iter__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__iter__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Iterator support.</p>
+<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__repr__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns representation of protocol chain data.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">protochain</span>
+<span class="go">ProtoChain(Ethernet, IPv6, Raw)</span>
+</pre></div>
+</div>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>]]]</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Iterator of protocol alias and class.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__len__">
-<span class="sig-name descname"><span class="pre">__len__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__len__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__len__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Length support.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Length of protocol chain.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.corekit.protochain.ProtoChain.__add__">
-<span class="sig-name descname"><span class="pre">__add__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/protochain.html#ProtoChain.__add__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.protochain.ProtoChain.__add__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Merge protocol chain by appending protocols from <code class="docutils literal notranslate"><span class="pre">other</span></code>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a>) – Protocol chain to be merged.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a></p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Merged protocol chain.</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -301,6 +197,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
 <li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Core Utilities</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="infoclass.html">Info Class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multidict.html">Multi-Mapping Dictionary</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Protocol Chain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="version.html">Version Info</a></li>
 </ul>
@@ -322,7 +219,7 @@ collection class <a class="reference internal" href="#pcapkit.corekit.protochain
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
   <li><a href="index.html">Core Utilities</a><ul>
-      <li>Previous: <a href="infoclass.html" title="previous chapter">Info Class</a></li>
+      <li>Previous: <a href="multidict.html" title="previous chapter">Multi-Mapping Dictionary</a></li>
       <li>Next: <a href="version.html" title="next chapter">Version Info</a></li>
   </ul></li>
   </ul></li>
