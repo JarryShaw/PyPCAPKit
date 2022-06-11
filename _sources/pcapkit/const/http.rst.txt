@@ -8,7 +8,6 @@ This module contains all constant enumerations of
 enumerations include:
 
 .. list-table::
-   :widths: auto
 
    * - :class:`HTTP_ErrorCode <pcapkit.const.http.error_code.ErrorCode>`
      - HTTP/2 Error Code [*]_
