@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""dump utilities
+"""Dump Utilities
+====================
 
 :mod:`pcapkit.dumpkit` is the collection of dumpers for
 :mod:`pcapkit` implementation, which is alike those described

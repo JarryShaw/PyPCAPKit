@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
-"""null dump utilities
+"""Null Dumper
+=================
 
 :mod:`pcapkit.dumpkit.null` is the dumper for :mod:`pcapkit` implementation,
 specifically for **NotImplemented** format, which is alike those described in
 :mod:`dictdumper`.
+
+Notes:
+   This dumper is used when the given format is not supported, as a fallback.
+   It shall not produce any output.
 
 """
 from typing import TYPE_CHECKING

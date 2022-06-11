@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""PCAP dump utilities
+"""PCAP Dumper
+=================
 
 :mod:`pcapkit.dumpkit.pcap` is the dumper for :mod:`pcapkit` implementation,
 specifically for PCAP format, which is alike those described in
@@ -29,7 +30,16 @@ __all__ = [
 
 
 class PCAPIO(dictdumper.Dumper):
-    """PCAP file dumper."""
+    """PCAP file dumper.
+
+     Args:
+        fname: output file name
+        protocol: data link type
+        byteorder: header byte order
+        nanosecond: nanosecond-resolution file flag
+        **kwargs: arbitrary keyword arguments
+
+    """
 
     ##########################################################################
     # Properties.
@@ -47,18 +57,6 @@ class PCAPIO(dictdumper.Dumper):
     def __init__(self, fname: 'str', *, protocol: 'RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int',
                  byteorder: 'Literal["big", "little"]' = sys.byteorder,
                  nanosecond: 'bool' = False, **kwargs: 'Any') -> 'None':  # pylint: disable=arguments-differ
-        """Initialise dumper.
-
-        Args:
-            fname: output file name
-
-        Keyword Args:
-            protocol: data link type
-            byteorder: header byte order
-            nanosecond: nanosecond-resolution file flag
-            **kwargs: arbitrary keyword arguments
-
-        """
         #: int: Frame counter.
         self._fnum = 1
         #: bool: Nanosecond-resolution file flag.
