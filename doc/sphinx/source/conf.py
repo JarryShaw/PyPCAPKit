@@ -64,13 +64,14 @@ intersphinx_mapping = {
 }
 
 autodoc_default_options = {
-    'members': True,
+    # 'members': True,
     'member-order': 'bysource',
-    'special-members': '__init__',
-    'undoc-members': True,
+    # 'special-members': '__init__',
+    # 'undoc-members': True,
     'exclude-members': '__weakref__, _abc_impl, _unbound_fields, _wtforms_meta, _meta, _schema',
     'ignore-module-all': True,
-    'private-members': True,
+    # 'private-members': True,
+    'show-inheritance': True,
 }
 autodoc_typehints = 'description'
 #autodoc_member_order = 'bysource'

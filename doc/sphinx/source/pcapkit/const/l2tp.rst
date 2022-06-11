@@ -17,5 +17,6 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.l2tp.type.Type
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:

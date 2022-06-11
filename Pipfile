@@ -36,7 +36,7 @@ coverage = "*"
 codecov = "*"
 sphinx = "*"
 sphinx-autodoc-typehints = "*"
-rstcheck = "*"
+rstcheck = {extras = ["sphinx","toml"],version = "*"}
 esbonio = "*"
 vermin = "*"
 types-chardet = "*"

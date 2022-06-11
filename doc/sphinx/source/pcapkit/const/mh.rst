@@ -17,6 +17,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.mh.packet.Packet
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

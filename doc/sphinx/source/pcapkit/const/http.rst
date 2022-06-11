@@ -21,6 +21,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.http.error_code.ErrorCode
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -29,6 +30,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.http.frame.Frame
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -37,6 +39,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.http.setting.Setting
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

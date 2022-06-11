@@ -20,6 +20,7 @@ implementations. Available enumerations include:
 
 .. autoclass:: pcapkit.const.reg.linktype.LinkType
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -28,6 +29,7 @@ implementations. Available enumerations include:
 
 .. autoclass:: pcapkit.const.reg.ethertype.EtherType
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -36,6 +38,7 @@ implementations. Available enumerations include:
 
 .. autoclass:: pcapkit.const.reg.transtype.TransType
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

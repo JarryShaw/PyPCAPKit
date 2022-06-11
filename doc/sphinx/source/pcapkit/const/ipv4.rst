@@ -37,6 +37,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.classification_level.ClassificationLevel
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -45,6 +46,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.option_class.OptionClass
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -53,6 +55,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.option_number.OptionNumber
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -61,6 +64,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.protection_authority.ProtectionAuthority
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -69,6 +73,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.qs_function.QSFunction
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -77,6 +82,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.router_alert.RouterAlert
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -85,6 +91,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.tos_del.ToSDelay
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -93,6 +100,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.tos_ecn.ToSECN
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -101,6 +109,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.tos_pre.ToSPrecedence
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -109,6 +118,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.tos_rel.ToSReliability
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -117,6 +127,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv4.tos_thr.ToSThroughput
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

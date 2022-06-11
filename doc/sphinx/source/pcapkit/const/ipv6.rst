@@ -31,6 +31,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv6.extension_header.ExtensionHeader
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -39,6 +40,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv6.option.Option
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -47,6 +49,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv6.qs_function.QSFunction
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -55,6 +58,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv6.router_alert.RouterAlert
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -63,6 +67,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv6.routing.Routing
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -71,6 +76,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv6.seed_id.SeedID
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -79,6 +85,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -87,6 +94,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ipv6.tagger_id.TaggerID
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

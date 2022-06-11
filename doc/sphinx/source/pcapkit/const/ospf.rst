@@ -19,6 +19,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ospf.authentication.Authentication
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -27,6 +28,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.ospf.packet.Packet
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 

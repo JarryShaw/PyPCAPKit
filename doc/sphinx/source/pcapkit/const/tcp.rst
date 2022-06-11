@@ -19,6 +19,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.tcp.checksum.Checksum
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
@@ -27,6 +28,7 @@ enumerations include:
 
 .. autoclass:: pcapkit.const.tcp.option.Option
    :members:
+   :undoc-members:
    :private-members:
    :show-inheritance:
 
