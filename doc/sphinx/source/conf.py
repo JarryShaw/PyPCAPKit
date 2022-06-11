@@ -65,7 +65,7 @@ intersphinx_mapping = {
 
 autodoc_default_options = {
     'members': True,
-    'member-order': 'groupwise',
+    'member-order': 'bysource',
     'special-members': '__init__',
     'undoc-members': True,
     'exclude-members': '__weakref__, _abc_impl, _unbound_fields, _wtforms_meta, _meta, _schema',
