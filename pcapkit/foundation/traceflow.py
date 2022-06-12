@@ -16,7 +16,7 @@ import collections
 import importlib
 import os
 import sys
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import FileExists, stacklevel
@@ -25,7 +25,7 @@ from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv6Address
-    from typing import Any, DefaultDict, Optional, TextIO, Type, overload
+    from typing import Any, DefaultDict, Optional, TextIO, Type
 
     from dictdumper.dumper import Dumper
     from typing_extensions import Literal

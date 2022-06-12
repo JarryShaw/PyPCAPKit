@@ -151,7 +151,7 @@ class Command(Vendor):
             cmmt = self.wrap_comment('%s %s' % (cmmd, ''.join(temp)))  # pylint: disable=consider-using-f-string
 
             if cmmd == '-N/A-':
-                MISS = '\n'.ljust(32).join(("CommandType(name='%s' % key,",
+                MISS = '\n'.ljust(32).join(("CommandType(name=key,",
                                             f'feat={feat!r},',
                                             f'desc={desc!r},',
                                             f'type={kind!r},',

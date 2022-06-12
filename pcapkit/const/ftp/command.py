@@ -57,7 +57,7 @@ class defaultInfo(Info[CommandType]):
         try:
             return super().__getitem__(key)
         except KeyError:
-            return CommandType(name='%s' % key,
+            return CommandType(name=key,
                                feat='TVFS',
                                desc='Trivial Virtual File Store',
                                type=('parameter setting',),

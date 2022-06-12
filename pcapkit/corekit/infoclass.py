@@ -99,8 +99,8 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
             args_.reverse()
             dict_.reverse()
 
-            # NOTE: We only generate ``__init__`` method if only the class has
-            # type annotations from any of itself and its base classes.
+            # NOTE: We only generate typed ``__init__`` method if only the class
+            # has type annotations from any of itself and its base classes.
             if args_:
                 # NOTE: The following code is to make the ``__init__`` method work.
                 # It is inspired from the :func:`dataclasses._create_fn` function.
@@ -110,10 +110,18 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
                     f'        self.__update__({", ".join(dict_)})\n'
                     f'    return __init__\n'
                 )
-                ns = {}  # type: dict[str, Any]
-                exec(init_, None, ns)  # pylint: disable=exec-used # nosec
-                cls.__init__ = ns['__create_fn__']()  # type: ignore[assignment]
-                cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
+            else:
+                init_ = (
+                    'def __create_fn__():\n'
+                    '    def __init__(self, dict_=None, **kwargs):\n'
+                    '        self.__update__(dict_, **kwargs)\n'
+                    '    return __init__\n'
+                )
+
+            ns = {}  # type: dict[str, Any]
+            exec(init_, None, ns)  # pylint: disable=exec-used # nosec
+            cls.__init__ = ns['__create_fn__']()
+            cls.__init__.__qualname__ = f'{cls.__name__}.__init__'
 
         self = super().__new__(cls)
         return self
@@ -154,6 +162,8 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
             # if isinstance(key, str):
             #     key = re.sub(r'\W', '_', key)
             self.__dict__[key] = value
+
+    __init__ = __update__
 
     def __str__(self) -> 'str':
         temp = []  # type: list[str]
