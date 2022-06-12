@@ -77,13 +77,12 @@ extracts parametres from a PCAP file.
 Data Structures
 ---------------
 
-.. autoclass:: pcapkit.foundation.extraction.ReassemblyData
+.. autoclass:: pcapkit.foundation.extraction.ReassemblyData(ipv4, ipv6, tcp)
    :show-inheritance:
    :no-special-members: __init__
 
-   :param ipv4: IPv4 reassembly data.
-   :param ipv6: IPv6 reassembly data.
-   :param tcp: TCP reassembly data.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. autoattribute:: ipv4
    .. autoattribute:: ipv6

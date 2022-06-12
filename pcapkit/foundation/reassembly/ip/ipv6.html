@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>IPv6 Datagram Reassembly &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+    <link rel="next" title="TCP Datagram Reassembly" href="../tcp/index.html" />
+    <link rel="prev" title="IPv4 Datagram Reassembly" href="ipv4.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pcapkit.foundation.reassembly.ipv6">
+<span id="ipv6-datagram-reassembly"></span><h1>IPv6 Datagram Reassembly<a class="headerlink" href="#module-pcapkit.foundation.reassembly.ipv6" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.foundation.reassembly.ipv6" title="pcapkit.foundation.reassembly.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ipv6</span></code></a> contains
+<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Reassembly</span></code>
+only, which reconstructs fragmented IPv6 packets back to
+origin. Please refer to <a class="reference internal" href="ip.html"><span class="doc">Base Class</span></a> for more information.</p>
+<section id="terminology">
+<h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this heading">¶</a></h2>
+<dl class="glossary">
+<dt id="term-ipv6.packet">ipv6.packet<a class="headerlink" href="#term-ipv6.packet" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>IPv6 datagram reassembly</strong>
+(<code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6_Reassembly.reassembly</span></code>)
+is as following:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">packet_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+  <span class="n">bufid</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+      <span class="n">ipv6</span><span class="o">.</span><span class="n">src</span><span class="p">,</span>                   <span class="c1"># source IP address</span>
+      <span class="n">ipv6</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span>                   <span class="c1"># destination IP address</span>
+      <span class="n">ipv6</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>                 <span class="c1"># label</span>
+      <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">next</span><span class="p">,</span>             <span class="c1"># next header field in IPv6 Fragment Header</span>
+  <span class="p">),</span>
+  <span class="n">num</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">number</span><span class="p">,</span>             <span class="c1"># original packet range number</span>
+  <span class="n">fo</span> <span class="o">=</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>          <span class="c1"># fragment offset</span>
+  <span class="n">ihl</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">,</span>             <span class="c1"># header length, only headers before IPv6-Frag</span>
+  <span class="n">mf</span> <span class="o">=</span> <span class="n">ipv6_frag</span><span class="o">.</span><span class="n">mf</span><span class="p">,</span>              <span class="c1"># more fragment flag</span>
+  <span class="n">tl</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                  <span class="c1"># total length, header includes</span>
+  <span class="n">header</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>           <span class="c1"># raw bytes type header before IPv6-Frag</span>
+  <span class="n">payload</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>         <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</dd>
+<dt id="term-ipv6.datagram">ipv6.datagram<a class="headerlink" href="#term-ipv6.datagram" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>reassembled IPv6 datagram</strong> (element from
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Reassembly.datagram</span></code>
+<em>tuple</em>) is as following:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) datagram
+ |--&gt; (Info) data
+ |     |--&gt; &#39;completed&#39; : (bool) True --&gt; implemented
+ |     |--&gt; &#39;id&#39; : (Info) original packet identifier
+ |     |            |--&gt; &#39;src&#39; --&gt; (IPv6Address) ipv6.src
+ |     |            |--&gt; &#39;dst&#39; --&gt; (IPv6Address) ipv6.dst
+ |     |            |--&gt; &#39;id&#39; --&gt; (int) ipv6.label
+ |     |            |--&gt; &#39;proto&#39; --&gt; (EtherType) ipv6_frag.next
+ |     |--&gt; &#39;index&#39; : (tuple) packet numbers
+ |     |               |--&gt; (int) original packet range number
+ |     |--&gt; &#39;payload&#39; : (bytes) reassembled IPv4 packet
+ |     |--&gt; &#39;packet&#39; : (Protocol) parsed reassembled payload
+ |--&gt; (Info) data
+ |     |--&gt; &#39;completed&#39; : (bool) False --&gt; not implemented
+ |     |--&gt; &#39;id&#39; : (Info) original packet identifier
+ |     |            |--&gt; &#39;src&#39; --&gt; (IPv6Address) ipv6.src
+ |     |            |--&gt; &#39;dst&#39; --&gt; (IPv6Address) ipv6.dst
+ |     |            |--&gt; &#39;id&#39; --&gt; (int) ipv6.id
+ |     |            |--&gt; &#39;proto&#39; --&gt; (EtherType) ipv6_frag.next
+ |     |--&gt; &#39;index&#39; : (tuple) packet numbers
+ |     |               |--&gt; (int) original packet range number
+ |     |--&gt; &#39;header&#39; : (bytes) IPv4 header
+ |     |--&gt; &#39;payload&#39; : (tuple) partially reassembled IPv4 payload
+ |     |                 |--&gt; (bytes) IPv4 payload fragment
+ |     |                 |--&gt; ...
+ |     |--&gt; &#39;packet&#39; : (None)
+ |--&gt; (Info) data ...
+</pre></div>
+</div>
+</dd>
+<dt id="term-ipv6.buffer">ipv6.buffer<a class="headerlink" href="#term-ipv6.buffer" title="Permalink to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
+(<code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Reassembly._buffer</span></code>)
+is as following:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(dict) buffer --&gt; memory buffer for reassembly
+ |--&gt; (tuple) BUFID : (dict)
+ |     |--&gt; ipv6.src       |
+ |     |--&gt; ipc6.dst       |
+ |     |--&gt; ipv6.label     |
+ |     |--&gt; ipv6_frag.next |
+ |                         |--&gt; &#39;TDL&#39; : (int) total data length
+ |                         |--&gt; RCVBT : (bytearray) fragment received bit table
+ |                         |             |--&gt; (bytes) b&#39;\\x00&#39; -&gt; not received
+ |                         |             |--&gt; (bytes) b&#39;\\x01&#39; -&gt; received
+ |                         |             |--&gt; (bytes) ...
+ |                         |--&gt; &#39;index&#39; : (list) list of reassembled packets
+ |                         |               |--&gt; (int) packet range number
+ |                         |--&gt; &#39;header&#39; : (bytes) header buffer
+ |                         |--&gt; &#39;datagram&#39; : (bytearray) data buffer, holes set to b&#39;\\x00&#39;
+ |--&gt; (tuple) BUFID ...
+</pre></div>
+</div>
+</dd>
+</dl>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../../index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../../interface/index.html">User Interface</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../index.html">Library Foundation</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../../extraction.html">Extractor for PCAP Files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../traceflow.html">Trace TCP Flows</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html">Fragmented Packets Reassembly</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../registry.html">Registry Management</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../protocols/index.html">Protocol Family</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module Documentation</a><ul>
+  <li><a href="../../index.html">Library Foundation</a><ul>
+  <li><a href="../index.html">Fragmented Packets Reassembly</a><ul>
+  <li><a href="index.html">IP Datagram Reassembly</a><ul>
+      <li>Previous: <a href="ipv4.html" title="previous chapter">IPv4 Datagram Reassembly</a></li>
+      <li>Next: <a href="../tcp/index.html" title="next chapter">TCP Datagram Reassembly</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+      |
+      <a href="../../../../_sources/pcapkit/foundation/reassembly/ip/ipv6.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>
