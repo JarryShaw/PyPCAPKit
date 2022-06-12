@@ -45,18 +45,18 @@ its main interface. Several scenarios are shown as below.</p>
 (with no reassembly)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pcapkit</span> <span class="kn">import</span> <span class="n">extract</span>
 <span class="c1"># dump to a PLIST file with no frame storage (property frame disabled)</span>
-<span class="n">plist</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out.plist&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;plist&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">plist</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out.plist&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;plist&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 <span class="c1"># dump to a JSON file with no extension auto-complete</span>
-<span class="n">json</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.cap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out.json&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">json</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.cap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out.json&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
 <span class="c1"># dump to a folder with each tree-view text file per frame</span>
-<span class="n">tree</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">tree</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
 <li><p>extract a PCAP file and fetch IP packet (both IPv4 and IPv6) from a frame
 (with no output file)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pcapkit</span> <span class="kn">import</span> <span class="n">IP</span><span class="p">,</span> <span class="n">extract</span>
-<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="n">frame0</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 <span class="c1"># check if IP (IPv4 or IPv6) in this frame</span>
 <span class="n">flag</span> <span class="o">=</span> <span class="n">IP</span> <span class="ow">in</span> <span class="n">frame0</span>
@@ -70,11 +70,11 @@ its main interface. Several scenarios are shown as below.</p>
 (with no output file nor frame storage)</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pcapkit</span> <span class="kn">import</span> <span class="n">HTTP</span><span class="p">,</span> <span class="n">extract</span>
 <span class="c1"># set strict to make sure full reassembly</span>
-<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">extraction</span> <span class="o">=</span> <span class="n">extract</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="s1">&#39;in.pcap&#39;</span><span class="p">,</span> <span class="n">store</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 <span class="c1"># print extracted packet if HTTP in reassembled payloads</span>
 <span class="k">for</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">reassembly</span><span class="o">.</span><span class="n">tcp</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">datagram</span><span class="o">.</span><span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">HTTP</span> <span class="ow">in</span> <span class="n">datagram</span><span class="o">.</span><span class="n">packet</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">packet</span><span class="p">[</span><span class="n">HTTP</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">datagram</span><span class="o">.</span><span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">HTTP</span> <span class="ow">in</span> <span class="n">datagram</span><span class="o">.</span><span class="n">packet</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">packet</span><span class="p">[</span><span class="n">HTTP</span><span class="p">])</span>
 </pre></div>
 </div>
 </li>
@@ -95,7 +95,7 @@ its main interface. Several scenarios are shown as below.</p>
 <ol class="arabic">
 <li><p>export to a macOS Property List
 (<a class="reference external" href="https://developer.apple.com/xcode">Xcode</a> has special support for this format)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli <span class="k">in</span> --format plist --verbose
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli in --format plist --verbose
 🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
 Frame   <span class="m">1</span>: Ethernet:IPv6:IPv6_ICMP
 Frame   <span class="m">2</span>: Ethernet:IPv6:IPv6_ICMP
@@ -103,12 +103,12 @@ Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">6</span>: Ethernet:IPv4:UDP:Raw
-🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out.plist&#39;</span>
+🍺Report file stored in <span class="s1">&#39;out.plist&#39;</span>
 </pre></div>
 </div>
 </li>
 <li><p>export to a JSON file (with no format specified)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli <span class="k">in</span> --output out.json --verbose
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli in --output out.json --verbose
 🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
 Frame   <span class="m">1</span>: Ethernet:IPv6:IPv6_ICMP
 Frame   <span class="m">2</span>: Ethernet:IPv6:IPv6_ICMP
@@ -116,12 +116,12 @@ Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">6</span>: Ethernet:IPv4:UDP:Raw
-🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out.json&#39;</span>
+🍺Report file stored in <span class="s1">&#39;out.json&#39;</span>
 </pre></div>
 </div>
 </li>
 <li><p>export to a text tree view file (without extension autocorrect)</p>
-<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli <span class="k">in</span> --output out.txt --format tree --verbose
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>$ pcapkit-cli in --output out.txt --format tree --verbose
 🚨Loading file <span class="s1">&#39;in.pcap&#39;</span>
 Frame   <span class="m">1</span>: Ethernet:IPv6:IPv6_ICMP
 Frame   <span class="m">2</span>: Ethernet:IPv6:IPv6_ICMP
@@ -129,7 +129,7 @@ Frame   <span class="m">3</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">4</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">5</span>: Ethernet:IPv4:TCP
 Frame   <span class="m">6</span>: Ethernet:IPv4:UDP:Raw
-🍺Report file stored <span class="k">in</span> <span class="s1">&#39;out.txt&#39;</span>
+🍺Report file stored in <span class="s1">&#39;out.txt&#39;</span>
 </pre></div>
 </div>
 </li>
