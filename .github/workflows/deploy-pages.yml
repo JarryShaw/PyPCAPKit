@@ -21,7 +21,7 @@ jobs:
           python3 -m pip install -U pip setuptools wheel
           python3 -m pip install -r doc/sphinx/requirements.txt
           python3 -m pip install .
-          make -C doc/sphinx html
+          PCAPKIT_SPHINX=1 make -C doc/sphinx html
 
           # disable Jekyll
           touch doc/sphinx/build/html/.nojekyll

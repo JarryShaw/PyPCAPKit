@@ -35,7 +35,7 @@ dist:
 	twine upload dist/* -r pypitest --skip-existing
 
 docs:
-	pipenv run $(MAKE) -C doc/sphinx html
+	PCAPKIT_SPHINX=1 pipenv run $(MAKE) -C doc/sphinx html
 
 pypi:
 	DIR=release $(MAKE) dist-prep dist

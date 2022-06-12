@@ -26,6 +26,13 @@ BOOLEAN_STATES = {'1': True, '0': False,
 DEVMODE = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_DEVMODE', 'false').casefold(), False)
 
 ###############################################################################
+# Sphinx Mode
+###############################################################################
+
+# NOTE: This is a workaround for TYPE_CHECKING in Sphinx.
+SPHINX_TYPE_CHECKING = BOOLEAN_STATES.get(os.environ.get('PCAPKIT_SPHINX', 'false').casefold(), False)
+
+###############################################################################
 # Logger Setup
 ###############################################################################
 
