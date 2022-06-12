@@ -408,14 +408,14 @@ class MultiDict(dict, Generic[_KT, _VT]):
     def poplist(self, key: '_KT') -> 'list[_VT]':
         """Pop the :obj:`list` for a key from the :obj:`dict`.
 
-        Args:
-            key: The key to pop.
-
         If the key is not in the :obj:`dict` an empty :obj:`list` is returned.
 
         Notes:
             If the key does no longer exist a :obj:`list` is returned instead
             of raising an error.
+
+        Args:
+            key: The key to pop.
 
         """
         return dict.pop(self, key, [])

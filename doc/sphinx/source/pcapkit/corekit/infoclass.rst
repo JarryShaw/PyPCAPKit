@@ -13,5 +13,8 @@ in :pep:`557`.
    :private-members:
    :show-inheritance:
 
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
    .. autoattribute:: __map__
    .. autoattribute:: __map_reverse__

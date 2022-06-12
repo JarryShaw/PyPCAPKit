@@ -38,10 +38,6 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
         accessing such renamed keys, the original key name should always be
         used, i.e., such renaming is totally transparent to the user.
 
-    Args:
-        *args: Arbitrary positional arguments.
-        **kwargs: Arbitrary keyword arguments.
-
     """
 
     #: Mapping of name conflicts with builtin methods (original names to

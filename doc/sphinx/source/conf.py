@@ -76,6 +76,7 @@ autodoc_default_options = {
 autodoc_typehints = 'description'
 #autodoc_member_order = 'bysource'
 #autodoc_member_order = 'alphabetic'
+autoclass_content = 'class'
 
 # Napoleon settings
 napoleon_google_docstring = True
@@ -92,7 +93,14 @@ napoleon_use_rtype = True
 napoleon_use_keyword = True
 napoleon_custom_sections = None
 
+manpages_url = 'https://linux.die.net/man/{section}/{page}'
+
 todo_include_todos = True
+
+set_type_checking_flag = True
+typehints_fully_qualified = False
+always_document_param_types = False
+typehints_document_rtype = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
