@@ -8,7 +8,7 @@ like class :class:`~pcapkit.corekit.version.VersionInfo`,
 which is originally designed alike :class:`sys.version_info`.
 
 .. autodata:: pcapkit.corekit.version.VersionInfo
-   :annotation:
+   :no-value:
 
    .. attribute:: major
       :type: int

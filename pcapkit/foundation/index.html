@@ -16,7 +16,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Analyser for Application Layer" href="analysis.html" />
+    <link rel="next" title="Extractor for PCAP Files" href="extraction.html" />
     <link rel="prev" title="Auxiliary Interface" href="../interface/misc.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -36,18 +36,20 @@
             
   <section id="module-pcapkit.foundation">
 <span id="library-foundation"></span><h1>Library Foundation<a class="headerlink" href="#module-pcapkit.foundation" title="Permalink to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> is a collection of fundations for
+<p><a class="reference internal" href="#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a> is a collection of foundations for
 <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, including PCAP file extraction tool
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Extrator</span></code>, application
-layer protocol analyser <code class="xref py py-class docutils literal notranslate"><span class="pre">Analysis</span></code>,
-and TCP flow tracer <code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code>.</p>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Extrator</span></code>, TCP flow tracer
+<code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code>, registry management
+APIs for <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, and TCP/IP reassembly implementations.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="analysis.html">Analyser for Application Layer</a></li>
-<li class="toctree-l1"><a class="reference internal" href="extraction.html">Extractor for PCAP Files</a></li>
+<li class="toctree-l1"><a class="reference internal" href="extraction.html">Extractor for PCAP Files</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="extraction.html#data-structures">Data Structures</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="traceflow.html">Trace TCP Flows</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="traceflow.html#data-structure">Data Structure</a></li>
-<li class="toctree-l2"><a class="reference internal" href="traceflow.html#implementation">Implementation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="traceflow.html#terminology">Terminology</a></li>
+<li class="toctree-l2"><a class="reference internal" href="traceflow.html#data-structures">Data Structures</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reassembly/index.html">Reassembly Packets &amp; Datagrams</a><ul>
@@ -56,6 +58,16 @@ and TCP flow tracer <code class="xref py py-class docutils literal notranslate">
 <li class="toctree-l2"><a class="reference internal" href="reassembly/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reassembly/ipv6.html">IPv6 Datagram Reassembly</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reassembly/tcp.html">TCP Datagram Reassembly</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="registry.html">Registry Management</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#auxiliary-methods">Auxiliary Methods</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#dumper-registries">Dumper Registries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#protocol-registries">Protocol Registries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#link-layer-registries">Link Layer Registries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#internet-layer-registries">Internet Layer Registries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#transport-layer-registries">Transport Layer Registries</a></li>
+<li class="toctree-l2"><a class="reference internal" href="registry.html#application-layer-registries">Application Layer Registries</a></li>
 </ul>
 </li>
 </ul>
@@ -90,10 +102,10 @@ and TCP flow tracer <code class="xref py py-class docutils literal notranslate">
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Library Foundation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="analysis.html">Analyser for Application Layer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="extraction.html">Extractor for PCAP Files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="traceflow.html">Trace TCP Flows</a></li>
 <li class="toctree-l3"><a class="reference internal" href="reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html">Registry Management</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
@@ -115,7 +127,7 @@ and TCP flow tracer <code class="xref py py-class docutils literal notranslate">
   <li><a href="../../index.html">Documentation overview</a><ul>
   <li><a href="../index.html">Module Documentation</a><ul>
       <li>Previous: <a href="../interface/misc.html" title="previous chapter">Auxiliary Interface</a></li>
-      <li>Next: <a href="analysis.html" title="next chapter">Analyser for Application Layer</a></li>
+      <li>Next: <a href="extraction.html" title="next chapter">Extractor for PCAP Files</a></li>
   </ul></li>
   </ul></li>
 </ul>

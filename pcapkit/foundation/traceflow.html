@@ -40,10 +40,11 @@
 TCP flows from a series of packets and connections.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This was implemented as the demand of my mate &#64;gousaiyang.</p>
+<p>This was implemented as the demand of my mate
+<a class="reference external" href="https://github.com/gousaiyang">&#64;gousaiyang</a></p>
 </div>
-<section id="data-structure">
-<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
+<section id="terminology">
+<h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this heading">¶</a></h2>
 <dl class="glossary">
 <dt id="term-trace.packet">trace.packet<a class="headerlink" href="#term-trace.packet" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>TCP flow tracing</strong>
 (<code class="xref py py-meth docutils literal notranslate"><span class="pre">dump()</span></code>)
@@ -62,14 +63,18 @@ is as following:</p>
 <span class="p">)</span>
 </pre></div>
 </div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.Packet</span></code></p>
+</div>
 </dd>
-<dt id="term-trace.buffer">trace.buffer<a class="headerlink" href="#term-trace.buffer" title="Permalink to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
+<dt id="term-trace.buffer">trace.buffer<a class="headerlink" href="#term-trace.buffer" title="Permalink to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing flow tracing algorithms
 (<code class="xref py py-attr docutils literal notranslate"><span class="pre">_buffer</span></code>) is as following:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(dict) buffer --&gt; memory buffer for reassembly
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(dict) buffer --&gt; memory buffer for reassembly
  |--&gt; (tuple) BUFID : (dict)
  |       |--&gt; ip.src      |
- |       |--&gt; ip.dst      |
  |       |--&gt; tcp.srcport |
+ |       |--&gt; ip.dst      |
  |       |--&gt; tcp.dstport |
  |                        |--&gt; &#39;fpout&#39; : (dictdumper.dumper.Dumper) output dumper object
  |                        |--&gt; &#39;index&#39;: (list) list of frame index
@@ -78,11 +83,15 @@ is as following:</p>
  |--&gt; (tuple) BUFID ...
 </pre></div>
 </div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.Buffer</span></code></p>
+</div>
 </dd>
 <dt id="term-trace.index">trace.index<a class="headerlink" href="#term-trace.index" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>TCP flow tracing</strong> (element from
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">index</span></code> <em>tuple</em>)
 is as following:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>(tuple) index
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) index
  |--&gt; (Info) data
  |     |--&gt; &#39;fpout&#39; : (Optional[str]) output filename if exists
  |     |--&gt; &#39;index&#39;: (tuple) tuple of frame index
@@ -91,11 +100,22 @@ is as following:</p>
  |--&gt; (Info) data ...
 </pre></div>
 </div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.traceflow.Index</span></code></p>
+</div>
 </dd>
 </dl>
 </section>
-<section id="implementation">
-<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this heading">¶</a></h2>
+<section id="data-structures">
+<h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading">¶</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.foundation.traceflow.BufferID">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.traceflow.</span></span><span class="sig-name descname"><span class="pre">BufferID</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">IPAddress</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.traceflow.BufferID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Buffer ID is a tuple of source IP, source port, destination IP, and
+destination port.</p>
+</dd></dl>
+
 </section>
 </section>
 
@@ -127,10 +147,10 @@ is as following:</p>
 <li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html">Library Foundation</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="analysis.html">Analyser for Application Layer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="extraction.html">Extractor for PCAP Files</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Trace TCP Flows</a></li>
 <li class="toctree-l3"><a class="reference internal" href="reassembly/index.html">Reassembly Packets &amp; Datagrams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="registry.html">Registry Management</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../protocols/index.html">Protocol Family</a></li>
