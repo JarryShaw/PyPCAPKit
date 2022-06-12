@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""registry management
+"""Registry Management
+=========================
 
 This module provides the registry management for :mod:`pcapkit`, as the module
 contains various registry points.
@@ -61,19 +62,19 @@ __all__ = [
 ]
 
 ###############################################################################
-# pcapkit.protocols.__proto__
+# pcapkit.protocols.Protocol.__proto__
 ###############################################################################
 
 
 def register_protocol(protocol: 'Type[Protocol]') -> 'None':
     """registered protocol class.
 
-    Args:
-        protocol: Protocol class.
-
     The protocol class must be a subclass of
     :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to
-    the :data:`pcapkit.protocols.__proto__` registry.
+    the :data:`pcapkit.protocols.Protocol.__proto__` registry.
+
+    Args:
+        protocol: Protocol class.
 
     """
     if not issubclass(protocol, Protocol):
@@ -89,13 +90,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 
 
 def register_extractor(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
-    """registered a new dumper class.
-
-    Arguments:
-        format: format name
-        module: module name
-        class_: class name
-        ext: file extension
+    r"""registered a new dumper class.
 
     Notes:
         The full qualified class name of the new dumper class
@@ -103,6 +98,12 @@ def register_extractor(format: 'str', module: 'str', class_: 'str', ext: 'str') 
 
     The function will register the given dumper class to the
     :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.
+
+    Arguments:
+        format: format name
+        module: module name
+        class\_: class name
+        ext: file extension
 
     """
     dumper = getattr(importlib.import_module(module), class_)
@@ -119,13 +120,7 @@ def register_extractor(format: 'str', module: 'str', class_: 'str', ext: 'str') 
 
 
 def register_traceflow(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
-    """registered a new dumper class.
-
-    Arguments:
-        format: format name
-        module: module name
-        class_: class name
-        ext: file extension
+    r"""registered a new dumper class.
 
     Notes:
         The full qualified class name of the new dumper class
@@ -133,6 +128,12 @@ def register_traceflow(format: 'str', module: 'str', class_: 'str', ext: 'str') 
 
     The function will register the given dumper class to the
     :data:`pcapkit.foundation.traceflow.TraceFlow.__output__` registry.
+
+    Arguments:
+        format: format name
+        module: module name
+        class\_: class name
+        ext: file extension
 
     """
     dumper = getattr(importlib.import_module(module), class_)
@@ -151,12 +152,13 @@ def register_traceflow(format: 'str', module: 'str', class_: 'str', ext: 'str') 
 def register_http(code: 'HTTP_Frame', meth: 'str | HTTP_FrameParser') -> 'None':
     """registered a frame parser.
 
-    Args:
-        code: HTTP frame type code.
-        meth: Method name or callable to parse the frame.
-
     The function will register the given frame parser to the
     :data:`pcapkit.protocols.application.httpv2.HTTPv2.__frame__` registry.
+
+    Args:
+        code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTPv2>` frame type
+            code as in :class:`~pcapkit.const.http.frame.Frame`.
+        meth: Method name or callable to parse the frame.
 
     """
     if isinstance(meth, str) and not hasattr(HTTPv2, f'_read_http_{meth}'):
@@ -174,12 +176,13 @@ def register_http(code: 'HTTP_Frame', meth: 'str | HTTP_FrameParser') -> 'None':
 def register_hopopt(code: 'IPv6_Option', meth: 'str | HOPOPT_OptionParser') -> 'None':
     """Register an option parser.
 
-    Args:
-        code: HOPOPT option code.
-        meth: Method name or callable to parse the option.
-
     The function will register the given option parser to the
     :data:`pcapkit.protocols.internet.hopopt.HOPOPT.__option__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` option code as
+            in :class:`~pcapkit.const.ipv6.option.Option`.
+        meth: Method name or callable to parse the option.
 
     """
     if isinstance(meth, str) and not hasattr(HOPOPT, f'_read_opt_{meth}'):
@@ -195,12 +198,7 @@ def register_hopopt(code: 'IPv6_Option', meth: 'str | HOPOPT_OptionParser') -> '
 
 
 def register_transtype(code: 'TransType', module: str, class_: str) -> 'None':
-    """Register a new protocol class.
-
-    Arguments:
-        code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
-        module: module name
-        class_: class name
+    r"""Register a new protocol class.
 
     Notes:
         The full qualified class name of the new protocol class
@@ -208,6 +206,11 @@ def register_transtype(code: 'TransType', module: str, class_: str) -> 'None':
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.internet.internet.Internet.__proto__` registry.
+
+    Arguments:
+        code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
+        module: module name
+        class\_: class name
 
     """
     protocol = getattr(importlib.import_module(module), class_)
@@ -229,12 +232,13 @@ def register_transtype(code: 'TransType', module: str, class_: str) -> 'None':
 def register_ipv6_opts(code: 'IPv6_Option', meth: 'str | IPv6_Opts_OptionParser') -> 'None':
     """Register an option parser.
 
-    Args:
-        code: IPv6-Opts option code.
-        meth: Method name or callable to parse the option.
-
     The function will register the given option parser to the
     :data:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__` registry.
+
+    Args:
+        code: :class:`IPv6-Opts <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts>`
+            option code as in :class:`~pcapkit.const.ipv6.option.Option`.
+        meth: Method name or callable to parse the option.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Opts, f'_read_opt_{meth}'):
@@ -250,14 +254,15 @@ def register_ipv6_opts(code: 'IPv6_Option', meth: 'str | IPv6_Opts_OptionParser'
 
 
 def register_ipv6_route(code: 'IPv6_Routing', meth: 'str | IPv6_Route_TypeParser') -> 'None':
-    """Register an routing data parser.
-
-    Args:
-        code: IPv6-Route data type code.
-        meth: Method name or callable to parse the data.
+    r"""Register an routing data parser.
 
     The function will register the given routing data parser to the
     :data:`pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__` registry.
+
+    Args:
+        code: :class:`IPv6-Route <pcapkit.protocols.internet.ipv6_route.IPv6_Route>`
+            data type code as in :class:`~pcapkit.const.ipv6.routing.Routing`.
+        meth: Method name or callable to parse the data.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Route, f'_read_data_type_{meth}'):
@@ -273,12 +278,7 @@ def register_ipv6_route(code: 'IPv6_Routing', meth: 'str | IPv6_Route_TypeParser
 
 
 def register_ethertype(code: 'EtherType', module: str, class_: str) -> 'None':
-    """Register a new protocol class.
-
-    Arguments:
-        code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
-        module: module name
-        class_: class name
+    r"""Register a new protocol class.
 
     Notes:
         The full qualified class name of the new protocol class
@@ -286,6 +286,11 @@ def register_ethertype(code: 'EtherType', module: str, class_: str) -> 'None':
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.link.link.Link.__proto__` registry.
+
+    Arguments:
+        code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`
+        module: module name
+        class\_: class name
 
     """
     protocol = getattr(importlib.import_module(module), class_)
@@ -305,12 +310,7 @@ def register_ethertype(code: 'EtherType', module: str, class_: str) -> 'None':
 
 
 def register_pcap(code: 'LinkType', module: str, class_: str) -> 'None':
-    """Register a new protocol class.
-
-    Arguments:
-        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name
-        class_: class name
+    r"""Register a new protocol class.
 
     Notes:
         The full qualified class name of the new protocol class
@@ -318,6 +318,11 @@ def register_pcap(code: 'LinkType', module: str, class_: str) -> 'None':
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__` registry.
+
+    Arguments:
+        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
+        module: module name
+        class\_: class name
 
     """
     protocol = getattr(importlib.import_module(module), class_)
@@ -339,12 +344,13 @@ def register_pcap(code: 'LinkType', module: str, class_: str) -> 'None':
 def register_tcp(code: 'TCP_Option', meth: 'str | TCP_OptionParser') -> 'None':
     """Register an option parser.
 
-    Args:
-        code: TCP option code.
-        meth: Method name or callable to parse the option.
-
     The function will register the given option parser to the
     :data:`pcapkit.protocols.transport.tcp.TCP.__option__` registry.
+
+    Args:
+        code: :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in
+            :class:`~pcapkit.const.tcp.option.Option`.
+        meth: Method name or callable to parse the option.
 
     """
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mode_{meth}'):
@@ -362,12 +368,13 @@ def register_tcp(code: 'TCP_Option', meth: 'str | TCP_OptionParser') -> 'None':
 def register_mptcp(code: 'TCP_MPTCPOption', meth: 'str | TCP_MPOptionParser') -> 'None':
     """Register an MPTCP option parser.
 
-    Args:
-        code: MPTCP option code.
-        meth: Method name or callable to parse the option.
-
     The function will register the given option parser to the
     :data:`pcapkit.protocols.transport.tcp.TCP.__mp_option__` registry.
+
+    Args:
+        code: Multipath :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in
+            :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
+        meth: Method name or callable to parse the option.
 
     """
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mptcp_{meth}'):
@@ -383,12 +390,7 @@ def register_mptcp(code: 'TCP_MPTCPOption', meth: 'str | TCP_MPOptionParser') ->
 
 
 def register_tcp_port(code: 'int', module: str, class_: str) -> 'None':
-    """Register a new protocol class.
-
-    Arguments:
-        code: port number
-        module: module name
-        class_: class name
+    r"""Register a new protocol class.
 
     Notes:
         The full qualified class name of the new protocol class
@@ -396,6 +398,11 @@ def register_tcp_port(code: 'int', module: str, class_: str) -> 'None':
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` registry.
+
+    Arguments:
+        code: port number
+        module: module name
+        class\_: class name
 
     """
     protocol = getattr(importlib.import_module(module), class_)
@@ -410,17 +417,12 @@ def register_tcp_port(code: 'int', module: str, class_: str) -> 'None':
 
 
 ###############################################################################
-# pcapkit.protocols.transport.tcp.UDP.__proto__
+# pcapkit.protocols.transport.udp.UDP.__proto__
 ###############################################################################
 
 
 def register_udp_port(code: 'int', module: str, class_: str) -> 'None':
-    """Register a new protocol class.
-
-    Arguments:
-        code: port number
-        module: module name
-        class_: class name
+    r"""Register a new protocol class.
 
     Notes:
         The full qualified class name of the new protocol class
@@ -428,6 +430,11 @@ def register_udp_port(code: 'int', module: str, class_: str) -> 'None':
 
     The function will register the given protocol class to the
     :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.
+
+    Arguments:
+        code: port number
+        module: module name
+        class\_: class name
 
     """
     protocol = getattr(importlib.import_module(module), class_)
@@ -447,13 +454,7 @@ def register_udp_port(code: 'int', module: str, class_: str) -> 'None':
 
 
 def register_output(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
-    """registered a new dumper class.
-
-    Arguments:
-        format: format name
-        module: module name
-        class_: class name
-        ext: file extension
+    r"""registered a new dumper class.
 
     Notes:
         The full qualified class name of the new dumper class
@@ -467,6 +468,12 @@ def register_output(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 
         * :func:`pcapkit.foundation.registry.register_extractor`
         * :func:`pcapkit.foundation.registry.register_traceflow`
 
+    Arguments:
+        format: format name
+        module: module name
+        class\_: class name
+        ext: file extension
+
     """
     dumper = getattr(importlib.import_module(module), class_)
     if not issubclass(dumper, Dumper):
@@ -478,12 +485,7 @@ def register_output(format: 'str', module: 'str', class_: 'str', ext: 'str') -> 
 
 
 def register_linktype(code: 'LinkType', module: str, class_: str) -> 'None':
-    """Register a new protocol class.
-
-    Arguments:
-        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-        module: module name
-        class_: class name
+    r"""Register a new protocol class.
 
     Notes:
         The full qualified class name of the new protocol class
@@ -494,6 +496,11 @@ def register_linktype(code: 'LinkType', module: str, class_: str) -> 'None':
 
     See Also:
         * :func:`pcapkit.foundation.registry.register_pcap`
+
+    Arguments:
+        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
+        module: module name
+        class\_: class name
 
     """
     protocol = getattr(importlib.import_module(module), class_)
@@ -508,13 +515,7 @@ def register_linktype(code: 'LinkType', module: str, class_: str) -> 'None':
 
 
 def register_port(proto: 'Literal["tcp", "udp"]', code: 'int', module: str, class_: str) -> 'None':
-    """Register a new protocol class.
-
-    Arguments:
-        proto: protocol name (must be ``tcp`` or ``udp``)
-        code: port number
-        module: module name
-        class_: class name
+    r"""Register a new protocol class.
 
     Notes:
         The full qualified class name of the new protocol class
@@ -527,6 +528,12 @@ def register_port(proto: 'Literal["tcp", "udp"]', code: 'int', module: str, clas
     See Also:
         * :func:`pcapkit.foundation.registry.register_tcp_port`
         * :func:`pcapkit.foundation.registry.register_udp_port`
+
+    Arguments:
+        proto: protocol name (must be ``tcp`` or ``udp``)
+        code: port number
+        module: module name
+        class\_: class name
 
     """
     if proto == 'tcp':

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import, unused-wildcard-import
-"""library foundation
+"""Library Foundation
+========================
 
-:mod:`pcapkit.foundation` is a collection of fundations for
+:mod:`pcapkit.foundation` is a collection of foundations for
 :mod:`pcapkit`, including PCAP file extraction tool
-:class:`~pcapkit.foundation.extraction.Extrator` and TCP flow
-tracer :class:`~pcapkit.foundation.tractflow.TraceFlow`, as
-well as the reassembly algorithm implementations.
+:class:`~pcapkit.foundation.extraction.Extrator`, TCP flow tracer
+:class:`~pcapkit.foundation.tractflow.TraceFlow`, registry management
+APIs for :mod:`pcapkit`, and TCP/IP reassembly implementations.
 
 """
 from pcapkit.foundation.extraction import Extractor

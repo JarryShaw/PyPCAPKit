@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-outside-toplevel
-"""trace TCP flows
+"""Trace TCP Flows
+=====================
 
 :mod:`pcapkit.foundation.traceflow` is the interface to trace
 TCP flows from a series of packets and connections.
@@ -9,68 +10,6 @@ TCP flows from a series of packets and connections.
 
    This was implemented as the demand of my mate
    `@gousaiyang <https://github.com/gousaiyang>`__.
-
-Glossary
---------
-
-trace.packet
-    Data structure for **TCP flow tracing**
-    (:meth:`~pcapkit.foundation.traceflow.TraceFlow.dump`)
-    is as following:
-
-    .. code-block:: python
-
-       tract_dict = dict(
-           protocol=data_link,                     # data link type from global header
-           index=frame.info.number,                # frame number
-           frame=frame.info,                       # extracted frame info
-           syn=tcp.flags.syn,                      # TCP synchronise (SYN) flag
-           fin=tcp.flags.fin,                      # TCP finish (FIN) flag
-           src=ip.src,                             # source IP
-           dst=ip.dst,                             # destination IP
-           srcport=tcp.srcport,                    # TCP source port
-           dstport=tcp.dstport,                    # TCP destination port
-           timestamp=frame.info.time_epoch,        # frame timestamp
-       )
-
-    .. seealso:: :class:`pcapkit.foundation.traceflow.Packet`
-
-trace.buffer
-    Data structure for internal buffering when performing flow tracing algorithms
-    (:attr:`~pcapkit.foundation.traceflow.TraceFlow._buffer`) is as following:
-
-    .. code-block:: text
-
-       (dict) buffer --> memory buffer for reassembly
-        |--> (tuple) BUFID : (dict)
-        |       |--> ip.src      |
-        |       |--> tcp.srcport |
-        |       |--> ip.dst      |
-        |       |--> tcp.dstport |
-        |                        |--> 'fpout' : (dictdumper.dumper.Dumper) output dumper object
-        |                        |--> 'index': (list) list of frame index
-        |                        |              |--> (int) frame index
-        |                        |--> 'label': (str) flow label generated from ``BUFID``
-        |--> (tuple) BUFID ...
-
-    .. seealso:: :class:`pcapkit.foundation.traceflow.Buffer`
-
-trace.index
-    Data structure for **TCP flow tracing** (element from
-    :attr:`~pcapkit.foundation.traceflow.TraceFlow.index` *tuple*)
-    is as following:
-
-    .. code-block:: text
-
-       (tuple) index
-        |--> (Info) data
-        |     |--> 'fpout' : (Optional[str]) output filename if exists
-        |     |--> 'index': (tuple) tuple of frame index
-        |     |              |--> (int) frame index
-        |     |--> 'label': (str) flow label generated from ``BUFID``
-        |--> (Info) data ...
-
-    .. seealso:: :class:`pcapkit.foundation.traceflow.Index`
 
 """
 import collections
@@ -81,7 +20,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from pcapkit.corekit.infoclass import Info
 from pcapkit.utilities.exceptions import FileExists, stacklevel
-from pcapkit.utilities.logging import logger
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING, logger
 from pcapkit.utilities.warnings import FileWarning, FormatWarning, warn
 
 if TYPE_CHECKING:
@@ -135,7 +74,7 @@ class Packet(Info, Generic[IPAddress]):
     #: Frame timestamp.
     timestamp: 'float'
 
-    if TYPE_CHECKING:
+    if SPHINX_TYPE_CHECKING:
         def __init__(self, protocol: 'RegType_LinkType', index: 'int', frame: 'DataType_Frame | dict[str, Any]', syn: 'bool', fin: 'bool', src: 'IPAddress', dst: 'IPAddress', srcport: 'int', dstport: 'int', timestamp: 'float') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
@@ -155,7 +94,7 @@ class Buffer(Info):
     #: Flow label generated from ``BUFID``.
     label: 'str'
 
-    if TYPE_CHECKING:
+    if SPHINX_TYPE_CHECKING:
         def __init__(self, fpout: 'Dumper', index: 'list[int]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
@@ -176,7 +115,7 @@ class Index(Info):
     #: Flow label generated from ``BUFID``.
     label: 'str'
 
-    if TYPE_CHECKING:
+    if SPHINX_TYPE_CHECKING:
         def __init__(self, fpout: 'Optional[str]', index: 'tuple[int, ...]', label: 'str') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
 
 
@@ -186,7 +125,15 @@ class Index(Info):
 
 
 class TraceFlow:
-    """Trace TCP flows."""
+    """Trace TCP flows.
+
+    Arguments:
+        fout: output path
+        format: output format
+        byteorder: output file byte order
+        nanosecond: output nanosecond-resolution file flag
+
+    """
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
@@ -229,17 +176,17 @@ class TraceFlow:
 
     @classmethod
     def register(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
-        """Register a new dumper class.
-
-        Arguments:
-            format: format name
-            module: module name
-            class_: class name
-            ext: file extension
+        r"""Register a new dumper class.
 
         Notes:
             The full qualified class name of the new dumper class
             should be as ``{module}.{class_}``.
+
+        Arguments:
+            format: format name
+            module: module name
+            class\_: class name
+            ext: file extension
 
         """
         cls.__output__[format] = (module, class_, ext)
@@ -312,7 +259,7 @@ class TraceFlow:
                     )
                 return super().object_hook(o)  # type: ignore[unreachable]
 
-            def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=no-self-use,unused-argument
+            def default(self, o: 'Any') -> 'Literal["fallback"]':  # pylint: disable=unused-argument
                 """Check content type for function call."""
                 return 'fallback'
 
@@ -451,15 +398,6 @@ class TraceFlow:
     def __init__(self, fout: 'Optional[str]', format: 'Optional[str]',  # pylint: disable=redefined-builtin
                  byteorder: 'Literal["little", "big"]' = sys.byteorder,
                  nanosecond: bool = False) -> 'None':
-        """Initialise instance.
-
-        Arguments:
-            fout: output path
-            format: output format
-            byteorder: output file byte order
-            nanosecond: output nanosecond-resolution file flag
-
-        """
         if fout is None:
             fout = './tmp'
         if format is None:

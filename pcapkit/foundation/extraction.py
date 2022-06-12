@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=import-outside-toplevel,fixme
-"""extractor for PCAP files
+"""Extractor for PCAP Files
+==============================
 
 :mod:`pcapkit.foundation.extraction` contains
 :class:`~pcapkit.foundation.extraction.Extractor` only,
@@ -23,7 +24,7 @@ from pcapkit.protocols.misc.pcap.frame import Frame
 from pcapkit.protocols.misc.pcap.header import Header
 from pcapkit.utilities.exceptions import (CallableError, FileNotFound, FormatError, IterableError,
                                           UnsupportedCall, stacklevel)
-from pcapkit.utilities.logging import logger
+from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING, logger
 from pcapkit.utilities.warnings import (AttributeWarning, DPKTWarning, EngineWarning, FormatWarning,
                                         warn)
 
@@ -67,23 +68,53 @@ class ReassemblyData(Info):
     #: TCP reassembled data.
     tcp: 'Optional[tuple[TCP_Datagram, ...]]'
 
-    if TYPE_CHECKING:
+    if SPHINX_TYPE_CHECKING:
         def __init__(self, ipv4: 'Optional[tuple[IP_Datagram, ...]]', ipv6: 'Optional[tuple[IP_Datagram, ...]]', tcp: 'Optional[tuple[TCP_Datagram, ...]]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
 class Extractor:
     """Extractor for PCAP files.
 
-    For supported engines, please refer to corresponding driver method for more information:
+    Notes:
+        For supported engines, please refer to
+        :meth:`~pcapkit.foundation.extraction.Extractor.run`.
 
-    * Default drivers:
+    Arguments:
+        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
+        fout: file name to be written
+        format: file format of output
 
-      * Global header: :meth:`~pcapkit.foundation.extraction.Extractor.record_header`
-      * Packet frames: :meth:`~pcapkit.foundation.extraction.Extractor.record_frames`
+        auto: if automatically run till EOF
+        extension: if check and append extensions to output file
+        store: if store extracted packet info
 
-    * DPKT driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_dpkt`
-    * Scapy driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_scapy`
-    * PyShark driver: :meth:`~pcapkit.foundation.extraction.Extractor._run_pyshark`
+        files: if split each frame into different files
+        nofile: if no output file is to be dumped
+        verbose: a :obj:`bool` value or a function takes the :class:`Extract`
+            instance and current parsed frame (depends on engine selected) as
+            parameters to print verbose output information
+
+        engine: extraction engine to be used
+        layer: extract til which layer
+        protocol: extract til which protocol
+
+        ip: if record data for IPv4 & IPv6 reassembly
+        ipv4: if perform IPv4 reassembly
+        ipv6: if perform IPv6 reassembly
+        tcp: if perform TCP reassembly
+        strict: if set strict flag for reassembly
+
+        trace: if trace TCP traffic flows
+        trace_fout: path name for flow tracer if necessary
+        trace_format: output file format of flow tracer
+        trace_byteorder: output file byte order
+        trace_nanosecond: output nanosecond-resolution file flag
+
+    Warns:
+        FormatWarning: Warns under following circumstances:
+
+            * If using PCAP output for TCP flow tracing while the extraction engine is PyShark.
+            * If output file format is not supported.
 
     """
     #: Input file name.
@@ -287,17 +318,17 @@ class Extractor:
 
     @classmethod
     def register(cls, format: 'str', module: 'str', class_: 'str', ext: 'str') -> 'None':  # pylint: disable=redefined-builtin
-        """Register a new dumper class.
-
-        Arguments:
-            format: format name
-            module: module name
-            class_: class name
-            ext: file extension
+        r"""Register a new dumper class.
 
         Notes:
             The full qualified class name of the new dumper class
             should be as ``{module}.{class_}``.
+
+        Arguments:
+            format: format name
+            module: module name
+            class\_: class name
+            ext: file extension
 
         """
         cls.__output__[format] = (module, class_, ext)
@@ -512,46 +543,6 @@ class Extractor:
                  ip: 'bool' = False, ipv4: 'bool' = False, ipv6: 'bool' = False, tcp: 'bool' = False, strict: 'bool' = True,    # reassembly settings # pylint: disable=line-too-long
                  trace: 'bool' = False, trace_fout: 'Optional[str]' = None, trace_format: 'Optional[Formats]' = None,           # trace settings # pylint: disable=line-too-long
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'None':      # trace settings # pylint: disable=line-too-long
-        """Initialise PCAP Reader.
-
-        Arguments:
-            fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
-            fout: file name to be written
-            format: file format of output
-
-            auto: if automatically run till EOF
-            extension: if check and append extensions to output file
-            store: if store extracted packet info
-
-            files: if split each frame into different files
-            nofile: if no output file is to be dumped
-            verbose: a :obj:`bool` value or a function takes the :class:`Extract`
-                instance and current parsed frame (depends on engine selected) as
-                parameters to print verbose output information
-
-            engine: extraction engine to be used
-            layer: extract til which layer
-            protocol: extract til which protocol
-
-            ip: if record data for IPv4 & IPv6 reassembly
-            ipv4: if perform IPv4 reassembly
-            ipv6: if perform IPv6 reassembly
-            tcp: if perform TCP reassembly
-            strict: if set strict flag for reassembly
-
-            trace: if trace TCP traffic flows
-            trace_fout: path name for flow tracer if necessary
-            trace_format: output file format of flow tracer
-            trace_byteorder: output file byte order
-            trace_nanosecond: output nanosecond-resolution file flag
-
-        Warns:
-            FormatWarning: Warns under following circumstances:
-
-                * If using PCAP output for TCP flow tracing while the extraction engine is PyShark.
-                * If output file format is not supported.
-
-        """
         if fin is None:
             fin = 'in.pcap'
         if fout is None:
