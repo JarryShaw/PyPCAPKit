@@ -1,6 +1,8 @@
 Trace TCP Flows
 ===============
 
+.. module:: pcapkit.foundation.traceflow
+
 :mod:`pcapkit.foundation.traceflow` is the interface to trace
 TCP flows from a series of packets and connections.
 
@@ -30,6 +32,7 @@ TCP flows from a series of packets and connections.
 
    .. autoattribute:: __output__
       :no-value:
+   .. autoattribute:: _buffer
 
 Terminology
 -----------
@@ -38,7 +41,7 @@ Terminology
 
    trace.packet
        Data structure for **TCP flow tracing**
-       (:meth:`~pcapkit.foundation.traceflow.TraceFlow.dump`)
+       (:meth:`TraceFlow.dump <pcapkit.foundation.traceflow.TraceFlow.dump>`)
        is as following:
 
        .. code-block:: python
@@ -60,7 +63,8 @@ Terminology
 
    trace.buffer
        Data structure for internal buffering when performing flow tracing algorithms
-       (:attr:`~pcapkit.foundation.traceflow.TraceFlow._buffer`) is as following:
+       (:attr:`TraceFlow._buffer <pcapkit.foundation.traceflow.TraceFlow._buffer>`)
+       is as following:
 
        .. code-block:: text
 
@@ -80,8 +84,8 @@ Terminology
 
    trace.index
        Data structure for **TCP flow tracing** (element from
-       :attr:`~pcapkit.foundation.traceflow.TraceFlow.index` *tuple*)
-       is as following:
+       :attr:`TraceFlow.index <pcapkit.foundation.traceflow.TraceFlow.index>`
+       *tuple*) is as following:
 
        .. code-block:: text
 
@@ -104,20 +108,12 @@ Data Structures
    Buffer ID is a tuple of source IP, source port, destination IP, and
    destination port.
 
-.. autoclass:: pcapkit.foundation.traceflow.Packet
+.. autoclass:: pcapkit.foundation.traceflow.Packet(protocol, index, frame, syn, fin, src, dst, srcport, dstport, timestamp)
    :no-members:
    :show-inheritance:
 
-   :param protocol: Data link type from global header.
-   :param index: Frame number.
-   :param frame: Extracted frame info.
-   :param syn: TCP synchronise (SYN) flag.
-   :param fin: TCP finish (FIN) flag.
-   :param src: Source IP.
-   :param dst: Destination IP.
-   :param srcport: TCP source port.
-   :param dstport: TCP destination port.
-   :param timestamp: Frame timestamp.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. autoattribute:: protocol
    .. autoattribute:: index
@@ -130,25 +126,23 @@ Data Structures
    .. autoattribute:: dstport
    .. autoattribute:: timestamp
 
-.. autoclass:: pcapkit.foundation.traceflow.Buffer
+.. autoclass:: pcapkit.foundation.traceflow.Buffer(fpout, index, label)
    :no-members:
    :show-inheritance:
 
-   :param fpout: Output dumper object.
-   :param index: List of frame index.
-   :param label: Flow label generated from ``BUFID``.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. autoattribute:: fpout
    .. autoattribute:: index
    .. autoattribute:: label
 
-.. autoclass:: pcapkit.foundation.traceflow.Index
+.. autoclass:: pcapkit.foundation.traceflow.Index(fpout, index, label)
    :no-members:
    :show-inheritance:
 
-   :param fpout: Output filename if exists.
-   :param index: Tuple of frame index.
-   :param label: Flow label generated from ``BUFID``.
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. autoattribute:: fpout
    .. autoattribute:: index

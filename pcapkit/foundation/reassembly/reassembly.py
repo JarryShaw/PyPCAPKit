@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-"""fragmented packets reassembly
+"""Base Class
+================
 
 :mod:`pcapkit.foundation.reassembly.reassembly` contains
-class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` only,
 which is an abstract base class for all reassembly classes,
-bases on algorithms described in :rfc:`815`, implements
-datagram reassembly of IP and TCP packets.
+bases on algorithms described in :rfc:`791` and :rfc:`815`,
+implements datagram reassembly of IP and TCP packets.
 
 """
 import abc
@@ -30,7 +31,13 @@ BT = TypeVar('BT', bound='Info')
 
 
 class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
-    """Base class for reassembly procedure."""
+    """Base class for reassembly procedure.
+
+    Args:
+        strict: if return all datagrams (including those not
+            implemented) when submit
+
+    """
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
@@ -93,6 +100,7 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
 
         Arguments:
             buf: buffer dict of reassembled packets
+            **kwargs: arbitrary keyword arguments
 
         """
 
@@ -177,11 +185,11 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
                 implemented) when submit
 
         """
-        #: bool: strict mode flag
+        #: bool: Strict mode flag.
         self._strflg = strict
-        #: dict[IT, BT]: dict buffer field
+        #: dict[IT, BT]: Dict buffer field.
         self._buffer = {}  # type: dict[IT, BT]
-        #: list[DT]: list reassembled datagram
+        #: list[DT]: List reassembled datagram.
         self._dtgram = []  # type: list[DT]
 
     def __call__(self, packet: 'PT') -> 'None':

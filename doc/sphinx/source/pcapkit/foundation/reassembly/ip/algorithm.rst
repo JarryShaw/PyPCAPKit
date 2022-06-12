@@ -1,17 +1,9 @@
-IP Datagram Reassembly
-======================
+Algorithm
+=========
 
-:mod:`pcapkit.foundation.reassembly.ip` contains
-:class:`~pcapkit.foundation.reassembly.ip.IP_Reassembly`
-only, which reconstructs fragmented IP packets back to
-origin. The following algorithm implement is based on IP
-reassembly procedure introduced in :rfc:`791`, using
-``RCVBT`` (fragment receivedbit table). Though another
-algorithm is explained in :rfc:`815`, replacing ``RCVBT``,
-however, this implement still used the elder one.
+.. seealso::
 
-Notation
---------
+   The algorithm is described in :rfc:`791`.
 
 +-----------+-----------------------------+
 | ``FO``    | Fragment Offset             |
@@ -34,9 +26,6 @@ Notation
 +-----------+-----------------------------+
 | ``TLB``   | Timer Lower Bound           |
 +-----------+-----------------------------+
-
-Algorithm
----------
 
 .. code-block:: text
 
@@ -83,12 +72,3 @@ Algorithm
       flush all reassembly with this BUFID;
       DONE.
    }
-
-Implementation
---------------
-
-.. automodule:: pcapkit.foundation.reassembly.ip
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:

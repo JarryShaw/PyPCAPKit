@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
-"""reassembly packets and datagrams
+"""Fragmented Packets Reassembly
+===================================
 
 :mod:`pcapkit.reassembly` bases on algorithms described
-in :rfc:`815`, implements datagram reassembly of IP and
-TCP packets.
+in :rfc:`791` and :rfc:`815`, implements datagram reassembly
+of IP and TCP packets.
 
 """
 # Base Class for Reassembly
