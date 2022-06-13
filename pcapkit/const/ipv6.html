@@ -35,38 +35,1162 @@
           <div class="body" role="main">
             
   <section id="module-pcapkit.const.ipv6">
-<span id="ipv6-constant-enumerations"></span><h1><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.ipv6" title="Permalink to this heading">¶</a></h1>
+<span id="ipv6-constant-enumerations"></span><h1><a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.ipv6" title="Permalink to this heading">¶</a></h1>
 <p>This module contains all constant enumerations of
-<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code> implementations. Available
+<a class="reference internal" href="../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> implementations. Available
 enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Extension_Header</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Extension_Header</span></code></a></p></td>
 <td><p>IPv6 Extension Header Types <a class="footnote-reference brackets" href="#id6" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Option</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Option</span></code></a></p></td>
 <td><p>Destination Options and Hop-by-Hop Options <a class="footnote-reference brackets" href="#id7" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_QSFunction</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.ipv6.qs_function.QSFunction" title="pcapkit.const.ipv6.qs_function.QSFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_QSFunction</span></code></a></p></td>
 <td><p>IPv6 QS Functions</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_RouterAlert</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.ipv6.router_alert.RouterAlert" title="pcapkit.const.ipv6.router_alert.RouterAlert"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_RouterAlert</span></code></a></p></td>
 <td><p>IPv6 Router Alert Option Values <a class="footnote-reference brackets" href="#id8" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>‡<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Routing</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Routing</span></code></a></p></td>
 <td><p>Routing Types <a class="footnote-reference brackets" href="#id9" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>§<span class="fn-bracket">]</span></a></p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_SeedID</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.ipv6.seed_id.SeedID" title="pcapkit.const.ipv6.seed_id.SeedID"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_SeedID</span></code></a></p></td>
 <td><p>Seed-ID Types</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_SMFDPDMode</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode" title="pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_SMFDPDMode</span></code></a></p></td>
 <td><p>Simplified Multicast Forwarding Duplicate Packet Detection (<code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code>) Options</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_TaggerID</span></code></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#pcapkit.const.ipv6.tagger_id.TaggerID" title="pcapkit.const.ipv6.tagger_id.TaggerID"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_TaggerID</span></code></a></p></td>
 <td><p>Tagger-ID Types <a class="footnote-reference brackets" href="#id10" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>¶<span class="fn-bracket">]</span></a></p></td>
 </tr>
 </tbody>
 </table>
+<span class="target" id="module-pcapkit.const.ipv6.extension_header"></span><section id="ipv6-extension-header-types">
+<h2>IPv6 Extension Header Types<a class="headerlink" href="#ipv6-extension-header-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>IPv6 Extension Header Types</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ipv6.extension_header.ExtensionHeader</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipv6.extension_header.</span></span><span class="sig-name descname"><span class="pre">ExtensionHeader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/extension_header.html#ExtensionHeader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[ExtensionHeader] IPv6 Extension Header Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT">
+<span class="sig-name descname"><span class="pre">HOPOPT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.HOPOPT" title="Permalink to this definition">¶</a></dt>
+<dd><p>HOPOPT, IPv6 Hop-by-Hop Option [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.IPv6_Route">
+<span class="sig-name descname"><span class="pre">IPv6_Route</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">43</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.IPv6_Route" title="Permalink to this definition">¶</a></dt>
+<dd><p>IPv6-Route, Routing Header for IPv6 [Steve Deering]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.IPv6_Frag">
+<span class="sig-name descname"><span class="pre">IPv6_Frag</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">44</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.IPv6_Frag" title="Permalink to this definition">¶</a></dt>
+<dd><p>IPv6-Frag, Fragment Header for IPv6 [Steve Deering]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.ESP">
+<span class="sig-name descname"><span class="pre">ESP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.ESP" title="Permalink to this definition">¶</a></dt>
+<dd><p>ESP, Encap Security Payload [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4303.html"><strong>RFC 4303</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.AH">
+<span class="sig-name descname"><span class="pre">AH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.AH" title="Permalink to this definition">¶</a></dt>
+<dd><p>AH, Authentication Header [<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.IPv6_Opts">
+<span class="sig-name descname"><span class="pre">IPv6_Opts</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.IPv6_Opts" title="Permalink to this definition">¶</a></dt>
+<dd><p>IPv6-Opts, Destination Options for IPv6 [<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html"><strong>RFC 8200</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.Mobility_Header">
+<span class="sig-name descname"><span class="pre">Mobility_Header</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">135</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.Mobility_Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mobility Header [<span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.HIP">
+<span class="sig-name descname"><span class="pre">HIP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">139</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.HIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>HIP, Host Identity Protocol [<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7401.html"><strong>RFC 7401</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6">
+<span class="sig-name descname"><span class="pre">Shim6</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">140</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Shim6, Shim6 Protocol [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5533.html"><strong>RFC 5533</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.Use_for_experimentation_and_testing_253">
+<span class="sig-name descname"><span class="pre">Use_for_experimentation_and_testing_253</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">253</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.Use_for_experimentation_and_testing_253" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use for experimentation and testing [<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.Use_for_experimentation_and_testing_254">
+<span class="sig-name descname"><span class="pre">Use_for_experimentation_and_testing_254</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.Use_for_experimentation_and_testing_254" title="Permalink to this definition">¶</a></dt>
+<dd><p>Use for experimentation and testing [<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3692.html"><strong>RFC 3692</strong></a>]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.extension_header.ExtensionHeader.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/extension_header.html#ExtensionHeader.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.const.ipv6.extension_header.ExtensionHeader" title="pcapkit.const.ipv6.extension_header.ExtensionHeader"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExtensionHeader</span></code></a></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – </p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pcapkit.const.ipv6.option"></span><section id="destination-options-and-hop-by-hop-options">
+<h2>Destination Options and Hop-by-Hop Options<a class="headerlink" href="#destination-options-and-hop-by-hop-options" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>Destination Options and Hop-by-Hop Options</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ipv6.option.Option</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipv6.option.</span></span><span class="sig-name descname"><span class="pre">Option</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/option.html#Option"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.option.Option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[Option] Destination Options and Hop-by-Hop Options</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Pad1">
+<span class="sig-name descname"><span class="pre">Pad1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Pad1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pad1 [<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html"><strong>RFC 2460</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.PadN">
+<span class="sig-name descname"><span class="pre">PadN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.PadN" title="Permalink to this definition">¶</a></dt>
+<dd><p>PadN [<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html"><strong>RFC 2460</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Jumbo_Payload">
+<span class="sig-name descname"><span class="pre">Jumbo_Payload</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">194</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Jumbo_Payload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Jumbo Payload [<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2675.html"><strong>RFC 2675</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RPL_Option_0x23">
+<span class="sig-name descname"><span class="pre">RPL_Option_0x23</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">35</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RPL_Option_0x23" title="Permalink to this definition">¶</a></dt>
+<dd><p>RPL Option [<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9008.html"><strong>RFC 9008</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RPL_Option_0x63">
+<span class="sig-name descname"><span class="pre">RPL_Option_0x63</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">99</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RPL_Option_0x63" title="Permalink to this definition">¶</a></dt>
+<dd><p>RPL Option (DEPRECATED) [<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6553.html"><strong>RFC 6553</strong></a>][<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9008.html"><strong>RFC 9008</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit">
+<span class="sig-name descname"><span class="pre">Tunnel_Encapsulation_Limit</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tunnel Encapsulation Limit [<span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html"><strong>RFC 2473</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Router_Alert">
+<span class="sig-name descname"><span class="pre">Router_Alert</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Router_Alert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Router Alert [<span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2711.html"><strong>RFC 2711</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Quick_Start">
+<span class="sig-name descname"><span class="pre">Quick_Start</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">38</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Quick_Start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Quick-Start [<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4782.html"><strong>RFC 4782</strong></a>][RFC Errata 2034]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.CALIPSO">
+<span class="sig-name descname"><span class="pre">CALIPSO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.CALIPSO" title="Permalink to this definition">¶</a></dt>
+<dd><p>CALIPSO [<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5570.html"><strong>RFC 5570</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.SMF_DPD">
+<span class="sig-name descname"><span class="pre">SMF_DPD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.SMF_DPD" title="Permalink to this definition">¶</a></dt>
+<dd><p>SMF_DPD [<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html"><strong>RFC 6621</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Home_Address">
+<span class="sig-name descname"><span class="pre">Home_Address</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">201</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Home_Address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Home Address [<span class="target" id="index-20"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Endpoint_Identification">
+<span class="sig-name descname"><span class="pre">Endpoint_Identification</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">138</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Endpoint_Identification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Endpoint Identification (DEPRECATED) [CHARLES LYNN]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.ILNP_Nonce">
+<span class="sig-name descname"><span class="pre">ILNP_Nonce</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">139</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.ILNP_Nonce" title="Permalink to this definition">¶</a></dt>
+<dd><p>ILNP Nonce [<span class="target" id="index-21"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6744.html"><strong>RFC 6744</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Line_Identification_Option">
+<span class="sig-name descname"><span class="pre">Line_Identification_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">140</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Line_Identification_Option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Line-Identification Option [<span class="target" id="index-22"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6788.html"><strong>RFC 6788</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Deprecated">
+<span class="sig-name descname"><span class="pre">Deprecated</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">77</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Deprecated" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deprecated [<span class="target" id="index-23"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7731.html"><strong>RFC 7731</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.MPL_Option">
+<span class="sig-name descname"><span class="pre">MPL_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">109</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.MPL_Option" title="Permalink to this definition">¶</a></dt>
+<dd><p>MPL Option [<span class="target" id="index-24"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7731.html"><strong>RFC 7731</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.IP_DFF">
+<span class="sig-name descname"><span class="pre">IP_DFF</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">238</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.IP_DFF" title="Permalink to this definition">¶</a></dt>
+<dd><p>IP_DFF [<span class="target" id="index-25"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6971.html"><strong>RFC 6971</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.PDM">
+<span class="sig-name descname"><span class="pre">PDM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.PDM" title="Permalink to this definition">¶</a></dt>
+<dd><p>Performance and Diagnostic Metrics (PDM) [<span class="target" id="index-26"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8250.html"><strong>RFC 8250</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.Path_MTU_Record_Option">
+<span class="sig-name descname"><span class="pre">Path_MTU_Record_Option</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">48</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.Path_MTU_Record_Option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path MTU Record Option [RFC-ietf-6man-mtu-option-15]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.IOAM_0x11">
+<span class="sig-name descname"><span class="pre">IOAM_0x11</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.IOAM_0x11" title="Permalink to this definition">¶</a></dt>
+<dd><p>IOAM (TEMPORARY - registered 2020-04-16, extension registered 2022-04-12,
+expires 2023-04-16) [draft-ietf-ippm-ioam-ipv6-options-05]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.IOAM_0x31">
+<span class="sig-name descname"><span class="pre">IOAM_0x31</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.IOAM_0x31" title="Permalink to this definition">¶</a></dt>
+<dd><p>IOAM (TEMPORARY - registered 2020-04-16, extension registered 2022-04-12,
+expires 2023-04-16) [draft-ietf-ippm-ioam-ipv6-options-05]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x1E">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_0x1E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x1E" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment [<span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x3E">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_0x3E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">62</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x3E" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment [<span class="target" id="index-28"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x5E">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_0x5E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">94</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x5E" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment [<span class="target" id="index-29"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x7E">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_0x7E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">126</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x7E" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment [<span class="target" id="index-30"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x9E">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_0x9E</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">158</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0x9E" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment [<span class="target" id="index-31"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0xBE">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_0xBE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">190</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0xBE" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment [<span class="target" id="index-32"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0xDE">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_0xDE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">222</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0xDE" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment [<span class="target" id="index-33"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0xFE">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_0xFE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.RFC3692_style_Experiment_0xFE" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment [<span class="target" id="index-34"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/option.html#Option.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.option.Option.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.option.Option._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/option.html#Option._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.option.Option._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.option.Option" title="pcapkit.const.ipv6.option.Option"><code class="xref py py-class docutils literal notranslate"><span class="pre">Option</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pcapkit.const.ipv6.qs_function"></span><section id="qs-functions">
+<h2>QS Functions<a class="headerlink" href="#qs-functions" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>QS Functions</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ipv6.qs_function.QSFunction</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.qs_function.QSFunction">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipv6.qs_function.</span></span><span class="sig-name descname"><span class="pre">QSFunction</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/qs_function.html#QSFunction"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.qs_function.QSFunction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[QSFunction] QS Functions</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.qs_function.QSFunction.Quick_Start_Request">
+<span class="sig-name descname"><span class="pre">Quick_Start_Request</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.ipv6.qs_function.QSFunction.Quick_Start_Request" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.qs_function.QSFunction.Report_of_Approved_Rate">
+<span class="sig-name descname"><span class="pre">Report_of_Approved_Rate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.ipv6.qs_function.QSFunction.Report_of_Approved_Rate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.qs_function.QSFunction.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/qs_function.html#QSFunction.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.qs_function.QSFunction.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.qs_function.QSFunction" title="pcapkit.const.ipv6.qs_function.QSFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSFunction</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.qs_function.QSFunction._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/qs_function.html#QSFunction._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.qs_function.QSFunction._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.qs_function.QSFunction" title="pcapkit.const.ipv6.qs_function.QSFunction"><code class="xref py py-class docutils literal notranslate"><span class="pre">QSFunction</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pcapkit.const.ipv6.router_alert"></span><section id="ipv6-router-alert-option-values">
+<h2>IPv6 Router Alert Option Values<a class="headerlink" href="#ipv6-router-alert-option-values" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>IPv6 Router Alert Option Values</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ipv6.router_alert.RouterAlert</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipv6.router_alert.</span></span><span class="sig-name descname"><span class="pre">RouterAlert</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/router_alert.html#RouterAlert"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[RouterAlert] IPv6 Router Alert Option Values</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Datagram_contains_a_Multicast_Listener_Discovery_message">
+<span class="sig-name descname"><span class="pre">Datagram_contains_a_Multicast_Listener_Discovery_message</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Datagram_contains_a_Multicast_Listener_Discovery_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Datagram contains a Multicast Listener Discovery message [<span class="target" id="index-35"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2710.html"><strong>RFC 2710</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Datagram_contains_RSVP_message">
+<span class="sig-name descname"><span class="pre">Datagram_contains_RSVP_message</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Datagram_contains_RSVP_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Datagram contains RSVP message [<span class="target" id="index-36"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2711.html"><strong>RFC 2711</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Datagram_contains_an_Active_Networks_message">
+<span class="sig-name descname"><span class="pre">Datagram_contains_an_Active_Networks_message</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Datagram_contains_an_Active_Networks_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Datagram contains an Active Networks message [<span class="target" id="index-37"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2711.html"><strong>RFC 2711</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Reserved_3">
+<span class="sig-name descname"><span class="pre">Reserved_3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Reserved_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [<span class="target" id="index-38"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5350.html"><strong>RFC 5350</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_0">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-39"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_1">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-40"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_2">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-41"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_3">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">7</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-42"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_4">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-43"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_5">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_5</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-44"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_6">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_6</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-45"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_7">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_7</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">11</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_7" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-46"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_8">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_8</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">12</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-47"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_9">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_9</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">13</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_9" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-48"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_10">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_10</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">14</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_10" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-49"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_11">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_11</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">15</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_11" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-50"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_12">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_12</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_12" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-51"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_13">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_13</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">17</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_13" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-52"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_14">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_14</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">18</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_14" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-53"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_15">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_15</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">19</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_15" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-54"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_16">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_16</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">20</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_16" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-55"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_17">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_17</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_17" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-56"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_18">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_18</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">22</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_18" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-57"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_19">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_19</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">23</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_19" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-58"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_20">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_20</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">24</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_20" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-59"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_21">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_21</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">25</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_21" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-60"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_22">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_22</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">26</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_22" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-61"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_23">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_23</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">27</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_23" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-62"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_24">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_24</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">28</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_24" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-63"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_25">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_25</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">29</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_25" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-64"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_26">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_26</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">30</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_26" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-65"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_27">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_27</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">31</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_27" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-66"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_28">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_28</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">32</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_28" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-67"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_29">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_29</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">33</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_29" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-68"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_30">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_30</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">34</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_30" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-69"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_31">
+<span class="sig-name descname"><span class="pre">Aggregated_Reservation_Nesting_Level_31</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">35</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Aggregated_Reservation_Nesting_Level_31" title="Permalink to this definition">¶</a></dt>
+<dd><p>Aggregated Reservation Nesting Level [<span class="target" id="index-70"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3175.html"><strong>RFC 3175</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_0">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_0</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">36</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_0" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-71"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_1">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">37</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-72"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_2">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">38</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-73"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_3">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_3</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">39</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_3" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_4">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">40</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_4" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_5">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_5</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">41</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_5" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_6">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_6</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">42</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_6" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_7">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_7</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">43</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_7" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_8">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_8</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">44</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_8" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_9">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_9</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">45</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_9" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_10">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_10</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">46</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_10" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_11">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_11</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">47</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_11" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_12">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_12</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">48</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_12" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_13">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_13</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">49</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_13" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_14">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_14</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">50</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_14" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-85"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_15">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_15</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">51</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_15" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-86"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_16">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_16</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">52</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_16" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-87"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_17">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_17</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">53</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_17" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-88"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_18">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_18</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">54</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_18" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-89"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_19">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_19</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">55</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_19" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-90"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_20">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_20</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">56</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_20" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-91"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_21">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_21</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">57</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_21" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-92"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_22">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_22</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">58</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_22" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-93"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_23">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_23</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">59</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_23" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-94"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_24">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_24</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">60</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_24" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-95"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_25">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_25</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">61</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_25" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-96"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_26">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_26</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">62</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_26" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-97"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_27">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_27</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">63</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_27" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-98"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_28">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_28</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">64</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_28" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-99"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_29">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_29</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_29" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-100"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_30">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_30</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">66</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_30" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-101"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_31">
+<span class="sig-name descname"><span class="pre">QoS_NSLP_Aggregation_Level_31</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">67</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.QoS_NSLP_Aggregation_Level_31" title="Permalink to this definition">¶</a></dt>
+<dd><p>QoS NSLP Aggregation Levels 0-31 [<span class="target" id="index-102"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5974.html"><strong>RFC 5974</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.NSIS_NATFW_NSLP">
+<span class="sig-name descname"><span class="pre">NSIS_NATFW_NSLP</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">68</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.NSIS_NATFW_NSLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>NSIS NATFW NSLP [<span class="target" id="index-103"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5973.html"><strong>RFC 5973</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.MPLS_OAM">
+<span class="sig-name descname"><span class="pre">MPLS_OAM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">69</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.MPLS_OAM" title="Permalink to this definition">¶</a></dt>
+<dd><p>MPLS OAM [<span class="target" id="index-104"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7506.html"><strong>RFC 7506</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.Reserved_65535">
+<span class="sig-name descname"><span class="pre">Reserved_65535</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65535</span></em><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.Reserved_65535" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved [The Internet Assigned Numbers Authority]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/router_alert.html#RouterAlert.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.router_alert.RouterAlert" title="pcapkit.const.ipv6.router_alert.RouterAlert"><code class="xref py py-class docutils literal notranslate"><span class="pre">RouterAlert</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.router_alert.RouterAlert._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/router_alert.html#RouterAlert._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.router_alert.RouterAlert._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.router_alert.RouterAlert" title="pcapkit.const.ipv6.router_alert.RouterAlert"><code class="xref py py-class docutils literal notranslate"><span class="pre">RouterAlert</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pcapkit.const.ipv6.routing"></span><section id="ipv6-routing-types">
+<h2>IPv6 Routing Types<a class="headerlink" href="#ipv6-routing-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>IPv6 Routing Types</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ipv6.routing.Routing</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipv6.routing.</span></span><span class="sig-name descname"><span class="pre">Routing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/routing.html#Routing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[Routing] IPv6 Routing Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.Source_Route">
+<span class="sig-name descname"><span class="pre">Source_Route</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.Source_Route" title="Permalink to this definition">¶</a></dt>
+<dd><p>Source Route (DEPRECATED) [<span class="target" id="index-105"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html"><strong>RFC 2460</strong></a>][<span class="target" id="index-106"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5095.html"><strong>RFC 5095</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.Nimrod">
+<span class="sig-name descname"><span class="pre">Nimrod</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DEPRECATED</span> <span class="pre">2009-05-06</span></span></em><span class="sig-paren">)</span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.Nimrod" title="Permalink to this definition">¶</a></dt>
+<dd><p>Nimrod (DEPRECATED 2009-05-06)</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header">
+<span class="sig-name descname"><span class="pre">Type_2_Routing_Header</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type 2 Routing Header [<span class="target" id="index-107"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6275.html"><strong>RFC 6275</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header">
+<span class="sig-name descname"><span class="pre">RPL_Source_Route_Header</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.RPL_Source_Route_Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>RPL Source Route Header [<span class="target" id="index-108"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6554.html"><strong>RFC 6554</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.Segment_Routing_Header">
+<span class="sig-name descname"><span class="pre">Segment_Routing_Header</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.Segment_Routing_Header" title="Permalink to this definition">¶</a></dt>
+<dd><p>Segment Routing Header (SRH) [<span class="target" id="index-109"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8754.html"><strong>RFC 8754</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.CRH_16">
+<span class="sig-name descname"><span class="pre">CRH_16</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.CRH_16" title="Permalink to this definition">¶</a></dt>
+<dd><p>CRH-16 (TEMPORARY - registered 2021-06-07, extension registered 2022-04-25,
+expires 2023-06-07) [draft-bonica-6man-comp-rtg-hdr-26]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.CRH_32">
+<span class="sig-name descname"><span class="pre">CRH_32</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.CRH_32" title="Permalink to this definition">¶</a></dt>
+<dd><p>CRH-32 (TEMPORARY - registered 2021-06-07, extension registered 2022-04-25,
+expires 2023-06-07) [draft-bonica-6man-comp-rtg-hdr-26]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.RFC3692_style_Experiment_1">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_1</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">253</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.RFC3692_style_Experiment_1" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment 1 [<span class="target" id="index-110"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.RFC3692_style_Experiment_2">
+<span class="sig-name descname"><span class="pre">RFC3692_style_Experiment_2</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">254</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.RFC3692_style_Experiment_2" title="Permalink to this definition">¶</a></dt>
+<dd><p>RFC3692-style Experiment 2 [<span class="target" id="index-111"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4727.html"><strong>RFC 4727</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.Reserved_255">
+<span class="sig-name descname"><span class="pre">Reserved_255</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">255</span></em><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.Reserved_255" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reserved</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/routing.html#Routing.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><code class="xref py py-class docutils literal notranslate"><span class="pre">Routing</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.routing.Routing._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/routing.html#Routing._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.routing.Routing._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.routing.Routing" title="pcapkit.const.ipv6.routing.Routing"><code class="xref py py-class docutils literal notranslate"><span class="pre">Routing</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pcapkit.const.ipv6.seed_id"></span><section id="seed-id-types">
+<h2>Seed-ID Types<a class="headerlink" href="#seed-id-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>Seed-ID Types</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ipv6.seed_id.SeedID</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.seed_id.SeedID">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipv6.seed_id.</span></span><span class="sig-name descname"><span class="pre">SeedID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/seed_id.html#SeedID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.seed_id.SeedID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[SeedID] Seed-ID Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS">
+<span class="sig-name descname"><span class="pre">IPV6_SOURCE_ADDRESS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.ipv6.seed_id.SeedID.IPV6_SOURCE_ADDRESS" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.seed_id.SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER">
+<span class="sig-name descname"><span class="pre">SEEDID_16_BIT_UNSIGNED_INTEGER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.ipv6.seed_id.SeedID.SEEDID_16_BIT_UNSIGNED_INTEGER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.seed_id.SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER">
+<span class="sig-name descname"><span class="pre">SEEDID_64_BIT_UNSIGNED_INTEGER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.ipv6.seed_id.SeedID.SEEDID_64_BIT_UNSIGNED_INTEGER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.seed_id.SeedID.SEEDID_128_BIT_UNSIGNED_INTEGER">
+<span class="sig-name descname"><span class="pre">SEEDID_128_BIT_UNSIGNED_INTEGER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.ipv6.seed_id.SeedID.SEEDID_128_BIT_UNSIGNED_INTEGER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.seed_id.SeedID.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/seed_id.html#SeedID.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.seed_id.SeedID.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.seed_id.SeedID" title="pcapkit.const.ipv6.seed_id.SeedID"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeedID</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.seed_id.SeedID._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/seed_id.html#SeedID._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.seed_id.SeedID._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.seed_id.SeedID" title="pcapkit.const.ipv6.seed_id.SeedID"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeedID</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pcapkit.const.ipv6.smf_dpd_mode"></span><section id="simplified-multicast-forwarding-duplicate-packet-detection-smf-dpd-options">
+<h2>Simplified Multicast Forwarding Duplicate Packet Detection (<code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code>) Options<a class="headerlink" href="#simplified-multicast-forwarding-duplicate-packet-detection-smf-dpd-options" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>Simplified Multicast Forwarding Duplicate Packet Detection (``SMF_DPD``) Options</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ipv6.smf_dpd_mode.SMFDPDMode</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipv6.smf_dpd_mode.</span></span><span class="sig-name descname"><span class="pre">SMFDPDMode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/smf_dpd_mode.html#SMFDPDMode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[SMFDPDMode] Simplified Multicast Forwarding Duplicate Packet Detection (<code class="docutils literal notranslate"><span class="pre">SMF_DPD</span></code>) Options</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode.I_DPD">
+<span class="sig-name descname"><span class="pre">I_DPD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode.I_DPD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode.H_DPD">
+<span class="sig-name descname"><span class="pre">H_DPD</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode.H_DPD" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/smf_dpd_mode.html#SMFDPDMode.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode" title="pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SMFDPDMode</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/smf_dpd_mode.html#SMFDPDMode._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode" title="pcapkit.const.ipv6.smf_dpd_mode.SMFDPDMode"><code class="xref py py-class docutils literal notranslate"><span class="pre">SMFDPDMode</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pcapkit.const.ipv6.tagger_id"></span><section id="taggerid-types">
+<h2>TaggerID Types<a class="headerlink" href="#taggerid-types" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>TaggerID Types</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.ipv6.tagger_id.TaggerID</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.tagger_id.TaggerID">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.ipv6.tagger_id.</span></span><span class="sig-name descname"><span class="pre">TaggerID</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/tagger_id.html#TaggerID"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.tagger_id.TaggerID" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[TaggerID] TaggerID Types</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.tagger_id.TaggerID.NULL">
+<span class="sig-name descname"><span class="pre">NULL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.ipv6.tagger_id.TaggerID.NULL" title="Permalink to this definition">¶</a></dt>
+<dd><p>NULL [<span class="target" id="index-112"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html"><strong>RFC 6621</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.tagger_id.TaggerID.DEFAULT">
+<span class="sig-name descname"><span class="pre">DEFAULT</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.ipv6.tagger_id.TaggerID.DEFAULT" title="Permalink to this definition">¶</a></dt>
+<dd><p>DEFAULT [<span class="target" id="index-113"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html"><strong>RFC 6621</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.tagger_id.TaggerID.IPv4">
+<span class="sig-name descname"><span class="pre">IPv4</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></em><a class="headerlink" href="#pcapkit.const.ipv6.tagger_id.TaggerID.IPv4" title="Permalink to this definition">¶</a></dt>
+<dd><p>IPv4 [<span class="target" id="index-114"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html"><strong>RFC 6621</strong></a>]</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.tagger_id.TaggerID.IPv6">
+<span class="sig-name descname"><span class="pre">IPv6</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#pcapkit.const.ipv6.tagger_id.TaggerID.IPv6" title="Permalink to this definition">¶</a></dt>
+<dd><p>IPv6 [<span class="target" id="index-115"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6621.html"><strong>RFC 6621</strong></a>]</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.tagger_id.TaggerID.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/tagger_id.html#TaggerID.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.tagger_id.TaggerID.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.tagger_id.TaggerID" title="pcapkit.const.ipv6.tagger_id.TaggerID"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaggerID</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.ipv6.tagger_id.TaggerID._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/ipv6/tagger_id.html#TaggerID._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.ipv6.tagger_id.TaggerID._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.ipv6.tagger_id.TaggerID" title="pcapkit.const.ipv6.tagger_id.TaggerID"><code class="xref py py-class docutils literal notranslate"><span class="pre">TaggerID</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <hr /><aside class="footnote brackets" id="id6" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#extension-header">https://www.iana.org/assignments/ipv6-parameters/ipv6-parameters.xhtml#extension-header</a></p>
@@ -131,6 +1255,8 @@ enumerations include:</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#library-index">Library Index</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>

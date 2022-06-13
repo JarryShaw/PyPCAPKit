@@ -1,0 +1,228 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.interface.misc &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.interface.misc</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;auxiliary interface</span>
+
+<span class="sd">:mod:`pcapkit.interface.misc` contains miscellaneous</span>
+<span class="sd">user interface functions, classes, etc., which are</span>
+<span class="sd">generally provided per user&#39;s requests.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.tcp</span> <span class="kn">import</span> <span class="n">TCP_Reassembly</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">stacklevel</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">warn</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+
+    <span class="n">ByteOrder</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;little&#39;</span><span class="p">,</span> <span class="s1">&#39;big&#39;</span><span class="p">]</span>
+    <span class="n">Formats</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;pcap&#39;</span><span class="p">,</span> <span class="s1">&#39;json&#39;</span><span class="p">,</span> <span class="s1">&#39;tree&#39;</span><span class="p">,</span> <span class="s1">&#39;plist&#39;</span><span class="p">]</span>
+    <span class="n">Engines</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;pcapkit&#39;</span><span class="p">,</span> <span class="s1">&#39;dpkt&#39;</span><span class="p">,</span> <span class="s1">&#39;scapy&#39;</span><span class="p">,</span> <span class="s1">&#39;pyshark&#39;</span><span class="p">]</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;follow_tcp_stream&#39;</span><span class="p">]</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Follow TCP Stream</span>
+<span class="c1">###############################################################################</span>
+
+
+<span class="k">class</span> <span class="nc">Stream</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for TCP streams.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Output filename.</span>
+    <span class="n">filename</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
+    <span class="c1">#: Packet list.</span>
+    <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;tuple[Frame, ...]&#39;</span>
+    <span class="c1">#: TCP conversation.</span>
+    <span class="n">conversations</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes | tuple[bytes, ...], ...]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">packets</span><span class="p">:</span> <span class="s1">&#39;tuple[Frame, ...]&#39;</span><span class="p">,</span> <span class="n">conversations</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes | tuple[bytes, ...], ...]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span>
+
+
+<div class="viewcode-block" id="follow_tcp_stream"><a class="viewcode-back" href="../../../pcapkit/interface/misc.html#pcapkit.interface.misc.follow_tcp_stream">[docs]</a><span class="k">def</span> <span class="nf">follow_tcp_stream</span><span class="p">(</span><span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>              <span class="c1"># Extrator options</span>
+                      <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">&#39;Optional[Engines]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># TraceFlow options # pylint: disable=redefined-builtin</span>
+                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;ByteOrder&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Stream, ...]&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Follow TCP streams.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`</span>
+<span class="sd">        extension: if check and append extensions to output file</span>
+<span class="sd">        verbose: if print verbose output information</span>
+<span class="sd">        engine: extraction engine to be used</span>
+
+<span class="sd">        fout: path name for flow tracer if necessary</span>
+<span class="sd">        format: output file format of flow tracer</span>
+<span class="sd">        byteorder: output file byte order</span>
+<span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List of extracted TCP streams.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">engine</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">engine</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;pyshark&#39;</span><span class="p">:</span>
+        <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;unsupported extraction engine: </span><span class="si">{</span><span class="n">engine</span><span class="si">}</span><span class="s1">; fallback to default engine&#39;</span><span class="p">,</span>
+             <span class="n">EngineWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">extraction</span> <span class="o">=</span> <span class="n">Extractor</span><span class="p">(</span><span class="n">fin</span><span class="o">=</span><span class="n">fin</span><span class="p">,</span> <span class="n">fout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auto</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">extension</span><span class="p">,</span>
+                           <span class="n">store</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">,</span> <span class="n">engine</span><span class="o">=</span><span class="n">engine</span><span class="p">,</span>
+                           <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ipv6</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tcp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                           <span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">trace_fout</span><span class="o">=</span><span class="n">fout</span><span class="p">,</span> <span class="n">trace_format</span><span class="o">=</span><span class="nb">format</span><span class="p">,</span>
+                           <span class="n">trace_byteorder</span><span class="o">=</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">)</span>
+
+    <span class="n">fallback</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;dpkt&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.dpkt</span> <span class="kn">import</span> <span class="n">tcp_reassembly</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
+    <span class="k">elif</span> <span class="n">extraction</span><span class="o">.</span><span class="n">engine</span> <span class="o">==</span> <span class="s1">&#39;scapy&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.scapy</span> <span class="kn">import</span> \
+            <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[no-redef] # pylint: disable=import-outside-toplevel</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pcapkit.toolkit.default</span> <span class="kn">import</span> \
+            <span class="n">tcp_reassembly</span>  <span class="c1"># type: ignore[no-redef] # pylint: disable=import-outside-toplevel</span>
+        <span class="n">fallback</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">streams</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Stream]</span>
+    <span class="n">frames</span> <span class="o">=</span> <span class="n">extraction</span><span class="o">.</span><span class="n">frame</span>
+    <span class="k">for</span> <span class="n">stream</span> <span class="ow">in</span> <span class="n">extraction</span><span class="o">.</span><span class="n">trace</span><span class="p">:</span>
+        <span class="n">reassembly</span> <span class="o">=</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="n">packets</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Frame]</span>
+        <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">stream</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="n">frame</span> <span class="o">=</span> <span class="n">frames</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">packets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">fallback</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">tcp_reassembly</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">reassembly</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="n">streams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Stream</span><span class="p">(</span>
+            <span class="n">filename</span><span class="o">=</span><span class="n">stream</span><span class="o">.</span><span class="n">fpout</span><span class="p">,</span>
+            <span class="n">packets</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">packets</span><span class="p">),</span>
+            <span class="n">conversations</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">datagram</span><span class="o">.</span><span class="n">payload</span> <span class="k">for</span> <span class="n">datagram</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span>
+                <span class="n">reassembly</span><span class="o">.</span><span class="n">datagram</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">datagram</span><span class="p">:</span> <span class="n">datagram</span><span class="o">.</span><span class="n">index</span>  <span class="c1"># make sure the converstations are in order</span>
+            <span class="p">)),</span>
+        <span class="p">))</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">streams</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

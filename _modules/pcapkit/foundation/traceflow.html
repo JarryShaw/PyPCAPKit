@@ -1,0 +1,553 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.foundation.traceflow &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.foundation.traceflow</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=import-outside-toplevel</span>
+<span class="sd">&quot;&quot;&quot;Trace TCP Flows</span>
+<span class="sd">=====================</span>
+
+<span class="sd">:mod:`pcapkit.foundation.traceflow` is the interface to trace</span>
+<span class="sd">TCP flows from a series of packets and connections.</span>
+
+<span class="sd">.. note::</span>
+
+<span class="sd">   This was implemented as the demand of my mate</span>
+<span class="sd">   `@gousaiyang &lt;https://github.com/gousaiyang&gt;`__.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">FileExists</span><span class="p">,</span> <span class="n">stacklevel</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.warnings</span> <span class="kn">import</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">warn</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Type</span>
+
+    <span class="kn">from</span> <span class="nn">dictdumper.dumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">DataType_Frame</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TraceFlow&#39;</span><span class="p">]</span>
+
+<span class="n">IPAddress</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Data Models</span>
+<span class="c1">###############################################################################</span>
+
+<span class="n">BufferID</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">IPAddress</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.Packet">[docs]</a><span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">IPAddress</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :meth:`pcapkit.foundation.traceflow.TraceFlow.dump`</span>
+<span class="sd">        * :term:`trace.packet`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: Data link type from global header.</span>
+    <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span>
+    <span class="c1">#: Frame number.</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Extracted frame info.</span>
+    <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;DataType_Frame | dict[str, Any]&#39;</span>
+    <span class="c1">#: TCP synchronise (SYN) flag.</span>
+    <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="c1">#: TCP finish (FIN) flag.</span>
+    <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="c1">#: Source IP.</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span>
+    <span class="c1">#: Destination IP.</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span>
+    <span class="c1">#: TCP source port.</span>
+    <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: TCP destination port.</span>
+    <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Frame timestamp.</span>
+    <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">frame</span><span class="p">:</span> <span class="s1">&#39;DataType_Frame | dict[str, Any]&#39;</span><span class="p">,</span> <span class="n">syn</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;IPAddress&#39;</span><span class="p">,</span> <span class="n">srcport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">dstport</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long</span></div>
+
+
+<div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :attr:`pcapkit.foundation.traceflow.TraceFlow.index`</span>
+<span class="sd">        * :term:`trace.buffer`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: Output dumper object.</span>
+    <span class="n">fpout</span><span class="p">:</span> <span class="s1">&#39;Dumper&#39;</span>
+    <span class="c1">#: List of frame index.</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span>
+    <span class="c1">#: Flow label generated from ``BUFID``.</span>
+    <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">&#39;Dumper&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+
+
+<div class="viewcode-block" id="Index"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.Index">[docs]</a><span class="k">class</span> <span class="nc">Index</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Data structure for **TCP flow tracing**.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * element from :attr:`pcapkit.foundation.traceflow.TraceFlow.index`</span>
+<span class="sd">          *tuple*</span>
+<span class="sd">        * :term:`trace.index`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#: Output filename if exists.</span>
+    <span class="n">fpout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
+    <span class="c1">#: Tuple of frame index.</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span>
+    <span class="c1">#: Flow label generated from ``BUFID``.</span>
+    <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fpout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Algorithm Implementation</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="TraceFlow"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow">[docs]</a><span class="k">class</span> <span class="nc">TraceFlow</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Trace TCP flows.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        fout: output path</span>
+<span class="sd">        format: output format</span>
+<span class="sd">        byteorder: output file byte order</span>
+<span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Internal data storage for cached properties.</span>
+    <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: DefaultDict[str, tuple[str, str, str | None]]: Format dumper mapping for</span>
+    <span class="c1">#: writing output files. The values should be a tuple representing the</span>
+    <span class="c1">#: module name, class name and file extension.</span>
+    <span class="n">__output__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;NotImplementedIO&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;pcap&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">,</span> <span class="s1">&#39;.pcap&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;cap&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.dumpkit&#39;</span><span class="p">,</span> <span class="s1">&#39;PCAPIO&#39;</span><span class="p">,</span> <span class="s1">&#39;.pcap&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;plist&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;PLIST&#39;</span><span class="p">,</span> <span class="s1">&#39;.plist&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;xml&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;PLIST&#39;</span><span class="p">,</span> <span class="s1">&#39;.plist&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;json&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;JSON&#39;</span><span class="p">,</span> <span class="s1">&#39;.json&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;tree&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Tree&#39;</span><span class="p">,</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;text&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Text&#39;</span><span class="p">,</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
+            <span class="s1">&#39;txt&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;dictdumper&#39;</span><span class="p">,</span> <span class="s1">&#39;Tree&#39;</span><span class="p">,</span> <span class="s1">&#39;.txt&#39;</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[str, tuple[str, str, str | None]]</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Index table for traced flow.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="TraceFlow.register"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.register">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+        <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new dumper class.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            The full qualified class name of the new dumper class</span>
+<span class="sd">            should be as ``{module}.{class_}``.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            format: format name</span>
+<span class="sd">            module: module name</span>
+<span class="sd">            class\_: class name</span>
+<span class="sd">            ext: file extension</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="nb">format</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TraceFlow.make_fout"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.make_fout">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">make_fout</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;./tmp&#39;</span><span class="p">,</span> <span class="n">fmt</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span> <span class="o">=</span> <span class="s1">&#39;pcap&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Type[Dumper], str | None]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Make root path for output.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fout: root path for output</span>
+<span class="sd">            fmt: output format</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dumper of specified format and file extension of output file.</span>
+
+<span class="sd">        Warns:</span>
+<span class="sd">            FormatWarning: If ``fmt`` is not supported.</span>
+<span class="sd">            FileWarning: If ``fout`` exists and ``fmt`` is :data:`None`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            FileExists: If ``fout`` exists and ``fmt`` is **NOT** :data:`None`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unsupported output format: </span><span class="si">{</span><span class="n">fmt</span><span class="si">}</span><span class="s1">; disabled file output feature&#39;</span><span class="p">,</span>
+                 <span class="n">FormatWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>  <span class="c1"># type: Type[Dumper]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">fout</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">FileExistsError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">warn</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">strerror</span><span class="p">,</span> <span class="n">FileWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">FileExists</span><span class="p">(</span><span class="o">*</span><span class="n">error</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">with_traceback</span><span class="p">(</span><span class="n">error</span><span class="o">.</span><span class="n">__traceback__</span><span class="p">)</span>
+
+        <span class="k">class</span> <span class="nc">DictDumper</span><span class="p">(</span><span class="n">output</span><span class="p">):</span>  <span class="c1"># type: ignore[valid-type,misc]</span>
+            <span class="sd">&quot;&quot;&quot;Customised :class:`~dictdumper.dumper.Dumper` object.&quot;&quot;&quot;</span>
+
+            <span class="k">def</span> <span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span><span class="p">:</span>
+                <span class="sd">&quot;&quot;&quot;Convert content for function call.</span>
+
+<span class="sd">                Args:</span>
+<span class="sd">                    o: object to convert</span>
+
+<span class="sd">                Returns:</span>
+<span class="sd">                    Converted object.</span>
+
+<span class="sd">                &quot;&quot;&quot;</span>
+                <span class="kn">import</span> <span class="nn">datetime</span>
+                <span class="kn">import</span> <span class="nn">decimal</span>
+                <span class="kn">import</span> <span class="nn">enum</span>
+                <span class="kn">import</span> <span class="nn">ipaddress</span>
+
+                <span class="kn">import</span> <span class="nn">aenum</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">o</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
+                    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">IntEnum</span><span class="p">)):</span>
+                    <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span>
+                        <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">o</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">::</span><span class="si">{</span><span class="n">o</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+                        <span class="n">value</span><span class="o">=</span><span class="n">o</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">object_hook</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>  <span class="c1"># type: ignore[unreachable]</span>
+
+            <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">o</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;fallback&quot;]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+                <span class="sd">&quot;&quot;&quot;Check content type for function call.&quot;&quot;&quot;</span>
+                <span class="k">return</span> <span class="s1">&#39;fallback&#39;</span>
+
+            <span class="k">def</span> <span class="nf">_append_fallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;TextIO&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__slots__&#39;</span><span class="p">):</span>
+                    <span class="n">new_value</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="vm">__slots__</span><span class="p">}</span>
+                <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;__dict__&#39;</span><span class="p">):</span>
+                    <span class="n">new_value</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;unsupported object type: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                    <span class="n">new_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[assignment]</span>
+
+                <span class="n">func</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_encode_func</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
+                <span class="n">func</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">DictDumper</span><span class="p">,</span> <span class="n">ext</span></div>
+
+<div class="viewcode-block" id="TraceFlow.dump"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.dump">[docs]</a>    <span class="k">def</span> <span class="nf">dump</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            packet (Dict[str, Any]): a flow packet (:term:`trace.packet`)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># fetch flow label</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># dump files</span>
+        <span class="n">output</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># pylint: disable=not-callable</span></div>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[True]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+<div class="viewcode-block" id="TraceFlow.trace"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.trace">[docs]</a>    <span class="k">def</span> <span class="nf">trace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">output</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Dumper | str&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Trace packets.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            packet: a flow packet (:term:`trace.packet`)</span>
+
+<span class="sd">        Keyword Arguments:</span>
+<span class="sd">            output: flag if has formatted dumper</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            If ``output`` is :data:`True`, returns the initiated</span>
+<span class="sd">            :class:`~dictdumper.dumper.Dumper` object, which will dump data to</span>
+<span class="sd">            the output file named after the flow label; otherwise, returns the</span>
+<span class="sd">            flow label itself.</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            The flow label is formatted as following:</span>
+
+<span class="sd">            .. code-block:: python</span>
+
+<span class="sd">               f&#39;{packet.src}_{packet.srcport}-{packet.dst}_{info.dstport}-{packet.timestamp}&#39;</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># clear cache</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;submit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Buffer Identifier</span>
+        <span class="n">BUFID</span> <span class="o">=</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="p">)</span>  <span class="c1"># type: BufferID</span>
+        <span class="c1"># SYN = packet.syn  # Synchronise Flag (Establishment)</span>
+        <span class="n">FIN</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">fin</span>  <span class="c1"># Finish Flag (Termination)</span>
+
+        <span class="c1"># # when SYN is set, reset buffer of this seesion</span>
+        <span class="c1"># if SYN and BUFID in self._buffer:</span>
+        <span class="c1">#     temp = self._buffer.pop(BUFID)</span>
+        <span class="c1">#     temp[&#39;fpout&#39;] = (self._fproot, self._fdpext)</span>
+        <span class="c1">#     temp[&#39;index&#39;] = tuple(temp[&#39;index&#39;])</span>
+        <span class="c1">#     self._stream.append(Info(temp))</span>
+
+        <span class="c1"># initialise buffer with BUFID</span>
+        <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">src</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">srcport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dst</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">dstport</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
+                <span class="n">fpout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span><span class="p">(</span><span class="n">fname</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span>
+                                   <span class="n">byteorder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_endian</span><span class="p">,</span> <span class="n">nanosecond</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_nnsecd</span><span class="p">),</span>
+                <span class="n">index</span><span class="o">=</span><span class="p">[],</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="c1"># trace frame record</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">fpout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">fpout</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">label</span>
+
+        <span class="c1"># when FIN is set, submit buffer of this session</span>
+        <span class="k">if</span> <span class="n">FIN</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">)</span>
+            <span class="c1"># fpout, label = buf[&#39;fpout&#39;], buf[&#39;label&#39;]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span>
+                <span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+                <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+            <span class="p">))</span>
+
+        <span class="c1"># return label or output object</span>
+        <span class="k">return</span> <span class="n">fpout</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">label</span></div>
+
+<div class="viewcode-block" id="TraceFlow.submit"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Index, ...]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Submit traced TCP flows.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Traced TCP flow (:term:`trace.index`).</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">cached</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;submit&#39;</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cached</span>
+
+        <span class="n">ret</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Index]</span>
+        <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">ret</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Index</span><span class="p">(</span><span class="n">fpout</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                             <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+                             <span class="n">label</span><span class="o">=</span><span class="n">buf</span><span class="o">.</span><span class="n">label</span><span class="p">,))</span>
+        <span class="n">ret</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">)</span>
+        <span class="n">ret_submit</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span><span class="p">[</span><span class="s1">&#39;submit&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ret_submit</span>
+        <span class="k">return</span> <span class="n">ret_submit</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TraceFlow&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: Assign this attribute after ``__new__`` to avoid shared memory</span>
+        <span class="c1"># reference between instances.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__cached__</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+                 <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+                 <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initialise instance.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            fout: output path</span>
+<span class="sd">            format: output format</span>
+<span class="sd">            byteorder: output file byte order</span>
+<span class="sd">            nanosecond: output nanosecond-resolution file flag</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">fout</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">fout</span> <span class="o">=</span> <span class="s1">&#39;./tmp&#39;</span>
+        <span class="k">if</span> <span class="nb">format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">format</span> <span class="o">=</span> <span class="s1">&#39;pcap&#39;</span>
+
+        <span class="c1">#: str: Output root path.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fproot</span> <span class="o">=</span> <span class="n">fout</span>
+
+        <span class="c1">#: dict[BufferID, Buffer]: Buffer field (:term:`trace.buffer`).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[BufferID, Buffer]</span>
+        <span class="c1">#: list[Index]: Stream index (:term:`trace.index`).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[Index]</span>
+
+        <span class="c1">#: Literal[&#39;little&#39;, &#39;big&#39;]: Output file byte order.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_endian</span> <span class="o">=</span> <span class="n">byteorder</span>
+        <span class="c1">#: bool: Output nanosecond-resolution file flag.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nnsecd</span> <span class="o">=</span> <span class="n">nanosecond</span>
+
+        <span class="c1"># dump I/O object</span>
+        <span class="n">fio</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_fout</span><span class="p">(</span><span class="n">fout</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span>
+        <span class="c1">#: Type[Dumper]: Dumper class.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span> <span class="o">=</span> <span class="n">fio</span>
+        <span class="c1">#: Optional[str]: Output file extension.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span>
+
+<div class="viewcode-block" id="TraceFlow.__call__"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            packet: a flow packet (:term:`trace.packet`)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># trace frame record</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

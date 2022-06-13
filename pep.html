@@ -66,11 +66,11 @@ ONC/RPC, POP, RIP, RTP, SIP, SMTP, SNMP, SSH, Telnet, TLS/SSL, XMPP</p></li>
 abandoned the implementation in the <cite>NotImplemented</cite> folder due to some design
 flaws within PyPCAPKit at that time. But now, the protocol should be able to
 implement quite smoothly.</p>
-<p>More over, <code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code> requires some help to
+<p>More over, <a class="reference internal" href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH" title="pcapkit.protocols.internet.mh.MH"><code class="xref py py-class docutils literal notranslate"><span class="pre">MH</span></code></a> requires some help to
 implement all the <em>message data</em> types, you can find more information in the
 specific file.</p>
 <p>Also, for the existing protocols, I am looking for a helping hand to implement
-the construction features, as defined in the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.make</span></code>
+the construction features, as defined in the <a class="reference internal" href="pcapkit/protocols/index.html#pcapkit.protocols.protocol.Protocol.make" title="pcapkit.protocols.protocol.Protocol.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.make</span></code></a>
 method. You can find some reference from the PCAP’s <code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code>
 header class.</p>
 </section>
@@ -96,13 +96,13 @@ confident about the performance improvement, but this is the most efficient way
 to accelerate PyPCAPKit at the moment, inspired from the implementation of
 Scapy and DPKT themselves.</p>
 <p>Specifically, as the following code from <code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.pcap.Frame.read()</span></code>,</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_tsus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">_ilen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-<span class="n">_olen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_tsus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">_ilen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">_olen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>we might be able to rewrite it as</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_tsus</span><span class="p">,</span> <span class="n">_ilen</span><span class="p">,</span> <span class="n">_olen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fields</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span> <span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">_tsus</span><span class="p">,</span> <span class="n">_ilen</span><span class="p">,</span> <span class="n">_olen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fields</span><span class="p">(</span><span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 </pre></div>
 </div>
 <p>and the PoC of <code class="docutils literal notranslate"><span class="pre">_read_fields</span></code> would be something like</p>
@@ -139,7 +139,7 @@ engines include:</p>
 <li><p><a class="reference external" href="https://github.com/kisom/pypcapfile">pycapfile</a></p></li>
 </ul>
 <p>Implementation for support of new engines would include adding corresponding
-handler methods and code blocks into <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code>
+handler methods and code blocks into <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction.Extractor</span></code></a>
 (see support for Scapy, DPKT, and/or PyShark), as well as, the unified auxiliary
 tools located in <a class="reference internal" href="pcapkit/toolkit/index.html#module-pcapkit.toolkit" title="pcapkit.toolkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.toolkit</span></code></a>.</p>
 </section>

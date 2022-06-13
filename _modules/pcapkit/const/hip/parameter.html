@@ -1,0 +1,532 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.const.hip.parameter &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.const.hip.parameter</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="sd">&quot;&quot;&quot;HIP Parameter Types</span>
+<span class="sd">=========================</span>
+
+<span class="sd">This module contains the constant enumeration for **HIP Parameter Types**,</span>
+<span class="sd">which is automatically generated from :class:`pcapkit.vendor.hip.parameter.Parameter`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">aenum</span> <span class="kn">import</span> <span class="n">IntEnum</span><span class="p">,</span> <span class="n">extend_enum</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Parameter&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="Parameter"><a class="viewcode-back" href="../../../../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter">[docs]</a><span class="k">class</span> <span class="nc">Parameter</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;[Parameter] HIP Parameter Types&quot;&quot;&quot;</span>
+
+    <span class="c1">#: ESP_INFO [:rfc:`7402`] (Length: 12)</span>
+    <span class="n">ESP_INFO</span> <span class="o">=</span> <span class="mi">65</span>
+
+    <span class="c1">#: R1_Counter (v1 only) [:rfc:`5201`] (Length: 12)</span>
+    <span class="n">R1_Counter</span> <span class="o">=</span> <span class="mi">128</span>
+
+    <span class="c1">#: R1_COUNTER [:rfc:`7401`] (Length: 12)</span>
+    <span class="n">R1_COUNTER</span> <span class="o">=</span> <span class="mi">129</span>
+
+    <span class="c1">#: LOCATOR_SET [:rfc:`8046`]</span>
+    <span class="n">LOCATOR_SET</span> <span class="o">=</span> <span class="mi">193</span>
+
+    <span class="c1">#: PUZZLE [:rfc:`7401`] (Length: 12)</span>
+    <span class="n">PUZZLE</span> <span class="o">=</span> <span class="mi">257</span>
+
+    <span class="c1">#: SOLUTION [:rfc:`7401`] (Length: 20)</span>
+    <span class="n">SOLUTION</span> <span class="o">=</span> <span class="mi">321</span>
+
+    <span class="c1">#: SEQ [:rfc:`7401`] (Length: 4)</span>
+    <span class="n">SEQ</span> <span class="o">=</span> <span class="mi">385</span>
+
+    <span class="c1">#: ACK [:rfc:`7401`]</span>
+    <span class="n">ACK</span> <span class="o">=</span> <span class="mi">449</span>
+
+    <span class="c1">#: DH_GROUP_LIST [:rfc:`7401`]</span>
+    <span class="n">DH_GROUP_LIST</span> <span class="o">=</span> <span class="mi">511</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">Unassigned_512</span> <span class="o">=</span> <span class="mi">512</span>
+
+    <span class="c1">#: DIFFIE_HELLMAN [:rfc:`7401`]</span>
+    <span class="n">DIFFIE_HELLMAN</span> <span class="o">=</span> <span class="mi">513</span>
+
+    <span class="c1">#: HIP_TRANSFORM (v1 only) [:rfc:`5201`]</span>
+    <span class="n">HIP_TRANSFORM</span> <span class="o">=</span> <span class="mi">577</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">Unassigned_578</span> <span class="o">=</span> <span class="mi">578</span>
+
+    <span class="c1">#: HIP_CIPHER [:rfc:`7401`]</span>
+    <span class="n">HIP_CIPHER</span> <span class="o">=</span> <span class="mi">579</span>
+
+    <span class="c1">#: NAT_TRAVERSAL_MODE [:rfc:`5770`]</span>
+    <span class="n">NAT_TRAVERSAL_MODE</span> <span class="o">=</span> <span class="mi">608</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">Unassigned_609</span> <span class="o">=</span> <span class="mi">609</span>
+
+    <span class="c1">#: TRANSACTION_PACING [:rfc:`5770`] (Length: 4)</span>
+    <span class="n">TRANSACTION_PACING</span> <span class="o">=</span> <span class="mi">610</span>
+
+    <span class="c1">#: ENCRYPTED [:rfc:`7401`]</span>
+    <span class="n">ENCRYPTED</span> <span class="o">=</span> <span class="mi">641</span>
+
+    <span class="c1">#: HOST_ID [:rfc:`7401`]</span>
+    <span class="n">HOST_ID</span> <span class="o">=</span> <span class="mi">705</span>
+
+    <span class="c1">#: HIT_SUITE_LIST [:rfc:`7401`]</span>
+    <span class="n">HIT_SUITE_LIST</span> <span class="o">=</span> <span class="mi">715</span>
+
+    <span class="c1">#: CERT [:rfc:`7401`][:rfc:`8002`]</span>
+    <span class="n">CERT</span> <span class="o">=</span> <span class="mi">768</span>
+
+    <span class="c1">#: NOTIFICATION [:rfc:`7401`]</span>
+    <span class="n">NOTIFICATION</span> <span class="o">=</span> <span class="mi">832</span>
+
+    <span class="c1">#: ECHO_REQUEST_SIGNED [:rfc:`7401`]</span>
+    <span class="n">ECHO_REQUEST_SIGNED</span> <span class="o">=</span> <span class="mi">897</span>
+
+    <span class="c1">#: REG_INFO [:rfc:`8003`]</span>
+    <span class="n">REG_INFO</span> <span class="o">=</span> <span class="mi">930</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">Unassigned_931</span> <span class="o">=</span> <span class="mi">931</span>
+
+    <span class="c1">#: REG_REQUEST [:rfc:`8003`]</span>
+    <span class="n">REG_REQUEST</span> <span class="o">=</span> <span class="mi">932</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">Unassigned_933</span> <span class="o">=</span> <span class="mi">933</span>
+
+    <span class="c1">#: REG_RESPONSE [:rfc:`8003`]</span>
+    <span class="n">REG_RESPONSE</span> <span class="o">=</span> <span class="mi">934</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">Unassigned_935</span> <span class="o">=</span> <span class="mi">935</span>
+
+    <span class="c1">#: REG_FAILED [:rfc:`8003`]</span>
+    <span class="n">REG_FAILED</span> <span class="o">=</span> <span class="mi">936</span>
+
+    <span class="c1">#: REG_FROM [:rfc:`5770`] (Length: 20)</span>
+    <span class="n">REG_FROM</span> <span class="o">=</span> <span class="mi">950</span>
+
+    <span class="c1">#: ECHO_RESPONSE_SIGNED [:rfc:`7401`]</span>
+    <span class="n">ECHO_RESPONSE_SIGNED</span> <span class="o">=</span> <span class="mi">961</span>
+
+    <span class="c1">#: TRANSPORT_FORMAT_LIST [:rfc:`7401`]</span>
+    <span class="n">TRANSPORT_FORMAT_LIST</span> <span class="o">=</span> <span class="mi">2049</span>
+
+    <span class="c1">#: ESP_TRANSFORM [:rfc:`7402`]</span>
+    <span class="n">ESP_TRANSFORM</span> <span class="o">=</span> <span class="mi">4095</span>
+
+    <span class="c1">#: SEQ_DATA [:rfc:`6078`] (Length: 4)</span>
+    <span class="n">SEQ_DATA</span> <span class="o">=</span> <span class="mi">4481</span>
+
+    <span class="c1">#: ACK_DATA [:rfc:`6078`]</span>
+    <span class="n">ACK_DATA</span> <span class="o">=</span> <span class="mi">4545</span>
+
+    <span class="c1">#: PAYLOAD_MIC [:rfc:`6078`]</span>
+    <span class="n">PAYLOAD_MIC</span> <span class="o">=</span> <span class="mi">4577</span>
+
+    <span class="c1">#: TRANSACTION_ID [:rfc:`6078`]</span>
+    <span class="n">TRANSACTION_ID</span> <span class="o">=</span> <span class="mi">4580</span>
+
+    <span class="c1">#: OVERLAY_ID [:rfc:`6079`]</span>
+    <span class="n">OVERLAY_ID</span> <span class="o">=</span> <span class="mi">4592</span>
+
+    <span class="c1">#: ROUTE_DST [:rfc:`6028`]</span>
+    <span class="n">ROUTE_DST</span> <span class="o">=</span> <span class="mi">4601</span>
+
+    <span class="c1">#: RELAYED_ADDRESS [:rfc:`9028`] (Length: 20)</span>
+    <span class="n">RELAYED_ADDRESS</span> <span class="o">=</span> <span class="mi">4650</span>
+
+    <span class="c1">#: MAPPED_ADDRESS [:rfc:`9028`] (Length: 20)</span>
+    <span class="n">MAPPED_ADDRESS</span> <span class="o">=</span> <span class="mi">4660</span>
+
+    <span class="c1">#: PEER_PERMISSION [:rfc:`9028`] (Length: 48)</span>
+    <span class="n">PEER_PERMISSION</span> <span class="o">=</span> <span class="mi">4680</span>
+
+    <span class="c1">#: CANDIDATE_PRIORITY [:rfc:`9028`] (Length: 4)</span>
+    <span class="n">CANDIDATE_PRIORITY</span> <span class="o">=</span> <span class="mi">4700</span>
+
+    <span class="c1">#: NOMINATE [:rfc:`9028`] (Length: 4)</span>
+    <span class="n">NOMINATE</span> <span class="o">=</span> <span class="mi">4710</span>
+
+    <span class="c1">#: HIP_TRANSPORT_MODE [:rfc:`6261`]</span>
+    <span class="n">HIP_TRANSPORT_MODE</span> <span class="o">=</span> <span class="mi">7680</span>
+
+    <span class="c1">#: HIP_MAC [:rfc:`7401`]</span>
+    <span class="n">HIP_MAC</span> <span class="o">=</span> <span class="mi">61505</span>
+
+    <span class="c1">#: HIP_MAC_2 [:rfc:`7401`]</span>
+    <span class="n">HIP_MAC_2</span> <span class="o">=</span> <span class="mi">61569</span>
+
+    <span class="c1">#: HIP_SIGNATURE_2 [:rfc:`7401`]</span>
+    <span class="n">HIP_SIGNATURE_2</span> <span class="o">=</span> <span class="mi">61633</span>
+
+    <span class="c1">#: HIP_SIGNATURE [:rfc:`7401`]</span>
+    <span class="n">HIP_SIGNATURE</span> <span class="o">=</span> <span class="mi">61697</span>
+
+    <span class="c1">#: ECHO_REQUEST_UNSIGNED [:rfc:`7401`]</span>
+    <span class="n">ECHO_REQUEST_UNSIGNED</span> <span class="o">=</span> <span class="mi">63661</span>
+
+    <span class="c1">#: ECHO_RESPONSE_UNSIGNED [:rfc:`7401`]</span>
+    <span class="n">ECHO_RESPONSE_UNSIGNED</span> <span class="o">=</span> <span class="mi">63425</span>
+
+    <span class="c1">#: RELAY_FROM [:rfc:`5770`] (Length: 20)</span>
+    <span class="n">RELAY_FROM</span> <span class="o">=</span> <span class="mi">63998</span>
+
+    <span class="c1">#: RELAY_TO [:rfc:`5770`] (Length: 20)</span>
+    <span class="n">RELAY_TO</span> <span class="o">=</span> <span class="mi">64002</span>
+
+    <span class="c1">#: OVERLAY_TTL [:rfc:`6079`] (Length: 4)</span>
+    <span class="n">OVERLAY_TTL</span> <span class="o">=</span> <span class="mi">64011</span>
+
+    <span class="c1">#: ROUTE_VIA [:rfc:`6028`]</span>
+    <span class="n">ROUTE_VIA</span> <span class="o">=</span> <span class="mi">64017</span>
+
+    <span class="c1">#: FROM [:rfc:`8004`] (Length: 16)</span>
+    <span class="n">FROM</span> <span class="o">=</span> <span class="mi">65498</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">Unassigned_65499</span> <span class="o">=</span> <span class="mi">65499</span>
+
+    <span class="c1">#: RVS_HMAC [:rfc:`8004`]</span>
+    <span class="n">RVS_HMAC</span> <span class="o">=</span> <span class="mi">65500</span>
+
+    <span class="c1">#: Unassigned</span>
+    <span class="n">Unassigned_65501</span> <span class="o">=</span> <span class="mi">65501</span>
+
+    <span class="c1">#: VIA_RVS [:rfc:`8004`]</span>
+    <span class="n">VIA_RVS</span> <span class="o">=</span> <span class="mi">65502</span>
+
+    <span class="c1">#: RELAY_HMAC [:rfc:`5770`]</span>
+    <span class="n">RELAY_HMAC</span> <span class="o">=</span> <span class="mi">65520</span>
+
+<div class="viewcode-block" id="Parameter.get"><a class="viewcode-back" href="../../../../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.get">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="s1">&#39;int | str&#39;</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Backport support for original codes.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Key to get enum item.</span>
+<span class="sd">            default: Default value if not found.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">_member_map_</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-member</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="n">Parameter</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Parameter</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>  <span class="c1"># type: ignore[misc]</span></div>
+
+<div class="viewcode-block" id="Parameter._missing_"><a class="viewcode-back" href="../../../../pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter._missing_">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_missing_</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Parameter&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Value to get enum item.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> is not a valid </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">64</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">66</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">127</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">130</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">192</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">194</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">256</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">258</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">320</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">322</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">384</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">386</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">448</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">450</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">510</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">514</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">576</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">580</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">607</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">611</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">640</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">642</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">704</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">706</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">714</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">716</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">767</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">769</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">831</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">833</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">896</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">898</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">929</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">937</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">949</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">951</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">960</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">962</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">2048</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">2050</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4094</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4096</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4480</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4482</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4544</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4546</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4576</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4578</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4579</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4581</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4591</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4593</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4600</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4602</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4649</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4651</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4659</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4661</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4679</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4681</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4699</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4701</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">4709</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">4711</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">7679</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">7681</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">32767</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">32768</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">49151</span><span class="p">:</span>
+            <span class="c1">#: Reserved [:rfc:`7401`]</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Reserved_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">49152</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">61504</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">61506</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">61568</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">61570</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">61632</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">61634</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">61696</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">61698</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">63660</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">63662</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">63424</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">63426</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">63997</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">63999</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">64001</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">64003</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">64010</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">64012</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">64016</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">64018</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65497</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">65503</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65519</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">65521</span> <span class="o">&lt;=</span> <span class="n">value</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">:</span>
+            <span class="c1">#: Unassigned</span>
+            <span class="n">extend_enum</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s1">&#39;Unassigned_</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

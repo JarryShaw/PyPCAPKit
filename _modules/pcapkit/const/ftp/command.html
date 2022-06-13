@@ -1,0 +1,711 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.const.ftp.command &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.const.ftp.command</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="sd">&quot;&quot;&quot;FTP Command</span>
+<span class="sd">=================</span>
+
+<span class="sd">This module contains the constant enumeration for **FTP Command**,</span>
+<span class="sd">which is automatically generated from :class:`pcapkit.vendor.ftp.command.Command`.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Command&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="CommandType"><a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.CommandType">[docs]</a><span class="k">class</span> <span class="nc">CommandType</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;FTP command type.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Name of command.</span>
+    <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+    <span class="c1">#: Feature of command.</span>
+    <span class="n">feat</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
+    <span class="c1">#: Description of command.</span>
+    <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
+    <span class="c1">#: Type of command.</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[str, ...]]&#39;</span>
+    <span class="c1">#: Conformance of command.</span>
+    <span class="n">conf</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span>
+    <span class="c1">#: Note of command.</span>
+    <span class="n">note</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[str, ...]]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">feat</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">desc</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[str, ...]]&#39;</span><span class="p">,</span> <span class="n">conf</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="n">note</span><span class="p">:</span> <span class="s1">&#39;Optional[tuple[str, ...]]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+
+
+<div class="viewcode-block" id="defaultInfo"><a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.defaultInfo">[docs]</a><span class="k">class</span> <span class="nc">defaultInfo</span><span class="p">(</span><span class="n">Info</span><span class="p">[</span><span class="n">CommandType</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Extended :class:`~pcapkit.corekit.infoclass.Info` with default values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *args: Arbitrary positional arguments.</span>
+<span class="sd">        **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="defaultInfo.__getitem__"><a class="viewcode-back" href="../../../../pcapkit/const/ftp.html#pcapkit.const.ftp.command.defaultInfo.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;CommandType&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Missing keys as specified in :rfc:`3659`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: Key of missing command.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__getitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">CommandType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">key</span><span class="p">,</span>
+                               <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;TVFS&#39;</span><span class="p">,</span>
+                               <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Trivial Virtual File Store&#39;</span><span class="p">,</span>
+                               <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+                               <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+                               <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 3659&#39;</span><span class="p">,))</span></div></div>
+
+
+<span class="c1">#: FTP Command</span>
+<span class="n">Command</span> <span class="o">=</span> <span class="n">defaultInfo</span><span class="p">(</span>
+    <span class="c1"># ABOR [:rfc:`959`]</span>
+    <span class="n">ABOR</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ABOR&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Abort&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># ACCT [:rfc:`959`]</span>
+    <span class="n">ACCT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ACCT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Account&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># ADAT [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="n">ADAT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ADAT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;secu&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Authentication/Security Data&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2228&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 2773&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 4217&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># ALGS [:rfc:`6384`][Section 11]</span>
+    <span class="n">ALGS</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ALGS&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;FTP64 ALG status&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 6384&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># ALLO [:rfc:`959`]</span>
+    <span class="n">ALLO</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ALLO&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Allocate&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># APPE [:rfc:`959`]</span>
+    <span class="n">APPE</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;APPE&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Append (with create)&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># AUTH [2][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="n">AUTH</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;AUTH&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;AUTH&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Authentication/Security Mechanism&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2773&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 4217&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># CCC [:rfc:`2228`]</span>
+    <span class="n">CCC</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CCC&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;secu&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Clear Command Channel&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2228&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># CDUP [:rfc:`959`]</span>
+    <span class="n">CDUP</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CDUP&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Change to Parent Directory&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># CONF [:rfc:`2228`]</span>
+    <span class="n">CONF</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CONF&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;secu&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Confidentiality Protected Command&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2228&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># CWD [:rfc:`959`]</span>
+    <span class="n">CWD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CWD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Change Working Directory&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># DELE [:rfc:`959`]</span>
+    <span class="n">DELE</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;DELE&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Delete File&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># ENC [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="n">ENC</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;ENC&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;secu&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Privacy Protected Command&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2228&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 2773&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 4217&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># EPRT [:rfc:`2428`]</span>
+    <span class="n">EPRT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;EPRT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;nat6&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Extended Port&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2428&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># EPSV [:rfc:`2428`]</span>
+    <span class="n">EPSV</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;EPSV&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;nat6&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Extended Passive Mode&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2428&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># FEAT [:rfc:`2389`]</span>
+    <span class="n">FEAT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;FEAT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;feat&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Feature Negotiation&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2389&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># HELP [:rfc:`959`]</span>
+    <span class="n">HELP</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;HELP&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Help&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># HOST [:rfc:`7151`]</span>
+    <span class="n">HOST</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;HOST&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;HOST&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Hostname&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 7151&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># LANG [:rfc:`2640`]</span>
+    <span class="n">LANG</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;LANG&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;UTF8&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Language (for Server Messages)&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2640&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># LIST [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="n">LIST</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;LIST&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;List&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># LPRT [:rfc:`1545`][:rfc:`1639`]</span>
+    <span class="n">LPRT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;LPRT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Data Port&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 1545&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1639&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># LPSV [:rfc:`1545`][:rfc:`1639`]</span>
+    <span class="n">LPSV</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;LPSV&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Passive Mode&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 1545&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1639&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># MDTM [:rfc:`3659`]</span>
+    <span class="n">MDTM</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MDTM&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;MDTM&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;File Modification Time&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 3659&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># MIC [:rfc:`2228`][:rfc:`2773`][:rfc:`4217`]</span>
+    <span class="n">MIC</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MIC&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;secu&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Integrity Protected Command&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2228&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 2773&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 4217&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># MKD [:rfc:`959`]</span>
+    <span class="n">MKD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MKD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Make Directory&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># MLSD [:rfc:`3659`]</span>
+    <span class="n">MLSD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MLSD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;MLST&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;List Directory (for machine)&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 3659&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># MLST [:rfc:`3659`]</span>
+    <span class="n">MLST</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MLST&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;MLST&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;List Single Object&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 3659&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># MODE [:rfc:`959`]</span>
+    <span class="n">MODE</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;MODE&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Transfer Mode&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># NLST [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="n">NLST</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;NLST&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Name List&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># NOOP [:rfc:`959`]</span>
+    <span class="n">NOOP</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;NOOP&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;No-Op&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># OPTS [:rfc:`2389`]</span>
+    <span class="n">OPTS</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;OPTS&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;feat&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Options&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 2389&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># PASS [:rfc:`959`]</span>
+    <span class="n">PASS</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PASS&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Password&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># PASV [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="n">PASV</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PASV&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Passive Mode&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># PBSZ [:rfc:`4217`]</span>
+    <span class="n">PBSZ</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PBSZ&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;PBSZ&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Protection Buffer Size&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 4217&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># PORT [:rfc:`959`]</span>
+    <span class="n">PORT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PORT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Data Port&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># PROT [:rfc:`4217`]</span>
+    <span class="n">PROT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PROT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;PROT&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Data Channel Protection Level&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 4217&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># PWD [:rfc:`959`]</span>
+    <span class="n">PWD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;PWD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Print Directory&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># QUIT [:rfc:`959`]</span>
+    <span class="n">QUIT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;QUIT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Logout&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># REIN [:rfc:`959`]</span>
+    <span class="n">REIN</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;REIN&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Reinitialize&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># REST [3][:rfc:`3659`]</span>
+    <span class="n">REST</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;REST&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;REST&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Restart (for STREAM mode)&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,</span> <span class="s1">&#39;parameter setting&#39;</span><span class="p">),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 3659&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># RETR [:rfc:`959`]</span>
+    <span class="n">RETR</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RETR&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Retrieve&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># RMD [:rfc:`959`]</span>
+    <span class="n">RMD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RMD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Remove Directory&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># RNFR [:rfc:`959`]</span>
+    <span class="n">RNFR</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RNFR&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Rename From&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,</span> <span class="s1">&#39;parameter setting&#39;</span><span class="p">),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># RNTO [:rfc:`959`]</span>
+    <span class="n">RNTO</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;RNTO&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Rename From&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># SITE [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="n">SITE</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;SITE&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Site Parameters&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># SIZE [:rfc:`3659`]</span>
+    <span class="n">SIZE</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;SIZE&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;SIZE&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;File Size&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 3659&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># SMNT [:rfc:`959`]</span>
+    <span class="n">SMNT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;SMNT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Structure Mount&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># STAT [:rfc:`959`]</span>
+    <span class="n">STAT</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;STAT&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Status&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># STOR [:rfc:`959`]</span>
+    <span class="n">STOR</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;STOR&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Store&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># STOU [:rfc:`959`][:rfc:`1123`]</span>
+    <span class="n">STOU</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;STOU&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Store Unique&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># STRU [:rfc:`959`]</span>
+    <span class="n">STRU</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;STRU&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;File Structure&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># SYST [:rfc:`959`]</span>
+    <span class="n">SYST</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;SYST&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;System&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># TYPE [4][:rfc:`959`]</span>
+    <span class="n">TYPE</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;TYPE&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;Representation Type&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;parameter setting&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># USER [:rfc:`959`]</span>
+    <span class="n">USER</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;USER&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;base&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="s1">&#39;User Name&#39;</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;access control&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;mandatory to implement&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 959&#39;</span><span class="p">,),</span>
+    <span class="p">),</span>
+    <span class="c1"># XCUP [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="n">XCUP</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;XCUP&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 775&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># XCWD [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="n">XCWD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;XCWD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 775&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># XMKD [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="n">XMKD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;XMKD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 775&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># XPWD [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="n">XPWD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;XPWD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 775&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+    <span class="c1"># XRMD [:rfc:`775`][:rfc:`1123`]</span>
+    <span class="n">XRMD</span><span class="o">=</span><span class="n">CommandType</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;XRMD&#39;</span><span class="p">,</span>
+        <span class="n">feat</span><span class="o">=</span><span class="s1">&#39;hist&#39;</span><span class="p">,</span>
+        <span class="n">desc</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="nb">type</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;service execution&#39;</span><span class="p">,),</span>
+        <span class="n">conf</span><span class="o">=</span><span class="s1">&#39;historic&#39;</span><span class="p">,</span>
+        <span class="n">note</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;RFC 775&#39;</span><span class="p">,</span> <span class="s1">&#39;RFC 1123&#39;</span><span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

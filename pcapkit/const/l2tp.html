@@ -35,17 +35,70 @@
           <div class="body" role="main">
             
   <section id="module-pcapkit.const.ipx">
-<span id="l2tp-constant-enumerations"></span><h1><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.ipx" title="Permalink to this heading">¶</a></h1>
+<span id="l2tp-constant-enumerations"></span><h1><a class="reference internal" href="../protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> Constant Enumerations<a class="headerlink" href="#module-pcapkit.const.ipx" title="Permalink to this heading">¶</a></h1>
 <p>This module contains all constant enumerations of
-<code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code> implementations. Available
+<a class="reference internal" href="../protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> implementations. Available
 enumerations include:</p>
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP_Type</span></code></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP_Type</span></code></a></p></td>
 <td><p>L2TP Types</p></td>
 </tr>
 </tbody>
 </table>
+<span class="target" id="module-pcapkit.const.l2tp.type"></span><section id="l2tp-type">
+<h2>L2TP Type<a class="headerlink" href="#l2tp-type" title="Permalink to this heading">¶</a></h2>
+<p>This module contains the constant enumeration for <strong>L2TP Type</strong>,
+which is automatically generated from <code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.l2tp.type.Type</span></code>.</p>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.const.l2tp.type.Type">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.const.l2tp.type.</span></span><span class="sig-name descname"><span class="pre">Type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value=&lt;no_arg&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">names=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qualname=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start=1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">boundary=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/l2tp/type.html#Type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.l2tp.type.Type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></p>
+<p>[Type] L2TP Type</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.l2tp.type.Type.Control">
+<span class="sig-name descname"><span class="pre">Control</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#pcapkit.const.l2tp.type.Type.Control" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.const.l2tp.type.Type.Data">
+<span class="sig-name descname"><span class="pre">Data</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#pcapkit.const.l2tp.type.Type.Data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.l2tp.type.Type.get">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/l2tp/type.html#Type.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.l2tp.type.Type.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backport support for original codes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Key to get enum item.</p></li>
+<li><p><strong>default</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Default value if not found.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.l2tp.type.Type._missing_">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/l2tp/type.html#Type._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.l2tp.type.Type._missing_" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lookup function used when value is not found.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Value to get enum item.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -90,6 +143,8 @@ enumerations include:</p>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../index.html#library-index">Library Index</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>

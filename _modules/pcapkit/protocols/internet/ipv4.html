@@ -1,0 +1,1165 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.internet.ipv4 &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.internet.ipv4</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;internet protocol version 4</span>
+
+<span class="sd">:mod:`pcapkit.protocols.internet.ipv4` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.internet.ipv4.IPv4` only,</span>
+<span class="sd">which implements extractor for Internet Protocol</span>
+<span class="sd">version 4 (IPv4) [*]_, whose structure is described</span>
+<span class="sd">as below:</span>
+
+<span class="sd">======= ========= ====================== =============================================</span>
+<span class="sd">Octets      Bits        Name                    Description</span>
+<span class="sd">======= ========= ====================== =============================================</span>
+<span class="sd">  0           0   ``ip.version``              Version (``4``)</span>
+<span class="sd">  0           4   ``ip.hdr_len``              Internal Header Length (IHL)</span>
+<span class="sd">  1           8   ``ip.dsfield.dscp``         Differentiated Services Code Point (DSCP)</span>
+<span class="sd">  1          14   ``ip.dsfield.ecn``          Explicit Congestion Notification (ECN)</span>
+<span class="sd">  2          16   ``ip.len``                  Total Length</span>
+<span class="sd">  4          32   ``ip.id``                   Identification</span>
+<span class="sd">  6          48                               Reserved Bit (must be ``\\x00``)</span>
+<span class="sd">  6          49   ``ip.flags.df``             Don&#39;t Fragment (DF)</span>
+<span class="sd">  6          50   ``ip.flags.mf``             More Fragments (MF)</span>
+<span class="sd">  6          51   ``ip.frag_offset``          Fragment Offset</span>
+<span class="sd">  8          64   ``ip.ttl``                  Time To Live (TTL)</span>
+<span class="sd">  9          72   ``ip.proto``                Protocol (Transport Layer)</span>
+<span class="sd">  10         80   ``ip.checksum``             Header Checksum</span>
+<span class="sd">  12         96   ``ip.src``                  Source IP Address</span>
+<span class="sd">  16        128   ``ip.dst``                  Destination IP Address</span>
+<span class="sd">  20        160   ``ip.options``              IP Options (if IHL &gt; ``5``)</span>
+<span class="sd">======= ========= ====================== =============================================</span>
+
+<span class="sd">.. [*] https://en.wikipedia.org/wiki/IPv4</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">ipaddress</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.classification_level</span> <span class="kn">import</span> \
+    <span class="n">ClassificationLevel</span> <span class="k">as</span> <span class="n">RegType_ClassificationLevel</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.option_class</span> <span class="kn">import</span> <span class="n">OptionClass</span> <span class="k">as</span> <span class="n">RegType_OptionClass</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.option_number</span> <span class="kn">import</span> <span class="n">OptionNumber</span> <span class="k">as</span> <span class="n">RegType_OptionNumber</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.protection_authority</span> <span class="kn">import</span> \
+    <span class="n">ProtectionAuthority</span> <span class="k">as</span> <span class="n">RegType_ProtectionAuthority</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.qs_function</span> <span class="kn">import</span> <span class="n">QSFunction</span> <span class="k">as</span> <span class="n">RegType_QSFunction</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.router_alert</span> <span class="kn">import</span> <span class="n">RouterAlert</span> <span class="k">as</span> <span class="n">RegType_RouterAlert</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.tos_del</span> <span class="kn">import</span> <span class="n">ToSDelay</span> <span class="k">as</span> <span class="n">RegType_ToSDelay</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.tos_ecn</span> <span class="kn">import</span> <span class="n">ToSECN</span> <span class="k">as</span> <span class="n">RegType_ToSECN</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.tos_pre</span> <span class="kn">import</span> <span class="n">ToSPrecedence</span> <span class="k">as</span> <span class="n">RegType_ToSPrecedence</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.tos_rel</span> <span class="kn">import</span> <span class="n">ToSReliability</span> <span class="k">as</span> <span class="n">RegType_ToSReliability</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.tos_thr</span> <span class="kn">import</span> <span class="n">ToSThroughput</span> <span class="k">as</span> <span class="n">RegType_ToSThroughput</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.ipv4.ts_flag</span> <span class="kn">import</span> <span class="n">TSFlag</span> <span class="k">as</span> <span class="n">RegType_TSFlag</span>
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.multidict</span> <span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">EOOLOption</span> <span class="k">as</span> <span class="n">DataType_EOOLOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">ESECOption</span> <span class="k">as</span> <span class="n">DataType_ESECOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">Flags</span> <span class="k">as</span> <span class="n">DataType_Flags</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">IPv4</span> <span class="k">as</span> <span class="n">DataType_IPv4</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">LSROption</span> <span class="k">as</span> <span class="n">DataType_LSROption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">MTUPOption</span> <span class="k">as</span> <span class="n">DataType_MTUPOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">MTUROption</span> <span class="k">as</span> <span class="n">DataType_MTUROption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">NOPOption</span> <span class="k">as</span> <span class="n">DataType_NOPOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">OptionType</span> <span class="k">as</span> <span class="n">DataType_OptionType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">QSOption</span> <span class="k">as</span> <span class="n">DataType_QSOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">RROption</span> <span class="k">as</span> <span class="n">DataType_RROption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">RTRALTOption</span> <span class="k">as</span> <span class="n">DataType_RTRALTOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">SECOption</span> <span class="k">as</span> <span class="n">DataType_SECOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">SIDOption</span> <span class="k">as</span> <span class="n">DataType_SIDOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">SSROption</span> <span class="k">as</span> <span class="n">DataType_SSROption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">ToSField</span> <span class="k">as</span> <span class="n">DataType_ToSField</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">TROption</span> <span class="k">as</span> <span class="n">DataType_TROption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">TSOption</span> <span class="k">as</span> <span class="n">DataType_TSOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">UnassignedOption</span> <span class="k">as</span> <span class="n">DataType_UnassignedOption</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ip</span> <span class="kn">import</span> <span class="n">IP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">ProtocolError</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span> <span class="k">as</span> <span class="n">dt_type</span>
+    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span>
+
+    <span class="kn">from</span> <span class="nn">mypy_extensions</span> <span class="kn">import</span> <span class="n">NamedArg</span>
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.internet.ipv4</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">DataType_Option</span>
+
+    <span class="n">Option</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">[</span><span class="n">RegType_OptionNumber</span><span class="p">,</span> <span class="n">DataType_Option</span><span class="p">]</span>
+    <span class="n">OptionParser</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">RegType_OptionNumber</span><span class="p">,</span> <span class="n">NamedArg</span><span class="p">(</span><span class="n">Option</span><span class="p">,</span> <span class="s1">&#39;options&#39;</span><span class="p">)],</span> <span class="n">DataType_Option</span><span class="p">]</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IPv4&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="IPv4"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4">[docs]</a><span class="k">class</span> <span class="nc">IPv4</span><span class="p">(</span><span class="n">IP</span><span class="p">[</span><span class="n">DataType_IPv4</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;This class implements Internet Protocol version 4.&quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[&quot;Internet Protocol version 4&quot;]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;Internet Protocol version 4&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">hdr_len</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Name of next layer protocol.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">protocol</span>
+
+    <span class="c1"># source IP address</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">src</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Source IP address.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">src</span>
+
+    <span class="c1"># destination IP address</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">dst</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Destination IP address.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">dst</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="IPv4.read"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_IPv4&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read Internet Protocol version 4 (IPv4).</span>
+
+<span class="sd">        Structure of IPv4 header [:rfc:`791`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |Version|  IHL  |Type of Service|          Total Length         |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |         Identification        |Flags|      Fragment Offset    |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |  Time to Live |    Protocol   |         Header Checksum       |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                       Source Address                          |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                    Destination Address                        |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                    Options                    |    Padding    |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length: Length of packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="n">_vihl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="n">_dscp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_tlen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_iden</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_frag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_ttol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_prot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_protos</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_csum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_srca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_addr</span><span class="p">()</span>
+        <span class="n">_dsta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_addr</span><span class="p">()</span>
+
+        <span class="n">_vers</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_vihl</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_vers</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;[IPv4] invalid version: </span><span class="si">{</span><span class="n">_vers</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="n">ipv4</span> <span class="o">=</span> <span class="n">DataType_IPv4</span><span class="p">(</span>
+            <span class="n">version</span><span class="o">=</span><span class="n">_vers</span><span class="p">,</span>  <span class="c1"># type: ignore[arg-type]</span>
+            <span class="n">hdr_len</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_vihl</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="n">tos</span><span class="o">=</span><span class="n">DataType_ToSField</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>  <span class="c1"># type: ignore[arg-type]</span>
+                <span class="s1">&#39;pre&#39;</span><span class="p">:</span> <span class="n">RegType_ToSPrecedence</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_dscp</span><span class="p">[:</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+                <span class="s1">&#39;del&#39;</span><span class="p">:</span> <span class="n">RegType_ToSDelay</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_dscp</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+                <span class="s1">&#39;thr&#39;</span><span class="p">:</span> <span class="n">RegType_ToSThroughput</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_dscp</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+                <span class="s1">&#39;rel&#39;</span><span class="p">:</span> <span class="n">RegType_ToSReliability</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_dscp</span><span class="p">[</span><span class="mi">5</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+                <span class="s1">&#39;ecn&#39;</span><span class="p">:</span> <span class="n">RegType_ToSECN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_dscp</span><span class="p">[</span><span class="mi">6</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)),</span>
+            <span class="p">}),</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">_tlen</span><span class="p">,</span>
+            <span class="nb">id</span><span class="o">=</span><span class="n">_iden</span><span class="p">,</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">DataType_Flags</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_frag</span><span class="p">[</span><span class="mi">1</span><span class="p">])),</span>
+                <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">_frag</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
+            <span class="p">),</span>
+            <span class="n">offset</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">_frag</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">ttl</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_ttol</span><span class="p">),</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">_prot</span><span class="p">,</span>
+            <span class="n">checksum</span><span class="o">=</span><span class="n">_csum</span><span class="p">,</span>
+            <span class="n">src</span><span class="o">=</span><span class="n">_srca</span><span class="p">,</span>
+            <span class="n">dst</span><span class="o">=</span><span class="n">_dsta</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">_optl</span> <span class="o">=</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span> <span class="o">-</span> <span class="mi">20</span>
+        <span class="k">if</span> <span class="n">_optl</span><span class="p">:</span>
+            <span class="n">ipv4</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
+                <span class="p">(</span><span class="s1">&#39;options&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_options</span><span class="p">(</span><span class="n">_optl</span><span class="p">)),</span>
+            <span class="p">])</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="n">_prot</span><span class="p">,</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IPv4.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+<div class="viewcode-block" id="IPv4.id"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.id">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[Literal[&quot;IPv4&quot;]]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+        <span class="sd">&quot;&quot;&quot;Index ID of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Index ID of the protocol.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;IPv4&#39;</span><span class="p">,)</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="IPv4.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[20]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">20</span></div>
+
+<div class="viewcode-block" id="IPv4.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4.__index__">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_TransType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Numeral registry index of the protocol in `IANA`_.</span>
+
+<span class="sd">        .. _IANA: https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">IPv4</span>  <span class="c1"># type: ignore[return-value]</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="IPv4._read_ipv4_addr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_addr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipv4_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read IP address.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed IP address.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="c1"># _addr = &#39;.&#39;.join([str(_) for _ in _byte])</span>
+        <span class="c1"># return _addr</span>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+
+<div class="viewcode-block" id="IPv4._read_ipv4_opt_type"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_opt_type">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipv4_opt_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_OptionType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=no-self-use</span>
+        <span class="sd">&quot;&quot;&quot;Read option type field.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            code: option kind value</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Extracted IPv4 option type, as an object of the option flag (copied</span>
+<span class="sd">            flag), option class, and option number.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">bin_</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">code</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="n">oflg</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">ocls</span> <span class="o">=</span> <span class="n">RegType_OptionClass</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+        <span class="n">onum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">bin_</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">DataType_OptionType</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+            <span class="s1">&#39;change&#39;</span><span class="p">:</span> <span class="n">oflg</span><span class="p">,</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="n">ocls</span><span class="p">,</span>
+            <span class="s1">&#39;number&#39;</span><span class="p">:</span> <span class="n">onum</span><span class="p">,</span>
+        <span class="p">})</span>  <span class="c1"># type: ignore[return-value]</span></div>
+
+<div class="viewcode-block" id="IPv4._read_ipv4_options"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options">[docs]</a>    <span class="k">def</span> <span class="nf">_read_ipv4_options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Option&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 option list.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            length: length of options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Extracted IPv4 options.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the threshold is **NOT** matching.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>                   <span class="c1"># length of read option list</span>
+        <span class="n">options</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: Option</span>
+
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="c1"># break when eol triggerred</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">code</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># get options type</span>
+            <span class="n">kind</span> <span class="o">=</span> <span class="n">RegType_OptionNumber</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+            <span class="c1"># extract option data</span>
+            <span class="n">meth_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">kind</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">meth</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">meth_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_opt_unassigned</span><span class="p">)</span>  <span class="c1"># type: OptionParser</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type,misc]</span>
+
+            <span class="c1"># record option data</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span>
+            <span class="n">options</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+            <span class="c1"># break when End of Option List (EOOL) triggered</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="n">RegType_OptionNumber</span><span class="o">.</span><span class="n">EOOL</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="c1"># get padding</span>
+        <span class="k">if</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="n">counter</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">options</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_unassigned"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_unassigned">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_unassigned</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_UnassignedOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 unassigned options.</span>
+
+<span class="sd">        Structure of IPv4 unassigned options [:rfc:`791`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">             0                   1                   2                   3</span>
+<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">            |     type      |    length     |         option data ...</span>
+<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``size`` is **LESS THAN** ``3``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_UnassignedOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_eool"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_eool">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_eool</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_EOOLOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 End of Option List (``EOOL``) option.</span>
+
+<span class="sd">        Structure of IPv4 End of Option List (``EOOL``) option [:rfc:`719`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+</span>
+<span class="sd">           |00000000|</span>
+<span class="sd">           +--------+</span>
+<span class="sd">             Type=0</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_EOOLOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_nop"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_nop">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_nop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_NOPOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 No Operation (``NOP``) option.</span>
+
+<span class="sd">        Structure of IPv4 No Operation (``NOP``) option [:rfc:`719`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+</span>
+<span class="sd">           |00000001|</span>
+<span class="sd">           +--------+</span>
+<span class="sd">             Type=1</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_NOPOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_sec"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_sec">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_sec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SECOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Security (``SEC``) option.</span>
+
+<span class="sd">        Structure of IPv4 Security (``SEC``) option [:rfc:`1108`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +------------+------------+------------+-------------//----------+</span>
+<span class="sd">           |  10000010  |  XXXXXXXX  |  SSSSSSSS  |  AAAAAAA[1]    AAAAAAA0 |</span>
+<span class="sd">           |            |            |            |         [0]             |</span>
+<span class="sd">           +------------+------------+------------+-------------//----------+</span>
+<span class="sd">             TYPE = 130     LENGTH   CLASSIFICATION         PROTECTION</span>
+<span class="sd">                                          LEVEL              AUTHORITY</span>
+<span class="sd">                                                               FLAGS</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``size`` is **LESS THAN** ``3``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_clvl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[RegType_ProtectionAuthority, bool]</span>
+            <span class="k">for</span> <span class="n">counter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+                <span class="n">_flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">counter</span> <span class="o">&lt;</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> \
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">counter</span> <span class="o">==</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">bit</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_flag</span><span class="p">):</span>
+                    <span class="n">_auth</span> <span class="o">=</span> <span class="n">RegType_ProtectionAuthority</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">_data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_auth</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bit</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_SECOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">level</span><span class="o">=</span><span class="n">RegType_ClassificationLevel</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_clvl</span><span class="p">),</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">_data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_lsr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_lsr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_lsr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_LSROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Loose Source Route (``LSR``) option.</span>
+
+<span class="sd">        Structure of IPv4 Loose Source Route (``LSR``) option [:rfc:`791`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+--------+--------+---------//--------+</span>
+<span class="sd">           |10000011| length | pointer|     route data    |</span>
+<span class="sd">           +--------+--------+--------+---------//--------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_rptr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_rptr</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[IPv4Address]</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">_rptr</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">endpoint</span><span class="p">:</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">address</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_addr</span><span class="p">())</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_LSROption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">pointer</span><span class="o">=</span><span class="n">_rptr</span><span class="p">,</span>
+            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_ts"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_ts">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TSOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Time Stamp (``TS``) option.</span>
+
+<span class="sd">        Structure of IPv4 Time Stamp (``TS``) option [:rfc:`791`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">           |01000100| length | pointer|oflw|flg|</span>
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">           |         internet address          |</span>
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">           |             timestamp             |</span>
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">           |                 .                 |</span>
+<span class="sd">                             .</span>
+<span class="sd">                             .</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">40</span> <span class="ow">or</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_tptr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_oflg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_oflw</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_oflg</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_tflg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_oflg</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">_tptr</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_flag</span> <span class="o">=</span> <span class="n">RegType_TSFlag</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_tflg</span><span class="p">)</span>
+
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">_tptr</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_flag</span> <span class="o">==</span> <span class="n">RegType_TSFlag</span><span class="o">.</span><span class="n">Timestamp_Only</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+            <span class="n">counter</span> <span class="o">=</span> <span class="mi">5</span>
+
+            <span class="n">_tsls</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[dt_type]</span>
+            <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">endpoint</span><span class="p">:</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">4</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">_tsls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_tsls</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="n">_flag</span> <span class="ow">in</span> <span class="p">(</span><span class="n">RegType_TSFlag</span><span class="o">.</span><span class="n">IP_with_Timestamp</span><span class="p">,</span> <span class="n">RegType_TSFlag</span><span class="o">.</span><span class="n">Prespecified_IP_with_Timestamp</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">8</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+            <span class="n">counter</span> <span class="o">=</span> <span class="mi">5</span>
+            <span class="n">_tsdt</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[IPv4Address, dt_type]</span>
+            <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">endpoint</span><span class="p">:</span>
+                <span class="n">counter</span> <span class="o">+=</span> <span class="mi">8</span>
+                <span class="n">ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_addr</span><span class="p">()</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">_tsdt</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">time</span><span class="p">))</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">_tsdt</span> <span class="ow">or</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">4</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_TSOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">pointer</span><span class="o">=</span><span class="n">_tptr</span><span class="p">,</span>
+            <span class="n">overflow</span><span class="o">=</span><span class="n">_oflw</span><span class="p">,</span>
+            <span class="n">flag</span><span class="o">=</span><span class="n">_flag</span><span class="p">,</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_esec"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_esec">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_esec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_ESECOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Extended Security (``ESEC``) option.</span>
+
+<span class="sd">        Structure of IPv4 Extended Security (``ESEC``) option [:rfc:`1108`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +------------+------------+------------+-------//-------+</span>
+<span class="sd">           |  10000101  |  000LLLLL  |  AAAAAAAA  |  add sec info  |</span>
+<span class="sd">           +------------+------------+------------+-------//-------+</span>
+<span class="sd">            TYPE = 133      LENGTH     ADDITIONAL      ADDITIONAL</span>
+<span class="sd">                                      SECURITY INFO     SECURITY</span>
+<span class="sd">                                       FORMAT CODE        INFO</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``size`` is **LESS THAN** ``3``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_clvl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[RegType_ProtectionAuthority, bool]</span>
+            <span class="k">for</span> <span class="n">counter</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
+                <span class="n">_flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">counter</span> <span class="o">&lt;</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">)</span> \
+                        <span class="ow">or</span> <span class="p">(</span><span class="n">counter</span> <span class="o">==</span> <span class="n">size</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">_flag</span><span class="p">[</span><span class="mi">7</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+                <span class="k">for</span> <span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">bit</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">_flag</span><span class="p">):</span>
+                    <span class="n">_auth</span> <span class="o">=</span> <span class="n">RegType_ProtectionAuthority</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+                    <span class="n">_data</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">_auth</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">bit</span><span class="p">,</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_data</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_ESECOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">level</span><span class="o">=</span><span class="n">RegType_ClassificationLevel</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_clvl</span><span class="p">),</span>
+            <span class="n">flags</span><span class="o">=</span><span class="n">_data</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_rr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_rr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_rr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Record Route (``RR``) option.</span>
+
+<span class="sd">        Structure of IPv4 Record Route (``RR``) option [:rfc:`791`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+--------+--------+---------//--------+</span>
+<span class="sd">           |00000111| length | pointer|     route data    |</span>
+<span class="sd">           +--------+--------+--------+---------//--------+</span>
+<span class="sd">             Type=7</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_rptr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_rptr</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[IPv4Address]</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">_rptr</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">endpoint</span><span class="p">:</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">address</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_addr</span><span class="p">())</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_RROption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">pointer</span><span class="o">=</span><span class="n">_rptr</span><span class="p">,</span>
+            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_sid"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_sid">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_sid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SIDOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Stream ID (``SID``) option.</span>
+
+<span class="sd">        Structure of IPv4 Stream ID (``SID``) option [:rfc:`791`][:rfc:`6814`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">           |10001000|00000010|    Stream ID    |</span>
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">            Type=136 Length=4</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``size`` is **NOT** ``4``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_SIDOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">sid</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_ssr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_ssr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_ssr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_SSROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Strict Source Route (``SSR``) option.</span>
+
+<span class="sd">        Structure of IPv4 Strict Source Route (``SSR``) option [:rfc:`791`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+--------+--------+---------//--------+</span>
+<span class="sd">           |10001001| length | pointer|     route data    |</span>
+<span class="sd">           +--------+--------+--------+---------//--------+</span>
+<span class="sd">            Type=137</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="mi">3</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_rptr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_rptr</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">counter</span> <span class="o">=</span> <span class="mi">4</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[IPv4Address]</span>
+        <span class="n">endpoint</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">_rptr</span><span class="p">,</span> <span class="n">size</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">counter</span> <span class="o">&lt;</span> <span class="n">endpoint</span><span class="p">:</span>
+            <span class="n">counter</span> <span class="o">+=</span> <span class="mi">4</span>
+            <span class="n">address</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_addr</span><span class="p">())</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_SSROption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">pointer</span><span class="o">=</span><span class="n">_rptr</span><span class="p">,</span>
+            <span class="n">route</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">address</span><span class="p">)</span> <span class="ow">or</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_mtup"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtup">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mtup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MTUPOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 MTU Probe (``MTUP``) option.</span>
+
+<span class="sd">        Structure of IPv4 MTU Probe (``MTUP``) option [:rfc:`1063`][:rfc:`1191`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">           |00001011|00000100|   2 octet value |</span>
+<span class="sd">           +--------+--------+--------+--------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``size`` is **NOT** ``4``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MTUPOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">mtu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_mtur"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_mtur">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_mtur</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_MTUROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 MTU Reply (``MTUR``) option.</span>
+
+<span class="sd">        Structure of IPv4 MTU Reply (``MTUR``) option [:rfc:`1063`][:rfc:`1191`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">           |00001100|00000100|   2 octet value |</span>
+<span class="sd">           +--------+--------+--------+--------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``size`` is **NOT** ``4``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_MTUROption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">mtu</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="n">size</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_tr"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_tr">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_tr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_TROption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Traceroute (``TR``) option.</span>
+
+<span class="sd">        Structure of IPv4 Traceroute (``TR``) option [:rfc:`1393`][:rfc:`6814`]:</span>
+
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0               8              16              24</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+---------------+---------------+---------------+</span>
+<span class="sd">           |F| C |  Number |    Length     |          ID Number            |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+---------------+---------------+---------------+</span>
+<span class="sd">           |      Outbound Hop Count       |       Return Hop Count        |</span>
+<span class="sd">           +---------------+---------------+---------------+---------------+</span>
+<span class="sd">           |                     Originator IP Address                     |</span>
+<span class="sd">           +---------------+---------------+---------------+---------------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``size`` is **NOT** ``12``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">12</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_idnm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_ohcn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_rhcn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_ipad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_addr</span><span class="p">()</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_TROption</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
+            <span class="s1">&#39;code&#39;</span><span class="p">:</span> <span class="n">kind</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="s1">&#39;length&#39;</span><span class="p">:</span> <span class="n">size</span><span class="p">,</span>
+            <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="n">_idnm</span><span class="p">,</span>
+            <span class="s1">&#39;outbound&#39;</span><span class="p">:</span> <span class="n">_ohcn</span><span class="p">,</span>
+            <span class="s1">&#39;return&#39;</span><span class="p">:</span> <span class="n">_rhcn</span><span class="p">,</span>
+            <span class="s1">&#39;originator&#39;</span><span class="p">:</span> <span class="n">_ipad</span><span class="p">,</span>
+        <span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">data</span>  <span class="c1"># type: ignore[return-value]</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_rsralt"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_rsralt">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_rsralt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_RTRALTOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Router Alert (``RTRALT``) option.</span>
+
+<span class="sd">        Structure of IPv4 Router Alert (``RTRALT``) option [:rfc:`2113`]:</span>
+
+<span class="sd">        .. code:: text</span>
+
+<span class="sd">           +--------+--------+--------+--------+</span>
+<span class="sd">           |10010100|00000100|  2 octet value  |</span>
+<span class="sd">           +--------+--------+--------+--------+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If ``size`` is **NOT** ``4``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_code</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_RTRALTOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">alert</span><span class="o">=</span><span class="n">RegType_RouterAlert</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_code</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="IPv4._read_opt_qs"><a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4._read_opt_qs">[docs]</a>    <span class="k">def</span> <span class="nf">_read_opt_qs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">&#39;RegType_OptionNumber&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">options</span><span class="p">:</span> <span class="s1">&#39;Option&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_QSOption&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Read IPv4 Quick Start (``QS``) option.</span>
+
+<span class="sd">        Structure of IPv4 Quick Start (``QS``) option [:rfc:`4782`]:</span>
+
+<span class="sd">        * A Quick-Start Request</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">              0                   1                   2                   3</span>
+<span class="sd">              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |   Option      |  Length=8     | Func. | Rate  |   QS TTL      |</span>
+<span class="sd">             |               |               | 0000  |Request|               |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |                        QS Nonce                           | R |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        * Report of Approved Rate</span>
+
+<span class="sd">          .. code-block:: text</span>
+
+<span class="sd">              0                   1                   2                   3</span>
+<span class="sd">              0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |   Option      |  Length=8     | Func. | Rate  |   Not Used    |</span>
+<span class="sd">             |               |               | 1000  | Report|               |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">             |                        QS Nonce                           | R |</span>
+<span class="sd">             +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            kind: option type code</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            options: extracted IPv4 options</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed option data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ProtocolError: If the option is malformed.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">size</span> <span class="o">!=</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">_fcrr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_func</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_fcrr</span><span class="p">[:</span><span class="mi">4</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_rate</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_fcrr</span><span class="p">[</span><span class="mi">4</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_ttlv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">_nonr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_binary</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+        <span class="n">_qsnn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_nonr</span><span class="p">[:</span><span class="mi">30</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">_qsfn</span> <span class="o">=</span> <span class="n">RegType_QSFunction</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_func</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_qsfn</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">RegType_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span><span class="p">,</span> <span class="n">RegType_QSFunction</span><span class="o">.</span><span class="n">Report_of_Approved_Rate</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">] invalid format&#39;</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">DataType_QSOption</span><span class="p">(</span>
+            <span class="n">code</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+            <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">kind</span><span class="p">),</span>
+            <span class="n">length</span><span class="o">=</span><span class="n">size</span><span class="p">,</span>
+            <span class="n">func</span><span class="o">=</span><span class="n">_qsfn</span><span class="p">,</span>
+            <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">_rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span><span class="p">,</span>
+            <span class="n">ttl</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">_func</span> <span class="o">!=</span> <span class="n">RegType_QSFunction</span><span class="o">.</span><span class="n">Quick_Start_Request</span> <span class="k">else</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">_ttlv</span><span class="p">),</span>
+            <span class="n">nounce</span><span class="o">=</span><span class="n">_qsnn</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

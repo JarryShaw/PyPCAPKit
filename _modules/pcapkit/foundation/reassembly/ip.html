@@ -1,0 +1,379 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.foundation.reassembly.ip &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.foundation.reassembly.ip</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;IP Datagram Reassembly</span>
+<span class="sd">============================</span>
+
+<span class="sd">:mod:`pcapkit.foundation.reassembly.ip` contains</span>
+<span class="sd">:class:`~pcapkit.foundation.reassembly.ip.IP_Reassembly`</span>
+<span class="sd">only, which reconstructs fragmented IP packets back to</span>
+<span class="sd">origin. The following algorithm implement is based on IP</span>
+<span class="sd">reassembly procedure introduced in :rfc:`791`, using</span>
+<span class="sd">``RCVBT`` (fragment receivedbit table). Though another</span>
+<span class="sd">algorithm is explained in :rfc:`815`, replacing ``RCVBT``,</span>
+<span class="sd">however, this implement still used the elder one.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.corekit.infoclass</span> <span class="kn">import</span> <span class="n">Info</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.reassembly</span> <span class="kn">import</span> <span class="n">Reassembly</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">overload</span>
+
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;IP_Reassembly&#39;</span><span class="p">]</span>
+
+<span class="n">AT</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;AT&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6Address&#39;</span><span class="p">)</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Data Models</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="Packet"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.Packet">[docs]</a><span class="k">class</span> <span class="nc">Packet</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.packet` / :term:`ipv6.packet`.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Buffer ID.</span>
+    <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;tuple[AT, AT, int, TransType]&#39;</span>
+    <span class="c1">#: Original packet range number.</span>
+    <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Fragment offset.</span>
+    <span class="n">fo</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Internet header length.</span>
+    <span class="n">ihl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: More fragments flag.</span>
+    <span class="n">mf</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="c1">#: Total length, header included.</span>
+    <span class="n">tl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Raw :obj:`bytes` type header.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Raw :obj:`bytearray` type payload.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;tuple[AT, AT, int, TransType]&#39;</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">fo</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ihl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">mf</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="n">tl</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+
+
+<div class="viewcode-block" id="DatagramID"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.DatagramID">[docs]</a><span class="k">class</span> <span class="nc">DatagramID</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.datagram` / :term:`ipv6.datagram` original packet identifier.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Source address.</span>
+    <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;AT&#39;</span>
+    <span class="c1">#: Destination address.</span>
+    <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;AT&#39;</span>
+    <span class="c1">#: IP protocol identifier.</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Payload protocol type.</span>
+    <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">src</span><span class="p">:</span> <span class="s1">&#39;AT&#39;</span><span class="p">,</span> <span class="n">dst</span><span class="p">:</span> <span class="s1">&#39;AT&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+
+
+<div class="viewcode-block" id="Datagram"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.Datagram">[docs]</a><span class="k">class</span> <span class="nc">Datagram</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.datagram` / :term:`ipv6.datagram`.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Completed flag.</span>
+    <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span>
+    <span class="c1">#: Original packet identifier.</span>
+    <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;DatagramID[AT]&#39;</span>
+    <span class="c1">#: Packet numbers.</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span>
+    <span class="c1">#: Initial IP header.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Reassembled IP payload.</span>
+    <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | tuple[bytes, ...]&#39;</span>
+    <span class="c1">#: Parsed IP payload.</span>
+    <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[Protocol]&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="nd">@overload</span>  <span class="c1">#pylint: disable=used-before-assignment</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;Literal[True]&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;DatagramID[AT]&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Protocol&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+
+        <span class="nd">@overload</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;Literal[False]&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;DatagramID[AT]&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;tuple[bytes, ...]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span>
+
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">completed</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">&#39;DatagramID[AT]&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;tuple[int, ...]&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">&#39;bytes | tuple[bytes, ...]&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Optional[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+
+
+<div class="viewcode-block" id="Buffer"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.Buffer">[docs]</a><span class="k">class</span> <span class="nc">Buffer</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Data model for :term:`ipv4.buffer` / :term:`ipv6.buffer`.&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Total data length.</span>
+    <span class="n">TDL</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span>
+    <span class="c1">#: Fragment received bit table.</span>
+    <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span>
+    <span class="c1">#: List of reassembled packets.</span>
+    <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span>
+    <span class="c1">#: Header buffer.</span>
+    <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span>
+    <span class="c1">#: Data buffer, holes set to ``b&#39;\x00&#39;``.</span>
+    <span class="n">datagram</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span>
+
+    <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">TDL</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">RCVBT</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">&#39;list[int]&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">&#39;bytearray&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>  <span class="c1"># pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Algorithm Implementation</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="IP_Reassembly"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly">[docs]</a><span class="k">class</span> <span class="nc">IP_Reassembly</span><span class="p">(</span><span class="n">Reassembly</span><span class="p">[</span><span class="n">Packet</span><span class="p">[</span><span class="n">AT</span><span class="p">],</span> <span class="n">Datagram</span><span class="p">[</span><span class="n">AT</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">AT</span><span class="p">,</span> <span class="n">AT</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;TransType&#39;</span><span class="p">],</span> <span class="n">Buffer</span><span class="p">[</span><span class="n">AT</span><span class="p">]],</span> <span class="n">Generic</span><span class="p">[</span><span class="n">AT</span><span class="p">]):</span>  <span class="c1"># pylint: disable=abstract-method</span>
+    <span class="sd">&quot;&quot;&quot;Reassembly for IP payload.</span>
+
+<span class="sd">    Important:</span>
+<span class="sd">        This class is not intended to be instantiated directly,</span>
+<span class="sd">        but rather used as a base class for the protocol-aware</span>
+<span class="sd">        reassembly classes.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="IP_Reassembly.reassembly"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly.reassembly">[docs]</a>    <span class="k">def</span> <span class="nf">reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info</span><span class="p">:</span> <span class="s1">&#39;Packet[AT]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reassembly procedure.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            info: info dict of packets to be reassembled</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">BUFID</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">bufid</span>  <span class="c1"># Buffer Identifier</span>
+        <span class="n">FO</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">fo</span>        <span class="c1"># Fragment Offset</span>
+        <span class="n">IHL</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">ihl</span>      <span class="c1"># Internet Header Length</span>
+        <span class="n">MF</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">mf</span>        <span class="c1"># More Fragments flag</span>
+        <span class="n">TL</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">tl</span>        <span class="c1"># Total Length</span>
+
+        <span class="c1"># when non-fragmented (possibly discarded) packet received</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">return</span>
+
+        <span class="c1"># initialise buffer with BUFID</span>
+        <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
+                <span class="n">TDL</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>
+                <span class="n">RCVBT</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">8191</span><span class="p">),</span>              <span class="c1"># Fragment Received Bit Table</span>
+                <span class="n">index</span><span class="o">=</span><span class="p">[],</span>                           <span class="c1"># index record</span>
+                <span class="n">header</span><span class="o">=</span><span class="sa">b</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">FO</span> <span class="k">else</span> <span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>  <span class="c1"># header buffer</span>
+                <span class="n">datagram</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="mi">65535</span><span class="p">),</span>          <span class="c1"># data buffer</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># put header into header buffer</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">FO</span><span class="p">:</span>  <span class="c1"># pylint: disable=else-if-used</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="n">info</span><span class="o">.</span><span class="n">header</span><span class="p">)</span>
+
+        <span class="c1"># append packet index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">num</span><span class="p">)</span>
+
+        <span class="c1"># put data into data buffer</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">FO</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="n">FO</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">datagram</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">payload</span>
+
+        <span class="c1"># set RCVBT bits (in 8 octets)</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span> <span class="o">+</span> <span class="p">(</span><span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x01</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">stop</span> <span class="o">-</span> <span class="n">start</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># get total data length (header excludes)</span>
+        <span class="n">TDL</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
+            <span class="n">TDL</span> <span class="o">=</span> <span class="n">TL</span> <span class="o">-</span> <span class="n">IHL</span> <span class="o">+</span> <span class="n">FO</span>
+
+        <span class="c1"># when datagram is reassembled in whole</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="k">if</span> <span class="n">TDL</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dtgram</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">BUFID</span><span class="p">),</span> <span class="n">bufid</span><span class="o">=</span><span class="n">BUFID</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="IP_Reassembly.submit"><a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly.submit">[docs]</a>    <span class="k">def</span> <span class="nf">submit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buf</span><span class="p">:</span> <span class="s1">&#39;Buffer[AT]&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">&#39;tuple[AT, AT, int, TransType]&#39;</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+               <span class="n">checked</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[Datagram[AT]]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Submit reassembled payload.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            buf: buffer dict of reassembled packets</span>
+<span class="sd">            bufid: buffer identifier</span>
+<span class="sd">            checked: buffer consistency checked flag</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Reassembled packets.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">TDL</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">TDL</span>
+        <span class="n">RCVBT</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">header</span>
+        <span class="n">datagram</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">datagram</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="n">checked</span> <span class="ow">or</span> <span class="p">(</span><span class="n">TDL</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">RCVBT</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">stop</span><span class="p">]))</span>
+        <span class="c1"># if datagram is not implemented</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">flag</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_strflg</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
+            <span class="n">byte</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+            <span class="c1"># extract received payload</span>
+            <span class="k">for</span> <span class="p">(</span><span class="n">bctr</span><span class="p">,</span> <span class="n">bit</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">RCVBT</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">bit</span><span class="p">:</span>     <span class="c1"># received bit</span>
+                    <span class="n">this</span> <span class="o">=</span> <span class="n">bctr</span> <span class="o">*</span> <span class="mi">8</span>
+                    <span class="n">that</span> <span class="o">=</span> <span class="n">this</span> <span class="o">+</span> <span class="mi">8</span>
+                    <span class="n">byte</span> <span class="o">+=</span> <span class="n">datagram</span><span class="p">[</span><span class="n">this</span><span class="p">:</span><span class="n">that</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>       <span class="c1"># missing bit</span>
+                    <span class="k">if</span> <span class="n">byte</span><span class="p">:</span>    <span class="c1"># strip empty payload</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
+                    <span class="n">byte</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">()</span>
+            <span class="c1"># strip empty packets</span>
+            <span class="k">if</span> <span class="n">data</span> <span class="ow">or</span> <span class="n">header</span><span class="p">:</span>
+                <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
+                    <span class="n">completed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
+                        <span class="n">src</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">dst</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="nb">id</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                        <span class="n">proto</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                    <span class="p">),</span>
+                    <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
+                    <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
+                    <span class="n">payload</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+                    <span class="n">packet</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="c1"># if datagram is reassembled in whole</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">payload</span> <span class="o">=</span> <span class="n">datagram</span><span class="p">[:</span><span class="n">TDL</span><span class="p">]</span>
+            <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
+                <span class="n">completed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>
+                    <span class="n">src</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">dst</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="nb">id</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>
+                    <span class="n">proto</span><span class="o">=</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>
+                <span class="p">),</span>
+                <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
+                <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
+                <span class="n">payload</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span>
+                <span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">(</span><span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">)),</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">packet</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

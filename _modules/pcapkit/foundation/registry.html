@@ -1,0 +1,664 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.foundation.registry &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.foundation.registry</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Registry Management</span>
+<span class="sd">=========================</span>
+
+<span class="sd">This module provides the registry management for :mod:`pcapkit`, as the module</span>
+<span class="sd">contains various registry points.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span> <span class="nn">dictdumper</span> <span class="kn">import</span> <span class="n">Dumper</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.extraction</span> <span class="kn">import</span> <span class="n">Extractor</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">TraceFlow</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols</span> <span class="kn">import</span> <span class="n">__proto__</span> <span class="k">as</span> <span class="n">protocol_registry</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">HTTPv2</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.hopopt</span> <span class="kn">import</span> <span class="n">HOPOPT</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.internet</span> <span class="kn">import</span> <span class="n">Internet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">IPv6_Opts</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">IPv6_Route</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">TCP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.udp</span> <span class="kn">import</span> <span class="n">UDP</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">RegistryError</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.logging</span> <span class="kn">import</span> <span class="n">logger</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span>
+
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.const.http.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">HTTP_Frame</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">IPv6_Option</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.ipv6.routing</span> <span class="kn">import</span> <span class="n">Routing</span> <span class="k">as</span> <span class="n">IPv6_Routing</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.ethertype</span> <span class="kn">import</span> <span class="n">EtherType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.mp_tcp_option</span> <span class="kn">import</span> <span class="n">MPTCPOption</span> <span class="k">as</span> <span class="n">TCP_MPTCPOption</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.const.tcp.option</span> <span class="kn">import</span> <span class="n">Option</span> <span class="k">as</span> <span class="n">TCP_Option</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.application.httpv2</span> <span class="kn">import</span> <span class="n">FrameParser</span> <span class="k">as</span> <span class="n">HTTP_FrameParser</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.hopopt</span> <span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">HOPOPT_OptionParser</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipv6_opts</span> <span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">IPv6_Opts_OptionParser</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.internet.ipv6_route</span> <span class="kn">import</span> <span class="n">TypeParser</span> <span class="k">as</span> <span class="n">IPv6_Route_TypeParser</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">MPOptionParser</span> <span class="k">as</span> <span class="n">TCP_MPOptionParser</span>
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.transport.tcp</span> <span class="kn">import</span> <span class="n">OptionParser</span> <span class="k">as</span> <span class="n">TCP_OptionParser</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;register_protocol&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;register_linktype&#39;</span><span class="p">,</span> <span class="s1">&#39;register_pcap&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;register_ethertype&#39;</span><span class="p">,</span> <span class="s1">&#39;register_transtype&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;register_port&#39;</span><span class="p">,</span> <span class="s1">&#39;register_tcp_port&#39;</span><span class="p">,</span> <span class="s1">&#39;register_udp_port&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;register_output&#39;</span><span class="p">,</span> <span class="s1">&#39;register_extractor&#39;</span><span class="p">,</span> <span class="s1">&#39;register_traceflow&#39;</span><span class="p">,</span>
+
+    <span class="s1">&#39;register_hopopt&#39;</span><span class="p">,</span> <span class="s1">&#39;register_ipv6_opts&#39;</span><span class="p">,</span> <span class="s1">&#39;register_ipv6_route&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;register_tcp&#39;</span><span class="p">,</span> <span class="s1">&#39;register_mptcp&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;register_http&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.Protocol.__proto__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_protocol"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_protocol">[docs]</a><span class="k">def</span> <span class="nf">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;registered protocol class.</span>
+
+<span class="sd">    The protocol class must be a subclass of</span>
+<span class="sd">    :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to</span>
+<span class="sd">    the :data:`pcapkit.protocols.Protocol.__proto__` registry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        protocol: Protocol class.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">protocol_registry</span><span class="p">[</span><span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="o">=</span> <span class="n">protocol</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">protocol</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.foundation.extraction.Extractor.__output__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_extractor"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_extractor">[docs]</a><span class="k">def</span> <span class="nf">register_extractor</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new dumper class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given dumper class to the</span>
+<span class="sd">    :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        format: format name</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+<span class="sd">        ext: file extension</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dumper</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;dumper must be a Dumper subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">Extractor</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered extractor output: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.foundation.traceflow.TraceFlow.__output__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_traceflow"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_traceflow">[docs]</a><span class="k">def</span> <span class="nf">register_traceflow</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new dumper class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given dumper class to the</span>
+<span class="sd">    :data:`pcapkit.foundation.traceflow.TraceFlow.__output__` registry.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        format: format name</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+<span class="sd">        ext: file extension</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dumper</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;dumper must be a Dumper subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">TraceFlow</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered traceflow output: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.application.httpv2.HTTPv2.__frame__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_http"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_http">[docs]</a><span class="k">def</span> <span class="nf">register_http</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;HTTP_Frame&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | HTTP_FrameParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;registered a frame parser.</span>
+
+<span class="sd">    The function will register the given frame parser to the</span>
+<span class="sd">    :data:`pcapkit.protocols.application.httpv2.HTTPv2.__frame__` registry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: :class:`HTTP/2 &lt;pcapkit.protocols.application.httpv2.HTTPv2&gt;` frame type</span>
+<span class="sd">            code as in :class:`~pcapkit.const.http.frame.Frame`.</span>
+<span class="sd">        meth: Method name or callable to parse the frame.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HTTPv2</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_http_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a frame parser function&#39;</span><span class="p">)</span>
+
+    <span class="n">HTTPv2</span><span class="o">.</span><span class="n">register_frame</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered HTTP/2 frame parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.internet.hopopt.HOPOPT.__option__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_hopopt"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_hopopt">[docs]</a><span class="k">def</span> <span class="nf">register_hopopt</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | HOPOPT_OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+
+<span class="sd">    The function will register the given option parser to the</span>
+<span class="sd">    :data:`pcapkit.protocols.internet.hopopt.HOPOPT.__option__` registry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` option code as</span>
+<span class="sd">            in :class:`~pcapkit.const.ipv6.option.Option`.</span>
+<span class="sd">        meth: Method name or callable to parse the option.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">HOPOPT</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a HOPOPT option parser function&#39;</span><span class="p">)</span>
+
+    <span class="n">HOPOPT</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered HOPOPT option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.internet.internet.Internet.__proto__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_transtype"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_transtype">[docs]</a><span class="k">def</span> <span class="nf">register_transtype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TransType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given protocol class to the</span>
+<span class="sd">    :data:`pcapkit.protocols.internet.internet.Internet.__proto__` registry.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">Internet</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered transtype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># register protocol to protocol registry</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_ipv6_opts"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_ipv6_opts">[docs]</a><span class="k">def</span> <span class="nf">register_ipv6_opts</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | IPv6_Opts_OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+
+<span class="sd">    The function will register the given option parser to the</span>
+<span class="sd">    :data:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.__option__` registry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: :class:`IPv6-Opts &lt;pcapkit.protocols.internet.ipv6_opts.IPv6_Opts&gt;`</span>
+<span class="sd">            option code as in :class:`~pcapkit.const.ipv6.option.Option`.</span>
+<span class="sd">        meth: Method name or callable to parse the option.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">IPv6_Opts</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_opt_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a IPv6_Opts option parser function&#39;</span><span class="p">)</span>
+
+    <span class="n">IPv6_Opts</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv6_Opts option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_ipv6_route"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_ipv6_route">[docs]</a><span class="k">def</span> <span class="nf">register_ipv6_route</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;IPv6_Routing&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | IPv6_Route_TypeParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register an routing data parser.</span>
+
+<span class="sd">    The function will register the given routing data parser to the</span>
+<span class="sd">    :data:`pcapkit.protocols.internet.ipv6_route.IPv6_Route.__routing__` registry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: :class:`IPv6-Route &lt;pcapkit.protocols.internet.ipv6_route.IPv6_Route&gt;`</span>
+<span class="sd">            data type code as in :class:`~pcapkit.const.ipv6.routing.Routing`.</span>
+<span class="sd">        meth: Method name or callable to parse the data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">IPv6_Route</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_data_type_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a IPv6_Route routing data parser function&#39;</span><span class="p">)</span>
+
+    <span class="n">IPv6_Route</span><span class="o">.</span><span class="n">register_routing</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered IPv6_Route routing data parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.link.link.Link.__proto__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_ethertype"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_ethertype">[docs]</a><span class="k">def</span> <span class="nf">register_ethertype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;EtherType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given protocol class to the</span>
+<span class="sd">    :data:`pcapkit.protocols.link.link.Link.__proto__` registry.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.ethertype.EtherType`</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">Link</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered ethertype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># register protocol to protocol registry</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.misc.pcap.frame.Frame.__proto__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_pcap"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_pcap">[docs]</a><span class="k">def</span> <span class="nf">register_pcap</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given protocol class to the</span>
+<span class="sd">    :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__` registry.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered PCAP frame protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># register protocol to protocol registry</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.transport.tcp.TCP.__option__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_tcp"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_tcp">[docs]</a><span class="k">def</span> <span class="nf">register_tcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_Option&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | TCP_OptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Register an option parser.</span>
+
+<span class="sd">    The function will register the given option parser to the</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__option__` registry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in</span>
+<span class="sd">            :class:`~pcapkit.const.tcp.option.Option`.</span>
+<span class="sd">        meth: Method name or callable to parse the option.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_mode_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a TCP option parser function&#39;</span><span class="p">)</span>
+
+    <span class="n">TCP</span><span class="o">.</span><span class="n">register_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered TCP option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.transport.tcp.TCP.__mp_option__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_mptcp"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_mptcp">[docs]</a><span class="k">def</span> <span class="nf">register_mptcp</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;TCP_MPTCPOption&#39;</span><span class="p">,</span> <span class="n">meth</span><span class="p">:</span> <span class="s1">&#39;str | TCP_MPOptionParser&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Register an MPTCP option parser.</span>
+
+<span class="sd">    The function will register the given option parser to the</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__mp_option__` registry.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        code: Multipath :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in</span>
+<span class="sd">            :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.</span>
+<span class="sd">        meth: Method name or callable to parse the option.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">meth</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TCP</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;_read_mptcp_</span><span class="si">{</span><span class="n">meth</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;method must be a MPTCP option parser function&#39;</span><span class="p">)</span>
+
+    <span class="n">TCP</span><span class="o">.</span><span class="n">register_mp_option</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered MPTCP option parser: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.transport.tcp.TCP.__proto__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_tcp_port"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_tcp_port">[docs]</a><span class="k">def</span> <span class="nf">register_tcp_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given protocol class to the</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` registry.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: port number</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">TCP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered TCP port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+
+    <span class="c1"># register protocol to protocol registry</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># pcapkit.protocols.transport.udp.UDP.__proto__</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_udp_port"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_udp_port">[docs]</a><span class="k">def</span> <span class="nf">register_udp_port</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given protocol class to the</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: port number</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">UDP</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered UDP port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">)</span>
+
+    <span class="c1"># register protocol to protocol registry</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># Combinations</span>
+<span class="c1">###############################################################################</span>
+
+
+<div class="viewcode-block" id="register_output"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_output">[docs]</a><span class="k">def</span> <span class="nf">register_output</span><span class="p">(</span><span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">ext</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;registered a new dumper class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new dumper class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given dumper class to the</span>
+<span class="sd">    :data:`pcapkit.foundation.traceflow.TraceFlow.__output__` and</span>
+<span class="sd">    :data:`pcapkit.foundation.extraction.Extractor.__output__` registry.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`pcapkit.foundation.registry.register_extractor`</span>
+<span class="sd">        * :func:`pcapkit.foundation.registry.register_traceflow`</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        format: format name</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+<span class="sd">        ext: file extension</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dumper</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">dumper</span><span class="p">,</span> <span class="n">Dumper</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;dumper must be a Dumper subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">Extractor</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">TraceFlow</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="nb">format</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">,</span> <span class="n">ext</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered output format: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">dumper</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register_linktype"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_linktype">[docs]</a><span class="k">def</span> <span class="nf">register_linktype</span><span class="p">(</span><span class="n">code</span><span class="p">:</span> <span class="s1">&#39;LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given protocol class to the</span>
+<span class="sd">    :data:`pcapkit.protocols.misc.pcap.frame.Frame.__proto__` registry.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`pcapkit.foundation.registry.register_pcap`</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+
+    <span class="n">Frame</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered linktype protocol: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">code</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># register protocol to protocol registry</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="register_port"><a class="viewcode-back" href="../../../pcapkit/foundation/registry.html#pcapkit.foundation.registry.register_port">[docs]</a><span class="k">def</span> <span class="nf">register_port</span><span class="p">(</span><span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;tcp&quot;, &quot;udp&quot;]&#39;</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        The full qualified class name of the new protocol class</span>
+<span class="sd">        should be as ``{module}.{class_}``.</span>
+
+<span class="sd">    The function will register the given protocol class to the</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.tcp.TCP.__proto__` and/or</span>
+<span class="sd">    :data:`pcapkit.protocols.transport.udp.UDP.__proto__` registry.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        * :func:`pcapkit.foundation.registry.register_tcp_port`</span>
+<span class="sd">        * :func:`pcapkit.foundation.registry.register_udp_port`</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        proto: protocol name (must be ``tcp`` or ``udp``)</span>
+<span class="sd">        code: port number</span>
+<span class="sd">        module: module name</span>
+<span class="sd">        class\_: class name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">proto</span> <span class="o">==</span> <span class="s1">&#39;tcp&#39;</span><span class="p">:</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">TCP</span>
+    <span class="k">elif</span> <span class="n">proto</span> <span class="o">==</span> <span class="s1">&#39;udp&#39;</span><span class="p">:</span>
+        <span class="bp">cls</span> <span class="o">=</span> <span class="n">UDP</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be &quot;tcp&quot; or &quot;udp&quot;&#39;</span><span class="p">)</span>
+
+    <span class="n">protocol</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="n">module</span><span class="p">),</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">RegistryError</span><span class="p">(</span><span class="s1">&#39;protocol must be a Protocol subclass&#39;</span><span class="p">)</span>
+
+    <span class="bp">cls</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;registered </span><span class="si">%s</span><span class="s1"> port: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="n">code</span><span class="p">)</span>
+
+    <span class="c1"># register protocol to protocol registry</span>
+    <span class="n">register_protocol</span><span class="p">(</span><span class="n">protocol</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

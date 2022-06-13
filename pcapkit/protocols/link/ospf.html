@@ -36,10 +36,10 @@
             
   <section id="ospf-open-shortest-path-first">
 <h1>OSPF - Open Shortest Path First<a class="headerlink" href="#ospf-open-shortest-path-first" title="Permalink to this heading">¶</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.ospf</span></code> contains
-<code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code> only,
+<p><a class="reference internal" href="#module-pcapkit.protocols.link.ospf" title="pcapkit.protocols.link.ospf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.ospf</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.link.ospf.OSPF" title="pcapkit.protocols.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> only,
 which implements extractor for Open Shortest Path
-First (OSPF) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described
+First (OSPF) <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described
 as below:</p>
 <table class="docutils align-default">
 <thead>
@@ -92,7 +92,212 @@ as below:</p>
 </tr>
 </tbody>
 </table>
-<br /><section id="data-structure">
+<br /><span class="target" id="module-pcapkit.protocols.link.ospf"></span><p>open shortest path first</p>
+<p><a class="reference internal" href="#module-pcapkit.protocols.link.ospf" title="pcapkit.protocols.link.ospf"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.ospf</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.link.ospf.OSPF" title="pcapkit.protocols.link.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a> only,
+which implements extractor for Open Shortest Path
+First (OSPF) <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a>, whose structure is described
+as below:</p>
+<p>+========+=======+====================+=================================+
+| Octets | Bits  | Name               | Description                     |
++========+=======+====================+=================================+
+| 0      |     0 | <code class="docutils literal notranslate"><span class="pre">ospf.version</span></code>   | Version Number                  |
++——–+——-+——————–+———————————+
+| 0      |     0 | <code class="docutils literal notranslate"><span class="pre">ospf.type</span></code>      | Type                            |
++——–+——-+——————–+———————————+
+| 0      |     1 | <code class="docutils literal notranslate"><span class="pre">ospf.len</span></code>       | Packet Length (header included) |
++——–+——-+——————–+———————————+
+| 0      |     2 | <code class="docutils literal notranslate"><span class="pre">ospf.router_id</span></code> | Router ID                       |
++——–+——-+——————–+———————————+
+| 0      |     4 | <code class="docutils literal notranslate"><span class="pre">ospf.area_id</span></code>   | Area ID                         |
++——–+——-+——————–+———————————+
+| 0      |     6 | <code class="docutils literal notranslate"><span class="pre">ospf.chksum</span></code>    | Checksum                        |
++——–+——-+——————–+———————————+
+| 0      |     7 | <code class="docutils literal notranslate"><span class="pre">ospf.autype</span></code>    | Authentication Type             |
++——–+——-+——————–+———————————+
+| 1      |     8 | <code class="docutils literal notranslate"><span class="pre">ospf.auth</span></code>      | Authentication                  |
++——–+——-+——————–+———————————+</p>
+<aside class="footnote brackets" id="id3" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="https://en.wikipedia.org/wiki/Open_Shortest_Path_First">https://en.wikipedia.org/wiki/Open_Shortest_Path_First</a></p>
+</aside>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ospf.</span></span><span class="sig-name descname"><span class="pre">OSPF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ospf.html#OSPF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code>]</p>
+<p>This class implements Open Shortest Path First.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of current protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF.alias">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">alias</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.alias" title="Permalink to this definition">¶</a></dt>
+<dd><p>Acronym of current protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF.length">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">24</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Header length of current protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[24]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF.type">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.packet.Packet" title="pcapkit.const.ospf.packet.Packet"><span class="pre">Packet</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>OSPF packet type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.packet.Packet" title="pcapkit.const.ospf.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ospf.html#OSPF.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.read" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read Open Shortest Path First.</p>
+<p>Structure of OSPF header [<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>]:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span> 0                   1                   2                   3
+ 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|   Version #   |     Type      |         Packet length         |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                          Router ID                            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                           Area ID                             |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|           Checksum            |             AuType            |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Authentication                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|                       Authentication                          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
+<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed packet data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF.make">
+<span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ospf.html#OSPF.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.make" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make (construct) packet data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Constructed packet data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)">bytes</a></p>
+</dd>
+<dt class="field-even">Parameters<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF.__length_hint__">
+<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ospf.html#OSPF.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF.__length_hint__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an estimated length for the object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[24]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF._read_id_numbers">
+<span class="sig-name descname"><span class="pre">_read_id_numbers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ospf.html#OSPF._read_id_numbers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF._read_id_numbers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read router and area IDs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Parsed IDs as an IPv4 address.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth">
+<span class="sig-name descname"><span class="pre">_read_encrypt_auth</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ospf.html#OSPF._read_encrypt_auth"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read Authentication field when Cryptographic Authentication is employed,
+i.e. <code class="xref py py-attr docutils literal notranslate"><span class="pre">autype</span></code> is <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p>
+<p>Structure of Cryptographic Authentication [<span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>]:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span> <span class="mi">0</span>                   <span class="mi">1</span>                   <span class="mi">2</span>                   <span class="mi">3</span>
+ <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">9</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">9</span> <span class="mi">0</span> <span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">7</span> <span class="mi">8</span> <span class="mi">9</span> <span class="mi">0</span> <span class="mi">1</span>
+<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="o">|</span>              <span class="mi">0</span>                <span class="o">|</span>    <span class="n">Key</span> <span class="n">ID</span>     <span class="o">|</span> <span class="n">Auth</span> <span class="n">Data</span> <span class="n">Len</span> <span class="o">|</span>
+<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="o">|</span>                 <span class="n">Cryptographic</span> <span class="n">sequence</span> <span class="n">number</span>                 <span class="o">|</span>
+<span class="o">+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>length</strong> – packet length</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">CrytographicAuthentication</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parsed packet data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<section id="data-structure">
 <h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -100,8 +305,8 @@ as below:</p>
 They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
 </div>
 <dl class="py class">
-<dt class="sig sig-object py" id="DataType_OSPF">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_OSPF</span></span><a class="headerlink" href="#DataType_OSPF" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ospf.</span></span><span class="sig-name descname"><span class="pre">DataType_OSPF</span></span><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -109,50 +314,50 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 </dl>
 <p>OSPF header.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_OSPF.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_OSPF.version" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF.version" title="Permalink to this definition">¶</a></dt>
 <dd><p>version number</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_OSPF.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.const.ospf.packet.Packet</span></em><a class="headerlink" href="#DataType_OSPF.type" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.packet.Packet" title="pcapkit.const.ospf.packet.Packet"><span class="pre">pcapkit.const.ospf.packet.Packet</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>type</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_OSPF.len">
-<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_OSPF.len" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF.len">
+<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF.len" title="Permalink to this definition">¶</a></dt>
 <dd><p>packet length (header included)</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_OSPF.router_id">
-<span class="sig-name descname"><span class="pre">router_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv4Address</span></a></em><a class="headerlink" href="#DataType_OSPF.router_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF.router_id">
+<span class="sig-name descname"><span class="pre">router_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv4Address</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF.router_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>router ID</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_OSPF.area_id">
-<span class="sig-name descname"><span class="pre">area_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv4Address</span></a></em><a class="headerlink" href="#DataType_OSPF.area_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF.area_id">
+<span class="sig-name descname"><span class="pre">area_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)"><span class="pre">ipaddress.IPv4Address</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF.area_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>area ID</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_OSPF.chksum">
-<span class="sig-name descname"><span class="pre">chksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#DataType_OSPF.chksum" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF.chksum">
+<span class="sig-name descname"><span class="pre">chksum</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF.chksum" title="Permalink to this definition">¶</a></dt>
 <dd><p>checksum</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_OSPF.autype">
-<span class="sig-name descname"><span class="pre">autype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">pcapkit.const.ospf.authentication.Authentication</span></em><a class="headerlink" href="#DataType_OSPF.autype" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF.autype">
+<span class="sig-name descname"><span class="pre">autype</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ospf.html#pcapkit.const.ospf.authentication.Authentication" title="pcapkit.const.ospf.authentication.Authentication"><span class="pre">pcapkit.const.ospf.authentication.Authentication</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF.autype" title="Permalink to this definition">¶</a></dt>
 <dd><p>authentication type</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_OSPF.auth">
-<span class="sig-name descname"><span class="pre">auth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#DataType_Auth" title="DataType_Auth"><span class="pre">DataType_Auth</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#DataType_OSPF.auth" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_OSPF.auth">
+<span class="sig-name descname"><span class="pre">auth</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)"><span class="pre">bytes</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.link.ospf.DataType_Auth" title="pcapkit.protocols.link.ospf.DataType_Auth"><span class="pre">DataType_Auth</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_OSPF.auth" title="Permalink to this definition">¶</a></dt>
 <dd><p>authentication</p>
 </dd></dl>
 
@@ -161,7 +366,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <section id="cryptographic-authentication-information">
 <h3>Cryptographic Authentication Information<a class="headerlink" href="#cryptographic-authentication-information" title="Permalink to this heading">¶</a></h3>
 <p>For cryptographic authentication information as
-described in <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>, its structure is described
+described in <span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2328.html"><strong>RFC 2328</strong></a>, its structure is described
 as below:</p>
 <table class="docutils align-default">
 <thead>
@@ -195,8 +400,8 @@ as below:</p>
 </tbody>
 </table>
 <br /><dl class="py class">
-<dt class="sig sig-object py" id="DataType_Auth">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DataType_Auth</span></span><a class="headerlink" href="#DataType_Auth" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_Auth">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ospf.</span></span><span class="sig-name descname"><span class="pre">DataType_Auth</span></span><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_Auth" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Bases<span class="colon">:</span></dt>
 <dd class="field-odd"><p>TypedDict</p>
@@ -204,27 +409,27 @@ as below:</p>
 </dl>
 <p>Cryptographic authentication.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_Auth.key_id">
-<span class="sig-name descname"><span class="pre">key_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_Auth.key_id" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_Auth.key_id">
+<span class="sig-name descname"><span class="pre">key_id</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_Auth.key_id" title="Permalink to this definition">¶</a></dt>
 <dd><p>key ID</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_Auth.len">
-<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_Auth.len" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_Auth.len">
+<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_Auth.len" title="Permalink to this definition">¶</a></dt>
 <dd><p>authentication data length</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="DataType_Auth.seq">
-<span class="sig-name descname"><span class="pre">seq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#DataType_Auth.seq" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ospf.DataType_Auth.seq">
+<span class="sig-name descname"><span class="pre">seq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ospf.DataType_Auth.seq" title="Permalink to this definition">¶</a></dt>
 <dd><p>cryptographic sequence number</p>
 </dd></dl>
 
 </dd></dl>
 
-<hr /><aside class="footnote brackets" id="id2" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<hr /><aside class="footnote brackets" id="id4" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Open_Shortest_Path_First">https://en.wikipedia.org/wiki/Open_Shortest_Path_First</a></p>
 </aside>
 </section>
@@ -275,6 +480,8 @@ as below:</p>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#library-index">Library Index</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>

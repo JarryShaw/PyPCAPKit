@@ -1,0 +1,419 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.toolkit.dpkt &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.toolkit.dpkt</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;DPKT tools</span>
+
+<span class="sd">:mod:`pcapkit.toolkit.dpkt` contains all you need for</span>
+<span class="sd">:mod:`pcapkit` handy usage with `DPKT`_ engine. All reforming</span>
+<span class="sd">functions returns with a flag to indicate if usable for</span>
+<span class="sd">its caller.</span>
+
+<span class="sd">.. _DPKT: https://dpkt.readthedocs.io</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">ipaddress</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.transtype</span> <span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">RegType_TransType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.ip</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">IP_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.reassembly.tcp</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TCP_Packet</span>
+<span class="kn">from</span> <span class="nn">pcapkit.foundation.traceflow</span> <span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_Packet</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv6Address</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span>
+
+    <span class="kn">from</span> <span class="nn">dpkt.dpkt</span> <span class="kn">import</span> <span class="n">Packet</span>
+    <span class="kn">from</span> <span class="nn">dpkt.ip</span> <span class="kn">import</span> <span class="n">IP</span>
+    <span class="kn">from</span> <span class="nn">dpkt.ip6</span> <span class="kn">import</span> <span class="n">IP6</span><span class="p">,</span> <span class="n">IP6FragmentHeader</span>
+    <span class="kn">from</span> <span class="nn">dpkt.tcp</span> <span class="kn">import</span> <span class="n">TCP</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;ipv6_hdr_len&#39;</span><span class="p">,</span> <span class="s1">&#39;packet2chain&#39;</span><span class="p">,</span> <span class="s1">&#39;packet2dict&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;ipv4_reassembly&#39;</span><span class="p">,</span> <span class="s1">&#39;ipv6_reassembly&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp_reassembly&#39;</span><span class="p">,</span> <span class="s1">&#39;tcp_traceflow&#39;</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="ipv6_hdr_len"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.ipv6_hdr_len">[docs]</a><span class="k">def</span> <span class="nf">ipv6_hdr_len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">:</span> <span class="s1">&#39;IP6&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Calculate length of headers before IPv6 Fragment header.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ipv6: DPKT IPv6 packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Length of headers before IPv6 Fragment header</span>
+<span class="sd">        :class:`dpkt.ip6.IP6FragmentHeader` (:rfc:`2460#section-4.5`).</span>
+
+<span class="sd">    As specified in :rfc:`2460#section-4.1`, such headers (before the IPv6 Fragment Header)</span>
+<span class="sd">    includes Hop-by-Hop Options header :class:`dpkt.ip6.IP6HopOptsHeader` (:rfc:`2460#section-4.3`),</span>
+<span class="sd">    Destination Options header :class:`dpkt.ip6.IP6DstOptHeader` (:rfc:`2460#section-4.6`) and</span>
+<span class="sd">    Routing header :class:`dpkt.ip6.IP6RoutingHeader` (:rfc:`2460#section-4.4`).</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">__hdr_len__</span>
+    <span class="c1"># IP6HopOptsHeader / IP6DstOptHeader / IP6RoutingHeader</span>
+    <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="mi">43</span><span class="p">):</span>
+        <span class="n">ext_hdr</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_hdrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ext_hdr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">hdr_len</span> <span class="o">+=</span> <span class="n">ext_hdr</span><span class="o">.</span><span class="n">length</span>
+    <span class="k">return</span> <span class="n">hdr_len</span></div>
+
+
+<div class="viewcode-block" id="packet2chain"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.packet2chain">[docs]</a><span class="k">def</span> <span class="nf">packet2chain</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Fetch DPKT packet protocol chain.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Colon (``:``) seperated list of protocol chain.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="n">chain</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">payload</span><span class="o">.</span><span class="n">data</span>
+    <span class="k">return</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="packet2dict"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.packet2dict">[docs]</a><span class="k">def</span> <span class="nf">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                <span class="n">data_link</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Convert DPKT packet into :obj:`dict`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet (dpkt.dpkt.Packet): Scapy packet.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict[str, Any]: A :obj:`dict` mapping of packet data.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">:</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">packet</span><span class="o">.</span><span class="n">__hdr_fields__</span><span class="p">:</span>
+            <span class="n">dict_</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+            <span class="n">dict_</span><span class="p">[</span><span class="nb">type</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dict_</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span> <span class="n">timestamp</span><span class="p">,</span>
+        <span class="s1">&#39;packet&#39;</span><span class="p">:</span> <span class="n">packet</span><span class="o">.</span><span class="n">pack</span><span class="p">(),</span>
+        <span class="n">data_link</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span>
+    <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="ipv4_reassembly"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.ipv4_reassembly">[docs]</a><span class="k">def</span> <span class="nf">ipv4_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IP_Packet[IPv4Address] | None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Make data for IPv4 reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Data for IPv4 reassembly.</span>
+
+<span class="sd">        * If the ``packet`` can be used for IPv4 reassembly. A packet can be reassembled</span>
+<span class="sd">          if it contains IPv4 layer (:class:`dpkt.ip.IP`) and the **DF** (:attr:`dpkt.ip.IP.df`)</span>
+<span class="sd">          flag is ``False``.</span>
+<span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv4</span>
+<span class="sd">          reassembly (:term:`ipv4.packet`) will be returned; otherwise, returns :data:`None`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.ipv4.IPv4Reassembly`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ipv4</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[IP]</span>
+    <span class="k">if</span> <span class="n">ipv4</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">df</span><span class="p">:</span>     <span class="c1"># dismiss not fragmented packet</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
+            <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span>
+                     <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">src</span><span class="p">)),</span>           <span class="c1"># source IP address</span>
+                <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv4Address&#39;</span><span class="p">,</span>
+                     <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>           <span class="c1"># destination IP address</span>
+                <span class="n">ipv4</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>                                        <span class="c1"># identification</span>
+                <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>             <span class="c1"># payload protocol type</span>
+            <span class="p">),</span>
+            <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                          <span class="c1"># original packet range number</span>
+            <span class="n">fo</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">,</span>                                        <span class="c1"># fragment offset</span>
+            <span class="n">ihl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">,</span>                               <span class="c1"># internet header length</span>
+            <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">mf</span><span class="p">),</span>                                   <span class="c1"># more fragment flag</span>
+            <span class="n">tl</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>                                        <span class="c1"># total length, header includes</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">ipv4</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">ipv4</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">],</span>              <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv4</span><span class="o">.</span><span class="n">pack</span><span class="p">()[</span><span class="n">ipv4</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">:]),</span>  <span class="c1"># raw bytearray type payload</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="ipv6_reassembly"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.ipv6_reassembly">[docs]</a><span class="k">def</span> <span class="nf">ipv6_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IP_Packet[IPv6Address] | None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Make data for IPv6 reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Data for IPv6 reassembly.</span>
+
+<span class="sd">        * If the ``packet`` can be used for IPv6 reassembly. A packet can be reassembled</span>
+<span class="sd">          if it contains IPv6 layer (:class:`dpkt.ip6.IP6`) and IPv6 Fragment header</span>
+<span class="sd">          (:rfc:`2460#section-4.5`, :class:`dpkt.ip6.IP6FragmentHeader`).</span>
+<span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for IPv6</span>
+<span class="sd">          reassembly (:term:`ipv6.packet`) will be returned; otherwise, returns :data:`None`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.ipv6.IPv6Reassembly`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ipv6</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">&#39;ip6&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[IP6]</span>
+    <span class="k">if</span> <span class="n">ipv6</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">ipv6_frag</span> <span class="o">=</span> <span class="n">ipv6</span><span class="o">.</span><span class="n">extension_hdrs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">44</span><span class="p">)</span>  <span class="c1"># type: Optional[IP6FragmentHeader]</span>
+        <span class="k">if</span> <span class="n">ipv6_frag</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented packet</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="n">hdr_len</span> <span class="o">=</span> <span class="n">ipv6_hdr_len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>
+            <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span>
+                     <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">src</span><span class="p">)),</span>            <span class="c1"># source IP address</span>
+                <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IPv6Address&#39;</span><span class="p">,</span>
+                     <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">dst</span><span class="p">)),</span>            <span class="c1"># destination IP address</span>
+                <span class="n">ipv6</span><span class="o">.</span><span class="n">flow</span><span class="p">,</span>                                       <span class="c1"># label</span>
+                <span class="n">RegType_TransType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nh</span><span class="p">)</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>        <span class="c1"># next header field in IPv6 Fragment Header</span>
+            <span class="p">),</span>
+            <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                           <span class="c1"># original packet range number</span>
+            <span class="n">fo</span><span class="o">=</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">nxt</span><span class="p">,</span>                                    <span class="c1"># fragment offset</span>
+            <span class="n">ihl</span><span class="o">=</span><span class="n">hdr_len</span><span class="p">,</span>                                         <span class="c1"># header length, only headers before IPv6-Frag</span>
+            <span class="n">mf</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">m_flag</span><span class="p">),</span>                           <span class="c1"># more fragment flag</span>
+            <span class="n">tl</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">),</span>                                        <span class="c1"># total length, header includes</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">ipv6</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">hdr_len</span><span class="p">],</span>                        <span class="c1"># raw bytearray type header before IPv6-Frag</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">ipv6</span><span class="o">.</span><span class="n">pack</span><span class="p">()[</span><span class="n">hdr_len</span><span class="o">+</span><span class="n">ipv6_frag</span><span class="p">:]),</span>  <span class="c1"># raw bytearray type payload after IPv6-Frag</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="tcp_reassembly"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.tcp_reassembly">[docs]</a><span class="k">def</span> <span class="nf">tcp_reassembly</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TCP_Packet | None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Make data for TCP reassembly.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Data for TCP reassembly.</span>
+
+<span class="sd">        * If the ``packet`` can be used for TCP reassembly. A packet can be reassembled</span>
+<span class="sd">          if it contains TCP layer (:class:`dpkt.tcp.TCP`).</span>
+<span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
+<span class="sd">          reassembly (:term:`tcp.packet`) will be returned; otherwise, returns :data:`None`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCPReassembly`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">):</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IP&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">&#39;ip6&#39;</span><span class="p">):</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IP6&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip6</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">tcp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">&#39;tcp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[TCP]</span>
+    <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+        <span class="n">raw_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">data</span><span class="p">)</span>                                 <span class="c1"># payload length, header excludes</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">TCP_Packet</span><span class="p">(</span>
+            <span class="n">bufid</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>                   <span class="c1"># source IP address</span>
+                <span class="n">tcp</span><span class="o">.</span><span class="n">sport</span><span class="p">,</span>                                      <span class="c1"># source port</span>
+                <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                   <span class="c1"># destination IP address</span>
+                <span class="n">tcp</span><span class="o">.</span><span class="n">dport</span><span class="p">,</span>                                      <span class="c1"># destination port</span>
+            <span class="p">),</span>
+            <span class="n">num</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                          <span class="c1"># original packet range number</span>
+            <span class="n">ack</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">ack</span><span class="p">,</span>                                        <span class="c1"># acknowledgement</span>
+            <span class="n">dsn</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                        <span class="c1"># data sequence number</span>
+            <span class="n">rst</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">5</span><span class="p">])),</span>                            <span class="c1"># reset connection flag</span>
+            <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>                            <span class="c1"># synchronise flag</span>
+            <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>                            <span class="c1"># finish flag</span>
+            <span class="n">header</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">pack</span><span class="p">()[:</span><span class="n">tcp</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">],</span>                <span class="c1"># raw bytes type header</span>
+            <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">pack</span><span class="p">()[</span><span class="n">tcp</span><span class="o">.</span><span class="n">__hdr_len__</span><span class="p">:]),</span>    <span class="c1"># raw bytearray type payload</span>
+            <span class="n">first</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>                                      <span class="c1"># this sequence number</span>
+            <span class="n">last</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">seq</span> <span class="o">+</span> <span class="n">raw_len</span><span class="p">,</span>                             <span class="c1"># next (wanted) sequence number</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">raw_len</span><span class="p">,</span>                                        <span class="c1"># payload length, header excludes</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+<div class="viewcode-block" id="tcp_traceflow"><a class="viewcode-back" href="../../../pcapkit/toolkit/dpkt.html#pcapkit.toolkit.dpkt.tcp_traceflow">[docs]</a><span class="k">def</span> <span class="nf">tcp_traceflow</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+                  <span class="n">data_link</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;TF_Packet | None&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Trace packet flow for TCP.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: DPKT packet.</span>
+<span class="sd">        timestamp: Timestamp of the packet.</span>
+
+<span class="sd">    Keyword Args:</span>
+<span class="sd">        data_link: Data link layer protocol (from global header).</span>
+<span class="sd">        count: Packet index. If not provided, default to ``-1``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Data for TCP reassembly.</span>
+
+<span class="sd">        * If the ``packet`` can be used for TCP flow tracing. A packet can be reassembled</span>
+<span class="sd">          if it contains TCP layer (:class:`dpkt.tcp.TCP`).</span>
+<span class="sd">        * If the ``packet`` can be reassembled, then the :obj:`dict` mapping of data for TCP</span>
+<span class="sd">          flow tracing (:term:`trace.packet`) will be returned; otherwise, returns :data:`None`.</span>
+
+<span class="sd">    See Also:</span>
+<span class="sd">        :class:`pcapkit.foundation.traceflow.TraceFlow`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">&#39;ip&#39;</span><span class="p">):</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IP&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">&#39;ip6&#39;</span><span class="p">):</span>
+        <span class="n">ip</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">&#39;IP6&#39;</span><span class="p">,</span> <span class="n">packet</span><span class="o">.</span><span class="n">ip6</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">tcp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="s1">&#39;tcp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># type: Optional[TCP]</span>
+    <span class="k">if</span> <span class="n">tcp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="nb">bin</span><span class="p">(</span><span class="n">tcp</span><span class="o">.</span><span class="n">flags</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span><span class="o">.</span><span class="n">zfill</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">TF_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                         <span class="c1"># data link type from global header</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                                <span class="c1"># frame number</span>
+            <span class="n">frame</span><span class="o">=</span><span class="n">packet2dict</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">data_link</span><span class="p">),</span>  <span class="c1"># extracted packet</span>
+            <span class="n">syn</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">6</span><span class="p">])),</span>                                    <span class="c1"># TCP synchronise (SYN) flag</span>
+            <span class="n">fin</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">flags</span><span class="p">[</span><span class="mi">7</span><span class="p">])),</span>                                    <span class="c1"># TCP finish (FIN) flag</span>
+            <span class="n">src</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">src</span><span class="p">),</span>                           <span class="c1"># source IP</span>
+            <span class="n">dst</span><span class="o">=</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="n">ip</span><span class="o">.</span><span class="n">dst</span><span class="p">),</span>                           <span class="c1"># destination IP</span>
+            <span class="n">srcport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">sport</span><span class="p">,</span>                                          <span class="c1"># TCP source port</span>
+            <span class="n">dstport</span><span class="o">=</span><span class="n">tcp</span><span class="o">.</span><span class="n">dport</span><span class="p">,</span>                                          <span class="c1"># TCP destination port</span>
+            <span class="n">timestamp</span><span class="o">=</span><span class="n">timestamp</span><span class="p">,</span>                                        <span class="c1"># timestamp</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">data</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,489 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.protocols.misc.pcap.frame &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../../" id="documentation_options" src="../../../../../_static/documentation_options.js"></script>
+    <script src="../../../../../_static/jquery.js"></script>
+    <script src="../../../../../_static/underscore.js"></script>
+    <script src="../../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.protocols.misc.pcap.frame</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;frame header</span>
+
+<span class="sd">:mod:`pcapkit.protocols.misc.pcap.frame` contains</span>
+<span class="sd">:class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,</span>
+<span class="sd">which implements extractor for frame headers of PCAP,</span>
+<span class="sd">whose structure is described as below:</span>
+
+<span class="sd">.. code-block:: c</span>
+
+<span class="sd">    typedef struct pcaprec_hdr_s {</span>
+<span class="sd">        guint32 ts_sec;     /* timestamp seconds */</span>
+<span class="sd">        guint32 ts_usec;    /* timestamp microseconds */</span>
+<span class="sd">        guint32 incl_len;   /* number of octets of packet saved in file */</span>
+<span class="sd">        guint32 orig_len;   /* actual length of packet */</span>
+<span class="sd">    } pcaprec_hdr_t;</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">decimal</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">overload</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.const.reg.linktype</span> <span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">RegType_LinkType</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">DataType_Frame</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.frame</span> <span class="kn">import</span> <span class="n">FrameInfo</span> <span class="k">as</span> <span class="n">DataType_FrameInfo</span>
+<span class="kn">from</span> <span class="nn">pcapkit.protocols.protocol</span> <span class="kn">import</span> <span class="n">Protocol</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">StructError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">decimal</span> <span class="kn">import</span> <span class="n">Decimal</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">BinaryIO</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+
+    <span class="kn">from</span> <span class="nn">typing_extensions</span> <span class="kn">import</span> <span class="n">Literal</span>
+
+    <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.misc.pcap.header</span> <span class="kn">import</span> <span class="n">Header</span> <span class="k">as</span> <span class="n">DataType_Header</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Frame&#39;</span><span class="p">]</span>
+
+<span class="c1"># check Python version</span>
+<span class="n">py37</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Frame"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame">[docs]</a><span class="k">class</span> <span class="nc">Frame</span><span class="p">(</span><span class="n">Protocol</span><span class="p">[</span><span class="n">DataType_Frame</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Per packet frame header extractor.</span>
+
+<span class="sd">    This class currently supports parsing of the following protocols, which are</span>
+<span class="sd">    registered in the :attr:`self.__proto__ &lt;pcapkit.protocols.misc.pcap.frame.Frame.__proto__&gt;`</span>
+<span class="sd">    attribute:</span>
+
+<span class="sd">    .. list-table::</span>
+<span class="sd">       :header-rows: 1</span>
+
+<span class="sd">       * - Index</span>
+<span class="sd">         - Protocol</span>
+<span class="sd">       * - 1</span>
+<span class="sd">         - :class:`~pcapkit.protocols.link.ethernet.Ethernet`</span>
+<span class="sd">       * - 228</span>
+<span class="sd">         - :class:`~pcapkit.protocols.internet.ipv4.IPv4`</span>
+<span class="sd">       * - 229</span>
+<span class="sd">         - :class:`~pcapkit.protocols.internet.ipv6.IPv6`</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: DefaultDict[int, tuple[str, str]]: Protocol index mapping for decoding next layer,</span>
+    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
+    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
+    <span class="c1">#: The values should be a tuple representing the module name and class name.</span>
+    <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.misc.raw&#39;</span><span class="p">,</span> <span class="s1">&#39;Raw&#39;</span><span class="p">),</span>
+        <span class="p">{</span>
+            <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.link&#39;</span><span class="p">,</span> <span class="s1">&#39;Ethernet&#39;</span><span class="p">),</span>
+            <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">IPV4</span><span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv4&#39;</span><span class="p">),</span>
+            <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">IPV6</span><span class="p">:</span>     <span class="p">(</span><span class="s1">&#39;pcapkit.protocols.internet&#39;</span><span class="p">,</span> <span class="s1">&#39;IPv6&#39;</span><span class="p">),</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Properties.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Name of corresponding protocol.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Frame </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="si">}</span><span class="s1">&#39;</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">length</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[16]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Header length of corresponding protocol.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">16</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">header</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Header&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Global header of the PCAP file.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Methods.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Frame.register"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.register">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">,</span> <span class="n">module</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Register a new protocol class.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`</span>
+<span class="sd">            module: module name</span>
+<span class="sd">            class_: class name</span>
+
+<span class="sd">        Notes:</span>
+<span class="sd">            The full qualified class name of the new protocol class</span>
+<span class="sd">            should be as ``{module}.{class_}``.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__proto__</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">class_</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Frame.index"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.index">[docs]</a>    <span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str | Protocol | Type[Protocol]&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Call :meth:`ProtoChain.index &lt;pcapkit.corekit.protochain.ProtoChain.index&gt;`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: ``name`` to be searched</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            First index of ``name``.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            IndexNotFound: if ``name`` is not present</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Frame.read"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+             <span class="n">__read</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Frame&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Read each block after global header.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            length (Optional[int]): Length of packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            __read: If the class is called in a parsing scenario.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DataType_Frame: Parsed packet data.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            EOFError: If :attr:`self._file &lt;pcapkit.protocols.misc.pcap.frame.Frame._file&gt;` reaches EOF.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_temp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">StructError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">eof</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">EOFError</span>  <span class="c1"># pylint: disable=raise-missing-from</span>
+            <span class="k">raise</span>
+
+        <span class="n">_tsss</span> <span class="o">=</span> <span class="n">_temp</span>
+        <span class="n">_tsus</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_ilen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">_olen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span><span class="p">:</span>
+            <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_epch</span> <span class="o">=</span> <span class="n">_tsss</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">_tsus</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1_000_000</span>
+        <span class="n">_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">_epch</span><span class="p">))</span>
+
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">DataType_Frame</span><span class="p">(</span>
+            <span class="n">frame_info</span><span class="o">=</span><span class="n">DataType_FrameInfo</span><span class="p">(</span>
+                <span class="n">ts_sec</span><span class="o">=</span><span class="n">_tsss</span><span class="p">,</span>
+                <span class="n">ts_usec</span><span class="o">=</span><span class="n">_tsus</span><span class="p">,</span>
+                <span class="n">incl_len</span><span class="o">=</span><span class="n">_ilen</span><span class="p">,</span>
+                <span class="n">orig_len</span><span class="o">=</span><span class="n">_olen</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">time</span><span class="o">=</span><span class="n">_time</span><span class="p">,</span>
+            <span class="n">number</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="p">,</span>
+            <span class="n">time_epoch</span><span class="o">=</span><span class="n">_epch</span><span class="p">,</span>
+            <span class="nb">len</span><span class="o">=</span><span class="n">_ilen</span><span class="p">,</span>
+            <span class="n">cap_len</span><span class="o">=</span><span class="n">_olen</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">__read</span><span class="p">:</span>
+            <span class="c1"># move backward to the beginning of the packet</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># NOTE: We create a copy of the frame packet data here for parsing</span>
+            <span class="c1"># scenarios to keep the original packet data intact.</span>
+
+            <span class="c1"># move backward to the beginning of the frame</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+
+            <span class="c1">#: bytes: Raw packet data.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">frame</span><span class="o">.</span><span class="n">len</span><span class="p">)</span>
+            <span class="c1">#: io.BytesIO: Source packet stream.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+            <span class="c1"># move forward to the beginning of frame&#39;s first packet</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">frame</span><span class="o">.</span><span class="n">len</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Frame.make"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;Optional[float | Decimal]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
+             <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ts_usec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">incl_len</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">orig_len</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+             <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;bytes&#39;</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Make frame packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            timestamp: UNIX-Epoch timestamp</span>
+<span class="sd">            ts_sec: timestamp seconds</span>
+<span class="sd">            ts_usec: timestamp microseconds</span>
+<span class="sd">            incl_len: number of octets of packet saved in file</span>
+<span class="sd">            orig_len: actual length of packet</span>
+<span class="sd">            packet: raw packet data</span>
+<span class="sd">            nanosecond: nanosecond-resolution file flag</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constructed packet data.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_timestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">incl_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">incl_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span><span class="o">.</span><span class="n">snaplen</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">orig_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">orig_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+
+        <span class="c1"># make packet</span>
+        <span class="k">return</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="si">%s%s%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_pack</span><span class="p">(</span><span class="n">ts_sec</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_pack</span><span class="p">(</span><span class="n">ts_usec</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_pack</span><span class="p">(</span><span class="n">incl_len</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_make_pack</span><span class="p">(</span><span class="n">orig_len</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+            <span class="n">packet</span><span class="p">[:</span><span class="n">incl_len</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Data models.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="nd">@overload</span>  <span class="c1"># type: ignore[override]</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                      <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;DataType_Header&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;DataType_Header&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span> <span class="o">...</span>
+
+<div class="viewcode-block" id="Frame.__post_init__"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.__post_init__">[docs]</a>    <span class="k">def</span> <span class="nf">__post_init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;Optional[BinaryIO]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+                      <span class="n">num</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">&#39;DataType_Header&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Initialisation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            file: Source packet stream.</span>
+<span class="sd">            length: Length of packet data.</span>
+
+<span class="sd">        Keyword Args:</span>
+<span class="sd">            num: Frame index number.</span>
+<span class="sd">            header: Global header of the PCAP file.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        See Also:</span>
+<span class="sd">            For construction argument, please refer to :meth:`make`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#: int: frame index number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">=</span> <span class="n">num</span>
+        <span class="c1">#: pcapkit.protocols.misc.pcap.header.Header: Global header of the PCAP file.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ghdr</span> <span class="o">=</span> <span class="n">header</span>
+
+        <span class="c1">#: pcapkit.const.reg.linktype.LinkType: next layer protocol index</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prot</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">network</span>
+        <span class="c1">#: bool: nanosecond-timestamp PCAP flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nsec</span> <span class="o">=</span> <span class="n">header</span><span class="o">.</span><span class="n">magic_number</span><span class="o">.</span><span class="n">nanosecond</span>
+
+        <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">__read</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1">#: bytes: Raw packet data.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1">#: io.BytesIO: Source packet stream.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">__read</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="c1">#: io.BytesIO: Source packet stream.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">file</span>  <span class="c1"># type: ignore[assignment]</span>
+
+        <span class="c1">#: pcapkit.corekit.infoclass.Info: Parsed packet data.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">__read</span><span class="o">=</span><span class="n">__read</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Frame.__length_hint__"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[16]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="mi">16</span></div>
+
+    <span class="c1"># NOTE: This is a hack to make the ``__index__`` method work both as a</span>
+    <span class="c1"># class method and an instance method.</span>
+<div class="viewcode-block" id="Frame.__index__"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame.__index__">[docs]</a>    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">&#39;Optional[Frame]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;int&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+        <span class="sd">&quot;&quot;&quot;Index of the frame.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            If the object is initiated, i.e. :attr:`self._fnum &lt;pcapkit.protocols.misc.pcap.frame.Frame._fnum&gt;`</span>
+<span class="sd">            exists, returns the frame index number of itself; else raises :exc:`UnsupportedCall`.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">&quot;&#39;Frame&#39; object cannot be interpreted as an integer&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span></div>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Utilities.</span>
+    <span class="c1">##########################################################################</span>
+
+<div class="viewcode-block" id="Frame._make_timestamp"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame._make_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">_make_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">:</span> <span class="s1">&#39;Optional[float | Decimal]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ts_sec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                        <span class="n">ts_usec</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[int, int]&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Make timestamp.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            timestamp: UNIX-Epoch timestamp</span>
+<span class="sd">            ts_sec: timestamp seconds</span>
+<span class="sd">            ts_usec: timestamp microseconds</span>
+<span class="sd">            nanosecond: nanosecond-resolution file flag</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[int, int]: Second and microsecond/nanosecond value of timestamp.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">py37</span> <span class="ow">and</span> <span class="n">nanosecond</span><span class="p">:</span>
+                <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time_ns</span><span class="p">())</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ts_sec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ts_sec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">ts_usec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ts_usec</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1_000_000_000</span> <span class="k">if</span> <span class="n">nanosecond</span> <span class="k">else</span> <span class="mi">1_000_000</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ts_sec</span><span class="p">,</span> <span class="n">ts_usec</span></div>
+
+<div class="viewcode-block" id="Frame._decode_next_layer"><a class="viewcode-back" href="../../../../../pcapkit/protocols/pcap/frame.html#pcapkit.protocols.misc.pcap.frame.Frame._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">&#39;DataType_Frame&#39;</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                           <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_Frame&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;Decode next layer protocol.</span>
+
+<span class="sd">        Positional arguments:</span>
+<span class="sd">            data: info buffer</span>
+<span class="sd">            proto: next layer protocol index</span>
+<span class="sd">            length: valid (*non-padding*) length</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: current protocol with packet extracted</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">next_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_import_next_layer</span><span class="p">(</span><span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span>  <span class="c1"># type: ignore[misc,call-arg]</span>
+        <span class="n">info</span><span class="p">,</span> <span class="n">chain</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="n">next_</span><span class="o">.</span><span class="n">protochain</span>
+
+        <span class="c1"># make next layer protocol name</span>
+        <span class="n">layer</span> <span class="o">=</span> <span class="n">next_</span><span class="o">.</span><span class="n">info_name</span>
+        <span class="c1"># proto = next_.__class__.__name__</span>
+
+        <span class="c1"># write info and protocol chain into dict</span>
+        <span class="n">dict_</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
+            <span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="n">info</span><span class="p">),</span>
+            <span class="p">(</span><span class="s1">&#39;protocols&#39;</span><span class="p">,</span> <span class="n">chain</span><span class="o">.</span><span class="n">chain</span><span class="p">),</span>
+        <span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="n">next_</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_protos</span> <span class="o">=</span> <span class="n">chain</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
+        <span class="k">return</span> <span class="n">dict_</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

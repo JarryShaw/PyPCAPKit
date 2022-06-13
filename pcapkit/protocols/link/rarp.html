@@ -36,10 +36,10 @@
             
   <section id="rarp-drarp-dynamic-reverse-address-resolution-protocol">
 <h1>RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol<a class="headerlink" href="#rarp-drarp-dynamic-reverse-address-resolution-protocol" title="Permalink to this heading">¶</a></h1>
-<p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.rarp</span></code> contains
-<code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code> only,
+<p><a class="reference internal" href="#module-pcapkit.protocols.link.rarp" title="pcapkit.protocols.link.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.rarp</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.link.rarp.RARP" title="pcapkit.protocols.link.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code></a> only,
 which implements extractor for (Dynamic) Reverse
-Address Resolution Protocol (RARP/DRARP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>,
+Address Resolution Protocol (RARP/DRARP) <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>,
 whose structure is described as below:</p>
 <table class="docutils align-default">
 <thead>
@@ -97,8 +97,117 @@ whose structure is described as below:</p>
 </tr>
 </tbody>
 </table>
-<br /><hr /><aside class="footnote brackets" id="id2" role="note">
+<br /><span class="target" id="module-pcapkit.protocols.link.rarp"></span><p>(dynamic) reverse address resolution protocol</p>
+<p><a class="reference internal" href="#module-pcapkit.protocols.link.rarp" title="pcapkit.protocols.link.rarp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.rarp</span></code></a> contains
+<a class="reference internal" href="#pcapkit.protocols.link.rarp.RARP" title="pcapkit.protocols.link.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code></a> only,
+which implements extractor for (Dynamic) Reverse
+Address Resolution Protocol (RARP/DRARP) <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a>,
+whose structure is described as below:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Octets</p></th>
+<th class="head"><p>Bits</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.htype</span></code></p></td>
+<td><p>Hardware Type</p></td>
+</tr>
+<tr class="row-odd"><td><p>2</p></td>
+<td><p>16</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.ptype</span></code></p></td>
+<td><p>Protocol Type</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p>32</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.hlen</span></code></p></td>
+<td><p>Hardware Address Length</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p>40</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.plen</span></code></p></td>
+<td><p>Protocol Address Length</p></td>
+</tr>
+<tr class="row-even"><td><p>6</p></td>
+<td><p>48</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.oper</span></code></p></td>
+<td><p>Operation</p></td>
+</tr>
+<tr class="row-odd"><td><p>8</p></td>
+<td><p>64</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.sha</span></code></p></td>
+<td><p>Sender Hardware Address</p></td>
+</tr>
+<tr class="row-even"><td><p>14</p></td>
+<td><p>112</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.spa</span></code></p></td>
+<td><p>Sender Protocol Address</p></td>
+</tr>
+<tr class="row-odd"><td><p>18</p></td>
+<td><p>144</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.tha</span></code></p></td>
+<td><p>Target Hardware Address</p></td>
+</tr>
+<tr class="row-even"><td><p>24</p></td>
+<td><p>192</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">rarp.tpa</span></code></p></td>
+<td><p>Target Protocol Address</p></td>
+</tr>
+</tbody>
+</table>
+<aside class="footnote brackets" id="id3" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
+<p><a class="reference external" href="http://en.wikipedia.org/wiki/Address_Resolution_Protocol">http://en.wikipedia.org/wiki/Address_Resolution_Protocol</a></p>
+</aside>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.rarp.RARP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.rarp.</span></span><span class="sig-name descname"><span class="pre">RARP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/rarp.html#RARP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.rarp.RARP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a></p>
+<p>This class implements Reverse Address Resolution Protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.rarp.RARP.id">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/rarp.html#RARP.id"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.rarp.RARP.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Index ID of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a>[Literal[“RARP”], Literal[“DRARP”]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.rarp.RARP.__index__">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/rarp.html#RARP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.rarp.RARP.__index__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeral registry index of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/ieee-802-numbers/ieee-802-numbers.xhtml">IANA</a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<hr /><aside class="footnote brackets" id="id4" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="http://en.wikipedia.org/wiki/Address_Resolution_Protocol">http://en.wikipedia.org/wiki/Address_Resolution_Protocol</a></p>
 </aside>
 </section>
@@ -147,6 +256,8 @@ whose structure is described as below:</p>
 <li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#library-index">Library Index</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>

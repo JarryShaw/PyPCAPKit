@@ -37,14 +37,66 @@
   <section id="module-pcapkit.foundation.reassembly.ipv6">
 <span id="ipv6-datagram-reassembly"></span><h1>IPv6 Datagram Reassembly<a class="headerlink" href="#module-pcapkit.foundation.reassembly.ipv6" title="Permalink to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.foundation.reassembly.ipv6" title="pcapkit.foundation.reassembly.ipv6"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.reassembly.ipv6</span></code></a> contains
-<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Reassembly</span></code>
+<a class="reference internal" href="#pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly" title="pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Reassembly</span></code></a>
 only, which reconstructs fragmented IPv6 packets back to
 origin. Please refer to <a class="reference internal" href="ip.html"><span class="doc">Base Class</span></a> for more information.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.ipv6.</span></span><span class="sig-name descname"><span class="pre">IPv6_Reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strict</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ipv6.html#IPv6_Reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ip.html#pcapkit.foundation.reassembly.ip.IP_Reassembly" title="pcapkit.foundation.reassembly.ip.IP_Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP_Reassembly</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code>]</p>
+<p>Reassembly for IPv6 payload.</p>
+<div class="admonition-example admonition">
+<p class="admonition-title">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pcapkit.reassembly</span> <span class="kn">import</span> <span class="n">IPv6_Reassembly</span>
+<span class="go"># Initialise instance:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ipv6_reassembly</span> <span class="o">=</span> <span class="n">IPv6_Reassembly</span><span class="p">()</span>
+<span class="go"># Call reassembly:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ipv6_reassembly</span><span class="p">(</span><span class="n">packet_dict</span><span class="p">)</span>
+<span class="go"># Fetch result:</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">result</span> <span class="o">=</span> <span class="n">ipv6_reassembly</span><span class="o">.</span><span class="n">datagram</span>
+</pre></div>
+</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly">Reassembly</a>[PT, DT, IT, BT]</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly.name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Internet</span> <span class="pre">Protocol</span> <span class="pre">version</span> <span class="pre">6'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Protocol of current packet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[“Internet Protocol version 6”]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly.protocol">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">protocol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../../../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><span class="pre">IPv6</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.foundation.reassembly.ipv6.IPv6_Reassembly.protocol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Protocol of current reassembly object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../../protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 <section id="terminology">
 <h2>Terminology<a class="headerlink" href="#terminology" title="Permalink to this heading">¶</a></h2>
 <dl class="glossary">
 <dt id="term-ipv6.packet">ipv6.packet<a class="headerlink" href="#term-ipv6.packet" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>IPv6 datagram reassembly</strong>
-(<code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6_Reassembly.reassembly</span></code>)
+(<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6_Reassembly.reassembly</span></code></a>)
 is as following:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">packet_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
   <span class="n">bufid</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
@@ -65,7 +117,7 @@ is as following:</p>
 </div>
 </dd>
 <dt id="term-ipv6.datagram">ipv6.datagram<a class="headerlink" href="#term-ipv6.datagram" title="Permalink to this term">¶</a></dt><dd><p>Data structure for <strong>reassembled IPv6 datagram</strong> (element from
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Reassembly.datagram</span></code>
+<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly.datagram" title="pcapkit.foundation.reassembly.reassembly.Reassembly.datagram"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Reassembly.datagram</span></code></a>
 <em>tuple</em>) is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(tuple) datagram
  |--&gt; (Info) data
@@ -98,7 +150,7 @@ is as following:</p>
 </div>
 </dd>
 <dt id="term-ipv6.buffer">ipv6.buffer<a class="headerlink" href="#term-ipv6.buffer" title="Permalink to this term">¶</a></dt><dd><p>Data structure for internal buffering when performing reassembly algorithms
-(<code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Reassembly._buffer</span></code>)
+(<a class="reference internal" href="../reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly._buffer" title="pcapkit.foundation.reassembly.reassembly.Reassembly._buffer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv6_Reassembly._buffer</span></code></a>)
 is as following:</p>
 <div class="highlight-text notranslate"><div class="highlight"><pre><span></span>(dict) buffer --&gt; memory buffer for reassembly
  |--&gt; (tuple) BUFID : (dict)
@@ -164,6 +216,8 @@ is as following:</p>
 <li class="toctree-l2"><a class="reference internal" href="../../../utilities/index.html">Utility Functions &amp; Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../const/index.html">Constant Enumerations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../index.html#library-index">Library Index</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
