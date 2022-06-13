@@ -1,6 +1,9 @@
 Ethernet Protocol
 =================
 
+.. module:: pcapkit.protocols.link.ethernet
+.. module:: pcapkit.protocols.data.link.ethernet
+
 :mod:`pcapkit.protocols.link.ethernet` contains
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`
 only, which implements extractor for Ethernet
@@ -23,40 +26,39 @@ below:
 
    <br />
 
-.. automodule:: pcapkit.protocols.link.ethernet
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.link.ethernet.Ethernet
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: protocol
+   .. autoproperty:: src
+   .. autoproperty:: dst
 
-.. class:: DataType_Ethernet
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+   .. .. automethod:: _read_mac_addr
 
-   Ethernet header.
+Data Structures
+---------------
 
-   .. attribute:: dst
-      :type: str
+.. autoclass:: pcapkit.protocols.data.link.ethernet.Ethernet(dst, src, type)
+   :no-members:
+   :show-inheritance:
 
-      destination MAC address
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: src
-      :type: str
-
-      source MAC address
-
-   .. attribute:: type
-      :type: pcapkit.const.reg.ethertype.EtherType
-
-      protocol (Internet layer)
+   .. autoattribute:: dst
+   .. autoattribute:: src
+   .. autoattribute:: type
 
 .. raw:: html
 
