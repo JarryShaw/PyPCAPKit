@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""root internet layer protocol
+"""Base Protocol
+===================
 
 :mod:`pcapkit.protocols.internet.internet` contains :class:`~pcapkit.protocols.internet.internet.Internet`,
 which is a base class for internet layer protocols, eg. :class:`~pcapkit.protocols.internet.ah.AH`,
@@ -28,7 +29,7 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     """Abstract base class for internet layer protocol family.
 
     This class currently supports parsing of the following protocols, which are
-    registered in the :attr:`self.__proto__ <pcapkit.protocols.link.Link.__proto__>`
+    registered in the :attr:`self.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>`
     attribute:
 
     .. list-table::
@@ -36,32 +37,32 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
 
        * - Index
          - Protocol
-       * - 0
-         - :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
-       * - 4
-         - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
-       * - 6
-         - :class:`~pcapkit.protocols.transport.tcp.TCP`
-       * - 17
-         - :class:`~pcapkit.protocols.transport.udp.UDP`
-       * - 41
-         - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
-       * - 43
-         - :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`
-       * - 44
-         - :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
-       * - 51
-         - :class:`~pcapkit.protocols.internet.ah.AH`
-       * - 59
-         - :class:`~pcapkit.protocols.misc.raw.Raw`
-       * - 60
-         - :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
-       * - 111
-         - :class:`~pcapkit.protocols.internet.ipx.IPX`
-       * - 135
-         - :class:`~pcapkit.protocols.internet.mh.MH`
-       * - 139
-         - :class:`~pcapkit.protocols.internet.hip.HIP`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.HOPOPT`
+         - :class:`pcapkit.protocols.internet.hopopt.HOPOPT`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv4`
+         - :class:`pcapkit.protocols.internet.ipv4.IPv4`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.TCP`
+         - :class:`pcapkit.protocols.transport.tcp.TCP`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.UDP`
+         - :class:`pcapkit.protocols.transport.udp.UDP`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6`
+         - :class:`pcapkit.protocols.internet.ipv6.IPv6`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Route`
+         - :class:`pcapkit.protocols.internet.ipv6_route.IPv6_Route`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Frag`
+         - :class:`pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.AH`
+         - :class:`pcapkit.protocols.internet.ah.AH`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_NoNxt`
+         - :class:`pcapkit.protocols.misc.raw.Raw`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.IPv6_Opts`
+         - :class:`pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.IPX_in_IP`
+         - :class:`pcapkit.protocols.internet.ipx.IPX`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.Mobility_Header`
+         - :class:`pcapkit.protocols.internet.mh.MH`
+       * - :attr:`pcapkit.const.reg.transtype.TransType.HIP`
+         - :class:`pcapkit.protocols.internet.hip.HIP`
 
     """
 
@@ -73,8 +74,8 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     __layer__ = 'Internet'  # type: Literal['Internet']
 
     #: DefaultDict[int, Tuple[str, str]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.link.Link._import_next_layer>`.
+    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.internet.internet.Internet._decode_next_layer>`
+    #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.internet.Internet._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -110,16 +111,16 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
 
     @classmethod
     def register(cls, code: 'RegType_TransType', module: str, class_: str) -> 'None':
-        """Register a new protocol class.
-
-        Arguments:
-            code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
-            module: module name
-            class_: class name
+        r"""Register a new protocol class.
 
         Notes:
             The full qualified class name of the new protocol class
             should be as ``{module}.{class_}``.
+
+        Arguments:
+            code: protocol code as in :class:`~pcapkit.const.reg.transtype.TransType`
+            module: module name
+            class\_: class name
 
         """
         cls.__proto__[code] = (module, class_)
@@ -145,14 +146,12 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
     def _decode_next_layer(self, dict_: 'PT', proto: 'Optional[int]' = None,  # pylint: disable=arguments-differ
                            length: 'Optional[int]' = None, *, version: 'Literal[4, 6]' = 4,
                            ipv6_exthdr: 'Optional[ProtoChain]' = None) -> 'PT':
-        """Decode next layer extractor.
+        r"""Decode next layer extractor.
 
         Arguments:
-            dict_: info buffer
+            dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
-
-        Keyword Arguments:
             version: IP version
             ipv6_exthdr: protocol chain of IPv6 extension headers
 
@@ -186,8 +185,6 @@ class Internet(Protocol[PT], Generic[PT]):  # pylint: disable=abstract-method
         Arguments:
             proto: next layer protocol index
             length: valid (*non-padding*) length
-
-        Keyword Arguments:
             version: IP protocol version
             extension: if is extension header
 

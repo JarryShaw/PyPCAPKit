@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import,fixme
-"""internet layer protocols
+"""Internet Layer Protocols
+==============================
 
 `pcapkit.protocols.internet` is collection of all protocols
 in internet layer, with detailed implementation and
