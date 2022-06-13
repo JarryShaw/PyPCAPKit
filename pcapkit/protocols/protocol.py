@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""root protocol
+"""Root Protocol
+===================
 
 :mod:`pcapkit.protocols.protocol` contains
 :class:`~pcapkit.protocols.protocol.Protocol` only, which is
@@ -53,6 +54,10 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
     #: Parsed packet data.
     _info: 'PT'
+    #: Raw packet data.
+    _data: 'bytes'
+    #: Source packet stream.
+    _file: 'BinaryIO'
     #： Next layer protocol instance.
     _next: 'Protocol'
     #: Protocol chain instance.
@@ -175,8 +180,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -188,7 +191,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     def make(self, **kwargs: 'Any') -> 'bytes':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -204,10 +207,11 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         Should decoding failed using ``encoding``, the method will try again decoding
         the :obj:`bytes` as ``'unicode_escape'`` with ``'replace'`` for error handling.
 
+        See Also:
+            The method is a wrapping function for :meth:`bytes.decode`.
+
         Args:
             byte: Source bytestring.
-
-        Keyword Args:
             encoding: The encoding with which to decode the :obj:`bytes`.
                 If not provided, :mod:`pcapkit` will first try detecting its encoding
                 using |chardet|_. The fallback encoding would is **UTF-8**.
@@ -216,9 +220,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
                 :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
                 as well as any other name registered with :func:`codecs.register_error` that
                 can handle :exc:`UnicodeDecodeError`.
-
-        See Also:
-            The method is a wrapping function for :meth:`bytes.decode`.
 
         .. |chardet| replace:: ``chardet``
         .. _chardet: https://chardet.readthedocs.io
@@ -238,19 +239,17 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         Should decoding failed , the method will try again replacing ``'%'`` with ``'\\x'`` then
         decoding the ``url`` as ``'unicode_escape'`` with ``'replace'`` for error handling.
 
+        See Also:
+            This method is a wrapper function for :func:`urllib.parse.unquote`.
+
         Args:
             url: URL string.
-
-        Keyword Args:
             encoding: The encoding with which to decode the :obj:`bytes`.
             errors: The error handling scheme to use for the handling of decoding errors.
                 The default is ``'strict'`` meaning that decoding errors raise a
                 :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``
                 as well as any other name registered with :func:`codecs.register_error` that
                 can handle :exc:`UnicodeDecodeError`.
-
-        See Also:
-            This method is a wrapper function for :func:`urllib.parse.unquote`.
 
         """
         try:
@@ -261,9 +260,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
     @staticmethod
     def expand_comp(value: 'str | Protocol | Type[Protocol]') -> 'tuple':
         """Expand protocol class to protocol name.
-
-        Args:
-            value: Protocol class or name.
 
         The method is used to expand protocol class to protocol name, in the
         following manner:
@@ -276,8 +272,11 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
            obtained from :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`.
         3. If ``value`` is :obj:`str`, the method will attempt to search for
            the existing registered protocol class from
-           :obj:`pcapkit.protocols.__proto__` and follow **step 2**; otherwise,
+           :data:`pcapkit.protocols.__proto__` and follow **step 2**; otherwise,
            return the value itself.
+
+        Args:
+            value: Protocol class or name.
 
         """
         if isinstance(value, type) and issubclass(value, Protocol):
@@ -285,8 +284,7 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         elif isinstance(value, Protocol):
             comp = (type(value), *(name.upper() for name in value.id()))
         else:
-            from pcapkit.protocols import \
-                __proto__ as protocols_registry  # pylint: disable=import-outside-toplevel
+            from pcapkit.protocols import __proto__ as protocols_registry  # pylint: disable=import-outside-toplevel # isort: skip
 
             if (proto := protocols_registry.get(value.upper())) is not None:
                 comp = (proto, *(name.upper() for name in proto.id()))
@@ -301,8 +299,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         Args:
             proto: Protocol registry number.
             payload: Packet payload.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -353,12 +349,10 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             _layer (str): Parse packet until ``_layer``
-                (:attr:`self._onerror <pcapkit.protocols.protocol.Protocol._exlayer>`).
+                (:attr:`self._exlayer <pcapkit.protocols.protocol.Protocol._exlayer>`).
             _protocol (str | Protocol | Type[Protocol]): Parse packet until ``_protocol``
-                (:attr:`self._onerror <pcapkit.protocols.protocol.Protocol._exproto>`).
+                (:attr:`self._exproto <pcapkit.protocols.protocol.Protocol._exproto>`).
             **kwargs: Arbitrary keyword arguments.
 
         """
@@ -388,8 +382,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
@@ -612,8 +604,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
         Args:
             *args: arbitrary positional arguments
-
-        Keyword Args:
             **kwargs: arbitrary keyword arguments
 
         Returns:
@@ -628,8 +618,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
         Arguments:
             size: buffer size
-
-        Keyword Arguments:
             signed: signed flag
             lilendian: little-endian flag
             quiet: quiet (no exception) flag
@@ -702,8 +690,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
         Arguments:
             length: length of the packet
-
-        Keyword Arguments:
             header: length of the packet header
             payload: length of the packet payload
             discard: flag if discard header data
@@ -733,8 +719,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
 
         Arguments:
             integer: integer to be packed
-
-        Keyword arguments:
             size: buffer size
             signed: signed flag
             lilendian: little-endian flag
@@ -819,8 +803,6 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         Arguments:
             name: item to be indexed
             default: default value
-
-        Keyword arguments:
             namespace: namespace for item
             reversed: if namespace is ``str -> int`` pairs
             pack: if need :func:`struct.pack` to pack the result

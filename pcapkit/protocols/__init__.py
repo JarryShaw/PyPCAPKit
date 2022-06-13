@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import,unused-wildcard-import,fixme
-"""protocol family
+"""Protocol Family
+=====================
 
 :mod:`pcapkit.protocols` is collection of all protocol families,
 with detailed implementation and methods.
 
 """
-# TODO: Implement specified classes for MAC and IP addresses.
-
 from typing import TYPE_CHECKING
 
 # Base Class for Protocols
