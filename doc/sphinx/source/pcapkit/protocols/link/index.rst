@@ -17,3 +17,10 @@ link layer, with detailed implementation and methods.
    ospf
    rarp
    vlan
+
+Protocol Registry
+-----------------
+
+.. data:: pcapkit.protocols.link.LINKTYPE
+
+   Alias of :class:`pcapkit.const.reg.linktype.LinkType`.
