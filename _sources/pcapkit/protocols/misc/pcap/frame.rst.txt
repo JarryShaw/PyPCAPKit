@@ -1,9 +1,12 @@
-Frame Header [*]_
------------------
+Frame Header
+============
+
+.. module:: pcapkit.protocols.misc.pcap.frame
+.. module:: pcapkit.protocols.data.misc.pcap.frame
 
 :mod:`pcapkit.protocols.misc.pcap.frame` contains
 :class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,
-which implements extractor for frame headers of PCAP,
+which implements extractor for frame headers [*]_ of PCAP,
 whose structure is described as below:
 
 .. code-block:: c
@@ -19,122 +22,61 @@ whose structure is described as below:
 
    <br />
 
-.. module:: pcapkit.protocols.misc.pcap.frame
-
 .. autoclass:: pcapkit.protocols.misc.pcap.frame.Frame
-   :members:
-   :undoc-members:
-   :private-members:
+   :no-members:
    :show-inheritance:
 
-   .. attribute:: Frame.__proto__
-      :type: DefaultDict[int, Tuple[str, str]]
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Protocol index mapping for decoding next layer,
-      c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-      & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-      The values should be a tuple representing the module name and class name.
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
-      .. list-table::
-         :header-rows: 1
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: header
 
-         * - Code
-           - Module
-           - Class
-         * - 1
-           - :mod:`pcapkit.protocols.link.ethernet`
-           - :class:`~pcapkit.protocols.link.ethernet.Ethernet`
-         * - 228
-           - :mod:`pcapkit.protocols.link.internet.ipv4`
-           - :class:`~pcapkit.protocols.link.internet.ipv4.IPv4`
-         * - 229
-           - :mod:`pcapkit.protocols.link.internet.ipv6`
-           - :class:`~pcapkit.protocols.link.internet.ipv6.IPv6`
+   .. automethod:: register
+   .. automethod:: index
+   .. automethod:: read
+   .. automethod:: make
 
-Data Structure
-~~~~~~~~~~~~~~
+   .. automethod:: _make_timestamp
+   .. automethod:: _decode_next_layer
 
-.. important::
+   .. autoattribute:: __proto__
+      :no-value:
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+Data Structures
+---------------
 
-.. class:: DataType_Frame
+.. autoclass:: pcapkit.protocols.data.misc.pcap.frame.Frame(frame_info, time, number, time_epoch, time_delta, len, cap_len)
+   :no-members:
+   :show-inheritance:
 
-   :bases: TypedDict
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   PCAP frame header.
+   .. autoattribute:: frame_info
+   .. autoattribute:: time
+   .. autoattribute:: number
+   .. autoattribute:: time_epoch
+   .. autoattribute:: len
+   .. autoattribute:: cap_len
 
-   .. attribute:: frame_info
-      :type: DataType_FrameInfo
+   .. autoattribute:: protocols
 
-      PCAP frame information
+.. autoclass:: pcapkit.protocols.data.misc.pcap.frame.FrameInfo(ts_sec, ts_usec, incl_len, orig_len)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: time
-      :type: datetime.datetime
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      timestamp
-
-   .. attribute:: number
-      :type: int
-
-      frame index number
-
-   .. attribute:: time_epoch
-      :type: float
-
-      EPOCH timestamp
-
-   .. attribute:: len
-      :type: int
-
-      captured packet length
-
-   .. attribute:: cap_len
-      :type: int
-
-      actual packet length
-
-   .. attribute:: packet
-      :type: bytes
-
-      packet raw data
-
-   .. attribute:: protocols
-      :type: pcapkit.corekit.protochain.ProtoChain
-
-      protocol chain
-
-   .. attribute:: error
-      :type: typing.Optional[str]
-
-      error message (optional)
-
-.. class:: DataType_FrameInfo
-
-   :bases: TypedDict
-
-   Frame information.
-
-   .. attribute:: ts_sec
-      :type: int
-
-      timestamp seconds
-
-   .. attribute:: ts_usec
-      :type: int
-
-      timestamp microseconds/nanoseconds
-
-   .. attribute:: incl_len
-      :type: int
-
-      number of octets of packet saved in file
-
-   .. attribute:: orig_len
-      :type: int
-
-      actual length of packet
+   .. autoattribute:: ts_sec
+   .. autoattribute:: ts_usec
+   .. autoattribute:: incl_len
+   .. autoattribute:: orig_len
 
 .. raw:: html
 

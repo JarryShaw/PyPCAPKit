@@ -2,6 +2,7 @@ Root Protocol
 =============
 
 .. module:: pcapkit.protocols.protocol
+.. module:: pcapkit.protocols.data.protocol
 
 :mod:`pcapkit.protocols.protocol` contains
 :class:`~pcapkit.protocols.protocol.Protocol` only, which is
@@ -14,6 +15,16 @@ utility arguments and methods of specified protocols.
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. automethod:: __init__
+   .. automethod:: __post_init__
+   .. automethod:: __repr__
+   .. automethod:: __str__
+   .. automethod:: __iter__
+   .. automethod:: __getitem__
+   .. automethod:: __contains__
+   .. automethod:: __index__
+   .. automethod:: __hash__
 
    .. autoproperty:: name
    .. autoproperty:: alias
@@ -33,16 +44,6 @@ utility arguments and methods of specified protocols.
    .. automethod:: unquote
    .. automethod:: expand_comp
    .. automethod:: analyze
-
-   .. automethod:: __init__
-   .. automethod:: __post_init__
-   .. automethod:: __repr__
-   .. automethod:: __str__
-   .. automethod:: __iter__
-   .. automethod:: __getitem__
-   .. automethod:: __contains__
-   .. automethod:: __index__
-   .. automethod:: __hash__
 
    .. automethod:: _read_protos
    .. automethod:: _read_fileng
@@ -70,3 +71,16 @@ utility arguments and methods of specified protocols.
    .. autoattribute:: _exlayer
    .. autoattribute:: _exproto
    .. autoattribute:: _sigterm
+
+Data Structures
+---------------
+
+.. autoclass:: pcapkit.protocols.data.protocol.Packet(header, payload)
+   :no-members:
+   :show-inheritance:
+
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. autoattribute:: header
+   .. autoattribute:: payload

@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.misc.null</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;no-payload packet</span>
+<span class="sd">&quot;&quot;&quot;No-Payload Packet</span>
+<span class="sd">=======================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.null` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.null.NoPayload` only, which</span>
@@ -96,8 +97,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -109,7 +108,7 @@
 <div class="viewcode-block" id="NoPayload.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -132,10 +131,8 @@
         <span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            file (Optional[io.BytesIO]): Source packet stream.</span>
-<span class="sd">            length (Optional[int]): Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
+<span class="sd">            file: Source packet stream.</span>
+<span class="sd">            length: Length of packet data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -159,41 +156,7 @@
 <span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer&#39;</span><span class="p">)</span></div>
-
-    <span class="c1">##########################################################################</span>
-    <span class="c1"># Utilities.</span>
-    <span class="c1">##########################################################################</span>
-
-<div class="viewcode-block" id="NoPayload._decode_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload._decode_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_decode_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=signature-differs</span>
-        <span class="sd">&quot;&quot;&quot;Decode next layer protocol.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            *args: arbitrary positional arguments</span>
-
-<span class="sd">        Keyword Args:</span>
-<span class="sd">            **kwargs: arbitrary keyword arguments</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: This protocol doesn&#39;t support :meth:`_decode_next_layer`.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;_decode_next_layer&#39;&quot;</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="NoPayload._import_next_layer"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/null.html#pcapkit.protocols.misc.null.NoPayload._import_next_layer">[docs]</a>    <span class="k">def</span> <span class="nf">_import_next_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=signature-differs</span>
-        <span class="sd">&quot;&quot;&quot;Import next layer extractor.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            *args: arbitrary positional arguments</span>
-
-<span class="sd">        Keyword Args:</span>
-<span class="sd">            **kwargs: arbitrary keyword arguments</span>
-
-<span class="sd">        Raises:</span>
-<span class="sd">            UnsupportedCall: This protocol doesn&#39;t support :meth:`_import_next_layer`.</span>
-
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&#39; object has no attribute &#39;_import_next_layer&#39;&quot;</span><span class="p">)</span></div></div>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer&#39;</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

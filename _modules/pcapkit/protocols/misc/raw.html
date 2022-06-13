@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.misc.raw</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;raw packet data</span>
+<span class="sd">&quot;&quot;&quot;Raw Packet Data</span>
+<span class="sd">=====================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.misc.raw` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.raw.Raw` only, which implements</span>
@@ -98,8 +99,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            error: Parsing errors if any.</span>
 <span class="sd">            alias: Original enumeration of the unknown protocol.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -119,7 +118,7 @@
 <div class="viewcode-block" id="Raw.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bytes&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make raw packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            packet (bytes): Raw packet data.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
@@ -143,17 +142,15 @@
                       <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;Optional[int]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Post initialisation hook.</span>
 
+<span class="sd">        Would :mod:`pcapkit` encounter malformed packets, the original parsing</span>
+<span class="sd">        error instance will be provided as in ``error``.</span>
+
 <span class="sd">        Args:</span>
 <span class="sd">            file: Source packet stream.</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            error (Optional[Exception]): Parsing errors if any (for parsing).</span>
 <span class="sd">            alias (Optional[int]): Original enumeration of the unknown protocol.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
-
-<span class="sd">        Would :mod:`pcapkit` encounter malformed packets, the original parsing</span>
-<span class="sd">        error instance will be provided as in ``error``.</span>
 
 <span class="sd">        See Also:</span>
 <span class="sd">            For construction argument, please refer to :meth:`make`.</span>
