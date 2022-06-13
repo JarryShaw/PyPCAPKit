@@ -24,7 +24,7 @@ jobs:
 
           python3 -m pip install -U pip setuptools wheel
           python3 -m pip install -r doc/sphinx/requirements.txt
-          python3 -m pip install .
+          python3 -m pip install .[all]
           make -C doc/sphinx html
 
           # disable Jekyll
