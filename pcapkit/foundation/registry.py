@@ -71,7 +71,7 @@ def register_protocol(protocol: 'Type[Protocol]') -> 'None':
 
     The protocol class must be a subclass of
     :class:`~pcapkit.protocols.protocol.Protocol`, and will be registered to
-    the :data:`pcapkit.protocols.Protocol.__proto__` registry.
+    the :data:`pcapkit.protocols.__proto__` registry.
 
     Args:
         protocol: Protocol class.
