@@ -1,6 +1,3 @@
-Miscellaneous Protocols
-=======================
-
 Raw Packet Data
 ---------------
 
@@ -38,18 +35,3 @@ Data Structure
       :type: Optional[str]
 
       optional error message
-
-No-Payload Packet
------------------
-
-:mod:`pcapkit.protocols.null` contains
-:class:`~pcapkit.protocols.null.NoPayload` only, which
-implements a :class:`~pcapkit.protocols.protocol.Protocol` like
-object whose payload is recursively
-:class:`~pcapkit.protocols.null.NoPayload` itself.
-
-.. automodule:: pcapkit.protocols.null
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
