@@ -180,7 +180,7 @@ class Reassembly(Generic[PT, DT, IT, BT], metaclass=abc.ABCMeta):
     def __init__(self, *, strict: 'bool' = True) -> 'None':
         """Initialise packet reassembly.
 
-        Keyword arguments:
+        Args:
             strict: if return all datagrams (including those not
                 implemented) when submit
 

@@ -59,7 +59,7 @@ class NotImplementedIO(dictdumper.Dumper):
     def _dump_header(self, **kwargs: 'Any') -> 'None':  # pylint: disable=unused-argument
         """Initially dump file heads and tails.
 
-        Keyword Args:
+        Args:
             **kwargs: arbitrary keyword arguments
 
         """

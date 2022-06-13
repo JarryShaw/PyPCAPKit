@@ -14,10 +14,12 @@ TCP flows from a series of packets and connections.
 .. autoclass:: pcapkit.foundation.traceflow.TraceFlow
    :no-members:
    :show-inheritance:
-   :no-special-members: __init__
 
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
+
+   .. automethod:: __init__
+   .. automethod:: __call__
 
    .. autoproperty:: index
 
@@ -27,8 +29,6 @@ TCP flows from a series of packets and connections.
 
    .. automethod:: register
    .. automethod:: make_fout
-
-   .. automethod:: __call__
 
    .. autoattribute:: __output__
       :no-value:

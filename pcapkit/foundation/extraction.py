@@ -79,43 +79,6 @@ class Extractor:
         For supported engines, please refer to
         :meth:`~pcapkit.foundation.extraction.Extractor.run`.
 
-    Arguments:
-        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
-        fout: file name to be written
-        format: file format of output
-
-        auto: if automatically run till EOF
-        extension: if check and append extensions to output file
-        store: if store extracted packet info
-
-        files: if split each frame into different files
-        nofile: if no output file is to be dumped
-        verbose: a :obj:`bool` value or a function takes the :class:`Extract`
-            instance and current parsed frame (depends on engine selected) as
-            parameters to print verbose output information
-
-        engine: extraction engine to be used
-        layer: extract til which layer
-        protocol: extract til which protocol
-
-        ip: if record data for IPv4 & IPv6 reassembly
-        ipv4: if perform IPv4 reassembly
-        ipv6: if perform IPv6 reassembly
-        tcp: if perform TCP reassembly
-        strict: if set strict flag for reassembly
-
-        trace: if trace TCP traffic flows
-        trace_fout: path name for flow tracer if necessary
-        trace_format: output file format of flow tracer
-        trace_byteorder: output file byte order
-        trace_nanosecond: output nanosecond-resolution file flag
-
-    Warns:
-        FormatWarning: Warns under following circumstances:
-
-            * If using PCAP output for TCP flow tracing while the extraction engine is PyShark.
-            * If output file format is not supported.
-
     """
     #: Input file name.
     _ifnm: 'str'
@@ -380,8 +343,6 @@ class Extractor:
 
         Args:
             engine: Extraction engine module name.
-
-        Keyword Args:
             name: Extraction engine display name.
 
         Warns:
@@ -427,8 +388,6 @@ class Extractor:
             extension: If append ``.pcap`` file extension to the input filename
                 if ``fin`` does not have such file extension; if check and append extensions
                 to output file.
-
-        Keyword Args:
             files: If split each frame into different files.
             nofile: If no output file is to be dumped.
 
@@ -545,7 +504,7 @@ class Extractor:
                  trace_byteorder: 'Literal["big", "little"]' = sys.byteorder, trace_nanosecond: 'bool' = False) -> 'None':      # trace settings # pylint: disable=line-too-long
         """Initialise PCAP Reader.
 
-        Arguments:
+        Args:
             fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
             fout: file name to be written
             format: file format of output
@@ -556,7 +515,7 @@ class Extractor:
 
             files: if split each frame into different files
             nofile: if no output file is to be dumped
-            verbose: a :obj:`bool` value or a function takes the :class:`Extract`
+            verbose: a :obj:`bool` value or a function takes the :class:`Extractor`
                 instance and current parsed frame (depends on engine selected) as
                 parameters to print verbose output information
 

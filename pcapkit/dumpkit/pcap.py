@@ -30,16 +30,7 @@ __all__ = [
 
 
 class PCAPIO(dictdumper.Dumper):
-    """PCAP file dumper.
-
-     Args:
-        fname: output file name
-        protocol: data link type
-        byteorder: header byte order
-        nanosecond: nanosecond-resolution file flag
-        **kwargs: arbitrary keyword arguments
-
-    """
+    """PCAP file dumper."""
 
     ##########################################################################
     # Properties.
@@ -57,6 +48,16 @@ class PCAPIO(dictdumper.Dumper):
     def __init__(self, fname: 'str', *, protocol: 'RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int',
                  byteorder: 'Literal["big", "little"]' = sys.byteorder,
                  nanosecond: 'bool' = False, **kwargs: 'Any') -> 'None':  # pylint: disable=arguments-differ
+        """Initialise dumper.
+
+        Args:
+            fname: output file name
+            protocol: data link type
+            byteorder: header byte order
+            nanosecond: nanosecond-resolution file flag
+            **kwargs: arbitrary keyword arguments
+
+        """
         #: int: Frame counter.
         self._fnum = 1
         #: bool: Nanosecond-resolution file flag.
@@ -90,7 +91,7 @@ class PCAPIO(dictdumper.Dumper):
                      **kwargs: 'Any') -> 'None':  # pylint: disable=unused-argument
         """Initially dump file heads and tails.
 
-        Keyword Args:
+        Args:
             protocol: data link type
             byteorder: header byte order
             nanosecond: nanosecond-resolution file flag

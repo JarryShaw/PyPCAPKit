@@ -125,15 +125,7 @@ class Index(Info):
 
 
 class TraceFlow:
-    """Trace TCP flows.
-
-    Arguments:
-        fout: output path
-        format: output format
-        byteorder: output file byte order
-        nanosecond: output nanosecond-resolution file flag
-
-    """
+    """Trace TCP flows."""
 
     # Internal data storage for cached properties.
     __cached__: 'dict[str, Any]'
@@ -300,8 +292,6 @@ class TraceFlow:
 
         Arguments:
             packet: a flow packet (:term:`trace.packet`)
-
-        Keyword Arguments:
             output: flag if has formatted dumper
 
         Returns:
