@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""authentication header
+"""AH - Authentication Header
+================================
 
 :mod:`pcapkit.protocols.internet.ah` contains
 :class:`~pcapkit.protocols.internet.AH` only,
@@ -120,8 +121,6 @@ class AH(IPsec[DataType_AH]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             version: IP protocol version.
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
@@ -171,7 +170,7 @@ class AH(IPsec[DataType_AH]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -209,8 +208,6 @@ class AH(IPsec[DataType_AH]):
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             version: IP protocol version.
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
