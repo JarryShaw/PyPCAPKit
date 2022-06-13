@@ -3,3 +3,6 @@ Sphinx==5.0.1
 
 # sphinx-autodoc-typehints
 sphinx-autodoc-typehints==1.18.2
+
+# typing-extensions
+typing_extensions==4.2.0
