@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""(dynamic) reverse address resolution protocol
+"""RARP/DRARP - (Dynamic) Reverse Address Resolution Protocol
+================================================================
 
 :mod:`pcapkit.protocols.link.rarp` contains
 :class:`~pcapkit.protocols.link.rarp.RARP` only,

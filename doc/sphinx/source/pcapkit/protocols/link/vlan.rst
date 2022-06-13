@@ -1,6 +1,9 @@
 VLAN - 802.1Q Customer VLAN Tag Type
 ====================================
 
+.. module:: pcapkit.protocols.link.vlan
+.. module:: pcapkit.protocols.data.link.vlan
+
 :mod:`pcapkit.protocols.link.vlan` contains
 :class:`~pcapkit.protocols.link.vlan.VLAN`
 only, which implements extractor for 802.1Q
@@ -21,56 +24,47 @@ Octets      Bits        Name                    Description
 
    <br />
 
-.. automodule:: pcapkit.protocols.link.vlan
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.link.vlan.VLAN
+   :no-members:
    :show-inheritance:
 
-Data Structure
-~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: alias
+   .. autoproperty:: info_name
+   .. autoproperty:: length
+   .. autoproperty:: protocol
 
-.. class:: DataType_VLAN
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+Data Structures
+---------------
 
-   IEEE 802.1Q customer VLAN tag type [:rfc:`7042`].
+.. autoclass:: pcapkit.protocols.data.link.vlan.VLAN(tci, type)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: tci
-      :type: DataType_TCI
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Tag control information.
+   .. autoattribute:: tci
+   .. autoattribute:: type
 
-   .. attribute:: type
-      :type: pcapkit.const.reg.ethertype.EtherType
+.. autoclass:: pcapkit.protocols.data.link.vlan.TCI(pcp, dei, vid)
+   :no-members:
+   :show-inheritance:
 
-      Protocol (internet layer).
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. class:: DataType_TCI
-
-   :bases: TypedDict
-
-   Tag control information.
-
-   .. attribute:: pcp
-      :type: pcapkit.const.vlan.priority_level.PriorityLevel
-
-      Priority code point.
-
-   .. attribute:: dei
-      :type: bool
-
-      Drop eligible indicator.
-
-   .. attribute:: vid
-      :type: int
-
-      VLAN identifier.
+   .. autoattribute:: pcp
+   .. autoattribute:: dei
+   .. autoattribute:: vid
 
 .. raw:: html
 

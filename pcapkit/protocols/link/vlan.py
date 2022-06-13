@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""802.1Q customer VLAN tag type
+"""VLAN - 802.1Q Customer VLAN Tag Type
+==========================================
 
 :mod:`pcapkit.protocols.link.vlan` contains
 :class:`~pcapkit.protocols.link.vlan.VLAN`
@@ -93,8 +94,6 @@ class VLAN(Link[DataType_VLAN]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -120,7 +119,7 @@ class VLAN(Link[DataType_VLAN]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

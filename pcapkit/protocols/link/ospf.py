@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""open shortest path first
+"""OSPF - Open Shortest Path First
+=====================================
 
 :mod:`pcapkit.protocols.link.ospf` contains
 :class:`~pcapkit.protocols.link.ospf.OSPF` only,
@@ -106,8 +107,6 @@ class OSPF(Link[DataType_OSPF]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -148,7 +147,7 @@ class OSPF(Link[DataType_OSPF]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -194,15 +193,17 @@ class OSPF(Link[DataType_OSPF]):
         """Read Authentication field when Cryptographic Authentication is employed,
         i.e. :attr:`~OSPF.autype` is ``2``.
 
-        Structure of Cryptographic Authentication [:rfc:`2328`]::
+        Structure of Cryptographic Authentication [:rfc:`2328`]:
 
-             0                   1                   2                   3
-             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |              0                |    Key ID     | Auth Data Len |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-            |                 Cryptographic sequence number                 |
-            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+        .. code-block:: text
+
+            0                   1                   2                   3
+            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |              0                |    Key ID     | Auth Data Len |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           |                 Cryptographic sequence number                 |
+           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
             length: packet length

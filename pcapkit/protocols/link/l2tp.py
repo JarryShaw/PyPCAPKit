@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""layer two tunnelling protocol
+"""L2TP - Layer Two Tunnelling Protocol
+==========================================
 
 :mod:`pcapkit.protocols.link.l2tp` contains
 :class:`~pcapkit.protocols.link.l2tp.L2TP` only,
@@ -109,8 +110,6 @@ class L2TP(Link[DataType_L2TP]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -161,7 +160,7 @@ class L2TP(Link[DataType_L2TP]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=unused-argument
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
