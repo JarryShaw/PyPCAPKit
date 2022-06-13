@@ -1,0 +1,288 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pcapkit.vendor.ftp.return_code &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pcapkit.vendor.ftp.return_code</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;FTP Server Return Code&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">import</span> <span class="nn">bs4</span>
+
+<span class="kn">from</span> <span class="nn">pcapkit.vendor.default</span> <span class="kn">import</span> <span class="n">Vendor</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+
+    <span class="kn">from</span> <span class="nn">bs4</span> <span class="kn">import</span> <span class="n">BeautifulSoup</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ReturnCode&#39;</span><span class="p">]</span>
+
+<span class="n">LINE</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">NAME</span><span class="p">,</span> <span class="n">DOCS</span><span class="p">,</span> <span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="n">MODL</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\</span>
+<span class="s1"># -*- coding: utf-8 -*-</span>
+<span class="s1"># pylint: disable=line-too-long,consider-using-f-string</span>
+<span class="s1">&quot;&quot;&quot;</span><span class="si">{</span><span class="p">(</span><span class="n">name</span> <span class="o">:=</span> <span class="n">DOCS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; [&#39;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span><span class="si">}</span><span class="s1"></span>
+<span class="si">{</span><span class="s1">&#39;=&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="mi">6</span><span class="p">)</span><span class="si">}</span><span class="s1"></span>
+
+<span class="s1">This module contains the constant enumeration for **</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">**,</span>
+<span class="s1">which is automatically generated from :class:`</span><span class="si">{</span><span class="n">MODL</span><span class="si">}</span><span class="s1">.</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">`.</span>
+
+<span class="s1">&quot;&quot;&quot;</span>
+
+<span class="s1">from aenum import IntEnum, extend_enum</span>
+
+<span class="s1">__all__ = [&#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;]</span>
+
+<span class="s1">#: Response kind; whether the response is good, bad or incomplete.</span>
+<span class="s1">KIND = </span><span class="se">{{</span><span class="s1"></span>
+<span class="s1">    &#39;1&#39;: &#39;Positive Preliminary&#39;,</span>
+<span class="s1">    &#39;2&#39;: &#39;Positive Completion&#39;,</span>
+<span class="s1">    &#39;3&#39;: &#39;Positive Intermediate&#39;,</span>
+<span class="s1">    &#39;4&#39;: &#39;Transient Negative Completion&#39;,</span>
+<span class="s1">    &#39;5&#39;: &#39;Permanent Negative Completion&#39;,</span>
+<span class="s1">    &#39;6&#39;: &#39;Protected&#39;,</span>
+<span class="se">}}</span><span class="s1">  # type: dict[str, str]</span>
+
+<span class="s1">#: Grouping information.</span>
+<span class="s1">INFO = </span><span class="se">{{</span><span class="s1"></span>
+<span class="s1">    &#39;0&#39;: &#39;Syntax&#39;,</span>
+<span class="s1">    &#39;1&#39;: &#39;Information&#39;,</span>
+<span class="s1">    &#39;2&#39;: &#39;Connections&#39;,</span>
+<span class="s1">    &#39;3&#39;: &#39;Authentication and accounting&#39;,</span>
+<span class="s1">    &#39;4&#39;: &#39;Unspecified&#39;,                     # [RFC 959]</span>
+<span class="s1">    &#39;5&#39;: &#39;File system&#39;,</span>
+<span class="se">}}</span><span class="s1">  # type: dict[str, str]</span>
+
+
+<span class="s1">class </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(IntEnum):</span>
+<span class="s1">    &quot;&quot;&quot;[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">] </span><span class="si">{</span><span class="n">DOCS</span><span class="si">}</span><span class="s1">&quot;&quot;&quot;</span>
+
+<span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span><span class="s1"></span>
+
+<span class="s1">    @staticmethod</span>
+<span class="s1">    def get(key: &#39;int | str&#39;, default: &#39;int&#39; = -1) -&gt; &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;:</span>
+<span class="s1">        &quot;&quot;&quot;Backport support for original codes.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            key: Key to get enum item.</span>
+<span class="s1">            default: Default value if not found.</span>
+
+<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        if isinstance(key, int):</span>
+<span class="s1">            return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">(key)</span>
+<span class="s1">        if key not in </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">._member_map_:  # pylint: disable=no-member</span>
+<span class="s1">            extend_enum(</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">, key, default)</span>
+<span class="s1">        return </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">[key]  # type: ignore[misc]</span>
+
+<span class="s1">    @classmethod</span>
+<span class="s1">    def _missing_(cls, value: &#39;int&#39;) -&gt; &#39;</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">&#39;:</span>
+<span class="s1">        &quot;&quot;&quot;Lookup function used when value is not found.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Value to get enum item.</span>
+
+<span class="s1">        &quot;&quot;&quot;</span>
+<span class="s1">        if not (</span><span class="si">{</span><span class="n">FLAG</span><span class="si">}</span><span class="s1">):</span>
+<span class="s1">            raise ValueError(&#39;%r is not a valid %s&#39; % (value, cls.__name__))</span>
+<span class="s1">        code = str(value)</span>
+<span class="s1">        kind = KIND.get(code[0], &#39;Reserved&#39;)</span>
+<span class="s1">        info = INFO.get(code[1], &#39;Reserved&#39;)</span>
+<span class="s1">        extend_enum(cls, &#39;%s - %s [%s]&#39; % (kind, info, value), value)</span>
+<span class="s1">        return cls(value)</span>
+<span class="s1">&#39;&#39;&#39;</span>  <span class="c1"># type: Callable[[str, str, str, str, str], str]</span>
+
+
+<div class="viewcode-block" id="ReturnCode"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode">[docs]</a><span class="k">class</span> <span class="nc">ReturnCode</span><span class="p">(</span><span class="n">Vendor</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;FTP Server Return Code&quot;&quot;&quot;</span>
+
+    <span class="c1">#: Value limit checker.</span>
+    <span class="n">FLAG</span> <span class="o">=</span> <span class="s1">&#39;isinstance(value, int) and 100 &lt;= value &lt;= 659&#39;</span>
+    <span class="c1">#: Link to registry.</span>
+    <span class="n">LINK</span> <span class="o">=</span> <span class="s1">&#39;https://en.wikipedia.org/wiki/List_of_FTP_server_return_codes&#39;</span>
+
+<div class="viewcode-block" id="ReturnCode.request"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=signature-differs</span>
+        <span class="sd">&quot;&quot;&quot;Fetch registry data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            text (str): Context from :attr:`~ReturnCode.LINK`.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Parsed HTML source.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">bs4</span><span class="o">.</span><span class="n">BeautifulSoup</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s1">&#39;html5lib&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReturnCode.context"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode.context">[docs]</a>    <span class="k">def</span> <span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
+        <span class="sd">&quot;&quot;&quot;Generate constant context.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            soup: Parsed HTML source.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Constant context.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">enum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="p">(</span><span class="n">soup</span><span class="p">)</span>
+        <span class="n">ENUM</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">    &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span> <span class="n">enum</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">LINE</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">NAME</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">DOCS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">FLAG</span><span class="p">,</span> <span class="n">ENUM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__module__</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReturnCode.process"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode.process">[docs]</a>    <span class="k">def</span> <span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;list[str]&#39;</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed</span>
+        <span class="sd">&quot;&quot;&quot;Process registry data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            soup: Parsed HTML source.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Enumeration fields.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">table</span> <span class="o">=</span> <span class="n">soup</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;table&#39;</span><span class="p">,</span> <span class="n">class_</span><span class="o">=</span><span class="s1">&#39;wikitable&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">content</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">bs4</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">Tag</span><span class="p">),</span> <span class="n">table</span><span class="o">.</span><span class="n">tbody</span><span class="p">)</span>
+        <span class="nb">next</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>  <span class="c1"># header</span>
+
+        <span class="n">enum</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">content</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">find_all</span><span class="p">(</span><span class="s1">&#39;td&#39;</span><span class="p">)</span>
+
+            <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">code</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1">#desc = f&quot;{&#39; &#39;.join(line[1].stripped_strings).split(&#39;.&#39;)[0].strip()}.&quot;</span>
+            <span class="c1">#enum.append(f&#39;{self.NAME}[{self.rename(desc, code)!r}] = {code}&#39;)</span>
+
+            <span class="n">sufs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">wrap_comment</span><span class="p">(</span><span class="s1">&#39;. &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">stripped_strings</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)))</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;e. g. ,&#39;</span><span class="p">,</span> <span class="s1">&#39;e.g.,&#39;</span><span class="p">))</span>  <span class="c1"># pylint: disable=line-too-long</span>
+            <span class="n">pref</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;CODE_</span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">code</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;#: </span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pref</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">enum</span></div>
+
+<div class="viewcode-block" id="ReturnCode.count"><a class="viewcode-back" href="../../../../pcapkit/vendor/ftp.html#pcapkit.vendor.ftp.return_code.ReturnCode.count">[docs]</a>    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">soup</span><span class="p">:</span> <span class="s1">&#39;BeautifulSoup&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Counter[str]&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed,unused-argument</span>
+        <span class="sd">&quot;&quot;&quot;Count field records.&quot;&quot;&quot;</span>
+        <span class="c1">#table = soup.find_all(&#39;table&#39;, class_=&#39;wikitable&#39;)[2]</span>
+        <span class="c1">#content = filter(lambda item: isinstance(item, bs4.element.Tag), table.tbody)</span>
+        <span class="c1">#next(content)  # header</span>
+
+        <span class="c1">#temp = list()</span>
+        <span class="c1">#for item in content:</span>
+        <span class="c1">#    line = item.find_all(&#39;td&#39;)</span>
+
+        <span class="c1">#    code = &#39; &#39;.join(line[0].stripped_strings)</span>
+        <span class="c1">#    if len(code) != 3:</span>
+        <span class="c1">#        continue</span>
+        <span class="c1">#    desc = f&quot;{&#39; &#39;.join(line[1].stripped_strings).split(&#39;.&#39;)[0].strip()}.&quot;</span>
+        <span class="c1">#    temp.append(desc)</span>
+        <span class="c1">#return collections.Counter(temp)</span>
+        <span class="k">return</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">ReturnCode</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pcapkit/index.html">Module Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

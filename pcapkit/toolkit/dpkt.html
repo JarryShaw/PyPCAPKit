@@ -51,10 +51,10 @@ its caller.</p>
 <dd><p>Calculate length of headers before IPv6 Fragment header.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ipv6</strong> (<em>IP6</em>) – DPKT IPv6 packet.</p>
+<dd class="field-odd"><p><strong>ipv6</strong> (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP6</span></code></a>) – DPKT IPv6 packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Length of headers before IPv6 Fragment header
@@ -73,10 +73,10 @@ Routing header <a class="reference external" href="https://dpkt.readthedocs.io/e
 <dd><p>Fetch DPKT packet protocol chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<a class="reference internal" href="../const/hip.html#pcapkit.const.hip.packet.Packet" title="pcapkit.const.hip.packet.Packet"><em>Packet</em></a>) – DPKT packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>) – DPKT packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a></p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Colon (<code class="docutils literal notranslate"><span class="pre">:</span></code>) seperated list of protocol chain.</p>
@@ -93,7 +93,7 @@ Routing header <a class="reference external" href="https://dpkt.readthedocs.io/e
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>packet</strong> (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><em>dpkt.dpkt.Packet</em></a>) – Scapy packet.</p></li>
 <li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – </p></li>
-<li><p><strong>data_link</strong> (<em>RegType_LinkType</em>) – </p></li>
+<li><p><strong>data_link</strong> (<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><em>LinkType</em></a>) – </p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -112,7 +112,7 @@ Routing header <a class="reference external" href="https://dpkt.readthedocs.io/e
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<a class="reference internal" href="../const/hip.html#pcapkit.const.hip.packet.Packet" title="pcapkit.const.hip.packet.Packet"><em>Packet</em></a>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>) – DPKT packet.</p></li>
 <li><p><strong>count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
@@ -120,7 +120,7 @@ Routing header <a class="reference external" href="https://dpkt.readthedocs.io/e
 <dd class="field-even"><p><strong>count</strong> – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>IP_Packet[IPv4Address] | None</p>
+<dd class="field-odd"><p><a class="reference internal" href="../foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.Packet" title="pcapkit.foundation.reassembly.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>Data for IPv4 reassembly.</p>
@@ -147,7 +147,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<a class="reference internal" href="../const/hip.html#pcapkit.const.hip.packet.Packet" title="pcapkit.const.hip.packet.Packet"><em>Packet</em></a>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>) – DPKT packet.</p></li>
 <li><p><strong>count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
@@ -155,7 +155,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv4
 <dd class="field-even"><p><strong>count</strong> – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>IP_Packet[IPv6Address] | None</p>
+<dd class="field-odd"><p><a class="reference internal" href="../foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.Packet" title="pcapkit.foundation.reassembly.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv6Address" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6Address</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>Data for IPv6 reassembly.</p>
@@ -182,7 +182,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<a class="reference internal" href="../const/hip.html#pcapkit.const.hip.packet.Packet" title="pcapkit.const.hip.packet.Packet"><em>Packet</em></a>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>) – DPKT packet.</p></li>
 <li><p><strong>count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
@@ -190,7 +190,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/ip/ipv6
 <dd class="field-even"><p><strong>count</strong> – Packet index. If not provided, default to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TCP_Packet | None</p>
+<dd class="field-odd"><p><a class="reference internal" href="../foundation/reassembly/tcp/tcp.html#pcapkit.foundation.reassembly.tcp.Packet" title="pcapkit.foundation.reassembly.tcp.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>Data for TCP reassembly.</p>
@@ -216,9 +216,9 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp/tcp
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<a class="reference internal" href="../const/hip.html#pcapkit.const.hip.packet.Packet" title="pcapkit.const.hip.packet.Packet"><em>Packet</em></a>) – DPKT packet.</p></li>
-<li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><em>float</em></a>) – Timestamp of the packet.</p></li>
-<li><p><strong>data_link</strong> (<em>RegType_LinkType</em>) – </p></li>
+<li><p><strong>packet</strong> (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>) – DPKT packet.</p></li>
+<li><p><strong>timestamp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – Timestamp of the packet.</p></li>
+<li><p><strong>data_link</strong> (<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><em>LinkType</em></a>) – </p></li>
 <li><p><strong>count</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – </p></li>
 </ul>
 </dd>
@@ -229,7 +229,7 @@ reassembly (<a class="reference internal" href="../foundation/reassembly/tcp/tcp
 </ul>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TF_Packet | None</p>
+<dd class="field-odd"><p><a class="reference internal" href="../foundation/traceflow.html#pcapkit.foundation.traceflow.Packet" title="pcapkit.foundation.traceflow.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><p>Data for TCP reassembly.</p>
