@@ -17,4 +17,6 @@ in :pep:`557`.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
    .. autoattribute:: __map__
+      :no-value:
    .. autoattribute:: __map_reverse__
+      :no-value:
