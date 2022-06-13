@@ -34,12 +34,12 @@
 
           <div class="body" role="main">
             
-  <section id="ethernet-protocol">
-<h1>Ethernet Protocol<a class="headerlink" href="#ethernet-protocol" title="Permalink to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.link.ethernet" title="pcapkit.protocols.link.ethernet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.ethernet</span></code></a> contains
+  <section id="module-pcapkit.protocols.link.ethernet">
+<span id="ethernet-protocol"></span><h1>Ethernet Protocol<a class="headerlink" href="#module-pcapkit.protocols.link.ethernet" title="Permalink to this heading">¶</a></h1>
+<span class="target" id="module-pcapkit.protocols.data.link.ethernet"></span><p><a class="reference internal" href="#module-pcapkit.protocols.link.ethernet" title="pcapkit.protocols.link.ethernet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.ethernet</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.link.ethernet.Ethernet" title="pcapkit.protocols.link.ethernet.Ethernet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code></a>
 only, which implements extractor for Ethernet
-Protocol <a class="footnote-reference brackets" href="#id4" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as
+Protocol <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as
 below:</p>
 <table class="docutils align-default">
 <thead>
@@ -67,45 +67,40 @@ below:</p>
 </tr>
 </tbody>
 </table>
-<br /><span class="target" id="module-pcapkit.protocols.link.ethernet"></span><section id="id2">
-<h2>Ethernet Protocol<a class="headerlink" href="#id2" title="Permalink to this heading">¶</a></h2>
-<p><a class="reference internal" href="#module-pcapkit.protocols.link.ethernet" title="pcapkit.protocols.link.ethernet"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.ethernet</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.link.ethernet.Ethernet" title="pcapkit.protocols.link.ethernet.Ethernet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code></a>
-only, which implements extractor for Ethernet
-Protocol <a class="footnote-reference brackets" href="#id5" id="id3" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a>, whose structure is described as
-below:</p>
-<p>+========+=======+==============+===========================+
-| Octets | Bits  | Name         | Description               |
-+========+=======+==============+===========================+
-| 0      |     0 | <code class="docutils literal notranslate"><span class="pre">eth.dst</span></code>  | Destination MAC Address   |
-+——–+——-+————–+—————————+
-| 1      |     8 | <code class="docutils literal notranslate"><span class="pre">eth.src</span></code>  | Source MAC Address        |
-+——–+——-+————–+—————————+
-| 2      |    16 | <code class="docutils literal notranslate"><span class="pre">eth.type</span></code> | Protocol (Internet Layer) |
-+——–+——-+————–+—————————+</p>
-<aside class="footnote brackets" id="id4" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://en.wikipedia.org/wiki/Ethernet">https://en.wikipedia.org/wiki/Ethernet</a></p>
-</aside>
-<dl class="py class">
+<br /><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ethernet.</span></span><span class="sig-name descname"><span class="pre">Ethernet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ethernet.html#Ethernet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.link.ethernet.Ethernet" title="pcapkit.protocols.data.link.ethernet.Ethernet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code></a>]</p>
 <p>This class implements Ethernet Protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
-<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.__index__">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ethernet.html#Ethernet.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.__index__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeral registry index of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.tcpdump.org/linktypes.html">tcpdump</a> link-layer
+header types.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Ethernet</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Ethernet</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -184,7 +179,7 @@ below:</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code></p>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.link.ethernet.Ethernet" title="pcapkit.protocols.data.link.ethernet.Ethernet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code></a></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Parsed packet data.</p>
@@ -209,87 +204,48 @@ below:</p>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.__length_hint__">
-<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ethernet.html#Ethernet.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.__length_hint__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an estimated length for the object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[14]</p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet.__index__">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ethernet.html#Ethernet.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet.__index__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Numeral registry index of the protocol.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.tcpdump.org/linktypes.html">tcpdump</a> link-layer
-header types.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr">
-<span class="sig-name descname"><span class="pre">_read_mac_addr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/ethernet.html#Ethernet._read_mac_addr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr" title="Permalink to this definition">¶</a></dt>
-<dd><p>Read MAC address.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Colon (<code class="docutils literal notranslate"><span class="pre">:</span></code>) seperated <em>hex</em> encoded MAC address.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="data-structure">
-<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>Following classes are only for <em>documentation</em> purpose.
-They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
-</div>
+<section id="data-structures">
+<h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.DataType_Ethernet">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.ethernet.</span></span><span class="sig-name descname"><span class="pre">DataType_Ethernet</span></span><a class="headerlink" href="#pcapkit.protocols.link.ethernet.DataType_Ethernet" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Bases<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TypedDict</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.ethernet.Ethernet">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.ethernet.</span></span><span class="sig-name descname"><span class="pre">Ethernet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/ethernet.html#Ethernet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
+<p>Data model for ethernet packet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
-<p>Ethernet header.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.DataType_Ethernet.dst">
-<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.DataType_Ethernet.dst" title="Permalink to this definition">¶</a></dt>
-<dd><p>destination MAC address</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.DataType_Ethernet.src">
-<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.DataType_Ethernet.src" title="Permalink to this definition">¶</a></dt>
-<dd><p>source MAC address</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.ethernet.Ethernet.dst">
+<span class="sig-name descname"><span class="pre">dst</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.dst" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destination MAC address.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.ethernet.DataType_Ethernet.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><span class="pre">pcapkit.const.reg.ethertype.EtherType</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.ethernet.DataType_Ethernet.type" title="Permalink to this definition">¶</a></dt>
-<dd><p>protocol (Internet layer)</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.ethernet.Ethernet.src">
+<span class="sig-name descname"><span class="pre">src</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.src" title="Permalink to this definition">¶</a></dt>
+<dd><p>Source MAC address.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.ethernet.Ethernet.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><span class="pre">EtherType</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.ethernet.Ethernet.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Protocol (internet layer).</p>
 </dd></dl>
 
 </dd></dl>
 
-<hr /><aside class="footnote brackets" id="id5" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id3">†</a><span class="fn-bracket">]</span></span>
+<hr /><aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Ethernet">https://en.wikipedia.org/wiki/Ethernet</a></p>
 </aside>
 </section>
