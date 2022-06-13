@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""raw packet data
+"""Raw Packet Data
+=====================
 
 :mod:`pcapkit.protocols.misc.raw` contains
 :class:`~pcapkit.protocols.misc.raw.Raw` only, which implements
@@ -64,8 +65,6 @@ class Raw(Protocol[DataType_Raw]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             error: Parsing errors if any.
             alias: Original enumeration of the unknown protocol.
             **kwargs: Arbitrary keyword arguments.
@@ -85,7 +84,7 @@ class Raw(Protocol[DataType_Raw]):
     def make(self, **kwargs: 'Any') -> 'bytes':
         """Make raw packet data.
 
-        Keyword Args:
+        Args:
             packet (bytes): Raw packet data.
             **kwargs: Arbitrary keyword arguments.
 
@@ -109,17 +108,15 @@ class Raw(Protocol[DataType_Raw]):
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
+        Would :mod:`pcapkit` encounter malformed packets, the original parsing
+        error instance will be provided as in ``error``.
+
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             error (Optional[Exception]): Parsing errors if any (for parsing).
             alias (Optional[int]): Original enumeration of the unknown protocol.
             **kwargs: Arbitrary keyword arguments.
-
-        Would :mod:`pcapkit` encounter malformed packets, the original parsing
-        error instance will be provided as in ``error``.
 
         See Also:
             For construction argument, please refer to :meth:`make`.

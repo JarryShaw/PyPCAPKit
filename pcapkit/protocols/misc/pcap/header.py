@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""global header
+"""Global Header
+===================
 
 :mod:`pcapkit.protocols.misc.pcap.header` contains
-:class:`~pcapkit.protocols.misc.pcap.header.Header`
-only, which implements extractor for global
-headers of PCAP, whose structure is described
-as below:
+:class:`~pcapkit.protocols.misc.pcap.Header` only,
+which implements extractor for global headers [*]_
+of PCAP, whose structure is described as below:
 
 .. code-block:: c
 
@@ -18,6 +18,8 @@ as below:
         guint32 snaplen;        /* max length of captured packets, in octets */
         guint32 network;        /* data link type */
     } pcap_hdr_t;
+
+.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Global_Header
 
 """
 import io
@@ -128,8 +130,6 @@ class Header(Protocol[DataType_Header]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -195,7 +195,7 @@ class Header(Protocol[DataType_Header]):
              network_reversed: bool = False, **kwargs: 'Any') -> 'bytes':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             byteorder: header byte order
             lilendian: little-endian flag
             bigendian: big-endian flag
@@ -250,10 +250,8 @@ class Header(Protocol[DataType_Header]):
         """Post initialisation hook.
 
         Args:
-            file (Optional[io.BytesIO]): Source packet stream.
-            length (Optional[int]): Length of packet data.
-
-        Keyword Args:
+            file: Source packet stream.
+            length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
@@ -300,7 +298,7 @@ class Header(Protocol[DataType_Header]):
         """Read next layer protocol type.
 
         Arguments:
-            size buffer size
+            size: buffer size
 
         Returns:
             Link layer protocol enumeration.
@@ -310,7 +308,7 @@ class Header(Protocol[DataType_Header]):
         _prot = RegType_LinkType.get(_byte)
         return _prot
 
-    def _make_magic(self, byteorder: 'Literal["big", "little"]' = sys.byteorder,  # pylint: disable=no-self-use
+    def _make_magic(self, byteorder: 'Literal["big", "little"]' = sys.byteorder,
                     lilendian: 'Optional[bool]' = None, bigendian: 'Optional[bool]' = None,
                     nanosecond: bool = False) -> 'tuple[bytes, bool]':
         """Generate magic number.
@@ -338,33 +336,3 @@ class Header(Protocol[DataType_Header]):
 
         magic_number = _MAGIC_NUM[(byteorder, nanosecond)]
         return magic_number, (byteorder == 'little')
-
-    def _decode_next_layer(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=signature-differs
-        """Decode next layer protocol.
-
-        Args:
-            *args: arbitrary positional arguments
-
-        Keyword Args:
-            **kwargs: arbitrary keyword arguments
-
-        Raises:
-            UnsupportedCall: This protocol doesn't support :meth:`_decode_next_layer`.
-
-        """
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
-
-    def _import_next_layer(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=signature-differs
-        """Import next layer extractor.
-
-        Args:
-            *args: arbitrary positional arguments
-
-        Keyword Args:
-            **kwargs: arbitrary keyword arguments
-
-        Raises:
-            UnsupportedCall: This protocol doesn't support :meth:`_import_next_layer`.
-
-        """
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_import_next_layer'")

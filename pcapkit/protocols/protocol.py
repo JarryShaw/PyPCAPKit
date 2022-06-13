@@ -848,10 +848,10 @@ class Protocol(Generic[PT], metaclass=abc.ABCMeta):
         return index
 
     def _decode_next_layer(self, dict_: 'PT', proto: 'int', length: 'Optional[int]' = None) -> 'PT':
-        """Decode next layer protocol.
+        r"""Decode next layer protocol.
 
         Arguments:
-            dict_: info buffer
+            dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
 

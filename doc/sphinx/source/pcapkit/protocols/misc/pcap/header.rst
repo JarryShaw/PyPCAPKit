@@ -1,11 +1,13 @@
 Global Header
--------------
+=============
+
+.. module:: pcapkit.protocols.misc.pcap.header
+.. module:: pcapkit.protocols.data.misc.pcap.header
 
 :mod:`pcapkit.protocols.misc.pcap.header` contains
 :class:`~pcapkit.protocols.misc.pcap.Header` only,
-which implements extractor for global headers
-[*]_ of PCAP, whose structure is described as
-below:
+which implements extractor for global headers [*]_
+of PCAP, whose structure is described as below:
 
 .. code-block:: c
 
@@ -23,82 +25,58 @@ below:
 
    <br />
 
-.. automodule:: pcapkit.protocols.misc.pcap.header
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.misc.pcap.header.Header
+   :no-members:
    :show-inheritance:
 
-Data Structure
-~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: version
+   .. autoproperty:: payload
+   .. autoproperty:: protocol
+   .. autoproperty:: protochain
+   .. autoproperty:: byteorder
+   .. autoproperty:: nanosecond
 
-.. class:: DataType_Header
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: :class:`TypedDict`
+   .. automethod:: _read_protos
+   .. automethod:: _make_magic
 
-   PCAP global header.
+Data Structures
+---------------
 
-   .. attribute:: magic_number
-      :type: DataType_MagicNumber
+.. autoclass:: pcapkit.protocols.data.misc.pcap.header.Header(magic_number, version_major, version_minor, thiszone, sigfigs, snaplen, network)
+   :no-members:
+   :show-inheritance:
 
-      magic number
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: version_major
-      :type: int
+   .. autoattribute:: magic_number
+   .. autoattribute:: version
+   .. autoattribute:: thiszone
+   .. autoattribute:: sigfigs
+   .. autoattribute:: snaplen
+   .. autoattribute:: network
 
-      major version number
+.. autoclass:: pcapkit.protocols.data.misc.pcap.header.MagicNumber(data, byteorder, nanosecond)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: version_minor
-      :type: int
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      minor version number
-
-   .. attribute:: thiszone
-      :type: int
-
-      GMT to local correction
-
-   .. attribute:: sigfigs
-      :type: int
-
-      accuracy of timestamps
-
-   .. attribute:: snaplen
-      :type: int
-
-      max length of captured packets, in octets
-
-   .. attribute:: network
-      :type: pcapkit.const.reg.linktype.LinkType
-
-      data link type
-
-
-.. class:: DataType_MagicNumber
-
-   :bases: :class:`TypedDict`
-
-   PCAP magic number.
-
-   .. attribute:: data
-      :type: bytes
-
-      original magic number
-
-   .. attribute:: byteorder
-      :type: str
-
-      byte order (``big`` / ``little``)
-
-   .. attribute:: nanosecond
-      :type: bool
-
-      nanosecond-timestamp support
+   .. autoattribute:: data
+   .. autoattribute:: byteorder
+   .. autoattribute:: nanosecond
 
 .. raw:: html
 

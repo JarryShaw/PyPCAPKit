@@ -2,6 +2,7 @@ Auxiliary Protocols
 ===================
 
 .. module:: pcapkit.protocols.misc
+.. module:: pcapkit.protocols.data.misc
 
 :mod:`pcapkit.protocols.misc` contains the auxiliary protocol implementations.
 Such includes the :class:`~pcapkit.protocols.misc.raw.Raw` class for not-supported

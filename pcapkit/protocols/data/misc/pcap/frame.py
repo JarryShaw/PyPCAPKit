@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from datetime import datetime
     from decimal import Decimal
 
-__all__ = ['Frame']
+__all__ = ['Frame', 'FrameInfo']
 
 
 class FrameInfo(Info):
@@ -48,5 +48,4 @@ class Frame(Info):
         #: Protocol chain.
         protocols: 'str'
 
-        def __init__(self, frame_info: 'FrameInfo', time: 'datetime', number: 'int',  # pylint: disable=unused-argument,multiple-statements,super-init-not-called
-                     time_epoch: 'Decimal', len: 'int', cap_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,redefined-builtin
+        def __init__(self, frame_info: 'FrameInfo', time: 'datetime', number: 'int', time_epoch: 'Decimal', len: 'int', cap_len: 'int') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,super-init-not-called,line-too-long,redefined-builtin

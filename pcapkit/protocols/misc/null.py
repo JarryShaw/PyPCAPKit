@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""no-payload packet
+"""No-Payload Packet
+=======================
 
 :mod:`pcapkit.protocols.null` contains
 :class:`~pcapkit.protocols.null.NoPayload` only, which
@@ -62,8 +63,6 @@ class NoPayload(Protocol[DataType_NoPayload]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -75,7 +74,7 @@ class NoPayload(Protocol[DataType_NoPayload]):
     def make(self, **kwargs: 'Any') -> 'bytes':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -98,10 +97,8 @@ class NoPayload(Protocol[DataType_NoPayload]):
         """Post initialisation hook.
 
         Args:
-            file (Optional[io.BytesIO]): Source packet stream.
-            length (Optional[int]): Length of packet data.
-
-        Keyword Args:
+            file: Source packet stream.
+            length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
         """
@@ -126,37 +123,3 @@ class NoPayload(Protocol[DataType_NoPayload]):
 
         """
         raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
-
-    ##########################################################################
-    # Utilities.
-    ##########################################################################
-
-    def _decode_next_layer(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=signature-differs
-        """Decode next layer protocol.
-
-        Args:
-            *args: arbitrary positional arguments
-
-        Keyword Args:
-            **kwargs: arbitrary keyword arguments
-
-        Raises:
-            UnsupportedCall: This protocol doesn't support :meth:`_decode_next_layer`.
-
-        """
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_decode_next_layer'")
-
-    def _import_next_layer(self, *args: 'Any', **kwargs: 'Any') -> 'NoReturn':  # pylint: disable=signature-differs
-        """Import next layer extractor.
-
-        Args:
-            *args: arbitrary positional arguments
-
-        Keyword Args:
-            **kwargs: arbitrary keyword arguments
-
-        Raises:
-            UnsupportedCall: This protocol doesn't support :meth:`_import_next_layer`.
-
-        """
-        raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute '_import_next_layer'")

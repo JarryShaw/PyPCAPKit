@@ -1,37 +1,41 @@
 Raw Packet Data
----------------
+===============
+
+.. module:: pcapkit.protocols.misc.raw
+.. module:: pcapkit.protocols.data.misc.raw
 
 :mod:`pcapkit.protocols.misc.raw` contains
 :class:`~pcapkit.protocols.misc.raw.Raw` only, which implements
 extractor for unknown protocol, and constructs a
 :class:`~pcapkit.protocols.protocol.Protocol` like object.
 
-.. automodule:: pcapkit.protocols.misc.raw
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.misc.raw.Raw
+   :no-members:
    :show-inheritance:
 
-Data Structure
-~~~~~~~~~~~~~~
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __post_init__
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: protocol
 
-.. class:: DataType_Raw
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+Data Structures
+---------------
 
-   Raw packet data.
+.. autoclass:: pcapkit.protocols.data.misc.raw.Raw(protocol, packet, error)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: packet
-      :type: bytes
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      raw packet data
-
-   .. attribute:: error
-      :type: Optional[str]
-
-      optional error message
+   .. autoattribute:: protocol
+   .. autoattribute:: packet
+   .. autoattribute:: error

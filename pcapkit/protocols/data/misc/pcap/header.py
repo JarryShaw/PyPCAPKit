@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from pcapkit.const.reg.linktype import LinkType
     from pcapkit.corekit.version import VersionInfo
 
-__all__ = ['Header']
+__all__ = ['Header', 'MagicNumber']
 
 
 class MagicNumber(Info):

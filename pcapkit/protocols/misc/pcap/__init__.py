@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import,unused-wildcard-import,fixme
-"""PCAP file headers
+"""PCAP File Headers
+=======================
 
 :mod:`pcapkit.protocols.misc.pcap` contains header descriptions for
 PCAP files, including global header

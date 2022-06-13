@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-"""frame header
+"""Frame Header
+==================
 
 :mod:`pcapkit.protocols.misc.pcap.frame` contains
 :class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,
-which implements extractor for frame headers of PCAP,
+which implements extractor for frame headers [*]_ of PCAP,
 whose structure is described as below:
 
 .. code-block:: c
@@ -14,6 +15,8 @@ whose structure is described as below:
         guint32 incl_len;   /* number of octets of packet saved in file */
         guint32 orig_len;   /* actual length of packet */
     } pcaprec_hdr_t;
+
+.. [*] https://wiki.wireshark.org/Development/LibpcapFileFormat#Record_.28Packet.29_Header
 
 """
 import collections
@@ -56,12 +59,12 @@ class Frame(Protocol[DataType_Frame]):
 
        * - Index
          - Protocol
-       * - 1
-         - :class:`~pcapkit.protocols.link.ethernet.Ethernet`
-       * - 228
-         - :class:`~pcapkit.protocols.internet.ipv4.IPv4`
-       * - 229
-         - :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.ETHERNET`
+         - :class:`pcapkit.protocols.link.ethernet.Ethernet`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV4`
+         - :class:`pcapkit.protocols.internet.ipv4.IPv4`
+       * - :attr:`pcapkit.const.reg.linktype.LinkType.IPV6`
+         - :class:`pcapkit.protocols.internet.ipv6.IPv6`
 
     """
 
@@ -107,16 +110,16 @@ class Frame(Protocol[DataType_Frame]):
 
     @classmethod
     def register(cls, code: 'RegType_LinkType', module: 'str', class_: 'str') -> 'None':
-        """Register a new protocol class.
-
-        Arguments:
-            code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
-            module: module name
-            class_: class name
+        r"""Register a new protocol class.
 
         Notes:
             The full qualified class name of the new protocol class
             should be as ``{module}.{class_}``.
+
+        Arguments:
+            code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
+            module: module name
+            class\_: class name
 
         """
         cls.__proto__[code] = (module, class_)
@@ -137,21 +140,19 @@ class Frame(Protocol[DataType_Frame]):
         return self._protos.index(name)
 
     def read(self, length: 'Optional[int]' = None, *,
-             __read: 'bool' = True, **kwargs: 'Any') -> 'DataType_Frame':
-        """Read each block after global header.
+             _read: 'bool' = True, **kwargs: 'Any') -> 'DataType_Frame':
+        r"""Read each block after global header.
 
         Args:
-            length (Optional[int]): Length of packet data.
-
-        Keyword Args:
-            __read: If the class is called in a parsing scenario.
+            length: Length of packet data.
+            \_read: If the class is called in a parsing scenario.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
             DataType_Frame: Parsed packet data.
 
         Raises:
-            EOFError: If :attr:`self._file <pcapkit.protocols.misc.pcap.frame.Frame._file>` reaches EOF.
+            EOFError: If :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>` reaches EOF.
 
         """
         try:
@@ -186,7 +187,7 @@ class Frame(Protocol[DataType_Frame]):
             cap_len=_olen,
         )
 
-        if not __read:
+        if not _read:
             # move backward to the beginning of the packet
             self._file.seek(-self.length, io.SEEK_CUR)
         else:
@@ -212,7 +213,7 @@ class Frame(Protocol[DataType_Frame]):
              packet: 'bytes', nanosecond: 'bool' = False, **kwargs: 'Any') -> 'bytes':
         """Make frame packet data.
 
-        Keyword Args:
+        Args:
             timestamp: UNIX-Epoch timestamp
             ts_sec: timestamp seconds
             ts_usec: timestamp microseconds
@@ -260,8 +261,6 @@ class Frame(Protocol[DataType_Frame]):
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             num: Frame index number.
             header: Global header of the PCAP file.
             **kwargs: Arbitrary keyword arguments.
@@ -281,18 +280,18 @@ class Frame(Protocol[DataType_Frame]):
         self._nsec = header.magic_number.nanosecond
 
         if file is None:
-            __read = False
+            _read = False
             #: bytes: Raw packet data.
             self._data = self.make(**kwargs)
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
         else:
-            __read = True
+            _read = True
             #: io.BytesIO: Source packet stream.
-            self._file = file  # type: ignore[assignment]
+            self._file = file
 
         #: pcapkit.corekit.infoclass.Info: Parsed packet data.
-        self._info = self.read(length, __read=__read, **kwargs)
+        self._info = self.read(length, _read=_read, **kwargs)
 
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""
@@ -302,6 +301,9 @@ class Frame(Protocol[DataType_Frame]):
     # class method and an instance method.
     def __index__(self: 'Optional[Frame]' = None) -> 'int':  # type: ignore[override]
         """Index of the frame.
+
+        Args:
+            self: :class:`Frame` object or :obj:`None`.
 
         Returns:
             If the object is initiated, i.e. :attr:`self._fnum <pcapkit.protocols.misc.pcap.frame.Frame._fnum>`
@@ -330,7 +332,7 @@ class Frame(Protocol[DataType_Frame]):
             nanosecond: nanosecond-resolution file flag
 
         Returns:
-            Tuple[int, int]: Second and microsecond/nanosecond value of timestamp.
+            Second and microsecond/nanosecond value of timestamp.
 
         """
         if timestamp is None:
@@ -351,10 +353,10 @@ class Frame(Protocol[DataType_Frame]):
 
     def _decode_next_layer(self, dict_: 'DataType_Frame', proto: 'Optional[int]' = None,
                            length: 'Optional[int]' = None) -> 'DataType_Frame':  # pylint: disable=arguments-differ
-        """Decode next layer protocol.
+        r"""Decode next layer protocol.
 
-        Positional arguments:
-            data: info buffer
+        Arguments:
+            dict\_: info buffer
             proto: next layer protocol index
             length: valid (*non-padding*) length
 

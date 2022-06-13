@@ -25,7 +25,8 @@ __all__ = [
     'Packet',
 
     # PCAP file headers
-    'PCAP_Header', 'PCAP_Frame',
+    'PCAP_Header', 'PCAP_MagicNumber',
+    'PCAP_Frame', 'PCAP_FrameInfo',
 
     # Address Resolution Protocol
     'ARP', 'ARP_Address', 'ARP_Type',
