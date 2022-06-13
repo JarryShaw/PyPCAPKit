@@ -1,0 +1,268 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>Base Protocol &#8212; PyPCAPKit 0.16.1 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="ARP/InARP - (Inverse) Address Resolution Protocol" href="arp.html" />
+    <link rel="prev" title="Link Layer Protocols" href="index.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-pcapkit.protocols.link.link">
+<span id="base-protocol"></span><h1>Base Protocol<a class="headerlink" href="#module-pcapkit.protocols.link.link" title="Permalink to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.protocols.link.link" title="pcapkit.protocols.link.link"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.link</span></code></a> contains <a class="reference internal" href="#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>,
+which is a base class for link layer protocols, e.g. <code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code>/InARP,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">Ethernet</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code>,
+<code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code>/DRARP and etc.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.link.Link">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.link.</span></span><span class="sig-name descname"><span class="pre">Link</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/link.html#Link"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.link.Link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>]</p>
+<p>Abstract base class for link layer protocol family.</p>
+<p>This class currently supports parsing of the following protocols, which are
+registered in the <a class="reference internal" href="#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a>
+attribute:</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Index</p></th>
+<th class="head"><p>Protocol</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol" title="pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType.Address_Resolution_Protocol</span></code></a></p></td>
+<td><p><a class="reference internal" href="arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.link.arp.ARP</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol" title="pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType.Reverse_Address_Resolution_Protocol</span></code></a></p></td>
+<td><p><a class="reference internal" href="rarp.html#pcapkit.protocols.link.rarp.RARP" title="pcapkit.protocols.link.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.link.rarp.RARP</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type" title="pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType.Customer_VLAN_Tag_Type</span></code></a></p></td>
+<td><p><a class="reference internal" href="vlan.html#pcapkit.protocols.link.vlan.VLAN" title="pcapkit.protocols.link.vlan.VLAN"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.link.vlan.VLAN</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4" title="pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_4</span></code></a></p></td>
+<td><p><a class="reference internal" href="../internet/ipv4.html#pcapkit.protocols.internet.ipv4.IPv4" title="pcapkit.protocols.internet.ipv4.IPv4"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv4.IPv4</span></code></a></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6" title="pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6"><code class="xref py py-attr docutils literal notranslate"><span class="pre">pcapkit.const.reg.ethertype.EtherType.Internet_Protocol_version_6</span></code></a></p></td>
+<td><p><a class="reference internal" href="../internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6" title="pcapkit.protocols.internet.ipv6.IPv6"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6.IPv6</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p>0x8137</p></td>
+<td><p><a class="reference internal" href="../internet/ipx.html#pcapkit.protocols.internet.ipx.IPX" title="pcapkit.protocols.internet.ipx.IPX"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipx.IPX</span></code></a></p></td>
+</tr>
+</tbody>
+</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.link.Link.layer">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Link'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.link.Link.layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Protocol layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[‘Link’]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.link.Link.register">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">register</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">module</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">class_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/link.html#Link.register"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.link.Link.register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a new protocol class.</p>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>The full qualified class name of the new protocol class
+should be as <code class="docutils literal notranslate"><span class="pre">{module}.{class_}</span></code>.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>code</strong> (<a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a>) – protocol code as in <a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a></p></li>
+<li><p><strong>module</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – module name</p></li>
+<li><p><strong>class_</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – class name</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.link.Link._read_protos">
+<span class="sig-name descname"><span class="pre">_read_protos</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/link.html#Link._read_protos"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.link.Link._read_protos" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read next layer protocol type.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – buffer size</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.ethertype.EtherType" title="pcapkit.const.reg.ethertype.EtherType"><code class="xref py py-class docutils literal notranslate"><span class="pre">EtherType</span></code></a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Internet layer protocol enumeration.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.link.Link.__layer__">
+<span class="sig-name descname"><span class="pre">__layer__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Link'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'Link'</span></em><a class="headerlink" href="#pcapkit.protocols.link.link.Link.__layer__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Layer of protocol.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.link.Link.__proto__">
+<span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.link.Link.__proto__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Protocol index mapping for decoding next layer,
+c.f. <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
+&amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DefaultDict[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)">str</a>]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">PyPCAPKit</a></h1>
+
+
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=JarryShaw&repo=PyPCAPKit&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Module Documentation</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../protocol.html">Root Protocol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../misc/index.html">Auxiliary Protocols</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html">Link Layer Protocols</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../internet/index.html">Internet Layer Protocols</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../transport/index.html">Transport Layer Protocols</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../application/index.html">Application Layer Protocols</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#protocol-registry">Protocol Registry</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#command-line-tool">Command Line Tool</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../index.html#library-index">Library Index</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module Documentation</a><ul>
+  <li><a href="../index.html">Protocol Family</a><ul>
+  <li><a href="index.html">Link Layer Protocols</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">Link Layer Protocols</a></li>
+      <li>Next: <a href="arp.html" title="next chapter">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017-2022, Jarry Shaw.
+      
+      |
+      <a href="../../../_sources/pcapkit/protocols/link/link.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+    <a href="https://github.com/JarryShaw/PyPCAPKit" class="github">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"  class="github"/>
+    </a>
+    
+
+    
+  </body>
+</html>

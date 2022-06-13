@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.link.arp</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;(inverse) address resolution protocol</span>
+<span class="sd">&quot;&quot;&quot;ARP/InARP - (Inverse) Address Resolution Protocol</span>
+<span class="sd">=======================================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.link.arp` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.link.arp.ARP` only,</span>
@@ -174,8 +175,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -228,7 +227,7 @@
 <div class="viewcode-block" id="ARP.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -241,9 +240,9 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="ARP.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[28]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[28]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">28</span></div>
+        <span class="k">return</span> <span class="mi">28</span>
 
 <div class="viewcode-block" id="ARP.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_EtherType&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
@@ -261,7 +260,7 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="ARP._read_addr_resolve"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP._read_addr_resolve">[docs]</a>    <span class="k">def</span> <span class="nf">_read_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_read_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Resolve headware address according to protocol.</span>
 
 <span class="sd">        Arguments:</span>
@@ -281,14 +280,14 @@
                 <span class="n">_addr</span> <span class="o">=</span> <span class="s1">&#39;:&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">_byte</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_addr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">_addr</span></div>
+        <span class="k">return</span> <span class="n">_addr</span>
 
-<div class="viewcode-block" id="ARP._read_proto_resolve"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP._read_proto_resolve">[docs]</a>    <span class="k">def</span> <span class="nf">_read_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_read_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str | IPv4Address | IPv6Address&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Resolve protocol address according to protocol.</span>
 
-<span class="sd">        Positional arguments:</span>
-<span class="sd">            length (int): Protocol address length.</span>
-<span class="sd">            ptype (int): Protocol type.</span>
+<span class="sd">        Arguments:</span>
+<span class="sd">            length: Protocol address length.</span>
+<span class="sd">            ptype: Protocol type.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Protocol address. If ``ptype`` is ``0x0800``, i.e. IPv4 adddress,</span>
@@ -302,7 +301,7 @@
             <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">RegType_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>  <span class="c1"># IPv6</span>
             <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">))</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span></div>
 </pre></div>
 
           </div>

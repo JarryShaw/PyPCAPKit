@@ -47,8 +47,8 @@ of PCAP, whose structure is described as below:
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _read_protos
-   .. automethod:: _make_magic
+   .. .. automethod:: _read_protos
+   .. .. automethod:: _make_magic
 
 Data Structures
 ---------------

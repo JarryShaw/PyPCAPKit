@@ -126,7 +126,7 @@ described as below:</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.vlan.</span></span><span class="sig-name descname"><span class="pre">VLAN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/vlan.html#VLAN"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">VLAN</span></code>]</p>
 <p>This class implements 802.1Q Customer VLAN Tag Type.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -256,6 +256,20 @@ described as below:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[4]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.vlan.VLAN.__index__">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/vlan.html#VLAN.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.vlan.VLAN.__index__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeral registry index of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol has no registry entry.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>

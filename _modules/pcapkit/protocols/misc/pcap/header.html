@@ -328,7 +328,7 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="Header._read_protos"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/header.html#pcapkit.protocols.misc.pcap.header.Header._read_protos">[docs]</a>    <span class="k">def</span> <span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_read_protos</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;RegType_LinkType&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Read next layer protocol type.</span>
 
 <span class="sd">        Arguments:</span>
@@ -340,9 +340,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">_byte</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_unpack</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">lilendian</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">_prot</span> <span class="o">=</span> <span class="n">RegType_LinkType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_byte</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_prot</span></div>
+        <span class="k">return</span> <span class="n">_prot</span>
 
-<div class="viewcode-block" id="Header._make_magic"><a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap/header.html#pcapkit.protocols.misc.pcap.header.Header._make_magic">[docs]</a>    <span class="k">def</span> <span class="nf">_make_magic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
+    <span class="k">def</span> <span class="nf">_make_magic</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
                     <span class="n">lilendian</span><span class="p">:</span> <span class="s1">&#39;Optional[bool]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">bigendian</span><span class="p">:</span> <span class="s1">&#39;Optional[bool]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                     <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[bytes, bool]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generate magic number.</span>
@@ -369,7 +369,7 @@
             <span class="k">raise</span> <span class="n">EndianError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown byte order: </span><span class="si">{</span><span class="n">byteorder</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">magic_number</span> <span class="o">=</span> <span class="n">_MAGIC_NUM</span><span class="p">[(</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="n">magic_number</span><span class="p">,</span> <span class="p">(</span><span class="n">byteorder</span> <span class="o">==</span> <span class="s1">&#39;little&#39;</span><span class="p">)</span></div></div>
+        <span class="k">return</span> <span class="n">magic_number</span><span class="p">,</span> <span class="p">(</span><span class="n">byteorder</span> <span class="o">==</span> <span class="s1">&#39;little&#39;</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

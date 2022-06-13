@@ -73,6 +73,7 @@
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.data.link.ospf</span> <span class="kn">import</span> \
     <span class="n">CrytographicAuthentication</span> <span class="k">as</span> <span class="n">DataType_CrytographicAuthentication</span>
 <span class="kn">from</span> <span class="nn">pcapkit.protocols.link.link</span> <span class="kn">import</span> <span class="n">Link</span>
+<span class="kn">from</span> <span class="nn">pcapkit.utilities.exceptions</span> <span class="kn">import</span> <span class="n">UnsupportedCall</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">ipaddress</span> <span class="kn">import</span> <span class="n">IPv4Address</span>
@@ -197,6 +198,16 @@
 <div class="viewcode-block" id="OSPF.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[24]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="mi">24</span></div>
+
+<div class="viewcode-block" id="OSPF.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.__index__">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
+        <span class="sd">&quot;&quot;&quot;Numeral registry index of the protocol.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: This protocol has no registry entry.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object cannot be interpreted as an integer&#39;</span><span class="p">)</span></div>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>

@@ -41,7 +41,7 @@ whose structure is described as below:
    .. automethod:: read
    .. automethod:: make
 
-   .. automethod:: _make_timestamp
+   .. .. automethod:: _make_timestamp
    .. automethod:: _decode_next_layer
 
    .. autoattribute:: __proto__
