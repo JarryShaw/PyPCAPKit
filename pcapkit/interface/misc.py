@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""auxiliary interface
+"""Auxiliary Interface
+=========================
 
 :mod:`pcapkit.interface.misc` contains miscellaneous
 user interface functions, classes, etc., which are
@@ -83,11 +84,9 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     if extraction.engine == 'dpkt':
         from pcapkit.toolkit.dpkt import tcp_reassembly  # pylint: disable=import-outside-toplevel
     elif extraction.engine == 'scapy':
-        from pcapkit.toolkit.scapy import \
-            tcp_reassembly  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
+        from pcapkit.toolkit.scapy import tcp_reassembly  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
     else:
-        from pcapkit.toolkit.default import \
-            tcp_reassembly  # type: ignore[no-redef] # pylint: disable=import-outside-toplevel
+        from pcapkit.toolkit.default import tcp_reassembly  # type: ignore[no-redef] # isort: skip # pylint: disable=import-outside-toplevel
         fallback = True
 
     streams = []  # type: list[Stream]
