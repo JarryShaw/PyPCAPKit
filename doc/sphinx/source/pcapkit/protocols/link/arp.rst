@@ -1,6 +1,9 @@
 ARP/InARP - (Inverse) Address Resolution Protocol
 =================================================
 
+.. module:: pcapkit.protocols.link.arp
+.. module:: pcapkit.protocols.data.link.arp
+
 :mod:`pcapkit.protocols.link.arp` contains
 :class:`~pcapkit.protocols.link.arp.ARP` only,
 which implements extractor for (Inverse) Address Resolution
@@ -35,71 +38,73 @@ below:
 
    <br />
 
-.. module:: pcapkit.protocols.link.arp
-
 .. autoclass:: pcapkit.protocols.link.arp.ARP
-   :members:
-   :undoc-members:
-   :private-members:
+   :no-members:
    :show-inheritance:
 
-   .. attribute:: _acnm
-      :type: Literal['ARP', 'InARP', 'RARP', 'DRARP']
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      Acronym of corresponding protocol.
+   .. automethod:: __index__
 
-      The value is based on operation type (:attr:`~DataType_ARP.oper`).
+   .. autoproperty:: name
+   .. autoproperty:: alias
+   .. autoproperty:: length
+   .. autoproperty:: src
+   .. autoproperty:: dst
+   .. autoproperty:: type
 
-   .. attribute:: _name
-      :type: Literal['Dynamic Reverse Address Resolution Protocol', 'Inverse Address Resolution Protocol', 'Reverse Address Resolution Protocol', 'Address Resolution Protocol']
+   .. automethod:: id
+   .. automethod:: read
+   .. automethod:: make
 
-      Name of current protocol.
+   .. .. automethod:: _read_addr_resolve
+   .. .. automethod:: _read_proto_resolve
 
-      The value is based on operation type (:attr:`~DataType_ARP.oper`).
+.. class:: pcapkit.protocols.link.InARP
 
-Data Structure
-~~~~~~~~~~~~~~
+   Alias of :class:`~pcapkit.protocols.link.arp.ARP`.
 
-.. important::
+Data Structures
+---------------
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+.. autoclass:: pcapkit.protocols.data.link.arp.ARP(htype, ptype, hlen, plen, oper, sha, spa, tha, tpa, len)
+   :no-members:
+   :show-inheritance:
 
-.. class:: DataType_ARP
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   :bases: TypedDict
+   .. autoattribute:: htype
+   .. autoattribute:: ptype
+   .. autoattribute:: hlen
+   .. autoattribute:: plen
+   .. autoattribute:: oper
+   .. autoattribute:: sha
+   .. autoattribute:: spa
+   .. autoattribute:: tha
+   .. autoattribute:: tpa
+   .. autoattribute:: len
 
-   ARP header [:rfc:`826`].
+.. autoclass:: pcapkit.protocols.data.link.arp.Address(hardware, protocol)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: htype
-      :type: pcapkit.const.arp.Headware
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      hardware type
+   .. autoattribute:: hardware
+   .. autoattribute:: protocol
 
-   .. attribute:: ptype
-      :type: Union[pcapkit.const.reg.ethertype.EtherType, str]
+.. autoclass:: pcapkit.protocols.data.link.arp.Type(hardware, protocol)
+   :no-members:
+   :show-inheritance:
 
-      protocol type
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: hlen
-      :type: int
-
-      headware address length
-
-   .. attribute:: plen
-      :type: int
-
-      protocol address length
-
-   .. attribute:: oper
-      :type: pcapkit.const.arp.operation.Operation
-
-      operation
-
-   .. attribute:: sha
-      :type: str
-
-      sender hardware address
+   .. autoattribute:: hardware
+   .. autoattribute:: protocol
 
 .. raw:: html
 
