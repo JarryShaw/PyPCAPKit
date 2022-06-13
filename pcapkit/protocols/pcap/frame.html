@@ -16,8 +16,6 @@
     <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Link Layer Protocols" href="../link/index.html" />
-    <link rel="prev" title="Global Header" href="header.html" />
    
   <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
   
@@ -51,7 +49,7 @@ whose structure is described as below:</p>
 <br /><span class="target" id="module-pcapkit.protocols.misc.pcap.frame"></span><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.Frame">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.pcap.frame.</span></span><span class="sig-name descname"><span class="pre">Frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/misc/pcap/frame.html#Frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.Frame" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code>]</p>
 <p>Per packet frame header extractor.</p>
 <p>This class currently supports parsing of the following protocols, which are
 registered in the <a class="reference internal" href="#pcapkit.protocols.misc.pcap.frame.Frame.__proto__" title="pcapkit.protocols.misc.pcap.frame.Frame.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code></a>
@@ -82,15 +80,15 @@ attribute:</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
+<dd class="field-even"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
 </dd>
 </dl>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.pcap.frame.Frame.__proto__">
 <span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.misc.pcap.frame.Frame.__proto__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol index mapping for decoding next layer,
-c.f. <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
-&amp; <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
+c.f. <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
+&amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
 The values should be a tuple representing the module name and class name.</p>
 <table class="docutils align-default">
 <thead>
@@ -191,7 +189,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <dd><p>Call <a class="reference internal" href="../../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.index" title="pcapkit.corekit.protochain.ProtoChain.index"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtoChain.index</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>]]) – <code class="docutils literal notranslate"><span class="pre">name</span></code> to be searched</p>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>]]) – <code class="docutils literal notranslate"><span class="pre">name</span></code> to be searched</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></p>
@@ -526,30 +524,8 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 
 
 <h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">Module Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="index.html">PCAP File Headers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../link/index.html">Link Layer Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../internet/index.html">Internet Layer Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../transport/index.html">Transport Layer Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../application/index.html">Application Layer Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../misc.html">Miscellaneous Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../index.html#base-protocol">Base Protocol</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../toolkit/index.html">Compatibility Tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../dumpkit/index.html">Dump Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../utilities/index.html">Utility Functions &amp; Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../const/index.html">Constant Enumerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../index.html#command-line-tool">Command Line Tool</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../index.html#library-index">Library Index</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../pep.html">Help Wanted</a></li>
 </ul>
@@ -558,14 +534,6 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../../index.html">Documentation overview</a><ul>
-  <li><a href="../../index.html">Module Documentation</a><ul>
-  <li><a href="../index.html">Protocol Family</a><ul>
-  <li><a href="index.html">PCAP File Headers</a><ul>
-      <li>Previous: <a href="header.html" title="previous chapter">Global Header</a></li>
-      <li>Next: <a href="../link/index.html" title="next chapter">Link Layer Protocols</a></li>
-  </ul></li>
-  </ul></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>

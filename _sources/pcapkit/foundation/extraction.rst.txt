@@ -16,10 +16,39 @@ extracts parametres from a PCAP file.
 .. autoclass:: pcapkit.foundation.extraction.Extractor
    :no-members:
    :show-inheritance:
-   :no-special-members: __init__
 
-   .. autoattribute:: __output__
-      :no-value:
+   :param fin: file name to be read; if file not exist, raise :exc:`FileNotFound`
+   :param fout: file name to be written
+   :param format: file format of output
+
+   :param auto: if automatically run till EOF
+   :param extension: if check and append extensions to output file
+   :param store: if store extracted packet info
+
+   :param files: if split each frame into different files
+   :param nofile: if no output file is to be dumped
+   :param verbose: a :obj:`bool` value or a function takes the :class:`Extractor` instance and current parsed frame (depends on engine selected) as parameters to print verbose output information
+
+   :param engine: extraction engine to be used
+   :param layer: extract til which layer
+   :param protocol: extract til which protocol
+
+   :param ip: if record data for IPv4 & IPv6 reassembly
+   :param ipv4: if perform IPv4 reassembly
+   :param ipv6: if perform IPv6 reassembly
+   :param tcp: if perform TCP reassembly
+   :param strict: if set strict flag for reassembly
+
+   :param trace: if trace TCP traffic flows
+   :param trace_fout: path name for flow tracer if necessary
+   :param trace_format: output file format of flow tracer
+   :param trace_byteorder: output file byte order
+   :param trace_nanosecond: output nanosecond-resolution file flag
+
+   .. automethod:: __init__
+   .. automethod:: __iter__
+   .. automethod:: __next__
+   .. automethod:: __call__
 
    .. autoproperty:: info
    .. autoproperty:: length
@@ -50,10 +79,6 @@ extracts parametres from a PCAP file.
    .. automethod:: _run_pyshark
    .. automethod:: _pyshark_read_frame
 
-   .. automethod:: __iter__
-   .. automethod:: __next__
-   .. automethod:: __call__
-
    .. autoattribute:: _flag_a
    .. autoattribute:: _flag_d
    .. autoattribute:: _flag_e
@@ -73,6 +98,9 @@ extracts parametres from a PCAP file.
    .. .. autoattribute:: _dlink
    .. .. autoattribute:: _nnsec
    .. .. autoattribute:: _type
+
+   .. autoattribute:: __output__
+      :no-value:
 
 Data Structures
 ---------------

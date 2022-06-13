@@ -218,7 +218,7 @@ which is a base class for internet layer protocols, eg. <a class="reference inte
 <span class="target" id="module-pcapkit.protocols.internet.internet"></span><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.internet.</span></span><span class="sig-name descname"><span class="pre">Internet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/internet.html#Internet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">PT</span></code>]</p>
 <p>Abstract base class for internet layer protocol family.</p>
 <p>This class currently supports parsing of the following protocols, which are
 registered in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">self.__proto__</span></code>
@@ -279,7 +279,7 @@ attribute:</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
+<dd class="field-even"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
 </dd>
 </dl>
 <dl class="py attribute">
@@ -292,8 +292,8 @@ attribute:</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.internet.Internet.__proto__">
 <span class="sig-name descname"><span class="pre">__proto__</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DefaultDict</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.internet.internet.Internet.__proto__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Protocol index mapping for decoding next layer,
-c.f. <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
-&amp; <a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
+c.f. <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
+&amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
 The values should be a tuple representing the module name and class name.</p>
 <table class="docutils align-default">
 <thead>
@@ -469,7 +469,7 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 </ul>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
+<dd class="field-odd"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Instance of next layer.</p>
@@ -511,13 +511,12 @@ should be as <code class="docutils literal notranslate"><span class="pre">{modul
 <li class="toctree-l2"><a class="reference internal" href="../../interface/index.html">User Interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../foundation/index.html">Library Foundation</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../index.html">Protocol Family</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../pcap/index.html">PCAP File Headers</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../protocol.html">Root Protocol</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../link/index.html">Link Layer Protocols</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Internet Layer Protocols</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../transport/index.html">Transport Layer Protocols</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../application/index.html">Application Layer Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../misc.html">Miscellaneous Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../index.html#base-protocol">Base Protocol</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#protocol-registry">Protocol Registry</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a></li>

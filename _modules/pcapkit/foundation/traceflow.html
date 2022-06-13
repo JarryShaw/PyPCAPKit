@@ -159,15 +159,7 @@
 
 
 <div class="viewcode-block" id="TraceFlow"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow">[docs]</a><span class="k">class</span> <span class="nc">TraceFlow</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Trace TCP flows.</span>
-
-<span class="sd">    Arguments:</span>
-<span class="sd">        fout: output path</span>
-<span class="sd">        format: output format</span>
-<span class="sd">        byteorder: output file byte order</span>
-<span class="sd">        nanosecond: output nanosecond-resolution file flag</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Trace TCP flows.&quot;&quot;&quot;</span>
 
     <span class="c1"># Internal data storage for cached properties.</span>
     <span class="n">__cached__</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
@@ -334,8 +326,6 @@
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            packet: a flow packet (:term:`trace.packet`)</span>
-
-<span class="sd">        Keyword Arguments:</span>
 <span class="sd">            output: flag if has formatted dumper</span>
 
 <span class="sd">        Returns:</span>
@@ -429,7 +419,7 @@
 
         <span class="k">return</span> <span class="bp">self</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
+<div class="viewcode-block" id="TraceFlow.__init__"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;little&quot;, &quot;big&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
                  <span class="n">nanosecond</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Initialise instance.</span>
@@ -464,7 +454,7 @@
         <span class="c1">#: Type[Dumper]: Dumper class.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_foutio</span> <span class="o">=</span> <span class="n">fio</span>
         <span class="c1">#: Optional[str]: Output file extension.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fdpext</span> <span class="o">=</span> <span class="n">ext</span></div>
 
 <div class="viewcode-block" id="TraceFlow.__call__"><a class="viewcode-back" href="../../../pcapkit/foundation/traceflow.html#pcapkit.foundation.traceflow.TraceFlow.__call__">[docs]</a>    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">&#39;Packet&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Dump frame to output files.</span>

@@ -64,16 +64,7 @@
 
 
 <div class="viewcode-block" id="PCAPIO"><a class="viewcode-back" href="../../../pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO">[docs]</a><span class="k">class</span> <span class="nc">PCAPIO</span><span class="p">(</span><span class="n">dictdumper</span><span class="o">.</span><span class="n">Dumper</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;PCAP file dumper.</span>
-
-<span class="sd">     Args:</span>
-<span class="sd">        fname: output file name</span>
-<span class="sd">        protocol: data link type</span>
-<span class="sd">        byteorder: header byte order</span>
-<span class="sd">        nanosecond: nanosecond-resolution file flag</span>
-<span class="sd">        **kwargs: arbitrary keyword arguments</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;PCAP file dumper.&quot;&quot;&quot;</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -91,6 +82,16 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fname</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int&#39;</span><span class="p">,</span>
                  <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span>
                  <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;Initialise dumper.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fname: output file name</span>
+<span class="sd">            protocol: data link type</span>
+<span class="sd">            byteorder: header byte order</span>
+<span class="sd">            nanosecond: nanosecond-resolution file flag</span>
+<span class="sd">            **kwargs: arbitrary keyword arguments</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#: int: Frame counter.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="c1">#: bool: Nanosecond-resolution file flag.</span>
@@ -119,12 +120,12 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span> <span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
+<div class="viewcode-block" id="PCAPIO._dump_header"><a class="viewcode-back" href="../../../pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO._dump_header">[docs]</a>    <span class="k">def</span> <span class="nf">_dump_header</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">&#39;RegType_LinkType | StdlibIntEnum | AenumIntEnum | str | int&#39;</span><span class="p">,</span>  <span class="c1"># pylint: disable=arguments-differ</span>
                      <span class="n">byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                      <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
         <span class="sd">&quot;&quot;&quot;Initially dump file heads and tails.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            protocol: data link type</span>
 <span class="sd">            byteorder: header byte order</span>
 <span class="sd">            nanosecond: nanosecond-resolution file flag</span>
@@ -137,9 +138,9 @@
             <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">data</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<div class="viewcode-block" id="PCAPIO._append_value"><a class="viewcode-back" href="../../../pcapkit/dumpkit/pcap.html#pcapkit.dumpkit.pcap.PCAPIO._append_value">[docs]</a>    <span class="k">def</span> <span class="nf">_append_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">&#39;Frame&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">:</span> <span class="s1">&#39;BinaryIO&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
         <span class="sd">&quot;&quot;&quot;Call this function to write contents.</span>
 
 <span class="sd">        Args:</span>
@@ -156,7 +157,7 @@
             <span class="o">**</span><span class="n">value</span><span class="o">.</span><span class="n">info</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span>
         <span class="p">)</span><span class="o">.</span><span class="n">data</span>
         <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
 </pre></div>
 
           </div>

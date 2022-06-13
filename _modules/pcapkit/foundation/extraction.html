@@ -113,43 +113,6 @@
 <span class="sd">        For supported engines, please refer to</span>
 <span class="sd">        :meth:`~pcapkit.foundation.extraction.Extractor.run`.</span>
 
-<span class="sd">    Arguments:</span>
-<span class="sd">        fin: file name to be read; if file not exist, raise :exc:`FileNotFound`</span>
-<span class="sd">        fout: file name to be written</span>
-<span class="sd">        format: file format of output</span>
-
-<span class="sd">        auto: if automatically run till EOF</span>
-<span class="sd">        extension: if check and append extensions to output file</span>
-<span class="sd">        store: if store extracted packet info</span>
-
-<span class="sd">        files: if split each frame into different files</span>
-<span class="sd">        nofile: if no output file is to be dumped</span>
-<span class="sd">        verbose: a :obj:`bool` value or a function takes the :class:`Extract`</span>
-<span class="sd">            instance and current parsed frame (depends on engine selected) as</span>
-<span class="sd">            parameters to print verbose output information</span>
-
-<span class="sd">        engine: extraction engine to be used</span>
-<span class="sd">        layer: extract til which layer</span>
-<span class="sd">        protocol: extract til which protocol</span>
-
-<span class="sd">        ip: if record data for IPv4 &amp; IPv6 reassembly</span>
-<span class="sd">        ipv4: if perform IPv4 reassembly</span>
-<span class="sd">        ipv6: if perform IPv6 reassembly</span>
-<span class="sd">        tcp: if perform TCP reassembly</span>
-<span class="sd">        strict: if set strict flag for reassembly</span>
-
-<span class="sd">        trace: if trace TCP traffic flows</span>
-<span class="sd">        trace_fout: path name for flow tracer if necessary</span>
-<span class="sd">        trace_format: output file format of flow tracer</span>
-<span class="sd">        trace_byteorder: output file byte order</span>
-<span class="sd">        trace_nanosecond: output nanosecond-resolution file flag</span>
-
-<span class="sd">    Warns:</span>
-<span class="sd">        FormatWarning: Warns under following circumstances:</span>
-
-<span class="sd">            * If using PCAP output for TCP flow tracing while the extraction engine is PyShark.</span>
-<span class="sd">            * If output file format is not supported.</span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#: Input file name.</span>
     <span class="n">_ifnm</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
@@ -414,8 +377,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            engine: Extraction engine module name.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            name: Extraction engine display name.</span>
 
 <span class="sd">        Warns:</span>
@@ -461,8 +422,6 @@
 <span class="sd">            extension: If append ``.pcap`` file extension to the input filename</span>
 <span class="sd">                if ``fin`` does not have such file extension; if check and append extensions</span>
 <span class="sd">                to output file.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            files: If split each frame into different files.</span>
 <span class="sd">            nofile: If no output file is to be dumped.</span>
 
@@ -569,7 +528,7 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="Extractor.__init__"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">fin</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">fout</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Optional[Formats]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>                 <span class="c1"># basic settings # pylint: disable=redefined-builtin</span>
                  <span class="n">auto</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>                                           <span class="c1"># internal settings # pylint: disable=line-too-long</span>
                  <span class="n">files</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">nofile</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="p">:</span> <span class="s1">&#39;bool | VerboseHandler&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>                       <span class="c1"># output settings # pylint: disable=line-too-long</span>
@@ -579,7 +538,7 @@
                  <span class="n">trace_byteorder</span><span class="p">:</span> <span class="s1">&#39;Literal[&quot;big&quot;, &quot;little&quot;]&#39;</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">byteorder</span><span class="p">,</span> <span class="n">trace_nanosecond</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>      <span class="c1"># trace settings # pylint: disable=line-too-long</span>
         <span class="sd">&quot;&quot;&quot;Initialise PCAP Reader.</span>
 
-<span class="sd">        Arguments:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            fin: file name to be read; if file not exist, raise :exc:`FileNotFound`</span>
 <span class="sd">            fout: file name to be written</span>
 <span class="sd">            format: file format of output</span>
@@ -590,7 +549,7 @@
 
 <span class="sd">            files: if split each frame into different files</span>
 <span class="sd">            nofile: if no output file is to be dumped</span>
-<span class="sd">            verbose: a :obj:`bool` value or a function takes the :class:`Extract`</span>
+<span class="sd">            verbose: a :obj:`bool` value or a function takes the :class:`Extractor`</span>
 <span class="sd">                instance and current parsed frame (depends on engine selected) as</span>
 <span class="sd">                parameters to print verbose output information</span>
 
@@ -745,7 +704,7 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">_ofile</span> <span class="o">=</span> <span class="n">DictDumper</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_f</span> <span class="k">else</span> <span class="n">DictDumper</span><span class="p">(</span><span class="n">ofnm</span><span class="p">)</span>  <span class="c1"># output file</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>    <span class="c1"># start extraction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>    <span class="c1"># start extraction</span></div>
 
 <div class="viewcode-block" id="Extractor.__iter__"><a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__iter__">[docs]</a>    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Extractor&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Iterate and parse PCAP frame.</span>

@@ -60,14 +60,14 @@ the decorated function.</p>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol._read_packet" title="pcapkit.protocols.protocol.Protocol._read_packet"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._read_packet()</span></code></a></p>
+<p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._read_packet" title="pcapkit.protocols.protocol.Protocol._read_packet"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._read_packet()</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R</span></code>)]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>Concatenate</em><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><em>P</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
+<dd class="field-even"><p><strong>func</strong> (<em>Callable</em><em>[</em><em>Concatenate</em><em>[</em><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><em>P</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
 </dd>
 </dl>
 </dd></dl>
@@ -81,9 +81,9 @@ the decorated function.</p>
 <p>This decorator function is designed for decorating <em>class methods</em>.</p>
 </div>
 <p>This decorate first keep the current offset of
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code>, then
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a>, then
 try to call the decorated function. Should any exception raised, it will
-re-parse the <code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code>
+re-parse the <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a>
 as <a class="reference internal" href="../protocols/misc.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> protocol.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -94,14 +94,14 @@ as <a class="reference internal" href="../protocols/misc.html#pcapkit.protocols.
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._decode_next_layer()</span></code></a></p>
+<p><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pcapkit.protocols.protocol.Protocol._decode_next_layer()</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">ParamSpec</span></code>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.TypeVar" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">TypeVar</span></code></a>(<code class="docutils literal notranslate"><span class="pre">R</span></code>)]</p>
 </dd>
 <dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Concatenate" title="(in Python v3.10)"><em>Concatenate</em></a><em>[</em><a class="reference internal" href="../protocols/index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>~P</em><em>]</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
+<dd class="field-even"><p><strong>func</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Callable" title="(in Python v3.10)"><em>Callable</em></a><em>[</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Concatenate" title="(in Python v3.10)"><em>Concatenate</em></a><em>[</em><a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><em>Protocol</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><em>Optional</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>]</em><em>, </em><em>~P</em><em>]</em><em>]</em><em>, </em><em>R</em><em>]</em>) – </p>
 </dd>
 </dl>
 </dd></dl>

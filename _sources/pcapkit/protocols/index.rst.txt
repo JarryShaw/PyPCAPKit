@@ -1,4 +1,3 @@
-===============
 Protocol Family
 ===============
 
@@ -10,21 +9,22 @@ with detailed implementation and methods.
 .. toctree::
    :maxdepth: 2
 
-   pcap/index
+   protocol
+   misc/index
    link/index
    internet/index
    transport/index
    application/index
-   misc
 
-Base Protocol
--------------
+Protocol Registry
+-----------------
 
-.. autoclass:: pcapkit.protocols.protocol.Protocol
-   :members:
-   :undoc-members:
-   :private-members:
-   :show-inheritance:
+.. data:: pcapkit.protocols.__proto__
+   :type: dict[str, Type[Protocol]]
 
-   .. autoattribute:: __layer__
-   .. autoattribute:: __proto__
+   Protocol registry.
+
+   .. seealso::
+
+      Please refer to :func:`pcapkit.foundation.registry.register_protocol`
+      for more information.

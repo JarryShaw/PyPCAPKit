@@ -56,14 +56,7 @@
 
 
 <div class="viewcode-block" id="ProtoChain"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain">[docs]</a><span class="k">class</span> <span class="nc">ProtoChain</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Protocols chain.</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        proto: New protocol class on the top stack.</span>
-<span class="sd">        alias: New protocol alias on the top stack.</span>
-<span class="sd">        basis: Original protocol chain as base stacks.</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Protocols chain.&quot;&quot;&quot;</span>
 
     <span class="c1">#: Internal data storage for protocol chain.</span>
     <span class="n">__data__</span><span class="p">:</span> <span class="s1">&#39;tuple[tuple[str, Type[Protocol]], ...]&#39;</span>
@@ -170,15 +163,13 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Protocol | Type[Protocol]&#39;</span><span class="p">,</span> <span class="n">alias</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
+<div class="viewcode-block" id="ProtoChain.__init__"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">&#39;Protocol | Type[Protocol]&#39;</span><span class="p">,</span> <span class="n">alias</span><span class="p">:</span> <span class="s1">&#39;Optional[str]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                  <span class="n">basis</span><span class="p">:</span> <span class="s1">&#39;Optional[ProtoChain]&#39;</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialisation.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            proto: New protocol class on the top stack.</span>
 <span class="sd">            alias: New protocol alias on the top stack.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            basis: Original protocol chain as base stacks.</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -194,7 +185,7 @@
         <span class="n">temp_data</span> <span class="o">=</span> <span class="p">[(</span><span class="n">alias</span><span class="p">,</span> <span class="n">proto</span><span class="p">)]</span>
         <span class="k">if</span> <span class="n">basis</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">temp_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">basis</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">temp_data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__data__</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">temp_data</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="ProtoChain.__repr__"><a class="viewcode-back" href="../../../pcapkit/corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Returns representation of protocol chain data.</span>

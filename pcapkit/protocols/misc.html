@@ -16,8 +16,6 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Core Utilities" href="../corekit/index.html" />
-    <link rel="prev" title="HTTP/2 - Hypertext Transfer Protocol" href="application/httpv2.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   
@@ -41,16 +39,16 @@
 <p><a class="reference internal" href="#module-pcapkit.protocols.misc.raw" title="pcapkit.protocols.misc.raw"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.raw</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> only, which implements
 extractor for unknown protocol, and constructs a
-<a class="reference internal" href="index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> like object.</p>
+<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> like object.</p>
 <span class="target" id="module-pcapkit.protocols.misc.raw"></span><p>raw packet data</p>
 <p><a class="reference internal" href="#module-pcapkit.protocols.misc.raw" title="pcapkit.protocols.misc.raw"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.misc.raw</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> only, which implements
 extractor for unknown protocol, and constructs a
-<a class="reference internal" href="index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> like object.</p>
+<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> like object.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.misc.raw.Raw">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.misc.raw.</span></span><span class="sig-name descname"><span class="pre">Raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/misc/raw.html#Raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.misc.raw.Raw" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code>]</p>
 <p>This class implements universal unknown protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -60,7 +58,7 @@ extractor for unknown protocol, and constructs a
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
+<dd class="field-even"><p><a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
 </dd>
 </dl>
 <dl class="py property">
@@ -237,7 +235,7 @@ They do <strong>NOT</strong> exist in the <a class="reference internal" href="..
 <h2>No-Payload Packet<a class="headerlink" href="#no-payload-packet" title="Permalink to this heading">¶</a></h2>
 <p><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.null</span></code> contains
 <code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code> only, which
-implements a <a class="reference internal" href="index.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> like
+implements a <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a> like
 object whose payload is recursively
 <code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code> itself.</p>
 </section>
@@ -267,30 +265,8 @@ object whose payload is recursively
 
 
 <h3>Navigation</h3>
-<ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="../index.html">Module Documentation</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../interface/index.html">User Interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../foundation/index.html">Library Foundation</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="index.html">Protocol Family</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="pcap/index.html">PCAP File Headers</a></li>
-<li class="toctree-l3"><a class="reference internal" href="link/index.html">Link Layer Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="internet/index.html">Internet Layer Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="transport/index.html">Transport Layer Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="application/index.html">Application Layer Protocols</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Miscellaneous Protocols</a></li>
-<li class="toctree-l3"><a class="reference internal" href="index.html#base-protocol">Base Protocol</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../corekit/index.html">Core Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../toolkit/index.html">Compatibility Tools</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../dumpkit/index.html">Dump Utilities</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../utilities/index.html">Utility Functions &amp; Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../const/index.html">Constant Enumerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../vendor/index.html">Web Crawlers for Constant Enumerations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#command-line-tool">Command Line Tool</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../index.html#library-index">Library Index</a></li>
-</ul>
-</li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Module Documentation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../pep.html">Help Wanted</a></li>
 </ul>
@@ -299,12 +275,6 @@ object whose payload is recursively
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../../index.html">Documentation overview</a><ul>
-  <li><a href="../index.html">Module Documentation</a><ul>
-  <li><a href="index.html">Protocol Family</a><ul>
-      <li>Previous: <a href="application/httpv2.html" title="previous chapter">HTTP/2 - Hypertext Transfer Protocol</a></li>
-      <li>Next: <a href="../corekit/index.html" title="next chapter">Core Utilities</a></li>
-  </ul></li>
-  </ul></li>
   </ul></li>
 </ul>
 </div>
