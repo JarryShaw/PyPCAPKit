@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.link.ospf</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;open shortest path first</span>
+<span class="sd">&quot;&quot;&quot;OSPF - Open Shortest Path First</span>
+<span class="sd">=====================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.link.ospf` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.link.ospf.OSPF` only,</span>
@@ -140,8 +141,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -182,7 +181,7 @@
 <div class="viewcode-block" id="OSPF.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -195,9 +194,9 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="OSPF.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[24]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[24]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">24</span></div>
+        <span class="k">return</span> <span class="mi">24</span>
 
 <div class="viewcode-block" id="OSPF.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>
@@ -213,7 +212,7 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="OSPF._read_id_numbers"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_id_numbers">[docs]</a>    <span class="k">def</span> <span class="nf">_read_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_read_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;IPv4Address&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Read router and area IDs.</span>
 
 <span class="sd">        Returns:</span>
@@ -222,21 +221,23 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#_byte = self._read_fileng(4)</span>
         <span class="c1">#_addr = &#39;.&#39;.join(str(_) for _ in _byte)</span>
-        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span></div>
+        <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>  <span class="c1"># type: ignore[return-value]</span>
 
 <div class="viewcode-block" id="OSPF._read_encrypt_auth"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_encrypt_auth">[docs]</a>    <span class="k">def</span> <span class="nf">_read_encrypt_auth</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;DataType_CrytographicAuthentication&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Read Authentication field when Cryptographic Authentication is employed,</span>
 <span class="sd">        i.e. :attr:`~OSPF.autype` is ``2``.</span>
 
-<span class="sd">        Structure of Cryptographic Authentication [:rfc:`2328`]::</span>
+<span class="sd">        Structure of Cryptographic Authentication [:rfc:`2328`]:</span>
 
-<span class="sd">             0                   1                   2                   3</span>
-<span class="sd">             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
-<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">            |              0                |    Key ID     | Auth Data Len |</span>
-<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
-<span class="sd">            |                 Cryptographic sequence number                 |</span>
-<span class="sd">            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">        .. code-block:: text</span>
+
+<span class="sd">            0                   1                   2                   3</span>
+<span class="sd">            0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |              0                |    Key ID     | Auth Data Len |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
+<span class="sd">           |                 Cryptographic sequence number                 |</span>
+<span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: packet length</span>

@@ -189,12 +189,6 @@
 </li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH.__length_hint__">(pcapkit.protocols.internet.mh.MH method)</a>
 </li>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.__length_hint__">(pcapkit.protocols.link.l2tp.L2TP method)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.__length_hint__">(pcapkit.protocols.link.ospf.OSPF method)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.__length_hint__">(pcapkit.protocols.link.vlan.VLAN method)</a>
-</li>
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP.__length_hint__">(pcapkit.protocols.transport.tcp.TCP method)</a>
 </li>
         <li><a href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.UDP.__length_hint__">(pcapkit.protocols.transport.udp.UDP method)</a>
@@ -460,10 +454,10 @@
 </li>
       <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._pyshark_read_frame">_pyshark_read_frame() (pcapkit.foundation.extraction.Extractor method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1._RE_METHOD">_RE_METHOD (in module pcapkit.protocols.application.httpv1)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1._RE_STATUS">_RE_STATUS (in module pcapkit.protocols.application.httpv1)</a>
 </li>
       <li><a href="pcapkit/protocols/application/httpv1.html#pcapkit.protocols.application.httpv1._RE_VERSION">_RE_VERSION (in module pcapkit.protocols.application.httpv1)</a>
@@ -513,8 +507,6 @@
       <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTPv2._read_http_settings">_read_http_settings() (pcapkit.protocols.application.httpv2.HTTPv2 method)</a>
 </li>
       <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTPv2._read_http_window_update">_read_http_window_update() (pcapkit.protocols.application.httpv2.HTTPv2 method)</a>
-</li>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF._read_id_numbers">_read_id_numbers() (pcapkit.protocols.link.ospf.OSPF method)</a>
 </li>
       <li><a href="pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._read_ip_addr">_read_ip_addr() (pcapkit.protocols.internet.ipv6.IPv6 method)</a>
 </li>
@@ -1250,7 +1242,7 @@
 </li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType.ARCNET_LINUX">ARCNET_LINUX (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF.area_id">area_id (pcapkit.protocols.link.ospf.DataType_OSPF attribute)</a>
+      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF.area_id">area_id (pcapkit.protocols.data.link.ospf.OSPF attribute)</a>
 </li>
       <li><a href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.DataType_FTP_Request.arg">arg (pcapkit.protocols.application.ftp.DataType_FTP_Request attribute)</a>
 
@@ -1294,7 +1286,7 @@
 </li>
       <li><a href="pcapkit/utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning">AttributeWarning</a>
 </li>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF.auth">auth (pcapkit.protocols.link.ospf.DataType_OSPF attribute)</a>
+      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF.auth">auth (pcapkit.protocols.data.link.ospf.OSPF attribute)</a>
 </li>
       <li><a href="pcapkit/const/ospf.html#pcapkit.const.ospf.authentication.Authentication">Authentication (class in pcapkit.const.ospf.authentication)</a>
 
@@ -1308,7 +1300,7 @@
 </li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.Autophon">Autophon (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF.autype">autype (pcapkit.protocols.link.ospf.DataType_OSPF attribute)</a>
+      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF.autype">autype (pcapkit.protocols.data.link.ospf.OSPF attribute)</a>
 </li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType.AX25">AX25 (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
@@ -1534,9 +1526,11 @@
 </li>
       <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.notify_message.NotifyMessage.CHECKSUM_FAILED">CHECKSUM_FAILED (pcapkit.const.hip.notify_message.NotifyMessage attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_HIP.chksum">chksum (pcapkit.protocols.internet.hip.DataType_HIP attribute)</a>
+      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF.chksum">chksum (pcapkit.protocols.data.link.ospf.OSPF attribute)</a>
 
       <ul>
+        <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_HIP.chksum">(pcapkit.protocols.internet.hip.DataType_HIP attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.DataType_Opt_CALIPSO.chksum">(pcapkit.protocols.internet.hopopt.DataType_Opt_CALIPSO attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO.chksum">(pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO attribute)</a>
@@ -1544,8 +1538,6 @@
         <li><a href="pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.DataType_IPX.chksum">(pcapkit.protocols.internet.ipx.DataType_IPX attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.DataType_MH.chksum">(pcapkit.protocols.internet.mh.DataType_MH attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF.chksum">(pcapkit.protocols.link.ospf.DataType_OSPF attribute)</a>
 </li>
       </ul></li>
       <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.cipher.Cipher">Cipher (class in pcapkit.const.hip.cipher)</a>
@@ -1648,10 +1640,10 @@
 </li>
       <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.CODE_430">CODE_430 (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.CODE_434">CODE_434 (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.CODE_450">CODE_450 (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
 </li>
       <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.return_code.ReturnCode.CODE_451">CODE_451 (pcapkit.const.ftp.return_code.ReturnCode attribute)</a>
@@ -1838,6 +1830,8 @@
 </li>
       <li><a href="pcapkit/const/ospf.html#pcapkit.const.ospf.authentication.Authentication.Cryptographic_Authentication_with_Extended_Sequence_Numbers">Cryptographic_Authentication_with_Extended_Sequence_Numbers (pcapkit.const.ospf.authentication.Authentication attribute)</a>
 </li>
+      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.CrytographicAuthentication">CrytographicAuthentication (class in pcapkit.protocols.data.link.ospf)</a>
+</li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Host_ID_ECDSA_Curve.curve">curve (pcapkit.protocols.internet.hip.DataType_Host_ID_ECDSA_Curve attribute)</a>
 
       <ul>
@@ -1968,8 +1962,6 @@
       </ul></li>
       <li><a href="pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.DataType_AH">DataType_AH (class in pcapkit.protocols.internet.ah)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_Auth">DataType_Auth (class in pcapkit.protocols.link.ospf)</a>
-</li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Control">DataType_Control (class in pcapkit.protocols.internet.hip)</a>
 </li>
       <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_CALIPSO">DataType_Dest_Opt_CALIPSO (class in pcapkit.protocols.internet.ipv6_opts)</a>
@@ -2009,11 +2001,7 @@
       <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_DS_Field">DataType_DS_Field (class in pcapkit.protocols.internet.ipv4)</a>
 </li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Flags">DataType_Flags (class in pcapkit.protocols.internet.hip)</a>
-
-      <ul>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_Flags">(class in pcapkit.protocols.link.l2tp)</a>
 </li>
-      </ul></li>
       <li><a href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.DataType_FTP_Request">DataType_FTP_Request (class in pcapkit.protocols.application.ftp)</a>
 </li>
       <li><a href="pcapkit/protocols/application/ftp.html#pcapkit.protocols.application.ftp.DataType_FTP_Response">DataType_FTP_Response (class in pcapkit.protocols.application.ftp)</a>
@@ -2114,8 +2102,6 @@
 </li>
       <li><a href="pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.DataType_IPX_Address">DataType_IPX_Address (class in pcapkit.protocols.internet.ipx)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP">DataType_L2TP (class in pcapkit.protocols.link.l2tp)</a>
-</li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Lifetime">DataType_Lifetime (class in pcapkit.protocols.internet.hip)</a>
 </li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Locator">DataType_Locator (class in pcapkit.protocols.internet.hip)</a>
@@ -2194,8 +2180,6 @@
       </ul></li>
       <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.DataType_Option_Type">DataType_Option_Type (class in pcapkit.protocols.internet.hopopt)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF">DataType_OSPF (class in pcapkit.protocols.link.ospf)</a>
-</li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_ACK">DataType_Param_ACK (class in pcapkit.protocols.internet.hip)</a>
 </li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_ACK_Data">DataType_Param_ACK_Data (class in pcapkit.protocols.internet.hip)</a>
@@ -2238,10 +2222,10 @@
 </li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_Notification">DataType_Param_Notification (class in pcapkit.protocols.internet.hip)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_Overlay_ID">DataType_Param_Overlay_ID (class in pcapkit.protocols.internet.hip)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_Overlay_TTL">DataType_Param_Overlay_TTL (class in pcapkit.protocols.internet.hip)</a>
 </li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_Payload_MIC">DataType_Param_Payload_MIC (class in pcapkit.protocols.internet.hip)</a>
@@ -2305,8 +2289,6 @@
 </li>
       </ul></li>
       <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_SEC_Flags">DataType_SEC_Flags (class in pcapkit.protocols.internet.ipv4)</a>
-</li>
-      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.DataType_TCI">DataType_TCI (class in pcapkit.protocols.link.vlan)</a>
 </li>
       <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP">DataType_TCP (class in pcapkit.protocols.transport.tcp)</a>
 </li>
@@ -2384,8 +2366,6 @@
 </li>
       <li><a href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.DataType_UDP">DataType_UDP (class in pcapkit.protocols.transport.udp)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.DataType_VLAN">DataType_VLAN (class in pcapkit.protocols.link.vlan)</a>
-</li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.linktype.LinkType.DBUS">DBUS (pcapkit.const.reg.linktype.LinkType attribute)</a>
 </li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.DCCP">DCCP (pcapkit.const.reg.transtype.TransType attribute)</a>
@@ -2432,7 +2412,7 @@
       </ul></li>
       <li><a href="pcapkit/const/ftp.html#pcapkit.const.ftp.command.defaultInfo">defaultInfo (class in pcapkit.const.ftp.command)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.DataType_TCI.dei">dei (pcapkit.protocols.link.vlan.DataType_TCI attribute)</a>
+      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI.dei">dei (pcapkit.protocols.data.link.vlan.TCI attribute)</a>
 </li>
       <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_IPv4_DSCP.del">del (pcapkit.protocols.internet.ipv4.DataType_IPv4_DSCP attribute)</a>
 </li>
@@ -3059,6 +3039,8 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.Flags">Flags (class in pcapkit.protocols.data.link.l2tp)</a>
+</li>
       <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION.flags">flags (pcapkit.protocols.application.httpv2.DataType_HTTPv2_CONTINUATION attribute)</a>
 
       <ul>
@@ -3082,6 +3064,8 @@
 </li>
         <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE.flags">(pcapkit.protocols.application.httpv2.DataType_HTTPv2_WINDOW_UPDATE attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.flags">(pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_Route_Dst.flags">(pcapkit.protocols.internet.hip.DataType_Param_Route_Dst attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_Route_Via.flags">(pcapkit.protocols.internet.hip.DataType_Param_Route_Via attribute)</a>
@@ -3101,8 +3085,6 @@
         <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL.flags">(pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RPL.flags">(pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_RPL attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP.flags">(pcapkit.protocols.link.l2tp.DataType_L2TP attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP.flags">(pcapkit.protocols.transport.tcp.DataType_TCP attribute)</a>
 </li>
@@ -3417,9 +3399,11 @@
 </li>
       <li><a href="pcapkit/foundation/reassembly/tcp/tcp.html#pcapkit.foundation.reassembly.tcp.Buffer.hdr">hdr (pcapkit.foundation.reassembly.tcp.Buffer attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_IPv4.hdr_len">hdr_len (pcapkit.protocols.internet.ipv4.DataType_IPv4 attribute)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.hdr_len">hdr_len (pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
 
       <ul>
+        <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_IPv4.hdr_len">(pcapkit.protocols.internet.ipv4.DataType_IPv4 attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP.hdr_len">(pcapkit.protocols.transport.tcp.DataType_TCP attribute)</a>
 </li>
       </ul></li>
@@ -4069,7 +4053,7 @@
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_Auth.key_id">key_id (pcapkit.protocols.link.ospf.DataType_Auth attribute)</a>
+      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.CrytographicAuthentication.key_id">key_id (pcapkit.protocols.data.link.ospf.CrytographicAuthentication attribute)</a>
 
       <ul>
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO.key_id">(pcapkit.protocols.transport.tcp.DataType_TCP_Opt_TCPAO attribute)</a>
@@ -4101,9 +4085,11 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.L2_IS_IS">L2_IS_IS (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP">L2TP (class in pcapkit.protocols.link.l2tp)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP">L2TP (class in pcapkit.protocols.data.link.l2tp)</a>
 
       <ul>
+        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP">(class in pcapkit.protocols.link.l2tp)</a>
+</li>
         <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.L2TP">(pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
       </ul></li>
@@ -4156,17 +4142,17 @@
 </li>
         <li><a href="pcapkit/protocols/link/arp.html#pcapkit.protocols.data.link.arp.ARP.len">(pcapkit.protocols.data.link.arp.ARP attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.Flags.len">(pcapkit.protocols.data.link.l2tp.Flags attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.CrytographicAuthentication.len">(pcapkit.protocols.data.link.ospf.CrytographicAuthentication attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF.len">(pcapkit.protocols.data.link.ospf.OSPF attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/misc/pcap/frame.html#pcapkit.protocols.data.misc.pcap.frame.Frame.len">(pcapkit.protocols.data.misc.pcap.frame.Frame attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_IPv4.len">(pcapkit.protocols.internet.ipv4.DataType_IPv4 attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipx.html#pcapkit.protocols.internet.ipx.DataType_IPX.len">(pcapkit.protocols.internet.ipx.DataType_IPX attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_Flags.len">(pcapkit.protocols.link.l2tp.DataType_Flags attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_Auth.len">(pcapkit.protocols.link.ospf.DataType_Auth attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF.len">(pcapkit.protocols.link.ospf.DataType_OSPF attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/transport/udp.html#pcapkit.protocols.transport.udp.DataType_UDP.len">(pcapkit.protocols.transport.udp.DataType_UDP attribute)</a>
 </li>
@@ -4181,6 +4167,8 @@
         <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.DataType_HTTPv2.length">(pcapkit.protocols.application.httpv2.DataType_HTTPv2 attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTPv2.length">(pcapkit.protocols.application.httpv2.HTTPv2 property)</a>
+</li>
+        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.length">(pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.AH.length">(pcapkit.protocols.internet.ah.AH property)</a>
 </li>
@@ -4235,8 +4223,6 @@
         <li><a href="pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.length">(pcapkit.protocols.link.arp.ARP property)</a>
 </li>
         <li><a href="pcapkit/protocols/link/ethernet.html#pcapkit.protocols.link.ethernet.Ethernet.length">(pcapkit.protocols.link.ethernet.Ethernet property)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP.length">(pcapkit.protocols.link.l2tp.DataType_L2TP attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.length">(pcapkit.protocols.link.l2tp.L2TP property)</a>
 </li>
@@ -4851,6 +4837,14 @@
 </li>
         <li><a href="pcapkit/protocols/link/ethernet.html#module-pcapkit.protocols.data.link.ethernet">pcapkit.protocols.data.link.ethernet</a>
 </li>
+        <li><a href="pcapkit/protocols/link/l2tp.html#module-pcapkit.protocols.data.link.l2tp">pcapkit.protocols.data.link.l2tp</a>
+</li>
+        <li><a href="pcapkit/protocols/link/ospf.html#module-pcapkit.protocols.data.link.ospf">pcapkit.protocols.data.link.ospf</a>
+</li>
+        <li><a href="pcapkit/protocols/link/rarp.html#module-pcapkit.protocols.data.link.rarp">pcapkit.protocols.data.link.rarp</a>
+</li>
+        <li><a href="pcapkit/protocols/link/vlan.html#module-pcapkit.protocols.data.link.vlan">pcapkit.protocols.data.link.vlan</a>
+</li>
         <li><a href="pcapkit/protocols/misc/index.html#module-pcapkit.protocols.data.misc">pcapkit.protocols.data.misc</a>
 </li>
         <li><a href="pcapkit/protocols/misc/null.html#module-pcapkit.protocols.data.misc.null">pcapkit.protocols.data.misc.null</a>
@@ -5366,9 +5360,9 @@
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT.nounce">(pcapkit.protocols.transport.tcp.DataType_TCP_Opt_QSOPT attribute)</a>
 </li>
       </ul></li>
-      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP.nr">nr (pcapkit.protocols.link.l2tp.DataType_L2TP attribute)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.nr">nr (pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP.ns">ns (pcapkit.protocols.link.l2tp.DataType_L2TP attribute)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.ns">ns (pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
 
       <ul>
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP_Flags.ns">(pcapkit.protocols.transport.tcp.DataType_TCP_Flags attribute)</a>
@@ -5440,12 +5434,12 @@
 </li>
       <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.certificate.Certificate.Obsoleted_8">Obsoleted_8 (pcapkit.const.hip.certificate.Certificate attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.DataType_IPv6_Frag.offset">offset (pcapkit.protocols.internet.ipv6_frag.DataType_IPv6_Frag attribute)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.Flags.offset">offset (pcapkit.protocols.data.link.l2tp.Flags attribute)</a>
 
       <ul>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_Flags.offset">(pcapkit.protocols.link.l2tp.DataType_Flags attribute)</a>
+        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.offset">(pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
 </li>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP.offset">(pcapkit.protocols.link.l2tp.DataType_L2TP attribute)</a>
+        <li><a href="pcapkit/protocols/internet/ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.DataType_IPv6_Frag.offset">(pcapkit.protocols.internet.ipv6_frag.DataType_IPv6_Frag attribute)</a>
 </li>
       </ul></li>
       <li><a href="pcapkit/protocols/internet/ipv4.html#pcapkit.protocols.internet.ipv4.DataType_Opt_Traceroute.ohc">ohc (pcapkit.protocols.internet.ipv4.DataType_Opt_Traceroute attribute)</a>
@@ -5514,8 +5508,12 @@
 </li>
       <li><a href="pcapkit/const/http.html#pcapkit.const.http.frame.Frame.ORIGIN">ORIGIN (pcapkit.const.http.frame.Frame attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF">OSPF (class in pcapkit.protocols.link.ospf)</a>
+      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF">OSPF (class in pcapkit.protocols.data.link.ospf)</a>
+
+      <ul>
+        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF">(class in pcapkit.protocols.link.ospf)</a>
 </li>
+      </ul></li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.OSPFIGP">OSPFIGP (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
       <li><a href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.output">output (pcapkit.foundation.extraction.Extractor property)</a>
@@ -6431,11 +6429,41 @@
         <li><a href="pcapkit/protocols/link/arp.html#module-pcapkit.protocols.data.link.arp">module</a>
 </li>
       </ul></li>
+      <li><a href="pcapkit/protocols/link/rarp.html#pcapkit.protocols.data.link.rarp.pcapkit.protocols.data.link.DRARP">pcapkit.protocols.data.link.DRARP (class in pcapkit.protocols.data.link.rarp)</a>
+</li>
       <li>
     pcapkit.protocols.data.link.ethernet
 
       <ul>
         <li><a href="pcapkit/protocols/link/ethernet.html#module-pcapkit.protocols.data.link.ethernet">module</a>
+</li>
+      </ul></li>
+      <li>
+    pcapkit.protocols.data.link.l2tp
+
+      <ul>
+        <li><a href="pcapkit/protocols/link/l2tp.html#module-pcapkit.protocols.data.link.l2tp">module</a>
+</li>
+      </ul></li>
+      <li>
+    pcapkit.protocols.data.link.ospf
+
+      <ul>
+        <li><a href="pcapkit/protocols/link/ospf.html#module-pcapkit.protocols.data.link.ospf">module</a>
+</li>
+      </ul></li>
+      <li>
+    pcapkit.protocols.data.link.rarp
+
+      <ul>
+        <li><a href="pcapkit/protocols/link/rarp.html#module-pcapkit.protocols.data.link.rarp">module</a>
+</li>
+      </ul></li>
+      <li>
+    pcapkit.protocols.data.link.vlan
+
+      <ul>
+        <li><a href="pcapkit/protocols/link/vlan.html#module-pcapkit.protocols.data.link.vlan">module</a>
 </li>
       </ul></li>
       <li>
@@ -6617,6 +6645,8 @@
         <li><a href="pcapkit/protocols/link/arp.html#module-pcapkit.protocols.link.arp">module</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pcapkit.protocols.link.ethernet
 
@@ -6633,8 +6663,6 @@
         <li><a href="pcapkit/protocols/link/l2tp.html#module-pcapkit.protocols.link.l2tp">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     pcapkit.protocols.link.link
 
@@ -7289,7 +7317,7 @@
 </li>
       <li><a href="pcapkit/vendor/index.html#index-1">PCAPKIT_HTTPS_PROXY</a>
 </li>
-      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.DataType_TCI.pcp">pcp (pcapkit.protocols.link.vlan.DataType_TCI attribute)</a>
+      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI.pcp">pcp (pcapkit.protocols.data.link.vlan.TCI attribute)</a>
 </li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.PCS_Basic_Block_Protocol">PCS_Basic_Block_Protocol (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
@@ -7369,7 +7397,7 @@
 </li>
       <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Locator.preferred">preferred (pcapkit.protocols.internet.hip.DataType_Locator attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_Flags.prio">prio (pcapkit.protocols.link.l2tp.DataType_Flags attribute)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.Flags.prio">prio (pcapkit.protocols.data.link.l2tp.Flags attribute)</a>
 
       <ul>
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO.prio">(pcapkit.protocols.transport.tcp.DataType_TCP_Opt_MP_PRIO attribute)</a>
@@ -8394,7 +8422,7 @@
 </li>
         <li><a href="pcapkit/const/arp.html#index-5">RFC 2225</a>
 </li>
-        <li><a href="pcapkit/const/ospf.html#index-2">RFC 2328</a>, <a href="pcapkit/const/ospf.html#index-5">[1]</a>, <a href="pcapkit/const/ospf.html#index-6">[2]</a>, <a href="pcapkit/const/ospf.html#index-7">[3]</a>, <a href="pcapkit/const/ospf.html#index-8">[4]</a>, <a href="pcapkit/const/ospf.html#index-9">[5]</a>, <a href="pcapkit/const/reg.html#index-63">[6]</a>, <a href="pcapkit/protocols/link/ospf.html#index-0">[7]</a>, <a href="pcapkit/protocols/link/ospf.html#index-1">[8]</a>, <a href="pcapkit/protocols/link/ospf.html#index-2">[9]</a>
+        <li><a href="pcapkit/const/ospf.html#index-2">RFC 2328</a>, <a href="pcapkit/const/ospf.html#index-5">[1]</a>, <a href="pcapkit/const/ospf.html#index-6">[2]</a>, <a href="pcapkit/const/ospf.html#index-7">[3]</a>, <a href="pcapkit/const/ospf.html#index-8">[4]</a>, <a href="pcapkit/const/ospf.html#index-9">[5]</a>, <a href="pcapkit/const/reg.html#index-63">[6]</a>, <a href="pcapkit/protocols/link/ospf.html#index-0">[7]</a>, <a href="pcapkit/protocols/link/ospf.html#index-1">[8]</a>
 </li>
         <li><a href="pcapkit/const/tcp.html#index-23">RFC 2385</a>, <a href="pcapkit/protocols/transport/tcp.html#index-21">[1]</a>, <a href="pcapkit/protocols/transport/tcp.html#index-60">[2]</a>
 </li>
@@ -8564,7 +8592,7 @@
 </li>
         <li><a href="pcapkit/const/ipv6.html#index-25">RFC 6971</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-16">[1]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-31">[2]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-76">[3]</a>, <a href="pcapkit/protocols/internet/hopopt.html#index-77">[4]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-16">[5]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-31">[6]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-76">[7]</a>, <a href="pcapkit/protocols/internet/ipv6_opts.html#index-77">[8]</a>
 </li>
-        <li><a href="pcapkit/const/reg.html#index-0">RFC 7042</a>, <a href="pcapkit/const/reg.html#index-1">[1]</a>, <a href="pcapkit/const/reg.html#index-12">[2]</a>, <a href="pcapkit/const/reg.html#index-13">[3]</a>, <a href="pcapkit/const/reg.html#index-18">[4]</a>, <a href="pcapkit/const/reg.html#index-19">[5]</a>, <a href="pcapkit/const/reg.html#index-20">[6]</a>, <a href="pcapkit/const/reg.html#index-23">[7]</a>, <a href="pcapkit/protocols/link/ethernet.html#index-0">[8]</a>, <a href="pcapkit/protocols/link/vlan.html#index-0">[9]</a>
+        <li><a href="pcapkit/const/reg.html#index-0">RFC 7042</a>, <a href="pcapkit/const/reg.html#index-1">[1]</a>, <a href="pcapkit/const/reg.html#index-12">[2]</a>, <a href="pcapkit/const/reg.html#index-13">[3]</a>, <a href="pcapkit/const/reg.html#index-18">[4]</a>, <a href="pcapkit/const/reg.html#index-19">[5]</a>, <a href="pcapkit/const/reg.html#index-20">[6]</a>, <a href="pcapkit/const/reg.html#index-23">[7]</a>, <a href="pcapkit/protocols/link/ethernet.html#index-0">[8]</a>
 </li>
         <li><a href="pcapkit/const/mh.html#index-19">RFC 7077</a>, <a href="pcapkit/const/mh.html#index-20">[1]</a>
 </li>
@@ -8727,7 +8755,7 @@
 </li>
       <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.option.Option.Router_Alert">Router_Alert (pcapkit.const.ipv6.option.Option attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF.router_id">router_id (pcapkit.protocols.link.ospf.DataType_OSPF attribute)</a>
+      <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF.router_id">router_id (pcapkit.protocols.data.link.ospf.OSPF attribute)</a>
 </li>
       <li><a href="pcapkit/const/ipv4.html#pcapkit.const.ipv4.router_alert.RouterAlert">RouterAlert (class in pcapkit.const.ipv4.router_alert)</a>
 
@@ -8895,9 +8923,13 @@
 </li>
       <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.SEQ">SEQ (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.DataType_AH.seq">seq (pcapkit.protocols.internet.ah.DataType_AH attribute)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.Flags.seq">seq (pcapkit.protocols.data.link.l2tp.Flags attribute)</a>
 
       <ul>
+        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.CrytographicAuthentication.seq">(pcapkit.protocols.data.link.ospf.CrytographicAuthentication attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/internet/ah.html#pcapkit.protocols.internet.ah.DataType_AH.seq">(pcapkit.protocols.internet.ah.DataType_AH attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Param_SEQ_Data.seq">(pcapkit.protocols.internet.hip.DataType_Param_SEQ_Data attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/hopopt.html#pcapkit.protocols.internet.hopopt.DataType_Opt_IP_DFF.seq">(pcapkit.protocols.internet.hopopt.DataType_Opt_IP_DFF attribute)</a>
@@ -8907,10 +8939,6 @@
         <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_IP_DFF.seq">(pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_IP_DFF attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL.seq">(pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_MPL attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_Flags.seq">(pcapkit.protocols.link.l2tp.DataType_Flags attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_Auth.seq">(pcapkit.protocols.link.ospf.DataType_Auth attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.DataType_TCP.seq">(pcapkit.protocols.transport.tcp.DataType_TCP attribute)</a>
 </li>
@@ -8925,7 +8953,7 @@
 </li>
       <li><a href="pcapkit/const/ipx.html#pcapkit.const.ipx.socket.Socket.Service_Advertising_Protocol">Service_Advertising_Protocol (pcapkit.const.ipx.socket.Socket attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP.sessionid">sessionid (pcapkit.protocols.link.l2tp.DataType_L2TP attribute)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.sessionid">sessionid (pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
 </li>
       <li><a href="pcapkit/corekit/multidict.html#pcapkit.corekit.multidict.MultiDict.setdefault">setdefault() (pcapkit.corekit.multidict.MultiDict method)</a>
 </li>
@@ -9187,7 +9215,9 @@
 </li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.TCF">TCF (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.DataType_VLAN.tci">tci (pcapkit.protocols.link.vlan.DataType_VLAN attribute)</a>
+      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI">TCI (class in pcapkit.protocols.data.link.vlan)</a>
+</li>
+      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.VLAN.tci">tci (pcapkit.protocols.data.link.vlan.VLAN attribute)</a>
 </li>
       <li><a href="pcapkit/protocols/transport/tcp.html#pcapkit.protocols.transport.tcp.TCP">TCP (class in pcapkit.protocols.transport.tcp)</a>
 
@@ -9421,7 +9451,7 @@
 </li>
       <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.option.Option.Tunnel_Encapsulation_Limit">Tunnel_Encapsulation_Limit (pcapkit.const.ipv6.option.Option attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP.tunnelid">tunnelid (pcapkit.protocols.link.l2tp.DataType_L2TP attribute)</a>
+      <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.tunnelid">tunnelid (pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
 </li>
       <li><a href="pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.TupleError">TupleError</a>
 </li>
@@ -9446,6 +9476,12 @@
 </li>
         <li><a href="pcapkit/protocols/link/ethernet.html#pcapkit.protocols.data.link.ethernet.Ethernet.type">(pcapkit.protocols.data.link.ethernet.Ethernet attribute)</a>
 </li>
+        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.Flags.type">(pcapkit.protocols.data.link.l2tp.Flags attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF.type">(pcapkit.protocols.data.link.ospf.OSPF attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.VLAN.type">(pcapkit.protocols.data.link.vlan.VLAN attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_HIP.type">(pcapkit.protocols.internet.hip.DataType_HIP attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_Locator.type">(pcapkit.protocols.internet.hip.DataType_Locator attribute)</a>
@@ -9466,15 +9502,9 @@
 </li>
         <li><a href="pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP.type">(pcapkit.protocols.link.arp.ARP property)</a>
 </li>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_Flags.type">(pcapkit.protocols.link.l2tp.DataType_Flags attribute)</a>
-</li>
         <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.L2TP.type">(pcapkit.protocols.link.l2tp.L2TP property)</a>
 </li>
-        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF.type">(pcapkit.protocols.link.ospf.DataType_OSPF attribute)</a>
-</li>
         <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.OSPF.type">(pcapkit.protocols.link.ospf.OSPF property)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.DataType_VLAN.type">(pcapkit.protocols.link.vlan.DataType_VLAN attribute)</a>
 </li>
       </ul></li>
       <li><a href="pcapkit/const/ipv6.html#pcapkit.const.ipv6.routing.Routing.Type_2_Routing_Header">Type_2_Routing_Header (pcapkit.const.ipv6.routing.Routing attribute)</a>
@@ -9718,6 +9748,10 @@
 </li>
         <li><a href="pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTPv2.version">(pcapkit.protocols.application.httpv2.HTTPv2 property)</a>
 </li>
+        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.data.link.l2tp.L2TP.version">(pcapkit.protocols.data.link.l2tp.L2TP attribute)</a>
+</li>
+        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.data.link.ospf.OSPF.version">(pcapkit.protocols.data.link.ospf.OSPF attribute)</a>
+</li>
         <li><a href="pcapkit/protocols/misc/pcap/header.html#pcapkit.protocols.data.misc.pcap.header.Header.version">(pcapkit.protocols.data.misc.pcap.header.Header attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/hip.html#pcapkit.protocols.internet.hip.DataType_HIP.version">(pcapkit.protocols.internet.hip.DataType_HIP attribute)</a>
@@ -9729,10 +9763,6 @@
         <li><a href="pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.DataType_IPv6.version">(pcapkit.protocols.internet.ipv6.DataType_IPv6 attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/internet/ipv6_opts.html#pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_IP_DFF.version">(pcapkit.protocols.internet.ipv6_opts.DataType_Dest_Opt_IP_DFF attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/l2tp.html#pcapkit.protocols.link.l2tp.DataType_L2TP.version">(pcapkit.protocols.link.l2tp.DataType_L2TP attribute)</a>
-</li>
-        <li><a href="pcapkit/protocols/link/ospf.html#pcapkit.protocols.link.ospf.DataType_OSPF.version">(pcapkit.protocols.link.ospf.DataType_OSPF attribute)</a>
 </li>
         <li><a href="pcapkit/protocols/misc/pcap/header.html#pcapkit.protocols.misc.pcap.header.Header.version">(pcapkit.protocols.misc.pcap.header.Header property)</a>
 </li>
@@ -9751,7 +9781,7 @@
 </li>
       <li><a href="pcapkit/const/hip.html#pcapkit.const.hip.parameter.Parameter.VIA_RVS">VIA_RVS (pcapkit.const.hip.parameter.Parameter attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.DataType_TCI.vid">vid (pcapkit.protocols.link.vlan.DataType_TCI attribute)</a>
+      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.TCI.vid">vid (pcapkit.protocols.data.link.vlan.TCI attribute)</a>
 </li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.VINES">VINES (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
@@ -9767,8 +9797,12 @@
       </ul></li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.ethertype.EtherType.Vitalink_TransLAN_III">Vitalink_TransLAN_III (pcapkit.const.reg.ethertype.EtherType attribute)</a>
 </li>
-      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN">VLAN (class in pcapkit.protocols.link.vlan)</a>
+      <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.data.link.vlan.VLAN">VLAN (class in pcapkit.protocols.data.link.vlan)</a>
+
+      <ul>
+        <li><a href="pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN">(class in pcapkit.protocols.link.vlan)</a>
 </li>
+      </ul></li>
       <li><a href="pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.VMTP">VMTP (pcapkit.const.reg.transtype.TransType attribute)</a>
 </li>
       <li><a href="pcapkit/const/vlan.html#pcapkit.const.vlan.priority_level.PriorityLevel.VO">VO (pcapkit.const.vlan.priority_level.PriorityLevel attribute)</a>

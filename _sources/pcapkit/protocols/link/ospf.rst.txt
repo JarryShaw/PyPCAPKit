@@ -1,6 +1,9 @@
 OSPF - Open Shortest Path First
 ===============================
 
+.. module:: pcapkit.protocols.link.ospf
+.. module:: pcapkit.protocols.data.link.ospf
+
 :mod:`pcapkit.protocols.link.ospf` contains
 :class:`~pcapkit.protocols.link.ospf.OSPF` only,
 which implements extractor for Open Shortest Path
@@ -33,111 +36,55 @@ as below:
 
    <br />
 
-.. automodule:: pcapkit.protocols.link.ospf
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.link.ospf.OSPF
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: alias
+   .. autoproperty:: length
+   .. autoproperty:: type
 
-.. class:: DataType_OSPF
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+   .. automethod:: _read_encrypt_auth
 
-   OSPF header.
+Data Structures
+---------------
 
-   .. attribute:: version
-      :type: int
+.. autoclass:: pcapkit.protocols.data.link.ospf.OSPF(version, type, length, router_id, area_id, chksum, autype)
+   :no-members:
+   :show-inheritance:
 
-      version number
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: type
-      :type: pcapkit.const.ospf.packet.Packet
+   .. autoattribute:: version
+   .. autoattribute:: type
+   .. autoattribute:: len
+   .. autoattribute:: router_id
+   .. autoattribute:: area_id
+   .. autoattribute:: chksum
+   .. autoattribute:: autype
 
-      type
+   .. autoattribute:: auth
 
-   .. attribute:: len
-      :type: int
+.. autoclass:: pcapkit.protocols.data.link.ospf.CrytographicAuthentication(key_id, len, seq)
+   :no-members:
+   :show-inheritance:
 
-      packet length (header included)
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-   .. attribute:: router_id
-      :type: ipaddress.IPv4Address
-
-      router ID
-
-   .. attribute:: area_id
-      :type: ipaddress.IPv4Address
-
-      area ID
-
-   .. attribute:: chksum
-      :type: bytes
-
-      checksum
-
-   .. attribute:: autype
-      :type: pcapkit.const.ospf.authentication.Authentication
-
-      authentication type
-
-   .. attribute:: auth
-      :type: Union[bytes, DataType_Auth]
-
-      authentication
-
-Cryptographic Authentication Information
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-For cryptographic authentication information as
-described in :rfc:`2328`, its structure is described
-as below:
-
-.. table::
-
-   ====== ===== ==================== =================================
-   Octets Bits  Name                 Description
-   ====== ===== ==================== =================================
-   0          0                      Reserved (must be zero ``\x00``)
-   ------ ----- -------------------- ---------------------------------
-   0          0 ``ospf.auth.key_id`` Key ID
-   ------ ----- -------------------- ---------------------------------
-   0          1 ``ospf.auth.len``    Authentication Data Length
-   ------ ----- -------------------- ---------------------------------
-   0          2 ``ospf.auth.seq``    Cryptographic Sequence Number
-   ====== ===== ==================== =================================
-
-.. raw:: html
-
-   <br />
-
-.. class:: DataType_Auth
-
-   :bases: TypedDict
-
-   Cryptographic authentication.
-
-   .. attribute:: key_id
-      :type: int
-
-      key ID
-
-   .. attribute:: len
-      :type: int
-
-      authentication data length
-
-   .. attribute:: seq
-      :type: int
-
-      cryptographic sequence number
+   .. autoattribute:: key_id
+   .. autoattribute:: len
+   .. autoattribute:: seq
 
 .. raw:: html
 

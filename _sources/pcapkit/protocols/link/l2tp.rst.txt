@@ -1,6 +1,9 @@
 L2TP - Layer Two Tunnelling Protocol
 ====================================
 
+.. module:: pcapkit.protocols.link.l2tp
+.. module:: pcapkit.protocols.data.link.l2tp
+
 :mod:`pcapkit.protocols.link.l2tp` contains
 :class:`~pcapkit.protocols.link.l2tp.L2TP` only,
 which implements extractor for Layer Two Tunnelling
@@ -49,96 +52,55 @@ as below:
 
    <br />
 
-.. automodule:: pcapkit.protocols.link.l2tp
-   :members:
-   :undoc-members:
-   :private-members:
+.. autoclass:: pcapkit.protocols.link.l2tp.L2TP
+   :no-members:
    :show-inheritance:
 
-Data Structure
---------------
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. important::
+   .. automethod:: __index__
 
-   Following classes are only for *documentation* purpose.
-   They do **NOT** exist in the :mod:`pcapkit` module.
+   .. autoproperty:: name
+   .. autoproperty:: length
+   .. autoproperty:: type
 
-.. class:: DataType_L2TP
+   .. automethod:: read
+   .. automethod:: make
 
-   :bases: TypedDict
+Data Structures
+---------------
 
-   L2TP header.
+.. autoclass:: pcapkit.protocols.data.link.l2tp.L2TP(flags, version, length, tunnelid, sessionid, ns, nr, offset)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: flags
-      :type: DataTYpe_Flags
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      flags & versoion info
+   .. autoattribute:: flags
+   .. autoattribute:: version
+   .. autoattribute:: length
+   .. autoattribute:: tunnelid
+   .. autoattribute:: sessionid
+   .. autoattribute:: ns
+   .. autoattribute:: nr
+   .. autoattribute:: offset
 
-   .. attribute:: version
-      :type: Literal[2]
+   .. autoattribute:: hdr_len
 
-      version (``2``)
+.. autoclass:: pcapkit.protocols.data.link.l2tp.Flags(type, len, seq, offset, prio)
+   :no-members:
+   :show-inheritance:
 
-   .. attribute:: length
-      :type: Optional[int]
+   :param \*args: Arbitrary positional arguments.
+   :param \*\*kwargs: Arbitrary keyword arguments.
 
-      length (optional by :attr:`~DataType_Flags.len`)
-
-   .. attribute:: tunnelid
-      :type: int
-
-      tunnel ID
-
-   .. attribute:: sessionid
-      :type: int
-
-      session ID
-
-   .. attribute:: ns
-      :type: Optional[int]
-
-      sequence number (optional by :attr:`~DataType_Flags.seq`)
-
-   .. attribute:: nr
-      :type: Optional[int]
-
-      next sequence number (optional by :attr:`~DataType_Flags.seq`)
-
-   .. attribute:: offset
-      :type: Optional[int]
-
-      offset (optional by :attr:`~DataType_Flags.offset`)
-
-.. class:: DataType_Flags
-
-   :bases: TypedDict
-
-   Flags and version info.
-
-   .. attribute:: type
-      :type: Literal['Control', 'Data']
-
-      type (control / data)
-
-   .. attribute:: len
-      :type: bool
-
-      length
-
-   .. attribute:: seq
-      :type: bool
-
-      sequence
-
-   .. attribute:: offset
-      :type: bool
-
-      offset
-
-   .. attribute:: prio
-      :type: bool
-
-      priority
+   .. autoattribute:: type
+   .. autoattribute:: len
+   .. autoattribute:: seq
+   .. autoattribute:: offset
+   .. autoattribute:: prio
 
 .. raw:: html
 

@@ -33,7 +33,8 @@
             
   <h1>Source code for pcapkit.protocols.link.vlan</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;802.1Q customer VLAN tag type</span>
+<span class="sd">&quot;&quot;&quot;VLAN - 802.1Q Customer VLAN Tag Type</span>
+<span class="sd">==========================================</span>
 
 <span class="sd">:mod:`pcapkit.protocols.link.vlan` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.link.vlan.VLAN`</span>
@@ -127,8 +128,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            length: Length of packet data.</span>
-
-<span class="sd">        Keyword Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -154,7 +153,7 @@
 <div class="viewcode-block" id="VLAN.make"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.make">[docs]</a>    <span class="k">def</span> <span class="nf">make</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Make (construct) packet data.</span>
 
-<span class="sd">        Keyword Args:</span>
+<span class="sd">        Args:</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        Returns:</span>
@@ -167,9 +166,9 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
-<div class="viewcode-block" id="VLAN.__length_hint__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.__length_hint__">[docs]</a>    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Literal[4]&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return an estimated length for the object.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="mi">4</span></div>
+        <span class="k">return</span> <span class="mi">4</span>
 
 <div class="viewcode-block" id="VLAN.__index__"><a class="viewcode-back" href="../../../../pcapkit/protocols/link/vlan.html#pcapkit.protocols.link.vlan.VLAN.__index__">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="fm">__index__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NoReturn&#39;</span><span class="p">:</span>  <span class="c1"># pylint: disable=invalid-index-returned</span>

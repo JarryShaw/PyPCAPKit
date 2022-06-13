@@ -34,12 +34,12 @@
 
           <div class="body" role="main">
             
-  <section id="l2tp-layer-two-tunnelling-protocol">
-<h1>L2TP - Layer Two Tunnelling Protocol<a class="headerlink" href="#l2tp-layer-two-tunnelling-protocol" title="Permalink to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a> contains
+  <section id="module-pcapkit.protocols.link.l2tp">
+<span id="l2tp-layer-two-tunnelling-protocol"></span><h1>L2TP - Layer Two Tunnelling Protocol<a class="headerlink" href="#module-pcapkit.protocols.link.l2tp" title="Permalink to this heading">¶</a></h1>
+<span class="target" id="module-pcapkit.protocols.data.link.l2tp"></span><p><a class="reference internal" href="#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> only,
 which implements extractor for Layer Two Tunnelling
-Protocol (L2TP) <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described
+Protocol (L2TP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described
 as below:</p>
 <table class="docutils align-default">
 <thead>
@@ -132,70 +132,39 @@ as below:</p>
 </tr>
 </tbody>
 </table>
-<br /><span class="target" id="module-pcapkit.protocols.link.l2tp"></span><p>layer two tunnelling protocol</p>
-<p><a class="reference internal" href="#module-pcapkit.protocols.link.l2tp" title="pcapkit.protocols.link.l2tp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.l2tp</span></code></a> contains
-<a class="reference internal" href="#pcapkit.protocols.link.l2tp.L2TP" title="pcapkit.protocols.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a> only,
-which implements extractor for Layer Two Tunnelling
-Protocol (L2TP) <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a>, whose structure is described
-as below:</p>
-<p>+========+=======+=======================+============================================+
-| Octets | Bits  | Name                  | Description                                |
-+========+=======+=======================+============================================+
-| 0      |     0 | <code class="docutils literal notranslate"><span class="pre">l2tp.flags</span></code>        | Flags and Version Info                     |
-+——–+——-+———————–+——————————————–+
-| 0      |     0 | <code class="docutils literal notranslate"><span class="pre">l2tp.flags.type</span></code>   | Type (control / data)                      |
-+——–+——-+———————–+——————————————–+
-| 0      |     1 | <code class="docutils literal notranslate"><span class="pre">l2tp.flags.len</span></code>    | Length                                     |
-+——–+——-+———————–+——————————————–+
-| 0      |     2 |                       | Reserved (must be zero <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)          |
-+——–+——-+———————–+——————————————–+
-| 0      |     4 | <code class="docutils literal notranslate"><span class="pre">l2tp.flags.seq</span></code>    | Sequence                                   |
-+——–+——-+———————–+——————————————–+
-| 0      |     5 |                       | Reserved (must be zero <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)          |
-+——–+——-+———————–+——————————————–+
-| 0      |     6 | <code class="docutils literal notranslate"><span class="pre">l2tp.flags.offset</span></code> | Offset                                     |
-+——–+——-+———————–+——————————————–+
-| 0      |     7 | <code class="docutils literal notranslate"><span class="pre">l2tp.flags.prio</span></code>   | Priority                                   |
-+——–+——-+———————–+——————————————–+
-| 1      |     8 |                       | Reserved (must be zero <code class="docutils literal notranslate"><span class="pre">\x00</span></code>)          |
-+——–+——-+———————–+——————————————–+
-| 1      |    12 | <code class="docutils literal notranslate"><span class="pre">l2tp.version</span></code>      | Version (<code class="docutils literal notranslate"><span class="pre">2</span></code>)                            |
-+——–+——-+———————–+——————————————–+
-| 2      |    16 | <code class="docutils literal notranslate"><span class="pre">l2tp.length</span></code>       | Length (optional by <code class="docutils literal notranslate"><span class="pre">len</span></code>)               |
-+——–+——-+———————–+——————————————–+
-| 4      |    32 | <code class="docutils literal notranslate"><span class="pre">l2tp.tunnelid</span></code>     | Tunnel ID                                  |
-+——–+——-+———————–+——————————————–+
-| 6      |    48 | <code class="docutils literal notranslate"><span class="pre">l2tp.sessionid</span></code>    | Session ID                                 |
-+——–+——-+———————–+——————————————–+
-| 8      |    64 | <code class="docutils literal notranslate"><span class="pre">l2tp.ns</span></code>           | Sequence Number (optional by <code class="docutils literal notranslate"><span class="pre">seq</span></code>)      |
-+——–+——-+———————–+——————————————–+
-| 10     |    80 | <code class="docutils literal notranslate"><span class="pre">l2tp.nr</span></code>           | Next Sequence Number (optional by <code class="docutils literal notranslate"><span class="pre">seq</span></code>) |
-+——–+——-+———————–+——————————————–+
-| 12     |    96 | <code class="docutils literal notranslate"><span class="pre">l2tp.offset</span></code>       | Offset Size (optional by <code class="docutils literal notranslate"><span class="pre">offset</span></code>)       |
-+========+=======+=======================+============================================+</p>
-<aside class="footnote brackets" id="id3" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol">https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol</a></p>
-</aside>
-<dl class="py class">
+<br /><dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.l2tp.</span></span><span class="sig-name descname"><span class="pre">L2TP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code>]</p>
+<dd><p>Bases: <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>[<a class="reference internal" href="#pcapkit.protocols.data.link.l2tp.L2TP" title="pcapkit.protocols.data.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a>]</p>
 <p>This class implements Layer Two Tunnelling Protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>args</strong> (<em>Any</em>) – </p></li>
-<li><p><strong>kwargs</strong> (<em>Any</em>) – </p></li>
+<li><p><strong>*args</strong> (<em>Any</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>Any</em>) – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol" title="pcapkit.protocols.protocol.Protocol">Protocol</a>[PT]</p>
 </dd>
 </dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.__index__">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.__index__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Numeral registry index of the protocol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol has no registry entry.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.name">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Layer</span> <span class="pre">2</span> <span class="pre">Tunnelling</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.name" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Layer</span> <span class="pre">2</span> <span class="pre">Tunnelling</span> <span class="pre">Protocol'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Name of current protocol.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -248,17 +217,14 @@ as below:</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>length</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]) – Length of packet data.</p></li>
-<li><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p></li>
+<li><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p></li>
 </ul>
 </dd>
-<dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#pcapkit.protocols.data.link.l2tp.L2TP" title="pcapkit.protocols.data.link.l2tp.L2TP"><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></a></p>
 </dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">L2TP</span></code></p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Parsed packet data.</p>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Parsed packet data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -268,8 +234,8 @@ as below:</p>
 <span class="sig-name descname"><span class="pre">make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP.make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.make" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make (construct) packet data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Keyword Arguments<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Arbitrary keyword arguments.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – Arbitrary keyword arguments.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Constructed packet data.</p>
@@ -277,148 +243,135 @@ as below:</p>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.10)">bytes</a></p>
 </dd>
-<dt class="field-even">Parameters<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.10)"><em>Any</em></a>) – </p>
-</dd>
 </dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.__length_hint__">
-<span class="sig-name descname"><span class="pre">__length_hint__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP.__length_hint__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.__length_hint__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return an estimated length for the object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[16]</p>
-</dd>
-</dl>
 </dd></dl>
 
-<dl class="py method">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.L2TP.__index__">
-<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">__index__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/link/l2tp.html#L2TP.__index__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.link.l2tp.L2TP.__index__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Numeral registry index of the protocol.</p>
+<section id="data-structures">
+<h2>Data Structures<a class="headerlink" href="#data-structures" title="Permalink to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.l2tp.</span></span><span class="sig-name descname"><span class="pre">L2TP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/l2tp.html#L2TP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
+<p>Data model for L2TP packet.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – This protocol has no registry entry.</p>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.NoReturn" title="(in Python v3.10)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NoReturn</span></code></a></p>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
-</dd></dl>
-
-</dd></dl>
-
-<section id="data-structure">
-<h2>Data Structure<a class="headerlink" href="#data-structure" title="Permalink to this heading">¶</a></h2>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<p>Following classes are only for <em>documentation</em> purpose.
-They do <strong>NOT</strong> exist in the <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> module.</p>
-</div>
-<dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.l2tp.</span></span><span class="sig-name descname"><span class="pre">DataType_L2TP</span></span><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Bases<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TypedDict</p>
-</dd>
-</dl>
-<p>L2TP header.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP.flags">
-<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">DataTYpe_Flags</span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP.flags" title="Permalink to this definition">¶</a></dt>
-<dd><p>flags &amp; versoion info</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.flags">
+<span class="sig-name descname"><span class="pre">flags</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.data.link.l2tp.Flags" title="pcapkit.protocols.data.link.l2tp.Flags"><span class="pre">Flags</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Flags and version info.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP.version">
-<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP.version" title="Permalink to this definition">¶</a></dt>
-<dd><p>version (<code class="docutils literal notranslate"><span class="pre">2</span></code>)</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.version">
+<span class="sig-name descname"><span class="pre">version</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.version" title="Permalink to this definition">¶</a></dt>
+<dd><p>Version.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP.length">
-<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP.length" title="Permalink to this definition">¶</a></dt>
-<dd><p>length (optional by <a class="reference internal" href="#pcapkit.protocols.link.l2tp.DataType_Flags.len" title="pcapkit.protocols.link.l2tp.DataType_Flags.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">len</span></code></a>)</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.length">
+<span class="sig-name descname"><span class="pre">length</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Length.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP.tunnelid">
-<span class="sig-name descname"><span class="pre">tunnelid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP.tunnelid" title="Permalink to this definition">¶</a></dt>
-<dd><p>tunnel ID</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.tunnelid">
+<span class="sig-name descname"><span class="pre">tunnelid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.tunnelid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tunnel ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP.sessionid">
-<span class="sig-name descname"><span class="pre">sessionid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP.sessionid" title="Permalink to this definition">¶</a></dt>
-<dd><p>session ID</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.sessionid">
+<span class="sig-name descname"><span class="pre">sessionid</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.sessionid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Session ID.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP.ns">
-<span class="sig-name descname"><span class="pre">ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP.ns" title="Permalink to this definition">¶</a></dt>
-<dd><p>sequence number (optional by <a class="reference internal" href="#pcapkit.protocols.link.l2tp.DataType_Flags.seq" title="pcapkit.protocols.link.l2tp.DataType_Flags.seq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">seq</span></code></a>)</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.ns">
+<span class="sig-name descname"><span class="pre">ns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.ns" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequence Number.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP.nr">
-<span class="sig-name descname"><span class="pre">nr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP.nr" title="Permalink to this definition">¶</a></dt>
-<dd><p>next sequence number (optional by <a class="reference internal" href="#pcapkit.protocols.link.l2tp.DataType_Flags.seq" title="pcapkit.protocols.link.l2tp.DataType_Flags.seq"><code class="xref py py-attr docutils literal notranslate"><span class="pre">seq</span></code></a>)</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.nr">
+<span class="sig-name descname"><span class="pre">nr</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.nr" title="Permalink to this definition">¶</a></dt>
+<dd><p>Next Sequence Number.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_L2TP.offset">
-<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_L2TP.offset" title="Permalink to this definition">¶</a></dt>
-<dd><p>offset (optional by <a class="reference internal" href="#pcapkit.protocols.link.l2tp.DataType_Flags.offset" title="pcapkit.protocols.link.l2tp.DataType_Flags.offset"><code class="xref py py-attr docutils literal notranslate"><span class="pre">offset</span></code></a>)</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Offset Size.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.L2TP.hdr_len">
+<span class="sig-name descname"><span class="pre">hdr_len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.L2TP.hdr_len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Header length.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_Flags">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.link.l2tp.</span></span><span class="sig-name descname"><span class="pre">DataType_Flags</span></span><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_Flags" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Bases<span class="colon">:</span></dt>
-<dd class="field-odd"><p>TypedDict</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.Flags">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.link.l2tp.</span></span><span class="sig-name descname"><span class="pre">Flags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/link/l2tp.html#Flags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.Flags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
+<p>Data model for L2TP flags and version info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> (<em>VT</em>) – Arbitrary positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> (<em>VT</em>) – Arbitrary keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info">Info</a></p>
 </dd>
 </dl>
-<p>Flags and version info.</p>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_Flags.type">
-<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Control'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Data'</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_Flags.type" title="Permalink to this definition">¶</a></dt>
-<dd><p>type (control / data)</p>
-</dd></dl>
-
-<dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_Flags.len">
-<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_Flags.len" title="Permalink to this definition">¶</a></dt>
-<dd><p>length</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.Flags.type">
+<span class="sig-name descname"><span class="pre">type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/l2tp.html#pcapkit.const.l2tp.type.Type" title="pcapkit.const.l2tp.type.Type"><span class="pre">Type</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.Flags.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_Flags.seq">
-<span class="sig-name descname"><span class="pre">seq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_Flags.seq" title="Permalink to this definition">¶</a></dt>
-<dd><p>sequence</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.Flags.len">
+<span class="sig-name descname"><span class="pre">len</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.Flags.len" title="Permalink to this definition">¶</a></dt>
+<dd><p>Length.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_Flags.offset">
-<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_Flags.offset" title="Permalink to this definition">¶</a></dt>
-<dd><p>offset</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.Flags.seq">
+<span class="sig-name descname"><span class="pre">seq</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.Flags.seq" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequence.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="pcapkit.protocols.link.l2tp.DataType_Flags.prio">
-<span class="sig-name descname"><span class="pre">prio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.link.l2tp.DataType_Flags.prio" title="Permalink to this definition">¶</a></dt>
-<dd><p>priority</p>
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.Flags.offset">
+<span class="sig-name descname"><span class="pre">offset</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.Flags.offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Offset.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.link.l2tp.Flags.prio">
+<span class="sig-name descname"><span class="pre">prio</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></em><a class="headerlink" href="#pcapkit.protocols.data.link.l2tp.Flags.prio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Priority.</p>
 </dd></dl>
 
 </dd></dl>
 
-<hr /><aside class="footnote brackets" id="id4" role="note">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
+<hr /><aside class="footnote brackets" id="id2" role="note">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
 <p><a class="reference external" href="https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol">https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol</a></p>
 </aside>
 </section>

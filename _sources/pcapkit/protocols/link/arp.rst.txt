@@ -63,7 +63,7 @@ below:
 
 .. class:: pcapkit.protocols.link.InARP
 
-   Alias of :class:`~pcapkit.protocols.link.arp.ARP`.
+   Alias of :class:`pcapkit.protocols.link.arp.ARP`.
 
 Data Structures
 ---------------
