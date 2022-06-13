@@ -12,11 +12,6 @@ PCAP Extration
 
 .. autofunction:: pcapkit.interface.core.extract
 
-Application Layer Analysis
---------------------------
-
-.. autofunction:: pcapkit.interface.core.analyse
-
 Payload Reassembly
 ------------------
 
@@ -46,19 +41,19 @@ Layer Thresholds
 ----------------
 
 .. data:: pcapkit.interface.core.RAW
-   :value: 'None'
+   :value: 'none'
 
 .. data:: pcapkit.interface.core.LINK
-   :value: 'Link'
+   :value: 'link'
 
 .. data:: pcapkit.interface.core.INET
-   :value: 'Internet'
+   :value: 'internet'
 
 .. data:: pcapkit.interface.core.TRANS
-   :value: 'Transport'
+   :value: 'transport'
 
 .. data:: pcapkit.interface.core.APP
-   :value: 'Application'
+   :value: 'application'
 
 Extration Engines
 -----------------
@@ -74,9 +69,3 @@ Extration Engines
 
 .. data:: pcapkit.interface.core.PyShark
    :value: 'pyshark'
-
-.. data:: pcapkit.interface.core.MPServer
-   :value: 'server'
-
-.. data:: pcapkit.interface.core.MPPipeline
-   :value: 'pipeline'
