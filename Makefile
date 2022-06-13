@@ -211,7 +211,7 @@ dist-devel: dist-pre git-upload
 dist-master: dist-prep dist-post
 
 isort:
-	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
+	pipenv run isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit temp/sort.py
 
 vermin:
 	vermin pcapkit --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --no-parse-comments pcapkit -v
