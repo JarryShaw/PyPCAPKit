@@ -39,6 +39,7 @@ from pcapkit.protocols.data.link.ospf import OSPF as DataType_OSPF
 from pcapkit.protocols.data.link.ospf import \
     CrytographicAuthentication as DataType_CrytographicAuthentication
 from pcapkit.protocols.link.link import Link
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address
@@ -163,6 +164,16 @@ class OSPF(Link[DataType_OSPF]):
     def __length_hint__(self) -> 'Literal[24]':
         """Return an estimated length for the object."""
         return 24
+
+    @classmethod
+    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')
 
     ##########################################################################
     # Utilities.

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import,unused-wildcard-import,fixme
-"""link layer protocols
+"""Link Layer Protocols
+==========================
 
 :mod:`pcapkit.protocols.link` is collection of all protocols in
 link layer, with detailed implementation and methods.

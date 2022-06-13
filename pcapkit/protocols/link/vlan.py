@@ -26,6 +26,7 @@ from pcapkit.const.vlan.priority_level import PriorityLevel as RegType_PriorityL
 from pcapkit.protocols.data.link.vlan import TCI as DataType_TCI
 from pcapkit.protocols.data.link.vlan import VLAN as DataType_VLAN
 from pcapkit.protocols.link.link import Link
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from typing import Any, NoReturn, Optional
@@ -135,3 +136,13 @@ class VLAN(Link[DataType_VLAN]):
     def __length_hint__(self) -> 'Literal[4]':
         """Return an estimated length for the object."""
         return 4
+
+    @classmethod
+    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')

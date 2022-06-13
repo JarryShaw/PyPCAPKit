@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""ethernet protocol
+"""Ethernet Protocol
+=======================
 
 :mod:`pcapkit.protocols.link.ethernet` contains
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`
@@ -24,6 +25,7 @@ import sys
 import textwrap
 from typing import TYPE_CHECKING
 
+from pcapkit.const.reg.linktype import LinkType as RegType_LinkType
 from pcapkit.protocols.data.link.ethernet import Ethernet as DataType_Ethernet
 from pcapkit.protocols.link.link import Link
 
@@ -98,13 +100,11 @@ class Ethernet(Link[DataType_Ethernet]):
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
         Args:
-            length (Optional[int]): Length of packet data.
-
-        Keyword Args:
+            length: Length of packet data.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
-            DataType_Ethernet: Parsed packet data.
+            Parsed packet data.
 
         """
         if length is None:
@@ -124,7 +124,7 @@ class Ethernet(Link[DataType_Ethernet]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -140,6 +140,19 @@ class Ethernet(Link[DataType_Ethernet]):
     def __length_hint__(self) -> 'Literal[14]':
         """Return an estimated length for the object."""
         return 14
+
+    @classmethod
+    def __index__(cls) -> 'RegType_LinkType':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Returns:
+            Numeral registry index of the protocol in `tcpdump`_ link-layer
+            header types.
+
+        .. _tcpdump: https://www.tcpdump.org/linktypes.html
+
+        """
+        return RegType_LinkType.ETHERNET  # type: ignore[return-value]
 
     ##########################################################################
     # Utilities.

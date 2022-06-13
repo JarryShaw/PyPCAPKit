@@ -52,6 +52,7 @@ from pcapkit.const.l2tp.type import Type as RegType_Type
 from pcapkit.protocols.data.link.l2tp import L2TP as DataType_L2TP
 from pcapkit.protocols.data.link.l2tp import Flags as DataType_Flags
 from pcapkit.protocols.link.link import Link
+from pcapkit.utilities.exceptions import UnsupportedCall
 
 if TYPE_CHECKING:
     from typing import Any, NoReturn, Optional
@@ -176,3 +177,13 @@ class L2TP(Link[DataType_L2TP]):
     def __length_hint__(self) -> 'Literal[16]':
         """Return an estimated length for the object."""
         return 16
+
+    @classmethod
+    def __index__(cls) -> 'NoReturn':  # pylint: disable=invalid-index-returned
+        """Numeral registry index of the protocol.
+
+        Raises:
+            UnsupportedCall: This protocol has no registry entry.
+
+        """
+        raise UnsupportedCall(f'{cls.__name__!r} object cannot be interpreted as an integer')

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""(inverse) address resolution protocol
+"""ARP/InARP - (Inverse) Address Resolution Protocol
+=======================================================
 
 :mod:`pcapkit.protocols.link.arp` contains
 :class:`~pcapkit.protocols.link.arp.ARP` only,
@@ -140,8 +141,6 @@ class ARP(Link[DataType_ARP]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -194,7 +193,7 @@ class ARP(Link[DataType_ARP]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -252,9 +251,9 @@ class ARP(Link[DataType_ARP]):
     def _read_proto_resolve(self, length: 'int', ptype: 'int') -> 'str | IPv4Address | IPv6Address':
         """Resolve protocol address according to protocol.
 
-        Positional arguments:
-            length (int): Protocol address length.
-            ptype (int): Protocol type.
+        Arguments:
+            length: Protocol address length.
+            ptype: Protocol type.
 
         Returns:
             Protocol address. If ``ptype`` is ``0x0800``, i.e. IPv4 adddress,
