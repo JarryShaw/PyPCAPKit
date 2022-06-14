@@ -187,6 +187,7 @@ class PuzzleParameter(Parameter):
     index: 'int'
     #: Lifetime.
     lifetime: 'timedelta'
+    #: Puzzle data.
     opaque: 'bytes'
     #: Random number.
     random: 'int'
@@ -202,6 +203,7 @@ class SolutionParameter(Parameter):
     index: 'int'
     #: Lifetime.
     lifetime: 'timedelta'
+    #: Solution data.
     opaque: 'bytes'
     #: Random number.
     random: 'int'
@@ -425,7 +427,7 @@ class RegRequestParameter(Parameter):
 
 
 class RegResponseParameter(Parameter):
-    """Data model for HIP ``REG_RESPONSE` parameter."""
+    """Data model for HIP ``REG_RESPONSE`` parameter."""
 
     #: Registration lifetime.
     lifetime: 'Lifetime'

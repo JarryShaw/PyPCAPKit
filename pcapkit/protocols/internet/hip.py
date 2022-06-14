@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""host identity protocol
+"""HIP - Host Identity Protocol
+==================================
 
 :mod:`pcapkit.protocols.internet.hip` contains
 :class:`~pcapkit.protocols.internet.hip.HIP` only,
@@ -241,8 +242,6 @@ class HIP(Internet[DataType_HIP]):
 
         Args:
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the packet is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -295,7 +294,7 @@ class HIP(Internet[DataType_HIP]):
     def make(self, **kwargs: 'Any') -> 'NoReturn':
         """Make (construct) packet data.
 
-        Keyword Args:
+        Args:
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -322,8 +321,6 @@ class HIP(Internet[DataType_HIP]):
         Args:
             file: Source packet stream.
             length: Length of packet data.
-
-        Keyword Args:
             extension: If the protocol is used as an IPv6 extension header.
             **kwargs: Arbitrary keyword arguments.
 
@@ -362,8 +359,6 @@ class HIP(Internet[DataType_HIP]):
 
         Arguments:
             length: length of parameters
-
-        Keyword arguments:
             version: HIP version
 
         Returns:
@@ -431,8 +426,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -480,8 +473,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -537,8 +528,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -608,8 +597,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -626,8 +613,8 @@ class HIP(Internet[DataType_HIP]):
             """Parse locator data.
 
             Args:
-                kind (int): locator type
-                size (int): locator length
+                kind: locator type
+                size: locator length
 
             Returns:
                 * If ``kind`` is ``0`` and ``size`` is ``16``,
@@ -703,8 +690,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -768,8 +753,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -833,8 +816,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -884,8 +865,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -937,8 +916,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -990,8 +967,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1043,8 +1018,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1102,8 +1075,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1166,8 +1137,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1222,8 +1191,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1280,8 +1247,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1334,8 +1299,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1378,7 +1341,7 @@ class HIP(Internet[DataType_HIP]):
             """Read domain identifier.
 
             Args:
-                di_data (str): bit string of DI information byte
+                di_data: bit string of DI information byte
 
             Returns:
                 A :data:`tuple` of DI type enumeration, DI content length and DI data.
@@ -1436,8 +1399,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1489,8 +1450,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1549,8 +1508,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1601,8 +1558,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1652,8 +1607,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1717,8 +1670,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1782,8 +1733,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1847,8 +1796,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1913,8 +1860,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -1967,8 +1912,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2016,8 +1959,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2075,8 +2016,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2132,8 +2071,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2182,8 +2119,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2240,8 +2175,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2294,8 +2227,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2343,8 +2274,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2403,8 +2332,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2465,8 +2392,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2528,8 +2453,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2579,8 +2502,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2628,8 +2549,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2679,8 +2598,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2728,8 +2645,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2775,8 +2690,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2827,8 +2740,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2886,8 +2797,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -2940,8 +2849,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -3002,8 +2909,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -3063,8 +2968,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -3114,8 +3017,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -3172,8 +3073,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
@@ -3225,8 +3124,6 @@ class HIP(Internet[DataType_HIP]):
             code: parameter code
             cbit: critical bit
             clen: length of contents
-
-        Keyword Args:
             desc: parameter type
             length: remaining packet length
             version: HIP protocol version
