@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""internet protocol
+"""IP - Internet Protocol
+============================
 
 :mod:`pcapkit.protocols.internet.ip` contains
 :class:`~pcapkit.protocols.internet.ip.IP` only,
@@ -28,7 +29,7 @@ class IP(Internet[PT], Generic[PT]):  # pylint: disable=abstract-method
 
     - Internet Protocol version 4 (:class:`~pcapkit.protocols.internet.ipv4.IPv4`) [:rfc:`791`]
     - Internet Protocol version 6 (:class:`~pcapkit.protocols.internet.ipv6.IPv6`) [:rfc:`2460`]
-    - Authentication Header (:class:`~pcapkit.protocols.internet.ah.AH`) [:rfc:`4302`]
+    - Authentication Header (:class:`pcapkit.~protocols.internet.ah.AH`) [:rfc:`4302`]
     - Encapsulating Security Payload (:class:`~pcapkit.protocols.internet.esp.ESP`) [:rfc:`4303`]
 
     """
