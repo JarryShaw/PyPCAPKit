@@ -48,7 +48,7 @@ from pcapkit.protocols.data.internet.ipv6_opts import PadOption as DataType_PadO
 from pcapkit.protocols.data.internet.ipv6_opts import PDMOption as DataType_PDMOption
 from pcapkit.protocols.data.internet.ipv6_opts import QuickStartOption as DataType_QuickStartOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
-    RouterAlterOption as DataType_RouterAlterOption
+    RouterAlertOption as DataType_RouterAlertOption
 from pcapkit.protocols.data.internet.ipv6_opts import RPLFlags as DataType_RPLFlags
 from pcapkit.protocols.data.internet.ipv6_opts import RPLOption as DataType_RPLOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
@@ -490,7 +490,7 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
         return opt
 
     def _read_opt_ra(self, code: 'RegType_Option', acts: 'int', cflg: 'bool', *,
-                     options: 'Option') -> 'DataType_RouterAlterOption':  # pylint: disable=unused-argument
+                     options: 'Option') -> 'DataType_RouterAlertOption':  # pylint: disable=unused-argument
         """Read IPv6-Opts Router Alert option.
 
         Structure of IPv6-Opts Router Alert option [:rfc:`2711`]:
@@ -522,7 +522,7 @@ class IPv6_Opts(Internet[DataType_IPv6_Opts]):
         _rval = self._read_unpack(2)
 
         _enum = RegType_RouterAlert.get(_rval)
-        opt = DataType_RouterAlterOption(
+        opt = DataType_RouterAlertOption(
             type=code,
             action=acts,
             change=cflg,

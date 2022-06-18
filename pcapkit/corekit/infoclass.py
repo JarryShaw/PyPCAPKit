@@ -203,7 +203,7 @@ class Info(collections.abc.Mapping[str, VT], Generic[VT]):
 
     @classmethod
     def from_dict(cls, dict_: 'Optional[Mapping[str, VT] | Iterable[tuple[str, VT]]]' = None,
-                  **kwargs: 'VT') -> 'Info':
+                  **kwargs: 'VT') -> 'Info[VT]':
         r"""Create a new instance.
 
         * If ``dict_`` is present and has a ``.keys()`` method, then does:

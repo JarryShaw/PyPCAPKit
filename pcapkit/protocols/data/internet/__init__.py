@@ -83,7 +83,7 @@ from pcapkit.protocols.data.internet.hopopt import MPLOption as HOPOPT_MPLOption
 from pcapkit.protocols.data.internet.hopopt import PadOption as HOPOPT_PadOption
 from pcapkit.protocols.data.internet.hopopt import PDMOption as HOPOPT_PDMOption
 from pcapkit.protocols.data.internet.hopopt import QuickStartOption as HOPOPT_QuickStartOption
-from pcapkit.protocols.data.internet.hopopt import RouterAlterOption as HOPOPT_RouterAlterOption
+from pcapkit.protocols.data.internet.hopopt import RouterAlertOption as HOPOPT_RouterAlertOption
 from pcapkit.protocols.data.internet.hopopt import RPLFlags as HOPOPT_RPLFlags
 from pcapkit.protocols.data.internet.hopopt import RPLOption as HOPOPT_RPLOption
 from pcapkit.protocols.data.internet.hopopt import \
@@ -136,7 +136,7 @@ from pcapkit.protocols.data.internet.ipv6_opts import PadOption as IPv6_Opts_Pad
 from pcapkit.protocols.data.internet.ipv6_opts import PDMOption as IPv6_Opts_PDMOption
 from pcapkit.protocols.data.internet.ipv6_opts import QuickStartOption as IPv6_Opts_QuickStartOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
-    RouterAlterOption as IPv6_Opts_RouterAlterOption
+    RouterAlertOption as IPv6_Opts_RouterAlertOption
 from pcapkit.protocols.data.internet.ipv6_opts import RPLFlags as IPv6_Opts_RPLFlags
 from pcapkit.protocols.data.internet.ipv6_opts import RPLOption as IPv6_Opts_RPLOption
 from pcapkit.protocols.data.internet.ipv6_opts import \
@@ -193,7 +193,7 @@ __all__ = [
     'HOPOPT',
     'HOPOPT_RPLFlags', 'HOPOPT_MPLFlags', 'HOPOPT_DFFFlags',
     'HOPOPT_UnassignedOption', 'HOPOPT_PadOption', 'HOPOPT_TunnelEncapsulationLimitOption',
-    'HOPOPT_RouterAlterOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
+    'HOPOPT_RouterAlertOption', 'HOPOPT_CALIPSOOption', 'HOPOPT_SMFIdentificationBasedDPDOption',
     'HOPOPT_SMFHashBasedDPDOption', 'HOPOPT_PDMOption', 'HOPOPT_QuickStartOption',
     'HOPOPT_RPLOption', 'HOPOPT_MPLOption', 'HOPOPT_ILNPOption',
     'HOPOPT_LineIdentificationOption', 'HOPOPT_JumboPayloadOption', 'HOPOPT_HomeAddressOption',
@@ -216,7 +216,7 @@ __all__ = [
     'IPv6_Opts',
     'IPv6_Opts_RPLFlags', 'IPv6_Opts_MPLFlags', 'IPv6_Opts_DFFFlags',
     'IPv6_Opts_UnassignedOption', 'IPv6_Opts_PadOption', 'IPv6_Opts_TunnelEncapsulationLimitOption',
-    'IPv6_Opts_RouterAlterOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',
+    'IPv6_Opts_RouterAlertOption', 'IPv6_Opts_CALIPSOOption', 'IPv6_Opts_SMFIdentificationBasedDPDOption',
     'IPv6_Opts_SMFHashBasedDPDOption', 'IPv6_Opts_PDMOption', 'IPv6_Opts_QuickStartOption',
     'IPv6_Opts_RPLOption', 'IPv6_Opts_MPLOption', 'IPv6_Opts_ILNPOption',
     'IPv6_Opts_LineIdentificationOption', 'IPv6_Opts_JumboPayloadOption', 'IPv6_Opts_HomeAddressOption',

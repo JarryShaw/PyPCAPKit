@@ -25,7 +25,7 @@ __all__ = [
     'RPLFlags', 'MPLFlags', 'DFFFlags',
 
     'UnassignedOption', 'PadOption', 'TunnelEncapsulationLimitOption',
-    'RouterAlterOption', 'CALIPSOOption', 'SMFIdentificationBasedDPDOption',
+    'RouterAlertOption', 'CALIPSOOption', 'SMFIdentificationBasedDPDOption',
     'SMFHashBasedDPDOption', 'PDMOption', 'QuickStartOption',
     'RPLOption', 'MPLOption', 'ILNPOption',
     'LineIdentificationOption', 'JumboPayloadOption', 'HomeAddressOption',
@@ -87,7 +87,7 @@ class TunnelEncapsulationLimitOption(Option):
         def __init__(self, type: 'RegType_Option', action: 'int', change: 'bool', length: 'int', limit: 'int') -> 'None': ...  # pylint: disable=super-init-not-called,unused-argument,redefined-builtin,multiple-statements,line-too-long
 
 
-class RouterAlterOption(Option):
+class RouterAlertOption(Option):
     """Data model for IPv6_Opts router alter option."""
 
     #: Router alter value.
@@ -155,7 +155,7 @@ class PDMOption(Option):
     #: Scale delta time last received.
     scaledtlr: 'timedelta'
     #: Scale delta time last sent.
-    sacledtls: 'timedelta'
+    scaledtls: 'timedelta'
     #: Packet sequence number this packet.
     psntp: 'int'
     #: Packet sequence number last received.
