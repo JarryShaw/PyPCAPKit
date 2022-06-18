@@ -148,7 +148,115 @@ __all__ = ['HIP']
 
 
 class HIP(Internet[DataType_HIP]):
-    """This class implements Host Identity Protocol."""
+    """This class implements Host Identity Protocol.
+
+    This class currently supports parsing of the following HIP parameters,
+    which are directly mapped to the :class:`pcapkit.const.hip.parameter.Parameter`
+    enumeration:
+
+    .. list-table::
+       :header-rows: 1
+
+       * - Parameter Code
+         - Parameter Parser
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ESP_INFO`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_esp_info`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.R1_COUNTER`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_r1_counter`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.LOCATOR_SET`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_locator_set`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.PUZZLE`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_puzzle`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.SOLUTION`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.SEQ`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_seq`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ACK`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_ack`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.DH_GROUP_LIST`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_dh_group_list`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.DIFFIE_HELLMAN`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_diffie_hellman`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_TRANSFORM`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_transform`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_CIPHER`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_cipher`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.NAT_TRAVERSAL_MODE`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_nat_traversal_mode`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.TRANSACTION_PACING`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_transaction_pacing`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ENCRYPTED`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_encrypted`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HOST_ID`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_host_id`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIT_SUITE_LIST`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hit_suite_list`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.CERT`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_cert`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.NOTIFICATION`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_notification`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_SIGNED`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_request_signed`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_INFO`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_info`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_REQUEST`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_request`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_RESPONSE`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_response`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_FAILED`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_failed`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.REG_FROM`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_reg_from`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_SIGNEED`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_response_signed`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.TRANSPORT_FORMAT_LIST`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_transport_format_list`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ESP_TRANSFORM`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_esp_transform`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.SEQ_DATA`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_seq_data`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ACK_DATA`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_ack_data`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.PAYLOAD_MIC`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_payload_mic`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.TRANSACTION_ID`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_transaction_id`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.OVERLAY_ID`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_overlay_id`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ROUTE_DST`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_route_dst`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_TRANSPORT_MODE`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_transport_mode`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_MAC`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_mac`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_MAC_2`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_mac_2`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE_2`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_signature_2`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.HIP_SIGNATURE`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_hip_signature`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ECHO_REQUEST_UNSIGNED`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_request_unsigned`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ECHO_RESPONSE_UNSIGNED`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_echo_response_unsigned`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.RELAY_FROM`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_from`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.RELAY_TO`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_to`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.OVERLAY_TTL`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_overlay_ttl`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.ROUTE_VIA`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_route_via`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.FROM`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_from`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.RVS_HMAC`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_rvs_hmac`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.VIA_RVS`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_via_rvs`
+       * - :attr:`pcapkit.const.hip.parameter.Parameter.RELAY_HMAC`
+         - :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_relay_hmac`
+
+    """
 
     ##########################################################################
     # Properties.
